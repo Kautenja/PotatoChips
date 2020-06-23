@@ -133,9 +133,6 @@ struct ChipVRC6 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
-    /// a clock divider for updating the LEDs slower than audio rate
-    // dsp::ClockDivider lightDivider;
-
     /// Initialize a new VRC6 Chip module.
     ChipVRC6() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -146,8 +143,6 @@ struct ChipVRC6 : Module {
         for (int i = 0; i < 3; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
-        // set the number of samples between LED updates
-        // lightDivider.setDivision(32);
     }
 
     /// Process square wave (channel 0).
@@ -222,19 +217,6 @@ struct ChipVRC6 : Module {
         return 10.f * output_buffer[0] / static_cast<float>(1 << 15);;
     }
 
-    // /// Set the lights on the module
-    // ///
-    // /// @param deltaTime the amount of time between LED update samples
-    // ///
-    // void setLights(float deltaTime) {
-    //     auto pw1index = pw1 >> 6;
-    //     for (int i = 0; i < 4; i++)
-    //         lights[LIGHT_PW1 + i].setSmoothBrightness(i == pw1index, deltaTime);
-    //     auto pw2index = pw2 >> 6;
-    //     for (int i = 0; i < 4; i++)
-    //         lights[LIGHT_PW2 + i].setSmoothBrightness(i == pw2index, deltaTime);
-    // }
-
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
@@ -256,13 +238,10 @@ struct ChipVRC6 : Module {
         // apu.write_osc(0, 0, FREQ_SCALE, 0b00);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
-        // // set the output from the oscillators
+        // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
         outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));
         outputs[OUTPUT_CHANNEL2].setVoltage(getAudioOut(2));
-        // // set the lights
-        // if (lightDivider.process())
-        //     setLights(lightDivider.getDivision() * args.sampleTime);
     }
 
     /// Respond to the change of sample rate in the engine.

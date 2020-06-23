@@ -190,6 +190,7 @@ struct Chip2A03 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM0].getVoltage();
         freq11bit = rack::clamp(freq11bit, 8, 1023);
         uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
         uint8_t sq_lo = freq11bit & 0b11111111;
@@ -205,6 +206,7 @@ struct Chip2A03 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM1].getVoltage();
         freq11bit = rack::clamp(freq11bit, 8, 1023);
         uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
         uint8_t sq_lo = freq11bit & 0b11111111;
@@ -220,6 +222,7 @@ struct Chip2A03 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (32 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM2].getVoltage();
         freq11bit = rack::clamp(freq11bit, 2, 2047);
         uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
         uint8_t tri_lo = freq11bit & 0b11111111;

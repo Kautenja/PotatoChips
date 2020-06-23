@@ -2,8 +2,8 @@
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
-[BuildStatus]:  https://travis-ci.org/Kautenja/2A03.svg?branch=master
-[BuildServer]:  https://travis-ci.org/Kautenja/2A03
+[BuildStatus]:  https://travis-ci.com/Kautenja/2A03.svg?branch=master
+[BuildServer]:  https://travis-ci.com/Kautenja/2A03
 
 2A03 is an emulation of the 2A03 sound chip from the Nintendo Entertainment
 System (NES) for VCV Rack. The 2A03 chip contains two square wave generators,

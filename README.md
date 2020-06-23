@@ -17,10 +17,13 @@ emulation.
 
 ## Features
 
-- **Dual square wave generator:** Dual 8-bit square waves with four duty cycles: _12.5%_, _25%_, _50%_, and _75%_
-- **Quantized triangle wave generator:** Generate NES style triangle wave with 16 steps of quantization
-- **Noise generator:** generate pseudo-random numbers at 16 different frequencies
-- **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
+-   **Dual square wave generator:** Dual 8-bit square waves with four duty
+    cycles: _12.5%_, _25%_, _50%_, and _75%_
+-   **Quantized triangle wave generator:** Generate NES style triangle wave
+    with 16 steps of quantization
+-   **Noise generator:** generate pseudo-random numbers at 16 different
+    frequencies
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
 See the [Manual](https://kautenja.github.io/modules/2A03/manual.pdf) for more
 information about the features of this module.

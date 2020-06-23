@@ -44,6 +44,11 @@ struct ChipVRC6 : Module {
         PARAM_FREQ0,
         PARAM_FREQ1,
         PARAM_FREQ2,
+        PARAM_PW0,
+        PARAM_PW1,
+        PARAM_LEVEL0,
+        PARAM_LEVEL1,
+        PARAM_LEVEL2,
         PARAM_COUNT
     };
     enum InputIds {
@@ -53,6 +58,11 @@ struct ChipVRC6 : Module {
         INPUT_FM0,
         INPUT_FM1,
         INPUT_FM2,
+        INPUT_PW0,
+        INPUT_PW1,
+        INPUT_LEVEL0,
+        INPUT_LEVEL1,
+        INPUT_LEVEL2,
         INPUT_COUNT
     };
     enum OutputIds {
@@ -221,18 +231,18 @@ struct ChipVRC6 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// string labels for the square wave PW values
-static const char* PWLabels[9] = {
-    "6.25%",
-    "12.5%",
-    "18.75%",
-    "25%",
-    "31.25%",
-    "37.5%",
-    "43.75%",
-    "50%",
-    "100%"
-};
+// /// string labels for the square wave PW values
+// static const char* PWLabels[9] = {
+//     "6.25%",
+//     "12.5%",
+//     "18.75%",
+//     "25%",
+//     "31.25%",
+//     "37.5%",
+//     "43.75%",
+//     "50%",
+//     "100%"
+// };
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipVRC6Widget : ModuleWidget {
@@ -249,13 +259,21 @@ struct ChipVRC6Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(33, 149), module, ChipVRC6::INPUT_FM1));
         addInput(createInput<PJ301MPort>(Vec(33, 258), module, ChipVRC6::INPUT_FM2));
         // PW inputs
-
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(37, 107), module, ChipVRC6::PARAM_PW0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(37, 218), module, ChipVRC6::PARAM_PW1));
+        addInput(createInput<PJ301MPort>(Vec(66, 104), module, ChipVRC6::INPUT_PW0));
+        addInput(createInput<PJ301MPort>(Vec(66, 215), module, ChipVRC6::INPUT_PW1));
         // Frequency parameters
         addParam(createParam<Rogan3PSNES>(Vec(61, 42), module, ChipVRC6::PARAM_FREQ0));
         addParam(createParam<Rogan3PSNES>(Vec(61, 151), module, ChipVRC6::PARAM_FREQ1));
         addParam(createParam<Rogan3PSNES>(Vec(61, 266), module, ChipVRC6::PARAM_FREQ2));
         // Levels
-
+        addInput(createInput<PJ301MPort>(Vec(109, 36), module, ChipVRC6::INPUT_LEVEL0));
+        addInput(createInput<PJ301MPort>(Vec(109, 146), module, ChipVRC6::INPUT_LEVEL1));
+        addInput(createInput<PJ301MPort>(Vec(109, 255), module, ChipVRC6::INPUT_LEVEL2));
+        addParam(createParam<Rogan0PSNES>(Vec(110, 64), module, ChipVRC6::PARAM_LEVEL0));
+        addParam(createParam<Rogan0PSNES>(Vec(110, 174), module, ChipVRC6::PARAM_LEVEL1));
+        addParam(createParam<Rogan0PSNES>(Vec(110, 283), module, ChipVRC6::PARAM_LEVEL2));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(114, 104), module, ChipVRC6::OUTPUT_CHANNEL0));
         addOutput(createOutput<PJ301MPort>(Vec(114, 214), module, ChipVRC6::OUTPUT_CHANNEL1));

@@ -110,7 +110,7 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
-        freq12bit += inputs[INPUT_FM0].getVoltage();
+        freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
         freq12bit = rack::clamp(freq12bit, 4, 4095);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
@@ -130,7 +130,7 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
-        freq12bit += inputs[INPUT_FM1].getVoltage();
+        freq12bit += 4 * inputs[INPUT_FM1].getVoltage();
         freq12bit = rack::clamp(freq12bit, 4, 4095);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
@@ -150,7 +150,7 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (14 * freq)) - 1;
-        freq12bit += inputs[INPUT_FM2].getVoltage();
+        freq12bit += 4 * inputs[INPUT_FM2].getVoltage();
         freq12bit = rack::clamp(freq12bit, 3, 4095);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;

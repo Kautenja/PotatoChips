@@ -22,71 +22,17 @@
 /// the IO registers on the VRC6 chip.
 enum IORegisters {
     PULSE1_DUTY_VOLUME = 0x9000,
-    PULSE1_PERIOD_LOW,
-    PULSE1_PERIOD_HIGH,
-    FREQ_SCALE,
+    PULSE1_PERIOD_LOW  = 0x9001,
+    PULSE1_PERIOD_HIGH = 0x9002,
+    FREQ_SCALE         = 0x9003,
     PULSE2_DUTY_VOLUME = 0xA000,
-    PULSE2_PERIOD_LOW,
-    PULSE2_PERIOD_HIGH,
-    SAW_VOLUME =         0xB000,
-    SAW_PERIOD_LOW,
-    SAW_PERIOD_HIGH,
-    MIRRORING_CTRL
+    PULSE2_PERIOD_LOW  = 0xA001,
+    PULSE2_PERIOD_HIGH = 0xA002,
+    SAW_VOLUME         = 0xB000,
+    SAW_PERIOD_LOW     = 0xB001,
+    SAW_PERIOD_HIGH    = 0xB002,
+    MIRRORING_CTRL     = 0xB003
 };
-
-// /// The pulse width modes available
-// enum class PulseWidth : uint8_t {
-//     TwelveHalf  = 0b00000000,  // 12.5%
-//     TwentyFive  = 0b01000000,  // 25%
-//     Fifty       = 0b10000000,  // 50%
-//     SeventyFive = 0b11000000   // 75%
-// };
-
-// /// Return the sum of a pulse width flag with an input value flag.
-// ///
-// /// @param a the pulse width value flag to add to the existing flags
-// /// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
-// /// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
-// ///
-// inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
-//     return static_cast<uint8_t>(a) + b;
-// }
-
-// /// Return the sum of a pulse width flag with an input value flag.
-// ///
-// /// @param a the pulse width value flag to add to the existing flags
-// /// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
-// /// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
-// ///
-// inline PulseWidth next(PulseWidth a) {
-//     auto b = ((static_cast<uint8_t>(a) >> 6) + 1) % 4;
-//     a = static_cast<PulseWidth>(b << 6);
-//     return a;
-// }
-
-// /// TODO:
-// inline uint8_t operator>>(const PulseWidth& a, const uint8_t& b) {
-//     return static_cast<uint8_t>(a) >> b;
-// }
-
-// /// The channels send flag bits.
-// enum class SendChannels : uint8_t {
-//     Square1  = 0b00000001,
-//     Square2  = 0b00000010,
-//     Triangle = 0b00000100,
-//     Noise    = 0b00001000,
-//     All      = 0b00001111
-// };
-
-// /// Return the sum of a send channel flag with an input value flag.
-// ///
-// /// @param a the send channel value flag to add to the existing flags
-// /// @param b a byte that represents flags where bits 'B' are used: 0bAAAABBBB
-// /// @returns the sum of a and b, i.e., the flag: 0bAAAABBBB
-// ///
-// inline uint8_t operator+(SendChannels a, uint8_t b) {
-//     return static_cast<uint8_t>(a) + b;
-// }
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -113,12 +59,9 @@ struct ChipVRC6 : Module {
         OUTPUT_CHANNEL0,
         OUTPUT_CHANNEL1,
         OUTPUT_CHANNEL2,
-        // OUTPUT_MIX, // TODO: remove in 2A03 and VRC6
         OUTPUT_COUNT
     };
     enum LightIds {
-        ENUMS(LIGHT_PW1, 4),
-        ENUMS(LIGHT_PW2, 4),
         LIGHT_COUNT
     };
 
@@ -142,7 +85,7 @@ struct ChipVRC6 : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < 3; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        // apu.volume(3.f);
     }
 
     /// Process square wave (channel 0).
@@ -180,7 +123,7 @@ struct ChipVRC6 : Module {
         hi |= 0b10000000;
 
         // TODO: duty cycle
-        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00101111);
+        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00001111);
         apu.write_osc(0, 1, PULSE2_PERIOD_LOW, lo);
         apu.write_osc(0, 1, PULSE2_PERIOD_HIGH, hi);
     }
@@ -235,7 +178,6 @@ struct ChipVRC6 : Module {
         // // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
         // TODO: update
-        // apu.write_osc(0, 0, FREQ_SCALE, 0b00);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators

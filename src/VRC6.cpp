@@ -162,53 +162,53 @@ struct ChipVRC6 : Module {
         // lightDivider.setDivision(32);
     }
 
-    // /// Process square wave (channel 1).
-    // void square1() {
-    //     float pitch = params[PARAM_FREQ0].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT0].getVoltage();
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
-    //     freq11bit += inputs[INPUT_FM0].getVoltage();
-    //     freq11bit = rack::clamp(freq11bit, 8, 1023);
-    //     uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-    //     uint8_t sq_lo = freq11bit & 0b11111111;
-    //     apu.write_register(0, SQ1_VOL, pw1 + 0b00011111);
-    //     apu.write_register(0, SQ1_LO, sq_lo);
-    //     apu.write_register(0, SQ1_HI, sq_hi);
-    // }
+    /// Process square wave (channel 0).
+    void channel0_pulse() {
+        float pitch = params[PARAM_FREQ0].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT0].getVoltage();
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM0].getVoltage();
+        freq11bit = rack::clamp(freq11bit, 8, 1023);
+        // uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
+        // uint8_t sq_lo = freq11bit & 0b11111111;
+        // apu.write_register(0, SQ1_VOL, pw1 + 0b00011111);
+        // apu.write_register(0, SQ1_LO, sq_lo);
+        // apu.write_register(0, SQ1_HI, sq_hi);
+    }
 
-    // /// Process square wave (channel 2).
-    // void square2() {
-    //     float pitch = params[PARAM_FREQ1].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT1].getVoltage();
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
-    //     freq11bit += inputs[INPUT_FM1].getVoltage();
-    //     freq11bit = rack::clamp(freq11bit, 8, 1023);
-    //     uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-    //     uint8_t sq_lo = freq11bit & 0b11111111;
-    //     apu.write_register(0, SQ2_VOL, pw2 + 0b00011111);
-    //     apu.write_register(0, SQ2_LO, sq_lo);
-    //     apu.write_register(0, SQ2_HI, sq_hi);
-    // }
+    /// Process square wave (channel 1).
+    void channel1_pulse() {
+        float pitch = params[PARAM_FREQ1].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT1].getVoltage();
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM1].getVoltage();
+        freq11bit = rack::clamp(freq11bit, 8, 1023);
+        uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
+        uint8_t sq_lo = freq11bit & 0b11111111;
+        // apu.write_register(0, SQ2_VOL, pw2 + 0b00011111);
+        // apu.write_register(0, SQ2_LO, sq_lo);
+        // apu.write_register(0, SQ2_HI, sq_hi);
+    }
 
-    // /// Process triangle wave (channel 3).
-    // void triangle() {
-    //     float pitch = params[PARAM_FREQ2].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT2].getVoltage();
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     uint16_t freq11bit = (CLOCK_RATE / (32 * freq)) - 1;
-    //     freq11bit += inputs[INPUT_FM2].getVoltage();
-    //     freq11bit = rack::clamp(freq11bit, 2, 2047);
-    //     uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
-    //     uint8_t tri_lo = freq11bit & 0b11111111;
-    //     apu.write_register(0, TRI_LINEAR, 0b01111111);
-    //     apu.write_register(0, TRI_LO, tri_lo);
-    //     apu.write_register(0, TRI_HI, tri_hi);
-    // }
+    /// Process saw wave (channel 2).
+    void channel2_saw() {
+        float pitch = params[PARAM_FREQ2].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT2].getVoltage();
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        uint16_t freq11bit = (CLOCK_RATE / (32 * freq)) - 1;
+        freq11bit += inputs[INPUT_FM2].getVoltage();
+        freq11bit = rack::clamp(freq11bit, 2, 2047);
+        uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
+        uint8_t tri_lo = freq11bit & 0b11111111;
+        // apu.write_register(0, TRI_LINEAR, 0b01111111);
+        // apu.write_register(0, TRI_LO, tri_lo);
+        // apu.write_register(0, TRI_HI, tri_hi);
+    }
 
     /// Return a 10V signed sample from the APU.
     ///
@@ -252,7 +252,7 @@ struct ChipVRC6 : Module {
             new_sample_rate = false;
         }
         // // process the data on the chip
-        // square1(); square2(); triangle();
+        channel0_pulse(); channel1_pulse(); channel2_saw();
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // // set the output from the oscillators

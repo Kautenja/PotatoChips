@@ -19,86 +19,86 @@
 #include "components.hpp"
 #include "2A03/Nes_Vrc6.h"
 
-/// the IO registers on the APU
-enum IORegisters {
-    SQ1_VOL =     0x4000,
-    SQ1_SWEEP =   0x4001,
-    SQ1_LO =      0x4002,
-    SQ1_HI =      0x4003,
-    SQ2_VOL =     0x4004,
-    SQ2_SWEEP =   0x4005,
-    SQ2_LO =      0x4006,
-    SQ2_HI =      0x4007,
-    TRI_LINEAR =  0x4008,
-    // APU_UNUSED1 = 0x4009,  // may be used for memory clearing loops
-    TRI_LO =      0x400A,
-    TRI_HI =      0x400B,
-    NOISE_VOL =   0x400C,
-    // APU_UNUSED2 = 0x400D,  // may be used for memory clearing loops
-    NOISE_LO =    0x400E,
-    NOISE_HI =    0x400F,
-    DMC_FREQ =    0x4010,
-    DMC_RAW =     0x4011,
-    DMC_START =   0x4012,
-    DMC_LEN =     0x4013,
-    SND_CHN =     0x4015,
-    // JOY1 =        0x4016,  // unused for APU
-    JOY2 =        0x4017,
-};
+// /// the IO registers on the APU
+// enum IORegisters {
+//     SQ1_VOL =     0x4000,
+//     SQ1_SWEEP =   0x4001,
+//     SQ1_LO =      0x4002,
+//     SQ1_HI =      0x4003,
+//     SQ2_VOL =     0x4004,
+//     SQ2_SWEEP =   0x4005,
+//     SQ2_LO =      0x4006,
+//     SQ2_HI =      0x4007,
+//     TRI_LINEAR =  0x4008,
+//     // APU_UNUSED1 = 0x4009,  // may be used for memory clearing loops
+//     TRI_LO =      0x400A,
+//     TRI_HI =      0x400B,
+//     NOISE_VOL =   0x400C,
+//     // APU_UNUSED2 = 0x400D,  // may be used for memory clearing loops
+//     NOISE_LO =    0x400E,
+//     NOISE_HI =    0x400F,
+//     DMC_FREQ =    0x4010,
+//     DMC_RAW =     0x4011,
+//     DMC_START =   0x4012,
+//     DMC_LEN =     0x4013,
+//     SND_CHN =     0x4015,
+//     // JOY1 =        0x4016,  // unused for APU
+//     JOY2 =        0x4017,
+// };
 
-/// The pulse width modes available
-enum class PulseWidth : uint8_t {
-    TwelveHalf  = 0b00000000,  // 12.5%
-    TwentyFive  = 0b01000000,  // 25%
-    Fifty       = 0b10000000,  // 50%
-    SeventyFive = 0b11000000   // 75%
-};
+// /// The pulse width modes available
+// enum class PulseWidth : uint8_t {
+//     TwelveHalf  = 0b00000000,  // 12.5%
+//     TwentyFive  = 0b01000000,  // 25%
+//     Fifty       = 0b10000000,  // 50%
+//     SeventyFive = 0b11000000   // 75%
+// };
 
-/// Return the sum of a pulse width flag with an input value flag.
-///
-/// @param a the pulse width value flag to add to the existing flags
-/// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
-/// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
-///
-inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
-    return static_cast<uint8_t>(a) + b;
-}
+// /// Return the sum of a pulse width flag with an input value flag.
+// ///
+// /// @param a the pulse width value flag to add to the existing flags
+// /// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
+// /// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
+// ///
+// inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
+//     return static_cast<uint8_t>(a) + b;
+// }
 
-/// Return the sum of a pulse width flag with an input value flag.
-///
-/// @param a the pulse width value flag to add to the existing flags
-/// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
-/// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
-///
-inline PulseWidth next(PulseWidth a) {
-    auto b = ((static_cast<uint8_t>(a) >> 6) + 1) % 4;
-    a = static_cast<PulseWidth>(b << 6);
-    return a;
-}
+// /// Return the sum of a pulse width flag with an input value flag.
+// ///
+// /// @param a the pulse width value flag to add to the existing flags
+// /// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
+// /// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
+// ///
+// inline PulseWidth next(PulseWidth a) {
+//     auto b = ((static_cast<uint8_t>(a) >> 6) + 1) % 4;
+//     a = static_cast<PulseWidth>(b << 6);
+//     return a;
+// }
 
-/// TODO:
-inline uint8_t operator>>(const PulseWidth& a, const uint8_t& b) {
-    return static_cast<uint8_t>(a) >> b;
-}
+// /// TODO:
+// inline uint8_t operator>>(const PulseWidth& a, const uint8_t& b) {
+//     return static_cast<uint8_t>(a) >> b;
+// }
 
-/// The channels send flag bits.
-enum class SendChannels : uint8_t {
-    Square1  = 0b00000001,
-    Square2  = 0b00000010,
-    Triangle = 0b00000100,
-    Noise    = 0b00001000,
-    All      = 0b00001111
-};
+// /// The channels send flag bits.
+// enum class SendChannels : uint8_t {
+//     Square1  = 0b00000001,
+//     Square2  = 0b00000010,
+//     Triangle = 0b00000100,
+//     Noise    = 0b00001000,
+//     All      = 0b00001111
+// };
 
-/// Return the sum of a send channel flag with an input value flag.
-///
-/// @param a the send channel value flag to add to the existing flags
-/// @param b a byte that represents flags where bits 'B' are used: 0bAAAABBBB
-/// @returns the sum of a and b, i.e., the flag: 0bAAAABBBB
-///
-inline uint8_t operator+(SendChannels a, uint8_t b) {
-    return static_cast<uint8_t>(a) + b;
-}
+// /// Return the sum of a send channel flag with an input value flag.
+// ///
+// /// @param a the send channel value flag to add to the existing flags
+// /// @param b a byte that represents flags where bits 'B' are used: 0bAAAABBBB
+// /// @returns the sum of a and b, i.e., the flag: 0bAAAABBBB
+// ///
+// inline uint8_t operator+(SendChannels a, uint8_t b) {
+//     return static_cast<uint8_t>(a) + b;
+// }
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -146,22 +146,10 @@ struct ChipVRC6 : Module {
     /// The BLIP buffer to render audio samples from
     Blip_Buffer buf[3];
     /// The VRC6 instance to synthesize sound with
-    Nes_Apu apu;
-
-    /// the pulse width of square wave 1
-    PulseWidth pw1 = PulseWidth::Fifty;
-    /// the pulse width of square wave 2
-    PulseWidth pw2 = PulseWidth::Fifty;
+    Nes_Vrc6 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
-
-    /// a Schmitt Trigger for handling inputs to the pulse width 1 button
-    dsp::SchmittTrigger pw1Trigger;
-    /// a Schmitt Trigger for handling inputs to the pulse width 2 button
-    dsp::SchmittTrigger pw2Trigger;
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr;
 
     /// a clock divider for updating the LEDs slower than audio rate
     dsp::ClockDivider lightDivider;
@@ -171,8 +159,7 @@ struct ChipVRC6 : Module {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Square 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ1, -30.f, 30.f, 0.f, "Square 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ3, 0,     15,   7,   "Noise Period", "", 0, 1, -15);
+        configParam(PARAM_FREQ2, -30.f, 30.f, 0.f, "Saw      Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_PW1,   0.0,    1.0, 0.0, "Square 1 Pulse Width");
         configParam(PARAM_PW2,   0.0,    1.0, 0.0, "Square 2 Pulse Width");
         // set the output buffer for each individual voice
@@ -231,18 +218,18 @@ struct ChipVRC6 : Module {
     //     apu.write_register(0, TRI_HI, tri_hi);
     // }
 
-    // /// Return a 10V signed sample from the APU.
-    // ///
-    // /// @param channel the channel to get the audio sample for
-    // ///
-    // float getAudioOut(int channel) {
-    //     auto samples = buf[channel].samples_avail();
-    //     if (samples == 0) return 0.f;
-    //     // copy the buffer to  a local vector and return the first sample
-    //     std::vector<int16_t> output_buffer(samples);
-    //     buf[channel].read_samples(&output_buffer[0], samples);
-    //     return 10.f * output_buffer[0] / static_cast<float>(1 << 15);;
-    // }
+    /// Return a 10V signed sample from the APU.
+    ///
+    /// @param channel the channel to get the audio sample for
+    ///
+    float getAudioOut(int channel) {
+        auto samples = buf[channel].samples_avail();
+        if (samples == 0) return 0.f;
+        // copy the buffer to  a local vector and return the first sample
+        std::vector<int16_t> output_buffer(samples);
+        buf[channel].read_samples(&output_buffer[0], samples);
+        return 10.f * output_buffer[0] / static_cast<float>(1 << 15);;
+    }
 
     // /// Set the lights on the module
     // ///
@@ -259,32 +246,27 @@ struct ChipVRC6 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // // calculate the number of clock cycles on the chip per audio sample
-        // uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
-        // // check for sample rate changes from the engine to send to the chip
-        // if (new_sample_rate) {
-        //     // update the buffer for each channel
-        //     for (int i = 0; i < 4; i++) {
-        //         buf[i].sample_rate(args.sampleRate);
-        //         buf[i].clock_rate(cycles_per_sample * args.sampleRate);
-        //         buf[i].clear();
-        //     }
-        //     // clear the new sample rate flag
-        //     new_sample_rate = false;
-        // }
-        // // handle PW selection button presses
-        // if (pw1Trigger.process(params[PARAM_PW1].getValue())) pw1 = next(pw1);
-        // if (pw2Trigger.process(params[PARAM_PW2].getValue())) pw2 = next(pw2);
+        // calculate the number of clock cycles on the chip per audio sample
+        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
+        // check for sample rate changes from the engine to send to the chip
+        if (new_sample_rate) {
+            // update the buffer for each channel
+            for (int i = 0; i < 3; i++) {
+                buf[i].sample_rate(args.sampleRate);
+                buf[i].clock_rate(cycles_per_sample * args.sampleRate);
+                buf[i].clear();
+            }
+            // clear the new sample rate flag
+            new_sample_rate = false;
+        }
         // // process the data on the chip
-        // square1(); square2(); triangle(); noise();
-        // apu.write_register(0, SND_CHN, static_cast<uint8_t>(SendChannels::All));
-        // apu.end_frame(cycles_per_sample);
-        // for (int i = 0; i < 4; i++) buf[i].end_frame(cycles_per_sample);
+        // square1(); square2(); triangle();
+        apu.end_frame(cycles_per_sample);
+        for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // // set the output from the oscillators
-        // outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
-        // outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));
-        // outputs[OUTPUT_CHANNEL2].setVoltage(getAudioOut(2));
-        // outputs[OUTPUT_CHANNEL3].setVoltage(getAudioOut(3));
+        outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
+        outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));
+        outputs[OUTPUT_CHANNEL2].setVoltage(getAudioOut(2));
         // // set the lights
         // if (lightDivider.process())
         //     setLights(lightDivider.getDivision() * args.sampleTime);
@@ -293,30 +275,30 @@ struct ChipVRC6 : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
 
-    /// Respond to the user resetting the module from the front end.
-    inline void onReset() override { pw1 = pw2 = PulseWidth::Fifty; }
+    // /// Respond to the user resetting the module from the front end.
+    // inline void onReset() override { pw1 = pw2 = PulseWidth::Fifty; }
 
-    /// Respond to the randomization of the module parameters.
-    inline void onRandomize() override {
-        pw1 = static_cast<PulseWidth>((random::u32() % 4) << 6);
-        pw2 = static_cast<PulseWidth>((random::u32() % 4) << 6);
-    }
+    // /// Respond to the randomization of the module parameters.
+    // inline void onRandomize() override {
+    //     pw1 = static_cast<PulseWidth>((random::u32() % 4) << 6);
+    //     pw2 = static_cast<PulseWidth>((random::u32() % 4) << 6);
+    // }
 
-    /// Convert the module's state to a JSON object
-    inline json_t* dataToJson() override {
-        json_t* root = json_object();
-        json_object_set_new(root, "pw1", json_integer(static_cast<uint8_t>(pw1)));
-        json_object_set_new(root, "pw2", json_integer(static_cast<uint8_t>(pw2)));
-        return root;
-    }
+    // /// Convert the module's state to a JSON object
+    // inline json_t* dataToJson() override {
+    //     json_t* root = json_object();
+    //     json_object_set_new(root, "pw1", json_integer(static_cast<uint8_t>(pw1)));
+    //     json_object_set_new(root, "pw2", json_integer(static_cast<uint8_t>(pw2)));
+    //     return root;
+    // }
 
-    /// Load the module's state from a JSON object
-    inline void dataFromJson(json_t* root) override {
-        json_t* pw1Data = json_object_get(root, "pw1");
-        if (pw1Data) pw1 = static_cast<PulseWidth>(json_integer_value(pw1Data));
-        json_t* pw2Data = json_object_get(root, "pw2");
-        if (pw2Data) pw2 = static_cast<PulseWidth>(json_integer_value(pw2Data));
-    }
+    // /// Load the module's state from a JSON object
+    // inline void dataFromJson(json_t* root) override {
+    //     json_t* pw1Data = json_object_get(root, "pw1");
+    //     if (pw1Data) pw1 = static_cast<PulseWidth>(json_integer_value(pw1Data));
+    //     json_t* pw2Data = json_object_get(root, "pw2");
+    //     if (pw2Data) pw2 = static_cast<PulseWidth>(json_integer_value(pw2Data));
+    // }
 };
 
 // ---------------------------------------------------------------------------
@@ -367,49 +349,49 @@ struct ChipVRC6Widget : ModuleWidget {
         addOutput(createOutput<PJ301MPort>(Vec(114, 329), module, ChipVRC6::OUTPUT_CHANNEL3));
     }
 
-    /// A menu item for controlling the oscillator shape.
-    struct PWItem : MenuItem {
-        /// the pulse width on the module to set when actions occur on this item
-        PulseWidth* pw;
-        /// the pulse width on this item
-        PulseWidth menuPW = PulseWidth::Fifty;
-        /// Respond to an action on the menu item.
-        inline void onAction(const event::Action &e) override {
-            (*pw) = menuPW;
-        }
-    };
+    // /// A menu item for controlling the oscillator shape.
+    // struct PWItem : MenuItem {
+    //     /// the pulse width on the module to set when actions occur on this item
+    //     PulseWidth* pw;
+    //     /// the pulse width on this item
+    //     PulseWidth menuPW = PulseWidth::Fifty;
+    //     /// Respond to an action on the menu item.
+    //     inline void onAction(const event::Action &e) override {
+    //         (*pw) = menuPW;
+    //     }
+    // };
 
-    /// Create a waveform menu for the waveform selection buttons.
-    ///
-    /// @param menu the menu to add the item to
-    /// @param labels the labels of the model selections
-    /// @param pw the pulse width value to set
-    ///
-    void create_waveform_menu(Menu *menu, const char* labels[4], PulseWidth* pw) {
-        // iterate over the 4 pulse width options for the waveform
-        for (int i = 0; i < 4; i++) {
-            auto modelItem = createMenuItem<PWItem>(
-                labels[i], CHECKMARK(static_cast<uint8_t>(*pw) == i << 6)
-            );
-            modelItem->pw = pw;
-            modelItem->menuPW = static_cast<PulseWidth>(i << 6);
-            menu->addChild(modelItem);
-        }
-    }
+    // /// Create a waveform menu for the waveform selection buttons.
+    // ///
+    // /// @param menu the menu to add the item to
+    // /// @param labels the labels of the model selections
+    // /// @param pw the pulse width value to set
+    // ///
+    // void create_waveform_menu(Menu *menu, const char* labels[4], PulseWidth* pw) {
+    //     // iterate over the 4 pulse width options for the waveform
+    //     for (int i = 0; i < 4; i++) {
+    //         auto modelItem = createMenuItem<PWItem>(
+    //             labels[i], CHECKMARK(static_cast<uint8_t>(*pw) == i << 6)
+    //         );
+    //         modelItem->pw = pw;
+    //         modelItem->menuPW = static_cast<PulseWidth>(i << 6);
+    //         menu->addChild(modelItem);
+    //     }
+    // }
 
-    /// Setup the context menus for the module
-    void appendContextMenu(Menu *menu) override {
-        ChipVRC6 *module = dynamic_cast<ChipVRC6*>(this->module);
-        assert(module);
-        // the PW for oscillator 1
-        menu->addChild(new MenuSeparator);
-        menu->addChild(createMenuLabel("Square 1 Pulse Width"));
-        create_waveform_menu(menu, PWLabels, &module->pw1);
-        // the PW for oscillator 2
-        menu->addChild(new MenuSeparator);
-        menu->addChild(createMenuLabel("Square 2 Pulse Width"));
-        create_waveform_menu(menu, PWLabels, &module->pw2);
-    }
+    // /// Setup the context menus for the module
+    // void appendContextMenu(Menu *menu) override {
+    //     ChipVRC6 *module = dynamic_cast<ChipVRC6*>(this->module);
+    //     assert(module);
+    //     // the PW for oscillator 1
+    //     menu->addChild(new MenuSeparator);
+    //     menu->addChild(createMenuLabel("Square 1 Pulse Width"));
+    //     create_waveform_menu(menu, PWLabels, &module->pw1);
+    //     // the PW for oscillator 2
+    //     menu->addChild(new MenuSeparator);
+    //     menu->addChild(createMenuLabel("Square 2 Pulse Width"));
+    //     create_waveform_menu(menu, PWLabels, &module->pw2);
+    // }
 };
 
 /// the global instance of the model

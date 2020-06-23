@@ -19,32 +19,20 @@
 #include "components.hpp"
 #include "2A03/Nes_Vrc6.h"
 
-// /// the IO registers on the APU
-// enum IORegisters {
-//     SQ1_VOL =     0x4000,
-//     SQ1_SWEEP =   0x4001,
-//     SQ1_LO =      0x4002,
-//     SQ1_HI =      0x4003,
-//     SQ2_VOL =     0x4004,
-//     SQ2_SWEEP =   0x4005,
-//     SQ2_LO =      0x4006,
-//     SQ2_HI =      0x4007,
-//     TRI_LINEAR =  0x4008,
-//     // APU_UNUSED1 = 0x4009,  // may be used for memory clearing loops
-//     TRI_LO =      0x400A,
-//     TRI_HI =      0x400B,
-//     NOISE_VOL =   0x400C,
-//     // APU_UNUSED2 = 0x400D,  // may be used for memory clearing loops
-//     NOISE_LO =    0x400E,
-//     NOISE_HI =    0x400F,
-//     DMC_FREQ =    0x4010,
-//     DMC_RAW =     0x4011,
-//     DMC_START =   0x4012,
-//     DMC_LEN =     0x4013,
-//     SND_CHN =     0x4015,
-//     // JOY1 =        0x4016,  // unused for APU
-//     JOY2 =        0x4017,
-// };
+/// the IO registers on the VRC6 chip.
+enum IORegisters {
+    PULSE1_DUTY_VOLUME = 0x9000,
+    PULSE1_PERIOD_LOW,
+    PULSE1_PERIOD_HIGH,
+    FREQ_SCALE,
+    PULSE2_DUTY_VOLUME = 0xA000,
+    PULSE2_PERIOD_LOW,
+    PULSE2_PERIOD_HIGH,
+    SAW_VOLUME =         0xB000,
+    SAW_PERIOD_LOW,
+    SAW_PERIOD_HIGH,
+    MIRRORING_CTRL
+};
 
 // /// The pulse width modes available
 // enum class PulseWidth : uint8_t {
@@ -168,14 +156,18 @@ struct ChipVRC6 : Module {
         pitch += inputs[INPUT_VOCT0].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
-        freq11bit += inputs[INPUT_FM0].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 8, 1023);
-        // uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-        // uint8_t sq_lo = freq11bit & 0b11111111;
-        // apu.write_register(0, SQ1_VOL, pw1 + 0b00011111);
-        // apu.write_register(0, SQ1_LO, sq_lo);
-        // apu.write_register(0, SQ1_HI, sq_hi);
+        uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq12bit += inputs[INPUT_FM0].getVoltage();
+        // TODO: double check
+        freq12bit = rack::clamp(freq12bit, 8, 2047);
+        uint8_t lo = freq12bit & 0b11111111;
+        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        hi |= 0b10000000;
+
+        // TODO: duty cycle
+        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 0, PULSE1_PERIOD_LOW, lo);
+        apu.write_osc(0, 0, PULSE1_PERIOD_HIGH, hi);
     }
 
     /// Process square wave (channel 1).
@@ -184,14 +176,18 @@ struct ChipVRC6 : Module {
         pitch += inputs[INPUT_VOCT1].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
-        freq11bit += inputs[INPUT_FM1].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 8, 1023);
-        uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-        uint8_t sq_lo = freq11bit & 0b11111111;
-        // apu.write_register(0, SQ2_VOL, pw2 + 0b00011111);
-        // apu.write_register(0, SQ2_LO, sq_lo);
-        // apu.write_register(0, SQ2_HI, sq_hi);
+        uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
+        freq12bit += inputs[INPUT_FM1].getVoltage();
+        // TODO: double check
+        freq12bit = rack::clamp(freq12bit, 8, 2047);
+        uint8_t lo = freq12bit & 0b11111111;
+        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        hi |= 0b10000000;
+
+        // TODO: duty cycle
+        apu.write_osc(0, 0, PULSE2_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 0, PULSE2_PERIOD_LOW, lo);
+        apu.write_osc(0, 0, PULSE2_PERIOD_HIGH, hi);
     }
 
     /// Process saw wave (channel 2).
@@ -200,7 +196,7 @@ struct ChipVRC6 : Module {
         pitch += inputs[INPUT_VOCT2].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (32 * freq)) - 1;
+        uint16_t freq11bit = (CLOCK_RATE / (14 * freq)) - 1;
         freq11bit += inputs[INPUT_FM2].getVoltage();
         freq11bit = rack::clamp(freq11bit, 2, 2047);
         uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
@@ -208,6 +204,8 @@ struct ChipVRC6 : Module {
         // apu.write_register(0, TRI_LINEAR, 0b01111111);
         // apu.write_register(0, TRI_LO, tri_lo);
         // apu.write_register(0, TRI_HI, tri_hi);
+
+        // apu.write_osc(0, 2, reg, data);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -253,6 +251,8 @@ struct ChipVRC6 : Module {
         }
         // // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
+        // TODO: update
+        apu.write_osc(0, 0, FREQ_SCALE, 0b00);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // // set the output from the oscillators

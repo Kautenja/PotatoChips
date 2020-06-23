@@ -185,9 +185,9 @@ struct ChipVRC6 : Module {
         hi |= 0b10000000;
 
         // TODO: duty cycle
-        apu.write_osc(0, 0, PULSE2_DUTY_VOLUME, 0b00001111);
-        apu.write_osc(0, 0, PULSE2_PERIOD_LOW, lo);
-        apu.write_osc(0, 0, PULSE2_PERIOD_HIGH, hi);
+        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 1, PULSE2_PERIOD_LOW, lo);
+        apu.write_osc(0, 1, PULSE2_PERIOD_HIGH, hi);
     }
 
     /// Process saw wave (channel 2).

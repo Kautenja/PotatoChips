@@ -185,7 +185,7 @@ struct ChipVRC6 : Module {
         hi |= 0b10000000;
 
         // TODO: duty cycle
-        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00101111);
         apu.write_osc(0, 1, PULSE2_PERIOD_LOW, lo);
         apu.write_osc(0, 1, PULSE2_PERIOD_HIGH, hi);
     }
@@ -197,17 +197,16 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (14 * freq)) - 1;
-        freq12bit += inputs[INPUT_FM1].getVoltage();
+        freq12bit += inputs[INPUT_FM2].getVoltage();
         // TODO: double check
         // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         hi |= 0b10000000;
 
-        // TODO: duty cycle
-        apu.write_osc(0, 1, SAW_VOLUME, 0b00001111);
-        apu.write_osc(0, 1, SAW_PERIOD_LOW, lo);
-        apu.write_osc(0, 1, SAW_PERIOD_HIGH, hi);
+        apu.write_osc(0, 2, SAW_VOLUME, 0b00001111);
+        apu.write_osc(0, 2, SAW_PERIOD_LOW, lo);
+        apu.write_osc(0, 2, SAW_PERIOD_HIGH, hi);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -254,7 +253,7 @@ struct ChipVRC6 : Module {
         // // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
         // TODO: update
-        apu.write_osc(0, 0, FREQ_SCALE, 0b00);
+        // apu.write_osc(0, 0, FREQ_SCALE, 0b00);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // // set the output from the oscillators

@@ -159,7 +159,7 @@ struct ChipVRC6 : Module {
         uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
         freq12bit += inputs[INPUT_FM0].getVoltage();
         // TODO: double check
-        freq12bit = rack::clamp(freq12bit, 8, 2047);
+        // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         hi |= 0b10000000;
@@ -179,7 +179,7 @@ struct ChipVRC6 : Module {
         uint16_t freq12bit = (CLOCK_RATE / (16 * freq)) - 1;
         freq12bit += inputs[INPUT_FM1].getVoltage();
         // TODO: double check
-        freq12bit = rack::clamp(freq12bit, 8, 2047);
+        // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         hi |= 0b10000000;
@@ -196,16 +196,18 @@ struct ChipVRC6 : Module {
         pitch += inputs[INPUT_VOCT2].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (14 * freq)) - 1;
-        freq11bit += inputs[INPUT_FM2].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 2, 2047);
-        uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
-        uint8_t tri_lo = freq11bit & 0b11111111;
-        // apu.write_register(0, TRI_LINEAR, 0b01111111);
-        // apu.write_register(0, TRI_LO, tri_lo);
-        // apu.write_register(0, TRI_HI, tri_hi);
+        uint16_t freq12bit = (CLOCK_RATE / (14 * freq)) - 1;
+        freq12bit += inputs[INPUT_FM1].getVoltage();
+        // TODO: double check
+        // freq12bit = rack::clamp(freq12bit, 8, 2047);
+        uint8_t lo = freq12bit & 0b11111111;
+        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        hi |= 0b10000000;
 
-        // apu.write_osc(0, 2, reg, data);
+        // TODO: duty cycle
+        apu.write_osc(0, 1, SAW_VOLUME, 0b00001111);
+        apu.write_osc(0, 1, SAW_PERIOD_LOW, lo);
+        apu.write_osc(0, 1, SAW_PERIOD_HIGH, hi);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -298,7 +300,17 @@ struct ChipVRC6 : Module {
 // ---------------------------------------------------------------------------
 
 /// string labels for the square wave PW values
-// static const char* PWLabels[4] = {"12.5%", "25%", "50%", "75%"};
+static const char* PWLabels[9] = {
+    "6.25%",
+    "12.5%",
+    "18.75%",
+    "25%",
+    "31.25%",
+    "37.5%",
+    "43.75%",
+    "50%",
+    "100%"
+};
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipVRC6Widget : ModuleWidget {

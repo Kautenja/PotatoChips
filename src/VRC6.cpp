@@ -248,59 +248,19 @@ struct ChipVRC6Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(33, 37), module, ChipVRC6::INPUT_FM0));
         addInput(createInput<PJ301MPort>(Vec(33, 149), module, ChipVRC6::INPUT_FM1));
         addInput(createInput<PJ301MPort>(Vec(33, 258), module, ChipVRC6::INPUT_FM2));
+        // PW inputs
+
         // Frequency parameters
         addParam(createParam<Rogan3PSNES>(Vec(61, 42), module, ChipVRC6::PARAM_FREQ0));
         addParam(createParam<Rogan3PSNES>(Vec(61, 151), module, ChipVRC6::PARAM_FREQ1));
         addParam(createParam<Rogan3PSNES>(Vec(61, 266), module, ChipVRC6::PARAM_FREQ2));
+        // Levels
+
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(114, 104), module, ChipVRC6::OUTPUT_CHANNEL0));
         addOutput(createOutput<PJ301MPort>(Vec(114, 214), module, ChipVRC6::OUTPUT_CHANNEL1));
         addOutput(createOutput<PJ301MPort>(Vec(114, 324), module, ChipVRC6::OUTPUT_CHANNEL2));
     }
-
-    // /// A menu item for controlling the oscillator shape.
-    // struct PWItem : MenuItem {
-    //     /// the pulse width on the module to set when actions occur on this item
-    //     PulseWidth* pw;
-    //     /// the pulse width on this item
-    //     PulseWidth menuPW = PulseWidth::Fifty;
-    //     /// Respond to an action on the menu item.
-    //     inline void onAction(const event::Action &e) override {
-    //         (*pw) = menuPW;
-    //     }
-    // };
-
-    // /// Create a waveform menu for the waveform selection buttons.
-    // ///
-    // /// @param menu the menu to add the item to
-    // /// @param labels the labels of the model selections
-    // /// @param pw the pulse width value to set
-    // ///
-    // void create_waveform_menu(Menu *menu, const char* labels[4], PulseWidth* pw) {
-    //     // iterate over the 4 pulse width options for the waveform
-    //     for (int i = 0; i < 4; i++) {
-    //         auto modelItem = createMenuItem<PWItem>(
-    //             labels[i], CHECKMARK(static_cast<uint8_t>(*pw) == i << 6)
-    //         );
-    //         modelItem->pw = pw;
-    //         modelItem->menuPW = static_cast<PulseWidth>(i << 6);
-    //         menu->addChild(modelItem);
-    //     }
-    // }
-
-    // /// Setup the context menus for the module
-    // void appendContextMenu(Menu *menu) override {
-    //     ChipVRC6 *module = dynamic_cast<ChipVRC6*>(this->module);
-    //     assert(module);
-    //     // the PW for oscillator 1
-    //     menu->addChild(new MenuSeparator);
-    //     menu->addChild(createMenuLabel("Square 1 Pulse Width"));
-    //     create_waveform_menu(menu, PWLabels, &module->pw1);
-    //     // the PW for oscillator 2
-    //     menu->addChild(new MenuSeparator);
-    //     menu->addChild(createMenuLabel("Square 2 Pulse Width"));
-    //     create_waveform_menu(menu, PWLabels, &module->pw2);
-    // }
 };
 
 /// the global instance of the model

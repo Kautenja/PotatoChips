@@ -236,7 +236,7 @@ struct Chip2A03 : Module {
         auto sign = sgn(inputs[INPUT_VOCT3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
         auto cv = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        uint32_t param = params[PARAM_FREQ3].getValue() - cv;
+        uint32_t param = params[PARAM_FREQ3].getValue() + cv;
         param = 15 - rack::clamp(param, 0, 15);
         apu.write_register(0, NOISE_VOL, 0b00011111);
         lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));

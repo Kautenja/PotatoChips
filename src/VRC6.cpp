@@ -110,28 +110,22 @@ struct ChipVRC6 : Module {
         PARAM_FREQ0,
         PARAM_FREQ1,
         PARAM_FREQ2,
-        PARAM_FREQ3,
-        PARAM_PW1,
-        PARAM_PW2,
         PARAM_COUNT
     };
     enum InputIds {
         INPUT_VOCT0,
         INPUT_VOCT1,
         INPUT_VOCT2,
-        INPUT_VOCT3,
         INPUT_FM0,
         INPUT_FM1,
         INPUT_FM2,
-        INPUT_LFSR,
         INPUT_COUNT
     };
     enum OutputIds {
         OUTPUT_CHANNEL0,
         OUTPUT_CHANNEL1,
         OUTPUT_CHANNEL2,
-        OUTPUT_CHANNEL3,
-        OUTPUT_MIX,
+        // OUTPUT_MIX, // TODO: remove in 2A03 and VRC6
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -152,7 +146,7 @@ struct ChipVRC6 : Module {
     bool new_sample_rate = true;
 
     /// a clock divider for updating the LEDs slower than audio rate
-    dsp::ClockDivider lightDivider;
+    // dsp::ClockDivider lightDivider;
 
     /// Initialize a new VRC6 Chip module.
     ChipVRC6() {
@@ -160,14 +154,12 @@ struct ChipVRC6 : Module {
         configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Square 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ1, -30.f, 30.f, 0.f, "Square 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ2, -30.f, 30.f, 0.f, "Saw      Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW1,   0.0,    1.0, 0.0, "Square 1 Pulse Width");
-        configParam(PARAM_PW2,   0.0,    1.0, 0.0, "Square 2 Pulse Width");
         // set the output buffer for each individual voice
         for (int i = 0; i < 3; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
         // set the number of samples between LED updates
-        lightDivider.setDivision(32);
+        // lightDivider.setDivision(32);
     }
 
     // /// Process square wave (channel 1).
@@ -306,7 +298,7 @@ struct ChipVRC6 : Module {
 // ---------------------------------------------------------------------------
 
 /// string labels for the square wave PW values
-static const char* PWLabels[4] = {"12.5%", "25%", "50%", "75%"};
+// static const char* PWLabels[4] = {"12.5%", "25%", "50%", "75%"};
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipVRC6Widget : ModuleWidget {
@@ -318,7 +310,6 @@ struct ChipVRC6Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(28, 74), module, ChipVRC6::INPUT_VOCT0));
         addInput(createInput<PJ301MPort>(Vec(28, 159), module, ChipVRC6::INPUT_VOCT1));
         addInput(createInput<PJ301MPort>(Vec(28, 244), module, ChipVRC6::INPUT_VOCT2));
-        addInput(createInput<PJ301MPort>(Vec(28, 329), module, ChipVRC6::INPUT_VOCT3));
         // FM inputs
         addInput(createInput<PJ301MPort>(Vec(33, 32), module, ChipVRC6::INPUT_FM0));
         addInput(createInput<PJ301MPort>(Vec(33, 118), module, ChipVRC6::INPUT_FM1));
@@ -327,26 +318,10 @@ struct ChipVRC6Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, ChipVRC6::PARAM_FREQ0));
         addParam(createParam<Rogan3PSNES>(Vec(62, 126), module, ChipVRC6::PARAM_FREQ1));
         addParam(createParam<Rogan3PSNES>(Vec(62, 211), module, ChipVRC6::PARAM_FREQ2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(62, 297), module, ChipVRC6::PARAM_FREQ3));
-        // square 1 PW
-        addChild(createLight<SmallLight<GreenLight>>(Vec(114, 49), module, ChipVRC6::LIGHT_PW1 + 0));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(121, 49), module, ChipVRC6::LIGHT_PW1 + 1));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(128, 49), module, ChipVRC6::LIGHT_PW1 + 2));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(135, 49), module, ChipVRC6::LIGHT_PW1 + 3));
-        addParam(createParam<TL1105>(Vec(115, 30), module, ChipVRC6::PARAM_PW1));
-        // square 2 PW
-        addChild(createLight<SmallLight<GreenLight>>(Vec(114, 133), module, ChipVRC6::LIGHT_PW2 + 0));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(121, 133), module, ChipVRC6::LIGHT_PW2 + 1));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(128, 133), module, ChipVRC6::LIGHT_PW2 + 2));
-        addChild(createLight<SmallLight<GreenLight>>(Vec(135, 133), module, ChipVRC6::LIGHT_PW2 + 3));
-        addParam(createParam<TL1105>(Vec(115, 115), module, ChipVRC6::PARAM_PW2));
-        // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(32, 284), module, ChipVRC6::INPUT_LFSR));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipVRC6::OUTPUT_CHANNEL0));
         addOutput(createOutput<PJ301MPort>(Vec(114, 159), module, ChipVRC6::OUTPUT_CHANNEL1));
         addOutput(createOutput<PJ301MPort>(Vec(114, 244), module, ChipVRC6::OUTPUT_CHANNEL2));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 329), module, ChipVRC6::OUTPUT_CHANNEL3));
     }
 
     // /// A menu item for controlling the oscillator shape.

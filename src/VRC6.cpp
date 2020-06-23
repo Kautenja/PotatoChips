@@ -85,7 +85,7 @@ struct ChipVRC6 : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < 3; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        // apu.volume(3.f);
+        apu.volume(3.f);
     }
 
     /// Process square wave (channel 0).
@@ -100,10 +100,11 @@ struct ChipVRC6 : Module {
         // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        // enable the channel
         hi |= 0b10000000;
 
         // TODO: duty cycle
-        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, 0b00101111);
         apu.write_osc(0, 0, PULSE1_PERIOD_LOW, lo);
         apu.write_osc(0, 0, PULSE1_PERIOD_HIGH, hi);
     }
@@ -120,10 +121,11 @@ struct ChipVRC6 : Module {
         // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        // enable the channel
         hi |= 0b10000000;
 
         // TODO: duty cycle
-        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00001111);
+        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00101111);
         apu.write_osc(0, 1, PULSE2_PERIOD_LOW, lo);
         apu.write_osc(0, 1, PULSE2_PERIOD_HIGH, hi);
     }
@@ -140,6 +142,7 @@ struct ChipVRC6 : Module {
         // freq12bit = rack::clamp(freq12bit, 8, 2047);
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        // enable the channel
         hi |= 0b10000000;
 
         apu.write_osc(0, 2, SAW_VOLUME, 0b00001111);

@@ -241,21 +241,21 @@ struct ChipVRC6Widget : ModuleWidget {
         static const auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(28, 74), module, ChipVRC6::INPUT_VOCT0));
-        addInput(createInput<PJ301MPort>(Vec(28, 159), module, ChipVRC6::INPUT_VOCT1));
-        addInput(createInput<PJ301MPort>(Vec(28, 244), module, ChipVRC6::INPUT_VOCT2));
+        addInput(createInput<PJ301MPort>(Vec(27, 78), module, ChipVRC6::INPUT_VOCT0));
+        addInput(createInput<PJ301MPort>(Vec(27, 188), module, ChipVRC6::INPUT_VOCT1));
+        addInput(createInput<PJ301MPort>(Vec(27, 298), module, ChipVRC6::INPUT_VOCT2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 32), module, ChipVRC6::INPUT_FM0));
-        addInput(createInput<PJ301MPort>(Vec(33, 118), module, ChipVRC6::INPUT_FM1));
-        addInput(createInput<PJ301MPort>(Vec(33, 203), module, ChipVRC6::INPUT_FM2));
+        addInput(createInput<PJ301MPort>(Vec(33, 37), module, ChipVRC6::INPUT_FM0));
+        addInput(createInput<PJ301MPort>(Vec(33, 149), module, ChipVRC6::INPUT_FM1));
+        addInput(createInput<PJ301MPort>(Vec(33, 258), module, ChipVRC6::INPUT_FM2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, ChipVRC6::PARAM_FREQ0));
-        addParam(createParam<Rogan3PSNES>(Vec(62, 126), module, ChipVRC6::PARAM_FREQ1));
-        addParam(createParam<Rogan3PSNES>(Vec(62, 211), module, ChipVRC6::PARAM_FREQ2));
+        addParam(createParam<Rogan3PSNES>(Vec(61, 42), module, ChipVRC6::PARAM_FREQ0));
+        addParam(createParam<Rogan3PSNES>(Vec(61, 151), module, ChipVRC6::PARAM_FREQ1));
+        addParam(createParam<Rogan3PSNES>(Vec(61, 266), module, ChipVRC6::PARAM_FREQ2));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipVRC6::OUTPUT_CHANNEL0));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 159), module, ChipVRC6::OUTPUT_CHANNEL1));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 244), module, ChipVRC6::OUTPUT_CHANNEL2));
+        addOutput(createOutput<PJ301MPort>(Vec(114, 104), module, ChipVRC6::OUTPUT_CHANNEL0));
+        addOutput(createOutput<PJ301MPort>(Vec(114, 214), module, ChipVRC6::OUTPUT_CHANNEL1));
+        addOutput(createOutput<PJ301MPort>(Vec(114, 324), module, ChipVRC6::OUTPUT_CHANNEL2));
     }
 
     // /// A menu item for controlling the oscillator shape.

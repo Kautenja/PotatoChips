@@ -15,23 +15,23 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iostream>
+
 #include "plugin.hpp"
 #include "components.hpp"
 #include "2A03/Nes_Vrc6.h"
 
 /// the IO registers on the VRC6 chip.
 enum IORegisters {
-    PULSE1_DUTY_VOLUME = 0x9000,
-    PULSE1_PERIOD_LOW  = 0x9001,
-    PULSE1_PERIOD_HIGH = 0x9002,
-    FREQ_SCALE         = 0x9003,
-    PULSE2_DUTY_VOLUME = 0xA000,
-    PULSE2_PERIOD_LOW  = 0xA001,
-    PULSE2_PERIOD_HIGH = 0xA002,
-    SAW_VOLUME         = 0xB000,
-    SAW_PERIOD_LOW     = 0xB001,
-    SAW_PERIOD_HIGH    = 0xB002,
-    MIRRORING_CTRL     = 0xB003
+    PULSE1_DUTY_VOLUME = 0,
+    PULSE1_PERIOD_LOW  = 1,
+    PULSE1_PERIOD_HIGH = 2,
+    PULSE2_DUTY_VOLUME = 0,
+    PULSE2_PERIOD_LOW  = 1,
+    PULSE2_PERIOD_HIGH = 2,
+    SAW_VOLUME         = 0,
+    SAW_PERIOD_LOW     = 1,
+    SAW_PERIOD_HIGH    = 2,
 };
 
 // ---------------------------------------------------------------------------
@@ -177,7 +177,6 @@ struct ChipVRC6 : Module {
         }
         // // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
-        // TODO: update
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators

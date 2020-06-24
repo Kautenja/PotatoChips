@@ -41,16 +41,29 @@ class APU {
     ///
     /// @param value the global volume level of the chip
     ///
-    void volume(double = 1.f);
+    inline void volume(double v = 1.f) {
+        square_synth.volume(0.1128 * v);
+        triangle.synth.volume(0.12765 * v);
+        noise.synth.volume(0.0741 * v);
+    }
 
-    // Set treble equalization (see notes.txt).
-    void treble_eq(const blip_eq_t&);
+    /// Set treble equalization.
+    ///
+    /// @param eq the equalizer settings to use
+    ///
+    inline void treble_eq(const blip_eq_t& eq) {
+        square_synth.treble_eq(eq);
+        triangle.synth.treble_eq(eq);
+        noise.synth.treble_eq(eq);
+    }
 
     /// Set buffer to generate all sound into, or disable sound if NULL.
     ///
     /// @param buf the buffer to write samples from the synthesizer to
     ///
-    void output(BLIPBuffer*);
+    inline void output(BLIPBuffer* buf) {
+        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
+    }
 
     /// Set the output buffer for an individual synthesizer voice.
     ///
@@ -64,7 +77,7 @@ class APU {
     ///       2) Triangle,
     ///       3) Noise.
     ///
-    void osc_output(int osc, BLIPBuffer* buf) {
+    inline void osc_output(int osc, BLIPBuffer* buf) {
         assert(("APU::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
         oscs[osc]->output = buf;
     }
@@ -75,10 +88,15 @@ class APU {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void end_frame(cpu_time_t);
+    void end_frame(cpu_time_t time);
 
-    /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
-    void write_register(cpu_time_t, cpu_addr_t, int data);
+    /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016).
+    ///
+    /// @param time the number of elapsed cycles
+    /// @param address the address of the register to write
+    /// @param data the data to write to the register
+    ///
+    void write_register(cpu_time_t time, cpu_addr_t address, int data);
 
  private:
     // TODO: remove these two nonlinear functions?
@@ -128,7 +146,7 @@ class APU {
 
     /// has been run until this time in current frame
     cpu_time_t last_time;
-    /// TODO:
+    /// TODO: document
     int frame_period;
     /// cycles until frame counter runs next
     int frame_delay;
@@ -136,7 +154,7 @@ class APU {
     int frame;
     /// the channel enabled register
     int osc_enables;
-    /// TODO:
+    /// TODO: document
     int frame_mode;
     /// a synthesizer shared by squares
     Pulse::Synth square_synth;

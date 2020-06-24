@@ -49,11 +49,9 @@ void BLIPImpulse::scale_impulse(int unit, imp_t* imp_in) const {
     memcpy(imp, imp_in, (res * width - 1) * sizeof *imp);
 }
 
-const int max_res = 1 << blip_res_bits_;
-
 void BLIPImpulse::fine_volume_unit() {
     // to do: find way of merging in-place without temporary buffer
-    imp_t temp[max_res * 2 * BLIPBuffer::widest_impulse_];
+    imp_t temp[BLIP_MAX_RES * 2 * BLIPBuffer::WIDEST_IMPULSE];
     scale_impulse((offset & 0xffff) << fine_bits, temp);
     imp_t* imp2 = impulses + res * 2 * width;
     scale_impulse(offset & 0xffff, imp2);
@@ -104,10 +102,10 @@ void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
     const double pow_a_nc = rescale * pow(rolloff, n_harm * cutoff);
 
     double total = 0.0;
-    const double to_angle = pi / 2 / n_harm / max_res;
+    const double to_angle = pi / 2 / n_harm / BLIP_MAX_RES;
 
-    float buf[max_res * (BLIPBuffer::widest_impulse_ - 2) / 2];
-    const int size = max_res * (width - 2) / 2;
+    float buf[BLIP_MAX_RES * (BLIPBuffer::WIDEST_IMPULSE - 2) / 2];
+    const int size = BLIP_MAX_RES * (width - 2) / 2;
     for (int i = size; i--;) {
         double angle = (i * 2 + 1) * to_angle;
 
@@ -129,7 +127,7 @@ void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
 
         // fixed window which affects wider impulses more
         if (width > 12) {
-            double window = cos(n_harm / 1.25 / BLIPBuffer::widest_impulse_ * angle);
+            double window = cos(n_harm / 1.25 / BLIPBuffer::WIDEST_IMPULSE * angle);
             y *= window * window;
         }
 
@@ -137,16 +135,16 @@ void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
         buf[i] = (float) y;
     }
 
-    // integrate runs of length 'max_res'
+    // integrate runs of length 'BLIP_MAX_RES'
     double factor = impulse_amp * 0.5 / total;  // 0.5 accounts for other mirrored half
     imp_t* imp = impulse;
-    const int step = max_res / res;
-    int offset = res > 1 ? max_res : max_res / 2;
+    const int step = BLIP_MAX_RES / res;
+    int offset = res > 1 ? BLIP_MAX_RES : BLIP_MAX_RES / 2;
     for (int n = res / 2 + 1; n--; offset -= step) {
         for (int w = -width / 2; w < width / 2; w++) {
             double sum = 0;
-            for (int i = max_res; i--;) {
-                int index = w * max_res + offset + i;
+            for (int i = BLIP_MAX_RES; i--;) {
+                int index = w * BLIP_MAX_RES + offset + i;
                 if (index < 0)
                     index = -index - 1;
                 if (index < size)
@@ -175,7 +173,7 @@ void BLIPBuffer::remove_samples(int32_t count) {
     // to do: kind of hacky, could add run_until() which keeps track of extra synthesis
     int const copy_extra = 1;
     // copy remaining samples to beginning and clear old samples
-    int32_t remain = samples_count() + widest_impulse_ + copy_extra;
+    int32_t remain = samples_count() + WIDEST_IMPULSE + copy_extra;
     if (count >= remain)
         memmove(buffer_, buffer_ + count, remain * sizeof (buf_t_));
     else
@@ -227,7 +225,7 @@ int32_t BLIPBuffer::read_samples(blip_sample_t* out, int32_t max_samples, bool s
 }
 
 void BLIPBuffer::mix_samples(const blip_sample_t* in, int32_t count) {
-    buf_t_* buf = &buffer_[(offset_ >> BLIP_BUFFER_ACCURACY) + (widest_impulse_ / 2 - 1)];
+    buf_t_* buf = &buffer_[(offset_ >> BLIP_BUFFER_ACCURACY) + (WIDEST_IMPULSE / 2 - 1)];
 
     int prev = 0;
     while (count--) {

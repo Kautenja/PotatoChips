@@ -1,8 +1,6 @@
 // A macro oscillator based on the Konami VRC6 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,18 +16,18 @@
 #ifndef NES_VRC6_H
 #define NES_VRC6_H
 
-#include "APU.h"
+#include "apu.h"
 
 /// A macro oscillator based on the Konami VRC6 synthesis chip.
-class Nes_Vrc6 {
+class VRC6 {
  public:
-    Nes_Vrc6() {
+    VRC6() {
         output(NULL);
         volume(1.0);
         reset();
     }
 
-    // See Nes_Apu.h for reference
+    // See APU.h for reference
     void reset() {
         last_time = 0;
         for (int i = 0; i < OSC_COUNT; i++) {
@@ -77,8 +75,8 @@ class Nes_Vrc6 {
     enum { base_addr = 0x9000 };
     enum { addr_step = 0x1000 };
     void write_osc(cpu_time_t time, int osc_index, int reg, int data) {
-        // require((unsigned) osc_index < OSC_COUNT);
-        // require((unsigned) reg < reg_count);
+        assert((unsigned) osc_index < OSC_COUNT);
+        assert((unsigned) reg < reg_count);
 
         run_until(time);
         oscs[osc_index].regs[reg] = data;
@@ -86,11 +84,11 @@ class Nes_Vrc6 {
 
  private:
     // noncopyable
-    Nes_Vrc6(const Nes_Vrc6&);
-    Nes_Vrc6& operator = (const Nes_Vrc6&);
+    VRC6(const VRC6&);
+    VRC6& operator = (const VRC6&);
 
     struct Vrc6_Osc {
-        BOOST::uint8_t regs[3];
+        uint8_t regs[3];
         Blip_Buffer* output;
         int delay;
         int last_amp;
@@ -105,11 +103,11 @@ class Nes_Vrc6 {
     Vrc6_Osc oscs[OSC_COUNT];
     cpu_time_t last_time;
 
-    Blip_Synth<blip_med_quality, 31> saw_synth;
-    Blip_Synth<blip_good_quality, 15> square_synth;
+    Blip_Synth<BLIPQuality::Medium, 31> saw_synth;
+    Blip_Synth<BLIPQuality::Good, 15> square_synth;
 
     void run_until(cpu_time_t time) {
-        // require(time >= last_time);
+        assert(time >= last_time);
         run_square(oscs[0], time);
         run_square(oscs[1], time);
         run_saw(time);

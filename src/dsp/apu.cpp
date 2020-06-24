@@ -1,8 +1,6 @@
 // A macro oscillator based on the NES 2A03 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -15,11 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "APU.h"
+#include "apu.h"
+#include <cassert>
 
-#include BLARGG_SOURCE_BEGIN
-
-Nes_Apu::Nes_Apu() {
+APU::APU() {
     square1.synth = &square_synth;
     square2.synth = &square_synth;
 
@@ -33,20 +30,20 @@ Nes_Apu::Nes_Apu() {
     reset(false);
 }
 
-void Nes_Apu::treble_eq(const blip_eq_t& eq) {
+void APU::treble_eq(const blip_eq_t& eq) {
     square_synth.treble_eq(eq);
     triangle.synth.treble_eq(eq);
     noise.synth.treble_eq(eq);
 }
 
-void Nes_Apu::buffer_cleared() {
+void APU::buffer_cleared() {
     square1.last_amp = 0;
     square2.last_amp = 0;
     triangle.last_amp = 0;
     noise.last_amp = 0;
 }
 
-void Nes_Apu::enable_nonlinear(double v) {
+void APU::enable_nonlinear(double v) {
     square_synth.volume(1.3 * 0.25751258 / 0.742467605 * 0.25 * v);
     const double tnd = 0.75 / 202 * 0.48;
     triangle.synth.volume_unit(3 * tnd);
@@ -54,18 +51,18 @@ void Nes_Apu::enable_nonlinear(double v) {
     buffer_cleared();
 }
 
-void Nes_Apu::volume(double v) {
+void APU::volume(double v) {
     square_synth.volume(0.1128 * v);
     triangle.synth.volume(0.12765 * v);
     noise.synth.volume(0.0741 * v);
 }
 
-void Nes_Apu::output(Blip_Buffer* buffer) {
+void APU::output(Blip_Buffer* buffer) {
     for (int i = 0; i < OSC_COUNT; i++)
         osc_output(i, buffer);
 }
 
-void Nes_Apu::reset(bool pal_mode) {
+void APU::reset(bool pal_mode) {
     // to do: time pal frame periods exactly
     frame_period = pal_mode ? 8314 : 7458;
 
@@ -86,8 +83,8 @@ void Nes_Apu::reset(bool pal_mode) {
 
 // frames
 
-void Nes_Apu::run_until(cpu_time_t end_time) {
-    require(end_time >= last_time);
+void APU::run_until(cpu_time_t end_time) {
+    assert(end_time >= last_time);
 
     if (end_time == last_time)
         return;
@@ -148,13 +145,13 @@ void Nes_Apu::run_until(cpu_time_t end_time) {
     }
 }
 
-void Nes_Apu::end_frame(cpu_time_t end_time) {
+void APU::end_frame(cpu_time_t end_time) {
     if (end_time > last_time)
         run_until(end_time);
 
     // make times relative to new frame
     last_time -= end_time;
-    require(last_time >= 0);
+    assert(last_time >= 0);
 }
 
 // registers
@@ -166,9 +163,9 @@ static const unsigned char length_table[0x20] = {
     0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
 };
 
-void Nes_Apu::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
-    require(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
-    require((unsigned) data <= 0xff);
+void APU::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
+    assert(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
+    assert((unsigned) data <= 0xff);
 
     // Ignore addresses outside range
     if (addr < start_addr || end_addr < addr) return;

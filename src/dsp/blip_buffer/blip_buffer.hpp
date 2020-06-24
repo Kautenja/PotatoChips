@@ -76,7 +76,8 @@ class Blip_Buffer {
         clocks_per_sec = cps;
         factor_ = (uint32_t) floor((double) samples_per_sec / cps *
                 (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-        assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
+        // clock_rate/sample_rate ratio is too large
+        assert(factor_ > 0);
     }
 
     /// Return number of source time unites per second.

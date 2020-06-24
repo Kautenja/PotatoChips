@@ -249,7 +249,7 @@ struct ChipVRC6 : Module {
     /// @param channel the channel to get the audio sample for
     ///
     float getAudioOut(int channel) {
-        auto samples = buf[channel].samples_avail();
+        auto samples = buf[channel].samples_count();
         if (samples == 0) return 0.f;
         // copy the buffer to  a local vector and return the first sample
         std::vector<int16_t> output_buffer(samples);

@@ -84,7 +84,7 @@ void APU::reset(bool pal_mode) {
 // frames
 
 void APU::run_until(cpu_time_t end_time) {
-    require(end_time >= last_time);
+    assert(end_time >= last_time);
 
     if (end_time == last_time)
         return;
@@ -151,7 +151,7 @@ void APU::end_frame(cpu_time_t end_time) {
 
     // make times relative to new frame
     last_time -= end_time;
-    require(last_time >= 0);
+    assert(last_time >= 0);
 }
 
 // registers
@@ -164,8 +164,8 @@ static const unsigned char length_table[0x20] = {
 };
 
 void APU::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
-    require(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
-    require((unsigned) data <= 0xff);
+    assert(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
+    assert((unsigned) data <= 0xff);
 
     // Ignore addresses outside range
     if (addr < start_addr || end_addr < addr) return;

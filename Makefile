@@ -3,6 +3,7 @@ FLAGS += \
 	-Wno-unused-local-typedefs
 
 SOURCES += $(wildcard src/dsp/*.cpp)
+SOURCES += $(wildcard src/dsp/blip_buffer/*.cpp)
 SOURCES += $(wildcard src/*.cpp)
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res

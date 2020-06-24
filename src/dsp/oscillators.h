@@ -1,8 +1,6 @@
 // Individual oscillators based on the NES 2A03 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -20,15 +18,12 @@
 
 #include <cstdint>
 #include <functional>
-#include "blip_buffer.h"
+#include "blip_buffer/blip_buffer.h"
 
 /// CPU clock cycle count
 typedef int32_t cpu_time_t;
 /// 16-bit memory address
 typedef int16_t cpu_addr_t;
-
-/// a forward declaration of the NES APU
-class Nes_Apu;
 
 /// An abstract base type for NES oscillators.
 struct Nes_Osc {
@@ -100,7 +95,7 @@ struct Nes_Square : Nes_Envelope {
     int phase;
     int sweep_delay;
 
-    typedef Blip_Synth<blip_good_quality, 15> Synth;
+    typedef Blip_Synth<BLIPQuality::Good, 15> Synth;
     // shared between squares
     const Synth* synth;
 
@@ -205,7 +200,7 @@ struct Nes_Triangle : Nes_Osc {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
-    Blip_Synth<blip_good_quality, 15> synth;
+    Blip_Synth<BLIPQuality::Good, 15> synth;
 
     inline int calc_amp() const {
         int amp = phase_range - phase;
@@ -282,7 +277,7 @@ static constexpr int16_t noise_period_table[16] = {
 /// The noise oscillator from the NES.
 struct Nes_Noise : Nes_Envelope {
     int noise;
-    Blip_Synth<blip_med_quality, 15> synth;
+    Blip_Synth<BLIPQuality::Medium, 15> synth;
 
     void run(cpu_time_t time, cpu_time_t end_time) {
         if (!output) return;

@@ -1,8 +1,6 @@
 // A macro oscillator based on the Namco 106 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -18,18 +16,18 @@
 #ifndef NES_NAMCO_H
 #define NES_NAMCO_H
 
-#include "APU.h"
+#include "apu.h"
 
 /// A macro oscillator based on the Namco 106 synthesis chip.
-class Nes_Namco {
+class Namco106 {
  public:
-    Nes_Namco() {
+    Namco106() {
         output(NULL);
         volume(1.0);
         reset();
     }
 
-    // See Nes_Apu.h for reference.
+    // See APU.h for reference.
     inline void volume(double v) { synth.volume(0.10 / OSC_COUNT * v); }
 
     inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
@@ -80,8 +78,8 @@ class Nes_Namco {
 
  private:
     // noncopyable
-    Nes_Namco(const Nes_Namco&);
-    Nes_Namco& operator = (const Nes_Namco&);
+    Namco106(const Namco106&);
+    Namco106& operator = (const Namco106&);
 
     struct Namco_Osc {
         int32_t delay;
@@ -96,10 +94,10 @@ class Nes_Namco {
     int addr_reg;
 
     static constexpr int REG_COUNT = 0x80;
-    BOOST::uint8_t reg[REG_COUNT];
-    Blip_Synth<blip_good_quality, 15> synth;
+    uint8_t reg[REG_COUNT];
+    Blip_Synth<BLIPQuality::Good, 15> synth;
 
-    BOOST::uint8_t& access() {
+    uint8_t& access() {
         int addr = addr_reg & 0x7f;
         if (addr_reg & 0x80) addr_reg = (addr + 1) | 0x80;
         return reg[addr];
@@ -117,7 +115,7 @@ class Nes_Namco {
             auto end_time = output->resampled_time(nes_end_time);
             osc.delay = 0;
             if (time < end_time) {
-                const BOOST::uint8_t* osc_reg = &reg[i * 8 + 0x40];
+                const uint8_t* osc_reg = &reg[i * 8 + 0x40];
                 if (!(osc_reg[4] & 0xe0))
                     continue;
 

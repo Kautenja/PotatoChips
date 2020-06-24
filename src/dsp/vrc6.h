@@ -88,7 +88,7 @@ class Nes_Vrc6 {
     Nes_Vrc6& operator = (const Nes_Vrc6&);
 
     struct Vrc6_Osc {
-        BOOST::uint8_t regs[3];
+        uint8_t regs[3];
         Blip_Buffer* output;
         int delay;
         int last_amp;

@@ -333,7 +333,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
             *out++ = (blip_sample_t) s;
 
             // clamp sample
-            if ((BOOST::int16_t) s != s)
+            if ((int16_t) s != s)
                 out [-1] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }
@@ -346,7 +346,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
             out += 2;
 
             // clamp sample
-            if ((BOOST::int16_t) s != s)
+            if ((int16_t) s != s)
                 out [-2] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }

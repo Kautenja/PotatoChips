@@ -21,92 +21,131 @@
 /// A macro oscillator based on the Namco 106 synthesis chip.
 class Namco106 {
  public:
-    Namco106() {
-        output(NULL);
-        volume(1.0);
-        reset();
-    }
-
-    // See APU.h for reference.
-    inline void volume(double v) { synth.volume(0.10 / OSC_COUNT * v); }
-
-    inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
-
-    void output(BLIPBuffer* buf) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
-    }
-
+    /// the number of oscillators on the Namco 106 chip
     static constexpr int OSC_COUNT = 8;
-    inline void osc_output(int i, BLIPBuffer* buf) {
-        assert((unsigned) i < OSC_COUNT);
-        oscs[i].output = buf;
-    }
+    /// the number of registers on the chip
+    static constexpr int REG_COUNT = 0x80;
 
-    void reset() {
+    /// Initialize a new Namco106 chip emulator.
+    Namco106() { output(NULL); volume(1.0); reset(); }
+
+    /// Reset internal frame counter, registers, and all oscillators.
+    inline void reset() {
+        last_time = 0;
         addr_reg = 0;
-
-        int i;
-        for (i = 0; i < REG_COUNT; i++)
-            reg[i] = 0;
-
-        for (i = 0; i < OSC_COUNT; i++) {
-            Namco_Osc& osc = oscs[i];
+        memset(reg, 0, REG_COUNT);
+        for (int i = 0; i < OSC_COUNT; i++) {
+            Namco106_Oscillator& osc = oscs[i];
             osc.delay = 0;
             osc.last_amp = 0;
             osc.wave_pos = 0;
         }
     }
 
-    void end_frame(cpu_time_t time) {
+    /// Set the volume.
+    ///
+    /// @param value the global volume level of the chip
+    ///
+    inline void volume(double value) { synth.volume(0.10 / OSC_COUNT * value); }
+
+    /// Set treble equalization.
+    ///
+    /// @param eq the equalizer settings to use
+    ///
+    inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
+
+    /// Set buffer to generate all sound into, or disable sound if NULL.
+    ///
+    /// @param buf the buffer to write samples from the synthesizer to
+    ///
+    inline void output(BLIPBuffer* buf) {
+        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
+    }
+
+    /// Set the output buffer for an individual synthesizer voice.
+    ///
+    /// @param i the index of the oscillator to set the output buffer for
+    /// @param buf the buffer to write samples from the synthesizer to
+    ///
+    inline void osc_output(int i, BLIPBuffer* buf) {
+        assert((unsigned) i < OSC_COUNT);
+        oscs[i].output = buf;
+    }
+
+    /// Run all oscillators up to specified time, end current time frame, then
+    /// start a new time frame at time 0. Time frames have no effect on
+    /// emulation and each can be whatever length is convenient.
+    ///
+    /// @param time the number of elapsed cycles
+    ///
+    inline void end_frame(cpu_time_t time) {
         if (time > last_time) run_until(time);
         last_time -= time;
         assert(last_time >= 0);
     }
 
-    // Read/write data register is at 0x4800
+    /// Write data to the register pointed to by the address register.
+    /// Read/write data register is at 0x4800
     enum { data_reg_addr = 0x4800 };
     inline void write_data(cpu_time_t time, int data) {
         run_until(time);
         access() = data;
     }
 
+    /// Return the data pointed to by the value in the address register.
     inline int read_data() { return access(); }
 
-    // Write-only address register is at 0xF800
-    enum { addr_reg_addr = 0xF800 };
-    inline void write_addr(int v) { addr_reg = v; }
+    /// Set the address register to a new value.
+    /// Write-only address register is at 0xF800
+    inline void write_addr(int value) { addr_reg = value; }
 
  private:
-    // noncopyable
+    /// Disable the public copy constructor.
     Namco106(const Namco106&);
-    Namco106& operator = (const Namco106&);
 
-    struct Namco_Osc {
+    /// Disable the public assignment operator.
+    Namco106& operator=(const Namco106&);
+
+    /// An oscillator on the Namco106 chip.
+    struct Namco106_Oscillator {
+        /// TODO: document
         int32_t delay;
+        /// the output buffer to write samples to
         BLIPBuffer* output;
+        /// TODO: document
         int16_t last_amp;
+        /// the position in the waveform
         int16_t wave_pos;
     };
 
-    Namco_Osc oscs[OSC_COUNT];
+    /// the oscillators on the chip
+    Namco106_Oscillator oscs[OSC_COUNT];
 
-    cpu_time_t last_time;
+    /// the time after the last run_until call
+    cpu_time_t last_time = 0;
+    /// the register to read / write data from / to
     int addr_reg;
 
-    static constexpr int REG_COUNT = 0x80;
+    /// the RAM on the chip
     uint8_t reg[REG_COUNT];
+    /// the synthesizer for producing sound from the chip
     BLIPSynth<BLIPQuality::Good, 15> synth;
 
+    /// Return a reference to the register pointed to by the address register.
     uint8_t& access() {
         int addr = addr_reg & 0x7f;
         if (addr_reg & 0x80) addr_reg = (addr + 1) | 0x80;
         return reg[addr];
     }
 
+    /// Run Namco106 until specified time.
+    ///
+    /// @param time the number of elapsed cycles
+    ///
     void run_until(cpu_time_t nes_end_time) {
         int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
-            Namco_Osc& osc = oscs[i];
+            Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
             if (!output)
                 continue;

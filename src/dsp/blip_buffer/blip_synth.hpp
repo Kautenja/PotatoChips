@@ -71,7 +71,7 @@ class Blip_Synth {
     /// specified) at the specified source time. Delta can be positive or
     /// negative. To increase performance by inlining code at the call site,
     /// use offset_inline().
-    void offset(blip_time_t time, int delta, Blip_Buffer* buf) const {
+    inline void offset(blip_time_t time, int delta, Blip_Buffer* buf) const {
         offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
     }
 
@@ -79,7 +79,60 @@ class Blip_Synth {
         offset(t, delta, impulse.buf);
     }
 
-    void offset_resampled(blip_resampled_time_t, int delta, Blip_Buffer*) const;
+    void offset_resampled(blip_resampled_time_t time, int delta, Blip_Buffer* blip_buf) const {
+        typedef blip_pair_t_ pair_t;
+
+        unsigned sample_index = (time >> Blip_Buffer::BLIP_BUFFER_ACCURACY) & ~1;
+        assert(("Blip_Synth/Blip_wave: Went past end of buffer",
+                sample_index < blip_buf->buffer_size_));
+        enum { const_offset = Blip_Buffer::widest_impulse_ / 2 - width / 2 };
+        pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
+
+        enum { shift = Blip_Buffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
+        enum { mask = res * 2 - 1 };
+        const pair_t* imp = &impulses[((time >> shift) & mask) * impulse_size];
+
+        pair_t deltaOffset = impulse.offset * delta;
+
+        if (!fine_bits) {
+            // normal mode
+            for (int n = width / 4; n; --n) {
+                pair_t t0 = buf[0] - deltaOffset;
+                pair_t t1 = buf[1] - deltaOffset;
+
+                t0 += imp[0] * delta;
+                t1 += imp[1] * delta;
+                imp += 2;
+
+                buf[0] = t0;
+                buf[1] = t1;
+                buf += 2;
+            }
+        } else {
+            // fine mode
+            enum { sub_range = 1 << fine_bits };
+            delta += sub_range / 2;
+            int delta2 = (delta & (sub_range - 1)) - sub_range / 2;
+            delta >>= fine_bits;
+
+            for (int n = width / 4; n; --n) {
+                pair_t t0 = buf[0] - deltaOffset;
+                pair_t t1 = buf[1] - deltaOffset;
+
+                t0 += imp[0] * delta2;
+                t0 += imp[1] * delta;
+
+                t1 += imp[2] * delta2;
+                t1 += imp[3] * delta;
+
+                imp += 4;
+
+                buf[0] = t0;
+                buf[1] = t1;
+                buf += 2;
+            }
+        }
+    }
 
     inline void offset_resampled(blip_resampled_time_t t, int o) const {
         offset_resampled(t, o, impulse.buf);
@@ -145,65 +198,5 @@ class Blip_Wave {
         time_ -= duration;
     }
 };
-
-template<BLIPQuality quality, int range>
-inline void Blip_Synth<quality, range>::offset_resampled(
-    blip_resampled_time_t time,
-    int delta,
-    Blip_Buffer* blip_buf
-) const {
-    typedef blip_pair_t_ pair_t;
-
-    unsigned sample_index = (time >> Blip_Buffer::BLIP_BUFFER_ACCURACY) & ~1;
-    assert(("Blip_Synth/Blip_wave: Went past end of buffer",
-            sample_index < blip_buf->buffer_size_));
-    enum { const_offset = Blip_Buffer::widest_impulse_ / 2 - width / 2 };
-    pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
-
-    enum { shift = Blip_Buffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
-    enum { mask = res * 2 - 1 };
-    const pair_t* imp = &impulses[((time >> shift) & mask) * impulse_size];
-
-    pair_t offset = impulse.offset * delta;
-
-    if (!fine_bits) {
-        // normal mode
-        for (int n = width / 4; n; --n) {
-            pair_t t0 = buf[0] - offset;
-            pair_t t1 = buf[1] - offset;
-
-            t0 += imp[0] * delta;
-            t1 += imp[1] * delta;
-            imp += 2;
-
-            buf[0] = t0;
-            buf[1] = t1;
-            buf += 2;
-        }
-    } else {
-        // fine mode
-        enum { sub_range = 1 << fine_bits };
-        delta += sub_range / 2;
-        int delta2 = (delta & (sub_range - 1)) - sub_range / 2;
-        delta >>= fine_bits;
-
-        for (int n = width / 4; n; --n) {
-            pair_t t0 = buf[0] - offset;
-            pair_t t1 = buf[1] - offset;
-
-            t0 += imp[0] * delta2;
-            t0 += imp[1] * delta;
-
-            t1 += imp[2] * delta2;
-            t1 += imp[3] * delta;
-
-            imp += 4;
-
-            buf[0] = t0;
-            buf[1] = t1;
-            buf += 2;
-        }
-    }
-}
 
 #endif  // BLIP_BUFFER_BLIP_SYNTH_HPP

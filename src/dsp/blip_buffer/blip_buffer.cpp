@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 #include <cstring>
 #include <cmath>
 #include <climits>
-#include "blargg_source.h"
+#include <cassert>
 
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;

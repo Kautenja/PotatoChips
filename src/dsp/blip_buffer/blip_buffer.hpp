@@ -7,8 +7,10 @@
 #ifndef BLIP_BUFFER_BLIP_BUFFER_HPP
 #define BLIP_BUFFER_BLIP_BUFFER_HPP
 
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
+#include <cmath>
+#include <cstring>
 
 /// Source time unit.
 typedef int32_t blip_time_t;
@@ -36,7 +38,12 @@ class Blip_Buffer {
     inline int32_t get_sample_rate() const { return samples_per_sec; };
 
     /// Set number of source time units per second.
-    void set_clock_rate(int32_t);
+    void set_clock_rate(int32_t cps) {
+        clocks_per_sec = cps;
+        factor_ = (uint32_t) floor((double) samples_per_sec / cps *
+                (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
+    }
 
     /// Return number of source time unites per second.
     inline int32_t get_clock_rate() const { return clocks_per_sec; }
@@ -50,7 +57,12 @@ class Blip_Buffer {
     /// Remove all available samples and clear buffer to silence. If
     /// 'entire_buffer' is false, just clear out any samples waiting rather
     /// than the entire buffer.
-    void clear(bool entire_buffer = true);
+    void clear(bool entire_buffer = true) {
+        int32_t count = (entire_buffer ? buffer_size_ : samples_count());
+        offset_ = 0;
+        reader_accum = 0;
+        memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
+    }
 
     /// End current time frame of specified duration and make its samples
     /// available (aint32_t with any still-unread samples) for reading with

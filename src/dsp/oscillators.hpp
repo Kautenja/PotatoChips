@@ -89,7 +89,7 @@ struct Envelope : Oscillator {
 };
 
 /// The square wave oscillator from the NES.
-struct Nes_Square : Envelope {
+struct Pulse : Envelope {
     enum { negate_flag = 0x08 };
     enum { shift_mask = 0x07 };
     enum { phase_range = 8 };
@@ -197,7 +197,7 @@ struct Nes_Square : Envelope {
 };
 
 /// The quantized triangle wave oscillator from the NES.
-struct Nes_Triangle : Oscillator {
+struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
@@ -276,7 +276,7 @@ static constexpr int16_t noise_period_table[16] = {
 };
 
 /// The noise oscillator from the NES.
-struct Nes_Noise : Envelope {
+struct Noise : Envelope {
     int noise;
     Blip_Synth<BLIPQuality::Medium, 15> synth;
 

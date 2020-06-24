@@ -276,8 +276,8 @@ struct Chip2A03Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(62, 211), module, Chip2A03::PARAM_FREQ2));
         addParam(createParam<Rogan3PSNES_Snap>(Vec(62, 297), module, Chip2A03::PARAM_FREQ3));
         // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(115, 30), module, Chip2A03::PARAM_PW0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(115, 115), module, Chip2A03::PARAM_PW1));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 30), module, Chip2A03::PARAM_PW0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 115), module, Chip2A03::PARAM_PW1));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(32, 284), module, Chip2A03::INPUT_LFSR));
         // channel outputs

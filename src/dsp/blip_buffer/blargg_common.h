@@ -9,14 +9,6 @@
 #ifndef BLARGG_COMMON_H
 #define BLARGG_COMMON_H
 
-// Allow prefix configuration file *which can re-include blargg_common.h*
-// (probably indirectly).
-#ifdef HAVE_CONFIG_H
-    #undef BLARGG_COMMON_H
-    #include "config.h"
-    #define BLARGG_COMMON_H
-#endif
-
 // Determine compiler's language support
 
 #if defined (__MWERKS__)
@@ -50,7 +42,11 @@
 #endif
 
 // Set up boost
-#include "boost/config.hpp"
+#define BOOST_MINIMAL 1
+
+#define BLARGG_BEGIN_NAMESPACE( name )
+#define BLARGG_END_NAMESPACE
+
 #ifndef BOOST_MINIMAL
     #define BOOST boost
     #ifndef BLARGG_COMPILER_HAS_NAMESPACE

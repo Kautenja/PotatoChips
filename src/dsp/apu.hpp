@@ -26,10 +26,6 @@ class APU {
     // Set buffer to generate all sound into, or disable sound if NULL
     void output(BLIPBuffer*);
 
-    // All time values are the number of CPU clock cycles relative to the
-    // beginning of the current time frame. Before resetting the CPU clock
-    // count, call end_frame(last_cpu_time).
-
     // Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
     enum { start_addr = 0x4000 };
     enum { end_addr   = 0x4017 };

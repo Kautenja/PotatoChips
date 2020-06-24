@@ -13,10 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_APU_H
-#define NES_APU_H
+#ifndef NES_APU_HPP
+#define NES_APU_HPP
 
-#include "oscillators.h"
+#include "oscillators.hpp"
 
 /// A macro oscillator based on the NES 2A03 synthesis chip.
 class APU {
@@ -82,15 +82,15 @@ class APU {
     APU& operator = (const APU&);
 
     /// the channel 1 square wave generator
-    Nes_Square          square1;
+    Pulse               square1;
     /// the channel 2 square wave generator
-    Nes_Square          square2;
+    Pulse               square2;
     /// the channel 2 triangle wave generator
-    Nes_Noise           noise;
+    Noise               noise;
     /// the channel 2 noise generator
-    Nes_Triangle        triangle;
+    Triangle            triangle;
     /// pointers to the oscillators
-    Nes_Osc*            oscs[OSC_COUNT];
+    Oscillator*         oscs[OSC_COUNT];
 
     /// has been run until this time in current frame
     cpu_time_t last_time;
@@ -105,7 +105,7 @@ class APU {
     /// TODO:
     int frame_mode;
     /// a synthesizer shared by squares
-    Nes_Square::Synth square_synth;
+    Pulse::Synth square_synth;
 };
 
-#endif  // NES_APU_H
+#endif  // NES_APU_HPP

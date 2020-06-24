@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/apu.h"
+#include "dsp/apu.hpp"
 
 /// the IO registers on the APU
 enum IORegisters {
@@ -204,7 +204,7 @@ struct Chip2A03 : Module {
     /// @param channel the channel to get the audio sample for
     ///
     float getAudioOut(int channel) {
-        auto samples = buf[channel].samples_avail();
+        auto samples = buf[channel].samples_count();
         if (samples == 0) return 0.f;
         // copy the buffer to a local vector and return the first sample
         std::vector<int16_t> output_buffer(samples);
@@ -223,7 +223,6 @@ struct Chip2A03 : Module {
             for (int i = 0; i < APU::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
                 buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
-                buf[i].clear();
             }
             // clear the new sample rate flag
             new_sample_rate = false;

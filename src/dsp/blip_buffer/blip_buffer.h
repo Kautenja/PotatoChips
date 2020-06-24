@@ -20,7 +20,7 @@ class Blip_Reader;
 /// Source time unit.
 typedef int32_t blip_time_t;
 
-/// Type of sample produced. Signed 16-bit format.
+/// Type for sample produced. Signed 16-bit format.
 typedef int16_t blip_sample_t;
 
 class Blip_Buffer {
@@ -47,7 +47,7 @@ class Blip_Buffer {
     int32_t get_clock_rate() const;
 
     /// Return length of buffer, in milliseconds
-    int length() const;
+    int get_length() const;
 
     /// Set frequency at which high-pass filter attenuation passes -3dB
     void bass_freq(int frequency);
@@ -141,6 +141,7 @@ class Blip_Buffer {
 class blip_eq_t {
  public:
     blip_eq_t(double treble = 0);
+
     blip_eq_t(double treble, int32_t cutoff, int32_t sample_rate);
 
  private:
@@ -204,36 +205,33 @@ class Blip_Impulse_ {
     bool    generate;
 
     void fine_volume_unit();
+
     void scale_impulse(int unit, imp_t*) const;
 
  public:
-    Blip_Buffer*    buf;
+    Blip_Buffer* buf;
     uint32_t offset;
 
     void init(blip_pair_t_* impulses, int width, int res, int fine_bits = 0);
+
     void volume_unit(double);
+
     void treble_eq(const blip_eq_t&);
 };
 
-inline blip_eq_t::blip_eq_t(double t) :
-        treble(t), cutoff(0), sample_rate(44100) {
-}
+inline blip_eq_t::blip_eq_t(double t) : treble(t), cutoff(0), sample_rate(44100) { }
 
 inline blip_eq_t::blip_eq_t(double t, int32_t c, int32_t sr) :
-        treble(t), cutoff(c), sample_rate(sr) {
+    treble(t), cutoff(c), sample_rate(sr) {
 }
 
-inline int Blip_Buffer::length() const {
-    return length_;
-}
+inline int Blip_Buffer::get_length() const { return length_; }
 
 inline int32_t Blip_Buffer::samples_avail() const {
     return int32_t (offset_ >> BLIP_BUFFER_ACCURACY);
 }
 
-inline int32_t Blip_Buffer::get_sample_rate() const {
-    return samples_per_sec;
-}
+inline int32_t Blip_Buffer::get_sample_rate() const { return samples_per_sec; }
 
 inline void Blip_Buffer::end_frame(blip_time_t t) {
     offset_ += t * factor_;
@@ -247,13 +245,9 @@ inline void Blip_Buffer::remove_silence(int32_t count) {
     offset_ -= resampled_time_t (count) << BLIP_BUFFER_ACCURACY;
 }
 
-inline int Blip_Buffer::output_latency() const {
-    return widest_impulse_ / 2;
-}
+inline int Blip_Buffer::output_latency() const { return widest_impulse_ / 2; }
 
-inline int32_t Blip_Buffer::get_clock_rate() const {
-    return clocks_per_sec;
-}
+inline int32_t Blip_Buffer::get_clock_rate() const { return clocks_per_sec; }
 
 // MSVC6 fix
 typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;

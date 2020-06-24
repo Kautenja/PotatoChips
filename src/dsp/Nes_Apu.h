@@ -62,9 +62,9 @@ class Nes_Apu {
     // the specified oscillator is muted and emulation accuracy is reduced.
     // The oscillators are indexed as follows: 0) Square 1, 1) Square 2,
     // 2) Triangle, 3) Noise.
-    enum { osc_count = 4 };
+    enum { OSC_COUNT = 4 };
     void osc_output(int osc, Blip_Buffer* buf) {
-        assert(("Nes_Apu::osc_output(): Index out of range", 0 <= osc && osc < osc_count));
+        assert(("Nes_Apu::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
         oscs[osc]->output = buf;
     }
 
@@ -92,7 +92,7 @@ class Nes_Apu {
     /// the channel 2 noise generator
     Nes_Triangle        triangle;
     /// pointers to the oscillators
-    Nes_Osc*            oscs[osc_count];
+    Nes_Osc*            oscs[OSC_COUNT];
 
     /// has been run until this time in current frame
     cpu_time_t last_time;

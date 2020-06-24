@@ -8,7 +8,7 @@
 ## 2A03
 
 2A03 is an emulation of the 2A03 sound chip from the Nintendo Entertainment
-System (NES) for VCV Rack. The 2A03 chip contains two square wave generators,
+System (NES) for VCV Rack. The 2A03 chip contains two pulse wave generators,
 a quantized triangle wave generator, and a noise generator. The original chip
 featured a DMC loader for playing samples that has been omitted in this
 emulation.
@@ -19,7 +19,7 @@ emulation.
 
 ### Features
 
--   **Dual square wave generator:** Dual 8-bit square waves with four duty
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with four duty
     cycles: _12.5%_, _25%_, _50%_, and _75%_
 -   **Quantized triangle wave generator:** Generate NES style triangle wave
     with 16 steps of quantization
@@ -33,7 +33,7 @@ information about the features of this module.
 ## VRC6
 
 VRC6 is an emulation of the Konami VRC6 sound chip from the Nintendo
-Entertainment System (NES) for VCV Rack. The VRC6 chip contains two square
+Entertainment System (NES) for VCV Rack. The VRC6 chip contains two pulse
 wave generators, and a quantized saw wave generator.
 
 <p align="center">
@@ -42,7 +42,7 @@ wave generators, and a quantized saw wave generator.
 
 ### Features
 
--   **Dual square wave generator:** Dual 8-bit square waves with eight duty
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
     cycles: _6.25\%_, _12.5\%_, _18.75\%_, _25\%_, _31.25\%_, _37.5\%_,
     _43.75\%_, and _50\%_
 -   **Quantized saw wave generator:** Generate NES style saw wave with variable

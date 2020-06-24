@@ -21,6 +21,8 @@ typedef int16_t blip_sample_t;
 
 class Blip_Buffer {
  public:
+    static constexpr auto BLIP_BUFFER_ACCURACY = 16;
+
     /// Initialize an empty BLIPBuffer.
     Blip_Buffer();
 
@@ -43,7 +45,7 @@ class Blip_Buffer {
     int32_t get_clock_rate() const;
 
     /// Return length of buffer, in milliseconds
-    int get_length() const;
+    inline int get_length() const { return length_; }
 
     /// Set frequency at which high-pass filter attenuation passes -3dB
     void bass_freq(int frequency);
@@ -60,7 +62,9 @@ class Blip_Buffer {
     void end_frame(blip_time_t time);
 
     /// Return the number of samples available for reading with read_samples().
-    int32_t samples_avail() const;
+    inline int32_t samples_avail() const {
+        return int32_t (offset_ >> BLIP_BUFFER_ACCURACY);
+    }
 
     /// Read at most 'max_samples' out of buffer into 'dest', removing them
     /// from the buffer. Return number of samples actually read and removed.
@@ -180,10 +184,6 @@ class Blip_Reader {
 
 // End of public interface
 
-#ifndef BLIP_BUFFER_ACCURACY
-    #define BLIP_BUFFER_ACCURACY 16
-#endif
-
 const int blip_res_bits_ = 5;
 
 typedef uint32_t blip_pair_t_;
@@ -221,12 +221,6 @@ inline blip_eq_t::blip_eq_t(double t, int32_t c, int32_t sr) :
     treble(t), cutoff(c), sample_rate(sr) {
 }
 
-inline int Blip_Buffer::get_length() const { return length_; }
-
-inline int32_t Blip_Buffer::samples_avail() const {
-    return int32_t (offset_ >> BLIP_BUFFER_ACCURACY);
-}
-
 inline int32_t Blip_Buffer::get_sample_rate() const { return samples_per_sec; }
 
 inline void Blip_Buffer::end_frame(blip_time_t t) {
@@ -238,7 +232,7 @@ inline void Blip_Buffer::end_frame(blip_time_t t) {
 inline void Blip_Buffer::remove_silence(int32_t count) {
     assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available",
             count <= samples_avail()));
-    offset_ -= resampled_time_t (count) << BLIP_BUFFER_ACCURACY;
+    offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
 }
 
 inline int Blip_Buffer::output_latency() const { return widest_impulse_ / 2; }

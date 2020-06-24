@@ -161,13 +161,13 @@ inline void Blip_Synth<quality, range>::offset_resampled(
 ) const {
     typedef blip_pair_t_ pair_t;
 
-    unsigned sample_index = (time >> BLIP_BUFFER_ACCURACY) & ~1;
+    unsigned sample_index = (time >> Blip_Buffer::BLIP_BUFFER_ACCURACY) & ~1;
     assert(("Blip_Synth/Blip_wave: Went past end of buffer",
             sample_index < blip_buf->buffer_size_));
     enum { const_offset = Blip_Buffer::widest_impulse_ / 2 - width / 2 };
     pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
 
-    enum { shift = BLIP_BUFFER_ACCURACY - blip_res_bits_ };
+    enum { shift = Blip_Buffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
     enum { mask = res * 2 - 1 };
     const pair_t* imp = &impulses[((time >> shift) & mask) * impulse_size];
 

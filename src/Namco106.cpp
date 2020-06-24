@@ -94,43 +94,36 @@ struct ChipNamco106 : Module {
             new_sample_rate = false;
         }
 
+        // a foo waveform
         static constexpr uint8_t values[32] = {
             0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
             0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
-
         // write the waveform to the RAM
         for (int i = 0; i < 32; i++) {
             apu.write_addr(i);
             apu.write_data(0, values[i]);
         }
-
-        // wave address
+        // write the wave address
         apu.write_addr(0x7E);
         apu.write_data(0, 0);
 
-        // get the pitch / frequency of the oscillator
+        // get the frequency of the oscillator from the parameter and CVs
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += 4 * inputs[INPUT_FM0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-
+        // convert the frequency to the 8-bit value for the oscillator
         auto num_channels = 2;
-        auto wave_length = 64;
+        auto wave_length = 48;
         freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
-        // std::cout << freq << std::endl;
-
+        freq = rack::clamp(freq, 4.f, 262143.f);
+        // extract the low, medium, and high frequency register values
         auto freq18bit = static_cast<uint32_t>(freq);
         uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
         uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
         uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
-
-        // uint32_t freq18bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        // freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
-        // freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
-        // convert the frequency to a 12-bit value spanning two 8-bit registers
-        // uint8_t lo = freq12bit & 0b11111111;
-        // uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
 
         // enable sound output from the chip
         // apu.write_addr(0xE000);
@@ -145,9 +138,10 @@ struct ChipNamco106 : Module {
         apu.write_addr(0x7C);
         apu.write_data(0, (56 << 2) + hig);
 
-        // volume
+        // volume and channel selection
         apu.write_addr(0x7F);
-        apu.write_data(0, 0b00011111);
+        static constexpr uint8_t volume = 0b00001111;
+        apu.write_data(0, (num_channels << 4) + volume);
 
         // set the output from the oscillators
         apu.end_frame(cycles_per_sample);

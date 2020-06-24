@@ -36,21 +36,6 @@ void APU::treble_eq(const blip_eq_t& eq) {
     noise.synth.treble_eq(eq);
 }
 
-void APU::buffer_cleared() {
-    pulse1.last_amp = 0;
-    pulse2.last_amp = 0;
-    triangle.last_amp = 0;
-    noise.last_amp = 0;
-}
-
-void APU::enable_nonlinear(double v) {
-    square_synth.volume(1.3 * 0.25751258 / 0.742467605 * 0.25 * v);
-    const double tnd = 0.75 / 202 * 0.48;
-    triangle.synth.volume_unit(3 * tnd);
-    noise.synth.volume_unit(2 * tnd);
-    buffer_cleared();
-}
-
 void APU::volume(double v) {
     square_synth.volume(0.1128 * v);
     triangle.synth.volume(0.12765 * v);

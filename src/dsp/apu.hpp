@@ -81,12 +81,26 @@ class APU {
     void write_register(cpu_time_t, cpu_addr_t, int data);
 
  private:
-    friend class Nes_Nonlinearizer;
-    void enable_nonlinear(double volume);
-
-    /// Reset oscillator amplitudes. Must be called when clearing buffer while
-    /// using non-linear sound.
-    void buffer_cleared();
+    // TODO: remove these two nonlinear functions?
+    // /// Enable nonlinear volume.
+    // ///
+    // /// @param v the volume level
+    // ///
+    // inline void enable_nonlinear(double v) {
+    //     square_synth.volume(1.3 * 0.25751258 / 0.742467605 * 0.25 * v);
+    //     const double tnd = 0.75 / 202 * 0.48;
+    //     triangle.synth.volume_unit(3 * tnd);
+    //     noise.synth.volume_unit(2 * tnd);
+    //     buffer_cleared();
+    // }
+    // /// Reset oscillator amplitudes. Must be called when clearing buffer while
+    // /// using non-linear sound.
+    // inline void buffer_cleared() {
+    //     pulse1.last_amp = 0;
+    //     pulse2.last_amp = 0;
+    //     triangle.last_amp = 0;
+    //     noise.last_amp = 0;
+    // }
 
     /// Run APU until specified time, so that any DMC memory reads can be
     /// accounted for (i.e. inserting CPU wait states).

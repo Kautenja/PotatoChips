@@ -12,10 +12,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 // Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
 
 #include "blip_buffer.hpp"
-#include <cstring>
-#include <cmath>
 #include <climits>
-#include <cassert>
 
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;
@@ -27,13 +24,6 @@ Blip_Buffer::Blip_Buffer() {
     buffer_size_ = 0;
     length_ = 0;
     bass_freq_ = 16;
-}
-
-void Blip_Buffer::clear(bool entire_buffer) {
-    int32_t count = (entire_buffer ? buffer_size_ : samples_count());
-    offset_ = 0;
-    reader_accum = 0;
-    memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
 }
 
 const char* Blip_Buffer::set_sample_rate(int32_t new_rate) {
@@ -60,13 +50,6 @@ const char* Blip_Buffer::set_sample_rate(int32_t new_rate) {
     clear();
 
     return 0;
-}
-
-void Blip_Buffer::set_clock_rate(int32_t cps) {
-    clocks_per_sec = cps;
-    factor_ = (uint32_t) floor((double) samples_per_sec / cps *
-            (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-    assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
 }
 
 void Blip_Buffer::bass_freq(int freq) {

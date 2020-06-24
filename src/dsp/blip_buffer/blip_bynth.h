@@ -7,10 +7,10 @@
 #ifndef BLIP_SYNTH_H
 #define BLIP_SYNTH_H
 
-#include <type_traits>
 #ifndef BLIP_BUFFER_H
     #include "blip_buffer.h"
 #endif
+#include <type_traits>
 
 /// TODO: change to enum
 /// Quality level. Higher levels are slower, and worse in a few cases.

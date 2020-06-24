@@ -13,8 +13,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_APU_H
-#define NES_APU_H
+#ifndef NES_APU_HPP
+#define NES_APU_HPP
 
 #include "oscillators.hpp"
 
@@ -108,4 +108,4 @@ class APU {
     Pulse::Synth square_synth;
 };
 
-#endif  // NES_APU_H
+#endif  // NES_APU_HPP

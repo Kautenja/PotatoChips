@@ -13,8 +13,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_VRC6_H
-#define NES_VRC6_H
+#ifndef NES_VRC6_HPP
+#define NES_VRC6_HPP
 
 #include "apu.hpp"
 
@@ -206,4 +206,4 @@ class VRC6 {
     }
 };
 
-#endif  // NES_VRC6_H
+#endif  // NES_VRC6_HPP

@@ -4,8 +4,8 @@
 
 // Blip_Buffer 0.3.3. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
 
-#ifndef BLIP_SYNTH_H
-#define BLIP_SYNTH_H
+#ifndef BLIP_BUFFER_BLIP_SYNTH_HPP
+#define BLIP_BUFFER_BLIP_SYNTH_HPP
 
 #include "blip_buffer.hpp"
 #include <type_traits>
@@ -220,4 +220,4 @@ void Blip_Synth<quality, range>::offset(
     offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
 }
 
-#endif  // BLIP_SYNTH_H
+#endif  // BLIP_BUFFER_BLIP_SYNTH_HPP

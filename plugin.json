@@ -18,6 +18,13 @@
       "description": "An emulation of the 2A03 sound chip.",
       "manualUrl": "https://kautenja.github.io/modules/2A03/manual.pdf",
       "tags": [ "VCO", "Noise", "Synth voice" ]
+    },
+    {
+      "slug": "VRC6",
+      "name": "VRC6",
+      "description": "An emulation of the VRC6 sound chip.",
+      "manualUrl": "https://kautenja.github.io/modules/VRC6/manual.pdf",
+      "tags": [ "VCO", "Noise", "Synth voice" ]
     }
   ]
 }

@@ -1,4 +1,4 @@
-// A 2A03 Chip module.
+// A Ricoh 2A03 Chip module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "2A03/Nes_Apu.h"
+#include "dsp/Nes_Apu.h"
 
 /// the IO registers on the APU
 enum IORegisters {
@@ -104,7 +104,7 @@ inline uint8_t operator+(SendChannels a, uint8_t b) {
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A 2A03 Chip module.
+/// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
     enum ParamIds {
         PARAM_FREQ0,
@@ -131,7 +131,6 @@ struct Chip2A03 : Module {
         OUTPUT_CHANNEL1,
         OUTPUT_CHANNEL2,
         OUTPUT_CHANNEL3,
-        OUTPUT_MIX,
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -169,12 +168,12 @@ struct Chip2A03 : Module {
     /// Initialize a new 2A03 Chip module.
     Chip2A03() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Square 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ1, -30.f, 30.f, 0.f, "Square 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ3, 0,     15,   7,   "Noise Period", "", 0, 1, -15);
-        configParam(PARAM_PW1,   0.0,    1.0, 0.0, "Square 1 Pulse Width");
-        configParam(PARAM_PW2,   0.0,    1.0, 0.0, "Square 2 Pulse Width");
+        configParam(PARAM_PW1,   0.0,    1.0, 0.0, "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW2,   0.0,    1.0, 0.0, "Pulse 2 Duty Cycle");
         // set the output buffer for each individual voice
         for (int i = 0; i < 4; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices

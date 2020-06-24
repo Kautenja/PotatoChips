@@ -1,9 +1,11 @@
-# 2A03
+# NES Oscillators
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
 [BuildStatus]:  https://travis-ci.com/Kautenja/2A03.svg?branch=master
 [BuildServer]:  https://travis-ci.com/Kautenja/2A03
+
+## 2A03
 
 2A03 is an emulation of the 2A03 sound chip from the Nintendo Entertainment
 System (NES) for VCV Rack. The 2A03 chip contains two square wave generators,
@@ -15,7 +17,7 @@ emulation.
 <img alt="2A03" src="img/2A03.png" height="380px">
 </p>
 
-## Features
+### Features
 
 -   **Dual square wave generator:** Dual 8-bit square waves with four duty
     cycles: _12.5%_, _25%_, _50%_, and _75%_
@@ -27,6 +29,14 @@ emulation.
 
 See the [Manual](https://kautenja.github.io/modules/2A03/manual.pdf) for more
 information about the features of this module.
+
+## VRC6
+
+**Coming Soon!**
+
+## Namco106
+
+**Coming Soon!**
 
 ## Acknowledgments
 

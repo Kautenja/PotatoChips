@@ -1,16 +1,16 @@
 {
-  "slug": "KautenjaDSP-2A03",
-  "version": "1.1.4",
+  "slug": "KautenjaDSP-NES-Oscillators",
+  "version": "1.0.0",
   "license": "GPL-3.0-or-later",
-  "name": "KautenjaDSP-2A03",
+  "name": "NES Oscillators",
   "brand": "KautenjaDSP",
   "author": "Christian Kauten",
   "authorEmail": "kautenja@auburn.edu",
   "authorUrl": "https://kautenja.github.io/",
-  "pluginUrl": "https://kautenja.github.io/modules/2A03",
-  "manualUrl": "https://kautenja.github.io/modules/2A03/manual.pdf",
-  "sourceUrl": "https://github.com/Kautenja/2A03",
-  "changelogUrl": "https://github.com/Kautenja/2A03/blob/master/CHANGELOG.md",
+  "pluginUrl": "https://kautenja.github.io/plugins/NES-Oscillators",
+  "manualUrl": "https://kautenja.github.io/plugins/NES-Oscillators/manual.pdf",
+  "sourceUrl": "https://github.com/Kautenja/NES-Oscillators",
+  "changelogUrl": "https://github.com/Kautenja/NES-Oscillators/blob/master/CHANGELOG.md",
   "modules": [
     {
       "slug": "2A03",
@@ -24,7 +24,7 @@
       "name": "VRC6",
       "description": "An emulation of the VRC6 sound chip.",
       "manualUrl": "https://kautenja.github.io/modules/VRC6/manual.pdf",
-      "tags": [ "VCO", "Noise", "Synth voice" ]
+      "tags": [ "VCO", "Synth voice" ]
     }
   ]
 }

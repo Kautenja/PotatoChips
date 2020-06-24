@@ -50,7 +50,6 @@ class Blip_Buffer {
             buffer_ = NULL;  // allow for exception in allocation below
             buffer_size_ = 0;
             offset_ = 0;
-
             buffer_ = new buf_t_[new_size + widest_impulse_];
         }
 
@@ -58,10 +57,10 @@ class Blip_Buffer {
         length_ = new_size * 1000 / new_rate - 1;
 
         samples_per_sec = new_rate;
-        if (clocks_per_sec)
-            set_clock_rate(clocks_per_sec); // recalculate factor
-
-        bass_freq(bass_freq_);  // recalculate shift
+        // recalculate factor
+        if (clocks_per_sec) set_clock_rate(clocks_per_sec);
+        // recalculate shift
+        bass_freq(bass_freq_);
 
         clear();
 
@@ -72,10 +71,9 @@ class Blip_Buffer {
     inline int32_t get_sample_rate() const { return samples_per_sec; };
 
     /// Set number of source time units per second.
-    void set_clock_rate(int32_t cps) {
+    inline void set_clock_rate(int32_t cps) {
         clocks_per_sec = cps;
-        factor_ = (uint32_t) floor((double) samples_per_sec / cps *
-                (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        factor_ = (uint32_t) floor((double) samples_per_sec / cps * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
         // clock_rate/sample_rate ratio is too large
         assert(factor_ > 0);
     }

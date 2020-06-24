@@ -222,7 +222,7 @@ struct Chip2A03 : Module {
             // update the buffer for each channel
             for (int i = 0; i < APU::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].clock_rate(cycles_per_sample * args.sampleRate);
+                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
                 buf[i].clear();
             }
             // clear the new sample rate flag

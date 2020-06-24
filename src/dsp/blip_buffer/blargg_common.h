@@ -9,34 +9,6 @@
 #ifndef BLARGG_COMMON_H
 #define BLARGG_COMMON_H
 
-// Set up boost
-#define BOOST_MINIMAL 1
-
-#define BLARGG_BEGIN_NAMESPACE( name )
-#define BLARGG_END_NAMESPACE
-
-#ifndef BOOST_MINIMAL
-    #define BOOST boost
-#endif
-
-#ifndef BOOST
-    #if BLARGG_USE_NAMESPACE
-        #define BOOST boost
-    #else
-        #define BOOST
-    #endif
-#endif
-
-#undef BLARGG_BEGIN_NAMESPACE
-#undef BLARGG_END_NAMESPACE
-#if BLARGG_USE_NAMESPACE
-    #define BLARGG_BEGIN_NAMESPACE( name ) namespace name {
-    #define BLARGG_END_NAMESPACE }
-#else
-    #define BLARGG_BEGIN_NAMESPACE( name )
-    #define BLARGG_END_NAMESPACE
-#endif
-
 // BOOST_STATIC_ASSERT( expr )
 #ifndef BOOST_STATIC_ASSERT_HPP
 #define BOOST_STATIC_ASSERT_HPP

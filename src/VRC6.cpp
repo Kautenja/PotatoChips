@@ -151,9 +151,9 @@ struct ChipVRC6 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
         // the minimal value for the pulse width register
-        static constexpr auto PW_MIN = 0;
+        static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register
-        static constexpr auto PW_MAX = 7;
+        static constexpr float PW_MAX = 7;
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
@@ -172,12 +172,11 @@ struct ChipVRC6 : Module {
         apu.write_osc(0, 0, PULSE1_PERIOD_HIGH, hi);
 
         // get the pulse width from the parameter knob
-        auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue());
-        // apply the control voltage to the pulse width with 1V/step
-        auto cv = static_cast<uint8_t>(inputs[INPUT_PW0].getVoltage() / 2.f);
-        pw += cv;
-        pw = rack::clamp(pw, PW_MIN, PW_MAX);
-        std::cout << static_cast<int>(pw) << std::endl;
+        auto pwParam = params[PARAM_PW0].getValue();
+        // get the control voltage to the pulse width with 1V/step
+        auto pwCV = inputs[INPUT_PW0].getVoltage() / 2.f;
+        // get the 8-bit pulse width clamped within legal limits
+        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
 
         // get the level from the parameter knob
         uint8_t level = 0b00001111;

@@ -17,6 +17,7 @@
 #define NES_APU_HPP
 
 #include "oscillators.hpp"
+#include <cassert>
 
 /// A macro oscillator based on the NES 2A03 synthesis chip.
 class APU {
@@ -29,7 +30,12 @@ class APU {
     static constexpr int ADDR_END   = 0x4017;
 
     /// Initialize a new APU.
-    APU();
+    APU() {
+        pulse1.synth = pulse2.synth = &square_synth;
+        output(NULL);
+        volume(1.0);
+        reset(false);
+    }
 
     /// Reset internal frame counter, registers, and all oscillators.
     ///
@@ -164,7 +170,9 @@ class APU {
     /// the channel 3 noise generator
     Triangle triangle;
     /// pointers to the oscillators
-    Oscillator* oscs[OSC_COUNT];
+    Oscillator* oscs[OSC_COUNT] = {
+        &pulse1, &pulse2, &triangle, &noise
+    };
 
     /// has been run until this time in current frame
     cpu_time_t last_time;

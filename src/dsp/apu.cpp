@@ -57,7 +57,7 @@ void APU::volume(double v) {
     noise.synth.volume(0.0741 * v);
 }
 
-void APU::output(Blip_Buffer* buffer) {
+void APU::output(BLIPBuffer* buffer) {
     for (int i = 0; i < OSC_COUNT; i++)
         osc_output(i, buffer);
 }

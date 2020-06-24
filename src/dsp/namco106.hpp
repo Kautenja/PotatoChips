@@ -32,12 +32,12 @@ class Namco106 {
 
     inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
 
-    void output(Blip_Buffer* buf) {
+    void output(BLIPBuffer* buf) {
         for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
     }
 
     static constexpr int OSC_COUNT = 8;
-    inline void osc_output(int i, Blip_Buffer* buf) {
+    inline void osc_output(int i, BLIPBuffer* buf) {
         assert((unsigned) i < OSC_COUNT);
         oscs[i].output = buf;
     }
@@ -83,7 +83,7 @@ class Namco106 {
 
     struct Namco_Osc {
         int32_t delay;
-        Blip_Buffer* output;
+        BLIPBuffer* output;
         int16_t last_amp;
         int16_t wave_pos;
     };
@@ -95,7 +95,7 @@ class Namco106 {
 
     static constexpr int REG_COUNT = 0x80;
     uint8_t reg[REG_COUNT];
-    Blip_Synth<BLIPQuality::Good, 15> synth;
+    BLIPSynth<BLIPQuality::Good, 15> synth;
 
     uint8_t& access() {
         int addr = addr_reg & 0x7f;
@@ -107,7 +107,7 @@ class Namco106 {
         int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Namco_Osc& osc = oscs[i];
-            Blip_Buffer* output = osc.output;
+            BLIPBuffer* output = osc.output;
             if (!output)
                 continue;
 
@@ -126,7 +126,7 @@ class Namco106 {
                 int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
                 if (!freq)
                     continue;
-                Blip_Buffer::resampled_time_t period =
+                BLIPBuffer::resampled_time_t period =
                         output->resampled_duration(983040) / freq * active_oscs;
 
                 int wave_size = (8 - ((osc_reg[4] >> 2) & 7)) * 4;

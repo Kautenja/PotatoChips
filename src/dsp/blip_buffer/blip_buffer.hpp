@@ -259,7 +259,16 @@ class BLIPImpulse {
         offset = 0;
     }
 
-    void volume_unit(double);
+    void volume_unit(double new_unit) {
+        if (new_unit == volume_unit_) return;
+        if (generate) treble_eq(blip_eq_t(-8.87, 8800, 44100));
+        volume_unit_ = new_unit;
+        offset = 0x10001 * (uint32_t) floor(volume_unit_ * 0x10000 + 0.5);
+        if (fine_bits)
+            fine_volume_unit();
+        else
+            scale_impulse(offset & 0xffff, impulses);
+    }
 
     void treble_eq(const blip_eq_t&);
 };

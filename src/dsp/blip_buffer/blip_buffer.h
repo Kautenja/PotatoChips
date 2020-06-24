@@ -56,7 +56,10 @@ class Blip_Buffer {
     /// available (aint32_t with any still-unread samples) for reading with
     /// read_samples(). Begin a new time frame at the end of the current
     /// frame. All transitions must have been added before 'time'.
-    void end_frame(blip_time_t time);
+    inline void end_frame(blip_time_t time) {
+        offset_ += time * factor_;
+        assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_avail() <= (int32_t) buffer_size_));
+    }
 
     /// Return the number of samples available for reading with read_samples().
     inline int32_t samples_avail() const {
@@ -91,7 +94,10 @@ class Blip_Buffer {
 
     // not documented yet
 
-    void remove_silence(int32_t count);
+    inline void remove_silence(int32_t count) {
+        assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_avail()));
+        offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
+    }
 
     typedef uint32_t resampled_time_t;
 
@@ -180,16 +186,6 @@ class Blip_Impulse_ {
 
     void treble_eq(const blip_eq_t&);
 };
-
-inline void Blip_Buffer::end_frame(blip_time_t t) {
-    offset_ += t * factor_;
-    assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_avail() <= (int32_t) buffer_size_));
-}
-
-inline void Blip_Buffer::remove_silence(int32_t count) {
-    assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_avail()));
-    offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
-}
 
 // MSVC6 fix
 typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;

@@ -7,8 +7,12 @@
 #ifndef BLIP_BUFFER_H
 #define BLIP_BUFFER_H
 
-#include "blargg_common.h"
 #include <cstdint>
+#include <cassert>
+
+// blargg_err_t (NULL on success, otherwise error string)
+typedef const char* blargg_err_t;
+const blargg_err_t blargg_success = 0;
 
 /// forward declaration of the Blip_Reader class
 class Blip_Reader;

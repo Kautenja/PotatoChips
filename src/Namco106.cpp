@@ -92,6 +92,38 @@ struct ChipNamco106 : Module {
             new_sample_rate = false;
         }
 
+        // enable sound output from the chip
+        apu.write_addr(0xE000);
+        apu.write_data(0, 0);
+        // low F
+        apu.write_addr(0x78);
+        apu.write_data(0, 0b11110000);
+        // med F
+        apu.write_addr(0x7A);
+        apu.write_data(0, 0b11110000);
+        // hi F / length
+        apu.write_addr(0x7C);
+        apu.write_data(0, 48 << 2);
+
+        static constexpr uint8_t values[32] = {
+            0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
+            0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        for (int i = 0; i < 32; i++) {
+            apu.write_addr(0x4800 + i);
+            apu.write_data(0, values[i]);
+        }
+
+        // wave address
+        apu.write_addr(0x7E);
+        apu.write_data(0, 0x4800);
+
+        // volume
+        apu.write_addr(0x7F);
+        apu.write_data(0, 0b00011111);
+
+
 
 
         // // the minimal value for the frequency register to produce sound
@@ -121,7 +153,7 @@ struct ChipNamco106 : Module {
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+            outputs[OUTPUT_CHANNEL + 7 - i].setVoltage(getAudioOut(i));
         }
     }
 

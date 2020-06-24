@@ -20,36 +20,31 @@ int32_t BLIPBuffer::read_samples(blip_sample_t* out, int32_t max_samples, bool s
     assert(buffer_);
     int32_t count = samples_count();
     if (count > max_samples) count = max_samples;
-    // optimization
     if (!count) return 0;
 
-    int sample_offset = this->sample_offset;
-    int bass_shift = this->bass_shift;
-    buf_t_* buf = buffer_;
+    auto buf = buffer_;
     int32_t accum = reader_accum;
 
     if (!stereo) {
         for (int32_t n = count; n--;) {
             int32_t s = accum >> accum_fract;
             accum -= accum >> bass_shift;
-            accum += (int32_t (*buf++) - sample_offset) << accum_fract;
-            *out++ = (blip_sample_t) s;
-
+            accum += (static_cast<int32_t>(*buf++) - sample_offset) << accum_fract;
+            *out++ = static_cast<blip_sample_t>(s);
             // clamp sample
-            if ((int16_t) s != s)
-                out[-1] = blip_sample_t (0x7FFF - (s >> 24));
+            if (static_cast<int16_t>(s) != s)
+                out[-1] = blip_sample_t(0x7FFF - (s >> 24));
         }
     } else {
         for (int32_t n = count; n--;) {
             int32_t s = accum >> accum_fract;
             accum -= accum >> bass_shift;
-            accum += (int32_t (*buf++) - sample_offset) << accum_fract;
-            *out = (blip_sample_t) s;
+            accum += (static_cast<int32_t>(*buf++) - sample_offset) << accum_fract;
+            *out = static_cast<blip_sample_t>(s);
             out += 2;
-
             // clamp sample
-            if ((int16_t) s != s)
-                out[-2] = blip_sample_t (0x7FFF - (s >> 24));
+            if (static_cast<int16_t>(s) != s)
+                out[-2] = blip_sample_t(0x7FFF - (s >> 24));
         }
     }
     reader_accum = accum;

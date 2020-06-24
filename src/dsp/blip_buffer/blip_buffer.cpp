@@ -27,7 +27,7 @@ BLIPBuffer::BLIPBuffer() {
     bass_freq_ = 16;
 }
 
-void Blip_Impulse_::init(blip_pair_t_* imps, int w, int r, int fb) {
+void BLIPImpulse::init(blip_pair_t_* imps, int w, int r, int fb) {
     fine_bits = fb;
     width = w;
     impulses = (imp_t*) imps;
@@ -44,7 +44,7 @@ const int impulse_bits = 15;
 const int32_t impulse_amp = 1L << impulse_bits;
 const int32_t impulse_offset = impulse_amp / 2;
 
-void Blip_Impulse_::scale_impulse(int unit, imp_t* imp_in) const {
+void BLIPImpulse::scale_impulse(int unit, imp_t* imp_in) const {
     int32_t offset = ((int32_t) unit << impulse_bits) - impulse_offset * unit +
             (1 << (impulse_bits - 1));
     imp_t* imp = imp_in;
@@ -76,7 +76,7 @@ void Blip_Impulse_::scale_impulse(int unit, imp_t* imp_in) const {
 
 const int max_res = 1 << blip_res_bits_;
 
-void Blip_Impulse_::fine_volume_unit() {
+void BLIPImpulse::fine_volume_unit() {
     // to do: find way of merging in-place without temporary buffer
     imp_t temp[max_res * 2 * BLIPBuffer::widest_impulse_];
     scale_impulse((offset & 0xffff) << fine_bits, temp);
@@ -94,7 +94,7 @@ void Blip_Impulse_::fine_volume_unit() {
     }
 }
 
-void Blip_Impulse_::volume_unit(double new_unit) {
+void BLIPImpulse::volume_unit(double new_unit) {
     if (new_unit == volume_unit_)
         return;
 
@@ -113,7 +113,7 @@ void Blip_Impulse_::volume_unit(double new_unit) {
 
 static const double pi = 3.1415926535897932384626433832795029L;
 
-void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
+void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
     if (!generate && new_eq.treble == eq.treble && new_eq.cutoff == eq.cutoff &&
             new_eq.sample_rate == eq.sample_rate)
         return; // already calculated with same parameters

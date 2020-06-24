@@ -207,7 +207,7 @@ class blip_eq_t {
     double treble;
     int32_t cutoff;
     int32_t sample_rate;
-    friend class Blip_Impulse_;
+    friend class BLIPImpulse;
 };
 
 // End of public interface
@@ -216,7 +216,7 @@ const int blip_res_bits_ = 5;
 
 typedef uint32_t blip_pair_t_;
 
-class Blip_Impulse_ {
+class BLIPImpulse {
     typedef uint16_t imp_t;
 
     blip_eq_t eq;

@@ -29,7 +29,6 @@
 struct ChipNamco106 : Module {
     enum ParamIds {
         PARAM_FREQ0,
-        PARAM_PW0,
         PARAM_COUNT
     };
     enum InputIds {
@@ -58,7 +57,6 @@ struct ChipNamco106 : Module {
     ChipNamco106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
@@ -136,7 +134,7 @@ struct ChipNamco106 : Module {
         apu.write_data(0, med);
         // hi F / length
         apu.write_addr(0x7C);
-        apu.write_data(0, (56 << 2) + hig);
+        apu.write_data(0, (48 << 2) + hig);
 
         // volume and channel selection
         apu.write_addr(0x7F);
@@ -171,8 +169,6 @@ struct ChipNamco106Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(33, 32), module, ChipNamco106::INPUT_FM0));
         // Frequency parameters
         addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, ChipNamco106::PARAM_FREQ0));
-        // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 30), module, ChipNamco106::PARAM_PW0));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipNamco106::OUTPUT_CHANNEL));
     }

@@ -11,22 +11,23 @@
     #include "blip_buffer.h"
 #endif
 
-// Quality level. Higher levels are slower, and worse in a few cases.
-// Use blip_good_quality as a starting point.
+/// TODO: change to enum
+/// Quality level. Higher levels are slower, and worse in a few cases.
+/// Use blip_good_quality as a starting point.
 const int blip_low_quality = 1;
 const int blip_med_quality = 2;
 const int blip_good_quality = 3;
 const int blip_high_quality = 4;
 
-// Blip_Synth is a transition waveform synthesizer which adds band-limited
-// offsets (transitions) into a Blip_Buffer. For a simpler interface, use
-// Blip_Wave (below).
-//
-// Range specifies the greatest expected offset that will occur. For a
-// waveform that goes between +amp and -amp, range should be amp * 2 (half
-// that if it only goes between +amp and 0). When range is large, a higher
-// accuracy scheme is used; to force this even when range is small, pass
-// the negative of range (i.e. -range).
+/// Blip_Synth is a transition waveform synthesizer which adds band-limited
+/// offsets (transitions) into a Blip_Buffer. For a simpler interface, use
+/// Blip_Wave (below).
+///
+/// Range specifies the greatest expected offset that will occur. For a
+/// waveform that goes between +amp and -amp, range should be amp * 2 (half
+/// that if it only goes between +amp and 0). When range is large, a higher
+/// accuracy scheme is used; to force this even when range is small, pass
+/// the negative of range (i.e. -range).
 template<int quality, int range>
 class Blip_Synth {
     BOOST_STATIC_ASSERT(1 <= quality && quality <= 5);
@@ -46,20 +47,23 @@ class Blip_Synth {
     Blip_Impulse_ impulse;
 
  public:
+    /// Initialize a new BLIP synth.
     Blip_Synth() { impulse.init(impulses, width, res, fine_bits); }
 
-    // Configure low-pass filter (see notes.txt). Not optimized for real-time control
+    /// Configure low-pass filter (see notes.txt).
+    /// Not optimized for real-time control
+    /// TODO: remove
     void treble_eq(const blip_eq_t& eq) { impulse.treble_eq(eq); }
 
-    // Set volume of a transition at amplitude 'range' by setting volume_unit
-    // to v / range
+    /// Set volume of a transition at amplitude 'range' by setting volume_unit
+    /// to v / range
     void volume(double v) { impulse.volume_unit(v * (1.0 / abs_range)); }
 
     /// Set base volume unit of transitions, where 1.0 is a full swing between
     /// the positive and negative extremes. Not optimized for real-time control.
     void volume_unit(double unit) { impulse.volume_unit(unit); }
 
-    // Return buffer used for output when none is specified for a given call.
+    /// Return buffer used for output when none is specified for a given call.
     Blip_Buffer* output() const { return impulse.buf; }
 
     void output(Blip_Buffer* b) { impulse.buf = b; }
@@ -90,9 +94,9 @@ class Blip_Synth {
     }
 };
 
-// Blip_Wave is a synthesizer for adding a *single* waveform to a Blip_Buffer.
-// A wave is built from a series of delays and new amplitudes. This provides a
-// simpler interface than Blip_Synth, nothing more.
+/// Blip_Wave is a synthesizer for adding a *single* waveform to a Blip_Buffer.
+/// A wave is built from a series of delays and new amplitudes. This provides a
+/// simpler interface than Blip_Synth, nothing more.
 template<int quality, int range>
 class Blip_Wave {
     Blip_Synth<quality, range> synth;
@@ -100,10 +104,10 @@ class Blip_Wave {
     int last_amp;
 
  public:
-    // Start wave at time 0 and amplitude 0
+    /// Start wave at time 0 and amplitude 0
     Blip_Wave() : time_(0), last_amp(0) { }
 
-    // See Blip_Synth for description
+    /// See Blip_Synth for description
     void volume(double v) { synth.volume(v); }
 
     void volume_unit(double v) { synth.volume_unit(v); }
@@ -117,20 +121,20 @@ class Blip_Wave {
         if (!b) time_ = last_amp = 0;
     }
 
-    // Current time in frame
+    /// Current time in frame
     blip_time_t time() const { return time_; }
 
     void time(blip_time_t t) { time_ = t; }
 
-    // Current amplitude of wave
+    /// Current amplitude of wave
     int amplitude() const { return last_amp; }
 
     void amplitude(int);
 
-    // Move forward by 't' time units
+    /// Move forward by 't' time units
     void delay(blip_time_t t) { time_ += t; }
 
-    // End time frame of specified duration. Localize time to new frame.
+    /// End time frame of specified duration. Localize time to new frame.
     void end_frame(blip_time_t duration) {
         assert(("Blip_Wave::end_frame(): Wave hadn't yet been run for entire frame",
                 duration <= time_));

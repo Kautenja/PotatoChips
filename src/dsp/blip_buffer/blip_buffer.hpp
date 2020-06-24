@@ -236,7 +236,18 @@ class BLIPImpulse {
     BLIPBuffer* buf;
     uint32_t offset;
 
-    void init(blip_pair_t_* impulses, int width, int res, int fine_bits = 0);
+    void init(blip_pair_t_* imps, int w, int r, int fb = 0) {
+        fine_bits = fb;
+        width = w;
+        impulses = reinterpret_cast<imp_t*>(imps);
+        generate = true;
+        volume_unit_ = -1.0;
+        res = r;
+        buf = NULL;
+
+        impulse = &impulses[width * res * 2 * (fine_bits ? 2 : 1)];
+        offset = 0;
+    }
 
     void volume_unit(double);
 

@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
-
 #include "plugin.hpp"
 #include "components.hpp"
 #include "2A03/Nes_Vrc6.h"
@@ -36,42 +34,6 @@ enum IORegisters {
     SAW_PERIOD_LOW     = 1,
     SAW_PERIOD_HIGH    = 2,
 };
-
-/// The pulse width modes available.
-// enum class PulseWidth : uint8_t {
-//     Six         = 0b00000000,  // 6.25%
-//     Twelve      = 0b00010000,  // 12.5%
-//     Eightteen   = 0b00100000,  // 18.75%
-//     TwentyFive  = 0b00110000,  // 25%
-//     ThirtyOne   = 0b01000000,  // 31.25%
-//     ThirtySeven = 0b01010000,  // 37.5%
-//     FourtyThree = 0b01100000,  // 43.75%
-//     Fifty       = 0b01110000,  // 50%
-//     Hundred     = 0b10000000   // 100%
-// };
-
-/// Return the sum of a pulse width flag with an input value flag.
-///
-/// @param a the pulse width value flag to add to the existing flags
-/// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
-/// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
-///
-// inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
-//     return static_cast<uint8_t>(a) + b;
-// }
-
-// /// string labels for the square wave PW values
-// static const char* PWLabels[9] = {
-//     "6.25%",
-//     "12.5%",
-//     "18.75%",
-//     "25%",
-//     "31.25%",
-//     "37.5%",
-//     "43.75%",
-//     "50%",
-//     "100%"
-// };
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -118,7 +80,7 @@ struct ChipVRC6 : Module {
     static constexpr uint64_t CLOCK_RATE = 800000;
 
     /// The BLIP buffer to render audio samples from
-    Blip_Buffer buf[3];
+    Blip_Buffer buf[Nes_Vrc6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with
     Nes_Vrc6 apu;
 
@@ -137,7 +99,8 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f, "Pulse 2 Level", "%", 0.f, 100.f);
         configParam(PARAM_LEVEL2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%", 0.f, 100.f);
         // set the output buffer for each individual voice
-        for (int i = 0; i < 3; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++)
+            apu.osc_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -302,7 +265,7 @@ struct ChipVRC6 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) {
                 buf[i].sample_rate(args.sampleRate);
                 buf[i].clock_rate(cycles_per_sample * args.sampleRate);
                 buf[i].clear();
@@ -313,7 +276,8 @@ struct ChipVRC6 : Module {
         // // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < 3; i++) buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++)
+            buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
         outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));

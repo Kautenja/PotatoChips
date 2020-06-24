@@ -25,29 +25,31 @@ typedef int16_t blip_sample_t;
 
 class Blip_Buffer {
  public:
-    // Construct an empty buffer.
+    /// Initialize an empty BLIPBuffer.
     Blip_Buffer();
+
+    /// Destroy an instance of BLIPBuffer.
     ~Blip_Buffer();
 
     /// Set output sample rate and buffer length in milliseconds (1/1000 sec),
-    /// then clear buffer. If length is not specified, make as large as
-    /// possible. If there is insufficient memory for the buffer, sets the
-    /// buffer length to 0 and returns error string or propagates exception
-    /// if compiler supports it.
+    /// then clear buffer. If there is insufficient memory for the buffer,
+    /// sets the buffer length to 0 and returns error string or propagates
+    /// exception if compiler supports it.
     blargg_err_t set_sample_rate(int32_t samples_per_sec);
 
-    // Current output sample rate
+    /// Return current output sample rate.
     int32_t get_sample_rate() const;
 
-    // Number of source time units per second
+    /// Set number of source time units per second.
     void set_clock_rate(int32_t);
 
+    /// Return number of source time unites per second.
     int32_t get_clock_rate() const;
 
-    // Length of buffer, in milliseconds
+    /// Return length of buffer, in milliseconds
     int length() const;
 
-    // Set frequency at which high-pass filter attenuation passes -3dB
+    /// Set frequency at which high-pass filter attenuation passes -3dB
     void bass_freq(int frequency);
 
     /// Remove all available samples and clear buffer to silence. If

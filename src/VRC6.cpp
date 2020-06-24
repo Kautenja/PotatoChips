@@ -1,4 +1,4 @@
-// A VRC6 Chip module.
+// A Konami VRC6 Chip module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -39,7 +39,7 @@ enum IORegisters {
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A VRC6 Chip module.
+/// A Konami VRC6 Chip module.
 struct ChipVRC6 : Module {
     enum ParamIds {
         PARAM_FREQ0,

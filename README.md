@@ -32,11 +32,41 @@ information about the features of this module.
 
 ## VRC6
 
-**Coming Soon!**
+VRC6 is an emulation of the Konami VRC6 sound chip from the Nintendo
+Entertainment System (NES) for VCV Rack. The VRC6 chip contains two square
+wave generators, and a quantized saw wave generator.
+
+<p align="center">
+<img alt="VRC6" src="img/VRC6.png" height="380px">
+</p>
+
+### Features
+
+-   **Dual square wave generator:** Dual 8-bit square waves with eight duty
+    cycles: _6.25\%_, _12.5\%_, _18.75\%_, _25\%_, _31.25\%_, _37.5\%_,
+    _43.75\%_, and _50\%_
+-   **Quantized saw wave generator:** Generate NES style saw wave with variable
+    quantization including the overflow bug in the VRC6
+-   **Amplitude modulation:** Manual and CV control over the individual voice
+    levels
+
+See the [Manual](https://kautenja.github.io/modules/VRC6/manual.pdf) for more
+information about the features of this module.
 
 ## Namco106
 
 **Coming Soon!**
+
+<!-- <p align="center">
+<img alt="Namco106" src="img/Namco106.png" height="380px">
+</p> -->
+
+<!-- ### Features -->
+
+<!-- - -->
+
+<!-- See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for more
+information about the features of this module. -->
 
 ## Acknowledgments
 

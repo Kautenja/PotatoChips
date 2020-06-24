@@ -77,7 +77,18 @@ class Blip_Buffer {
     inline int get_length() const { return length_; }
 
     /// Set frequency at which high-pass filter attenuation passes -3dB
-    void bass_freq(int frequency);
+    void bass_freq(int freq) {
+        bass_freq_ = freq;
+        if (freq == 0) {
+            bass_shift = 31;  // 32 or greater invokes undefined behavior elsewhere
+            return;
+        }
+        bass_shift = 1 + (int) floor(1.442695041 * log(0.124 * samples_per_sec / freq));
+        if (bass_shift < 0)
+            bass_shift = 0;
+        if (bass_shift > 24)
+            bass_shift = 24;
+    }
 
     /// Remove all available samples and clear buffer to silence. If
     /// 'entire_buffer' is false, just clear out any samples waiting rather
@@ -124,7 +135,9 @@ class Blip_Buffer {
 
     /// Number of raw samples that can be mixed within frame of specified
     /// duration
-    int32_t count_samples(blip_time_t duration) const;
+    int32_t count_samples(blip_time_t duration) const {
+        return (resampled_time(duration) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
+    }
 
     /// Mix 'count' samples from 'buf' into buffer.
     void mix_samples(const blip_sample_t* buf, int32_t count);

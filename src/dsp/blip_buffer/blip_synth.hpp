@@ -52,7 +52,7 @@ class BLIPSynth {
             abs_range <= 2048 ? 7 : 8) : 0)
     };
     blip_pair_t_  impulses[impulse_size * res * 2 + base_impulses_size];
-    Blip_Impulse_ impulse;
+    BLIPImpulse impulse;
 
  public:
     /// Initialize a new BLIP synth.

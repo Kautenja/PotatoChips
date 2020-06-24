@@ -150,12 +150,12 @@
 
 \begin{enumerate}
   \item Coarse frequency control over the four channels.
-  \item CV Frequency modulation for pulse and triangle generators.
-  \item Channel outputs, $10V_{pp}$.
+  \item $V$/Octave inputs for pulse1, pulse2, and triangle waveform generators.
+  \item linear CV frequency modulation for pulse1, pulse2, and triangle waveform generators.
   \item Pulse width selector. Chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$.
-  \item $V$/Octave inputs for pulse and triangle generators.
-  \item CV (Linear Feedback Shift Register) LFSR gate, high at $2V$.
-  \item Period of randomness $\in [0, 15]$. See \url{https://wiki.nesdev.com/w/index.php/APU_Noise} for approximate frequency and pitch mappings.
+  \item CV LFSR gate, high at $2V$. Holds the LFSR generator as long as the input voltage is $>2V$.
+  \item Period of randomness $\in [0, 15]$ for the noise generator. See \url{https://wiki.nesdev.com/w/index.php/APU_Noise} for approximate frequency and pitch mappings.
+  \item Channel outputs, ${\approx}10V_{pp}$.
 \end{enumerate}
 
 % -------------------

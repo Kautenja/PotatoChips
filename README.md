@@ -5,6 +5,10 @@
 [BuildStatus]:  https://travis-ci.com/Kautenja/2A03.svg?branch=master
 [BuildServer]:  https://travis-ci.com/Kautenja/2A03
 
+<p align="center">
+<img alt="Plugin" src="img/Plugin.png">
+</p>
+
 ## 2A03
 
 2A03 is an emulation of the 2A03 sound chip from the Nintendo Entertainment

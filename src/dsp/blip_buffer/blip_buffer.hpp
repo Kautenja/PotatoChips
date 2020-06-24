@@ -243,7 +243,4 @@ class BLIPImpulse {
     void treble_eq(const blip_eq_t&);
 };
 
-// MSVC6 fix
-typedef BLIPBuffer::resampled_time_t blip_resampled_time_t;
-
 #endif  // BLIP_BUFFER_BLIP_BUFFER_HPP

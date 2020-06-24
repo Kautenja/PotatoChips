@@ -88,7 +88,7 @@ class BLIPSynth {
         offset(t, delta, impulse.buf);
     }
 
-    void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
+    void offset_resampled(BLIPBuffer::resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
         typedef blip_pair_t_ pair_t;
 
         unsigned sample_index = (time >> BLIPBuffer::BLIP_BUFFER_ACCURACY) & ~1;
@@ -142,7 +142,7 @@ class BLIPSynth {
         }
     }
 
-    inline void offset_resampled(blip_resampled_time_t t, int o) const {
+    inline void offset_resampled(BLIPBuffer::resampled_time_t t, int o) const {
         offset_resampled(t, o, impulse.buf);
     }
 

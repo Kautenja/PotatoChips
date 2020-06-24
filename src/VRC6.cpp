@@ -77,7 +77,7 @@ struct ChipVRC6 : Module {
     };
 
     /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 800000;
+    static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
     Blip_Buffer buf[Nes_Vrc6::OSC_COUNT];

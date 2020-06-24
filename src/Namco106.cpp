@@ -118,12 +118,12 @@ struct ChipNamco106 : Module {
         auto num_channels = 2;
         auto wave_length = 64;
         freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
-        std::cout << freq << std::endl;
+        // std::cout << freq << std::endl;
 
-        // auto freq18bit = static_cast<uint32_t>(freq);
-        // uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
-        // uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
-        // uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
+        auto freq18bit = static_cast<uint32_t>(freq);
+        uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
+        uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
+        uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
 
         // uint32_t freq18bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         // freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
@@ -137,13 +137,13 @@ struct ChipNamco106 : Module {
         // apu.write_data(0, 0);
         // low F
         apu.write_addr(0x78);
-        apu.write_data(0, 0b11110000);
+        apu.write_data(0, low);
         // med F
         apu.write_addr(0x7A);
-        apu.write_data(0, 0b11110000);
+        apu.write_data(0, med);
         // hi F / length
         apu.write_addr(0x7C);
-        apu.write_data(0, 48 << 2);
+        apu.write_data(0, (48 << 2) + hig);
 
         // volume
         apu.write_addr(0x7F);

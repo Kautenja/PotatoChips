@@ -90,17 +90,16 @@ struct ChipVRC6 : Module {
     /// Initialize a new VRC6 Chip module.
     ChipVRC6() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f,  "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ1, -30.f, 30.f, 0.f,  "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ2, -30.f, 30.f, 0.f,  "Saw Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW0,     0,    7,   4,    "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW1,     0,    7,   4,    "Pulse 1 Duty Cycle");
-        configParam(PARAM_LEVEL0,  0.f,  1.f, 0.5f, "Pulse 1 Level", "%", 0.f, 100.f);
-        configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f, "Pulse 2 Level", "%", 0.f, 100.f);
-        configParam(PARAM_LEVEL2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%", 0.f, 100.f);
+        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ2, -30.f, 30.f, 0.f,   "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_PW0,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_PW1,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_LEVEL0,  0.f,  1.f, 0.5f,  "Pulse 1 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         // set the output buffer for each individual voice
-        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++)
-            apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -273,11 +272,10 @@ struct ChipVRC6 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // // process the data on the chip
+        // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++)
-            buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
         outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));

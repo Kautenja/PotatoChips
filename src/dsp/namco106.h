@@ -19,9 +19,9 @@
 #include "apu.h"
 
 /// A macro oscillator based on the Namco 106 synthesis chip.
-class Nes_Namco {
+class Namco106 {
  public:
-    Nes_Namco() {
+    Namco106() {
         output(NULL);
         volume(1.0);
         reset();
@@ -78,8 +78,8 @@ class Nes_Namco {
 
  private:
     // noncopyable
-    Nes_Namco(const Nes_Namco&);
-    Nes_Namco& operator = (const Nes_Namco&);
+    Namco106(const Namco106&);
+    Namco106& operator = (const Namco106&);
 
     struct Namco_Osc {
         int32_t delay;

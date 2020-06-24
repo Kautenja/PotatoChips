@@ -80,9 +80,9 @@ struct ChipVRC6 : Module {
     static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
-    Blip_Buffer buf[Nes_Vrc6::OSC_COUNT];
+    Blip_Buffer buf[VRC6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with
-    Nes_Vrc6 apu;
+    VRC6 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -99,7 +99,7 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         // set the output buffer for each individual voice
-        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < VRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -265,7 +265,7 @@ struct ChipVRC6 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) {
+            for (int i = 0; i < VRC6::OSC_COUNT; i++) {
                 buf[i].sample_rate(args.sampleRate);
                 buf[i].clock_rate(cycles_per_sample * args.sampleRate);
                 buf[i].clear();
@@ -276,7 +276,7 @@ struct ChipVRC6 : Module {
         // process the data on the chip
         channel0_pulse(); channel1_pulse(); channel2_saw();
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Nes_Vrc6::OSC_COUNT; i++) buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < VRC6::OSC_COUNT; i++) buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
         outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));

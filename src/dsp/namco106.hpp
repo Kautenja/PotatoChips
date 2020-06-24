@@ -46,7 +46,9 @@ class Namco106 {
     ///
     /// @param value the global volume level of the chip
     ///
-    inline void volume(double value) { synth.volume(0.10 / OSC_COUNT * value); }
+    inline void volume(double value = 1.f) {
+        synth.volume(0.10 / OSC_COUNT * value);
+    }
 
     /// Set treble equalization.
     ///
@@ -66,6 +68,8 @@ class Namco106 {
     ///
     /// @param i the index of the oscillator to set the output buffer for
     /// @param buf the buffer to write samples from the synthesizer to
+    /// @note If buffer is NULL, the specified oscillator is muted and
+    ///       emulation accuracy is reduced.
     ///
     inline void osc_output(int i, BLIPBuffer* buf) {
         assert((unsigned) i < OSC_COUNT);

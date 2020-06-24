@@ -21,49 +21,76 @@
 /// A macro oscillator based on the NES 2A03 synthesis chip.
 class APU {
  public:
+    /// the number of oscillators on the VRC6 chip
+    static constexpr int OSC_COUNT = 4;
+    /// the first address of the APU RAM addresses
+    static constexpr int ADDR_START = 0x4000;
+    /// the last address of the APU RAM addresses
+    static constexpr int ADDR_END   = 0x4017;
+
+    /// Initialize a new APU.
     APU();
 
-    // Set buffer to generate all sound into, or disable sound if NULL
-    void output(BLIPBuffer*);
-
-    // Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
-    enum { start_addr = 0x4000 };
-    enum { end_addr   = 0x4017 };
-    void write_register(cpu_time_t, cpu_addr_t, int data);
-
-    // Run all oscillators up to specified time, end current time frame, then
-    // start a new time frame at time 0. Time frames have no effect on emulation
-    // and each can be whatever length is convenient.
-    void end_frame(cpu_time_t);
-
-// Additional optional features (can be ignored without any problem)
-
-    // Reset internal frame counter, registers, and all oscillators.
-    // Use PAL timing if pal_timing is true, otherwise use NTSC timing.
+    /// Reset internal frame counter, registers, and all oscillators.
+    ///
+    /// @param pal_timing Use PAL timing if pal_timing is true, otherwise NTSC
+    ///
     void reset(bool pal_timing = false);
 
-    // Set overall volume (default is 1.0)
-    void volume(double);
-
-    // Reset oscillator amplitudes. Must be called when clearing buffer while
-    // using non-linear sound.
-    void buffer_cleared();
+    /// Set the volume.
+    ///
+    /// @param value the global volume level of the chip
+    ///
+    void volume(double = 1.f);
 
     // Set treble equalization (see notes.txt).
     void treble_eq(const blip_eq_t&);
 
-    // Set sound output of specific oscillator to buffer. If buffer is NULL,
-    // the specified oscillator is muted and emulation accuracy is reduced.
-    // The oscillators are indexed as follows: 0) Square 1, 1) Square 2,
-    // 2) Triangle, 3) Noise.
-    enum { OSC_COUNT = 4 };
+    /// Set buffer to generate all sound into, or disable sound if NULL.
+    ///
+    /// @param buf the buffer to write samples from the synthesizer to
+    ///
+    void output(BLIPBuffer*);
+
+    /// Set the output buffer for an individual synthesizer voice.
+    ///
+    /// @param i the index of the oscillator to set the output buffer for
+    /// @param buf the buffer to write samples from the synthesizer to
+    /// @note If buffer is NULL, the specified oscillator is muted and
+    ///       emulation accuracy is reduced.
+    /// @note The oscillators are indexed as follows:
+    ///       0) Pulse 1,
+    ///       1) Pulse 2,
+    ///       2) Triangle,
+    ///       3) Noise.
+    ///
     void osc_output(int osc, BLIPBuffer* buf) {
         assert(("APU::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
         oscs[osc]->output = buf;
     }
 
-    // Run APU until specified time, so that any DMC memory reads can be
-    // accounted for (i.e. inserting CPU wait states).
+    /// Run all oscillators up to specified time, end current time frame, then
+    /// start a new time frame at time 0. Time frames have no effect on
+    /// emulation and each can be whatever length is convenient.
+    ///
+    /// @param time the number of elapsed cycles
+    ///
+    void end_frame(cpu_time_t);
+
+    /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
+    void write_register(cpu_time_t, cpu_addr_t, int data);
+
+// Additional optional features (can be ignored without any problem)
+
+    /// Reset oscillator amplitudes. Must be called when clearing buffer while
+    /// using non-linear sound.
+    void buffer_cleared();
+
+    /// Run APU until specified time, so that any DMC memory reads can be
+    /// accounted for (i.e. inserting CPU wait states).
+    ///
+    /// @param time the number of elapsed cycles
+    ///
     void run_until(cpu_time_t);
 
 // End of public interface.

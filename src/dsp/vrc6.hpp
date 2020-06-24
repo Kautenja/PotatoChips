@@ -46,7 +46,7 @@ class VRC6 {
     ///
     /// @param value the global volume level of the chip
     ///
-    inline void volume(double value) {
+    inline void volume(double value = 1.f) {
         value *= 0.0967 * 2;
         saw_synth.volume(value);
         square_synth.volume(value * 0.5);
@@ -73,6 +73,12 @@ class VRC6 {
     ///
     /// @param i the index of the oscillator to set the output buffer for
     /// @param buf the buffer to write samples from the synthesizer to
+    /// @note If buffer is NULL, the specified oscillator is muted and
+    ///       emulation accuracy is reduced.
+    /// @note The oscillators are indexed as follows:
+    ///       0) Pulse 1,
+    ///       1) Pulse 2,
+    ///       2) Saw.
     ///
     inline void osc_output(int i, BLIPBuffer* buf) {
         assert((unsigned) i < OSC_COUNT);

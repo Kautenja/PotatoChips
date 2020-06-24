@@ -77,7 +77,7 @@ void APU::reset(bool pal_mode) {
     write_register(0, 0x4017, 0x00);
     write_register(0, 0x4015, 0x00);
     // initialize sq1, sq2, tri, and noise, not DMC
-    for (cpu_addr_t addr = start_addr; addr <= 0x4009; addr++)
+    for (cpu_addr_t addr = ADDR_START; addr <= 0x4009; addr++)
         write_register(0, addr, (addr & 3) ? 0x00 : 0x10);
 }
 
@@ -168,13 +168,13 @@ void APU::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
     assert((unsigned) data <= 0xff);
 
     // Ignore addresses outside range
-    if (addr < start_addr || end_addr < addr) return;
+    if (addr < ADDR_START || ADDR_END < addr) return;
 
     run_until(time);
 
     if (addr < 0x4010) {  // synthesize registers
         // Write to channel
-        int osc_index = (addr - start_addr) >> 2;
+        int osc_index = (addr - ADDR_START) >> 2;
         Oscillator* osc = oscs[osc_index];
 
         int reg = addr & 3;

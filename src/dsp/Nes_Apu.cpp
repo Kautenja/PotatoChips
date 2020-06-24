@@ -61,7 +61,7 @@ void Nes_Apu::volume(double v) {
 }
 
 void Nes_Apu::output(Blip_Buffer* buffer) {
-    for (int i = 0; i < osc_count; i++)
+    for (int i = 0; i < OSC_COUNT; i++)
         osc_output(i, buffer);
 }
 
@@ -198,7 +198,7 @@ void Nes_Apu::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
         }
     } else if (addr == 0x4015) {
         // Channel enables
-        for (int i = osc_count; i--;)
+        for (int i = OSC_COUNT; i--;)
             if (!((data >> i) & 1))
                 oscs[i]->length_counter = 0;
         int old_enables = osc_enables;

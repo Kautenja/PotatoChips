@@ -168,9 +168,9 @@ class BLIPBuffer {
 
     /// Number of raw samples that can be mixed within frame of specified
     /// duration
-    inline int32_t count_samples(blip_time_t duration) const {
-        return (resampled_time(duration) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
-    }
+    // inline int32_t count_samples(blip_time_t duration) const {
+    //     return (resampled_time(duration) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
+    // }
 
     /// Mix 'count' samples from 'buf' into buffer.
     void mix_samples(const blip_sample_t* in, int32_t count) {

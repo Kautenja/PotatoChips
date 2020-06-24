@@ -52,12 +52,12 @@ class VRC6 {
         square_synth.treble_eq(eq);
     }
 
-    void output(Blip_Buffer* buf) {
+    void output(BLIPBuffer* buf) {
         for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
     }
 
     static constexpr int OSC_COUNT = 3;
-    inline void osc_output(int i, Blip_Buffer* buf) {
+    inline void osc_output(int i, BLIPBuffer* buf) {
         // assert((unsigned) i < OSC_COUNT);
         oscs[i].output = buf;
     }
@@ -89,7 +89,7 @@ class VRC6 {
 
     struct Vrc6_Osc {
         uint8_t regs[3];
-        Blip_Buffer* output;
+        BLIPBuffer* output;
         int delay;
         int last_amp;
         int phase;
@@ -103,8 +103,8 @@ class VRC6 {
     Vrc6_Osc oscs[OSC_COUNT];
     cpu_time_t last_time;
 
-    Blip_Synth<BLIPQuality::Medium, 31> saw_synth;
-    Blip_Synth<BLIPQuality::Good, 15> square_synth;
+    BLIPSynth<BLIPQuality::Medium, 31> saw_synth;
+    BLIPSynth<BLIPQuality::Good, 15> square_synth;
 
     void run_until(cpu_time_t time) {
         assert(time >= last_time);
@@ -115,7 +115,7 @@ class VRC6 {
     }
 
     void run_square(Vrc6_Osc& osc, cpu_time_t end_time) {
-        Blip_Buffer* output = osc.output;
+        BLIPBuffer* output = osc.output;
         if (!output) return;
 
         int volume = osc.regs[0] & 15;
@@ -160,7 +160,7 @@ class VRC6 {
 
     void run_saw(cpu_time_t end_time) {
         Vrc6_Osc& osc = oscs[2];
-        Blip_Buffer* output = osc.output;
+        BLIPBuffer* output = osc.output;
         if (!output)
             return;
 

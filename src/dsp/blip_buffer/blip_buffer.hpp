@@ -28,15 +28,15 @@ typedef int32_t blip_time_t;
 /// Type for sample produced. Signed 16-bit format.
 typedef int16_t blip_sample_t;
 
-class Blip_Buffer {
+class BLIPBuffer {
  public:
     static constexpr auto BLIP_BUFFER_ACCURACY = 16;
 
     /// Initialize an empty BLIPBuffer.
-    Blip_Buffer();
+    BLIPBuffer();
 
     /// Destroy an instance of BLIPBuffer.
-    ~Blip_Buffer() { delete[] buffer_; }
+    ~BLIPBuffer() { delete[] buffer_; }
 
     /// Set output sample rate and buffer length in milliseconds (1/1000 sec),
     /// then clear buffer. If there is insufficient memory for the buffer,
@@ -115,7 +115,7 @@ class Blip_Buffer {
     /// frame. All transitions must have been added before 'time'.
     inline void end_frame(blip_time_t time) {
         offset_ += time * factor_;
-        assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_count() <= (int32_t) buffer_size_));
+        assert(("BLIPBuffer::end_frame(): Frame went past end of buffer", samples_count() <= (int32_t) buffer_size_));
     }
 
     /// Return the number of samples available for reading with read_samples().
@@ -151,8 +151,8 @@ class Blip_Buffer {
     // not documented yet
 
     inline void remove_silence(int32_t count) {
-        assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_count()));
-        offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
+        assert(("BLIPBuffer::remove_silence(): Tried to remove more samples than available", count <= samples_count()));
+        offset_ -= resampled_time_t (count) << BLIPBuffer::BLIP_BUFFER_ACCURACY;
     }
 
     typedef uint32_t resampled_time_t;
@@ -167,8 +167,8 @@ class Blip_Buffer {
 
  private:
     // noncopyable
-    Blip_Buffer(const Blip_Buffer&);
-    Blip_Buffer& operator = (const Blip_Buffer&);
+    BLIPBuffer(const BLIPBuffer&);
+    BLIPBuffer& operator = (const BLIPBuffer&);
 
 // Don't use the following members. They are public only for technical reasons.
  public:
@@ -233,7 +233,7 @@ class Blip_Impulse_ {
     void scale_impulse(int unit, imp_t*) const;
 
  public:
-    Blip_Buffer* buf;
+    BLIPBuffer* buf;
     uint32_t offset;
 
     void init(blip_pair_t_* impulses, int width, int res, int fine_bits = 0);
@@ -244,6 +244,6 @@ class Blip_Impulse_ {
 };
 
 // MSVC6 fix
-typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;
+typedef BLIPBuffer::resampled_time_t blip_resampled_time_t;
 
 #endif  // BLIP_BUFFER_BLIP_BUFFER_HPP

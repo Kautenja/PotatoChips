@@ -80,7 +80,7 @@ struct ChipVRC6 : Module {
     static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
-    Blip_Buffer buf[VRC6::OSC_COUNT];
+    BLIPBuffer buf[VRC6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with
     VRC6 apu;
 

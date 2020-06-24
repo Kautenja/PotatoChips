@@ -2,8 +2,8 @@
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
-[BuildStatus]:  https://travis-ci.com/Kautenja/2A03.svg?branch=master
-[BuildServer]:  https://travis-ci.com/Kautenja/2A03
+[BuildStatus]:  https://travis-ci.com/Kautenja/NES-Oscillators.svg?branch=master
+[BuildServer]:  https://travis-ci.com/Kautenja/NES-Oscillators
 
 <p align="center">
 <img alt="Plugin" src="img/Plugin.png">

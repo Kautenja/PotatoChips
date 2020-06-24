@@ -16,7 +16,7 @@
 #ifndef NES_APU_H
 #define NES_APU_H
 
-#include "oscillators.h"
+#include "oscillators.hpp"
 
 /// A macro oscillator based on the NES 2A03 synthesis chip.
 class APU {

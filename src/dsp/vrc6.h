@@ -18,7 +18,7 @@
 #ifndef NES_VRC6_H
 #define NES_VRC6_H
 
-#include "APU.h"
+#include "apu.h"
 
 /// A macro oscillator based on the Konami VRC6 synthesis chip.
 class Nes_Vrc6 {

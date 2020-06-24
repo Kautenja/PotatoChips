@@ -15,9 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "APU.h"
-
-#include BLARGG_SOURCE_BEGIN
+#include "apu.h"
+#include "blip_buffer/blargg_source.h"
 
 Nes_Apu::Nes_Apu() {
     square1.synth = &square_synth;

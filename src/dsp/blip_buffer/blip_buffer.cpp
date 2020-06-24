@@ -2,9 +2,9 @@
 // Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
 
 #include "blip_buffer.h"
-
 #include <string.h>
 #include <math.h>
+#include "blargg_source.h"
 
 /* Copyright (C) 2003-2005 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -16,8 +16,6 @@ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
-
-#include BLARGG_SOURCE_BEGIN
 
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;
@@ -311,7 +309,7 @@ void Blip_Buffer::remove_samples(int32_t count) {
     memset(buffer_ + remain, sample_offset & 0xFF, count * sizeof (buf_t_));
 }
 
-#include BLARGG_ENABLE_OPTIMIZER
+#include "blargg_common.h"
 
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
     require(buffer_); // sample rate must have been set

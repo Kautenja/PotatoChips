@@ -140,9 +140,11 @@ class Blip_Buffer {
 // Low-pass equalization parameters (see notes.txt)
 class blip_eq_t {
  public:
-    blip_eq_t(double treble = 0);
+    blip_eq_t(double treble_ = 0) :
+        treble(treble_), cutoff(0), sample_rate(44100) { }
 
-    blip_eq_t(double treble, int32_t cutoff, int32_t sample_rate);
+    blip_eq_t(double treble_, int32_t cutoff_, int32_t sample_rate_) :
+        treble(treble_), cutoff(cutoff_), sample_rate(sample_rate_) { }
 
  private:
     double treble;
@@ -214,12 +216,6 @@ class Blip_Impulse_ {
 
     void treble_eq(const blip_eq_t&);
 };
-
-inline blip_eq_t::blip_eq_t(double t) :
-    treble(t), cutoff(0), sample_rate(44100) { }
-
-inline blip_eq_t::blip_eq_t(double t, int32_t c, int32_t sr) :
-    treble(t), cutoff(c), sample_rate(sr) { }
 
 inline void Blip_Buffer::end_frame(blip_time_t t) {
     offset_ += t * factor_;

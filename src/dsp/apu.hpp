@@ -127,7 +127,6 @@ class APU {
     void write_register(cpu_time_t time, cpu_addr_t addr, int data) {
         assert(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
         assert((unsigned) data <= 0xff);
-
         // Ignore addresses outside range
         if (addr < ADDR_START || ADDR_END < addr) return;
 
@@ -200,9 +199,7 @@ class APU {
     /// the channel 3 noise generator
     Triangle triangle;
     /// pointers to the oscillators
-    Oscillator* oscs[OSC_COUNT] = {
-        &pulse1, &pulse2, &triangle, &noise
-    };
+    Oscillator* oscs[OSC_COUNT] = { &pulse1, &pulse2, &triangle, &noise };
 
     /// has been run until this time in current frame
     cpu_time_t last_time;
@@ -219,7 +216,6 @@ class APU {
     /// a synthesizer shared by squares
     Pulse::Synth square_synth;
 
-    // TODO: remove these two nonlinear functions?
     // /// Enable nonlinear volume.
     // ///
     // /// @param v the volume level

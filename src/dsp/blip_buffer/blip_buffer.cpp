@@ -49,12 +49,12 @@ blargg_err_t Blip_Buffer::sample_rate(int32_t new_rate, int msec) {
     }
 
     if (buffer_size_ != new_size) {
-        delete [] buffer_;
+        delete[] buffer_;
         buffer_ = NULL; // allow for exception in allocation below
         buffer_size_ = 0;
         offset_ = 0;
 
-        buffer_ = BLARGG_NEW buf_t_ [new_size + widest_impulse_];
+        buffer_ = new (std::nothrow) buf_t_[new_size + widest_impulse_];
         BLARGG_CHECK_ALLOC(buffer_);
     }
 
@@ -82,7 +82,7 @@ void Blip_Buffer::clock_rate(int32_t cps) {
 }
 
 Blip_Buffer::~Blip_Buffer() {
-    delete [] buffer_;
+    delete[] buffer_;
 }
 
 void Blip_Buffer::bass_freq(int freq) {
@@ -111,7 +111,7 @@ void Blip_Impulse_::init(blip_pair_t_* imps, int w, int r, int fb) {
     res = r;
     buf = NULL;
 
-    impulse = &impulses [width * res * 2 * (fine_bits ? 2 : 1)];
+    impulse = &impulses[width * res * 2 * (fine_bits ? 2 : 1)];
     offset = 0;
 }
 
@@ -133,7 +133,7 @@ void Blip_Impulse_::scale_impulse(int unit, imp_t* imp_in) const {
         }
 
         // add error to middle
-        imp [-width / 2 - 1] += (imp_t) error;
+        imp[-width / 2 - 1] += (imp_t) error;
     }
 
     if (res > 2) {
@@ -153,7 +153,7 @@ const int max_res = 1 << blip_res_bits_;
 
 void Blip_Impulse_::fine_volume_unit() {
     // to do: find way of merging in-place without temporary buffer
-    imp_t temp [max_res * 2 * Blip_Buffer::widest_impulse_];
+    imp_t temp[max_res * 2 * Blip_Buffer::widest_impulse_];
     scale_impulse((offset & 0xffff) << fine_bits, temp);
     imp_t* imp2 = impulses + res * 2 * width;
     scale_impulse(offset & 0xffff, imp2);
@@ -223,7 +223,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     double total = 0.0;
     const double to_angle = pi / 2 / n_harm / max_res;
 
-    float buf [max_res * (Blip_Buffer::widest_impulse_ - 2) / 2];
+    float buf[max_res * (Blip_Buffer::widest_impulse_ - 2) / 2];
     const int size = max_res * (width - 2) / 2;
     for (int i = size; i--;) {
         double angle = (i * 2 + 1) * to_angle;
@@ -256,7 +256,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
         }
 
         total += (float) y;
-        buf [i] = (float) y;
+        buf[i] = (float) y;
     }
 
     // integrate runs of length 'max_res'
@@ -273,7 +273,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
                 if (index < 0)
                     index = -index - 1;
                 if (index < size)
-                    sum += buf [index];
+                    sum += buf[index];
             }
             *imp++ = (imp_t) floor(sum * factor + (impulse_offset + 0.5));
         }
@@ -335,7 +335,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
 
             // clamp sample
             if ((int16_t) s != s)
-                out [-1] = blip_sample_t (0x7FFF - (s >> 24));
+                out[-1] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }
     else {
@@ -348,7 +348,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
 
             // clamp sample
             if ((int16_t) s != s)
-                out [-2] = blip_sample_t (0x7FFF - (s >> 24));
+                out[-2] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }
 
@@ -360,7 +360,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
 }
 
 void Blip_Buffer::mix_samples(const blip_sample_t* in, int32_t count) {
-    buf_t_* buf = &buffer_ [(offset_ >> BLIP_BUFFER_ACCURACY) + (widest_impulse_ / 2 - 1)];
+    buf_t_* buf = &buffer_[(offset_ >> BLIP_BUFFER_ACCURACY) + (widest_impulse_ / 2 - 1)];
 
     int prev = 0;
     while (count--) {

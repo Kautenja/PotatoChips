@@ -9,18 +9,6 @@
 #ifndef BLARGG_COMMON_H
 #define BLARGG_COMMON_H
 
-// Determine compiler's language support
-
-#if defined (__MWERKS__)
-#elif defined (_MSC_VER)
-#elif defined (__GNUC__)
-#elif defined (__MINGW32__)
-#elif __cplusplus < 199711
-    #define BLARGG_NEW new
-    #define STATIC_CAST( type ) (type)
-
-#endif
-
 // Set up boost
 #define BOOST_MINIMAL 1
 
@@ -76,12 +64,6 @@
 // blargg_err_t (NULL on success, otherwise error string)
 typedef const char* blargg_err_t;
 const blargg_err_t blargg_success = 0;
-
-// BLARGG_NEW is used in place of 'new' to create objects. By default,
-// nothrow new is used.
-#ifndef BLARGG_NEW
-    #define BLARGG_NEW new (std::nothrow)
-#endif
 
 // BLARGG_BIG_ENDIAN and BLARGG_LITTLE_ENDIAN
 // Only needed if modules are used which must know byte order.

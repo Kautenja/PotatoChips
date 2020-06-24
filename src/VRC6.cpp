@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/Nes_Vrc6.h"
+#include "dsp/vrc6.h"
 
 /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
 enum IORegisters {

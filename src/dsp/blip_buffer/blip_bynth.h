@@ -12,21 +12,13 @@
 #endif
 #include <type_traits>
 
-/// TODO: change to enum
-/// Quality level. Higher levels are slower, and worse in a few cases.
-/// Use blip_good_quality as a starting point.
-// const int blip_low_quality = 1;
-// const int blip_med_quality = 2;
-// const int blip_good_quality = 3;
-// const int blip_high_quality = 4;
-
 /// Quality level. Higher levels are slower, and worse in a few cases.
 /// Use "Good" as a starting point.
 enum class BLIPQuality {
-    Low = 1,
+    Low    = 1,
     Medium = 2,
-    Good = 3,
-    High = 4
+    Good   = 3,
+    High   = 4
 };
 
 /// Blip_Synth is a transition waveform synthesizer which adds band-limited

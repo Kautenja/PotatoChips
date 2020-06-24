@@ -14,21 +14,6 @@
 //
 
 #include "apu.hpp"
-#include <cassert>
-
-APU::APU() {
-    pulse1.synth = &square_synth;
-    pulse2.synth = &square_synth;
-
-    oscs[0] = &pulse1;
-    oscs[1] = &pulse2;
-    oscs[2] = &triangle;
-    oscs[3] = &noise;
-
-    output(NULL);
-    volume(1.0);
-    reset(false);
-}
 
 // frames
 

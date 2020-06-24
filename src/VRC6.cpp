@@ -37,17 +37,18 @@ enum IORegisters {
     SAW_PERIOD_HIGH    = 2,
 };
 
-enum class PulseWidth : uint8_t {
-    Six         = 0b00000000,  // 6.25%
-    Twelve      = 0b00010000,  // 12.5%
-    Eightteen   = 0b00100000,  // 18.75%
-    TwentyFive  = 0b00110000,  // 25%
-    ThirtyOne   = 0b01000000,  // 31.25%
-    ThirtySeven = 0b01010000,  // 37.5%
-    FourtyThree = 0b01100000,  // 43.75%
-    Fifty       = 0b01110000,  // 50%
-    Hundred     = 0b10000000   // 100%
-};
+/// The pulse width modes available.
+// enum class PulseWidth : uint8_t {
+//     Six         = 0b00000000,  // 6.25%
+//     Twelve      = 0b00010000,  // 12.5%
+//     Eightteen   = 0b00100000,  // 18.75%
+//     TwentyFive  = 0b00110000,  // 25%
+//     ThirtyOne   = 0b01000000,  // 31.25%
+//     ThirtySeven = 0b01010000,  // 37.5%
+//     FourtyThree = 0b01100000,  // 43.75%
+//     Fifty       = 0b01110000,  // 50%
+//     Hundred     = 0b10000000   // 100%
+// };
 
 /// Return the sum of a pulse width flag with an input value flag.
 ///
@@ -55,9 +56,22 @@ enum class PulseWidth : uint8_t {
 /// @param b a byte that represents flags where bits 'B' are used: 0bAABBBBBB
 /// @returns the sum of a and b, i.e., the flag: 0bAABBBBBB
 ///
-inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
-    return static_cast<uint8_t>(a) + b;
-}
+// inline uint8_t operator+(const PulseWidth& a, const uint8_t& b) {
+//     return static_cast<uint8_t>(a) + b;
+// }
+
+// /// string labels for the square wave PW values
+// static const char* PWLabels[9] = {
+//     "6.25%",
+//     "12.5%",
+//     "18.75%",
+//     "25%",
+//     "31.25%",
+//     "37.5%",
+//     "43.75%",
+//     "50%",
+//     "100%"
+// };
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -108,11 +122,6 @@ struct ChipVRC6 : Module {
     /// The VRC6 instance to synthesize sound with
     Nes_Vrc6 apu;
 
-    /// the pulse width of square wave 1
-    PulseWidth pw1 = PulseWidth::Fifty;
-    /// the pulse width of square wave 2
-    PulseWidth pw2 = PulseWidth::Fifty;
-
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
@@ -141,6 +150,10 @@ struct ChipVRC6 : Module {
         static constexpr auto FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
+        // the minimal value for the pulse width register
+        static constexpr auto PW_MIN = 0;
+        // the maximal value for the pulse width register
+        static constexpr auto PW_MAX = 7;
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
@@ -154,12 +167,25 @@ struct ChipVRC6 : Module {
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
-
-        // TODO: duty cycle
-        // TODO: volume level
-        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, 0b00101111);
+        // write the register for the frequency
         apu.write_osc(0, 0, PULSE1_PERIOD_LOW, lo);
         apu.write_osc(0, 0, PULSE1_PERIOD_HIGH, hi);
+
+        // get the pulse width from the parameter knob
+        auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue());
+        // apply the control voltage to the pulse width with 1V/step
+        auto cv = static_cast<uint8_t>(inputs[INPUT_PW0].getVoltage() / 2.f);
+        pw += cv;
+        pw = rack::clamp(pw, PW_MIN, PW_MAX);
+        std::cout << static_cast<int>(pw) << std::endl;
+
+        // get the level from the parameter knob
+        uint8_t level = 0b00001111;
+
+        // apply the control voltage to the level
+
+        // write the register for the duty cycle and volume
+        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process square wave (channel 1).
@@ -170,6 +196,10 @@ struct ChipVRC6 : Module {
         static constexpr auto FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
+        // the minimal value for the pulse width register
+        static constexpr auto PW_MIN = 0;
+        // the maximal value for the pulse width register
+        static constexpr auto PW_MAX = 7;
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ1].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT1].getVoltage();
@@ -259,49 +289,11 @@ struct ChipVRC6 : Module {
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
-
-    // /// Respond to the user resetting the module from the front end.
-    // inline void onReset() override { pw1 = pw2 = PulseWidth::Fifty; }
-
-    // /// Respond to the randomization of the module parameters.
-    // inline void onRandomize() override {
-    //     pw1 = static_cast<PulseWidth>((random::u32() % 4) << 6);
-    //     pw2 = static_cast<PulseWidth>((random::u32() % 4) << 6);
-    // }
-
-    // /// Convert the module's state to a JSON object
-    // inline json_t* dataToJson() override {
-    //     json_t* root = json_object();
-    //     json_object_set_new(root, "pw1", json_integer(static_cast<uint8_t>(pw1)));
-    //     json_object_set_new(root, "pw2", json_integer(static_cast<uint8_t>(pw2)));
-    //     return root;
-    // }
-
-    // /// Load the module's state from a JSON object
-    // inline void dataFromJson(json_t* root) override {
-    //     json_t* pw1Data = json_object_get(root, "pw1");
-    //     if (pw1Data) pw1 = static_cast<PulseWidth>(json_integer_value(pw1Data));
-    //     json_t* pw2Data = json_object_get(root, "pw2");
-    //     if (pw2Data) pw2 = static_cast<PulseWidth>(json_integer_value(pw2Data));
-    // }
 };
 
 // ---------------------------------------------------------------------------
 // MARK: Widget
 // ---------------------------------------------------------------------------
-
-// /// string labels for the square wave PW values
-// static const char* PWLabels[9] = {
-//     "6.25%",
-//     "12.5%",
-//     "18.75%",
-//     "25%",
-//     "31.25%",
-//     "37.5%",
-//     "43.75%",
-//     "50%",
-//     "100%"
-// };
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipVRC6Widget : ModuleWidget {

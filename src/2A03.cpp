@@ -126,6 +126,7 @@ struct Chip2A03 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM0].getVoltage();
+        // TODO: clamp before converting to 16 bit
         freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
         apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
@@ -150,6 +151,7 @@ struct Chip2A03 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM1].getVoltage();
+        // TODO: clamp before converting to 16 bit
         freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, PULSE1_LO, freq11bit & 0b11111111);
         apu.write_register(0, PULSE1_HI, (freq11bit & 0b0000011100000000) >> 8);
@@ -174,6 +176,7 @@ struct Chip2A03 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM2].getVoltage();
+        // TODO: clamp before converting to 16 bit
         freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, TRI_LO, freq11bit & 0b11111111);
         apu.write_register(0, TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
@@ -192,6 +195,7 @@ struct Chip2A03 : Module {
         auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
         auto cv = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         uint32_t param = params[PARAM_FREQ3].getValue() + cv;
+        // TODO: clamp before converting to 32 bit
         param = FREQ_MAX - rack::clamp(param, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + param);
         apu.write_register(0, NOISE_HI, 0);

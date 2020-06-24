@@ -15,10 +15,19 @@
 /// TODO: change to enum
 /// Quality level. Higher levels are slower, and worse in a few cases.
 /// Use blip_good_quality as a starting point.
-const int blip_low_quality = 1;
-const int blip_med_quality = 2;
-const int blip_good_quality = 3;
-const int blip_high_quality = 4;
+// const int blip_low_quality = 1;
+// const int blip_med_quality = 2;
+// const int blip_good_quality = 3;
+// const int blip_high_quality = 4;
+
+/// Quality level. Higher levels are slower, and worse in a few cases.
+/// Use "Good" as a starting point.
+enum class BLIPQuality {
+    Low = 1,
+    Medium = 2,
+    Good = 3,
+    High = 4
+};
 
 /// Blip_Synth is a transition waveform synthesizer which adds band-limited
 /// offsets (transitions) into a Blip_Buffer. For a simpler interface, use
@@ -29,14 +38,13 @@ const int blip_high_quality = 4;
 /// that if it only goes between +amp and 0). When range is large, a higher
 /// accuracy scheme is used; to force this even when range is small, pass
 /// the negative of range (i.e. -range).
-template<int quality, int range>
+template<BLIPQuality quality, int range>
 class Blip_Synth {
-    static_assert(1 <= quality && quality <= 5);
     static_assert(-32768 <= range && range <= 32767);
     enum {
         abs_range = (range < 0) ? -range : range,
         fine_mode = (range > 512 || range < 0),
-        width = (quality < 5 ? quality * 4 : Blip_Buffer::widest_impulse_),
+        width = static_cast<int>(quality) * 4,
         res = 1 << blip_res_bits_,
         impulse_size = width / 2 * (fine_mode + 1),
         base_impulses_size = width / 2 * (res / 2 + 1),
@@ -98,7 +106,7 @@ class Blip_Synth {
 /// Blip_Wave is a synthesizer for adding a *single* waveform to a Blip_Buffer.
 /// A wave is built from a series of delays and new amplitudes. This provides a
 /// simpler interface than Blip_Synth, nothing more.
-template<int quality, int range>
+template<BLIPQuality quality, int range>
 class Blip_Wave {
     Blip_Synth<quality, range> synth;
     blip_time_t time_;
@@ -146,14 +154,14 @@ class Blip_Wave {
 
 // End of public interface
 
-template<int quality, int range>
+template<BLIPQuality quality, int range>
 void Blip_Wave<quality, range>::amplitude(int amp) {
     int delta = amp - last_amp;
     last_amp = amp;
     synth.offset_inline(time_, delta);
 }
 
-template<int quality, int range>
+template<BLIPQuality quality, int range>
 inline void Blip_Synth<quality, range>::offset_resampled(
     blip_resampled_time_t time,
     int delta,
@@ -213,7 +221,7 @@ inline void Blip_Synth<quality, range>::offset_resampled(
     }
 }
 
-template<int quality, int range>
+template<BLIPQuality quality, int range>
 void Blip_Synth<quality, range>::offset(
     blip_time_t time,
     int delta,

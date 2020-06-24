@@ -82,7 +82,7 @@ struct Chip2A03 : Module {
     enum LightIds { LIGHT_COUNT };
 
     /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 800000;
+    static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
     Blip_Buffer buf[Nes_Apu::OSC_COUNT];

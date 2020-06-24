@@ -13,8 +13,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_OSCS_H
-#define NES_OSCS_H
+#ifndef NES_OSCILLATORS_HPP
+#define NES_OSCILLATORS_HPP
 
 #include <cstdint>
 #include <functional>
@@ -343,4 +343,4 @@ struct Noise : Envelope {
     }
 };
 
-#endif  // NES_OSCS_H
+#endif  // NES_OSCILLATORS_HPP

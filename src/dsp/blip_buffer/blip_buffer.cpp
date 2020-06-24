@@ -15,19 +15,15 @@
 
 #include "blip_buffer.hpp"
 
-const int impulse_bits = 15;
-const int32_t impulse_amp = 1L << impulse_bits;
-const int32_t impulse_offset = impulse_amp / 2;
-
 void BLIPImpulse::scale_impulse(int unit, imp_t* imp_in) const {
-    int32_t offset = ((int32_t) unit << impulse_bits) - impulse_offset * unit +
-            (1 << (impulse_bits - 1));
+    int32_t offset = ((int32_t) unit << IMPULSE_BITS) - IMPULSE_OFFSET * unit +
+            (1 << (IMPULSE_BITS - 1));
     imp_t* imp = imp_in;
     imp_t* fimp = impulse;
     for (int n = res / 2 + 1; n--;) {
         int error = unit;
         for (int nn = width; nn--;) {
-            int32_t a = ((int32_t) *fimp++ * unit + offset) >> impulse_bits;
+            int32_t a = ((int32_t) *fimp++ * unit + offset) >> IMPULSE_BITS;
             error -= a - unit;
             *imp++ = (imp_t) a;
         }
@@ -48,7 +44,6 @@ void BLIPImpulse::scale_impulse(int unit, imp_t* imp_in) const {
     *imp++ = (imp_t) unit;
     memcpy(imp, imp_in, (res * width - 1) * sizeof *imp);
 }
-
 
 void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
     static constexpr double pi = 3.1415926535897932384626433832795029L;
@@ -118,7 +113,7 @@ void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
     }
 
     // integrate runs of length 'BLIP_MAX_RES'
-    double factor = impulse_amp * 0.5 / total;  // 0.5 accounts for other mirrored half
+    double factor = IMPULSE_AMP * 0.5 / total;  // 0.5 accounts for other mirrored half
     imp_t* imp = impulse;
     const int step = BLIP_MAX_RES / res;
     int offset = res > 1 ? BLIP_MAX_RES : BLIP_MAX_RES / 2;
@@ -132,7 +127,7 @@ void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
                 if (index < size)
                     sum += buf[index];
             }
-            *imp++ = (imp_t) floor(sum * factor + (impulse_offset + 0.5));
+            *imp++ = (imp_t) floor(sum * factor + (IMPULSE_OFFSET + 0.5));
         }
     }
 

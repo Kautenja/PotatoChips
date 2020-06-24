@@ -64,7 +64,7 @@ blargg_err_t Blip_Buffer::set_sample_rate(int32_t new_rate, int msec) {
 
     samples_per_sec = new_rate;
     if (clocks_per_sec)
-        clock_rate(clocks_per_sec); // recalculate factor
+        set_clock_rate(clocks_per_sec); // recalculate factor
 
     bass_freq(bass_freq_);  // recalculate shift
 
@@ -73,7 +73,7 @@ blargg_err_t Blip_Buffer::set_sample_rate(int32_t new_rate, int msec) {
     return blargg_success;
 }
 
-void Blip_Buffer::clock_rate(int32_t cps) {
+void Blip_Buffer::set_clock_rate(int32_t cps) {
     clocks_per_sec = cps;
     factor_ = (uint32_t) floor((double) samples_per_sec / cps *
             (1L << BLIP_BUFFER_ACCURACY) + 0.5);

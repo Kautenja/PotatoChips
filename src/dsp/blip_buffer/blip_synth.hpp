@@ -37,9 +37,8 @@ enum class BLIPQuality {
 /// that if it only goes between +amp and 0). When range is large, a higher
 /// accuracy scheme is used; to force this even when range is small, pass
 /// the negative of range (i.e. -range).
-template<BLIPQuality quality, int range>
+template<BLIPQuality quality, int16_t range>
 class BLIPSynth {
-    static_assert(-32768 <= range && range <= 32767);
     enum {
         abs_range = (range < 0) ? -range : range,
         fine_mode = (range > 512 || range < 0),
@@ -158,7 +157,7 @@ class BLIPSynth {
 /// Blip_Wave is a synthesizer for adding a *single* waveform to a BLIPBuffer.
 /// A wave is built from a series of delays and new amplitudes. This provides a
 /// simpler interface than BLIPSynth, nothing more.
-template<BLIPQuality quality, int range>
+template<BLIPQuality quality, int16_t range>
 class Blip_Wave {
     BLIPSynth<quality, range> synth;
     blip_time_t time_;

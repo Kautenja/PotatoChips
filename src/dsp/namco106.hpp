@@ -13,8 +13,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_NAMCO_H
-#define NES_NAMCO_H
+#ifndef NES_NAMCO106_HPP
+#define NES_NAMCO106_HPP
 
 #include "apu.hpp"
 
@@ -167,4 +167,4 @@ class Namco106 {
     }
 };
 
-#endif  // NES_NAMCO_H
+#endif  // NES_NAMCO106_HPP

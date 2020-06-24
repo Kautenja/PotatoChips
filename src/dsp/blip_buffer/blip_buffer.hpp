@@ -4,8 +4,8 @@
 
 // Blip_Buffer 0.3.3. Copyright (C) 2003-2005 Shay Green. GNU LGPL license.
 
-#ifndef BLIP_BUFFER_H
-#define BLIP_BUFFER_H
+#ifndef BLIP_BUFFER_BLIP_BUFFER_HPP
+#define BLIP_BUFFER_BLIP_BUFFER_HPP
 
 #include <cstdint>
 #include <cassert>
@@ -190,4 +190,4 @@ class Blip_Impulse_ {
 // MSVC6 fix
 typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;
 
-#endif  // BLIP_BUFFER_H
+#endif  // BLIP_BUFFER_BLIP_BUFFER_HPP

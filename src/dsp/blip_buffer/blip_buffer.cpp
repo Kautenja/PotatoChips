@@ -55,7 +55,6 @@ blargg_err_t Blip_Buffer::sample_rate(int32_t new_rate, int msec) {
         offset_ = 0;
 
         buffer_ = new (std::nothrow) buf_t_[new_size + widest_impulse_];
-        BLARGG_CHECK_ALLOC(buffer_);
     }
 
     buffer_size_ = new_size;

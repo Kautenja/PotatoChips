@@ -24,7 +24,7 @@ class Blip_Buffer {
     Blip_Buffer();
 
     /// Destroy an instance of BLIPBuffer.
-    ~Blip_Buffer();
+    ~Blip_Buffer() { delete[] buffer_; }
 
     /// Set output sample rate and buffer length in milliseconds (1/1000 sec),
     /// then clear buffer. If there is insufficient memory for the buffer,

@@ -29,8 +29,6 @@ Blip_Buffer::Blip_Buffer() {
     bass_freq_ = 16;
 }
 
-Blip_Buffer::~Blip_Buffer() { delete[] buffer_; }
-
 void Blip_Buffer::clear(bool entire_buffer) {
     int32_t count = (entire_buffer ? buffer_size_ : samples_avail());
     offset_ = 0;

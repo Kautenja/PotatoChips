@@ -82,13 +82,13 @@ class APU {
     APU& operator = (const APU&);
 
     /// the channel 1 square wave generator
-    Nes_Square          square1;
+    Pulse               square1;
     /// the channel 2 square wave generator
-    Nes_Square          square2;
+    Pulse               square2;
     /// the channel 2 triangle wave generator
-    Nes_Noise           noise;
+    Noise               noise;
     /// the channel 2 noise generator
-    Nes_Triangle        triangle;
+    Triangle            triangle;
     /// pointers to the oscillators
     Oscillator*         oscs[OSC_COUNT];
 
@@ -105,7 +105,7 @@ class APU {
     /// TODO:
     int frame_mode;
     /// a synthesizer shared by squares
-    Nes_Square::Synth square_synth;
+    Pulse::Synth square_synth;
 };
 
 #endif  // NES_APU_H

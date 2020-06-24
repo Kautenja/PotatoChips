@@ -50,7 +50,7 @@ blargg_err_t Blip_Buffer::sample_rate(int32_t new_rate, int msec) {
 
     if (buffer_size_ != new_size) {
         delete[] buffer_;
-        buffer_ = NULL; // allow for exception in allocation below
+        buffer_ = NULL;  // allow for exception in allocation below
         buffer_size_ = 0;
         offset_ = 0;
 
@@ -60,13 +60,13 @@ blargg_err_t Blip_Buffer::sample_rate(int32_t new_rate, int msec) {
     buffer_size_ = new_size;
     length_ = new_size * 1000 / new_rate - 1;
     if (msec)
-        assert(length_ == msec); // ensure length is same as that passed in
+        assert(length_ == msec);  // ensure length is same as that passed in
 
     samples_per_sec = new_rate;
     if (clocks_per_sec)
         clock_rate(clocks_per_sec); // recalculate factor
 
-    bass_freq(bass_freq_); // recalculate shift
+    bass_freq(bass_freq_);  // recalculate shift
 
     clear();
 
@@ -87,7 +87,7 @@ Blip_Buffer::~Blip_Buffer() {
 void Blip_Buffer::bass_freq(int freq) {
     bass_freq_ = freq;
     if (freq == 0) {
-        bass_shift = 31; // 32 or greater invokes undefined behavior elsewhere
+        bass_shift = 31;  // 32 or greater invokes undefined behavior elsewhere
         return;
     }
     bass_shift = 1 + (int) floor(1.442695041 * log(0.124 * samples_per_sec / freq));
@@ -195,11 +195,11 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     generate = false;
     eq = new_eq;
 
-    double treble = pow(10.0, 1.0 / 20 * eq.treble); // dB (-6dB = 0.50)
+    double treble = pow(10.0, 1.0 / 20 * eq.treble);  // dB (-6dB = 0.50)
     if (treble < 0.000005)
         treble = 0.000005;
 
-    const double treble_freq = 22050.0; // treble level at 22 kHz harmonic
+    const double treble_freq = 22050.0;  // treble level at 22 kHz harmonic
     const double sample_rate = eq.sample_rate;
     const double pt = treble_freq * 2 / sample_rate;
     double cutoff = eq.cutoff * 2 / sample_rate;
@@ -226,11 +226,6 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     const int size = max_res * (width - 2) / 2;
     for (int i = size; i--;) {
         double angle = (i * 2 + 1) * to_angle;
-
-        // equivalent
-        //double y =     dsf(angle, n_harm * cutoff, 1.0);
-        //y -= rescale * dsf(angle, n_harm * cutoff, rolloff);
-        //y += rescale * dsf(angle, n_harm,          rolloff);
 
         const double cos_angle = cos(angle);
         const double cos_nc_angle = cos(n_harm * cutoff * angle);
@@ -259,15 +254,14 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     }
 
     // integrate runs of length 'max_res'
-    double factor = impulse_amp * 0.5 / total; // 0.5 accounts for other mirrored half
+    double factor = impulse_amp * 0.5 / total;  // 0.5 accounts for other mirrored half
     imp_t* imp = impulse;
     const int step = max_res / res;
     int offset = res > 1 ? max_res : max_res / 2;
     for (int n = res / 2 + 1; n--; offset -= step) {
         for (int w = -width / 2; w < width / 2; w++) {
             double sum = 0;
-            for (int i = max_res; i--;)
-            {
+            for (int i = max_res; i--;) {
                 int index = w * max_res + offset + i;
                 if (index < 0)
                     index = -index - 1;
@@ -289,7 +283,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
 void Blip_Buffer::remove_samples(int32_t count) {
     assert(buffer_);  // sample rate must have been set
 
-    if (!count) // optimization
+    if (!count)  // optimization
         return;
 
     remove_silence(count);

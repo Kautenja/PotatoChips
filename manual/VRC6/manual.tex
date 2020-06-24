@@ -128,11 +128,11 @@
 
 \section{Overview}
 
-VRC6 is an emulation of the Konami VRC6 sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two square wave generators, and a quantized saw wave generator.
+VRC6 is an emulation of the Konami VRC6 sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two pulse wave generators, and a quantized saw wave generator.
 
 VRC6 provides the key features of the VRC6 chip, namely,
 \begin{itemize}
-  \item \textbf{Dual square wave generator:} Dual 8-bit square waves with eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $25\%$, $31.25\%$, $37.5\%$, $43.75\%$, and $50\%$;
+  \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $25\%$, $31.25\%$, $37.5\%$, $43.75\%$, and $50\%$;
   \item \textbf{Quantized saw wave generator:} Generate NES style saw wave with variable quantization;
   \item \textbf{Amplitude modulation:} Manual and CV control over the individual voice levels
 \end{itemize}
@@ -147,15 +147,14 @@ VRC6 provides the key features of the VRC6 chip, namely,
 \includegraphics[width=0.3\textwidth]{VRC6-Manual}
 \end{center}
 
-% \begin{enumerate}
-%   \item Coarse frequency control over the four channels.
-%   \item CV Frequency modulation for square and triangle generators.
-%   \item Channel outputs, $10V_{pp}$.
-%   \item Pulse width selector. Chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$.
-%   \item $V$/Octave inputs for square and triangle generators.
-%   \item CV (Linear Feedback Shift Register) LFSR gate, high at $2V$.
-%   \item Period of randomness $\in [0, 15]$. See \url{https://wiki.nesdev.com/w/index.php/APU_Noise} for approximate frequency and pitch mappings.
-% \end{enumerate}
+\begin{enumerate}
+  \item Coarse frequency control for the pulse1, pulse2, and saw waveform generators.
+  \item $V$/Octave inputs for pulse1, pulse2, and saw waveform generators.
+  \item linear CV frequency modulation for pulse1, pulse2, and saw generators.
+  \item Pulse width selector. Chooses between eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $25\%$, $31.25\%$, $37.5\%$, $43.75\%$, and $50\%$. CV control is discretized into $2V$ windows per stage.
+  \item Level control for pulse1, pulse2, and saw waveform generators. The knob controls base level from $0\%$ to $100\%$ and the CV applies a linear offset. When the saw reaches $68\%$, it overdrives and distorts based on a bug in the original VRC6.
+  \item Channel outputs, $\approx 5V_{pp}$.
+\end{enumerate}
 
 % -------------------
 % MARK: References

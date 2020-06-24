@@ -143,7 +143,7 @@ struct ChipNamco106 : Module {
         apu.write_data(0, med);
         // hi F / length
         apu.write_addr(0x7C);
-        apu.write_data(0, (48 << 2) + hig);
+        apu.write_data(0, (56 << 2) + hig);
 
         // volume
         apu.write_addr(0x7F);

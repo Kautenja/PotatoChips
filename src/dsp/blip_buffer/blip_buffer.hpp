@@ -58,11 +58,11 @@ class Blip_Buffer {
     /// frame. All transitions must have been added before 'time'.
     inline void end_frame(blip_time_t time) {
         offset_ += time * factor_;
-        assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_avail() <= (int32_t) buffer_size_));
+        assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_count() <= (int32_t) buffer_size_));
     }
 
     /// Return the number of samples available for reading with read_samples().
-    inline int32_t samples_avail() const {
+    inline int32_t samples_count() const {
         return int32_t (offset_ >> BLIP_BUFFER_ACCURACY);
     }
 
@@ -95,7 +95,7 @@ class Blip_Buffer {
     // not documented yet
 
     inline void remove_silence(int32_t count) {
-        assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_avail()));
+        assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_count()));
         offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
     }
 

@@ -36,7 +36,7 @@ struct ChipNamco106 : Module {
         INPUT_COUNT
     };
     enum OutputIds {
-        OUTPUT_CHANNEL0,
+        ENUMS(OUTPUT_CHANNEL, 8),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
@@ -58,34 +58,9 @@ struct ChipNamco106 : Module {
         configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_PW0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         // set the output buffer for each individual voice
-        for (int i = 0; i < Namco106::OSC_COUNT; i++)
-            apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < Namco106::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
-    }
-
-    /// Process pulse wave (channel 0).
-    void channel0_pulse() {
-        // // the minimal value for the frequency register to produce sound
-        // static constexpr auto FREQ_MIN = 8;
-        // // the maximal value for the frequency register
-        // static constexpr auto FREQ_MAX = 1023;
-        // // the clock division of the oscillator relative to the CPU
-        // static constexpr auto CLOCK_DIVISION = 16;
-        // // get the pitch / frequency of the oscillator in 11-bit
-        // float pitch = params[PARAM_FREQ0].getValue() / 12.f;
-        // pitch += inputs[INPUT_VOCT0].getVoltage();
-        // float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        // freq11bit += inputs[INPUT_FM0].getVoltage();
-        // freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
-        // apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
-        // apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
-        // // set the pulse width of the pulse wave (high 2 bits) and set the
-        // // volume to a constant level
-        // auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue()) << 6;
-        // apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
     }
 
     /// Return a 10V signed sample from the chip.
@@ -116,14 +91,38 @@ struct ChipNamco106 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // process the data on the chip
-        channel0_pulse();
-        // enable all four channels
-        // apu.end_frame(cycles_per_sample);
-        // for (int i = 0; i < Namco106::OSC_COUNT; i++)
-        //     buf[i].end_frame(cycles_per_sample);
-        // // set the output from the oscillators
-        // outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
+
+
+
+        // // the minimal value for the frequency register to produce sound
+        // static constexpr auto FREQ_MIN = 8;
+        // // the maximal value for the frequency register
+        // static constexpr auto FREQ_MAX = 1023;
+        // // the clock division of the oscillator relative to the CPU
+        // static constexpr auto CLOCK_DIVISION = 16;
+        // // get the pitch / frequency of the oscillator in 11-bit
+        // float pitch = params[PARAM_FREQ0].getValue() / 12.f;
+        // pitch += inputs[INPUT_VOCT0].getVoltage();
+        // float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        // freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        // freq11bit += inputs[INPUT_FM0].getVoltage();
+        // freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        // apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
+        // apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
+        // // set the pulse width of the pulse wave (high 2 bits) and set the
+        // // volume to a constant level
+        // auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue()) << 6;
+        // apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
+
+
+
+        // set the output from the oscillators
+        apu.end_frame(cycles_per_sample);
+        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+            buf[i].end_frame(cycles_per_sample);
+            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        }
     }
 
     /// Respond to the change of sample rate in the engine.
@@ -149,7 +148,7 @@ struct ChipNamco106Widget : ModuleWidget {
         // PW
         addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 30), module, ChipNamco106::PARAM_PW0));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipNamco106::OUTPUT_CHANNEL0));
+        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipNamco106::OUTPUT_CHANNEL));
     }
 };
 

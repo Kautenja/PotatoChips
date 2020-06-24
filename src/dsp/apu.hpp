@@ -102,9 +102,9 @@ class APU {
     APU& operator=(const APU&);
 
     /// the channel 0 pulse wave generator
-    Pulse square1;
+    Pulse pulse1;
     /// the channel 1 pulse wave generator
-    Pulse square2;
+    Pulse pulse2;
     /// the channel 2 triangle wave generator
     Noise noise;
     /// the channel 3 noise generator
@@ -120,7 +120,7 @@ class APU {
     int frame_delay;
     /// current frame (0-3)
     int frame;
-    /// TODO:
+    /// the channel enabled register
     int osc_enables;
     /// TODO:
     int frame_mode;

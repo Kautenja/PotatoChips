@@ -1,4 +1,4 @@
-// A 2A03 Chip module.
+// A Ricoh 2A03 Chip module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -104,7 +104,7 @@ inline uint8_t operator+(SendChannels a, uint8_t b) {
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A 2A03 Chip module.
+/// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
     enum ParamIds {
         PARAM_FREQ0,

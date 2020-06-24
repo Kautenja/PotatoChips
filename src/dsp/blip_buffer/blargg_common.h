@@ -13,7 +13,7 @@
 
 #if defined (__MWERKS__)
     // Metrowerks CodeWarrior
-    #define BLARGG_COMPILER_HAS_NAMESPACE 1
+    // #define BLARGG_COMPILER_HAS_NAMESPACE 1
     // #if !__option(bool)
     //     #define BLARGG_COMPILER_HAS_BOOL 0
     // #endif
@@ -26,7 +26,7 @@
 
 #elif defined (__GNUC__)
     // GNU C++
-    #define BLARGG_COMPILER_HAS_NAMESPACE 1
+    // #define BLARGG_COMPILER_HAS_NAMESPACE 1
     // #define BLARGG_COMPILER_HAS_BOOL 1
 
 #elif defined (__MINGW32__)
@@ -49,9 +49,9 @@
 
 #ifndef BOOST_MINIMAL
     #define BOOST boost
-    #ifndef BLARGG_COMPILER_HAS_NAMESPACE
-        #define BLARGG_COMPILER_HAS_NAMESPACE 1
-    #endif
+    // #ifndef BLARGG_COMPILER_HAS_NAMESPACE
+    //     #define BLARGG_COMPILER_HAS_NAMESPACE 1
+    // #endif
     // #ifndef BLARGG_COMPILER_HAS_BOOL
     //     #define BLARGG_COMPILER_HAS_BOOL 1
     // #endif
@@ -68,13 +68,13 @@
 
 // Set up namespace support
 
-#ifndef BLARGG_COMPILER_HAS_NAMESPACE
-    #define BLARGG_COMPILER_HAS_NAMESPACE 0
-#endif
+// #ifndef BLARGG_COMPILER_HAS_NAMESPACE
+//     #define BLARGG_COMPILER_HAS_NAMESPACE 0
+// #endif
 
-#ifndef BLARGG_USE_NAMESPACE
-    #define BLARGG_USE_NAMESPACE BLARGG_COMPILER_HAS_NAMESPACE
-#endif
+// #ifndef BLARGG_USE_NAMESPACE
+//     #define BLARGG_USE_NAMESPACE BLARGG_COMPILER_HAS_NAMESPACE
+// #endif
 
 #ifndef BOOST
     #if BLARGG_USE_NAMESPACE
@@ -115,14 +115,14 @@
 #endif
 
 // Common standard headers
-#if BLARGG_COMPILER_HAS_NAMESPACE
+// #if BLARGG_COMPILER_HAS_NAMESPACE
     #include <cstddef>
     #include <cassert>
     #include <new>
-#else
-    #include <stddef.h>
-    #include <assert.h>
-#endif
+// #else
+//     #include <stddef.h>
+//     #include <assert.h>
+// #endif
 
 // blargg_err_t (NULL on success, otherwise error string)
 typedef const char* blargg_err_t;

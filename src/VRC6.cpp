@@ -254,6 +254,7 @@ struct ChipVRC6 : Module {
         // copy the buffer to  a local vector and return the first sample
         std::vector<int16_t> output_buffer(samples);
         buf[channel].read_samples(&output_buffer[0], samples);
+        // convert the 16-bit sample to 10Vpp floating point
         return 10.f * output_buffer[0] / static_cast<float>(1 << 15);;
     }
 

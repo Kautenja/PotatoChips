@@ -19,9 +19,9 @@
 #include "apu.h"
 
 /// A macro oscillator based on the Konami VRC6 synthesis chip.
-class Nes_Vrc6 {
+class VRC6 {
  public:
-    Nes_Vrc6() {
+    VRC6() {
         output(NULL);
         volume(1.0);
         reset();
@@ -84,8 +84,8 @@ class Nes_Vrc6 {
 
  private:
     // noncopyable
-    Nes_Vrc6(const Nes_Vrc6&);
-    Nes_Vrc6& operator = (const Nes_Vrc6&);
+    VRC6(const VRC6&);
+    VRC6& operator = (const VRC6&);
 
     struct Vrc6_Osc {
         uint8_t regs[3];

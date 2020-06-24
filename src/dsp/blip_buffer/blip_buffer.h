@@ -36,13 +36,13 @@ class Blip_Buffer {
     const char* set_sample_rate(int32_t samples_per_sec);
 
     /// Return current output sample rate.
-    int32_t get_sample_rate() const;
+    inline int32_t get_sample_rate() const { return samples_per_sec; };
 
     /// Set number of source time units per second.
     void set_clock_rate(int32_t);
 
     /// Return number of source time unites per second.
-    int32_t get_clock_rate() const;
+    inline int32_t get_clock_rate() const { return clocks_per_sec; }
 
     /// Return length of buffer, in milliseconds
     inline int get_length() const { return length_; }
@@ -81,7 +81,7 @@ class Blip_Buffer {
     void remove_samples(int32_t count);
 
     /// Number of samples delay from synthesis to samples read out
-    int output_latency() const;
+    inline int get_output_latency() const { return widest_impulse_ / 2; }
 
     // Experimental external buffer mixing support
 
@@ -215,29 +215,21 @@ class Blip_Impulse_ {
     void treble_eq(const blip_eq_t&);
 };
 
-inline blip_eq_t::blip_eq_t(double t) : treble(t), cutoff(0), sample_rate(44100) { }
+inline blip_eq_t::blip_eq_t(double t) :
+    treble(t), cutoff(0), sample_rate(44100) { }
 
 inline blip_eq_t::blip_eq_t(double t, int32_t c, int32_t sr) :
-    treble(t), cutoff(c), sample_rate(sr) {
-}
-
-inline int32_t Blip_Buffer::get_sample_rate() const { return samples_per_sec; }
+    treble(t), cutoff(c), sample_rate(sr) { }
 
 inline void Blip_Buffer::end_frame(blip_time_t t) {
     offset_ += t * factor_;
-    assert(("Blip_Buffer::end_frame(): Frame went past end of buffer",
-            samples_avail() <= (int32_t) buffer_size_));
+    assert(("Blip_Buffer::end_frame(): Frame went past end of buffer", samples_avail() <= (int32_t) buffer_size_));
 }
 
 inline void Blip_Buffer::remove_silence(int32_t count) {
-    assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available",
-            count <= samples_avail()));
+    assert(("Blip_Buffer::remove_silence(): Tried to remove more samples than available", count <= samples_avail()));
     offset_ -= resampled_time_t (count) << Blip_Buffer::BLIP_BUFFER_ACCURACY;
 }
-
-inline int Blip_Buffer::output_latency() const { return widest_impulse_ / 2; }
-
-inline int32_t Blip_Buffer::get_clock_rate() const { return clocks_per_sec; }
 
 // MSVC6 fix
 typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;

@@ -124,9 +124,66 @@ class APU {
     /// @param address the address of the register to write
     /// @param data the data to write to the register
     ///
-    void write_register(cpu_time_t time, cpu_addr_t address, int data);
+    void write_register(cpu_time_t time, cpu_addr_t addr, int data) {
+        assert(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
+        assert((unsigned) data <= 0xff);
+
+        // Ignore addresses outside range
+        if (addr < ADDR_START || ADDR_END < addr) return;
+
+        run_until(time);
+
+        if (addr < 0x4010) {  // synthesize registers
+            // Write to channel
+            int osc_index = (addr - ADDR_START) >> 2;
+            Oscillator* osc = oscs[osc_index];
+
+            int reg = addr & 3;
+            osc->regs[reg] = data;
+            osc->reg_written[reg] = true;
+
+            if (osc_index == 4) {
+                // handle DMC specially
+            } else if (reg == 3) {
+                // load length counter
+                if ((osc_enables >> osc_index) & 1)
+                    osc->length_counter = length_table[(data >> 3) & 0x1f];
+                // DISABLED TO HACK SQUARE OSCILLATOR
+                // // reset square phase
+                // if (osc_index < 2)
+                //  ((Nes_Square*) osc)->phase = Nes_Square::phase_range - 1;
+            }
+        } else if (addr == 0x4015) {
+            // Channel enables
+            for (int i = OSC_COUNT; i--;)
+                if (!((data >> i) & 1))
+                    oscs[i]->length_counter = 0;
+            int old_enables = osc_enables;
+            osc_enables = data;
+        } else if (addr == 0x4017) {
+            // Frame mode
+            frame_mode = data;
+
+            // mode 1
+            frame_delay = (frame_delay & 1);
+            frame = 0;
+
+            if (!(data & 0x80)) {
+                // mode 0
+                frame = 1;
+                frame_delay += frame_period;
+            }
+        }
+    }
 
  private:
+    static constexpr unsigned char length_table[0x20] = {
+        0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
+        0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
+        0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
+        0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
+    };
+
     // TODO: remove these two nonlinear functions?
     // /// Enable nonlinear volume.
     // ///

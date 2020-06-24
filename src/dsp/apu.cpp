@@ -17,11 +17,11 @@
 #include <cassert>
 
 APU::APU() {
-    square1.synth = &square_synth;
-    square2.synth = &square_synth;
+    pulse1.synth = &square_synth;
+    pulse2.synth = &square_synth;
 
-    oscs[0] = &square1;
-    oscs[1] = &square2;
+    oscs[0] = &pulse1;
+    oscs[1] = &pulse2;
     oscs[2] = &triangle;
     oscs[3] = &noise;
 
@@ -37,8 +37,8 @@ void APU::treble_eq(const blip_eq_t& eq) {
 }
 
 void APU::buffer_cleared() {
-    square1.last_amp = 0;
-    square2.last_amp = 0;
+    pulse1.last_amp = 0;
+    pulse2.last_amp = 0;
     triangle.last_amp = 0;
     noise.last_amp = 0;
 }
@@ -66,8 +66,8 @@ void APU::reset(bool pal_mode) {
     // to do: time pal frame periods exactly
     frame_period = pal_mode ? 8314 : 7458;
 
-    square1.reset();
-    square2.reset();
+    pulse1.reset();
+    pulse2.reset();
     triangle.reset();
     noise.reset();
 
@@ -97,8 +97,8 @@ void APU::run_until(cpu_time_t end_time) {
         frame_delay -= time - last_time;
 
         // run oscs to present
-        square1.run(last_time, time);
-        square2.run(last_time, time);
+        pulse1.run(last_time, time);
+        pulse2.run(last_time, time);
         triangle.run(last_time, time);
         noise.run(last_time, time);
         last_time = time;
@@ -113,14 +113,14 @@ void APU::run_until(cpu_time_t end_time) {
                 // fall through
             case 2:
                 // clock length and sweep on frames 0 and 2
-                square1.clock_length(0x20);
-                square2.clock_length(0x20);
+                pulse1.clock_length(0x20);
+                pulse2.clock_length(0x20);
                 noise.clock_length(0x20);
                 // different bit for halt flag on triangle
                 triangle.clock_length(0x80);
 
-                square1.clock_sweep(-1);
-                square2.clock_sweep(0);
+                pulse1.clock_sweep(-1);
+                pulse2.clock_sweep(0);
                 break;
 
             case 1:
@@ -139,8 +139,8 @@ void APU::run_until(cpu_time_t end_time) {
 
         // clock envelopes and linear counter every frame
         triangle.clock_linear_counter();
-        square1.clock_envelope();
-        square2.clock_envelope();
+        pulse1.clock_envelope();
+        pulse2.clock_envelope();
         noise.clock_envelope();
     }
 }

@@ -1,11 +1,3 @@
-
-// Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
-
-#include "blip_buffer.h"
-#include <string.h>
-#include <math.h>
-#include "blargg_source.h"
-
 /* Copyright (C) 2003-2005 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
 General Public License as published by the Free Software Foundation; either
@@ -16,6 +8,13 @@ FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
 more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
+
+// Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
+
+#include "blip_buffer.h"
+#include <cstring>
+#include <cmath>
+#include "blargg_source.h"
 
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;

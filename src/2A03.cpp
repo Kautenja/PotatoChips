@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/apu.h"
+#include "dsp/apu.hpp"
 
 /// the IO registers on the APU
 enum IORegisters {

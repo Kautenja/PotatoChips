@@ -24,13 +24,13 @@
 /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
 enum IORegisters {
     // pulse wave 1 registers
+    PULSE0_DUTY_VOLUME = 0,
+    PULSE0_PERIOD_LOW  = 1,
+    PULSE0_PERIOD_HIGH = 2,
+    // pulse wave 2 registers
     PULSE1_DUTY_VOLUME = 0,
     PULSE1_PERIOD_LOW  = 1,
     PULSE1_PERIOD_HIGH = 2,
-    // pulse wave 2 registers
-    PULSE2_DUTY_VOLUME = 0,
-    PULSE2_PERIOD_LOW  = 1,
-    PULSE2_PERIOD_HIGH = 2,
     // saw wave registers
     SAW_VOLUME         = 0,
     SAW_PERIOD_LOW     = 1,
@@ -152,8 +152,12 @@ struct ChipVRC6 : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
-        // the maximal value for the pulse width register
+        // the maximal value for the pulse width register (0b00000111)
         static constexpr float PW_MAX = 7;
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register (0b00001111)
+        static constexpr float LEVEL_MAX = 15;
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
@@ -168,8 +172,8 @@ struct ChipVRC6 : Module {
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, 0, PULSE1_PERIOD_LOW, lo);
-        apu.write_osc(0, 0, PULSE1_PERIOD_HIGH, hi);
+        apu.write_osc(0, 0, PULSE0_PERIOD_LOW, lo);
+        apu.write_osc(0, 0, PULSE0_PERIOD_HIGH, hi);
 
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW0].getValue();
@@ -177,14 +181,14 @@ struct ChipVRC6 : Module {
         auto pwCV = inputs[INPUT_PW0].getVoltage() / 2.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
-
         // get the level from the parameter knob
-        uint8_t level = 0b00001111;
-
+        auto levelParam = params[PARAM_LEVEL0].getValue();
         // apply the control voltage to the level
-
+        auto levelCV = inputs[INPUT_LEVEL0].getVoltage() / 2.f;
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the duty cycle and volume
-        apu.write_osc(0, 0, PULSE1_DUTY_VOLUME, (pw << 4) + level);
+        apu.write_osc(0, 0, PULSE0_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process square wave (channel 1).
@@ -196,9 +200,14 @@ struct ChipVRC6 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
         // the minimal value for the pulse width register
-        static constexpr auto PW_MIN = 0;
-        // the maximal value for the pulse width register
-        static constexpr auto PW_MAX = 7;
+        static constexpr float PW_MIN = 0;
+        // the maximal value for the pulse width register (0b00000111)
+        static constexpr float PW_MAX = 7;
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register (0b00001111)
+        static constexpr float LEVEL_MAX = 15;
+
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ1].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT1].getVoltage();
@@ -212,12 +221,24 @@ struct ChipVRC6 : Module {
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
+        // write the register for the frequency
+        apu.write_osc(0, 1, PULSE1_PERIOD_LOW, lo);
+        apu.write_osc(0, 1, PULSE1_PERIOD_HIGH, hi);
 
-        // TODO: duty cycle
-        // TODO: volume level
-        apu.write_osc(0, 1, PULSE2_DUTY_VOLUME, 0b00101111);
-        apu.write_osc(0, 1, PULSE2_PERIOD_LOW, lo);
-        apu.write_osc(0, 1, PULSE2_PERIOD_HIGH, hi);
+        // get the pulse width from the parameter knob
+        auto pwParam = params[PARAM_PW1].getValue();
+        // get the control voltage to the pulse width with 1V/step
+        auto pwCV = inputs[INPUT_PW1].getVoltage() / 2.f;
+        // get the 8-bit pulse width clamped within legal limits
+        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        // get the level from the parameter knob
+        auto levelParam = params[PARAM_LEVEL1].getValue();
+        // apply the control voltage to the level
+        auto levelCV = inputs[INPUT_LEVEL1].getVoltage() / 2.f;
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
+        // write the register for the duty cycle and volume
+        apu.write_osc(0, 1, PULSE1_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process saw wave (channel 2).
@@ -228,6 +249,12 @@ struct ChipVRC6 : Module {
         static constexpr auto FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 14;
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register (0b00111111)
+        // the actual max for volume is 42, but some distortion effects are
+        // available on the chip from 42 to 63 (as a result of overflow)
+        static constexpr float LEVEL_MAX = 63;
         // get the pitch / frequency of the oscillator
         float pitch = params[PARAM_FREQ2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT2].getVoltage();
@@ -241,11 +268,18 @@ struct ChipVRC6 : Module {
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
-
-        // TODO: volume level
-        apu.write_osc(0, 2, SAW_VOLUME, 0b00001111);
+        // write the register for the frequency
         apu.write_osc(0, 2, SAW_PERIOD_LOW, lo);
         apu.write_osc(0, 2, SAW_PERIOD_HIGH, hi);
+
+        // get the level from the parameter knob
+        auto levelParam = params[PARAM_LEVEL2].getValue();
+        // apply the control voltage to the level
+        auto levelCV = inputs[INPUT_LEVEL2].getVoltage() / 2.f;
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
+        // write the register for the volume
+        apu.write_osc(0, 2, SAW_VOLUME, level);
     }
 
     /// Return a 10V signed sample from the APU.

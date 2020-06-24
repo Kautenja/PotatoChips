@@ -30,23 +30,6 @@ APU::APU() {
     reset(false);
 }
 
-void APU::treble_eq(const blip_eq_t& eq) {
-    square_synth.treble_eq(eq);
-    triangle.synth.treble_eq(eq);
-    noise.synth.treble_eq(eq);
-}
-
-void APU::volume(double v) {
-    square_synth.volume(0.1128 * v);
-    triangle.synth.volume(0.12765 * v);
-    noise.synth.volume(0.0741 * v);
-}
-
-void APU::output(BLIPBuffer* buffer) {
-    for (int i = 0; i < OSC_COUNT; i++)
-        osc_output(i, buffer);
-}
-
 void APU::reset(bool pal_mode) {
     // to do: time pal frame periods exactly
     frame_period = pal_mode ? 8314 : 7458;

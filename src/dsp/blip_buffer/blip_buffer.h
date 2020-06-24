@@ -10,9 +10,6 @@
 #include <cstdint>
 #include <cassert>
 
-/// forward declaration of the Blip_Reader class
-class Blip_Reader;
-
 /// Source time unit.
 typedef int32_t blip_time_t;
 
@@ -133,8 +130,6 @@ class Blip_Buffer {
         enum { accum_fract = 15 };
         // repeated byte allows memset to clear buffer
         enum { sample_offset = 0x7F7F };
-
-        friend class Blip_Reader;
 };
 
 // Low-pass equalization parameters (see notes.txt)
@@ -151,37 +146,6 @@ class blip_eq_t {
     int32_t cutoff;
     int32_t sample_rate;
     friend class Blip_Impulse_;
-};
-
-// not documented yet (see Multi_Buffer.cpp for an example of use)
-class Blip_Reader {
-    const Blip_Buffer::buf_t_* buf;
-    int32_t accum;
-    #ifdef __MWERKS__
-    void operator=(struct foobar);  // helps optimizer
-    #endif
-
- public:
-    // avoid anything which might cause optimizer to put object in memory
-
-    int begin(Blip_Buffer& blip_buf) {
-        buf = blip_buf.buffer_;
-        accum = blip_buf.reader_accum;
-        return blip_buf.bass_shift;
-    }
-
-    int read() const {
-        return accum >> Blip_Buffer::accum_fract;
-    }
-
-    void next(int bass_shift = 9) {
-        accum -= accum >> bass_shift;
-        accum += ((int32_t) *buf++ - Blip_Buffer::sample_offset) << Blip_Buffer::accum_fract;
-    }
-
-    void end(Blip_Buffer& blip_buf) {
-        blip_buf.reader_accum = accum;
-    }
 };
 
 // End of public interface

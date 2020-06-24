@@ -246,6 +246,6 @@ inline int32_t Blip_Buffer::clock_rate() const {
 // MSVC6 fix
 typedef Blip_Buffer::resampled_time_t blip_resampled_time_t;
 
-#include "Blip_Synth.h"
+#include "blip_bynth.h"
 
 #endif  // BLIP_BUFFER_H

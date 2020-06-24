@@ -18,7 +18,7 @@
 #ifndef NES_NAMCO_H
 #define NES_NAMCO_H
 
-#include "Nes_Apu.h"
+#include "APU.h"
 
 /// A macro oscillator based on the Namco 106 synthesis chip.
 class Nes_Namco {

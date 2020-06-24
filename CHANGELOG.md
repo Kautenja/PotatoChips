@@ -1,3 +1,4 @@
-### 1.0.0 (2020-TODO)
+### 1.0.0 (2020-23)
 
-TODO
+- 2A03 implementation
+- VRC6 implementation

@@ -81,25 +81,6 @@ inline uint8_t operator>>(const PulseWidth& a, const uint8_t& b) {
     return static_cast<uint8_t>(a) >> b;
 }
 
-/// The channels send flag bits.
-enum class SendChannels : uint8_t {
-    Square1  = 0b00000001,
-    Square2  = 0b00000010,
-    Triangle = 0b00000100,
-    Noise    = 0b00001000,
-    All      = 0b00001111
-};
-
-/// Return the sum of a send channel flag with an input value flag.
-///
-/// @param a the send channel value flag to add to the existing flags
-/// @param b a byte that represents flags where bits 'B' are used: 0bAAAABBBB
-/// @returns the sum of a and b, i.e., the flag: 0bAAAABBBB
-///
-inline uint8_t operator+(SendChannels a, uint8_t b) {
-    return static_cast<uint8_t>(a) + b;
-}
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -289,7 +270,8 @@ struct Chip2A03 : Module {
         if (pw2Trigger.process(params[PARAM_PW2].getValue())) pw2 = next(pw2);
         // process the data on the chip
         square1(); square2(); triangle(); noise();
-        apu.write_register(0, SND_CHN, static_cast<uint8_t>(SendChannels::All));
+        // enable all four channels
+        apu.write_register(0, SND_CHN, 0b00001111);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < 4; i++) buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators

@@ -7,7 +7,7 @@
 #ifndef BLIP_SYNTH_H
 #define BLIP_SYNTH_H
 
-#include "blip_buffer.h"
+#include "blip_buffer.hpp"
 #include <type_traits>
 
 /// Quality level. Higher levels are slower, and worse in a few cases.

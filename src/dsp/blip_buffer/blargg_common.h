@@ -49,11 +49,6 @@
 
 #endif
 
-// STATIC_CAST(T) (expr) -> static_cast< T > (expr)
-#ifndef STATIC_CAST
-    #define STATIC_CAST( type ) static_cast< type >
-#endif
-
 // Set up boost
 #include "boost/config.hpp"
 #ifndef BOOST_MINIMAL

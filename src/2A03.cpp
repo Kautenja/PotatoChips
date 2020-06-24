@@ -85,9 +85,9 @@ struct Chip2A03 : Module {
     static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
-    Blip_Buffer buf[Nes_Apu::OSC_COUNT];
+    Blip_Buffer buf[APU::OSC_COUNT];
     /// The 2A03 instance to synthesize sound with
-    Nes_Apu apu;
+    APU apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -105,7 +105,7 @@ struct Chip2A03 : Module {
         configParam(PARAM_PW0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         // set the output buffer for each individual voice
-        for (int i = 0; i < Nes_Apu::OSC_COUNT; i++)
+        for (int i = 0; i < APU::OSC_COUNT; i++)
             apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
@@ -220,7 +220,7 @@ struct Chip2A03 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < Nes_Apu::OSC_COUNT; i++) {
+            for (int i = 0; i < APU::OSC_COUNT; i++) {
                 buf[i].sample_rate(args.sampleRate);
                 buf[i].clock_rate(cycles_per_sample * args.sampleRate);
                 buf[i].clear();
@@ -238,7 +238,7 @@ struct Chip2A03 : Module {
         // enable all four channels
         apu.write_register(0, SND_CHN, 0b00001111);
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Nes_Apu::OSC_COUNT; i++)
+        for (int i = 0; i < APU::OSC_COUNT; i++)
             buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));

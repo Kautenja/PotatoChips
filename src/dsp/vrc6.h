@@ -27,7 +27,7 @@ class Nes_Vrc6 {
         reset();
     }
 
-    // See Nes_Apu.h for reference
+    // See APU.h for reference
     void reset() {
         last_time = 0;
         for (int i = 0; i < OSC_COUNT; i++) {

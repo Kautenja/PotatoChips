@@ -27,7 +27,7 @@ class Nes_Namco {
         reset();
     }
 
-    // See Nes_Apu.h for reference.
+    // See APU.h for reference.
     inline void volume(double v) { synth.volume(0.10 / OSC_COUNT * v); }
 
     inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }

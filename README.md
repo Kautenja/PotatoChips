@@ -6,7 +6,7 @@
 [BuildServer]:  https://travis-ci.com/Kautenja/2A03
 
 <p align="center">
-<img alt="Plugin" src="img/Plugin.png" height="380px">
+<img alt="Plugin" src="img/Plugin.png">
 </p>
 
 ## 2A03

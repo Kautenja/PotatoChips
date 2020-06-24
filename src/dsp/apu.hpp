@@ -101,7 +101,7 @@ class APU {
     ///       3) Noise.
     ///
     inline void osc_output(int osc, BLIPBuffer* buf) {
-        assert(("APU::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
+        assert(0 <= osc && osc < OSC_COUNT && "APU::osc_output(): Index out of range");
         oscs[osc]->output = buf;
     }
 
@@ -115,7 +115,7 @@ class APU {
         if (end_time > last_time) run_until(end_time);
         // make times relative to new frame
         last_time -= end_time;
-        assert(last_time >= 0);
+        assert(last_time >= 0 && "last_time went negative");
     }
 
     /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016).

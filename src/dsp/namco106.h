@@ -95,7 +95,7 @@ class Namco106 {
 
     static constexpr int REG_COUNT = 0x80;
     uint8_t reg[REG_COUNT];
-    Blip_Synth<blip_good_quality, 15> synth;
+    Blip_Synth<BLIPQuality::Good, 15> synth;
 
     uint8_t& access() {
         int addr = addr_reg & 0x7f;

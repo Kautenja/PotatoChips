@@ -30,7 +30,7 @@ Blip_Buffer::Blip_Buffer() {
 }
 
 void Blip_Buffer::clear(bool entire_buffer) {
-    int32_t count = (entire_buffer ? buffer_size_ : samples_avail());
+    int32_t count = (entire_buffer ? buffer_size_ : samples_count());
     offset_ = 0;
     reader_accum = 0;
     memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
@@ -279,7 +279,7 @@ void Blip_Buffer::remove_samples(int32_t count) {
     int const copy_extra = 1;
 
     // copy remaining samples to beginning and clear old samples
-    int32_t remain = samples_avail() + widest_impulse_ + copy_extra;
+    int32_t remain = samples_count() + widest_impulse_ + copy_extra;
     if (count >= remain)
         memmove(buffer_, buffer_ + count, remain * sizeof (buf_t_));
     else
@@ -290,7 +290,7 @@ void Blip_Buffer::remove_samples(int32_t count) {
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
     assert(buffer_);  // sample rate must have been set
 
-    int32_t count = samples_avail();
+    int32_t count = samples_count();
     if (count > max_samples)
         count = max_samples;
 

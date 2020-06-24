@@ -84,10 +84,8 @@ class Blip_Buffer {
             return;
         }
         bass_shift = 1 + (int) floor(1.442695041 * log(0.124 * samples_per_sec / freq));
-        if (bass_shift < 0)
-            bass_shift = 0;
-        if (bass_shift > 24)
-            bass_shift = 24;
+        if (bass_shift < 0)  bass_shift = 0;
+        if (bass_shift > 24) bass_shift = 24;
     }
 
     /// Remove all available samples and clear buffer to silence. If

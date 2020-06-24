@@ -302,8 +302,6 @@ void Blip_Buffer::remove_samples(int32_t count) {
     memset(buffer_ + remain, sample_offset & 0xFF, count * sizeof (buf_t_));
 }
 
-#include "blargg_common.h"
-
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
     assert(buffer_);  // sample rate must have been set
 

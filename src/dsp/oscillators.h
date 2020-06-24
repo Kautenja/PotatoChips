@@ -95,7 +95,7 @@ struct Nes_Square : Nes_Envelope {
     int phase;
     int sweep_delay;
 
-    typedef Blip_Synth<blip_good_quality, 15> Synth;
+    typedef Blip_Synth<BLIPQuality::Good, 15> Synth;
     // shared between squares
     const Synth* synth;
 
@@ -200,7 +200,7 @@ struct Nes_Triangle : Nes_Osc {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
-    Blip_Synth<blip_good_quality, 15> synth;
+    Blip_Synth<BLIPQuality::Good, 15> synth;
 
     inline int calc_amp() const {
         int amp = phase_range - phase;
@@ -277,7 +277,7 @@ static constexpr int16_t noise_period_table[16] = {
 /// The noise oscillator from the NES.
 struct Nes_Noise : Nes_Envelope {
     int noise;
-    Blip_Synth<blip_med_quality, 15> synth;
+    Blip_Synth<BLIPQuality::Medium, 15> synth;
 
     void run(cpu_time_t time, cpu_time_t end_time) {
         if (!output) return;

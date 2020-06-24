@@ -103,8 +103,8 @@ class VRC6 {
     Vrc6_Osc oscs[OSC_COUNT];
     cpu_time_t last_time;
 
-    Blip_Synth<blip_med_quality, 31> saw_synth;
-    Blip_Synth<blip_good_quality, 15> square_synth;
+    Blip_Synth<BLIPQuality::Medium, 31> saw_synth;
+    Blip_Synth<BLIPQuality::Good, 15> square_synth;
 
     void run_until(cpu_time_t time) {
         assert(time >= last_time);

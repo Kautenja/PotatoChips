@@ -80,7 +80,9 @@ class APU {
     /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016)
     void write_register(cpu_time_t, cpu_addr_t, int data);
 
-// Additional optional features (can be ignored without any problem)
+ private:
+    friend class Nes_Nonlinearizer;
+    void enable_nonlinear(double volume);
 
     /// Reset oscillator amplitudes. Must be called when clearing buffer while
     /// using non-linear sound.
@@ -93,27 +95,22 @@ class APU {
     ///
     void run_until(cpu_time_t);
 
-// End of public interface.
- private:
-    friend class Nes_Nonlinearizer;
-    void enable_nonlinear(double volume);
-
- private:
-    /// Disable the copy constructor.
+    /// Disable the public copy constructor.
     APU(const APU&);
-    /// Disable the assignment operator.
-    APU& operator = (const APU&);
 
-    /// the channel 1 square wave generator
-    Pulse               square1;
-    /// the channel 2 square wave generator
-    Pulse               square2;
+    /// Disable the public assignment operator.
+    APU& operator=(const APU&);
+
+    /// the channel 0 pulse wave generator
+    Pulse square1;
+    /// the channel 1 pulse wave generator
+    Pulse square2;
     /// the channel 2 triangle wave generator
-    Noise               noise;
-    /// the channel 2 noise generator
-    Triangle            triangle;
+    Noise noise;
+    /// the channel 3 noise generator
+    Triangle triangle;
     /// pointers to the oscillators
-    Oscillator*         oscs[OSC_COUNT];
+    Oscillator* oscs[OSC_COUNT];
 
     /// has been run until this time in current frame
     cpu_time_t last_time;

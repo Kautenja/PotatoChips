@@ -33,7 +33,17 @@ class BLIPBuffer {
     static constexpr auto BLIP_BUFFER_ACCURACY = 16;
 
     /// Initialize an empty BLIPBuffer.
-    BLIPBuffer();
+    BLIPBuffer() {
+        samples_per_sec = 44100;
+        buffer_ = NULL;
+        // try to cause assertion failure if buffer is used before these are set
+        clocks_per_sec = 0;
+        factor_ = ~0ul;
+        offset_ = 0;
+        buffer_size_ = 0;
+        length_ = 0;
+        bass_freq_ = 16;
+    }
 
     /// Destroy an instance of BLIPBuffer.
     ~BLIPBuffer() { delete[] buffer_; }
@@ -236,7 +246,7 @@ class BLIPImpulse {
     BLIPBuffer* buf;
     uint32_t offset;
 
-    void init(blip_pair_t_* imps, int w, int r, int fb = 0) {
+    inline void init(blip_pair_t_* imps, int w, int r, int fb = 0) {
         fine_bits = fb;
         width = w;
         impulses = reinterpret_cast<imp_t*>(imps);

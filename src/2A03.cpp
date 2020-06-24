@@ -113,65 +113,90 @@ struct Chip2A03 : Module {
 
     /// Process pulse wave (channel 0).
     void channel0_pulse() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr auto FREQ_MIN = 8;
+        // the maximal value for the frequency register
+        static constexpr auto FREQ_MAX = 1023;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 16;
+        // get the pitch / frequency of the oscillator in 11-bit
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM0].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 8, 1023);
-        uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-        uint8_t sq_lo = freq11bit & 0b11111111;
+        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
+        apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
+        // set the pulse width of the pulse wave (high 2 bits) and set the
+        // volume to a constant level
         auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue()) << 6;
         apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
-        apu.write_register(0, PULSE0_LO, sq_lo);
-        apu.write_register(0, PULSE0_HI, sq_hi);
     }
 
     /// Process pulse wave (channel 1).
     void channel1_pulse() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr auto FREQ_MIN = 8;
+        // the maximal value for the frequency register
+        static constexpr auto FREQ_MAX = 1023;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 16;
+        // get the pitch / frequency of the oscillator in 11-bit
         float pitch = params[PARAM_FREQ1].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT1].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (16 * freq)) - 1;
+        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM1].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 8, 1023);
-        uint8_t sq_hi = (freq11bit & 0b0000011100000000) >> 8;
-        uint8_t sq_lo = freq11bit & 0b11111111;
+        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        apu.write_register(0, PULSE1_LO, freq11bit & 0b11111111);
+        apu.write_register(0, PULSE1_HI, (freq11bit & 0b0000011100000000) >> 8);
+        // set the pulse width of the pulse wave (high 2 bits) and set the
+        // volume to a constant level
         auto pw = static_cast<uint8_t>(params[PARAM_PW1].getValue()) << 6;
         apu.write_register(0, PULSE1_VOL, pw + 0b00011111);
-        apu.write_register(0, PULSE1_LO, sq_lo);
-        apu.write_register(0, PULSE1_HI, sq_hi);
     }
 
     /// Process triangle wave (channel 2).
     void channel2_triangle() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr auto FREQ_MIN = 2;
+        // the maximal value for the frequency register
+        static constexpr auto FREQ_MAX = 2047;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 32;
+        // get the pitch / frequency of the oscillator in 11-bit
         float pitch = params[PARAM_FREQ2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT2].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (32 * freq)) - 1;
+        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq11bit += inputs[INPUT_FM2].getVoltage();
-        freq11bit = rack::clamp(freq11bit, 2, 2047);
-        uint8_t tri_hi = (freq11bit & 0b0000011100000000) >> 8;
-        uint8_t tri_lo = freq11bit & 0b11111111;
+        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        apu.write_register(0, TRI_LO, freq11bit & 0b11111111);
+        apu.write_register(0, TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
+        // write the linear register to enable the oscillator
         apu.write_register(0, TRI_LINEAR, 0b01111111);
-        apu.write_register(0, TRI_LO, tri_lo);
-        apu.write_register(0, TRI_HI, tri_hi);
     }
 
     /// Process noise (channel 3).
     void channel3_noise() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr auto FREQ_MIN = 0;
+        // the maximal value for the frequency register
+        static constexpr auto FREQ_MAX = 15;
+        // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
         auto cv = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         uint32_t param = params[PARAM_FREQ3].getValue() + cv;
-        param = 15 - rack::clamp(param, 0, 15);
-        apu.write_register(0, NOISE_VOL, 0b00011111);
-        lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+        param = FREQ_MAX - rack::clamp(param, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + param);
         apu.write_register(0, NOISE_HI, 0);
+        // set the volume to a constant level
+        apu.write_register(0, NOISE_VOL, 0b00011111);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -181,9 +206,10 @@ struct Chip2A03 : Module {
     float getAudioOut(int channel) {
         auto samples = buf[channel].samples_avail();
         if (samples == 0) return 0.f;
-        // copy the buffer to  a local vector and return the first sample
+        // copy the buffer to a local vector and return the first sample
         std::vector<int16_t> output_buffer(samples);
         buf[channel].read_samples(&output_buffer[0], samples);
+        // convert the 16-bit sample to 10Vpp floating point
         return 10.f * output_buffer[0] / static_cast<float>(1 << 15);;
     }
 
@@ -202,6 +228,8 @@ struct Chip2A03 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
+        // process input triggers
+        lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
         // process the data on the chip
         channel0_pulse();
         channel1_pulse();

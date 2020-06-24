@@ -13,10 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_NAMCO_H
-#define NES_NAMCO_H
+#ifndef NES_NAMCO106_HPP
+#define NES_NAMCO106_HPP
 
-#include "apu.h"
+#include "apu.hpp"
 
 /// A macro oscillator based on the Namco 106 synthesis chip.
 class Namco106 {
@@ -167,4 +167,4 @@ class Namco106 {
     }
 };
 
-#endif  // NES_NAMCO_H
+#endif  // NES_NAMCO106_HPP

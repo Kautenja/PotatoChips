@@ -1,21 +1,19 @@
-/* Copyright (C) 2003-2005 Shay Green. This module is free software; you
-can redistribute it and/or modify it under the terms of the GNU Lesser
-General Public License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version. This
-module is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for
-more details. You should have received a copy of the GNU Lesser General
-Public License along with this module; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
+// Band-limited waveform buffer.
+// Copyright 2020 Christian Kauten
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 
-// Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
-
-#include "blip_buffer.h"
-#include <cstring>
-#include <cmath>
-#include <climits>
-#include <cassert>
+#include "blip_buffer.hpp"
 
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;
@@ -27,65 +25,6 @@ Blip_Buffer::Blip_Buffer() {
     buffer_size_ = 0;
     length_ = 0;
     bass_freq_ = 16;
-}
-
-Blip_Buffer::~Blip_Buffer() { delete[] buffer_; }
-
-void Blip_Buffer::clear(bool entire_buffer) {
-    int32_t count = (entire_buffer ? buffer_size_ : samples_avail());
-    offset_ = 0;
-    reader_accum = 0;
-    memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
-}
-
-const char* Blip_Buffer::set_sample_rate(int32_t new_rate) {
-    unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
-
-    if (buffer_size_ != new_size) {
-        delete[] buffer_;
-        buffer_ = NULL;  // allow for exception in allocation below
-        buffer_size_ = 0;
-        offset_ = 0;
-
-        buffer_ = new buf_t_[new_size + widest_impulse_];
-    }
-
-    buffer_size_ = new_size;
-    length_ = new_size * 1000 / new_rate - 1;
-
-    samples_per_sec = new_rate;
-    if (clocks_per_sec)
-        set_clock_rate(clocks_per_sec); // recalculate factor
-
-    bass_freq(bass_freq_);  // recalculate shift
-
-    clear();
-
-    return 0;
-}
-
-void Blip_Buffer::set_clock_rate(int32_t cps) {
-    clocks_per_sec = cps;
-    factor_ = (uint32_t) floor((double) samples_per_sec / cps *
-            (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-    assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
-}
-
-void Blip_Buffer::bass_freq(int freq) {
-    bass_freq_ = freq;
-    if (freq == 0) {
-        bass_shift = 31;  // 32 or greater invokes undefined behavior elsewhere
-        return;
-    }
-    bass_shift = 1 + (int) floor(1.442695041 * log(0.124 * samples_per_sec / freq));
-    if (bass_shift < 0)
-        bass_shift = 0;
-    if (bass_shift > 24)
-        bass_shift = 24;
-}
-
-int32_t Blip_Buffer::count_samples(blip_time_t t) const {
-    return (resampled_time(t) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
 }
 
 void Blip_Impulse_::init(blip_pair_t_* imps, int w, int r, int fb) {
@@ -268,20 +207,17 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
 }
 
 void Blip_Buffer::remove_samples(int32_t count) {
-    assert(buffer_);  // sample rate must have been set
-
-    if (!count)  // optimization
-        return;
-
+    // sample rate must have been set
+    assert(buffer_);
+    // optimization
+    if (!count) return;
     remove_silence(count);
-
     // Allows synthesis slightly past time passed to end_frame(), as int32_t as it's
     // not more than an output sample.
     // to do: kind of hacky, could add run_until() which keeps track of extra synthesis
     int const copy_extra = 1;
-
     // copy remaining samples to beginning and clear old samples
-    int32_t remain = samples_avail() + widest_impulse_ + copy_extra;
+    int32_t remain = samples_count() + widest_impulse_ + copy_extra;
     if (count >= remain)
         memmove(buffer_, buffer_ + count, remain * sizeof (buf_t_));
     else
@@ -290,14 +226,12 @@ void Blip_Buffer::remove_samples(int32_t count) {
 }
 
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
-    assert(buffer_);  // sample rate must have been set
-
-    int32_t count = samples_avail();
-    if (count > max_samples)
-        count = max_samples;
-
-    if (!count)
-        return 0; // optimization
+    // sample rate must have been set
+    assert(buffer_);
+    int32_t count = samples_count();
+    if (count > max_samples) count = max_samples;
+    // optimization
+    if (!count) return 0;
 
     int sample_offset = this->sample_offset;
     int bass_shift = this->bass_shift;
@@ -329,11 +263,8 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
                 out[-2] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }
-
     reader_accum = accum;
-
     remove_samples(count);
-
     return count;
 }
 

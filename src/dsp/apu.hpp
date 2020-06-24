@@ -153,7 +153,60 @@ class APU {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(cpu_time_t);
+    void run_until(cpu_time_t end_time) {
+        assert(end_time >= last_time);
+        if (end_time == last_time) return;
+
+        while (true) {
+            // earlier of next frame time or end time
+            cpu_time_t time = last_time + frame_delay;
+            if (time > end_time) time = end_time;
+            frame_delay -= time - last_time;
+
+            // run oscs to present
+            pulse1.run(last_time, time);
+            pulse2.run(last_time, time);
+            triangle.run(last_time, time);
+            noise.run(last_time, time);
+            last_time = time;
+
+            // no more frames to run
+            if (time == end_time) break;
+
+            // take frame-specific actions
+            frame_delay = frame_period;
+            switch (frame++) {
+                case 0:
+                    // fall through
+                case 2:
+                    // clock length and sweep on frames 0 and 2
+                    pulse1.clock_length(0x20);
+                    pulse2.clock_length(0x20);
+                    noise.clock_length(0x20);
+                    // different bit for halt flag on triangle
+                    triangle.clock_length(0x80);
+
+                    pulse1.clock_sweep(-1);
+                    pulse2.clock_sweep(0);
+                    break;
+                case 1:
+                    // frame 1 is slightly shorter
+                    frame_delay -= 2;
+                    break;
+                case 3:
+                    frame = 0;
+                    // frame 3 is almost twice as long in mode 1
+                    if (frame_mode & 0x80)
+                        frame_delay += frame_period - 6;
+                    break;
+            }
+            // clock envelopes and linear counter every frame
+            triangle.clock_linear_counter();
+            pulse1.clock_envelope();
+            pulse2.clock_envelope();
+            noise.clock_envelope();
+        }
+    }
 
     /// Disable the public copy constructor.
     APU(const APU&);

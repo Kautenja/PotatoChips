@@ -266,7 +266,7 @@ struct ChipVRC6 : Module {
         if (new_sample_rate) {
             // update the buffer for each channel
             for (int i = 0; i < VRC6::OSC_COUNT; i++) {
-                buf[i].sample_rate(args.sampleRate);
+                buf[i].set_sample_rate(args.sampleRate);
                 buf[i].clock_rate(cycles_per_sample * args.sampleRate);
                 buf[i].clear();
             }

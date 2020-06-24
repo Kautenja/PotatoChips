@@ -230,6 +230,10 @@ static constexpr int BLIP_MAX_RES = 1 << BLIP_RES_BITS;
 typedef uint32_t blip_pair_t_;
 
 class BLIPImpulse {
+    static constexpr int IMPULSE_BITS = 15;
+    static constexpr int32_t IMPULSE_AMP = 1L << IMPULSE_BITS;
+    static constexpr int32_t IMPULSE_OFFSET = IMPULSE_AMP / 2;
+
     typedef uint16_t imp_t;
 
     blip_eq_t eq;

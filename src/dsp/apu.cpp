@@ -30,25 +30,6 @@ APU::APU() {
     reset(false);
 }
 
-void APU::reset(bool pal_mode) {
-    // to do: time pal frame periods exactly
-    frame_period = pal_mode ? 8314 : 7458;
-
-    pulse1.reset();
-    pulse2.reset();
-    triangle.reset();
-    noise.reset();
-
-    last_time = 0;
-    osc_enables = 0;
-    frame_delay = 1;
-    write_register(0, 0x4017, 0x00);
-    write_register(0, 0x4015, 0x00);
-    // initialize sq1, sq2, tri, and noise, not DMC
-    for (cpu_addr_t addr = ADDR_START; addr <= 0x4009; addr++)
-        write_register(0, addr, (addr & 3) ? 0x00 : 0x10);
-}
-
 // frames
 
 void APU::run_until(cpu_time_t end_time) {
@@ -113,14 +94,6 @@ void APU::run_until(cpu_time_t end_time) {
     }
 }
 
-void APU::end_frame(cpu_time_t end_time) {
-    if (end_time > last_time)
-        run_until(end_time);
-
-    // make times relative to new frame
-    last_time -= end_time;
-    assert(last_time >= 0);
-}
 
 // registers
 

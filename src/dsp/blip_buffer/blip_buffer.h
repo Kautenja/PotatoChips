@@ -23,22 +23,18 @@ typedef int32_t blip_time_t;
 /// Type of sample produced. Signed 16-bit format.
 typedef int16_t blip_sample_t;
 
-/// Make buffer as large as possible (currently about 65000 samples)
-const int blip_default_length = 0;
-
 class Blip_Buffer {
  public:
     // Construct an empty buffer.
     Blip_Buffer();
     ~Blip_Buffer();
 
-    /// TODO: rename to set_sample_rate
     /// Set output sample rate and buffer length in milliseconds (1/1000 sec),
     /// then clear buffer. If length is not specified, make as large as
     /// possible. If there is insufficient memory for the buffer, sets the
     /// buffer length to 0 and returns error string or propagates exception
     /// if compiler supports it.
-    blargg_err_t set_sample_rate(int32_t samples_per_sec, int msec_length = blip_default_length);
+    blargg_err_t set_sample_rate(int32_t samples_per_sec);
 
     // Current output sample rate
     int32_t get_sample_rate() const;

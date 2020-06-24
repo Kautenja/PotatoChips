@@ -22,3 +22,4 @@ using namespace rack;
 /// the global instance of the RackNES plug-in
 extern rack::Plugin* plugin_instance;
 extern rack::Model *modelChip2A03;
+extern rack::Model *modelChipVRC6;

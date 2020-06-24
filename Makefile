@@ -2,7 +2,7 @@ FLAGS += \
 	-DTEST \
 	-Wno-unused-local-typedefs
 
-SOURCES += $(wildcard src/2A03/*.cpp)
+SOURCES += $(wildcard src/dsp/*.cpp)
 SOURCES += $(wildcard src/*.cpp)
 
 DISTRIBUTABLES += $(wildcard LICENSE*) res

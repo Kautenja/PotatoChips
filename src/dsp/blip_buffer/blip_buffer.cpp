@@ -27,19 +27,6 @@ BLIPBuffer::BLIPBuffer() {
     bass_freq_ = 16;
 }
 
-void BLIPImpulse::init(blip_pair_t_* imps, int w, int r, int fb) {
-    fine_bits = fb;
-    width = w;
-    impulses = (imp_t*) imps;
-    generate = true;
-    volume_unit_ = -1.0;
-    res = r;
-    buf = NULL;
-
-    impulse = &impulses[width * res * 2 * (fine_bits ? 2 : 1)];
-    offset = 0;
-}
-
 const int impulse_bits = 15;
 const int32_t impulse_amp = 1L << impulse_bits;
 const int32_t impulse_offset = impulse_amp / 2;

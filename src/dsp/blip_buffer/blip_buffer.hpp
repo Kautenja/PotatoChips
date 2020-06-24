@@ -30,20 +30,11 @@ typedef int16_t blip_sample_t;
 
 class BLIPBuffer {
  public:
+    /// the accuracy of the BLIP buffer
     static constexpr auto BLIP_BUFFER_ACCURACY = 16;
 
     /// Initialize an empty BLIPBuffer.
-    BLIPBuffer() {
-        samples_per_sec = 44100;
-        buffer_ = NULL;
-        // try to cause assertion failure if buffer is used before these are set
-        clocks_per_sec = 0;
-        factor_ = ~0ul;
-        offset_ = 0;
-        buffer_size_ = 0;
-        length_ = 0;
-        bass_freq_ = 16;
-    }
+    BLIPBuffer() { }
 
     /// Destroy an instance of BLIPBuffer.
     ~BLIPBuffer() { delete[] buffer_; }
@@ -215,18 +206,18 @@ class BLIPBuffer {
         static constexpr int WIDEST_IMPULSE = 24;
         typedef uint16_t buf_t_;
 
-        uint32_t factor_;
-        resampled_time_t offset_;
-        buf_t_* buffer_;
-        unsigned buffer_size_;
+        uint32_t factor_ = ~0;
+        resampled_time_t offset_ = 0;
+        buf_t_* buffer_ = NULL;
+        unsigned buffer_size_ = 0;
 
  private:
-        int32_t reader_accum;
-        int bass_shift;
-        int32_t samples_per_sec;
-        int32_t clocks_per_sec;
-        int bass_freq_;
-        int length_;
+        int32_t reader_accum = 0;
+        int bass_shift = 0;
+        int32_t samples_per_sec = 44100;
+        int32_t clocks_per_sec = 0;
+        int bass_freq_ = 16;
+        int length_ = 0;
 
         // less than 16 to give extra sample range
         enum { accum_fract = 15 };

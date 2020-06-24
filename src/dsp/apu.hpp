@@ -90,7 +90,7 @@ class APU {
     /// the channel 2 noise generator
     Nes_Triangle        triangle;
     /// pointers to the oscillators
-    Nes_Osc*            oscs[OSC_COUNT];
+    Oscillator*         oscs[OSC_COUNT];
 
     /// has been run until this time in current frame
     cpu_time_t last_time;

@@ -175,7 +175,7 @@ void APU::write_register(cpu_time_t time, cpu_addr_t addr, int data) {
     if (addr < 0x4010) {  // synthesize registers
         // Write to channel
         int osc_index = (addr - start_addr) >> 2;
-        Nes_Osc* osc = oscs[osc_index];
+        Oscillator* osc = oscs[osc_index];
 
         int reg = addr & 3;
         osc->regs[reg] = data;

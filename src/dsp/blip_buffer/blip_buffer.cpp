@@ -20,16 +20,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 Blip_Buffer::Blip_Buffer() {
     samples_per_sec = 44100;
     buffer_ = NULL;
-
     // try to cause assertion failure if buffer is used before these are set
     clocks_per_sec = 0;
     factor_ = ~0ul;
     offset_ = 0;
     buffer_size_ = 0;
     length_ = 0;
-
     bass_freq_ = 16;
 }
+
+Blip_Buffer::~Blip_Buffer() { delete[] buffer_; }
 
 void Blip_Buffer::clear(bool entire_buffer) {
     int32_t count = (entire_buffer ? buffer_size_ : samples_avail());
@@ -78,10 +78,6 @@ void Blip_Buffer::clock_rate(int32_t cps) {
     factor_ = (uint32_t) floor((double) samples_per_sec / cps *
             (1L << BLIP_BUFFER_ACCURACY) + 0.5);
     assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
-}
-
-Blip_Buffer::~Blip_Buffer() {
-    delete[] buffer_;
 }
 
 void Blip_Buffer::bass_freq(int freq) {

@@ -207,18 +207,15 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
 }
 
 void Blip_Buffer::remove_samples(int32_t count) {
-    assert(buffer_);  // sample rate must have been set
-
-    if (!count)  // optimization
-        return;
-
+    // sample rate must have been set
+    assert(buffer_);
+    // optimization
+    if (!count) return;
     remove_silence(count);
-
     // Allows synthesis slightly past time passed to end_frame(), as int32_t as it's
     // not more than an output sample.
     // to do: kind of hacky, could add run_until() which keeps track of extra synthesis
     int const copy_extra = 1;
-
     // copy remaining samples to beginning and clear old samples
     int32_t remain = samples_count() + widest_impulse_ + copy_extra;
     if (count >= remain)
@@ -229,14 +226,12 @@ void Blip_Buffer::remove_samples(int32_t count) {
 }
 
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
-    assert(buffer_);  // sample rate must have been set
-
+    // sample rate must have been set
+    assert(buffer_);
     int32_t count = samples_count();
-    if (count > max_samples)
-        count = max_samples;
-
-    if (!count)
-        return 0; // optimization
+    if (count > max_samples) count = max_samples;
+    // optimization
+    if (!count) return 0;
 
     int sample_offset = this->sample_offset;
     int bass_shift = this->bass_shift;
@@ -268,11 +263,8 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
                 out[-2] = blip_sample_t (0x7FFF - (s >> 24));
         }
     }
-
     reader_accum = accum;
-
     remove_samples(count);
-
     return count;
 }
 

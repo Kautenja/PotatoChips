@@ -241,7 +241,23 @@ class BLIPImpulse {
     int     res;
     bool    generate;
 
-    void fine_volume_unit();
+    void fine_volume_unit() {
+        // to do: find way of merging in-place without temporary buffer
+        imp_t temp[BLIP_MAX_RES * 2 * BLIPBuffer::WIDEST_IMPULSE];
+        scale_impulse((offset & 0xffff) << fine_bits, temp);
+        imp_t* imp2 = impulses + res * 2 * width;
+        scale_impulse(offset & 0xffff, imp2);
+
+        // merge impulses
+        imp_t* imp = impulses;
+        imp_t* src2 = temp;
+        for (int n = res / 2 * 2 * width; n--;) {
+            *imp++ = *imp2++;
+            *imp++ = *imp2++;
+            *imp++ = *src2++;
+            *imp++ = *src2++;
+        }
+    }
 
     void scale_impulse(int unit, imp_t*) const;
 

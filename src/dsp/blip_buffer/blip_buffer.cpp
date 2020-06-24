@@ -49,27 +49,9 @@ void BLIPImpulse::scale_impulse(int unit, imp_t* imp_in) const {
     memcpy(imp, imp_in, (res * width - 1) * sizeof *imp);
 }
 
-void BLIPImpulse::fine_volume_unit() {
-    // to do: find way of merging in-place without temporary buffer
-    imp_t temp[BLIP_MAX_RES * 2 * BLIPBuffer::WIDEST_IMPULSE];
-    scale_impulse((offset & 0xffff) << fine_bits, temp);
-    imp_t* imp2 = impulses + res * 2 * width;
-    scale_impulse(offset & 0xffff, imp2);
-
-    // merge impulses
-    imp_t* imp = impulses;
-    imp_t* src2 = temp;
-    for (int n = res / 2 * 2 * width; n--;) {
-        *imp++ = *imp2++;
-        *imp++ = *imp2++;
-        *imp++ = *src2++;
-        *imp++ = *src2++;
-    }
-}
-
-static const double pi = 3.1415926535897932384626433832795029L;
 
 void BLIPImpulse::treble_eq(const blip_eq_t& new_eq) {
+    static constexpr double pi = 3.1415926535897932384626433832795029L;
     if (!generate && new_eq.treble == eq.treble && new_eq.cutoff == eq.cutoff &&
             new_eq.sample_rate == eq.sample_rate)
         return; // already calculated with same parameters

@@ -45,7 +45,7 @@ blargg_err_t Blip_Buffer::sample_rate(int32_t new_rate, int msec) {
         if (s < new_size)
             new_size = s;
         else
-            require(false); // requested buffer length exceeds limit
+            assert(false);  // requested buffer length exceeds limit
     }
 
     if (buffer_size_ != new_size) {
@@ -78,7 +78,7 @@ void Blip_Buffer::clock_rate(int32_t cps) {
     clocks_per_sec = cps;
     factor_ = (uint32_t) floor((double) samples_per_sec / cps *
             (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-    require(factor_ > 0); // clock_rate/sample_rate ratio is too large
+    assert(factor_ > 0);  // clock_rate/sample_rate ratio is too large
 }
 
 Blip_Buffer::~Blip_Buffer() {
@@ -288,7 +288,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
 }
 
 void Blip_Buffer::remove_samples(int32_t count) {
-    require(buffer_); // sample rate must have been set
+    assert(buffer_);  // sample rate must have been set
 
     if (!count) // optimization
         return;
@@ -312,7 +312,7 @@ void Blip_Buffer::remove_samples(int32_t count) {
 #include "blargg_common.h"
 
 int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
-    require(buffer_); // sample rate must have been set
+    assert(buffer_);  // sample rate must have been set
 
     int32_t count = samples_avail();
     if (count > max_samples)

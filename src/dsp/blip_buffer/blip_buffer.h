@@ -38,18 +38,18 @@ class Blip_Buffer {
     /// possible. If there is insufficient memory for the buffer, sets the
     /// buffer length to 0 and returns error string or propagates exception
     /// if compiler supports it.
-    blargg_err_t sample_rate(int32_t samples_per_sec, int msec_length = blip_default_length);
-
-    // Length of buffer, in milliseconds
-    int length() const;
+    blargg_err_t set_sample_rate(int32_t samples_per_sec, int msec_length = blip_default_length);
 
     // Current output sample rate
-    int32_t sample_rate() const;
+    int32_t get_sample_rate() const;
 
     // Number of source time units per second
     void clock_rate(int32_t);
 
     int32_t clock_rate() const;
+
+    // Length of buffer, in milliseconds
+    int length() const;
 
     // Set frequency at which high-pass filter attenuation passes -3dB
     void bass_freq(int frequency);
@@ -227,7 +227,7 @@ inline int32_t Blip_Buffer::samples_avail() const {
     return int32_t (offset_ >> BLIP_BUFFER_ACCURACY);
 }
 
-inline int32_t Blip_Buffer::sample_rate() const {
+inline int32_t Blip_Buffer::get_sample_rate() const {
     return samples_per_sec;
 }
 

@@ -135,8 +135,8 @@ class VRC6 {
 
     /// the oscillators on the chip
     VRC6_Oscillator oscs[OSC_COUNT];
-    /// TODO: document
-    cpu_time_t last_time;
+    /// the time after the last run_until call
+    cpu_time_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
     BLIPSynth<BLIPQuality::Medium, 31> saw_synth;

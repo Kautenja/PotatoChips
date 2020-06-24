@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "2A03/Nes_Apu.h"
+#include "dsp/Nes_Apu.h"
 
 /// the IO registers on the APU
 enum IORegisters {

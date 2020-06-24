@@ -18,8 +18,8 @@
 
 #include <cstdint>
 #include <functional>
-#include "blip_buffer/blip_buffer.h"
-#include "blip_buffer/blip_synth.h"
+#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer/blip_synth.hpp"
 
 /// CPU clock cycle count
 typedef int32_t cpu_time_t;

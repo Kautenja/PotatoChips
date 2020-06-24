@@ -38,7 +38,7 @@ void Blip_Buffer::clear(bool entire_buffer) {
     memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
 }
 
-blargg_err_t Blip_Buffer::set_sample_rate(int32_t new_rate) {
+const char* Blip_Buffer::set_sample_rate(int32_t new_rate) {
     unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
 
     if (buffer_size_ != new_size) {
@@ -61,7 +61,7 @@ blargg_err_t Blip_Buffer::set_sample_rate(int32_t new_rate) {
 
     clear();
 
-    return blargg_success;
+    return 0;
 }
 
 void Blip_Buffer::set_clock_rate(int32_t cps) {

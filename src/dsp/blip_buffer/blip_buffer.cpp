@@ -25,23 +25,6 @@ Blip_Buffer::Blip_Buffer() {
     bass_freq_ = 16;
 }
 
-void Blip_Buffer::bass_freq(int freq) {
-    bass_freq_ = freq;
-    if (freq == 0) {
-        bass_shift = 31;  // 32 or greater invokes undefined behavior elsewhere
-        return;
-    }
-    bass_shift = 1 + (int) floor(1.442695041 * log(0.124 * samples_per_sec / freq));
-    if (bass_shift < 0)
-        bass_shift = 0;
-    if (bass_shift > 24)
-        bass_shift = 24;
-}
-
-int32_t Blip_Buffer::count_samples(blip_time_t t) const {
-    return (resampled_time(t) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
-}
-
 void Blip_Impulse_::init(blip_pair_t_* imps, int w, int r, int fb) {
     fine_bits = fb;
     width = w;

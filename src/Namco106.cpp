@@ -15,6 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iostream>
+
 #include "plugin.hpp"
 #include "components.hpp"
 #include "dsp/namco106.hpp"
@@ -92,9 +94,47 @@ struct ChipNamco106 : Module {
             new_sample_rate = false;
         }
 
-        // enable sound output from the chip
-        apu.write_addr(0xE000);
+        static constexpr uint8_t values[32] = {
+            0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
+            0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+
+        // write the waveform to the RAM
+        for (int i = 0; i < 32; i++) {
+            apu.write_addr(i);
+            apu.write_data(0, values[i]);
+        }
+
+        // wave address
+        apu.write_addr(0x7E);
         apu.write_data(0, 0);
+
+        // get the pitch / frequency of the oscillator
+        float pitch = params[PARAM_FREQ0].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT0].getVoltage();
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+
+        auto num_channels = 2;
+        auto wave_length = 64;
+        freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
+        std::cout << freq << std::endl;
+
+        // auto freq18bit = static_cast<uint32_t>(freq);
+        // uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
+        // uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
+        // uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
+
+        // uint32_t freq18bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        // freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
+        // freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to a 12-bit value spanning two 8-bit registers
+        // uint8_t lo = freq12bit & 0b11111111;
+        // uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+
+        // enable sound output from the chip
+        // apu.write_addr(0xE000);
+        // apu.write_data(0, 0);
         // low F
         apu.write_addr(0x78);
         apu.write_data(0, 0b11110000);
@@ -105,49 +145,9 @@ struct ChipNamco106 : Module {
         apu.write_addr(0x7C);
         apu.write_data(0, 48 << 2);
 
-        static constexpr uint8_t values[32] = {
-            0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
-            0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        };
-
-        for (int i = 0; i < 32; i++) {
-            apu.write_addr(0x4800 + i);
-            apu.write_data(0, values[i]);
-        }
-
-        // wave address
-        apu.write_addr(0x7E);
-        apu.write_data(0, 0x4800);
-
         // volume
         apu.write_addr(0x7F);
         apu.write_data(0, 0b00011111);
-
-
-
-
-        // // the minimal value for the frequency register to produce sound
-        // static constexpr auto FREQ_MIN = 8;
-        // // the maximal value for the frequency register
-        // static constexpr auto FREQ_MAX = 1023;
-        // // the clock division of the oscillator relative to the CPU
-        // static constexpr auto CLOCK_DIVISION = 16;
-        // // get the pitch / frequency of the oscillator in 11-bit
-        // float pitch = params[PARAM_FREQ0].getValue() / 12.f;
-        // pitch += inputs[INPUT_VOCT0].getVoltage();
-        // float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        // freq11bit += inputs[INPUT_FM0].getVoltage();
-        // freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
-        // apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
-        // apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
-        // // set the pulse width of the pulse wave (high 2 bits) and set the
-        // // volume to a constant level
-        // auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue()) << 6;
-        // apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
-
-
 
         // set the output from the oscillators
         apu.end_frame(cycles_per_sample);

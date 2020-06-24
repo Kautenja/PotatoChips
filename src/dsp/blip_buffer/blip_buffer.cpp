@@ -15,18 +15,6 @@
 
 #include "blip_buffer.hpp"
 
-BLIPBuffer::BLIPBuffer() {
-    samples_per_sec = 44100;
-    buffer_ = NULL;
-    // try to cause assertion failure if buffer is used before these are set
-    clocks_per_sec = 0;
-    factor_ = ~0ul;
-    offset_ = 0;
-    buffer_size_ = 0;
-    length_ = 0;
-    bass_freq_ = 16;
-}
-
 const int impulse_bits = 15;
 const int32_t impulse_amp = 1L << impulse_bits;
 const int32_t impulse_offset = impulse_amp / 2;

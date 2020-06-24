@@ -8,8 +8,9 @@
 #define BLIP_BUFFER_BLIP_BUFFER_HPP
 
 #include <cassert>
-#include <cstdint>
+#include <climits>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 
 /// Source time unit.
@@ -32,7 +33,31 @@ class Blip_Buffer {
     /// then clear buffer. If there is insufficient memory for the buffer,
     /// sets the buffer length to 0 and returns error string or propagates
     /// exception if compiler supports it.
-    const char* set_sample_rate(int32_t samples_per_sec);
+    const char* set_sample_rate(int32_t new_rate) {
+        unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
+
+        if (buffer_size_ != new_size) {
+            delete[] buffer_;
+            buffer_ = NULL;  // allow for exception in allocation below
+            buffer_size_ = 0;
+            offset_ = 0;
+
+            buffer_ = new buf_t_[new_size + widest_impulse_];
+        }
+
+        buffer_size_ = new_size;
+        length_ = new_size * 1000 / new_rate - 1;
+
+        samples_per_sec = new_rate;
+        if (clocks_per_sec)
+            set_clock_rate(clocks_per_sec); // recalculate factor
+
+        bass_freq(bass_freq_);  // recalculate shift
+
+        clear();
+
+        return 0;
+    }
 
     /// Return current output sample rate.
     inline int32_t get_sample_rate() const { return samples_per_sec; };

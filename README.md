@@ -61,16 +61,17 @@ information about the features of this module.
 
 **Coming Soon!**
 
-<!-- <p align="center">
+<p align="center">
 <img alt="Namco106" src="img/Namco106.png" height="380px">
-</p> -->
+</p>
 
-<!-- ### Features -->
+### Features
 
-<!-- - -->
+-   **Wavetable synthesis:** 8 channels of wavetable synthesis
+-   **128 bytes RAM:** 128 bytes of RAM for runtime wavetable data
 
-<!-- See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for more
-information about the features of this module. -->
+See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for more
+information about the features of this module.
 
 ## Acknowledgments
 

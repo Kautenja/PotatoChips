@@ -53,14 +53,14 @@ class BLIPBuffer {
     /// sets the buffer length to 0 and returns error string or propagates
     /// exception if compiler supports it.
     const char* set_sample_rate(int32_t new_rate) {
-        unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - widest_impulse_ - 64;
+        unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - WIDEST_IMPULSE - 64;
 
         if (buffer_size_ != new_size) {
             delete[] buffer_;
             buffer_ = NULL;  // allow for exception in allocation below
             buffer_size_ = 0;
             offset_ = 0;
-            buffer_ = new buf_t_[new_size + widest_impulse_];
+            buffer_ = new buf_t_[new_size + WIDEST_IMPULSE];
         }
 
         buffer_size_ = new_size;
@@ -95,7 +95,7 @@ class BLIPBuffer {
     inline int get_length() const { return length_; }
 
     /// Number of samples delay from synthesis to samples read out
-    inline int get_output_latency() const { return widest_impulse_ / 2; }
+    inline int get_output_latency() const { return WIDEST_IMPULSE / 2; }
 
     /// Set frequency at which high-pass filter attenuation passes -3dB
     inline void bass_freq(int freq) {
@@ -116,7 +116,7 @@ class BLIPBuffer {
         int32_t count = (entire_buffer ? buffer_size_ : samples_count());
         offset_ = 0;
         reader_accum = 0;
-        memset(buffer_, sample_offset & 0xFF, (count + widest_impulse_) * sizeof (buf_t_));
+        memset(buffer_, sample_offset & 0xFF, (count + WIDEST_IMPULSE) * sizeof (buf_t_));
     }
 
     /// End current time frame of specified duration and make its samples
@@ -176,13 +176,15 @@ class BLIPBuffer {
     }
 
  private:
-    // noncopyable
+    /// Disable the public copy constructor.
     BLIPBuffer(const BLIPBuffer&);
-    BLIPBuffer& operator = (const BLIPBuffer&);
+
+    /// Disable the public assignment operator.
+    BLIPBuffer& operator=(const BLIPBuffer&);
 
 // Don't use the following members. They are public only for technical reasons.
  public:
-        enum { widest_impulse_ = 24 };
+        static constexpr int WIDEST_IMPULSE = 24;
         typedef uint16_t buf_t_;
 
         uint32_t factor_;
@@ -222,7 +224,8 @@ class blip_eq_t {
 
 // End of public interface
 
-const int blip_res_bits_ = 5;
+static constexpr int BLIP_RES_BITS = 5;
+static constexpr int BLIP_MAX_RES = 1 << BLIP_RES_BITS;
 
 typedef uint32_t blip_pair_t_;
 

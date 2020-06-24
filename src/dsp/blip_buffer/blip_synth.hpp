@@ -44,7 +44,7 @@ class BLIPSynth {
         abs_range = (range < 0) ? -range : range,
         fine_mode = (range > 512 || range < 0),
         width = static_cast<int>(quality) * 4,
-        res = 1 << blip_res_bits_,
+        res = 1 << BLIP_RES_BITS,
         impulse_size = width / 2 * (fine_mode + 1),
         base_impulses_size = width / 2 * (res / 2 + 1),
         fine_bits = (fine_mode ? (abs_range <= 64 ? 2 : abs_range <= 128 ? 3 :
@@ -93,10 +93,10 @@ class BLIPSynth {
 
         unsigned sample_index = (time >> BLIPBuffer::BLIP_BUFFER_ACCURACY) & ~1;
         assert(("BLIPSynth/Blip_wave: Went past end of buffer", sample_index < blip_buf->buffer_size_));
-        enum { const_offset = BLIPBuffer::widest_impulse_ / 2 - width / 2 };
+        enum { const_offset = BLIPBuffer::WIDEST_IMPULSE / 2 - width / 2 };
         pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
 
-        enum { shift = BLIPBuffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
+        enum { shift = BLIPBuffer::BLIP_BUFFER_ACCURACY - BLIP_RES_BITS };
         enum { mask = res * 2 - 1 };
         const pair_t* imp = &impulses[((time >> shift) & mask) * impulse_size];
 

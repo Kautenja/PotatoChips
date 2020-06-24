@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Nes_Apu.h"
+#include "APU.h"
 
 #include BLARGG_SOURCE_BEGIN
 

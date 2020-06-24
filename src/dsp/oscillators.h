@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <functional>
-#include "Blip_Buffer.h"
+#include "blip_buffer.h"
 
 /// CPU clock cycle count
 typedef int32_t cpu_time_t;

@@ -84,8 +84,11 @@ class Blip_Buffer {
     /// Return length of buffer, in milliseconds
     inline int get_length() const { return length_; }
 
+    /// Number of samples delay from synthesis to samples read out
+    inline int get_output_latency() const { return widest_impulse_ / 2; }
+
     /// Set frequency at which high-pass filter attenuation passes -3dB
-    void bass_freq(int freq) {
+    inline void bass_freq(int freq) {
         bass_freq_ = freq;
         if (freq == 0) {
             bass_shift = 31;  // 32 or greater invokes undefined behavior elsewhere
@@ -99,7 +102,7 @@ class Blip_Buffer {
     /// Remove all available samples and clear buffer to silence. If
     /// 'entire_buffer' is false, just clear out any samples waiting rather
     /// than the entire buffer.
-    void clear(bool entire_buffer = true) {
+    inline void clear(bool entire_buffer = true) {
         int32_t count = (entire_buffer ? buffer_size_ : samples_count());
         offset_ = 0;
         reader_accum = 0;
@@ -134,14 +137,11 @@ class Blip_Buffer {
     /// Remove 'count' samples from those waiting to be read
     void remove_samples(int32_t count);
 
-    /// Number of samples delay from synthesis to samples read out
-    inline int get_output_latency() const { return widest_impulse_ / 2; }
-
     // Experimental external buffer mixing support
 
     /// Number of raw samples that can be mixed within frame of specified
     /// duration
-    int32_t count_samples(blip_time_t duration) const {
+    inline int32_t count_samples(blip_time_t duration) const {
         return (resampled_time(duration) >> BLIP_BUFFER_ACCURACY) - (offset_ >> BLIP_BUFFER_ACCURACY);
     }
 
@@ -157,11 +157,11 @@ class Blip_Buffer {
 
     typedef uint32_t resampled_time_t;
 
-    resampled_time_t resampled_time(blip_time_t t) const {
+    inline resampled_time_t resampled_time(blip_time_t t) const {
         return t * resampled_time_t (factor_) + offset_;
     }
 
-    resampled_time_t resampled_duration(int t) const {
+    inline resampled_time_t resampled_duration(int t) const {
         return t * resampled_time_t (factor_);
     }
 

@@ -13,12 +13,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_OSCS_H
-#define NES_OSCS_H
+#ifndef NES_OSCILLATORS_HPP
+#define NES_OSCILLATORS_HPP
 
 #include <cstdint>
 #include <functional>
-#include "blip_buffer/blip_buffer.h"
+#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer/blip_synth.hpp"
 
 /// CPU clock cycle count
 typedef int32_t cpu_time_t;
@@ -26,7 +27,7 @@ typedef int32_t cpu_time_t;
 typedef int16_t cpu_addr_t;
 
 /// An abstract base type for NES oscillators.
-struct Nes_Osc {
+struct Oscillator {
     unsigned char regs[4];
     bool reg_written[4];
     Blip_Buffer* output;
@@ -58,7 +59,7 @@ struct Nes_Osc {
 };
 
 /// An envelope-based NES oscillator
-struct Nes_Envelope : Nes_Osc {
+struct Envelope : Oscillator {
     int envelope;
     int env_delay;
 
@@ -83,12 +84,12 @@ struct Nes_Envelope : Nes_Osc {
     inline void reset() {
         envelope = 0;
         env_delay = 0;
-        Nes_Osc::reset();
+        Oscillator::reset();
     }
 };
 
 /// The square wave oscillator from the NES.
-struct Nes_Square : Nes_Envelope {
+struct Pulse : Envelope {
     enum { negate_flag = 0x08 };
     enum { shift_mask = 0x07 };
     enum { phase_range = 8 };
@@ -191,12 +192,12 @@ struct Nes_Square : Nes_Envelope {
 
     inline void reset() {
         sweep_delay = 0;
-        Nes_Envelope::reset();
+        Envelope::reset();
     }
 };
 
 /// The quantized triangle wave oscillator from the NES.
-struct Nes_Triangle : Nes_Osc {
+struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
@@ -265,7 +266,7 @@ struct Nes_Triangle : Nes_Osc {
     inline void reset() {
         linear_counter = 0;
         phase = phase_range;
-        Nes_Osc::reset();
+        Oscillator::reset();
     }
 };
 
@@ -275,7 +276,7 @@ static constexpr int16_t noise_period_table[16] = {
 };
 
 /// The noise oscillator from the NES.
-struct Nes_Noise : Nes_Envelope {
+struct Noise : Envelope {
     int noise;
     Blip_Synth<BLIPQuality::Medium, 15> synth;
 
@@ -338,8 +339,8 @@ struct Nes_Noise : Nes_Envelope {
 
     inline void reset() {
         noise = 1 << 14;
-        Nes_Envelope::reset();
+        Envelope::reset();
     }
 };
 
-#endif  // NES_OSCS_H
+#endif  // NES_OSCILLATORS_HPP

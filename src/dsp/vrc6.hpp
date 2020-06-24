@@ -13,10 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef NES_VRC6_H
-#define NES_VRC6_H
+#ifndef NES_VRC6_HPP
+#define NES_VRC6_HPP
 
-#include "apu.h"
+#include "apu.hpp"
 
 /// A macro oscillator based on the Konami VRC6 synthesis chip.
 class VRC6 {
@@ -206,4 +206,4 @@ class VRC6 {
     }
 };
 
-#endif  // NES_VRC6_H
+#endif  // NES_VRC6_HPP

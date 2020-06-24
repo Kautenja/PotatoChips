@@ -114,7 +114,8 @@ struct ChipNamco106 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         auto num_channels = 2;
-        auto wave_length = 48;
+        auto num_samples = 64;
+        auto wave_length = 64 - (num_samples / 16);
         freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
         freq = rack::clamp(freq, 4.f, 262143.f);
         // extract the low, medium, and high frequency register values

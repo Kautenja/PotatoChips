@@ -14,7 +14,7 @@
 //
 
 #include "apu.h"
-#include "blip_buffer/blargg_source.h"
+#include <cassert>
 
 APU::APU() {
     square1.synth = &square_synth;

@@ -119,33 +119,30 @@ struct ChipNamco106 : Module {
         freq = rack::clamp(freq, 4.f, 262143.f);
         // extract the low, medium, and high frequency register values
         auto freq18bit = static_cast<uint32_t>(freq);
+        // FREQUENCY LOW
         uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
-        uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
-        uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
-
-        // enable sound output from the chip
-        // apu.write_addr(0xE000);
-        // apu.write_data(0, 0);
-        // low F
         apu.write_addr(0x78);
         apu.write_data(0, low);
-        // med F
+        // FREQUENCY MEDIUM
+        uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
         apu.write_addr(0x7A);
         apu.write_data(0, med);
-        // hi F / length
+        // WAVEFORM LENGTH + FREQUENCY HIGH
+        uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
         apu.write_addr(0x7C);
         apu.write_data(0, (48 << 2) + hig);
 
         // volume and channel selection
-        apu.write_addr(0x7F);
         static constexpr uint8_t volume = 0b00001111;
+        apu.write_addr(0x7F);
         apu.write_data(0, (num_channels << 4) + volume);
 
-        // set the output from the oscillators
+        // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
-            outputs[OUTPUT_CHANNEL + 7 - i].setVoltage(getAudioOut(i));
+            auto channel = (Namco106::OSC_COUNT - 1) + OUTPUT_CHANNEL - i;
+            outputs[channel].setVoltage(getAudioOut(i));
         }
     }
 

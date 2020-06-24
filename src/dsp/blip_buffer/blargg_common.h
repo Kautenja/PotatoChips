@@ -14,28 +14,28 @@
 #if defined (__MWERKS__)
     // Metrowerks CodeWarrior
     #define BLARGG_COMPILER_HAS_NAMESPACE 1
-    #if !__option(bool)
-        #define BLARGG_COMPILER_HAS_BOOL 0
-    #endif
+    // #if !__option(bool)
+    //     #define BLARGG_COMPILER_HAS_BOOL 0
+    // #endif
 
 #elif defined (_MSC_VER)
     // Microsoft Visual C++
-    #if _MSC_VER < 1100
-        #define BLARGG_COMPILER_HAS_BOOL 0
-    #endif
+    // #if _MSC_VER < 1100
+    //     #define BLARGG_COMPILER_HAS_BOOL 0
+    // #endif
 
 #elif defined (__GNUC__)
     // GNU C++
     #define BLARGG_COMPILER_HAS_NAMESPACE 1
-    #define BLARGG_COMPILER_HAS_BOOL 1
+    // #define BLARGG_COMPILER_HAS_BOOL 1
 
 #elif defined (__MINGW32__)
     // Mingw?
-    #define BLARGG_COMPILER_HAS_BOOL 1
+    // #define BLARGG_COMPILER_HAS_BOOL 1
 
 #elif __cplusplus < 199711
     // Pre-ISO C++ compiler
-    #define BLARGG_COMPILER_HAS_BOOL 0
+    // #define BLARGG_COMPILER_HAS_BOOL 0
     #define BLARGG_NEW new
     #define STATIC_CAST( type ) (type)
 
@@ -52,19 +52,19 @@
     #ifndef BLARGG_COMPILER_HAS_NAMESPACE
         #define BLARGG_COMPILER_HAS_NAMESPACE 1
     #endif
-    #ifndef BLARGG_COMPILER_HAS_BOOL
-        #define BLARGG_COMPILER_HAS_BOOL 1
-    #endif
+    // #ifndef BLARGG_COMPILER_HAS_BOOL
+    //     #define BLARGG_COMPILER_HAS_BOOL 1
+    // #endif
 #endif
 
-// Bool support
-#ifndef BLARGG_COMPILER_HAS_BOOL
-    #define BLARGG_COMPILER_HAS_BOOL 1
-#elif !BLARGG_COMPILER_HAS_BOOL
-    typedef int bool;
-    const bool true  = 1;
-    const bool false = 0;
-#endif
+// // Bool support
+// #ifndef BLARGG_COMPILER_HAS_BOOL
+//     #define BLARGG_COMPILER_HAS_BOOL 1
+// #elif !BLARGG_COMPILER_HAS_BOOL
+//     typedef int bool;
+//     const bool true  = 1;
+//     const bool false = 0;
+// #endif
 
 // Set up namespace support
 

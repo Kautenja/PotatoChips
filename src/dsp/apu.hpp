@@ -24,7 +24,7 @@ class APU {
     APU();
 
     // Set buffer to generate all sound into, or disable sound if NULL
-    void output(Blip_Buffer*);
+    void output(BLIPBuffer*);
 
     // All time values are the number of CPU clock cycles relative to the
     // beginning of the current time frame. Before resetting the CPU clock
@@ -61,7 +61,7 @@ class APU {
     // The oscillators are indexed as follows: 0) Square 1, 1) Square 2,
     // 2) Triangle, 3) Noise.
     enum { OSC_COUNT = 4 };
-    void osc_output(int osc, Blip_Buffer* buf) {
+    void osc_output(int osc, BLIPBuffer* buf) {
         assert(("APU::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
         oscs[osc]->output = buf;
     }

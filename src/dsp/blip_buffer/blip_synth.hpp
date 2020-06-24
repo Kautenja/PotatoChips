@@ -28,8 +28,8 @@ enum class BLIPQuality {
     High   = 4
 };
 
-/// Blip_Synth is a transition waveform synthesizer which adds band-limited
-/// offsets (transitions) into a Blip_Buffer. For a simpler interface, use
+/// BLIPSynth is a transition waveform synthesizer which adds band-limited
+/// offsets (transitions) into a BLIPBuffer. For a simpler interface, use
 /// Blip_Wave (below).
 ///
 /// Range specifies the greatest expected offset that will occur. For a
@@ -38,7 +38,7 @@ enum class BLIPQuality {
 /// accuracy scheme is used; to force this even when range is small, pass
 /// the negative of range (i.e. -range).
 template<BLIPQuality quality, int range>
-class Blip_Synth {
+class BLIPSynth {
     static_assert(-32768 <= range && range <= 32767);
     enum {
         abs_range = (range < 0) ? -range : range,
@@ -56,7 +56,7 @@ class Blip_Synth {
 
  public:
     /// Initialize a new BLIP synth.
-    Blip_Synth() { impulse.init(impulses, width, res, fine_bits); }
+    BLIPSynth() { impulse.init(impulses, width, res, fine_bits); }
 
     /// Configure low-pass filter (see notes.txt).
     /// Not optimized for real-time control
@@ -71,16 +71,16 @@ class Blip_Synth {
     inline void volume_unit(double unit) { impulse.volume_unit(unit); }
 
     /// Return buffer used for output when none is specified for a given call.
-    inline Blip_Buffer* output() const { return impulse.buf; }
+    inline BLIPBuffer* output() const { return impulse.buf; }
 
-    inline void output(Blip_Buffer* b) { impulse.buf = b; }
+    inline void output(BLIPBuffer* b) { impulse.buf = b; }
 
     /// Add an amplitude offset (transition) with a magnitude of
     /// delta * volume_unit into the specified buffer (default buffer if none
     /// specified) at the specified source time. Delta can be positive or
     /// negative. To increase performance by inlining code at the call site,
     /// use offset_inline().
-    inline void offset(blip_time_t time, int delta, Blip_Buffer* buf) const {
+    inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
         offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
     }
 
@@ -88,15 +88,15 @@ class Blip_Synth {
         offset(t, delta, impulse.buf);
     }
 
-    void offset_resampled(blip_resampled_time_t time, int delta, Blip_Buffer* blip_buf) const {
+    void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
         typedef blip_pair_t_ pair_t;
 
-        unsigned sample_index = (time >> Blip_Buffer::BLIP_BUFFER_ACCURACY) & ~1;
-        assert(("Blip_Synth/Blip_wave: Went past end of buffer", sample_index < blip_buf->buffer_size_));
-        enum { const_offset = Blip_Buffer::widest_impulse_ / 2 - width / 2 };
+        unsigned sample_index = (time >> BLIPBuffer::BLIP_BUFFER_ACCURACY) & ~1;
+        assert(("BLIPSynth/Blip_wave: Went past end of buffer", sample_index < blip_buf->buffer_size_));
+        enum { const_offset = BLIPBuffer::widest_impulse_ / 2 - width / 2 };
         pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
 
-        enum { shift = Blip_Buffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
+        enum { shift = BLIPBuffer::BLIP_BUFFER_ACCURACY - blip_res_bits_ };
         enum { mask = res * 2 - 1 };
         const pair_t* imp = &impulses[((time >> shift) & mask) * impulse_size];
 
@@ -146,7 +146,7 @@ class Blip_Synth {
         offset_resampled(t, o, impulse.buf);
     }
 
-    inline void offset_inline(blip_time_t time, int delta, Blip_Buffer* buf) const {
+    inline void offset_inline(blip_time_t time, int delta, BLIPBuffer* buf) const {
         offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
     }
 
@@ -155,12 +155,12 @@ class Blip_Synth {
     }
 };
 
-/// Blip_Wave is a synthesizer for adding a *single* waveform to a Blip_Buffer.
+/// Blip_Wave is a synthesizer for adding a *single* waveform to a BLIPBuffer.
 /// A wave is built from a series of delays and new amplitudes. This provides a
-/// simpler interface than Blip_Synth, nothing more.
+/// simpler interface than BLIPSynth, nothing more.
 template<BLIPQuality quality, int range>
 class Blip_Wave {
-    Blip_Synth<quality, range> synth;
+    BLIPSynth<quality, range> synth;
     blip_time_t time_;
     int last_amp;
 
@@ -168,16 +168,16 @@ class Blip_Wave {
     /// Start wave at time 0 and amplitude 0
     Blip_Wave() : time_(0), last_amp(0) { }
 
-    /// See Blip_Synth for description
+    /// See BLIPSynth for description
     inline void volume(double v) { synth.volume(v); }
 
     inline void volume_unit(double v) { synth.volume_unit(v); }
 
     inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
 
-    inline Blip_Buffer* output() const { return synth.output(); }
+    inline BLIPBuffer* output() const { return synth.output(); }
 
-    inline void output(Blip_Buffer* b) {
+    inline void output(BLIPBuffer* b) {
         synth.output(b);
         if (!b) time_ = last_amp = 0;
     }

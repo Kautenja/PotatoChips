@@ -15,7 +15,7 @@
 
 #include "blip_buffer.hpp"
 
-Blip_Buffer::Blip_Buffer() {
+BLIPBuffer::BLIPBuffer() {
     samples_per_sec = 44100;
     buffer_ = NULL;
     // try to cause assertion failure if buffer is used before these are set
@@ -78,7 +78,7 @@ const int max_res = 1 << blip_res_bits_;
 
 void Blip_Impulse_::fine_volume_unit() {
     // to do: find way of merging in-place without temporary buffer
-    imp_t temp[max_res * 2 * Blip_Buffer::widest_impulse_];
+    imp_t temp[max_res * 2 * BLIPBuffer::widest_impulse_];
     scale_impulse((offset & 0xffff) << fine_bits, temp);
     imp_t* imp2 = impulses + res * 2 * width;
     scale_impulse(offset & 0xffff, imp2);
@@ -148,7 +148,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     double total = 0.0;
     const double to_angle = pi / 2 / n_harm / max_res;
 
-    float buf[max_res * (Blip_Buffer::widest_impulse_ - 2) / 2];
+    float buf[max_res * (BLIPBuffer::widest_impulse_ - 2) / 2];
     const int size = max_res * (width - 2) / 2;
     for (int i = size; i--;) {
         double angle = (i * 2 + 1) * to_angle;
@@ -171,7 +171,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
 
         // fixed window which affects wider impulses more
         if (width > 12) {
-            double window = cos(n_harm / 1.25 / Blip_Buffer::widest_impulse_ * angle);
+            double window = cos(n_harm / 1.25 / BLIPBuffer::widest_impulse_ * angle);
             y *= window * window;
         }
 
@@ -206,7 +206,7 @@ void Blip_Impulse_::treble_eq(const blip_eq_t& new_eq) {
     }
 }
 
-void Blip_Buffer::remove_samples(int32_t count) {
+void BLIPBuffer::remove_samples(int32_t count) {
     // sample rate must have been set
     assert(buffer_);
     // optimization
@@ -225,7 +225,7 @@ void Blip_Buffer::remove_samples(int32_t count) {
     memset(buffer_ + remain, sample_offset & 0xFF, count * sizeof (buf_t_));
 }
 
-int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
+int32_t BLIPBuffer::read_samples(blip_sample_t* out, int32_t max_samples, bool stereo) {
     // sample rate must have been set
     assert(buffer_);
     int32_t count = samples_count();
@@ -268,7 +268,7 @@ int32_t Blip_Buffer::read_samples(blip_sample_t* out, int32_t max_samples, bool 
     return count;
 }
 
-void Blip_Buffer::mix_samples(const blip_sample_t* in, int32_t count) {
+void BLIPBuffer::mix_samples(const blip_sample_t* in, int32_t count) {
     buf_t_* buf = &buffer_[(offset_ >> BLIP_BUFFER_ACCURACY) + (widest_impulse_ / 2 - 1)];
 
     int prev = 0;

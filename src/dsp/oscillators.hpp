@@ -30,7 +30,7 @@ typedef int16_t cpu_addr_t;
 struct Oscillator {
     unsigned char regs[4];
     bool reg_written[4];
-    Blip_Buffer* output;
+    BLIPBuffer* output;
     /// length counter (0 if unused by oscillator)
     int length_counter;
     /// delay until next (potential) transition
@@ -96,7 +96,7 @@ struct Pulse : Envelope {
     int phase;
     int sweep_delay;
 
-    typedef Blip_Synth<BLIPQuality::Good, 15> Synth;
+    typedef BLIPSynth<BLIPQuality::Good, 15> Synth;
     // shared between squares
     const Synth* synth;
 
@@ -169,7 +169,7 @@ struct Pulse : Envelope {
 
             time += delay;
             if (time < end_time) {
-                Blip_Buffer* const output = this->output;
+                BLIPBuffer* const output = this->output;
                 const Synth* synth = this->synth;
                 int delta = amp * 2 - volume;
                 int phase = this->phase;
@@ -201,7 +201,7 @@ struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
-    Blip_Synth<BLIPQuality::Good, 15> synth;
+    BLIPSynth<BLIPQuality::Good, 15> synth;
 
     inline int calc_amp() const {
         int amp = phase_range - phase;
@@ -226,7 +226,7 @@ struct Triangle : Oscillator {
         if (length_counter == 0 || linear_counter == 0 || timer_period < 3) {
             time = end_time;
         } else if (time < end_time) {
-            Blip_Buffer* const output = this->output;
+            BLIPBuffer* const output = this->output;
 
             int phase = this->phase;
             int volume = 1;
@@ -278,7 +278,7 @@ static constexpr int16_t noise_period_table[16] = {
 /// The noise oscillator from the NES.
 struct Noise : Envelope {
     int noise;
-    Blip_Synth<BLIPQuality::Medium, 15> synth;
+    BLIPSynth<BLIPQuality::Medium, 15> synth;
 
     void run(cpu_time_t time, cpu_time_t end_time) {
         if (!output) return;
@@ -306,7 +306,7 @@ struct Noise : Envelope {
                     noise = (feedback & 0x4000) | (noise >> 1);
                 }
             } else {
-                Blip_Buffer* const output = this->output;
+                BLIPBuffer* const output = this->output;
 
                 // using re-sampled time avoids conversion in synth.offset()
                 auto rperiod = output->resampled_duration(period);

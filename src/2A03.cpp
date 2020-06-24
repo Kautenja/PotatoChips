@@ -85,7 +85,7 @@ struct Chip2A03 : Module {
     static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
-    Blip_Buffer buf[APU::OSC_COUNT];
+    BLIPBuffer buf[APU::OSC_COUNT];
     /// The 2A03 instance to synthesize sound with
     APU apu;
 

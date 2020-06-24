@@ -94,10 +94,10 @@ class Nes_Namco {
     int addr_reg;
 
     static constexpr int REG_COUNT = 0x80;
-    BOOST::uint8_t reg[REG_COUNT];
+    uint8_t reg[REG_COUNT];
     Blip_Synth<blip_good_quality, 15> synth;
 
-    BOOST::uint8_t& access() {
+    uint8_t& access() {
         int addr = addr_reg & 0x7f;
         if (addr_reg & 0x80) addr_reg = (addr + 1) | 0x80;
         return reg[addr];
@@ -115,7 +115,7 @@ class Nes_Namco {
             auto end_time = output->resampled_time(nes_end_time);
             osc.delay = 0;
             if (time < end_time) {
-                const BOOST::uint8_t* osc_reg = &reg[i * 8 + 0x40];
+                const uint8_t* osc_reg = &reg[i * 8 + 0x40];
                 if (!(osc_reg[4] & 0xe0))
                     continue;
 

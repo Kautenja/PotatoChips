@@ -164,7 +164,6 @@ class APU {
             for (int i = OSC_COUNT; i--;)
                 if (!((data >> i) & 1))
                     oscs[i]->length_counter = 0;
-            int old_enables = osc_enables;
             osc_enables = data;
         } else if (addr == 0x4017) {
             // Frame mode

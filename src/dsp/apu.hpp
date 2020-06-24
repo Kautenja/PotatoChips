@@ -148,8 +148,8 @@ class APU {
                 // load length counter
                 if ((osc_enables >> osc_index) & 1)
                     osc->length_counter = length_table[(data >> 3) & 0x1f];
-                // DISABLED TO HACK SQUARE OSCILLATOR
-                // // reset square phase
+                // reset square phase
+                // DISABLED TO HACK SQUARE OSCILLATOR for VCV Rack
                 // if (osc_index < 2)
                 //  ((Nes_Square*) osc)->phase = Nes_Square::phase_range - 1;
             }
@@ -177,12 +177,47 @@ class APU {
     }
 
  private:
+    /// The length table to lookup length values from registers
     static constexpr unsigned char length_table[0x20] = {
         0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
         0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
         0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
         0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
     };
+
+    /// Disable the public copy constructor.
+    APU(const APU&);
+
+    /// Disable the public assignment operator.
+    APU& operator=(const APU&);
+
+    /// the channel 0 pulse wave generator
+    Pulse pulse1;
+    /// the channel 1 pulse wave generator
+    Pulse pulse2;
+    /// the channel 2 triangle wave generator
+    Noise noise;
+    /// the channel 3 noise generator
+    Triangle triangle;
+    /// pointers to the oscillators
+    Oscillator* oscs[OSC_COUNT] = {
+        &pulse1, &pulse2, &triangle, &noise
+    };
+
+    /// has been run until this time in current frame
+    cpu_time_t last_time;
+    /// TODO: document
+    int frame_period;
+    /// cycles until frame counter runs next
+    int frame_delay;
+    /// current frame (0-3)
+    int frame;
+    /// the channel enabled register
+    int osc_enables;
+    /// TODO: document
+    int frame_mode;
+    /// a synthesizer shared by squares
+    Pulse::Synth square_synth;
 
     // TODO: remove these two nonlinear functions?
     // /// Enable nonlinear volume.
@@ -264,40 +299,6 @@ class APU {
             noise.clock_envelope();
         }
     }
-
-    /// Disable the public copy constructor.
-    APU(const APU&);
-
-    /// Disable the public assignment operator.
-    APU& operator=(const APU&);
-
-    /// the channel 0 pulse wave generator
-    Pulse pulse1;
-    /// the channel 1 pulse wave generator
-    Pulse pulse2;
-    /// the channel 2 triangle wave generator
-    Noise noise;
-    /// the channel 3 noise generator
-    Triangle triangle;
-    /// pointers to the oscillators
-    Oscillator* oscs[OSC_COUNT] = {
-        &pulse1, &pulse2, &triangle, &noise
-    };
-
-    /// has been run until this time in current frame
-    cpu_time_t last_time;
-    /// TODO: document
-    int frame_period;
-    /// cycles until frame counter runs next
-    int frame_delay;
-    /// current frame (0-3)
-    int frame;
-    /// the channel enabled register
-    int osc_enables;
-    /// TODO: document
-    int frame_mode;
-    /// a synthesizer shared by squares
-    Pulse::Synth square_synth;
 };
 
 #endif  // NES_APU_HPP

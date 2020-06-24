@@ -11,7 +11,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
 // Blip_Buffer 0.3.3. http://www.slack.net/~ant/libs/
 
-#include "blip_buffer.h"
+#include "blip_buffer.hpp"
 #include <cstring>
 #include <cmath>
 #include <climits>

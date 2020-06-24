@@ -19,9 +19,9 @@
 #include "oscillators.h"
 
 /// A macro oscillator based on the NES 2A03 synthesis chip.
-class Nes_Apu {
+class APU {
  public:
-    Nes_Apu();
+    APU();
 
     // Set buffer to generate all sound into, or disable sound if NULL
     void output(Blip_Buffer*);
@@ -62,7 +62,7 @@ class Nes_Apu {
     // 2) Triangle, 3) Noise.
     enum { OSC_COUNT = 4 };
     void osc_output(int osc, Blip_Buffer* buf) {
-        assert(("Nes_Apu::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
+        assert(("APU::osc_output(): Index out of range", 0 <= osc && osc < OSC_COUNT));
         oscs[osc]->output = buf;
     }
 
@@ -77,9 +77,9 @@ class Nes_Apu {
 
  private:
     /// Disable the copy constructor.
-    Nes_Apu(const Nes_Apu&);
+    APU(const APU&);
     /// Disable the assignment operator.
-    Nes_Apu& operator = (const Nes_Apu&);
+    APU& operator = (const APU&);
 
     /// the channel 1 square wave generator
     Nes_Square          square1;

@@ -25,9 +25,6 @@ typedef int32_t cpu_time_t;
 /// 16-bit memory address
 typedef int16_t cpu_addr_t;
 
-/// a forward declaration of the NES APU
-class Nes_Apu;
-
 /// An abstract base type for NES oscillators.
 struct Nes_Osc {
     unsigned char regs[4];

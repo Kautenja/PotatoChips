@@ -91,7 +91,7 @@ class BLIPSynth {
         typedef blip_pair_t_ pair_t;
 
         unsigned sample_index = (time >> BLIPBuffer::BLIP_BUFFER_ACCURACY) & ~1;
-        assert(("BLIPSynth/Blip_wave: Went past end of buffer", sample_index < blip_buf->buffer_size_));
+        assert(sample_index < blip_buf->buffer_size_ && "BLIPSynth/Blip_wave: Went past end of buffer");
         enum { const_offset = BLIPBuffer::WIDEST_IMPULSE / 2 - width / 2 };
         pair_t* buf = (pair_t*) &blip_buf->buffer_[const_offset + sample_index];
 
@@ -200,7 +200,7 @@ class Blip_Wave {
 
     /// End time frame of specified duration. Localize time to new frame.
     inline void end_frame(blip_time_t duration) {
-        assert(("Blip_Wave::end_frame(): Wave hadn't yet been run for entire frame", duration <= time_));
+        assert(duration <= time_ && "Blip_Wave::end_frame(): Wave hadn't yet been run for entire frame");
         time_ -= duration;
     }
 };

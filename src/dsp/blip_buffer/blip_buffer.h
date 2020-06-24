@@ -44,9 +44,9 @@ class Blip_Buffer {
     int32_t get_sample_rate() const;
 
     // Number of source time units per second
-    void clock_rate(int32_t);
+    void set_clock_rate(int32_t);
 
-    int32_t clock_rate() const;
+    int32_t get_clock_rate() const;
 
     // Length of buffer, in milliseconds
     int length() const;
@@ -247,7 +247,7 @@ inline int Blip_Buffer::output_latency() const {
     return widest_impulse_ / 2;
 }
 
-inline int32_t Blip_Buffer::clock_rate() const {
+inline int32_t Blip_Buffer::get_clock_rate() const {
     return clocks_per_sec;
 }
 

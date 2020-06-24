@@ -63,7 +63,7 @@ class Blip_Buffer {
     /// frame. All transitions must have been added before 'time'.
     void end_frame(blip_time_t time);
 
-    // Number of samples available for reading with read_samples()
+    /// Return the number of samples available for reading with read_samples().
     int32_t samples_avail() const;
 
     /// Read at most 'max_samples' out of buffer into 'dest', removing them
@@ -71,7 +71,11 @@ class Blip_Buffer {
     /// If stereo is true, increment 'dest' one extra time after writing each
     /// sample, to allow easy interleving of two channels into a stereo output
     /// buffer.
-    int32_t read_samples(blip_sample_t* dest, int32_t max_samples, bool stereo = false);
+    int32_t read_samples(
+        blip_sample_t* dest,
+        int32_t max_samples,
+        bool stereo = false
+    );
 
     /// Remove 'count' samples from those waiting to be read
     void remove_samples(int32_t count);
@@ -125,8 +129,10 @@ class Blip_Buffer {
         int bass_freq_;
         int length_;
 
-        enum { accum_fract = 15 }; // less than 16 to give extra sample range
-        enum { sample_offset = 0x7F7F }; // repeated byte allows memset to clear buffer
+        // less than 16 to give extra sample range
+        enum { accum_fract = 15 };
+        // repeated byte allows memset to clear buffer
+        enum { sample_offset = 0x7F7F };
 
         friend class Blip_Reader;
 };

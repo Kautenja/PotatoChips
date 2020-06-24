@@ -10,10 +10,6 @@
 #include <cstdint>
 #include <cassert>
 
-// blargg_err_t (NULL on success, otherwise error string)
-typedef const char* blargg_err_t;
-const blargg_err_t blargg_success = 0;
-
 /// forward declaration of the Blip_Reader class
 class Blip_Reader;
 
@@ -35,7 +31,7 @@ class Blip_Buffer {
     /// then clear buffer. If there is insufficient memory for the buffer,
     /// sets the buffer length to 0 and returns error string or propagates
     /// exception if compiler supports it.
-    blargg_err_t set_sample_rate(int32_t samples_per_sec);
+    const char* set_sample_rate(int32_t samples_per_sec);
 
     /// Return current output sample rate.
     int32_t get_sample_rate() const;

@@ -75,8 +75,8 @@ class VRC6 {
     enum { base_addr = 0x9000 };
     enum { addr_step = 0x1000 };
     void write_osc(cpu_time_t time, int osc_index, int reg, int data) {
-        // require((unsigned) osc_index < OSC_COUNT);
-        // require((unsigned) reg < reg_count);
+        assert((unsigned) osc_index < OSC_COUNT);
+        assert((unsigned) reg < reg_count);
 
         run_until(time);
         oscs[osc_index].regs[reg] = data;
@@ -107,7 +107,7 @@ class VRC6 {
     Blip_Synth<blip_good_quality, 15> square_synth;
 
     void run_until(cpu_time_t time) {
-        // require(time >= last_time);
+        assert(time >= last_time);
         run_square(oscs[0], time);
         run_square(oscs[1], time);
         run_saw(time);

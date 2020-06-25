@@ -107,11 +107,13 @@ struct ChipVRC6 : Module {
     /// Process square wave (channel 0).
     void channel0_pulse() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 4;
+        static constexpr float FREQ_MIN = 4;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 4095;
+        static constexpr float FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
+        // the constant modulation factor
+        static constexpr float MOD_FACTOR = 10;
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (0b00000111)
@@ -120,23 +122,27 @@ struct ChipVRC6 : Module {
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register (0b00001111)
         static constexpr float LEVEL_MAX = 15;
-        // get the pitch / frequency of the oscillator
+        // the index of the channel
+        static constexpr int CHANNEL_INDEX = 0;
+
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        // TODO: clamp before converting to 16 bit
-        freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
-        freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to 12-bit
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, 0, PULSE0_PERIOD_LOW, lo);
-        apu.write_osc(0, 0, PULSE0_PERIOD_HIGH, hi);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE0_PERIOD_LOW, lo);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE0_PERIOD_HIGH, hi);
 
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW0].getValue();
@@ -151,17 +157,19 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the duty cycle and volume
-        apu.write_osc(0, 0, PULSE0_DUTY_VOLUME, (pw << 4) + level);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE0_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process square wave (channel 1).
     void channel1_pulse() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 4;
+        static constexpr float FREQ_MIN = 4;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 4095;
+        static constexpr float FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
+        // the constant modulation factor
+        static constexpr float MOD_FACTOR = 10;
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (0b00000111)
@@ -170,24 +178,27 @@ struct ChipVRC6 : Module {
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register (0b00001111)
         static constexpr float LEVEL_MAX = 15;
+        // the index of the channel
+        static constexpr int CHANNEL_INDEX = 1;
 
-        // get the pitch / frequency of the oscillator
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ1].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT1].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        freq12bit += 4 * inputs[INPUT_FM1].getVoltage();
-        // TODO: clamp before converting to 16 bit
-        freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to 12-bit
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, 1, PULSE1_PERIOD_LOW, lo);
-        apu.write_osc(0, 1, PULSE1_PERIOD_HIGH, hi);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE1_PERIOD_LOW, lo);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE1_PERIOD_HIGH, hi);
 
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW1].getValue();
@@ -202,40 +213,46 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the duty cycle and volume
-        apu.write_osc(0, 1, PULSE1_DUTY_VOLUME, (pw << 4) + level);
+        apu.write_osc(0, CHANNEL_INDEX, PULSE1_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process saw wave (channel 2).
     void channel2_saw() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 3;
+        static constexpr float FREQ_MIN = 3;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 4095;
+        static constexpr float FREQ_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 14;
+        // the constant modulation factor
+        static constexpr float MOD_FACTOR = 10;
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register (0b00111111)
         // the actual max for volume is 42, but some distortion effects are
         // available on the chip from 42 to 63 (as a result of overflow)
         static constexpr float LEVEL_MAX = 63;
-        // get the pitch / frequency of the oscillator
+        // the index of the channel
+        static constexpr int CHANNEL_INDEX = 2;
+
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT2].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        freq12bit += 4 * inputs[INPUT_FM2].getVoltage();
-        // TODO: clamp before converting to 16 bit
-        freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to 12-bit
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, 2, SAW_PERIOD_LOW, lo);
-        apu.write_osc(0, 2, SAW_PERIOD_HIGH, hi);
+        apu.write_osc(0, CHANNEL_INDEX, SAW_PERIOD_LOW, lo);
+        apu.write_osc(0, CHANNEL_INDEX, SAW_PERIOD_HIGH, hi);
 
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL2].getValue();
@@ -244,7 +261,7 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the volume
-        apu.write_osc(0, 2, SAW_VOLUME, level);
+        apu.write_osc(0, CHANNEL_INDEX, SAW_VOLUME, level);
     }
 
     /// Return a 10V signed sample from the APU.

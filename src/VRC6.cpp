@@ -126,6 +126,7 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        // TODO: clamp before converting to 16 bit
         freq12bit += 4 * inputs[INPUT_FM0].getVoltage();
         freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
@@ -177,6 +178,7 @@ struct ChipVRC6 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq12bit += 4 * inputs[INPUT_FM1].getVoltage();
+        // TODO: clamp before converting to 16 bit
         freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -224,6 +226,7 @@ struct ChipVRC6 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         uint16_t freq12bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
         freq12bit += 4 * inputs[INPUT_FM2].getVoltage();
+        // TODO: clamp before converting to 16 bit
         freq12bit = rack::clamp(freq12bit, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;

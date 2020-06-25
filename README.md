@@ -1,4 +1,4 @@
-# Stale Chips
+# Potato Chips
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 

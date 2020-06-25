@@ -265,29 +265,29 @@ struct Chip2A03Widget : ModuleWidget {
         static const auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip2A03::INPUT_VOCT0));
-        addInput(createInput<PJ301MPort>(Vec(28, 159), module, Chip2A03::INPUT_VOCT1));
-        addInput(createInput<PJ301MPort>(Vec(28, 244), module, Chip2A03::INPUT_VOCT2));
-        addInput(createInput<PJ301MPort>(Vec(28, 329), module, Chip2A03::INPUT_VOCT3));
+        addInput(createInput<PJ301MPort>(Vec(20, 74), module, Chip2A03::INPUT_VOCT0));
+        addInput(createInput<PJ301MPort>(Vec(20, 159), module, Chip2A03::INPUT_VOCT1));
+        addInput(createInput<PJ301MPort>(Vec(20, 244), module, Chip2A03::INPUT_VOCT2));
+        addInput(createInput<PJ301MPort>(Vec(20, 329), module, Chip2A03::INPUT_VOCT3));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 32), module, Chip2A03::INPUT_FM0));
-        addInput(createInput<PJ301MPort>(Vec(33, 118), module, Chip2A03::INPUT_FM1));
-        addInput(createInput<PJ301MPort>(Vec(33, 203), module, Chip2A03::INPUT_FM2));
+        addInput(createInput<PJ301MPort>(Vec(25, 32), module, Chip2A03::INPUT_FM0));
+        addInput(createInput<PJ301MPort>(Vec(25, 118), module, Chip2A03::INPUT_FM1));
+        addInput(createInput<PJ301MPort>(Vec(25, 203), module, Chip2A03::INPUT_FM2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, Chip2A03::PARAM_FREQ0));
-        addParam(createParam<Rogan3PSNES>(Vec(62, 126), module, Chip2A03::PARAM_FREQ1));
-        addParam(createParam<Rogan3PSNES>(Vec(62, 211), module, Chip2A03::PARAM_FREQ2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(62, 297), module, Chip2A03::PARAM_FREQ3));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, Chip2A03::PARAM_FREQ0));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, Chip2A03::PARAM_FREQ1));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, Chip2A03::PARAM_FREQ2));
+        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, Chip2A03::PARAM_FREQ3));
         // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 30), module, Chip2A03::PARAM_PW0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(109, 115), module, Chip2A03::PARAM_PW1));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, Chip2A03::PARAM_PW0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, Chip2A03::PARAM_PW1));
         // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(32, 284), module, Chip2A03::INPUT_LFSR));
+        addInput(createInput<PJ301MPort>(Vec(24, 284), module, Chip2A03::INPUT_LFSR));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, Chip2A03::OUTPUT_CHANNEL0));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 159), module, Chip2A03::OUTPUT_CHANNEL1));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 244), module, Chip2A03::OUTPUT_CHANNEL2));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 329), module, Chip2A03::OUTPUT_CHANNEL3));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 74), module, Chip2A03::OUTPUT_CHANNEL0));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, Chip2A03::OUTPUT_CHANNEL1));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, Chip2A03::OUTPUT_CHANNEL2));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, Chip2A03::OUTPUT_CHANNEL3));
     }
 };
 

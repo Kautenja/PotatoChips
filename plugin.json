@@ -1,16 +1,14 @@
 {
-  "slug": "KautenjaDSP-NES-Oscillators",
+  "slug": "KautenjaDSP-PotatoChips",
   "version": "1.1.0",
   "license": "GPL-3.0-or-later",
-  "name": "NES Oscillators",
+  "name": "Potato Chips",
   "brand": "KautenjaDSP",
   "author": "Christian Kauten",
   "authorEmail": "kautenja@auburn.edu",
   "authorUrl": "https://kautenja.github.io/",
-  "pluginUrl": "https://kautenja.github.io/plugins/NES-Oscillators",
-  "manualUrl": "https://kautenja.github.io/plugins/NES-Oscillators/manual.pdf",
-  "sourceUrl": "https://github.com/Kautenja/NES-Oscillators",
-  "changelogUrl": "https://github.com/Kautenja/NES-Oscillators/blob/master/CHANGELOG.md",
+  "sourceUrl": "https://github.com/Kautenja/PotatoChips",
+  "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md",
   "modules": [
     {
       "slug": "2A03",

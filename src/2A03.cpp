@@ -199,18 +199,17 @@ struct Chip2A03 : Module {
     /// Process noise (channel 3).
     void channel3_noise() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 0;
+        static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 15;
+        static constexpr float FREQ_MAX = 15;
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
         // convert the pitch to frequency based on standard exponential scale
-        auto cv = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        uint32_t param = params[PARAM_FREQ3].getValue() + cv;
-        // TODO: clamp before converting to 32 bit
-        param = FREQ_MAX - rack::clamp(param, FREQ_MIN, FREQ_MAX);
-        apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + param);
+        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
+        freq += params[PARAM_FREQ3].getValue();
+        uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
         apu.write_register(0, NOISE_HI, 0);
         // set the volume to a constant level
         apu.write_register(0, NOISE_VOL, 0b00011111);

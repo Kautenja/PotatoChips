@@ -25,6 +25,13 @@
       "description": "An emulation of the VRC6 sound chip.",
       "manualUrl": "https://kautenja.github.io/modules/VRC6/manual.pdf",
       "tags": [ "VCO", "Synth voice" ]
+    },
+    {
+      "slug": "Namco106",
+      "name": "Namco 106",
+      "description": "An emulation of the Namco 106 sound chip.",
+      "manualUrl": "https://kautenja.github.io/modules/Namco106/manual.pdf",
+      "tags": [ "VCO", "Synth voice" ]
     }
   ]
 }

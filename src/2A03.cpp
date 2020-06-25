@@ -114,20 +114,24 @@ struct Chip2A03 : Module {
     /// Process pulse wave (channel 0).
     void channel0_pulse() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 8;
+        static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 1023;
+        static constexpr float FREQ11BIT_MAX = 1023;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
-        // get the pitch / frequency of the oscillator in 11-bit
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ0].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT0].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        freq11bit += inputs[INPUT_FM0].getVoltage();
-        // TODO: clamp before converting to 16 bit
-        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to 11-bit
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        // write the frequency to the low and high registers
         apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
         apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
@@ -139,20 +143,24 @@ struct Chip2A03 : Module {
     /// Process pulse wave (channel 1).
     void channel1_pulse() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 8;
+        static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 1023;
+        static constexpr float FREQ11BIT_MAX = 1023;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
-        // get the pitch / frequency of the oscillator in 11-bit
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ1].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT1].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        freq11bit += inputs[INPUT_FM1].getVoltage();
-        // TODO: clamp before converting to 16 bit
-        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to an 11-bit value
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        // write the frequency to the low and high registers
         apu.write_register(0, PULSE1_LO, freq11bit & 0b11111111);
         apu.write_register(0, PULSE1_HI, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
@@ -164,20 +172,24 @@ struct Chip2A03 : Module {
     /// Process triangle wave (channel 2).
     void channel2_triangle() {
         // the minimal value for the frequency register to produce sound
-        static constexpr auto FREQ_MIN = 2;
+        static constexpr float FREQ11BIT_MIN = 2;
         // the maximal value for the frequency register
-        static constexpr auto FREQ_MAX = 2047;
+        static constexpr float FREQ11BIT_MAX = 2047;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
-        // get the pitch / frequency of the oscillator in 11-bit
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT2].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
-        freq11bit += inputs[INPUT_FM2].getVoltage();
-        // TODO: clamp before converting to 16 bit
-        freq11bit = rack::clamp(freq11bit, FREQ_MIN, FREQ_MAX);
+        // convert the frequency to an 11-bit value
+        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        // write the frequency to the low and high registers
         apu.write_register(0, TRI_LO, freq11bit & 0b11111111);
         apu.write_register(0, TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
         // write the linear register to enable the oscillator
@@ -193,6 +205,7 @@ struct Chip2A03 : Module {
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
+        // convert the pitch to frequency based on standard exponential scale
         auto cv = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         uint32_t param = params[PARAM_FREQ3].getValue() + cv;
         // TODO: clamp before converting to 32 bit

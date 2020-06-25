@@ -300,33 +300,33 @@ struct ChipVRC6Widget : ModuleWidget {
         static const auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(27, 78), module, ChipVRC6::INPUT_VOCT0));
-        addInput(createInput<PJ301MPort>(Vec(27, 188), module, ChipVRC6::INPUT_VOCT1));
-        addInput(createInput<PJ301MPort>(Vec(27, 298), module, ChipVRC6::INPUT_VOCT2));
+        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipVRC6::INPUT_VOCT0));
+        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipVRC6::INPUT_VOCT1));
+        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipVRC6::INPUT_VOCT2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 37), module, ChipVRC6::INPUT_FM0));
-        addInput(createInput<PJ301MPort>(Vec(33, 149), module, ChipVRC6::INPUT_FM1));
-        addInput(createInput<PJ301MPort>(Vec(33, 258), module, ChipVRC6::INPUT_FM2));
+        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipVRC6::INPUT_FM0));
+        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipVRC6::INPUT_FM1));
+        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipVRC6::INPUT_FM2));
         // PW inputs
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(37, 107), module, ChipVRC6::PARAM_PW0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(37, 218), module, ChipVRC6::PARAM_PW1));
-        addInput(createInput<PJ301MPort>(Vec(66, 104), module, ChipVRC6::INPUT_PW0));
-        addInput(createInput<PJ301MPort>(Vec(66, 215), module, ChipVRC6::INPUT_PW1));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(30, 107), module, ChipVRC6::PARAM_PW0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(30, 218), module, ChipVRC6::PARAM_PW1));
+        addInput(createInput<PJ301MPort>(Vec(58, 104), module, ChipVRC6::INPUT_PW0));
+        addInput(createInput<PJ301MPort>(Vec(58, 215), module, ChipVRC6::INPUT_PW1));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(61, 42), module, ChipVRC6::PARAM_FREQ0));
-        addParam(createParam<Rogan3PSNES>(Vec(61, 151), module, ChipVRC6::PARAM_FREQ1));
-        addParam(createParam<Rogan3PSNES>(Vec(61, 266), module, ChipVRC6::PARAM_FREQ2));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipVRC6::PARAM_FREQ0));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipVRC6::PARAM_FREQ1));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipVRC6::PARAM_FREQ2));
         // Levels
-        addInput(createInput<PJ301MPort>(Vec(109, 36), module, ChipVRC6::INPUT_LEVEL0));
-        addInput(createInput<PJ301MPort>(Vec(109, 146), module, ChipVRC6::INPUT_LEVEL1));
-        addInput(createInput<PJ301MPort>(Vec(109, 255), module, ChipVRC6::INPUT_LEVEL2));
-        addParam(createParam<Rogan0PSNES>(Vec(110, 64), module, ChipVRC6::PARAM_LEVEL0));
-        addParam(createParam<Rogan0PSNES>(Vec(110, 174), module, ChipVRC6::PARAM_LEVEL1));
-        addParam(createParam<Rogan0PSNES>(Vec(110, 283), module, ChipVRC6::PARAM_LEVEL2));
+        addInput(createInput<PJ301MPort>(Vec(102, 36), module, ChipVRC6::INPUT_LEVEL0));
+        addInput(createInput<PJ301MPort>(Vec(102, 146), module, ChipVRC6::INPUT_LEVEL1));
+        addInput(createInput<PJ301MPort>(Vec(102, 255), module, ChipVRC6::INPUT_LEVEL2));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 64), module, ChipVRC6::PARAM_LEVEL0));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipVRC6::PARAM_LEVEL1));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipVRC6::PARAM_LEVEL2));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 104), module, ChipVRC6::OUTPUT_CHANNEL0));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 214), module, ChipVRC6::OUTPUT_CHANNEL1));
-        addOutput(createOutput<PJ301MPort>(Vec(114, 324), module, ChipVRC6::OUTPUT_CHANNEL2));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipVRC6::OUTPUT_CHANNEL0));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipVRC6::OUTPUT_CHANNEL1));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 324), module, ChipVRC6::OUTPUT_CHANNEL2));
     }
 };
 

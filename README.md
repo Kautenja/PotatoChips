@@ -5,7 +5,7 @@
 [BuildStatus]:  https://travis-ci.com/Kautenja/NES-Oscillators.svg?branch=master
 [BuildServer]:  https://travis-ci.com/Kautenja/NES-Oscillators
 
-These retro sound chips are so good, [i eat em like theyre potato chips](https://www.youtube.com/watch?v=lL5M-vXq58c). They're just so addicting.
+These retro sound chips are so good, [I eat 'em like they're potato chips.](https://www.youtube.com/watch?v=lL5M-vXq58c) They're just so addicting.
 
 <p align="center">
 <img alt="Plugin" src="img/Plugin.png">

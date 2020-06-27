@@ -2,8 +2,8 @@
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
-[BuildStatus]:  https://travis-ci.com/Kautenja/Potato-Chips.svg?branch=master
-[BuildServer]:  https://travis-ci.com/Kautenja/Potato-Chips
+[BuildStatus]:  https://travis-ci.com/Kautenja/PotatoChips.svg?branch=master
+[BuildServer]:  https://travis-ci.com/Kautenja/PotatoChips
 
 These retro sound chips are so good, [I eat 'em like they're potato chips.](https://www.youtube.com/watch?v=lL5M-vXq58c) They're just so addicting.
 

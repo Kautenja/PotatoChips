@@ -2,10 +2,16 @@
 language: cpp
 matrix:
   include:
-  - os: linux
-    dist: bionic
-  - os: osx
-    osx_image: xcode11
+    - os: linux
+      dist: xenial
+    - os: linux
+      dist: bionic
+    - os: linux
+      dist: precise
+    - os: osx
+      osx_image: xcode11
+    - os: osx
+      osx_image: xcode12
   - os: windows
     before_install:
     - choco install make -y

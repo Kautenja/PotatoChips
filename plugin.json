@@ -2,34 +2,35 @@
   "slug": "KautenjaDSP-PotatoChips",
   "version": "1.1.0",
   "license": "GPL-3.0-or-later",
-  "name": "Potato Chips",
+  "name": "KautenjaDSP Potato Chips",
   "brand": "KautenjaDSP",
   "author": "Christian Kauten",
   "authorEmail": "kautenja@auburn.edu",
   "authorUrl": "https://kautenja.github.io/",
   "sourceUrl": "https://github.com/Kautenja/PotatoChips",
+  "manualUrl": "https://github.com/Kautenja/PotatoChips/manuals/PotatoChips.pdf",
   "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md",
   "modules": [
     {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the 2A03 sound chip.",
-      "manualUrl": "https://kautenja.github.io/modules/2A03/manual.pdf",
-      "tags": [ "VCO", "Noise", "Synth voice" ]
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/manuals/2A03.pdf",
+      "tags": [ "Oscillator", "Noise" ]
     },
     {
       "slug": "VRC6",
       "name": "VRC6",
       "description": "An emulation of the VRC6 sound chip.",
-      "manualUrl": "https://kautenja.github.io/modules/VRC6/manual.pdf",
-      "tags": [ "VCO", "Synth voice" ]
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/manuals/VRC6.pdf",
+      "tags": [ "Oscillator" ]
     },
     {
       "slug": "Namco106",
       "name": "Namco 106",
       "description": "An emulation of the Namco 106 sound chip.",
-      "manualUrl": "https://kautenja.github.io/modules/Namco106/manual.pdf",
-      "tags": [ "VCO", "Synth voice" ]
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/manuals/Namco106.pdf",
+      "tags": [ "Oscillator" ]
     }
   ]
 }

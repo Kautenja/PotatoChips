@@ -64,7 +64,7 @@ information about the features of this module.
 **Coming Soon!**
 
 <p align="center">
-<img alt="Namco106" src="img/Namco106.png" height="380px">
+<img alt="106" src="img/106.png" height="380px">
 </p>
 
 ### Features

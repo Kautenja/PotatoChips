@@ -26,7 +26,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Namco 106 Chip module.
-struct ChipNamco106 : Module {
+struct Chip106 : Module {
     enum ParamIds {
         PARAM_FREQ0,
         PARAM_COUNT
@@ -47,14 +47,14 @@ struct ChipNamco106 : Module {
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[Namco106::OSC_COUNT];
-    /// The Namco106 instance to synthesize sound with
+    /// The 106 instance to synthesize sound with
     Namco106 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
-    /// Initialize a new Namco106 Chip module.
-    ChipNamco106() {
+    /// Initialize a new 106 Chip module.
+    Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // set the output buffer for each individual voice
@@ -162,21 +162,21 @@ struct ChipNamco106 : Module {
 // ---------------------------------------------------------------------------
 
 /// The widget structure that lays out the panel of the module and the UI menus.
-struct ChipNamco106Widget : ModuleWidget {
-    ChipNamco106Widget(ChipNamco106 *module) {
+struct Chip106Widget : ModuleWidget {
+    Chip106Widget(Chip106 *module) {
         setModule(module);
-        static const auto panel = "res/Namco106.svg";
+        static const auto panel = "res/106.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(28, 74), module, ChipNamco106::INPUT_VOCT0));
+        addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip106::INPUT_VOCT0));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 32), module, ChipNamco106::INPUT_FM0));
+        addInput(createInput<PJ301MPort>(Vec(33, 32), module, Chip106::INPUT_FM0));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, ChipNamco106::PARAM_FREQ0));
+        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, Chip106::PARAM_FREQ0));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, ChipNamco106::OUTPUT_CHANNEL));
+        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, Chip106::OUTPUT_CHANNEL));
     }
 };
 
 /// the global instance of the model
-Model *modelChipNamco106 = createModel<ChipNamco106, ChipNamco106Widget>("Namco106");
+Model *modelChip106 = createModel<Chip106, Chip106Widget>("106");

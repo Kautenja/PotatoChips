@@ -5,7 +5,11 @@
 [BuildStatus]:  https://travis-ci.com/Kautenja/PotatoChips.svg?branch=master
 [BuildServer]:  https://travis-ci.com/Kautenja/PotatoChips
 
-These retro sound chips are so good, [I eat 'em like they're potato chips.](https://www.youtube.com/watch?v=lL5M-vXq58c) They're just so addicting.
+These retro sound chips are so good,
+[I eat 'em like they're potato chips.][sam-hyde]
+They're just so addicting.
+
+[sam-hyde]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <p align="center">
 <img alt="Plugin" src="img/Plugin.png">
@@ -59,9 +63,11 @@ pulse wave generators, and a quantized saw wave generator.
 See the [Manual](https://kautenja.github.io/modules/VRC6/manual.pdf) for more
 information about the features of this module.
 
-## Namco106
+## 106 _(Coming Soon!)_
 
-**Coming Soon!**
+106 is an emulation of the Namco 106 audio processing unit from the
+Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains
+eight channels of wave-table synthesis and 128 bytes of operational RAM.
 
 <p align="center">
 <img alt="Namco106" src="img/Namco106.png" height="380px">
@@ -69,11 +75,11 @@ information about the features of this module.
 
 ### Features
 
--   **Wavetable synthesis:** 8 channels of wavetable synthesis
--   **128 bytes RAM:** 128 bytes of RAM for runtime wavetable data
+-   **Wavetable synthesis:** 8 channels of wave-table synthesis
+-   **128 bytes RAM:** 128 bytes of RAM for runtime wave-table data
 
-See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for more
-information about the features of this module.
+See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for
+more information about the features of this module.
 
 ## Acknowledgments
 

@@ -13,11 +13,11 @@ These retro sound chips are so good, [I eat 'em like they're potato chips.](http
 
 ## 2A03
 
-2A03 is an emulation of the 2A03 sound chip from the Nintendo Entertainment
-System (NES) for VCV Rack. The 2A03 chip contains two pulse wave generators,
-a quantized triangle wave generator, and a noise generator. The original chip
-featured a DMC loader for playing samples that has been omitted in this
-emulation.
+2A03 is an emulation of the Ricoh 2A03 audio processing unit from the Nintendo
+Entertainment System (NES) for VCV Rack. The 2A03 chip contains two pulse wave
+generators, a quantized triangle wave generator, and a noise generator. The
+original chip featured a DMC loader for playing samples that has been omitted
+in this emulation.
 
 <p align="center">
 <img alt="2A03" src="img/2A03.png" height="380px">
@@ -38,9 +38,9 @@ information about the features of this module.
 
 ## VRC6
 
-VRC6 is an emulation of the Konami VRC6 sound chip from the Nintendo
-Entertainment System (NES) for VCV Rack. The VRC6 chip contains two pulse
-wave generators, and a quantized saw wave generator.
+VRC6 is an emulation of the Konami VRC6 audio processing unit from the
+Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two
+pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
 <img alt="VRC6" src="img/VRC6.png" height="380px">

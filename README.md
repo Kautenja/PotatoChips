@@ -37,7 +37,7 @@ in this emulation.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual](https://kautenja.github.io/modules/2A03/manual.pdf) for more
+See the [Manual](manual/2A03.pdf) for more
 information about the features of this module.
 
 ## VRC6
@@ -60,7 +60,7 @@ pulse wave generators, and a quantized saw wave generator.
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
-See the [Manual](https://kautenja.github.io/modules/VRC6/manual.pdf) for more
+See the [Manual](manual/VRC6.pdf) for more
 information about the features of this module.
 
 ## 106 _(Coming Soon!)_
@@ -78,7 +78,7 @@ eight channels of wave-table synthesis and 128 bytes of operational RAM.
 -   **Wavetable synthesis:** 8 channels of wave-table synthesis
 -   **128 bytes RAM:** 128 bytes of RAM for runtime wave-table data
 
-See the [Manual](https://kautenja.github.io/modules/Namco106/manual.pdf) for
+See the [Manual](manual/106.pdf) for
 more information about the features of this module.
 
 ## Acknowledgments

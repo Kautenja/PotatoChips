@@ -99,7 +99,10 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         // set the output buffer for each individual voice
-        for (int i = 0; i < VRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < VRC6::OSC_COUNT; i++) {
+            apu.osc_output(i, &buf[i]);
+            buf[i].set_clock_rate(CLOCK_RATE);
+        }
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -291,7 +294,6 @@ struct ChipVRC6 : Module {
             // update the buffer for each channel
             for (int i = 0; i < VRC6::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

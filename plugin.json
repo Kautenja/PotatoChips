@@ -14,7 +14,7 @@
     {
       "slug": "2A03",
       "name": "2A03",
-      "description": "An emulation of the 2A03 sound chip.",
+      "description": "An emulation of the Ricoh 2A03 audio processing unit.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/blob/master/manual/2A03.pdf",
       "tags": [
         "Oscillator",
@@ -24,7 +24,7 @@
     {
       "slug": "VRC6",
       "name": "VRC6",
-      "description": "An emulation of the VRC6 sound chip.",
+      "description": "An emulation of the Konami VRC6 audio processing unit.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/blob/master/manual/VRC6.pdf",
       "tags": [
         "Oscillator"

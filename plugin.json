@@ -31,9 +31,9 @@
       ]
     },
     {
-      "slug": "Namco106",
-      "name": "Namco 106",
-      "description": "An emulation of the Namco 106 sound chip.",
+      "slug": "106",
+      "name": "106",
+      "description": "An emulation of the Namco 106 audio processing unit.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/blob/master/manual/Namco106.pdf",
       "tags": [
         "Oscillator"

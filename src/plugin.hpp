@@ -22,4 +22,4 @@ using namespace rack;
 extern rack::Plugin* plugin_instance;
 extern rack::Model *modelChip2A03;
 extern rack::Model *modelChipVRC6;
-extern rack::Model *modelChipNamco106;
+extern rack::Model *modelChip106;

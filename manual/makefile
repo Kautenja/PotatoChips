@@ -6,5 +6,3 @@ manual:
 	cp VRC6/build/manual.pdf VRC6.pdf
 	make -C 106
 	cp 106/build/manual.pdf 106.pdf
-	make -C PotatoChips
-	cp PotatoChips/build/manual.pdf PotatoChips.pdf

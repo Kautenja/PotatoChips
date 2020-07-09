@@ -12,7 +12,7 @@ They're just so addicting.
 [sam-hyde]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <p align="center">
-<img alt="Plugin" src="manual/PotatoChips/img/PotatoChips-Plugin.svg" height="380px">
+<img alt="Plugin" src="manual/PotatoChips-Plugin.svg" height="380px">
 </p>
 
 ## 2A03

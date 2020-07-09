@@ -1,6 +1,6 @@
 // Game_Music_Emu 0.5.2. http://www.slack.net/~ant/
 
-#include "Nes_Fme7_Apu.h"
+#include "fme7.h"
 
 #include <string.h>
 
@@ -17,15 +17,15 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 
 // #include "blargg_source.h"
 
-void Nes_Fme7_Apu::reset()
+void FME7::reset()
 {
 	last_time = 0;
 
-	for ( int i = 0; i < osc_count; i++ )
+	for ( int i = 0; i < OSC_COUNT; i++ )
 		oscs [i].last_amp = 0;
 }
 
-unsigned char const Nes_Fme7_Apu::amp_table [16] =
+unsigned char const FME7::amp_table [16] =
 {
 	#define ENTRY( n ) (unsigned char) (n * amp_range + 0.5)
 	ENTRY(0.0000), ENTRY(0.0078), ENTRY(0.0110), ENTRY(0.0156),
@@ -35,11 +35,11 @@ unsigned char const Nes_Fme7_Apu::amp_table [16] =
 	#undef ENTRY
 };
 
-void Nes_Fme7_Apu::run_until( blip_time_t end_time )
+void FME7::run_until( blip_time_t end_time )
 {
 	// require( end_time >= last_time );
 
-	for ( int index = 0; index < osc_count; index++ )
+	for ( int index = 0; index < OSC_COUNT; index++ )
 	{
 		int mode = regs [7] >> index;
 		int vol_mode = regs [010 + index];
@@ -50,14 +50,11 @@ void Nes_Fme7_Apu::run_until( blip_time_t end_time )
 			continue;
 
 		// check for unsupported mode
-		// #ifndef NDEBUG
-		// 	if ( (mode & 011) <= 001 && vol_mode & 0x1F )
-		// 		dprintf( "FME7 used unimplemented sound mode: %02X, vol_mode: %02X\n",
-		// 				mode, vol_mode & 0x1F );
-		// #endif
+		// if ( (mode & 011) <= 001 && vol_mode & 0x1F )
+		// 	printf( "FME7 used unimplemented sound mode: %02X, vol_mode: %02X\n", mode, vol_mode & 0x1F );
 
-		if ( (mode & 001) | (vol_mode & 0x10) )
-			volume = 0; // noise and envelope aren't supported
+		// if ( (mode & 001) | (vol_mode & 0x10) )
+		// 	volume = 0; // noise and envelope aren't supported
 
 		// period
 		int const period_factor = 16;

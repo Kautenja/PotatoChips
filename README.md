@@ -2,8 +2,8 @@
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
-[BuildStatus]:  https://travis-ci.com/Kautenja/PotatoChips.svg?branch=master
-[BuildServer]:  https://travis-ci.com/Kautenja/PotatoChips
+[BuildStatus]:  https://travis-ci.org/Kautenja/PotatoChips.svg?branch=master
+[BuildServer]:  https://travis-ci.org/Kautenja/PotatoChips
 
 These retro sound chips are so good,
 [I eat 'em like they're potato chips.][sam-hyde]
@@ -12,7 +12,7 @@ They're just so addicting.
 [sam-hyde]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <p align="center">
-<img alt="Plugin" src="img/Plugin.png">
+<img alt="Plugin" src="manual/PotatoChips/img/PotatoChips-Plugin.svg" height="380px">
 </p>
 
 ## 2A03
@@ -24,7 +24,7 @@ original chip featured a DMC loader for playing samples that has been omitted
 in this emulation.
 
 <p align="center">
-<img alt="2A03" src="img/2A03.png" height="380px">
+<img alt="2A03" src="manual/2A03/img/2A03-Module.svg" height="380px">
 </p>
 
 ### Features
@@ -47,7 +47,7 @@ Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two
 pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="VRC6" src="img/VRC6.png" height="380px">
+<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg" height="380px">
 </p>
 
 ### Features
@@ -70,7 +70,7 @@ Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains
 eight channels of wave-table synthesis and 128 bytes of operational RAM.
 
 <p align="center">
-<img alt="106" src="img/106.png" height="380px">
+<img alt="106" src="manual/106/img/106-Module.svg" height="380px">
 </p>
 
 ### Features

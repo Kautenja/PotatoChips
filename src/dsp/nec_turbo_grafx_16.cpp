@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "turbo_grafx_16.hpp"
+#include "nec_turbo_grafx_16.hpp"
 #include <cstring>
 #include "blargg_source.h"
 

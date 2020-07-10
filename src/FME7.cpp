@@ -19,6 +19,8 @@
 #include "components.hpp"
 #include "dsp/fme7.hpp"
 
+#include <iostream>
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -54,9 +56,9 @@ struct ChipFME7 : Module {
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f, "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f, "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f, "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // set the output buffer for each individual voice
         for (int i = 0; i < FME7::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -66,93 +68,37 @@ struct ChipFME7 : Module {
         apu.volume(3.f);
     }
 
-    /// Process pulse wave (channel A).
-    void channelA_pulse() {
+    /// Process pulse wave for the given channel.
+    ///
+    /// @param channel the index of the channel to process
+    ///
+    inline void pulse(int channel) {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ12BIT_MIN = 8;
+        static constexpr float FREQ12BIT_MIN = 4;
         // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8192;
+        static constexpr float FREQ12BIT_MAX = 8191;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 0].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 0].getVoltage();
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 0].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
         uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+        std::cout << freq12bit << std::endl;
         // write the registers with the frequency data
-        apu.write_latch(PULSE_A_LO);
+        apu.write_latch(PULSE_A_LO + 2 * channel);
         apu.write_data(0, freq12bit & 0b11111111);
-        apu.write_latch(PULSE_A_HI);
+        apu.write_latch(PULSE_A_HI + 2 * channel);
         apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
         // set the volume to a constant level
-        apu.write_latch(PULSE_A_ENV);
-        apu.write_data(0, 0b00000111);
-    }
-
-    /// Process pulse wave (channel B).
-    void channelB_pulse() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ12BIT_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8192;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 1].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 1].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 1].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 12-bit value
-        freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
-        uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-        // write the registers with the frequency data
-        apu.write_latch(PULSE_B_LO);
-        apu.write_data(0, freq12bit & 0b11111111);
-        apu.write_latch(PULSE_B_HI);
-        apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
-        // set the volume to a constant level
-        apu.write_latch(PULSE_B_ENV);
-        apu.write_data(0, 0b00000111);
-    }
-
-    /// Process pulse wave (channel C).
-    void channelC_pulse() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ12BIT_MIN = 2;
-        // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8192;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 2].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 12-bit value
-        freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
-        uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-        // write the registers with the frequency data
-        apu.write_latch(PULSE_C_LO);
-        apu.write_data(0, freq12bit & 0b11111111);
-        apu.write_latch(PULSE_C_HI);
-        apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
-        // set the volume to a constant level
-        apu.write_latch(PULSE_C_ENV);
+        apu.write_latch(PULSE_A_ENV + channel);
         apu.write_data(0, 0b00000111);
     }
 
@@ -160,7 +106,7 @@ struct ChipFME7 : Module {
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    float getAudioOut(int channel) {
+    inline float getAudioOut(int channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
@@ -189,9 +135,7 @@ struct ChipFME7 : Module {
             new_sample_rate = false;
         }
         // process the data on the chip
-        channelA_pulse();
-        channelB_pulse();
-        channelC_pulse();
+        for (int i = 0; i < FME7::OSC_COUNT; i++) pulse(i);
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < FME7::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);

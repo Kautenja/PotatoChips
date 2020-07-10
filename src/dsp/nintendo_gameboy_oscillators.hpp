@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef GB_OSCS_H
-#define GB_OSCS_H
+#ifndef DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
+#define DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
 
 #include "blargg_common.h"
 #include "blip_buffer/blip_synth.hpp"
@@ -95,4 +95,4 @@ inline void Gb_Env::reset()
 	Gb_Osc::reset();
 }
 
-#endif
+#endif  // DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_

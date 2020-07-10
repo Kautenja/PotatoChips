@@ -2120,7 +2120,7 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 #endif /* EMU2413_COMPACTION */
 
 // Ym2413_Emu
-#include "yamaha_ym2413.h"
+#include "yamaha_ym2413_apu.hpp"
 
 #include <assert.h>
 

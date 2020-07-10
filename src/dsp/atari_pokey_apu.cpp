@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "atari_pokey.hpp"
+#include "atari_pokey_apu.hpp"
 #include <string.h>
 #include "blargg_source.h"
 

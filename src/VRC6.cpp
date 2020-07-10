@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/vrc6.hpp"
+#include "dsp/konami_vrc6_apu.hpp"
 
 /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
 enum IORegisters {

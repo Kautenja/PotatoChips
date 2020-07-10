@@ -19,7 +19,7 @@
 #ifndef SMS_APU_H
 #define SMS_APU_H
 
-#include "Sms_Oscs.h"
+#include "texas_instruments_sn76489_oscillators.hpp"
 
 class Sms_Apu {
 public:

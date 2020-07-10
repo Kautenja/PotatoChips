@@ -19,8 +19,6 @@
 #include "components.hpp"
 #include "dsp/fme7.hpp"
 
-#include <iostream>
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -29,11 +27,13 @@
 struct ChipFME7 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, 3),
+        ENUMS(PARAM_LEVEL, 3),
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, 3),
         ENUMS(INPUT_FM, 3),
+        ENUMS(INPUT_LEVEL, 3),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -56,9 +56,12 @@ struct ChipFME7 : Module {
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f, "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f, "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f, "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
         // set the output buffer for each individual voice
         for (int i = 0; i < FME7::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -81,6 +84,11 @@ struct ChipFME7 : Module {
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float LEVEL_MAX = 13;
+
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -91,15 +99,21 @@ struct ChipFME7 : Module {
         // convert the frequency to 12-bit
         freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
         uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-        std::cout << freq12bit << std::endl;
         // write the registers with the frequency data
         apu.write_latch(PULSE_A_LO + 2 * channel);
         apu.write_data(0, freq12bit & 0b11111111);
         apu.write_latch(PULSE_A_HI + 2 * channel);
         apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
-        // set the volume to a constant level
+
+        // get the level from the parameter knob
+        auto levelParam = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the level
+        if (inputs[INPUT_LEVEL + channel].isConnected())
+            levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
         apu.write_latch(PULSE_A_ENV + channel);
-        apu.write_data(0, 0b00000111);
+        apu.write_data(0, level);
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -158,17 +172,24 @@ struct ChipFME7Widget : ModuleWidget {
         static const auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipFME7::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(20, 78),  module, ChipFME7::INPUT_VOCT + 0));
         addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipFME7::INPUT_VOCT + 1));
         addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipFME7::INPUT_VOCT + 2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipFME7::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(26, 37),  module, ChipFME7::INPUT_FM + 0));
         addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipFME7::INPUT_FM + 1));
         addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipFME7::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipFME7::PARAM_FREQ + 0));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, ChipFME7::PARAM_FREQ + 0));
         addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ + 1));
         addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipFME7::PARAM_FREQ + 2));
+        // levels
+        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, ChipFME7::INPUT_LEVEL + 0));
+        addInput(createInput<PJ301MPort>(Vec(102, 146),  module, ChipFME7::INPUT_LEVEL + 1));
+        addInput(createInput<PJ301MPort>(Vec(102, 255),  module, ChipFME7::INPUT_LEVEL + 2));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipFME7::PARAM_LEVEL + 0));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipFME7::PARAM_LEVEL + 1));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipFME7::PARAM_LEVEL + 2));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipFME7::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipFME7::OUTPUT_CHANNEL + 1));

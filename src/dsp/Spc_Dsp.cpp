@@ -298,8 +298,8 @@ inline int Spc_Dsp::clock_envelope( int v )
 // Clamp n into range -32768 <= n <= 32767
 inline int clamp_16( int n )
 {
-	if ( (BOOST::int16_t) n != n )
-		n = BOOST::int16_t (0x7FFF - (n >> 31));
+	if ( (int16_t) n != n )
+		n = int16_t (0x7FFF - (n >> 31));
 	return n;
 }
 
@@ -344,7 +344,7 @@ void Spc_Dsp::run( long count, short* out_buf )
 			{
 				noise_count = env_rate_init;
 
-				noise_amp = BOOST::int16_t (noise * 2);
+				noise_amp = int16_t (noise * 2);
 
 				// TODO: switch to Galios style
 				int feedback = (noise << 13) ^ (noise << 14);
@@ -505,7 +505,7 @@ void Spc_Dsp::run( long count, short* out_buf )
 				voice.interp3 = voice.interp2;
 				voice.interp2 = smp2;
 				voice.interp1 = smp1;
-				voice.interp0 = BOOST::int16_t (clamp_16( delta ) * 2); // sign-extend
+				voice.interp0 = int16_t (clamp_16( delta ) * 2); // sign-extend
 			}
 
 			// rate (with possible modulation)
@@ -516,12 +516,12 @@ void Spc_Dsp::run( long count, short* out_buf )
 			// Gaussian interpolation using most recent 4 samples
 			int index = voice.fraction >> 2 & 0x3FC;
 			voice.fraction = (voice.fraction & 0x0FFF) + rate;
-			const BOOST::int16_t* table  = (BOOST::int16_t const*) ((char const*) gauss + index);
-			const BOOST::int16_t* table2 = (BOOST::int16_t const*) ((char const*) gauss + (255*4 - index));
+			const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
+			const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255*4 - index));
 			int s = ((table  [0] * voice.interp3) >> 12) +
 					((table  [1] * voice.interp2) >> 12) +
 					((table2 [1] * voice.interp1) >> 12);
-			s = (BOOST::int16_t) (s * 2);
+			s = (int16_t) (s * 2);
 			s += (table2 [0] * voice.interp0) >> 11 & ~1;
 			int output = clamp_16( s );
 			if ( g.noise_enables & vbit )
@@ -558,8 +558,8 @@ void Spc_Dsp::run( long count, short* out_buf )
 		echo_ptr += 4;
 		if ( echo_ptr >= (g.echo_delay & 15) * 0x800 )
 			echo_ptr = 0;
-		int fb_left  = (BOOST::int16_t) GET_LE16( echo_buf     ); // sign-extend
-		int fb_right = (BOOST::int16_t) GET_LE16( echo_buf + 2 ); // sign-extend
+		int fb_left  = (int16_t) GET_LE16( echo_buf     ); // sign-extend
+		int fb_right = (int16_t) GET_LE16( echo_buf + 2 ); // sign-extend
 		this->echo_ptr = echo_ptr;
 
 		// put samples in history ring buffer
@@ -631,7 +631,7 @@ void Spc_Dsp::run( long count, short* out_buf )
 
 // Interleved gauss table (to improve cache coherency).
 // gauss [i * 2 + j] = normal_gauss [(1 - j) * 256 + i]
-const BOOST::int16_t Spc_Dsp::gauss [512] =
+const int16_t Spc_Dsp::gauss [512] =
 {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,

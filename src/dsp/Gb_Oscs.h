@@ -30,7 +30,7 @@ struct Gb_Osc
 	BLIPBuffer* outputs [4]; // NULL, right, left, center
 	BLIPBuffer* output;
 	int output_select;
-	BOOST::uint8_t* regs; // osc's 5 registers
+	uint8_t* regs; // osc's 5 registers
 
 	int delay;
 	int last_amp;
@@ -83,7 +83,7 @@ struct Gb_Wave : Gb_Osc
 	Synth const* synth;
 	int wave_pos;
 	enum { wave_size = 32 };
-	BOOST::uint8_t wave [wave_size];
+	uint8_t wave [wave_size];
 
 	void write_register( int, int );
 	void run( blip_time_t, blip_time_t, int playing );

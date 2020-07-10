@@ -220,21 +220,21 @@ struct ChipFME7Widget : ModuleWidget {
         static const auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, ChipFME7::INPUT_VOCT_A));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, ChipFME7::INPUT_VOCT_B));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, ChipFME7::INPUT_VOCT_C));
+        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipFME7::INPUT_VOCT_A));
+        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipFME7::INPUT_VOCT_B));
+        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipFME7::INPUT_VOCT_C));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, ChipFME7::INPUT_FM_A));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, ChipFME7::INPUT_FM_B));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, ChipFME7::INPUT_FM_C));
+        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipFME7::INPUT_FM_A));
+        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipFME7::INPUT_FM_B));
+        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipFME7::INPUT_FM_C));
         // Frequency parameters
         addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipFME7::PARAM_FREQ_A));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipFME7::PARAM_FREQ_B));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipFME7::PARAM_FREQ_C));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ_B));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipFME7::PARAM_FREQ_C));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74), module, ChipFME7::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipFME7::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, ChipFME7::OUTPUT_CHANNEL + 2));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipFME7::OUTPUT_CHANNEL + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipFME7::OUTPUT_CHANNEL + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(107, 324), module, ChipFME7::OUTPUT_CHANNEL + 2));
     }
 };
 

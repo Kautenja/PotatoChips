@@ -22,9 +22,6 @@
 #include "blargg_common.h"
 
 class Spc_Dsp {
-	typedef BOOST::int8_t int8_t;
-	typedef BOOST::uint8_t uint8_t;
-
  public:
 	// Keeps pointer to 64K ram
 	Spc_Dsp( uint8_t* ram );
@@ -122,7 +119,7 @@ private:
 
 	int surround_threshold;
 
-	static BOOST::int16_t const gauss [];
+	static int16_t const gauss [];
 
 	enum state_t {
 		state_attack,

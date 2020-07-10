@@ -44,9 +44,7 @@
       "description": "An emulation of the Sunsoft 5B audio processing unit.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/download/1.2.0/FME7.pdf",
       "tags": [
-        "Oscillator",
-        "Noise",
-        "Voice"
+        "Oscillator"
       ]
     }
   ]

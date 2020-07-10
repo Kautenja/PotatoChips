@@ -1,6 +1,6 @@
 // Included at the beginning of library source files, after all other #include lines
-#ifndef BLARGG_SOURCE_H
-#define BLARGG_SOURCE_H
+#ifndef BLARGG_SOURCE_H_
+#define BLARGG_SOURCE_H_
 
 // If debugging is enabled, abort program if expr is false. Meant for checking
 // internal state and consistency. A failed assertion indicates a bug in the module.
@@ -37,4 +37,4 @@ typedef unsigned char byte;
     #include BLARGG_SOURCE_BEGIN
 #endif
 
-#endif
+#endif  // BLARGG_SOURCE_H_

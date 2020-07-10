@@ -53,14 +53,33 @@ pulse wave generators, and a quantized saw wave generator.
 ### Features
 
 -   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
-    cycles: _6.25\%_, _12.5\%_, _18.75\%_, _25\%_, _31.25\%_, _37.5\%_,
-    _43.75\%_, and _50\%_
+    cycles: _6.25%_, _12.5%_, _18.75%_, _25%_, _31.25%_, _37.5%_, _43.75%_, and
+    _50%_
 -   **Quantized saw wave generator:** Generate NES style saw wave with variable
     quantization including the overflow bug in the VRC6
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
 See the [Manual](manual/VRC6.pdf) for more
+information about the features of this module.
+
+## FME7
+
+FME7 is an emulation of the Sunsoft FME7 audio processing unit from the
+Nintendo Entertainment System (NES) for VCV Rack. The FME7 chip contains three
+pulse wave generators, a noise generator, and an envelope generator. Only the
+pulse wave generators are implemented currently.
+
+<p align="center">
+<img alt="FME7" src="manual/FME7/img/FME7-Module.svg" height="380px">
+</p>
+
+### Features
+
+-   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
+-   **Amplitude modulation:** Manual and CV control over the individual voice levels
+
+See the [Manual](manual/FME7.pdf) for more
 information about the features of this module.
 
 ## 106 _(Coming Soon!)_

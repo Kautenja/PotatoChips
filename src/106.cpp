@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
-
 #include "plugin.hpp"
 #include "components.hpp"
 #include "dsp/namco106.hpp"

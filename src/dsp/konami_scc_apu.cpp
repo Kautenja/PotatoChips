@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "konami_scc.hpp"
+#include "konami_scc_apu.hpp"
 #include "blargg_source.h"
 
 // Tones above this frequency are treated as disabled tone at half volume.

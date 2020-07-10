@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "general_instrument_ay_3_8910.hpp"
+#include "general_instrument_ay_3_8910_apu.hpp"
 #include "blargg_source.h"
 
 // Emulation inaccuracies:

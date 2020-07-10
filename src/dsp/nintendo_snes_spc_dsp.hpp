@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef SPC_DSP_H
-#define SPC_DSP_H
+#ifndef DSP_NINTENDO_SNES_SPC_DSP_HPP_
+#define DSP_NINTENDO_SNES_SPC_DSP_HPP_
 
 #include "blargg_common.h"
 
@@ -161,4 +161,4 @@ inline int Spc_Dsp::read( int i )
 	return reg [i];
 }
 
-#endif
+#endif  // DSP_NINTENDO_SNES_SPC_DSP_HPP_

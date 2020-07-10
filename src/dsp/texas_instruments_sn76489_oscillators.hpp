@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef SMS_OSCS_H
-#define SMS_OSCS_H
+#ifndef DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
+#define DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 
 #include "blip_buffer/blip_synth.hpp"
 
@@ -60,4 +60,4 @@ struct Sms_Noise : Sms_Osc
 	void run( blip_time_t, blip_time_t );
 };
 
-#endif
+#endif  // DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_

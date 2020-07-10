@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef KSS_SCC_APU_H
-#define KSS_SCC_APU_H
+#ifndef DSP_KONAMI_SCC_APU_HPP_
+#define DSP_KONAMI_SCC_APU_HPP_
 
 #include "blargg_common.h"
 #include "blip_buffer/blip_synth.hpp"
@@ -118,4 +118,4 @@ inline void Scc_Apu::reset()
 	memset( regs, 0, sizeof regs );
 }
 
-#endif
+#endif  // DSP_KONAMI_SCC_APU_HPP_

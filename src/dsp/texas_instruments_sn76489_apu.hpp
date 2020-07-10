@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef SMS_APU_H
-#define SMS_APU_H
+#ifndef DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_
+#define DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_
 
 #include "texas_instruments_sn76489_oscillators.hpp"
 
@@ -87,4 +87,4 @@ inline void Sms_Apu::output( BLIPBuffer* b ) { output( b, b, b ); }
 
 inline void Sms_Apu::osc_output( int i, BLIPBuffer* b ) { osc_output( i, b, b, b ); }
 
-#endif
+#endif  // DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_

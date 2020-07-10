@@ -22,6 +22,26 @@
 #include "blip_buffer/blip_synth.hpp"
 #include <cstdint>
 
+/// the IO registers on the FME7.
+enum IORegisters {
+    PULSE_A_LO   = 0x00,
+    PULSE_A_HI   = 0x01,
+    PULSE_B_LO   = 0x02,
+    PULSE_B_HI   = 0x03,
+    PULSE_C_LO   = 0x04,
+    PULSE_C_HI   = 0x05,
+    NOISE_PERIOD = 0x06,
+    NOISE_TONE   = 0x07,
+    PULSE_A_ENV  = 0x08,
+    PULSE_B_ENV  = 0x09,
+    PULSE_C_ENV  = 0x0A,
+    ENV_LO       = 0x0B,
+    ENV_HI       = 0x0C,
+    ENV_RESET    = 0x0D,
+    IO_PORT_A    = 0x0E,  // unused
+    IO_PORT_B    = 0x0F   // unused
+};
+
 // can be any value; this gives best error/quality tradeoff
 enum { amp_range = 192 };
 

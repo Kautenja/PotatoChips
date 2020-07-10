@@ -93,6 +93,7 @@ struct Chip106 : Module {
             // update the buffer for each channel
             for (int i = 0; i < Namco106::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
+                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

@@ -1,4 +1,4 @@
-// A macro oscillator based on the Konami VRC6 synthesis chip.
+// An oscillator based on the Konami VRC6 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -12,15 +12,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+// derived from: Nes_Snd_Emu 0.1.7
+//
 
-#ifndef NES_VRC6_HPP
-#define NES_VRC6_HPP
+#ifndef NES_VRC6_APU_HPP_
+#define NES_VRC6_APU_HPP_
 
-#include "apu.hpp"
+#include "blip_buffer/blip_synth.hpp"
 
-/// A macro oscillator based on the Konami VRC6 synthesis chip.
+/// An oscillator based on the Konami VRC6 synthesis chip.
 class VRC6 {
  public:
+    /// CPU clock cycle count
+    typedef int32_t cpu_time_t;
+    /// 16-bit memory address
+    typedef int16_t cpu_addr_t;
     /// the number of oscillators on the VRC6 chip
     static constexpr int OSC_COUNT = 3;
     /// the number of registers per oscillator
@@ -253,4 +259,4 @@ class VRC6 {
     }
 };
 
-#endif  // NES_VRC6_HPP
+#endif  // NES_VRC6_APU_HPP_

@@ -1,4 +1,4 @@
-// A macro oscillator based on the NES 2A03 synthesis chip.
+// An oscillator based on the NES 2A03 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -12,14 +12,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+// derived from: Nes_Snd_Emu 0.1.7
+//
 
-#ifndef NES_APU_HPP
-#define NES_APU_HPP
+#ifndef NES_2A03_APU_HPP_
+#define NES_2A03_APU_HPP_
 
 #include "oscillators.hpp"
 #include <cassert>
 
-/// A macro oscillator based on the NES 2A03 synthesis chip.
+/// An oscillator based on the NES 2A03 synthesis chip.
 class APU {
  public:
     /// the number of oscillators on the VRC6 chip
@@ -56,7 +58,7 @@ class APU {
         write_register(0, 0x4017, 0x00);
         write_register(0, 0x4015, 0x00);
         // initialize sq1, sq2, tri, and noise, not DMC
-        for (cpu_addr_t addr = ADDR_START; addr <= 0x4009; addr++)
+        for (nes_cpu_addr_t addr = ADDR_START; addr <= 0x4009; addr++)
             write_register(0, addr, (addr & 3) ? 0x00 : 0x10);
     }
 
@@ -111,7 +113,7 @@ class APU {
     ///
     /// @param time the number of elapsed cycles
     ///
-    inline void end_frame(cpu_time_t end_time) {
+    inline void end_frame(nes_cpu_time_t end_time) {
         if (end_time > last_time) run_until(end_time);
         // make times relative to new frame
         last_time -= end_time;
@@ -124,7 +126,7 @@ class APU {
     /// @param address the address of the register to write
     /// @param data the data to write to the register
     ///
-    void write_register(cpu_time_t time, cpu_addr_t addr, int data) {
+    void write_register(nes_cpu_time_t time, nes_cpu_addr_t addr, int data) {
         /// The length table to lookup length values from registers
         static constexpr unsigned char length_table[0x20] = {
             0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
@@ -200,7 +202,7 @@ class APU {
     Oscillator* oscs[OSC_COUNT] = { &pulse1, &pulse2, &triangle, &noise };
 
     /// has been run until this time in current frame
-    cpu_time_t last_time;
+    nes_cpu_time_t last_time;
     /// TODO: document
     int frame_period;
     /// cycles until frame counter runs next
@@ -239,13 +241,13 @@ class APU {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(cpu_time_t end_time) {
+    void run_until(nes_cpu_time_t end_time) {
         assert(end_time >= last_time);
         if (end_time == last_time) return;
 
         while (true) {
             // earlier of next frame time or end time
-            cpu_time_t time = last_time + frame_delay;
+            nes_cpu_time_t time = last_time + frame_delay;
             if (time > end_time) time = end_time;
             frame_delay -= time - last_time;
 
@@ -295,4 +297,4 @@ class APU {
     }
 };
 
-#endif  // NES_APU_HPP
+#endif  // NES_2A03_APU_HPP_

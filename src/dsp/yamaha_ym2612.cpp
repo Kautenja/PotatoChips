@@ -20,7 +20,7 @@
 // Version 1.4 (final beta)
 //
 
-#include "ym2612.hpp"
+#include "yamaha_ym2612.hpp"
 typedef Ym2612_Impl YM2612;
 
 typedef void (*FM_TIMERHANDLER)( void* user_data, int c, int cnt, double stepTime );

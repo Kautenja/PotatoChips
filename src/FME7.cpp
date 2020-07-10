@@ -172,13 +172,13 @@ struct ChipFME7Widget : ModuleWidget {
         static const auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 78),  module, ChipFME7::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipFME7::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipFME7::INPUT_VOCT + 2));
+        addInput(createInput<PJ301MPort>(Vec(23, 99),  module, ChipFME7::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(23, 211), module, ChipFME7::INPUT_VOCT + 1));
+        addInput(createInput<PJ301MPort>(Vec(23, 320), module, ChipFME7::INPUT_VOCT + 2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(26, 37),  module, ChipFME7::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipFME7::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipFME7::INPUT_FM + 2));
+        addInput(createInput<PJ301MPort>(Vec(23, 56),  module, ChipFME7::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(23, 168), module, ChipFME7::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(23, 279), module, ChipFME7::INPUT_FM + 2));
         // Frequency parameters
         addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, ChipFME7::PARAM_FREQ + 0));
         addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ + 1));

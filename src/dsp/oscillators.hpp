@@ -12,19 +12,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+// derived from: Nes_Snd_Emu 0.1.7
+//
 
-#ifndef NES_OSCILLATORS_HPP
-#define NES_OSCILLATORS_HPP
+#ifndef NES_OSCILLATORS_HPP_
+#define NES_OSCILLATORS_HPP_
 
-#include <cstdint>
-#include <functional>
-#include "blip_buffer/blip_buffer.hpp"
 #include "blip_buffer/blip_synth.hpp"
+#include <functional>
 
 /// CPU clock cycle count
-typedef int32_t cpu_time_t;
+typedef int32_t nes_cpu_time_t;
 /// 16-bit memory address
-typedef int16_t cpu_addr_t;
+typedef int16_t nes_cpu_addr_t;
 
 /// An abstract base type for NES oscillators.
 struct Oscillator {
@@ -129,7 +129,7 @@ struct Pulse : Envelope {
         }
     }
 
-    void run(cpu_time_t time, cpu_time_t end_time) {
+    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
 
         const int volume = this->volume();
@@ -149,7 +149,7 @@ struct Pulse : Envelope {
                 // maintain proper phase
                 int count = (end_time - time + timer_period - 1) / timer_period;
                 phase = (phase + count) & (phase_range - 1);
-                time += static_cast<cpu_time_t>(count * timer_period);
+                time += static_cast<nes_cpu_time_t>(count * timer_period);
             }
         } else {
             // handle duty select
@@ -210,7 +210,7 @@ struct Triangle : Oscillator {
         return amp;
     }
 
-    void run(cpu_time_t time, cpu_time_t end_time) {
+    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
 
         // TODO: track phase when period < 3
@@ -280,7 +280,7 @@ struct Noise : Envelope {
     int noise;
     BLIPSynth<BLIPQuality::Medium, 15> synth;
 
-    void run(cpu_time_t time, cpu_time_t end_time) {
+    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
 
         const int volume = this->volume();
@@ -343,4 +343,4 @@ struct Noise : Envelope {
     }
 };
 
-#endif  // NES_OSCILLATORS_HPP
+#endif  // NES_OSCILLATORS_HPP_

@@ -1,4 +1,4 @@
-// A macro oscillator based on the Sunsoft 5B synthesis chip.
+// An oscillator based on the Sunsoft FME7 synthesis chip.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,7 @@
 #ifndef NES_FME7_APU_HPP_
 #define NES_FME7_APU_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
 #include "blip_buffer/blip_synth.hpp"
-#include <cstdint>
 
 /// the IO registers on the FME7.
 enum IORegisters {

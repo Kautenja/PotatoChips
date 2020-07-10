@@ -1,54 +1,22 @@
-
-// Game_Music_Emu 0.3.0. http://www.slack.net/~ant/
-
-/***********************************************************************************
-
-  emu2413.c -- YM2413 emulator written by Mitsutaka Okazaki 2001
-
-  2001 01-08 : Version 0.10 -- 1st version.
-  2001 01-15 : Version 0.20 -- semi-public version.
-  2001 01-16 : Version 0.30 -- 1st public version.
-  2001 01-17 : Version 0.31 -- Fixed bassdrum problem.
-             : Version 0.32 -- LPF implemented.
-  2001 01-18 : Version 0.33 -- Fixed the drum problem, refine the mix-down method.
-                            -- Fixed the LFO bug.
-  2001 01-24 : Version 0.35 -- Fixed the drum problem, 
-                               support undocumented EG behavior.
-  2001 02-02 : Version 0.38 -- Improved the performance.
-                               Fixed the hi-hat and cymbal model.
-                               Fixed the default percussive datas.
-                               Noise reduction.
-                               Fixed the feedback problem.
-  2001 03-03 : Version 0.39 -- Fixed some drum bugs.
-                               Improved the performance.
-  2001 03-04 : Version 0.40 -- Improved the feedback.
-                               Change the default table size.
-                               Clock and Rate can be changed during play.
-  2001 06-24 : Version 0.50 -- Improved the hi-hat and the cymbal tone.
-                               Added VRC7 patch (OPLL_reset_patch is changed).
-                               Fixed OPLL_reset() bug.
-                               Added OPLL_setMask, OPLL_getMask and OPLL_toggleMask.
-                               Added OPLL_writeIO.
-  2001 09-28 : Version 0.51 -- Removed the noise table.
-  2002 01-28 : Version 0.52 -- Added Stereo mode.
-  2002 02-07 : Version 0.53 -- Fixed some drum bugs.
-  2002 02-20 : Version 0.54 -- Added the best quality mode.
-  2002 03-02 : Version 0.55 -- Removed OPLL_init & OPLL_close.
-  2002 05-30 : Version 0.60 -- Fixed HH&CYM generator and all voice datas.
-  2004 04-10 : Version 0.61 -- Added YMF281B tone (defined by Chabin).
-
-  References: 
-    fmopl.c        -- 1999,2000 written by Tatsuyuki Satoh (MAME development).
-    fmopl.c(fixed) -- (C) 2002 Jarek Burczynski.
-    s_opl.c        -- 2001 written by Mamiya (NEZplug development).
-    fmgen.cpp      -- 1999,2000 written by cisc.
-    fmpac.ill      -- 2000 created by NARUTO.
-    MSX-Datapack
-    YMU757 data sheet
-    YM2143 data sheet
-
-**************************************************************************************/
-
+// YM2413 emulator written by Mitsutaka Okazaki 2001
+// Copyright 2020 Christian Kauten
+// Copyright 2006 Shay Green
+// Copyright 2001 Mitsutaka Okazaki
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// derived from: Game_Music_Emu 0.5.2
+// Version 0.61
+//
 
 #ifndef _EMU2413_H_
 #define _EMU2413_H_
@@ -84,7 +52,7 @@ typedef struct __OPLL_PATCH {
 /* slot */
 typedef struct __OPLL_SLOT {
 
-  OPLL_PATCH *patch;  
+  OPLL_PATCH *patch;
 
   e_int32 type ;          /* 0 : modulator 1 : carrier */
 
@@ -137,7 +105,7 @@ typedef struct OPLL {
 #endif
 
   /* Register */
-  e_uint8 reg[0x40] ; 
+  e_uint8 reg[0x40] ;
   e_int32 slot_on_flag[18] ;
 
   /* Pitch Modulator */
@@ -206,7 +174,7 @@ EMU2413_API e_uint32 OPLL_toggleMask(OPLL *, e_uint32 mask) ;
 }
 #endif
 
-#endif
+#endif  // _EMU2413_H_
 
 
 
@@ -216,7 +184,7 @@ EMU2413_API e_uint32 OPLL_toggleMask(OPLL *, e_uint32 mask) ;
 #include <math.h>
 
 #define EMU2413_COMPACTION
-#define INLINE inline 
+#define INLINE inline
 
 #ifdef EMU2413_COMPACTION
 #define OPLL_TONE_NUM 1
@@ -247,8 +215,8 @@ static unsigned char default_inst[OPLL_TONE_NUM][(16 + 3) * 16] = {
 #else
 #define OPLL_TONE_NUM 3
 static unsigned char default_inst[OPLL_TONE_NUM][(16 + 3) * 16] = {
-  { 
-#include "2413tone.h" 
+  {
+#include "2413tone.h"
   },
   {
 #include "vrc7tone.h"
@@ -377,7 +345,7 @@ static OPLL_PATCH null_patch = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static OPLL_PATCH default_patch[OPLL_TONE_NUM][(16 + 3) * 2];
 
 /* Definition of envelope mode */
-enum OPLL_EG_STATE 
+enum OPLL_EG_STATE
 { READY, ATTACK, DECAY, SUSHOLD, SUSTINE, RELEASE, SETTLE, FINISH };
 
 /* Phase incr table for Attack */
@@ -393,9 +361,9 @@ static e_int32 rksTable[2][8][2];
 static e_uint32 dphaseTable[512][8][16];
 
 /***************************************************
- 
+
                   Create tables
- 
+
 ****************************************************/
 INLINE static e_int32
 Min (e_int32 i, e_int32 j)
@@ -624,7 +592,7 @@ makeDphaseARTable (void)
         dphaseARTable[AR][Rks] = 0;
         break;
       case 15:
-        dphaseARTable[AR][Rks] = 0;/*EG_DP_WIDTH;*/ 
+        dphaseARTable[AR][Rks] = 0;/*EG_DP_WIDTH;*/
         break;
       default:
 #ifdef USE_SPEC_ENV_SPEED
@@ -1439,7 +1407,7 @@ calc_envelope (OPLL_SLOT * slot, e_int32 lfo)
 
   if (egout >= DB_MUTE)
     egout = DB_MUTE - 1;
-  
+
   slot->egout = egout | 3;
 }
 
@@ -1505,24 +1473,24 @@ calc_slot_snare (OPLL_SLOT * slot, e_uint32 noise)
 {
   if(slot->egout>=(DB_MUTE-1))
     return 0;
-  
+
   if(BIT(slot->pgout,7))
     return DB2LIN_TABLE[(noise?DB_POS(0.0):DB_POS(15.0))+slot->egout];
   else
     return DB2LIN_TABLE[(noise?DB_NEG(0.0):DB_NEG(15.0))+slot->egout];
 }
 
-/* 
-  TOP-CYM 
+/*
+  TOP-CYM
  */
 INLINE static e_int32
 calc_slot_cym (OPLL_SLOT * slot, e_uint32 pgout_hh)
 {
   e_uint32 dbout;
 
-  if (slot->egout >= (DB_MUTE - 1)) 
+  if (slot->egout >= (DB_MUTE - 1))
     return 0;
-  else if( 
+  else if(
       /* the same as fmopl.c */
       ((BIT(pgout_hh,PG_BITS-8)^BIT(pgout_hh,PG_BITS-1))|BIT(pgout_hh,PG_BITS-7)) ^
       /* different from fmopl.c */
@@ -1535,17 +1503,17 @@ calc_slot_cym (OPLL_SLOT * slot, e_uint32 pgout_hh)
   return DB2LIN_TABLE[dbout + slot->egout];
 }
 
-/* 
-  HI-HAT 
+/*
+  HI-HAT
 */
 INLINE static e_int32
 calc_slot_hat (OPLL_SLOT *slot, e_int32 pgout_cym, e_uint32 noise)
 {
   e_uint32 dbout;
 
-  if (slot->egout >= (DB_MUTE - 1)) 
+  if (slot->egout >= (DB_MUTE - 1))
     return 0;
-  else if( 
+  else if(
       /* the same as fmopl.c */
       ((BIT(slot->pgout,PG_BITS-8)^BIT(slot->pgout,PG_BITS-1))|BIT(slot->pgout,PG_BITS-7)) ^
       /* different from fmopl.c */
@@ -2152,7 +2120,7 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 #endif /* EMU2413_COMPACTION */
 
 // Ym2413_Emu
-#include "Ym2413_Emu.h"
+#include "yamaha_ym2413.h"
 
 #include <assert.h>
 
@@ -2180,15 +2148,15 @@ int Ym2413_Emu::set_rate( double sample_rate, double clock_rate )
 		opll = 0;
 		use_count--;
 	}
-	
+
 	// Only one YM2413 may be used at a time (emu2413 uses lots of global data)
 	assert( use_count == 0 );
 	use_count++;
-	
+
 	opll = OPLL_new( clock_rate, sample_rate );
 	if ( !opll )
 		return 1;
-	
+
 	reset();
 	return 0;
 }

@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "Hes_Apu.h"
-#include <string.h>
+#include "turbo_grafx_16.hpp"
+#include <cstring>
 #include "blargg_source.h"
 
 bool const center_waves = true; // reduces asymmetry and clamping when starting notes

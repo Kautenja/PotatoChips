@@ -17,3 +17,7 @@
 ### 1.2.0 (2020-07-09)
 
 - FME7 implementation
+
+### 1.2.1 (2020-07-09)
+
+- fix issues with FME7 panel

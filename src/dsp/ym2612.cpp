@@ -1,15 +1,28 @@
-
-// Game_Music_Emu 0.3.0. http://www.slack.net/~ant/
-
-// File: fm.c -- software implementation of Yamaha FM sound generator
-// Copyright (C) 2001, 2002, 2003 Jarek Burczynski (bujar at mame dot net)
-// Copyright (C) 1998 Tatsuyuki Satoh , MultiArcadeMachineEmulator development
+// YM2612 FM sound chip emulator interface
+// Copyright 2020 Christian Kauten
+// Copyright 2006 Shay Green
+// Copyright 2001 Jarek Burczynski
+// Copyright 1998 Tatsuyuki Satoh
+// Copyright 1997 Nicola Salmoria and the MAME team
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// derived from: Game_Music_Emu 0.5.2
 // Version 1.4 (final beta)
+//
 
-#include "Ym2612_Emu.h"
+#include "ym2612.hpp"
 typedef Ym2612_Impl YM2612;
 
-// fm.h
 typedef void (*FM_TIMERHANDLER)( void* user_data, int c, int cnt, double stepTime );
 typedef void (*FM_IRQHANDLER)( void* user_data, int irq );
 YM2612* YM2612Init( void* user_data, int index, long baseclock, long rate,
@@ -26,32 +39,6 @@ void YM2612Mute( YM2612*, int mask );
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-
-/* Copyright (C) 1997-2005, Nicola Salmoria and the MAME team. All rights
-reserved. Redistribution and use of this code or any derivative works are
-permitted provided that the following conditions are met:
-- Redistributions may not be sold, nor may they be used in a commercial
-product or activity.
-- Redistributions that are modified from the original source must include the
-complete source code, including the source code for all components used by a
-binary built from the modified sources. However, as a special exception, the
-source code distributed need not include anything that is normally distributed
-(in either source or binary form) with the major components (compiler, kernel,
-and so on) of the operating system on which the executable runs, unless that
-component itself accompanies the executable.
-- Redistributions must reproduce the above copyright notice, this list of
-conditions and the following disclaimer in the documentation and/or other
-materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 #define BUILD_YM2612  1
 #define FM_INTERNAL_TIMER 0
@@ -599,7 +586,7 @@ typedef struct
 	UINT32  lfo_inc;
 
 	UINT32  lfo_freq[8];    /* LFO FREQ table */
-	
+
 	/* there are 2048 FNUMs that can be generated using FNUM/BLK registers
 		but LFO works with one more bit of a precision so we really need 4096 elements */
 
@@ -1727,13 +1714,13 @@ static void OPNWriteReg(FM_HELPER *CRAP, FM_OPN *OPN, int r, int v)
 		break;
 
 	case 0x90:  /* SSG-EG */
-		
+
 		if ( OPN->type & TYPE_SSG )
 		{
 			SLOT->ssg  =  v&0x0f;
 			SLOT->ssgn = (v&0x04)>>1; /* bit 1 in ssgn = attack */
 		}
-		
+
 		/* SSG-EG envelope shapes :
 
 		E AtAlH
@@ -1910,7 +1897,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 	int i;
 	INT32 dacout  = F2612->dacout;
 	int active_chan;
-	
+
 	if( (void *)F2612 != CRAP->cur_chip ){
 		CRAP->cur_chip = (void *)F2612;
 		CRAP->State = &OPN->ST;
@@ -1923,7 +1910,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 		/* DAC mode */
 		CRAP->dacen = F2612->dacen;
 	}
-	
+
 	/* refresh PG and EG */
 	for ( i = 0; i < 6; i++ )
 	{
@@ -1940,9 +1927,9 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 			refresh_fc_eg_slot(&CRAP->cch[2]->SLOT[SLOT4] , CRAP->cch[2]->fc , CRAP->cch[2]->kcode );
 		}
 	}
-	
+
 	active_chan = CRAP->dacen ? 5 : 6;
-	
+
 	/* buffering */
 	while ( length-- > 0 )
 	{
@@ -1962,7 +1949,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 		{
 			OPN->eg_timer -= OPN->eg_timer_overflow;
 			OPN->eg_cnt++;
-			
+
 			#if BLARGG_CPU_X86
 				advance_eg_channel(OPN, &CRAP->cch[0]->SLOT[SLOT1]);
 				advance_eg_channel(OPN, &CRAP->cch[1]->SLOT[SLOT1]);
@@ -1983,7 +1970,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 			chan_calc(CRAP, OPN, CRAP->cch[2] );
 			chan_calc(CRAP, OPN, CRAP->cch[3] );
 			chan_calc(CRAP, OPN, CRAP->cch[4] );
-			
+
 			if( !CRAP->dacen )
 				chan_calc(CRAP, OPN, CRAP->cch[5] );
 			/* handle DAC externally
@@ -1999,7 +1986,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 				*CRAP->cch[5]->connect4 += dacout;
 			*/
 		#endif
-		
+
 		{
 			int lt,rt;
 
@@ -2015,7 +2002,7 @@ void YM2612UpdateOne(YM2612* F2612, short *buffer, int length)
 			rt += ((CRAP->out_fm[4]>>0) & OPN->pan[9]);
 			lt += ((CRAP->out_fm[5]>>0) & OPN->pan[10]);
 			rt += ((CRAP->out_fm[5]>>0) & OPN->pan[11]);
-			
+
 			lt >>= 1;
 			rt >>= 1;
 
@@ -2092,7 +2079,7 @@ YM2612 * YM2612Init( void* param, int index, long clock, long rate,
 	YM2612* F2612 = (YM2612*) calloc( sizeof *F2612, 1 );
 	if ( !F2612 )
 		return 0;
-	
+
 	/* allocate total level table (128kb space) */
 	if( !init_tables() )
 	{
@@ -2295,7 +2282,7 @@ const char* Ym2612_Emu::set_rate( double sample_rate, double clock_rate )
 	impl = YM2612Init( 0, 0, (long) (clock_rate + 0.5), (long) (sample_rate + 0.5), 0, 0 );
 	if ( !impl )
 		return "Out of memory";
-	
+
 	return 0;
 }
 

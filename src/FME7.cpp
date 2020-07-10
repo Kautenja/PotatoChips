@@ -26,18 +26,12 @@
 /// A Sunsoft 5B (FME7) Chip module.
 struct ChipFME7 : Module {
     enum ParamIds {
-        PARAM_FREQ_A,
-        PARAM_FREQ_B,
-        PARAM_FREQ_C,
+        ENUMS(PARAM_FREQ, 3),
         PARAM_COUNT
     };
     enum InputIds {
-        INPUT_VOCT_A,
-        INPUT_VOCT_B,
-        INPUT_VOCT_C,
-        INPUT_FM_A,
-        INPUT_FM_B,
-        INPUT_FM_C,
+        ENUMS(INPUT_VOCT, 3),
+        ENUMS(INPUT_FM, 3),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -60,9 +54,9 @@ struct ChipFME7 : Module {
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ_A,     -30.f, 30.f, 0.f, "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ_B,     -30.f, 30.f, 0.f, "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ_C,     -30.f, 30.f, 0.f, "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // set the output buffer for each individual voice
         for (int i = 0; i < FME7::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -83,11 +77,11 @@ struct ChipFME7 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ_A].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT_A].getVoltage();
+        float pitch = params[PARAM_FREQ + 0].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 0].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM_A].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
@@ -113,11 +107,11 @@ struct ChipFME7 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ_B].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT_B].getVoltage();
+        float pitch = params[PARAM_FREQ + 1].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 1].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM_B].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 12-bit value
         freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
@@ -143,11 +137,11 @@ struct ChipFME7 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ_C].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT_C].getVoltage();
+        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 2].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM_C].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 12-bit value
         freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
@@ -220,17 +214,17 @@ struct ChipFME7Widget : ModuleWidget {
         static const auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipFME7::INPUT_VOCT_A));
-        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipFME7::INPUT_VOCT_B));
-        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipFME7::INPUT_VOCT_C));
+        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipFME7::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipFME7::INPUT_VOCT + 1));
+        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipFME7::INPUT_VOCT + 2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipFME7::INPUT_FM_A));
-        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipFME7::INPUT_FM_B));
-        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipFME7::INPUT_FM_C));
+        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipFME7::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipFME7::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipFME7::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipFME7::PARAM_FREQ_A));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ_B));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipFME7::PARAM_FREQ_C));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipFME7::PARAM_FREQ + 0));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ + 1));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipFME7::PARAM_FREQ + 2));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipFME7::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipFME7::OUTPUT_CHANNEL + 1));

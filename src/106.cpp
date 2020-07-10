@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/namco106.hpp"
+#include "dsp/namco_106_apu.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

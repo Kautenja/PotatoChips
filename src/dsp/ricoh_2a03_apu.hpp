@@ -18,7 +18,7 @@
 #ifndef NES_2A03_APU_HPP_
 #define NES_2A03_APU_HPP_
 
-#include "oscillators.hpp"
+#include "ricoh_2a03_oscillators.hpp"
 #include <cassert>
 
 /// An oscillator based on the NES 2A03 synthesis chip.

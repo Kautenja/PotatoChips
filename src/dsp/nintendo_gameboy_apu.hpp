@@ -19,7 +19,7 @@
 #ifndef GB_APU_H
 #define GB_APU_H
 
-#include "gameboy_oscillators.hpp"
+#include "nintendo_gameboy_oscillators.hpp"
 
 class Gb_Apu {
 public:

@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "gameboy_apu.hpp"
+#include "nintendo_gameboy_apu.hpp"
 #include <cstring>
 #include "blargg_source.h"
 

@@ -18,7 +18,7 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#include "Spc_Dsp.h"
+#include "nintendo_snes_spc_dsp.hpp"
 #include "blargg_endian.h"
 #include <string.h>
 #include "blargg_source.h"

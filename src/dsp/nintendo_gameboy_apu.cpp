@@ -17,7 +17,8 @@
 //
 
 #include "nintendo_gameboy_apu.hpp"
-#include <string.h>
+#include <algorithm>
+#include <cstring>
 #include "blargg_source.h"
 
 unsigned const vol_reg    = 0xFF24;
@@ -79,7 +80,7 @@ void Gb_Apu::update_volume()
 	// TODO: doesn't handle differing left/right global volume (support would
 	// require modification to all oscillator code)
 	int data = regs [vol_reg - start_addr];
-	double vol = (max( data & 7, data >> 4 & 7 ) + 1) * volume_unit;
+	double vol = (std::max( data & 7, data >> 4 & 7 ) + 1) * volume_unit;
 	square_synth.volume( vol );
 	other_synth.volume( vol );
 }

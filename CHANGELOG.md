@@ -13,3 +13,7 @@
 ### 1.1.2 (2020-06-30)
 
 - minor improvements and optimizations
+
+### 1.2.0 (2020-07-09)
+
+- FME7 implementation

@@ -1,8 +1,8 @@
 // CPU Byte Order Utilities
 
 // Game_Music_Emu 0.5.2
-#ifndef BLARGG_ENDIAN
-#define BLARGG_ENDIAN
+#ifndef BLARGG_ENDIAN_H_
+#define BLARGG_ENDIAN_H_
 
 #include "blargg_common.h"
 
@@ -155,4 +155,4 @@ inline blargg_ulong get_le( uint32_t* p ) { return GET_LE32( p ); }
 inline unsigned     get_be( uint16_t* p ) { return GET_BE16( p ); }
 inline blargg_ulong get_be( uint32_t* p ) { return GET_BE32( p ); }
 
-#endif
+#endif  // BLARGG_ENDIAN_H_

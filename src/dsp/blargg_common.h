@@ -1,8 +1,8 @@
 // Sets up common environment for Shay Green's libraries.
 // To change configuration options, modify blargg_config.h, not this file.
 
-#ifndef BLARGG_COMMON_H
-#define BLARGG_COMMON_H
+#ifndef BLARGG_COMMON_H_
+#define BLARGG_COMMON_H_
 
 // Uncomment to use zlib for transparent decompression of gzipped files
 //#define HAVE_ZLIB_H
@@ -37,4 +37,4 @@
 	typedef unsigned long blargg_ulong;
 #endif
 
-#endif  // BLARGG_COMMON_H
+#endif  // BLARGG_COMMON_H_

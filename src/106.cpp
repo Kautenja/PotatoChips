@@ -165,6 +165,8 @@ struct WaveTableEditor : OpaqueWidget {
  private:
     /// the background color for the widget
     NVGcolor background;
+    /// the fill color for the widget
+    NVGcolor fill;
     /// the state of the drag operation
     struct {
         /// whether a drag is currently active
@@ -178,6 +180,8 @@ struct WaveTableEditor : OpaqueWidget {
     uint32_t length;
     /// the bit depth of the waveform
     uint64_t bit_depth;
+    /// the vector containing the waveform
+    std::vector<uint64_t> waveform;
 
  public:
     /// @brief Initialize a new wave-table editor widget.
@@ -185,6 +189,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param position the position of the screen on the module
     /// @param size the output size of the display to render
     /// @param background_ the background color for the widget
+    /// @param fill_ the fill color for the widget
     /// @param length_ the length of the wave-table to edit
     /// @param bit_depth_ the bit-depth of the waveform samples to generate
     ///
@@ -192,15 +197,18 @@ struct WaveTableEditor : OpaqueWidget {
         Vec position,
         Vec size,
         NVGcolor background_,
+        NVGcolor fill_,
         uint32_t length_,
         uint64_t bit_depth_
     ) :
         OpaqueWidget(),
         background(background_),
+        fill(fill_),
         length(length_),
         bit_depth(bit_depth_) {
         setPosition(position);
         setSize(size);
+        waveform.resize(length, 0);
     }
 
     /// @brief Update a sample in the wave-table.
@@ -209,7 +217,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param value the value of the waveform for the given index
     ///
     void update_position(uint32_t index, uint64_t value) {
-        // TODO:
+        waveform[index] = value;
     }
 
     void onButton(const event::Button &e) override {
@@ -287,7 +295,26 @@ struct WaveTableEditor : OpaqueWidget {
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
         // draw the waveform
-        // TODO:
+        nvgBeginPath(args.vg);
+        nvgMoveTo(args.vg, 0, box.size.y);
+        for (int i = 0; i < length; i++) {
+            auto pixelX = box.size.x * i / static_cast<float>(length);
+            auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
+            nvgLineTo(args.vg, pixelX, pixelY);
+        }
+        nvgMoveTo(args.vg, 0, box.size.y);
+        nvgStrokeColor(args.vg, fill);
+        nvgClosePath(args.vg);
+        nvgStroke(args.vg);
+
+        // nvgBeginPath(args.vg );
+        // nvgMoveTo(args.vg, 0, 0 );
+        // nvgLineTo(args.vg, box.size.x - 1, 0 );
+        // nvgLineTo(args.vg, box.size.x - 1, box.size.y - 1 );
+        // nvgLineTo(args.vg, 0, box.size.y - 1 );
+        // nvgClosePath(args.vg );
+        // nvgStroke(args.vg );
+
     }
 };
 
@@ -308,6 +335,7 @@ struct Chip106Widget : ModuleWidget {
             Vec(RACK_GRID_WIDTH, 110),                    // position
             Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
             {.r = 0, .g = 0, .b = 0, .a = 255},           // background color
+            {.r = 0, .g = 0, .b = 255, .a = 255},         // fill color
             32,                                           // wave-table length
             15                                            // waveform bit depth
         );

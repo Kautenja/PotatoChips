@@ -218,7 +218,7 @@ struct WaveTableEditor : OpaqueWidget {
 
     /// @brief Update a sample in the wave-table.
     ///
-    /// @param index the index of the value in the wavetable to update
+    /// @param index the index of the value in the wave-table to update
     /// @param value the value of the waveform for the given index
     ///
     void update_position(uint32_t index, uint64_t value) {
@@ -301,7 +301,7 @@ struct WaveTableEditor : OpaqueWidget {
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
         nvgMoveTo(args.vg, 0, box.size.y);
-        for (int i = 0; i < length; i++) {
+        for (uint32_t i = 0; i < length; i++) {
             auto pixelX = box.size.x * i / static_cast<float>(length);
             auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
             nvgLineTo(args.vg, pixelX, pixelY);
@@ -323,7 +323,6 @@ struct WaveTableEditor : OpaqueWidget {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip106Widget : ModuleWidget {
-    WaveTableEditor* table_editor = nullptr;
     Chip106Widget(Chip106 *module) {
         setModule(module);
         static const auto panel = "res/106.svg";
@@ -334,7 +333,7 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // add the wavetable editor
-        table_editor = new WaveTableEditor(
+        auto table_editor = new WaveTableEditor(
             Vec(RACK_GRID_WIDTH, 110),                    // position
             Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
             {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color

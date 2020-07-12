@@ -161,7 +161,9 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // -------------------------------------------------------------------
         // draw the waveform
         // -------------------------------------------------------------------
+        nvgSave(args.vg);
         nvgBeginPath(args.vg);
+        nvgScissor(args.vg, x + 1, y + 1, box.size.x - 1, box.size.y - 1);
         nvgMoveTo(args.vg, 0, box.size.y);
         for (uint32_t i = 0; i < length; i++) {
             auto pixelX = box.size.x * i / static_cast<float>(length);
@@ -172,6 +174,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         nvgStrokeColor(args.vg, fill);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);
+        nvgRestore(args.vg);
         // -------------------------------------------------------------------
         // draw the border
         // -------------------------------------------------------------------

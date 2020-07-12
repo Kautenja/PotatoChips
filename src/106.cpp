@@ -160,8 +160,6 @@ struct Chip106 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-#include <iostream>
-
 /// A widget that displays / edits a wave-table.
 struct WaveTableEditor : OpaqueWidget {
  private:
@@ -210,7 +208,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param value the value of the waveform for the given index
     ///
     void update_position(uint32_t index, uint64_t value) {
-        std::cout << index << " " << value << std::endl;
+
     }
 
     void onButton(const event::Button &e) override {
@@ -237,7 +235,7 @@ struct WaveTableEditor : OpaqueWidget {
         float y = 1.f - drag_state.position.y / box.size.y;
         y = math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
-        uint32_t value = y * bit_depth;
+        uint64_t value = y * bit_depth;
         update_position(index, value);
     }
 
@@ -265,7 +263,7 @@ struct WaveTableEditor : OpaqueWidget {
         float y = 1.f - drag_state.position.y / box.size.y;
         y = math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
-        uint32_t value = y * bit_depth;
+        uint64_t value = y * bit_depth;
         if (next_index < index)  // swap next index if it's less the current
             (index ^= next_index), (next_index ^= index), (index ^= next_index);
         for (; index < next_index; index++)  // update the positions

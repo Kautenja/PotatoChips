@@ -323,6 +323,11 @@ struct ChipVRC6Widget : ModuleWidget {
         setModule(module);
         static const auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        // panel screws
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
         addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipVRC6::INPUT_VOCT0));
         addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipVRC6::INPUT_VOCT1));

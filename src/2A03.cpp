@@ -282,6 +282,11 @@ struct Chip2A03Widget : ModuleWidget {
         setModule(module);
         static const auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        // panel screws
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
         addInput(createInput<PJ301MPort>(Vec(20, 74), module, Chip2A03::INPUT_VOCT0));
         addInput(createInput<PJ301MPort>(Vec(20, 159), module, Chip2A03::INPUT_VOCT1));

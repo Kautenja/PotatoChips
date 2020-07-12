@@ -148,11 +148,13 @@ struct WaveTableEditor : rack::OpaqueWidget {
         static constexpr int x = 0;
         // the y position of the widget
         static constexpr int y = 0;
+        // the radius for the corner on the rectangle
+        static constexpr int corner_radius = 3;
         // -------------------------------------------------------------------
         // draw the background
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRect(args.vg, x, y, box.size.x, box.size.y);
+        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
         nvgClosePath(args.vg);
@@ -168,13 +170,13 @@ struct WaveTableEditor : rack::OpaqueWidget {
         }
         nvgMoveTo(args.vg, 0, box.size.y);
         nvgStrokeColor(args.vg, fill);
-        nvgClosePath(args.vg);
         nvgStroke(args.vg);
+        nvgClosePath(args.vg);
         // -------------------------------------------------------------------
         // draw the border
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRect(args.vg, x, y, box.size.x, box.size.y);
+        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
         nvgStrokeColor(args.vg, border);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);

@@ -150,6 +150,8 @@ struct WaveTableEditor : rack::OpaqueWidget {
         static constexpr int y = 0;
         // the radius for the corner on the rectangle
         static constexpr int corner_radius = 3;
+        // arbitrary padding
+        static constexpr int pad = 1;
         // -------------------------------------------------------------------
         // draw the background
         // -------------------------------------------------------------------
@@ -163,7 +165,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // -------------------------------------------------------------------
         nvgSave(args.vg);
         nvgBeginPath(args.vg);
-        nvgScissor(args.vg, x + 1, y + 1, box.size.x - 1, box.size.y - 1);
+        nvgScissor(args.vg, x + pad, y + pad, box.size.x - pad, box.size.y - pad);
         nvgMoveTo(args.vg, 0, box.size.y);
         for (uint32_t i = 0; i < length; i++) {
             auto pixelX = box.size.x * i / static_cast<float>(length);

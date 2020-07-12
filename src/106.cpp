@@ -27,16 +27,16 @@
 /// A Namco 106 Chip module.
 struct Chip106 : Module {
     enum ParamIds {
-        PARAM_FREQ0,
+        ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        INPUT_VOCT0,
-        INPUT_FM0,
+        ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
+        ENUMS(INPUT_FM, Namco106::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, 8),
+        ENUMS(OUTPUT_CHANNEL, Namco106::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
@@ -52,12 +52,20 @@ struct Chip106 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
+    // the values of the wave-table
+    uint8_t values[64] = {
+        0x0,0x0,0x0,0x0,0x0,0x0,0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,
+        0xE,0xF,0xD,0xE,0xA,0xC,0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,
+        0x1,0x0,0x2,0x1,0x5,0x3,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0
+    };
+
     /// Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+            configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             apu.osc_output(i, &buf[i]);
             buf[i].set_clock_rate(CLOCK_RATE);
         }
@@ -82,18 +90,6 @@ struct Chip106 : Module {
         // convert the 16-bit sample to 10Vpp floating point
         return Vpp * output_buffer[0] / divisor;
     }
-
-    // // a foo waveform
-    // uint8_t values[32] = {
-    //     0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
-    //     0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    // };
-
-    // a foo waveform
-    uint8_t values[64] = {
-        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xA, 0x8, 0xD, 0xC, 0xE, 0xE, 0xF, 0xF, 0xF, 0xF, 0xE, 0xF, 0xD, 0xE, 0xA, 0xC, 0x5, 0x8, 0x2, 0x3, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0,
-        0x1, 0x0, 0x2, 0x1, 0x5, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
-    };
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
@@ -120,10 +116,10 @@ struct Chip106 : Module {
         apu.write_data(0, 0);
 
         // get the frequency of the oscillator from the parameter and CVs
-        float pitch = params[PARAM_FREQ0].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT0].getVoltage();
+        float pitch = params[PARAM_FREQ].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT].getVoltage();
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += 4 * inputs[INPUT_FM0].getVoltage();
+        freq += 4 * inputs[INPUT_FM].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         auto num_channels = 2;
@@ -206,13 +202,15 @@ struct Chip106Widget : ModuleWidget {
         );
         addChild(table_editor);
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip106::INPUT_VOCT0));
+        addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip106::INPUT_VOCT));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 32), module, Chip106::INPUT_FM0));
+        addInput(createInput<PJ301MPort>(Vec(33, 32), module, Chip106::INPUT_FM));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, Chip106::PARAM_FREQ0));
+        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, Chip106::PARAM_FREQ));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(114, 74), module, Chip106::OUTPUT_CHANNEL));
+        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+            addOutput(createOutput<PJ301MPort>(Vec(114, 74 + i * 25), module, Chip106::OUTPUT_CHANNEL + i));
+        }
     }
 };
 

@@ -160,12 +160,115 @@ struct Chip106 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
+#include <iostream>
+
+/// A widget that displays / edits a wave-table.
+struct WaveTableEditor : OpaqueWidget {
+ private:
+    /// the background color for the widget
+    NVGcolor background;
+    /// the state of the drag operation
+    struct {
+        /// whether a drag is currently active
+        bool is_active = false;
+        /// whether the drag operation is being modified
+        bool is_modified = false;
+        /// the current position of the mouse pointer during the drag
+        Vec position = {0, 0};
+    } drag_state;
+
+ public:
+    /// @brief Initialize a new wave-table editor widget.
+    ///
+    /// @param position the position of the screen on the module
+    /// @param size the output size of the display to render
+    /// @param background_ the background color for the widget
+    ///
+    explicit WaveTableEditor(
+        Vec position,
+        Vec size,
+        NVGcolor background_
+    ) : OpaqueWidget(), background(background_) {
+        setPosition(position);
+        setSize(size);
+    }
+
+    void onButton(const event::Button &e) override {
+        OpaqueWidget::onButton(e);
+        // consume the event to prevent it from propagating
+        e.consume(this);
+        // setup the drag state
+        drag_state.is_active = e.button == GLFW_MOUSE_BUTTON_LEFT;
+        drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
+        if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {  // handle right click event
+            // TODO: show menu with basic waveforms
+        }
+        // return if the drag operation is not active
+        if (!drag_state.is_active) return;
+        // set the position of the drag operation to the position of the mouse
+        drag_state.position = e.pos;
+        // std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+    }
+
+    // void onDragStart(const event::DragStart &e) override {
+    //     OpaqueWidget::onDragStart(e);
+    // }
+
+    // void onDragEnd(const event::DragEnd &e) override {
+    //     OpaqueWidget::onDragEnd(e);
+    // }
+
+    void onDragMove(const event::DragMove &e) override {
+        OpaqueWidget::onDragMove(e);
+        // consume the event to prevent it from propagating
+        e.consume(this);
+        // if the drag operation is not active, return early
+        if (!drag_state.is_active) return;
+        // update the drag state based on the change in position from the mouse
+        drag_state.position.x += e.mouseDelta.x;
+        drag_state.position.y += e.mouseDelta.y;
+        // std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+    }
+
+    /// @brief Draw the display on the main context.
+    ///
+    /// @param args the arguments for the draw context for this widget
+    ///
+    void draw(const DrawArgs& args) override {
+        // the x position of the screen
+        static constexpr int x = 0;
+        // the y position of the screen
+        static constexpr int y = 0;
+        OpaqueWidget::draw(args);
+        // create a path for the rectangle to show the screen
+        nvgBeginPath(args.vg);
+        // create a rectangle to draw the screen
+        nvgRect(args.vg, x, y, box.size.x, box.size.y);
+        // paint the rectangle's fill from the screen
+        nvgFillColor(args.vg, background);
+        nvgFill(args.vg);
+    }
+};
+
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip106Widget : ModuleWidget {
+    WaveTableEditor* table_editor = nullptr;
     Chip106Widget(Chip106 *module) {
         setModule(module);
         static const auto panel = "res/106.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        // panel screws
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // add the wavetable editor
+        table_editor = new WaveTableEditor(
+            Vec(RACK_GRID_WIDTH, 110),                    // position
+            Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
+            {.r = 0, .g = 0, .b = 0, .a = 255}            // background color
+        );
+        addChild(table_editor);
         // V/OCT inputs
         addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip106::INPUT_VOCT0));
         // FM inputs

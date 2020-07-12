@@ -176,6 +176,10 @@ struct WaveTableEditor : OpaqueWidget {
         /// the current position of the mouse pointer during the drag
         Vec position = {0, 0};
     } drag_state;
+    /// the length of the wave-table to edit
+    uint32_t length;
+    /// the bit depth of the waveform
+    uint64_t bit_depth;
 
  public:
     /// @brief Initialize a new wave-table editor widget.
@@ -183,14 +187,30 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param position the position of the screen on the module
     /// @param size the output size of the display to render
     /// @param background_ the background color for the widget
+    /// @param length_ the length of the wave-table to edit
     ///
     explicit WaveTableEditor(
         Vec position,
         Vec size,
-        NVGcolor background_
-    ) : OpaqueWidget(), background(background_) {
+        NVGcolor background_,
+        uint32_t length_,
+        uint64_t bit_depth_
+    ) :
+        OpaqueWidget(),
+        background(background_),
+        length(length_),
+        bit_depth(bit_depth_) {
         setPosition(position);
         setSize(size);
+    }
+
+    /// @brief Update a sample in the wave-table.
+    ///
+    /// @param index the index of the value in the wavetable to update
+    /// @param value the value of the waveform for the given index
+    ///
+    void update_position(uint32_t index, uint64_t value) {
+        std::cout << index << " " << value << std::endl;
     }
 
     void onButton(const event::Button &e) override {
@@ -207,7 +227,18 @@ struct WaveTableEditor : OpaqueWidget {
         if (!drag_state.is_active) return;
         // set the position of the drag operation to the position of the mouse
         drag_state.position = e.pos;
-        std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+        // calculate the normalized x position in [0, 1]
+        float x = drag_state.position.x / box.size.x;
+        x = math::clamp(x, 0.f, 1.f);
+        // calculate the position in the wave-table
+        uint32_t index = x * length;
+        // calculate the normalized y position in [0, 1]
+        // y increases downward in pixel space, so invert about 1
+        float y = 1.f - drag_state.position.y / box.size.y;
+        y = math::clamp(y, 0.f, 1.f);
+        // calculate the value of the wave-table at this index
+        uint32_t value = y * bit_depth;
+        update_position(index, value);
     }
 
     // void onDragStart(const event::DragStart &e) override {
@@ -225,9 +256,20 @@ struct WaveTableEditor : OpaqueWidget {
         // if the drag operation is not active, return early
         if (!drag_state.is_active) return;
         // update the drag state based on the change in position from the mouse
+        uint32_t index = length * math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
+        uint32_t next_index = length * math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.y += e.mouseDelta.y / APP->scene->rackScroll->zoomWidget->zoom;
-        std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+        // calculate the normalized y position in [0, 1]
+        // y increases downward in pixel space, so invert about 1
+        float y = 1.f - drag_state.position.y / box.size.y;
+        y = math::clamp(y, 0.f, 1.f);
+        // calculate the value of the wave-table at this index
+        uint32_t value = y * bit_depth;
+        if (next_index < index)  // swap next index if it's less the current
+            (index ^= next_index), (next_index ^= index), (index ^= next_index);
+        for (; index < next_index; index++)  // update the positions
+            update_position(index, value);
     }
 
     /// @brief Draw the display on the main context.
@@ -265,7 +307,9 @@ struct Chip106Widget : ModuleWidget {
         table_editor = new WaveTableEditor(
             Vec(RACK_GRID_WIDTH, 110),                    // position
             Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
-            {.r = 0, .g = 0, .b = 0, .a = 255}            // background color
+            {.r = 0, .g = 0, .b = 0, .a = 255},           // background color
+            32,                                           // wave-table length
+            15                                            // waveform bit depth
         );
         addChild(table_editor);
         // V/OCT inputs

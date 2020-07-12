@@ -82,6 +82,18 @@ struct Chip106 : Module {
         return Vpp * output_buffer[0] / divisor;
     }
 
+    // // a foo waveform
+    // uint8_t values[32] = {
+    //     0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
+    //     0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    // };
+
+    // a foo waveform
+    uint8_t values[64] = {
+        0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xA, 0x8, 0xD, 0xC, 0xE, 0xE, 0xF, 0xF, 0xF, 0xF, 0xE, 0xF, 0xD, 0xE, 0xA, 0xC, 0x5, 0x8, 0x2, 0x3, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0,
+        0x1, 0x0, 0x2, 0x1, 0x5, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
+    };
+
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
@@ -97,15 +109,10 @@ struct Chip106 : Module {
             new_sample_rate = false;
         }
 
-        // a foo waveform
-        static constexpr uint8_t values[32] = {
-            0x00, 0x00, 0x00, 0xA8, 0xDC, 0xEE, 0xFF, 0xFF, 0xEF, 0xDE, 0xAC, 0x58, 0x23, 0x11, 0x00, 0x00,
-            0x10, 0x21, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-        };
         // write the waveform to the RAM
         for (int i = 0; i < 32; i++) {
             apu.write_addr(i);
-            apu.write_data(0, values[i]);
+            apu.write_data(0, (values[2 * i] << 4) + values[2 * i + 1]);
         }
         // write the wave address
         apu.write_addr(0x7E);
@@ -154,6 +161,10 @@ struct Chip106 : Module {
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
+
+    void update_wavetable(uint32_t index, uint64_t value) {
+        values[index] = value;
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -162,6 +173,10 @@ struct Chip106 : Module {
 
 /// A widget that displays / edits a wave-table.
 struct WaveTableEditor : OpaqueWidget {
+ public:
+    /// a callback function for passing update events to a listener
+    typedef std::function<void(uint32_t, uint64_t)> Callback;
+
  private:
     /// the background color for the widget
     NVGcolor background;
@@ -184,6 +199,8 @@ struct WaveTableEditor : OpaqueWidget {
     uint64_t bit_depth;
     /// the vector containing the waveform
     std::vector<uint64_t> waveform;
+    /// the callback to pass wave-table update events to
+    Callback callback;
 
  public:
     /// @brief Initialize a new wave-table editor widget.
@@ -203,26 +220,19 @@ struct WaveTableEditor : OpaqueWidget {
         NVGcolor fill_,
         NVGcolor border_,
         uint32_t length_,
-        uint64_t bit_depth_
+        uint64_t bit_depth_,
+        Callback callback_
     ) :
         OpaqueWidget(),
         background(background_),
         fill(fill_),
         border(border_),
         length(length_),
-        bit_depth(bit_depth_) {
+        bit_depth(bit_depth_),
+        callback(callback_) {
         setPosition(position);
         setSize(size);
         waveform.resize(length, 0);
-    }
-
-    /// @brief Update a sample in the wave-table.
-    ///
-    /// @param index the index of the value in the wave-table to update
-    /// @param value the value of the waveform for the given index
-    ///
-    void update_position(uint32_t index, uint64_t value) {
-        waveform[index] = value;
     }
 
     /// Respond to a button event on this widget.
@@ -251,7 +261,8 @@ struct WaveTableEditor : OpaqueWidget {
         y = math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
-        update_position(index, value);
+        waveform[index] = value;
+        callback(index, value);
     }
 
     /// Respond to drag move event on this widget.
@@ -274,8 +285,10 @@ struct WaveTableEditor : OpaqueWidget {
         uint64_t value = y * bit_depth;
         if (next_index < index)  // swap next index if it's less the current
             (index ^= next_index), (next_index ^= index), (index ^= next_index);
-        for (; index < next_index; index++)  // update the positions
-            update_position(index, value);
+        for (; index < next_index; index++) {  // update the positions
+            waveform[index] = value;
+            callback(index, value);
+        }
     }
 
     /// @brief Draw the display on the main context.
@@ -321,6 +334,8 @@ struct WaveTableEditor : OpaqueWidget {
     }
 };
 
+#include <iostream>
+
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip106Widget : ModuleWidget {
     Chip106Widget(Chip106 *module) {
@@ -339,8 +354,14 @@ struct Chip106Widget : ModuleWidget {
             {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
             {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color
             {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  },     // border color
-            32,                                           // wave-table length
-            15                                            // waveform bit depth
+            64,                                           // wave-table length
+            15,                                           // waveform bit depth
+            // [&](uint32_t index, uint64_t value) {         // update callback
+            //     std::cout << index << " " << value << std::endl;
+            //     module->update_wavetable(index, value)
+            // }
+            std::bind(&Chip106::update_wavetable, module, std::placeholders::_1, std::placeholders::_2)
+
         );
         addChild(table_editor);
         // V/OCT inputs

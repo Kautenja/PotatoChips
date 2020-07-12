@@ -207,7 +207,7 @@ struct WaveTableEditor : OpaqueWidget {
         if (!drag_state.is_active) return;
         // set the position of the drag operation to the position of the mouse
         drag_state.position = e.pos;
-        // std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+        std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
     }
 
     // void onDragStart(const event::DragStart &e) override {
@@ -225,9 +225,9 @@ struct WaveTableEditor : OpaqueWidget {
         // if the drag operation is not active, return early
         if (!drag_state.is_active) return;
         // update the drag state based on the change in position from the mouse
-        drag_state.position.x += e.mouseDelta.x;
-        drag_state.position.y += e.mouseDelta.y;
-        // std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
+        drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
+        drag_state.position.y += e.mouseDelta.y / APP->scene->rackScroll->zoomWidget->zoom;
+        std::cout << drag_state.position.x << " " << drag_state.position.y << std::endl;
     }
 
     /// @brief Draw the display on the main context.
@@ -240,13 +240,12 @@ struct WaveTableEditor : OpaqueWidget {
         // the y position of the screen
         static constexpr int y = 0;
         OpaqueWidget::draw(args);
-        // create a path for the rectangle to show the screen
+        // draw the background
         nvgBeginPath(args.vg);
-        // create a rectangle to draw the screen
         nvgRect(args.vg, x, y, box.size.x, box.size.y);
-        // paint the rectangle's fill from the screen
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
+        // draw the waveform
     }
 };
 

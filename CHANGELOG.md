@@ -21,3 +21,7 @@
 ### 1.2.1 (2020-07-09)
 
 - fix issues with FME7 panel
+
+### 1.3.0 (2020-07-14)
+
+- wave-table editor for 106

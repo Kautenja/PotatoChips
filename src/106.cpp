@@ -167,6 +167,8 @@ struct WaveTableEditor : OpaqueWidget {
     NVGcolor background;
     /// the fill color for the widget
     NVGcolor fill;
+    /// the border color for the widget
+    NVGcolor border;
     /// the state of the drag operation
     struct {
         /// whether a drag is currently active
@@ -190,6 +192,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param size the output size of the display to render
     /// @param background_ the background color for the widget
     /// @param fill_ the fill color for the widget
+    /// @param fill_ the border color for the widget
     /// @param length_ the length of the wave-table to edit
     /// @param bit_depth_ the bit-depth of the waveform samples to generate
     ///
@@ -198,12 +201,14 @@ struct WaveTableEditor : OpaqueWidget {
         Vec size,
         NVGcolor background_,
         NVGcolor fill_,
+        NVGcolor border_,
         uint32_t length_,
         uint64_t bit_depth_
     ) :
         OpaqueWidget(),
         background(background_),
         fill(fill_),
+        border(border_),
         length(length_),
         bit_depth(bit_depth_) {
         setPosition(position);
@@ -220,6 +225,7 @@ struct WaveTableEditor : OpaqueWidget {
         waveform[index] = value;
     }
 
+    /// Respond to a button event on this widget.
     void onButton(const event::Button &e) override {
         OpaqueWidget::onButton(e);
         // consume the event to prevent it from propagating
@@ -248,14 +254,7 @@ struct WaveTableEditor : OpaqueWidget {
         update_position(index, value);
     }
 
-    // void onDragStart(const event::DragStart &e) override {
-    //     OpaqueWidget::onDragStart(e);
-    // }
-
-    // void onDragEnd(const event::DragEnd &e) override {
-    //     OpaqueWidget::onDragEnd(e);
-    // }
-
+    /// Respond to drag move event on this widget.
     void onDragMove(const event::DragMove &e) override {
         OpaqueWidget::onDragMove(e);
         // consume the event to prevent it from propagating
@@ -284,17 +283,22 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param args the arguments for the draw context for this widget
     ///
     void draw(const DrawArgs& args) override {
-        // the x position of the screen
+        // the x position of the widget
         static constexpr int x = 0;
-        // the y position of the screen
+        // the y position of the widget
         static constexpr int y = 0;
         OpaqueWidget::draw(args);
+        // -------------------------------------------------------------------
         // draw the background
+        // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
         nvgRect(args.vg, x, y, box.size.x, box.size.y);
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
+        nvgClosePath(args.vg);
+        // -------------------------------------------------------------------
         // draw the waveform
+        // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
         nvgMoveTo(args.vg, 0, box.size.y);
         for (int i = 0; i < length; i++) {
@@ -306,15 +310,14 @@ struct WaveTableEditor : OpaqueWidget {
         nvgStrokeColor(args.vg, fill);
         nvgClosePath(args.vg);
         nvgStroke(args.vg);
-
-        // nvgBeginPath(args.vg );
-        // nvgMoveTo(args.vg, 0, 0 );
-        // nvgLineTo(args.vg, box.size.x - 1, 0 );
-        // nvgLineTo(args.vg, box.size.x - 1, box.size.y - 1 );
-        // nvgLineTo(args.vg, 0, box.size.y - 1 );
-        // nvgClosePath(args.vg );
-        // nvgStroke(args.vg );
-
+        // -------------------------------------------------------------------
+        // draw the border
+        // -------------------------------------------------------------------
+        nvgBeginPath(args.vg);
+        nvgRect(args.vg, x, y, box.size.x, box.size.y);
+        nvgStrokeColor(args.vg, border);
+        nvgStroke(args.vg);
+        nvgClosePath(args.vg);
     }
 };
 
@@ -334,8 +337,9 @@ struct Chip106Widget : ModuleWidget {
         table_editor = new WaveTableEditor(
             Vec(RACK_GRID_WIDTH, 110),                    // position
             Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
-            {.r = 0, .g = 0, .b = 0, .a = 255},           // background color
-            {.r = 0, .g = 0, .b = 255, .a = 255},         // fill color
+            {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
+            {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color
+            {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  },     // border color
             32,                                           // wave-table length
             15                                            // waveform bit depth
         );

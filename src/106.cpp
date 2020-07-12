@@ -186,6 +186,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param size the output size of the display to render
     /// @param background_ the background color for the widget
     /// @param length_ the length of the wave-table to edit
+    /// @param bit_depth_ the bit-depth of the waveform samples to generate
     ///
     explicit WaveTableEditor(
         Vec position,
@@ -208,7 +209,7 @@ struct WaveTableEditor : OpaqueWidget {
     /// @param value the value of the waveform for the given index
     ///
     void update_position(uint32_t index, uint64_t value) {
-
+        // TODO:
     }
 
     void onButton(const event::Button &e) override {
@@ -286,6 +287,7 @@ struct WaveTableEditor : OpaqueWidget {
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
         // draw the waveform
+        // TODO:
     }
 };
 

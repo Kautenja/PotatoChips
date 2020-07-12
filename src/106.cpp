@@ -162,7 +162,12 @@ struct Chip106 : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
 
-    void update_wavetable(uint32_t index, uint64_t value) {
+    /// Update the wave-table.
+    ///
+    /// @param index the index in the wave-table
+    /// @param value the value of the waveform at given index
+    ///
+    inline void update_wavetable(uint32_t index, uint64_t value) {
         values[index] = value;
     }
 };

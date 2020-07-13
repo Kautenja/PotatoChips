@@ -28,11 +28,13 @@
 struct Chip106 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
+        PARAM_NUM_CHANNELS,
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
         ENUMS(INPUT_FM, Namco106::OSC_COUNT),
+        INPUT_NUM_CHANNELS,
         INPUT_COUNT
     };
     enum OutputIds {
@@ -65,6 +67,7 @@ struct Chip106 : Module {
     /// Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        configParam(PARAM_NUM_CHANNELS, 1, 8, 1, "Active Channels",  "");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -78,13 +81,14 @@ struct Chip106 : Module {
     /// Set the frequency for a given channel.
     ///
     /// @param channel the channel to set the frequency for
-    /// @param num_channels the number of enabled channels
-    /// @param volume the volume for the channel
+    /// @param num_channels the number of enabled channels in [1, 8]
+    /// @param wave_address the address of the waveform for the channel
+    /// @param volume the volume for the channel in [0x0, 0xF]
     ///
     void setFrequency(int channel,
-        uint8_t num_channels = 2,
+        uint8_t num_channels = 1,
         uint8_t wave_address = 0,
-        uint8_t volume = 0x0F
+        uint8_t volume = 0xF
     ) {
         // get the frequency of the oscillator from the parameter and CVs
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
@@ -159,9 +163,14 @@ struct Chip106 : Module {
             apu.write_addr(i);
             apu.write_data(0, (values[2 * i] << 4) | values[2 * i + 1]);
         }
+        // get the number of active channels
+        float num_channels = params[PARAM_NUM_CHANNELS].getValue();
+        num_channels += inputs[INPUT_NUM_CHANNELS].getVoltage();
+        num_channels = rack::math::clamp(num_channels, 1.f, 8.f);
+
         // set the frequency for all channels
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
-            setFrequency(i);
+            setFrequency(i, num_channels);
         // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
@@ -213,6 +222,8 @@ struct Chip106Widget : ModuleWidget {
             }
         );
         addChild(table_editor);
+        addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));
+        addInput(createInput<PJ301MPort>(Vec(15, 160), module, Chip106::INPUT_NUM_CHANNELS));
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(140, 40 + i * 40), module, Chip106::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(170, 40 + i * 40), module, Chip106::INPUT_FM + i      ));

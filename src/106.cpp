@@ -53,6 +53,7 @@ struct Chip106 : Module {
     bool new_sample_rate = true;
 
     // the values of the wave-table
+    static constexpr auto num_samples = 64;
     uint8_t values[64] = {
         0x0,0x0,0x0,0x0,0x0,0x0,0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,
         0xE,0xF,0xD,0xE,0xA,0xC,0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,
@@ -107,7 +108,7 @@ struct Chip106 : Module {
         }
 
         // write the waveform to the RAM
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < num_samples / 2; i++) {
             apu.write_addr(i);
             apu.write_data(0, (values[2 * i] << 4) + values[2 * i + 1]);
         }
@@ -123,8 +124,7 @@ struct Chip106 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         auto num_channels = 2;
-        auto num_samples = 64;
-        auto wave_length = 64 - (num_samples / 16);
+        auto wave_length = 64 - (num_samples / 4);
         freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
         freq = rack::clamp(freq, 4.f, 262143.f);
         // extract the low, medium, and high frequency register values
@@ -140,7 +140,7 @@ struct Chip106 : Module {
         // WAVEFORM LENGTH + FREQUENCY HIGH
         uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
         apu.write_addr(0x7C);
-        apu.write_data(0, (48 << 2) + hig);
+        apu.write_data(0, (wave_length << 2) + hig);
 
         // volume and channel selection
         static constexpr uint8_t volume = 0b00001111;

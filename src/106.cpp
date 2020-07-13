@@ -222,7 +222,7 @@ struct Chip106 : Module {
 struct Chip106Widget : ModuleWidget {
     Chip106Widget(Chip106 *module) {
         setModule(module);
-        static const auto panel = "res/106.svg";
+        static constexpr auto panel = "res/106.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

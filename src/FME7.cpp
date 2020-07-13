@@ -169,7 +169,7 @@ struct ChipFME7 : Module {
 struct ChipFME7Widget : ModuleWidget {
     ChipFME7Widget(ChipFME7 *module) {
         setModule(module);
-        static const auto panel = "res/FME7.svg";
+        static constexpr auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

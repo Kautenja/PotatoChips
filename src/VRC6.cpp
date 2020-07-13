@@ -321,7 +321,7 @@ struct ChipVRC6 : Module {
 struct ChipVRC6Widget : ModuleWidget {
     ChipVRC6Widget(ChipVRC6 *module) {
         setModule(module);
-        static const auto panel = "res/VRC6.svg";
+        static constexpr auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

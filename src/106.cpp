@@ -42,13 +42,14 @@ enum Namco106Registers {
 struct Chip106 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
+        ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
         PARAM_NUM_CHANNELS,
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
         ENUMS(INPUT_FM, Namco106::OSC_COUNT),
-        ENUMS(INPUT_SYNC, Namco106::OSC_COUNT),
+        ENUMS(INPUT_VOLUME, Namco106::OSC_COUNT),
         INPUT_NUM_CHANNELS,
         INPUT_COUNT
     };
@@ -89,6 +90,7 @@ struct Chip106 : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_VOLUME + i, 0, 15, 15, "Channel Volume",  "%", 0, 100.f / 15.f);
             apu.osc_output(i, &buf[i]);
             buf[i].set_clock_rate(CLOCK_RATE);
         }
@@ -101,13 +103,8 @@ struct Chip106 : Module {
     /// @param channel the channel to set the frequency for
     /// @param num_channels the number of enabled channels in [1, 8]
     /// @param wave_address the address of the waveform for the channel
-    /// @param volume the volume for the channel in [0x0, 0xF]
     ///
-    void setFrequency(int channel,
-        uint8_t num_channels = 1,
-        uint8_t wave_address = 0,
-        uint8_t volume = 0xF
-    ) {
+    void setFrequency(int channel, uint8_t num_channels = 1, uint8_t wave_address = 0) {
         // get the frequency of the oscillator from the parameter and CVs
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -140,6 +137,18 @@ struct Chip106 : Module {
         apu.write_addr(WAVE_ADDRESS + 8 * channel);
         apu.write_data(0, wave_address);
         // VOLUME (and channel selection on channel 8, no effect elsewhere)
+        // the minimal value for the volume width register
+        static constexpr float VOLUME_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float VOLUME_MAX = 15;
+        // get the volume from the parameter knob
+        auto levelParam = params[PARAM_VOLUME + channel].getValue();
+        // apply the control voltage to the volume
+        if (inputs[INPUT_VOLUME + channel].isConnected())
+            levelParam *= inputs[INPUT_VOLUME + channel].getVoltage() / 2.f;
+        // get the 8-bit volume clamped within legal limits
+        uint8_t volume = rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
+
         apu.write_addr(VOLUME + 8 * channel);
         apu.write_data(0, ((num_channels - 1) << 4) | volume);
     }
@@ -275,7 +284,11 @@ struct Chip106Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(140, 40 + i * 40), module, Chip106::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(170, 40 + i * 40), module, Chip106::INPUT_FM + i      ));
             addParam(createParam<Rogan3PSNES>( Vec(200, 30 + i * 40), module, Chip106::PARAM_FREQ + i    ));
-            addOutput(createOutput<PJ301MPort>(Vec(250, 40 + i * 40), module, Chip106::OUTPUT_CHANNEL + i));
+
+            addInput(createInput<PJ301MPort>(  Vec(250, 40 + i * 40), module, Chip106::INPUT_VOLUME + i  ));
+            addParam(createParam<Rogan3PSNES>( Vec(280, 30 + i * 40), module, Chip106::PARAM_VOLUME + i  ));
+
+            addOutput(createOutput<PJ301MPort>(Vec(320, 40 + i * 40), module, Chip106::OUTPUT_CHANNEL + i));
         }
     }
 };

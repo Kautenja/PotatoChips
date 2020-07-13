@@ -124,7 +124,7 @@ struct Chip106 : Module {
         freq += 4 * inputs[INPUT_FM].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
-        auto num_channels = 2;
+        auto num_channels = 1;
         auto wave_length = 64 - (num_samples / 4);
         freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
         freq = rack::clamp(freq, 4.f, 262143.f);
@@ -141,19 +141,18 @@ struct Chip106 : Module {
         // WAVEFORM LENGTH + FREQUENCY HIGH
         uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
         apu.write_addr(0x7C);
-        apu.write_data(0, (wave_length << 2) + hig);
+        apu.write_data(0, (wave_length << 2) | hig);
 
         // volume and channel selection
         static constexpr uint8_t volume = 0b00001111;
         apu.write_addr(0x7F);
-        apu.write_data(0, (num_channels << 4) + volume);
+        apu.write_data(0, ((num_channels - 1) << 4) | volume);
 
         // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
-            auto channel = (Namco106::OSC_COUNT - 1) + OUTPUT_CHANNEL - i;
-            outputs[channel].setVoltage(getAudioOut(i));
+            outputs[i].setVoltage(getAudioOut(i));
         }
     }
 

@@ -203,9 +203,8 @@ struct Chip106 : Module {
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
         json_t* array = json_array();
-        for (int i = 0; i < num_samples; i++) {
+        for (int i = 0; i < num_samples; i++)
             json_array_append_new(array, json_integer(values[i]));
-        }
         json_object_set_new(rootJ, "values", array);
         return rootJ;
     }
@@ -242,16 +241,18 @@ struct Chip106Widget : ModuleWidget {
             0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
         };
         auto module_ = reinterpret_cast<Chip106*>(this->module);
-        // add wave-table editor (1)
-        uint8_t* wavetable = module ? &module_->values[0] : &default_values[0];
-        auto table_editor = new WaveTableEditor<uint8_t>(
-            wavetable,                                 // wave-table buffer
-            Chip106::num_samples,                      // wave-table length
-            Chip106::bit_depth,                        // waveform bit depth
-            Vec(RACK_GRID_WIDTH, 20),                  // position
-            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80)  // size
-        );
-        addChild(table_editor);
+        // add wave-table editors
+        for (int i = 0; i < 5; i++){
+            uint8_t* wavetable = module ? &module_->values[0] : &default_values[0];
+            auto table_editor = new WaveTableEditor<uint8_t>(
+                wavetable,                                 // wave-table buffer
+                Chip106::num_samples,                      // wave-table length
+                Chip106::bit_depth,                        // waveform bit depth
+                Vec(RACK_GRID_WIDTH, 20 + 69 * i),         // position
+                Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 64)  // size
+            );
+            addChild(table_editor);
+        }
         addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));
         addInput(createInput<PJ301MPort>(Vec(15, 160), module, Chip106::INPUT_NUM_CHANNELS));
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {

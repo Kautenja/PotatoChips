@@ -280,7 +280,7 @@ struct Chip2A03 : Module {
 struct Chip2A03Widget : ModuleWidget {
     Chip2A03Widget(Chip2A03 *module) {
         setModule(module);
-        static const auto panel = "res/2A03.svg";
+        static constexpr auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

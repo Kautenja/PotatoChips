@@ -193,9 +193,10 @@ struct Chip106 : Module {
             apu.write_data(0, (values[2 * i] << 4) | values[2 * i + 1]);
         }
         // get the number of active channels
-        float num_channels = params[PARAM_NUM_CHANNELS].getValue();
-        num_channels += inputs[INPUT_NUM_CHANNELS].getVoltage();
-        num_channels = rack::math::clamp(num_channels, 1.f, 8.f);
+        int num_channels = rack::math::clamp(
+            params[PARAM_NUM_CHANNELS].getValue() + inputs[INPUT_NUM_CHANNELS].getVoltage(),
+            1.f, 8.f
+        );
         // set the frequency for all channels
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
             setFrequency(i, num_channels);
@@ -204,6 +205,7 @@ struct Chip106 : Module {
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
             outputs[i].setVoltage(getAudioOut(i));
+            lights[LIGHT_CHANNEL + 8 - i - 1].setSmoothBrightness(i < num_channels, args.sampleTime);
         }
     }
 

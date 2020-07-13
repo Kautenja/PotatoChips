@@ -131,6 +131,20 @@ struct Chip106 : Module {
         apu.volume(3.f);
     }
 
+    /// Return the active channels parameter.
+    inline uint8_t getActiveChannels() {
+        auto param = params[PARAM_NUM_CHANNELS].getValue();
+        auto cv = inputs[INPUT_NUM_CHANNELS].getVoltage();
+        return rack::math::clamp(param + cv, 1.f, 8.f);
+    }
+
+    /// Return the wave-table parameter.
+    inline float getWavetable() {
+        auto param = params[PARAM_WAVETABLE].getValue();
+        auto cv = inputs[INPUT_WAVETABLE].getVoltage();
+        return rack::math::clamp(param + cv, 1.f, 5.f);
+    }
+
     /// Return the frequency parameter for the given channel.
     ///
     /// @param channel the channel to get the frequency parameter for
@@ -243,25 +257,24 @@ struct Chip106 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // write the waveform data to the RAM
-        for (int i = 0; i < num_samples / 2; i++) {
+        // write the waveform data to the chip's RAM
+        for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
             apu.write_addr(i);
+            // combine the two nibbles into a byte for the RAM
             apu.write_data(0, (values[0][2 * i] << 4) | values[0][2 * i + 1]);
         }
-        // get the number of active channels
-        int num_channels = rack::math::clamp(
-            params[PARAM_NUM_CHANNELS].getValue() + inputs[INPUT_NUM_CHANNELS].getVoltage(),
-            1.f, 8.f
-        );
-        // set the frequency for all channels
+        // get the number of active channels from the panel
+        uint8_t num_channels = getActiveChannels();
+        // set the frequency for all channels on the chip
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
             setFrequency(i, num_channels);
-        // set the output from the oscillators (in reverse order)
+        // set the output from the oscillators on the chip
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
             outputs[i].setVoltage(getAudioOut(i));
-            lights[LIGHT_CHANNEL + 8 - i - 1].setSmoothBrightness(i < num_channels, args.sampleTime);
+            auto light = lights[LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1];
+            light.setSmoothBrightness(i < num_channels, args.sampleTime);
         }
     }
 

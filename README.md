@@ -103,12 +103,12 @@ channels.
 
 -   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
     of 4 bits and table size of 32 samples
--   **Namco 106 compute limitation:** activating each additional channel (up
-    to 8) reduces the amount of compute available for all channels. This causes
-    all channels to drop in frequency when additional channels are activated.
 -   **Waveform morph:** 5 banks of wave-tables to morph between using linear
     interpolation
 -   **Amplitude modulation:** 4-bit amplifier with voltage control
+-   **Namco 106 compute limitation:** activating each additional channel (up
+    to 8) reduces the amount of compute available for all channels. This causes
+    all channels to drop in frequency when additional channels are activated.
 
 See the [Manual](manual/106.pdf) for
 more information about the features of this module.

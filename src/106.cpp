@@ -19,6 +19,7 @@
 #include "components.hpp"
 #include "dsp/namco_106_apu.hpp"
 #include "widgets/wavetable_editor.hpp"
+#include <iostream>
 
 /// Addresses to the registers for channel 1. To get channel \f$n\f$,
 /// multiply by \f$8n\f$.
@@ -93,29 +94,6 @@ struct Chip106 : Module {
         }
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
-    }
-
-    /// Triggers for syncing waveforms to other waveforms
-    dsp::SchmittTrigger syncTrigger[Namco106::OSC_COUNT];
-
-    /// Hard sync the given channel based on the given input source.
-    ///
-    /// @param channel the channel to set the frequency for
-    ///
-    void hardSync(int channel) {
-        // get the value from the waveform
-        float syncTo = inputs[INPUT_SYNC + channel].getVoltage();
-        // rescale the voltage to the trigger range
-        syncTo = rescale(syncTo, 0.f, 2.f, 0.f, 1.f);
-        // return if the sync trigger hasn't flipped to high
-        if (!syncTrigger[channel].process(syncTo)) return;
-        // set the 24-bit phase to 0
-        apu.write_addr(PHASE_LOW + 8 * channel);
-        apu.write_data(0, 0);
-        apu.write_addr(PHASE_MEDIUM + 8 * channel);
-        apu.write_data(0, 0);
-        apu.write_addr(PHASE_HIGH + 8 * channel);
-        apu.write_data(0, 0);
     }
 
     /// Set the frequency for a given channel.
@@ -208,10 +186,8 @@ struct Chip106 : Module {
         num_channels += inputs[INPUT_NUM_CHANNELS].getVoltage();
         num_channels = rack::math::clamp(num_channels, 1.f, 8.f);
         // set the frequency for all channels
-        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
-            hardSync(i);
+        for (int i = 0; i < Namco106::OSC_COUNT; i++)
             setFrequency(i, num_channels);
-        }
         // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {

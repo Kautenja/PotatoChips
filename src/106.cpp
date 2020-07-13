@@ -47,6 +47,7 @@ struct Chip106 : Module {
     enum InputIds {
         ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
         ENUMS(INPUT_FM, Namco106::OSC_COUNT),
+        ENUMS(INPUT_SYNC, Namco106::OSC_COUNT),
         INPUT_NUM_CHANNELS,
         INPUT_COUNT
     };
@@ -94,11 +95,21 @@ struct Chip106 : Module {
         apu.volume(3.f);
     }
 
+    /// Triggers for syncing waveforms to other waveforms
+    dsp::SchmittTrigger syncTrigger[Namco106::OSC_COUNT];
+
     /// Hard sync the given channel based on the given input source.
     ///
-    /// @param input_waveform the input waveform to sync to
+    /// @param channel the channel to set the frequency for
     ///
-    void hardSync(int channel, float input_waveform) {
+    void hardSync(int channel) {
+        // get the value from the waveform
+        float syncTo = inputs[INPUT_SYNC + channel].getVoltage();
+        // rescale the voltage to the trigger range
+        syncTo = rescale(syncTo, 0.f, 2.f, 0.f, 1.f);
+        // return if the sync trigger hasn't flipped to high
+        if (!syncTrigger[channel].process(syncTo)) return;
+        // set the 24-bit phase to 0
         apu.write_addr(PHASE_LOW + 8 * channel);
         apu.write_data(0, 0);
         apu.write_addr(PHASE_MEDIUM + 8 * channel);
@@ -197,8 +208,10 @@ struct Chip106 : Module {
         num_channels += inputs[INPUT_NUM_CHANNELS].getVoltage();
         num_channels = rack::math::clamp(num_channels, 1.f, 8.f);
         // set the frequency for all channels
-        for (int i = 0; i < Namco106::OSC_COUNT; i++)
+        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+            hardSync(i);
             setFrequency(i, num_channels);
+        }
         // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {

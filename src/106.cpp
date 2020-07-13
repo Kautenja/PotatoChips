@@ -241,20 +241,36 @@ struct Chip106Widget : ModuleWidget {
             0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
         };
         auto module_ = reinterpret_cast<Chip106*>(this->module);
+        // the number of editors on the module
+        static constexpr int num_editors = 5;
+        // the fill colors for the wave-ttable editor lines
+        static constexpr NVGcolor colors[num_editors] = {
+            {{{1.f, 0.f, 0.f, 1.f}}},  // red
+            {{{0.f, 1.f, 0.f, 1.f}}},  // green
+            {{{0.f, 0.f, 1.f, 1.f}}},  // blue
+            {{{1.f, 1.f, 0.f, 1.f}}},  // yellow
+            {{{1.f, 1.f, 1.f, 1.f}}}   // white
+        };
         // add wave-table editors
-        for (int i = 0; i < 5; i++){
+        for (int i = 0; i < num_editors; i++) {
+            // get the wavetable buffer for this editor
             uint8_t* wavetable = module ? &module_->values[0] : &default_values[0];
+            // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,                                 // wave-table buffer
-                Chip106::num_samples,                      // wave-table length
-                Chip106::bit_depth,                        // waveform bit depth
-                Vec(RACK_GRID_WIDTH, 20 + 69 * i),         // position
-                Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 64)  // size
+                wavetable,             // wave-table buffer
+                Chip106::num_samples,  // wave-table length
+                Chip106::bit_depth,    // waveform bit depth
+                Vec(10, 26 + 67 * i),  // position
+                Vec(135, 60),          // size
+                colors[i]              // line fill color
             );
+            // add the table editor to the module
             addChild(table_editor);
         }
+        // channel select
         addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));
         addInput(createInput<PJ301MPort>(Vec(15, 160), module, Chip106::INPUT_NUM_CHANNELS));
+        // individual channel controls
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(140, 40 + i * 40), module, Chip106::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(170, 40 + i * 40), module, Chip106::INPUT_FM + i      ));

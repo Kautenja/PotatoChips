@@ -75,6 +75,53 @@ struct Chip106 : Module {
         apu.volume(3.f);
     }
 
+    /// Set the frequency for a given channel.
+    ///
+    /// @param channel the channel to set the frequency for
+    /// @param num_channels the number of enabled channels
+    /// @param volume the volume for the channel
+    ///
+    void setFrequency(int channel,
+        uint8_t num_channels = 2,
+        uint8_t wave_address = 0,
+        uint8_t volume = 0x0F
+    ) {
+        // get the frequency of the oscillator from the parameter and CVs
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        static constexpr float FM_SCALE = 5.f;
+        freq += FM_SCALE * inputs[INPUT_FM + channel].getVoltage();
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to the 8-bit value for the oscillator
+        auto wave_length = 64 - (num_samples / 4);
+        // TODO: changing num_channels to 1 allows the standard 103 function
+        //       where additional channels reduce the frequency of all
+        freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
+        // clamp within the legal bounds for the frequency value
+        freq = rack::clamp(freq, 4.f, 262143.f);
+        // extract the low, medium, and high frequency register values
+        auto freq18bit = static_cast<uint32_t>(freq);
+        // FREQUENCY LOW
+        uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
+        apu.write_addr(0x40 + 8 * channel);
+        apu.write_data(0, low);
+        // FREQUENCY MEDIUM
+        uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
+        apu.write_addr(0x42 + 8 * channel);
+        apu.write_data(0, med);
+        // WAVEFORM LENGTH + FREQUENCY HIGH
+        uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
+        apu.write_addr(0x44 + 8 * channel);
+        apu.write_data(0, (wave_length << 2) | hig);
+        // WAVE ADDRESS
+        apu.write_addr(0x46 + 8 * channel);
+        apu.write_data(0, wave_address);
+        // VOLUME (and channel selection on channel 8, no effect elsewhere)
+        apu.write_addr(0x47 + 8 * channel);
+        apu.write_data(0, ((num_channels - 1) << 4) | volume);
+    }
+
     /// Return a 10V signed sample from the chip.
     ///
     /// @param channel the channel to get the audio sample for
@@ -107,47 +154,14 @@ struct Chip106 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-
-        // write the waveform to the RAM
+        // write the waveform data to the RAM
         for (int i = 0; i < num_samples / 2; i++) {
             apu.write_addr(i);
-            apu.write_data(0, (values[2 * i] << 4) + values[2 * i + 1]);
+            apu.write_data(0, (values[2 * i] << 4) | values[2 * i + 1]);
         }
-        // write the wave address
-        apu.write_addr(0x7E);
-        apu.write_data(0, 0);
-
-        // get the frequency of the oscillator from the parameter and CVs
-        float pitch = params[PARAM_FREQ].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT].getVoltage();
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += 4 * inputs[INPUT_FM].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to the 8-bit value for the oscillator
-        auto num_channels = 1;
-        auto wave_length = 64 - (num_samples / 4);
-        freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
-        freq = rack::clamp(freq, 4.f, 262143.f);
-        // extract the low, medium, and high frequency register values
-        auto freq18bit = static_cast<uint32_t>(freq);
-        // FREQUENCY LOW
-        uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
-        apu.write_addr(0x78);
-        apu.write_data(0, low);
-        // FREQUENCY MEDIUM
-        uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
-        apu.write_addr(0x7A);
-        apu.write_data(0, med);
-        // WAVEFORM LENGTH + FREQUENCY HIGH
-        uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
-        apu.write_addr(0x7C);
-        apu.write_data(0, (wave_length << 2) | hig);
-
-        // volume and channel selection
-        static constexpr uint8_t volume = 0b00001111;
-        apu.write_addr(0x7F);
-        apu.write_data(0, ((num_channels - 1) << 4) | volume);
-
+        // set the frequency for all channels
+        for (int i = 0; i < Namco106::OSC_COUNT; i++)
+            setFrequency(i);
         // set the output from the oscillators (in reverse order)
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {

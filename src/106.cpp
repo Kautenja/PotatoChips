@@ -186,7 +186,7 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // add the wavetable editor
         auto table_editor = new WaveTableEditor(
-            Vec(RACK_GRID_WIDTH, 110),                    // position
+            Vec(RACK_GRID_WIDTH, 20),                     // position
             Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80),    // size
             {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
             {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color

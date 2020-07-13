@@ -52,13 +52,12 @@ struct Chip106 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
-    // the values of the wave-table
-    static constexpr auto num_samples = 64;
-    uint8_t values[64] = {
-        0x0,0x0,0x0,0x0,0x0,0x0,0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,
-        0xE,0xF,0xD,0xE,0xA,0xC,0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,
-        0x1,0x0,0x2,0x1,0x5,0x3,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0
+    /// the number of samples in the wave-table
+    static constexpr auto num_samples = 32;
+    /// the samples in the wave-table
+    uint8_t values[num_samples] = {
+        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
+        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
     };
 
     /// Initialize a new 106 Chip module.
@@ -191,14 +190,11 @@ struct Chip106Widget : ModuleWidget {
             {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
             {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color
             {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  },     // border color
-            64,                                           // wave-table length
+            32,                                           // wave-table length
             15,                                           // waveform bit depth
-            // [&](uint32_t index, uint64_t value) {         // update callback
-            //     std::cout << index << " " << value << std::endl;
-            //     module->update_wavetable(index, value)
-            // }
-            std::bind(&Chip106::update_wavetable, module, std::placeholders::_1, std::placeholders::_2)
-
+            [&](uint32_t index, uint64_t value) {         // update callback
+                module->update_wavetable(index, value);
+            }
         );
         addChild(table_editor);
         // V/OCT inputs

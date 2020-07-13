@@ -199,19 +199,25 @@ struct Chip106 : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
 
-    // /// Convert the module's state to a JSON object.
-    // json_t* dataToJson() override {
-    //     json_t* rootJ = json_object();
-    //     json_object_set_new(rootJ, "data", data.dataToJson());
-    //     return rootJ;
-    // }
+    /// Convert the module's state to a JSON object.
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_t* array = json_array();
+        for (int i = 0; i < num_samples; i++) {
+            json_array_append_new(array, json_integer(values[i]));
+        }
+        json_object_set_new(rootJ, "values", array);
+        return rootJ;
+    }
 
-    // /// Load the module's state from a JSON object.
-    // void dataFromJson(json_t* rootJ) override {
-    //     json_t* data = json_object_get(rootJ, "data");
-    //     if (data) {
-    //     }
-    // }
+    /// Load the module's state from a JSON object.
+    void dataFromJson(json_t* rootJ) override {
+        json_t* data = json_object_get(rootJ, "values");
+        if (data) {
+            for (int i = 0; i < num_samples; i++)
+                values[i] = json_integer_value(json_array_get(data, i));
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------

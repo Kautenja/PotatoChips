@@ -20,6 +20,19 @@
 #include "dsp/namco_106_apu.hpp"
 #include "widgets/wavetable_editor.hpp"
 
+/// Addresses to the registers for channel 1. To get channel \f$n\f$,
+/// multiply by \f$8n\f$.
+enum Namco106Registers {
+    FREQ_LOW = 0x40,
+    PHASE_LOW,
+    FREQ_MEDIUM,
+    PHASE_MEDIUM,
+    FREQ_HIGH,
+    PHASE_HIGH,
+    WAVE_ADDRESS,
+    VOLUME
+};
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -81,6 +94,19 @@ struct Chip106 : Module {
         apu.volume(3.f);
     }
 
+    /// Hard sync the given channel based on the given input source.
+    ///
+    /// @param input_waveform the input waveform to sync to
+    ///
+    void hardSync(int channel, float input_waveform) {
+        apu.write_addr(PHASE_LOW + 8 * channel);
+        apu.write_data(0, 0);
+        apu.write_addr(PHASE_MEDIUM + 8 * channel);
+        apu.write_data(0, 0);
+        apu.write_addr(PHASE_HIGH + 8 * channel);
+        apu.write_data(0, 0);
+    }
+
     /// Set the frequency for a given channel.
     ///
     /// @param channel the channel to set the frequency for
@@ -111,21 +137,21 @@ struct Chip106 : Module {
         auto freq18bit = static_cast<uint32_t>(freq);
         // FREQUENCY LOW
         uint8_t low = (freq18bit & 0b000000000011111111) >> 0;
-        apu.write_addr(0x40 + 8 * channel);
+        apu.write_addr(FREQ_LOW + 8 * channel);
         apu.write_data(0, low);
         // FREQUENCY MEDIUM
         uint8_t med = (freq18bit & 0b001111111100000000) >> 8;
-        apu.write_addr(0x42 + 8 * channel);
+        apu.write_addr(FREQ_MEDIUM + 8 * channel);
         apu.write_data(0, med);
         // WAVEFORM LENGTH + FREQUENCY HIGH
         uint8_t hig = (freq18bit & 0b110000000000000000) >> 16;
-        apu.write_addr(0x44 + 8 * channel);
+        apu.write_addr(FREQ_HIGH + 8 * channel);
         apu.write_data(0, (wave_length << 2) | hig);
         // WAVE ADDRESS
-        apu.write_addr(0x46 + 8 * channel);
+        apu.write_addr(WAVE_ADDRESS + 8 * channel);
         apu.write_data(0, wave_address);
         // VOLUME (and channel selection on channel 8, no effect elsewhere)
-        apu.write_addr(0x47 + 8 * channel);
+        apu.write_addr(VOLUME + 8 * channel);
         apu.write_data(0, ((num_channels - 1) << 4) | volume);
     }
 

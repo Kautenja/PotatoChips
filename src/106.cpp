@@ -44,6 +44,7 @@ struct Chip106 : Module {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
         ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
         PARAM_NUM_CHANNELS,
+        PARAM_WAVETABLE,
         PARAM_COUNT
     };
     enum InputIds {
@@ -51,6 +52,7 @@ struct Chip106 : Module {
         ENUMS(INPUT_FM, Namco106::OSC_COUNT),
         ENUMS(INPUT_VOLUME, Namco106::OSC_COUNT),
         INPUT_NUM_CHANNELS,
+        INPUT_WAVETABLE,
         INPUT_COUNT
     };
     enum OutputIds {
@@ -58,7 +60,7 @@ struct Chip106 : Module {
         OUTPUT_COUNT
     };
     enum LightIds {
-        ENUMS(LIGHT_CHANNEL_ACTIVE, Namco106::OSC_COUNT),
+        ENUMS(LIGHT_CHANNEL, Namco106::OSC_COUNT),
         LIGHT_COUNT
     };
 
@@ -87,6 +89,7 @@ struct Chip106 : Module {
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels",  "");
+        configParam(PARAM_WAVETABLE, 1, 5, 1, "Waveform Morph", "");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -277,18 +280,20 @@ struct Chip106Widget : ModuleWidget {
             addChild(table_editor);
         }
         // channel select
-        addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));
-        addInput(createInput<PJ301MPort>(Vec(15, 160), module, Chip106::INPUT_NUM_CHANNELS));
+        addParam(createParam<Rogan3PSNES>(Vec(157, 38), module, Chip106::PARAM_NUM_CHANNELS));
+        addInput(createInput<PJ301MPort>(Vec(166, 95), module, Chip106::INPUT_NUM_CHANNELS));
+        // wave-table morph
+        addParam(createParam<Rogan3PSNES>(Vec(157, 148), module, Chip106::PARAM_WAVETABLE));
+        addInput(createInput<PJ301MPort>(Vec(166, 205), module, Chip106::INPUT_WAVETABLE));
         // individual channel controls
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(  Vec(140, 40 + i * 40), module, Chip106::INPUT_VOCT + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(170, 40 + i * 40), module, Chip106::INPUT_FM + i      ));
-            addParam(createParam<Rogan3PSNES>( Vec(200, 30 + i * 40), module, Chip106::PARAM_FREQ + i    ));
-
-            addInput(createInput<PJ301MPort>(  Vec(250, 40 + i * 40), module, Chip106::INPUT_VOLUME + i  ));
-            addParam(createParam<Rogan3PSNES>( Vec(280, 30 + i * 40), module, Chip106::PARAM_VOLUME + i  ));
-
-            addOutput(createOutput<PJ301MPort>(Vec(320, 40 + i * 40), module, Chip106::OUTPUT_CHANNEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(212, 35 + i * 41), module, Chip106::INPUT_VOCT + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(242, 35 + i * 41), module, Chip106::INPUT_FM + i      ));
+            addParam(createParam<Rogan2PSNES>( Vec(275, 35 + i * 41), module, Chip106::PARAM_FREQ + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(317, 35 + i * 41), module, Chip106::INPUT_VOLUME + i  ));
+            addParam(createParam<Rogan2PSNES>( Vec(350, 35 + i * 41), module, Chip106::PARAM_VOLUME + i  ));
+            addOutput(createOutput<PJ301MPort>(Vec(392, 35 + i * 41), module, Chip106::OUTPUT_CHANNEL + i));
+            addChild(createLight<SmallLight<WhiteLight>>(Vec(415, 52 + i * 41), module, Chip106::LIGHT_CHANNEL + i));
         }
     }
 };

@@ -187,28 +187,23 @@ struct Chip106Widget : ModuleWidget {
         // add the wavetable editor
         auto table_editor = new WaveTableEditor(
             Vec(RACK_GRID_WIDTH, 110),                    // position
-            Vec(box.size.x - 2 * RACK_GRID_WIDTH, 80),    // size
+            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80),    // size
             {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
             {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color
             {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  },     // border color
             Chip106::num_samples,                         // wave-table length
             Chip106::bit_depth,                           // waveform bit depth
-            // [&](uint32_t index, uint64_t value) {         // update callback
-            //     std::cout << index << " " << value << std::endl;
-            //     module->update_wavetable(index, value)
-            // }
-            std::bind(&Chip106::update_wavetable, module, std::placeholders::_1, std::placeholders::_2)
+            [&](uint32_t index, uint64_t value) {         // update callback
+                auto module = reinterpret_cast<Chip106*>(this->module);
+                module->update_wavetable(index, value);
+            }
         );
         addChild(table_editor);
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(28, 74), module, Chip106::INPUT_VOCT));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(33, 32), module, Chip106::INPUT_FM));
-        // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(62, 42), module, Chip106::PARAM_FREQ));
-        // channel outputs
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
-            addOutput(createOutput<PJ301MPort>(Vec(114, 74 + i * 25), module, Chip106::OUTPUT_CHANNEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(140, 40 + i * 40), module, Chip106::INPUT_VOCT + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(170, 40 + i * 40), module, Chip106::INPUT_FM + i      ));
+            addParam(createParam<Rogan3PSNES>( Vec(200, 30 + i * 40), module, Chip106::PARAM_FREQ + i    ));
+            addOutput(createOutput<PJ301MPort>(Vec(250, 40 + i * 40), module, Chip106::OUTPUT_CHANNEL + i));
         }
     }
 };

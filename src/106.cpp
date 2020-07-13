@@ -199,14 +199,19 @@ struct Chip106 : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
 
-    /// Update the wave-table.
-    ///
-    /// @param index the index in the wave-table
-    /// @param value the value of the waveform at given index
-    ///
-    inline void update_wavetable(uint32_t index, uint64_t value) {
-        values[index] = value;
-    }
+    // /// Convert the module's state to a JSON object.
+    // json_t* dataToJson() override {
+    //     json_t* rootJ = json_object();
+    //     json_object_set_new(rootJ, "data", data.dataToJson());
+    //     return rootJ;
+    // }
+
+    // /// Load the module's state from a JSON object.
+    // void dataFromJson(json_t* rootJ) override {
+    //     json_t* data = json_object_get(rootJ, "data");
+    //     if (data) {
+    //     }
+    // }
 };
 
 // ---------------------------------------------------------------------------
@@ -224,19 +229,17 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // add the wavetable editor
-        auto table_editor = new WaveTableEditor(
-            Vec(RACK_GRID_WIDTH, 20),                     // position
-            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80),    // size
-            {.r = 0,   .g = 0,   .b = 0,   .a = 1  },     // background color
-            {.r = 0,   .g = 0,   .b = 1,   .a = 1  },     // fill color
-            {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  },     // border color
-            Chip106::num_samples,                         // wave-table length
-            Chip106::bit_depth,                           // waveform bit depth
-            [&](uint32_t index, uint64_t value) {         // update callback
-                auto module = reinterpret_cast<Chip106*>(this->module);
-                module->update_wavetable(index, value);
-            }
+        // add the wave-table editor
+        auto chip_module = reinterpret_cast<Chip106*>(this->module);
+        auto table_editor = new WaveTableEditor<uint8_t>(
+            &chip_module->values[0],                    // wave-table buffer
+            Chip106::num_samples,                       // wave-table length
+            Chip106::bit_depth,                         // waveform bit depth
+            Vec(RACK_GRID_WIDTH, 20),                   // position
+            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80),  // size
+            {.r = 0,   .g = 0,   .b = 1,   .a = 1  },   // fill color
+            {.r = 0,   .g = 0,   .b = 0,   .a = 1  },   // background color
+            {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  }    // border color
         );
         addChild(table_editor);
         addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));

@@ -15,23 +15,24 @@
 
 #include "rack.hpp"
 #include <cstdint>
-#include <vector>
-#include <functional>
 
 #ifndef WIDGETS_WAVETABLE_EDITOR_HPP_
 #define WIDGETS_WAVETABLE_EDITOR_HPP_
 
 /// A widget that displays / edits a wave-table.
+template<typename Wavetable>
 struct WaveTableEditor : rack::OpaqueWidget {
- public:
-    /// a callback function for passing update events to a listener
-    typedef std::function<void(uint32_t, uint64_t)> Callback;
-
  private:
-    /// the background color for the widget
-    NVGcolor background;
+    /// the vector containing the waveform
+    Wavetable* waveform;
+    /// the length of the wave-table to edit
+    uint32_t length;
+    /// the bit depth of the waveform
+    uint64_t bit_depth;
     /// the fill color for the widget
     NVGcolor fill;
+    /// the background color for the widget
+    NVGcolor background;
     /// the border color for the widget
     NVGcolor border;
     /// the state of the drag operation
@@ -43,46 +44,45 @@ struct WaveTableEditor : rack::OpaqueWidget {
         /// the current position of the mouse pointer during the drag
         rack::Vec position = {0, 0};
     } drag_state;
-    /// the length of the wave-table to edit
-    uint32_t length;
-    /// the bit depth of the waveform
-    uint64_t bit_depth;
-    /// the vector containing the waveform
-    std::vector<uint64_t> waveform;
-    /// the callback to pass wave-table update events to
-    Callback callback;
 
  public:
+    /// the default background color
+    static constexpr NVGcolor ColorBackgroud =  {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+    /// the default fill color
+    static constexpr NVGcolor ColorFill =       {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+    /// the default border color
+    static constexpr NVGcolor ColorBorder =     {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+
     /// @brief Initialize a new wave-table editor widget.
     ///
     /// @param position the position of the screen on the module
     /// @param size the output size of the display to render
-    /// @param background_ the background color for the widget
     /// @param fill_ the fill color for the widget
-    /// @param fill_ the border color for the widget
+    /// @param background_ the background color for the widget
+    /// @param border_ the border color for the widget
     /// @param length_ the length of the wave-table to edit
     /// @param bit_depth_ the bit-depth of the waveform samples to generate
+    /// @param waveform_ the waveform buffer to read and update
     ///
     explicit WaveTableEditor(
-        rack::Vec position,
-        rack::Vec size,
-        NVGcolor background_,
-        NVGcolor fill_,
-        NVGcolor border_,
+        Wavetable* waveform_,
         uint32_t length_,
         uint64_t bit_depth_,
-        Callback callback_
+        rack::Vec position,
+        rack::Vec size,
+        NVGcolor fill_ = ColorFill,
+        NVGcolor background_ = ColorBackgroud,
+        NVGcolor border_ = ColorBorder
     ) :
         OpaqueWidget(),
-        background(background_),
-        fill(fill_),
-        border(border_),
+        waveform(waveform_),
         length(length_),
         bit_depth(bit_depth_),
-        callback(callback_) {
+        fill(fill_),
+        background(background_),
+        border(border_) {
         setPosition(position);
         setSize(size);
-        waveform.resize(length, 0);
     }
 
     /// Respond to a button event on this widget.
@@ -110,8 +110,8 @@ struct WaveTableEditor : rack::OpaqueWidget {
         y = rack::math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
+        // update the waveform
         waveform[index] = value;
-        callback(index, value);
     }
 
     /// Respond to drag move event on this widget.
@@ -133,10 +133,8 @@ struct WaveTableEditor : rack::OpaqueWidget {
         uint64_t value = y * bit_depth;
         if (next_index < index)  // swap next index if it's less the current
             (index ^= next_index), (next_index ^= index), (index ^= next_index);
-        for (; index < next_index; index++) {  // update the positions
-            waveform[index] = value;
-            callback(index, value);
-        }
+        // update the waveform (use memset for SIMD; opposed to a loop)
+        memset(waveform + index, value, next_index - index);
     }
 
     /// @brief Draw the display on the main context.

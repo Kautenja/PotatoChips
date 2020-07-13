@@ -132,17 +132,25 @@ struct Chip106 : Module {
     }
 
     /// Return the active channels parameter.
+    ///
+    /// @returns the active channel count in [1, 8]
+    ///
     inline uint8_t getActiveChannels() {
         auto param = params[PARAM_NUM_CHANNELS].getValue();
         auto cv = inputs[INPUT_NUM_CHANNELS].getVoltage();
+        // channels are indexed maths style on the chip, not CS style
         return rack::math::clamp(param + cv, 1.f, 8.f);
     }
 
     /// Return the wave-table parameter.
+    ///
+    /// @returns the floating index of the wave-table table in [0, 4]
+    ///
     inline float getWavetable() {
         auto param = params[PARAM_WAVETABLE].getValue();
         auto cv = inputs[INPUT_WAVETABLE].getVoltage();
-        return rack::math::clamp(param + cv, 1.f, 5.f);
+        // wave-tables are indexed maths style on panel, subtract 1 for CS style
+        return rack::math::clamp(param + cv, 1.f, 5.f) - 1;
     }
 
     /// Return the frequency parameter for the given channel.
@@ -258,10 +266,23 @@ struct Chip106 : Module {
             new_sample_rate = false;
         }
         // write the waveform data to the chip's RAM
+        auto wavetable = getWavetable();
+        uint8_t wavetable0 = floor(wavetable);
+        uint8_t wavetable1 = ceil(wavetable);
+        float interpolate = wavetable - wavetable0;
         for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
             apu.write_addr(i);
+            // get the first waveform data
+            auto nibbleHi0 = values[wavetable0][2 * i];
+            auto nibbleLo0 = values[wavetable0][2 * i + 1];
+            // get the second waveform data
+            auto nibbleHi1 = values[wavetable1][2 * i];
+            auto nibbleLo1 = values[wavetable1][2 * i + 1];
+            // floating point interpolation for a nicer sound
+            uint8_t nibbleHi = (nibbleHi0 + interpolate * nibbleHi1);
+            uint8_t nibbleLo = (nibbleLo0 + interpolate * nibbleLo1);
             // combine the two nibbles into a byte for the RAM
-            apu.write_data(0, (values[0][2 * i] << 4) | values[0][2 * i + 1]);
+            apu.write_data(0, (nibbleHi << 4) | nibbleLo);
         }
         // get the number of active channels from the panel
         uint8_t num_channels = getActiveChannels();

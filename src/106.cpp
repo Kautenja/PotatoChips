@@ -239,14 +239,11 @@ struct Chip106Widget : ModuleWidget {
         // add wave-table editor (1)
         uint8_t* wavetable = module ? &module_->values[0] : &default_values[0];
         auto table_editor = new WaveTableEditor<uint8_t>(
-            wavetable,                                  // wave-table buffer
-            Chip106::num_samples,                       // wave-table length
-            Chip106::bit_depth,                         // waveform bit depth
-            Vec(RACK_GRID_WIDTH, 20),                   // position
-            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80),  // size
-            {.r = 0,   .g = 0,   .b = 1,   .a = 1  },   // fill color
-            {.r = 0,   .g = 0,   .b = 0,   .a = 1  },   // background color
-            {.r = 0.2, .g = 0.2, .b = 0.2, .a = 1  }    // border color
+            wavetable,                                 // wave-table buffer
+            Chip106::num_samples,                      // wave-table length
+            Chip106::bit_depth,                        // waveform bit depth
+            Vec(RACK_GRID_WIDTH, 20),                  // position
+            Vec(box.size.x/2 - 2*RACK_GRID_WIDTH, 80)  // size
         );
         addChild(table_editor);
         addParam(createParam<Rogan3PSNES>(Vec(15, 110), module, Chip106::PARAM_NUM_CHANNELS));

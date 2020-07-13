@@ -47,11 +47,11 @@ struct WaveTableEditor : rack::OpaqueWidget {
 
  public:
     /// the default background color
-    static constexpr NVGcolor ColorBackgroud =  {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+    static constexpr NVGcolor ColorBackgroud =  {{{0.f,  0.f,  0.f,  1.f}}};
     /// the default fill color
-    static constexpr NVGcolor ColorFill =       {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+    static constexpr NVGcolor ColorFill =       {{{0.f,  0.f,  1.f,  1.f}}};
     /// the default border color
-    static constexpr NVGcolor ColorBorder =     {.r = 0,   .g = 0,   .b = 0,   .a = 1  };
+    static constexpr NVGcolor ColorBorder =     {{{0.2f, 0.2f, 0.2f, 1.f}}};
 
     /// @brief Initialize a new wave-table editor widget.
     ///

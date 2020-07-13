@@ -30,19 +30,19 @@
       ]
     },
     {
-      "slug": "106",
-      "name": "106",
-      "description": "An emulation of the Namco 106 audio processing unit.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/download/1.3.0/106.pdf",
+      "slug": "FME7",
+      "name": "FME7",
+      "description": "An emulation of the Sunsoft FME-7 audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/download/1.3.0/FME7.pdf",
       "tags": [
         "Oscillator"
       ]
     },
     {
-      "slug": "FME7",
-      "name": "FME7",
-      "description": "An emulation of the Sunsoft FME-7 audio processing unit.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/download/1.3.0/FME7.pdf",
+      "slug": "106",
+      "name": "106",
+      "description": "An emulation of the Namco 106 wavetable audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/download/1.3.0/106.pdf",
       "tags": [
         "Oscillator"
       ]

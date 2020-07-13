@@ -102,7 +102,7 @@ channels.
 ### Features
 
 -   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
-    of 4 bits depth and table size of 32 samples
+    of 4 bits and table size of 32 samples
 -   **Namco 106 compute limitation:** activating each additional channel (up
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.

@@ -105,7 +105,8 @@ channels.
     of 4 bits and table size of 32 samples
 -   **Waveform morph:** 5 banks of wave-tables to morph between using linear
     interpolation
--   **Amplitude modulation:** 4-bit amplifier with voltage control
+-   **Frequency control:** 18-bit frequency control with linear frequency modulation
+-   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
 -   **Namco 106 compute limitation:** activating each additional channel (up
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.

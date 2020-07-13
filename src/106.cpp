@@ -229,10 +229,17 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // add the wave-table editor
-        auto chip_module = reinterpret_cast<Chip106*>(this->module);
+        // if the module is displaying in/being rendered for the library, the
+        // module will be null and a dummy waveform is displayed
+        static uint8_t default_values[Chip106::num_samples] = {
+            0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
+            0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
+        };
+        auto module_ = reinterpret_cast<Chip106*>(this->module);
+        // add wave-table editor (1)
+        uint8_t* wavetable = module ? &module_->values[0] : &default_values[0];
         auto table_editor = new WaveTableEditor<uint8_t>(
-            &chip_module->values[0],                    // wave-table buffer
+            wavetable,                                  // wave-table buffer
             Chip106::num_samples,                       // wave-table length
             Chip106::bit_depth,                         // waveform bit depth
             Vec(RACK_GRID_WIDTH, 20),                   // position

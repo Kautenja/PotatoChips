@@ -90,7 +90,10 @@ information about the features of this module.
 
 106 is an emulation of the Namco 106 audio processing unit from the
 Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains
-eight channels of wave-table synthesis and 128 bytes of operational RAM.
+eight channels of wave-table synthesis and 128 bytes of operational RAM. The
+wave-tables are 4-bit and can be as long as 63 samples. This module uses a
+bank of five 32-sample wave-tables to act as the waveform for all eight
+channels.
 
 <p align="center">
 <img alt="106" src="manual/106/img/106-Module.svg" height="380px">
@@ -98,8 +101,14 @@ eight channels of wave-table synthesis and 128 bytes of operational RAM.
 
 ### Features
 
--   **Wavetable synthesis:** 8 channels of wave-table synthesis
--   **128 bytes RAM:** 128 bytes of RAM for runtime wave-table data
+-   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
+    of 4 bits depth and table size of 32 samples
+-   **Namco 106 compute limitation:** activating each additional channel (up
+    to 8) reduces the amount of compute available for all channels. This causes
+    all channels to drop in frequency when additional channels are activated.
+-   **Waveform morph:** 5 banks of wave-tables to morph between using linear
+    interpolation
+-   **Amplitude modulation:** 4-bit amplifier with voltage control
 
 See the [Manual](manual/106.pdf) for
 more information about the features of this module.

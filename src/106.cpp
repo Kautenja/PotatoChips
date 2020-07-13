@@ -41,7 +41,10 @@ struct Chip106 : Module {
         ENUMS(OUTPUT_CHANNEL, Namco106::OSC_COUNT),
         OUTPUT_COUNT
     };
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds {
+        ENUMS(LIGHT_CHANNEL_ACTIVE, Namco106::OSC_COUNT),
+        LIGHT_COUNT
+    };
 
     /// the clock rate of the module
     static constexpr uint64_t CLOCK_RATE = 768000;
@@ -67,7 +70,7 @@ struct Chip106 : Module {
     /// Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_NUM_CHANNELS, 1, 8, 1, "Active Channels",  "");
+        configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels",  "");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -99,9 +102,9 @@ struct Chip106 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         auto wave_length = 64 - (num_samples / 4);
-        // TODO: changing num_channels to 1 allows the standard 103 function
-        //       where additional channels reduce the frequency of all
-        freq *= (wave_length * num_channels * 15.f * 65536.f) / CLOCK_RATE;
+        // changing num_channels to 1 allows the standard 103 function where
+        // additional channels reduce the frequency of all channels
+        freq *= (wave_length * 1 * 15.f * 65536.f) / CLOCK_RATE;
         // clamp within the legal bounds for the frequency value
         freq = rack::clamp(freq, 4.f, 262143.f);
         // extract the low, medium, and high frequency register values
@@ -167,7 +170,6 @@ struct Chip106 : Module {
         float num_channels = params[PARAM_NUM_CHANNELS].getValue();
         num_channels += inputs[INPUT_NUM_CHANNELS].getVoltage();
         num_channels = rack::math::clamp(num_channels, 1.f, 8.f);
-
         // set the frequency for all channels
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
             setFrequency(i, num_channels);

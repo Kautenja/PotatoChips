@@ -24,4 +24,8 @@
 
 ### 1.3.0 (2020-07-14)
 
-- wave-table editor for 106
+- 106 Module
+    - new panel design
+    - wave-table editor
+    - waveform morph with 5 tables
+    - all 8 channels active

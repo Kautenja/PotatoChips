@@ -86,7 +86,7 @@ pulse wave generators are implemented currently.
 See the [Manual](manual/FME7.pdf) for more
 information about the features of this module.
 
-## 106 _(Coming Soon!)_
+## 106
 
 106 is an emulation of the Namco 106 audio processing unit from the
 Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains

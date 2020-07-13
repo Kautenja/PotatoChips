@@ -151,7 +151,6 @@ struct Chip106 : Module {
             levelParam *= inputs[INPUT_VOLUME + channel].getVoltage() / 2.f;
         // get the 8-bit volume clamped within legal limits
         uint8_t volume = rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
-
         apu.write_addr(VOLUME + 8 * channel);
         apu.write_data(0, ((num_channels - 1) << 4) | volume);
     }

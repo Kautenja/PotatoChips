@@ -20,7 +20,7 @@
 #define DSP_NEC_TURBO_GRAFX_16_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 struct Hes_Osc
 {
@@ -41,7 +41,7 @@ struct Hes_Osc
 	unsigned char control;
 
 	enum { amp_range = 0x8000 };
-	typedef BLIPSynth<BLIPQuality::Medium,1> synth_t;
+	typedef BLIPSynth<blip_med_quality,1> synth_t;
 
 	void run_until( synth_t& synth, blip_time_t );
 };

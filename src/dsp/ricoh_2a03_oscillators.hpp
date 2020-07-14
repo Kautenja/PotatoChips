@@ -19,7 +19,7 @@
 #ifndef NES_OSCILLATORS_HPP_
 #define NES_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 #include <functional>
 
 /// CPU clock cycle count
@@ -97,7 +97,7 @@ struct Pulse : Envelope {
     int phase;
     int sweep_delay;
 
-    typedef BLIPSynth<BLIPQuality::Good, 15> Synth;
+    typedef BLIPSynth<blip_good_quality, 15> Synth;
     // shared between squares
     const Synth* synth;
 
@@ -202,7 +202,7 @@ struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
-    BLIPSynth<BLIPQuality::Good, 15> synth;
+    BLIPSynth<blip_good_quality, 15> synth;
 
     inline int calc_amp() const {
         int amp = phase_range - phase;
@@ -279,7 +279,7 @@ static constexpr int16_t noise_period_table[16] = {
 /// The noise oscillator from the NES.
 struct Noise : Envelope {
     int noise;
-    BLIPSynth<BLIPQuality::Medium, 15> synth;
+    BLIPSynth<blip_med_quality, 15> synth;
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;

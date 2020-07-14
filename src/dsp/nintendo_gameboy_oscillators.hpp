@@ -20,7 +20,7 @@
 #define DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 struct Gb_Osc
 {
@@ -57,7 +57,7 @@ struct Gb_Square : Gb_Env
 	enum { period_mask = 0x70 };
 	enum { shift_mask  = 0x07 };
 
-	typedef BLIPSynth<BLIPQuality::Good, 1> Synth;
+	typedef BLIPSynth<blip_good_quality, 1> Synth;
 	Synth const* synth;
 	int sweep_delay;
 	int sweep_freq;
@@ -70,7 +70,7 @@ struct Gb_Square : Gb_Env
 
 struct Gb_Noise : Gb_Env
 {
-	typedef BLIPSynth<BLIPQuality::Medium, 1> Synth;
+	typedef BLIPSynth<blip_med_quality, 1> Synth;
 	Synth const* synth;
 	unsigned bits;
 
@@ -79,7 +79,7 @@ struct Gb_Noise : Gb_Env
 
 struct Gb_Wave : Gb_Osc
 {
-	typedef BLIPSynth<BLIPQuality::Medium, 1> Synth;
+	typedef BLIPSynth<blip_med_quality, 1> Synth;
 	Synth const* synth;
 	int wave_pos;
 	enum { wave_size = 32 };

@@ -19,7 +19,7 @@
 #ifndef NES_NAMCO106_APU_HPP_
 #define NES_NAMCO106_APU_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 /// An oscillator based on the Namco 106 synthesis chip.
 class Namco106 {
@@ -141,7 +141,7 @@ class Namco106 {
     /// the RAM on the chip
     uint8_t reg[REG_COUNT];
     /// the synthesizer for producing sound from the chip
-    BLIPSynth<BLIPQuality::Good, 15> synth;
+    BLIPSynth<blip_good_quality, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
     uint8_t& access() {
@@ -160,7 +160,7 @@ class Namco106 {
             Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
             if (!output) continue;
-            // output->set_modified();
+            output->set_modified();
 
             auto time = output->resampled_time(last_time) + osc.delay;
             auto end_time = output->resampled_time(nes_end_time);

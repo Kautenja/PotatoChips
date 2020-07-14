@@ -19,7 +19,7 @@
 #ifndef DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 #define DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 struct Sms_Osc
 {
@@ -40,7 +40,7 @@ struct Sms_Square : Sms_Osc
 	int period;
 	int phase;
 
-	typedef BLIPSynth<BLIPQuality::Good, 1> Synth;
+	typedef BLIPSynth<blip_good_quality, 1> Synth;
 	const Synth* synth;
 
 	void reset();
@@ -53,7 +53,7 @@ struct Sms_Noise : Sms_Osc
 	unsigned shifter;
 	unsigned feedback;
 
-	typedef BLIPSynth<BLIPQuality::Medium, 1> Synth;
+	typedef BLIPSynth<blip_med_quality, 1> Synth;
 	Synth synth;
 
 	void reset();

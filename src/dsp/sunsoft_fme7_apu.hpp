@@ -19,7 +19,7 @@
 #ifndef NES_FME7_APU_HPP_
 #define NES_FME7_APU_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 /// the IO registers on the FME7.
 enum IORegisters {
@@ -102,7 +102,7 @@ class FME7 {
 	} oscs [OSC_COUNT];
 	blip_time_t last_time;
 
-	BLIPSynth<BLIPQuality::Good, 1> synth;
+	BLIPSynth<blip_good_quality, 1> synth;
 
 	void run_until(blip_time_t end_time) {
 		// require( end_time >= last_time );

@@ -113,11 +113,11 @@
 % center the title page contents
 \vspace*{\fill}
 \begin{center}
-\includegraphics[width=0.8\textwidth]{106-Logo}
+\includegraphics{106-Logo}
 \linebreak\linebreak\linebreak\linebreak
-\includegraphics[width=0.3\textwidth]{106-Module}
+\includegraphics{106-Module}
 \linebreak\linebreak\linebreak\linebreak
-\includegraphics[width=0.8\textwidth]{KautenjaDSP}
+\includegraphics{KautenjaDSP}
 \end{center}
 \vspace*{\fill}
 \clearpage
@@ -128,14 +128,16 @@
 
 \section{Overview}
 
-106 is an emulation of the Namco 106 wave-table synthesis sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains eight synthesis channels and 128 bytes of RAM.
-% Namco 106 provides the key features of the Namco 106 chip, namely,
-% \begin{itemize}
-%   \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$;
-%   \item \textbf{Quantized triangle wave generator:} Generate NES style triangle wave with 16 steps of quantization;
-%   \item \textbf{Noise generator:} generate pseudo-random numbers at 16 different frequencies; and
-%   \item \textbf{Linear Feedback Shift Register (LFSR):} for that old-school 8-bit randomness!
-% \end{itemize}
+106 is an emulation of the Namco 106 audio processing unit from the Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains eight channels of wave-table synthesis and 128 bytes of operational RAM. The wave-tables are 4-bit and can be as long as 63 samples. This module uses a bank of five 32-sample wave-tables to act as the waveform for all eight channels.
+
+Namco 106 provides the key features of the Namco 106 chip, namely,
+\begin{itemize}
+  \item \textbf{Wave-table synthesis:} 8 channels of wave-table synthesis with bit depth of 4 bits and table size of 32 samples
+  \item \textbf{Waveform morph:} 5 banks of wave-tables to morph between using 32-bit floating point linear interpolation (not very retro, but it sounds nice)
+  \item \textbf{Frequency control:} 18-bit frequency control with linear frequency modulation
+  \item \textbf{Amplitude modulation:} 4-bit amplifier with linear amplitude modulation
+  \item \textbf{Namco 106 compute limitation:} activating each additional channel (up to 8) reduces the amount of compute available for all channels. This causes all channels to drop in frequency when additional channels are activated.
+\end{itemize}
 
 % -------------------
 % MARK: Panel Layout
@@ -144,7 +146,7 @@
 \section{Panel Layout}
 
 \begin{center}
-\includegraphics[width=0.3\textwidth]{106-Manual}
+\includegraphics{106-Manual}
 \end{center}
 
 % \begin{enumerate}

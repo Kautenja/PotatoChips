@@ -212,9 +212,8 @@ struct Chip106 : Module {
     ///
     /// @param channel the channel to set the frequency for
     /// @param channels the number of enabled channels in [1, 8]
-    /// @param address the address of the waveform for the channel
     ///
-    void setFrequency(uint8_t channel, uint8_t channels = 1, uint8_t address = 0) {
+    void setFrequency(uint8_t channel, uint8_t channels = 1) {
         // extract the low, medium, and high frequency register values
         auto freq = getFrequency(channel);
         // FREQUENCY LOW
@@ -231,7 +230,7 @@ struct Chip106 : Module {
         apu.write_data(0, hig);
         // WAVE ADDRESS
         apu.write_addr(WAVE_ADDRESS + REGS_PER_VOICE * channel);
-        apu.write_data(0, address);
+        apu.write_data(0, 0);
         // VOLUME (and channel selection on channel 8, this has no effect on
         // other channels, so the check logic is skipped)
         apu.write_addr(VOLUME + REGS_PER_VOICE * channel);

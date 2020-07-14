@@ -271,8 +271,8 @@ struct Chip106 : Module {
         }
         // write the waveform data to the chip's RAM
         auto wavetable = getWavetable();
-        uint8_t wavetable0 = floor(wavetable);
-        uint8_t wavetable1 = ceil(wavetable);
+        int wavetable0 = floor(wavetable);
+        int wavetable1 = ceil(wavetable);
         float interpolate = wavetable - wavetable0;
         for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
             apu.write_addr(i);
@@ -283,8 +283,8 @@ struct Chip106 : Module {
             auto nibbleHi1 = values[wavetable1][2 * i];
             auto nibbleLo1 = values[wavetable1][2 * i + 1];
             // floating point interpolation
-            uint8_t nibbleHi = (nibbleHi0 + interpolate * nibbleHi1);
-            uint8_t nibbleLo = (nibbleLo0 + interpolate * nibbleLo1);
+            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
             // combine the two nibbles into a byte for the RAM
             apu.write_data(0, (nibbleHi << 4) | nibbleLo);
         }
@@ -355,7 +355,7 @@ struct Chip106Widget : ModuleWidget {
             0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
         };
         auto module_ = reinterpret_cast<Chip106*>(this->module);
-        // the fill colors for the wave-ttable editor lines
+        // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[Chip106::num_wavetables] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green

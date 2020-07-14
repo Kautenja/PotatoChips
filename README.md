@@ -38,7 +38,7 @@ in this emulation.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/download/latest/2A03.pdf) for more
+See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf) for more
 information about the features of this module.
 
 ## VRC6
@@ -61,7 +61,7 @@ pulse wave generators, and a quantized saw wave generator.
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/download/latest/VRC6.pdf) for more
+See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf) for more
 information about the features of this module.
 
 ## FME7
@@ -80,7 +80,7 @@ pulse wave generators are implemented currently.
 -   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/download/latest/FME7.pdf) for more
+See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf) for more
 information about the features of this module.
 
 ## 106
@@ -108,7 +108,7 @@ channels.
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/download/latest/106.pdf) for
+See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf) for
 more information about the features of this module.
 
 ## Acknowledgments

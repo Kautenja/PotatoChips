@@ -154,7 +154,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // draw the background
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
+        nvgRoundedRect(args.vg, x-1, y-1, box.size.x+2, box.size.y+2, corner_radius);
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
         nvgClosePath(args.vg);
@@ -163,7 +163,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // -------------------------------------------------------------------
         nvgSave(args.vg);
         nvgBeginPath(args.vg);
-        nvgScissor(args.vg, x + pad, y + pad, box.size.x - pad, box.size.y - pad);
+        nvgScissor(args.vg, x, y, box.size.x, box.size.y);
         nvgMoveTo(args.vg, 0, box.size.y);
         for (uint32_t i = 0; i < length; i++) {
             auto pixelX = box.size.x * i / static_cast<float>(length);
@@ -179,7 +179,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // draw the border
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
+        nvgRoundedRect(args.vg, x-1, y-1, box.size.x+2, box.size.y+2, corner_radius);
         nvgStrokeColor(args.vg, border);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);

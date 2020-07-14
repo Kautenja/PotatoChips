@@ -19,6 +19,7 @@
 #include "components.hpp"
 #include "widgets/wavetable_editor.hpp"
 #include "dsp/namco_106_apu.hpp"
+#include <iostream>
 
 /// Addresses to the registers for channel 1. To get channel \f$n\f$,
 /// multiply by \f$8n\f$.
@@ -43,8 +44,8 @@ struct Chip106 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
         ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
-        PARAM_NUM_CHANNELS,
-        PARAM_WAVETABLE,
+        PARAM_NUM_CHANNELS, PARAM_NUM_CHANNELS_ATT,
+        PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
     enum InputIds {
@@ -118,8 +119,10 @@ struct Chip106 : Module {
     /// Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels",  "");
-        configParam(PARAM_WAVETABLE, 1, 5, 1, "Waveform Morph", "");
+        configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels");
+        configParam(PARAM_NUM_CHANNELS_ATT, -1, 1, 0, "Active Channels Attenuverter");
+        configParam(PARAM_WAVETABLE, 1, 5, 1, "Waveform Morph");
+        configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -137,9 +140,10 @@ struct Chip106 : Module {
     ///
     inline uint8_t getActiveChannels() {
         auto param = params[PARAM_NUM_CHANNELS].getValue();
-        auto cv = inputs[INPUT_NUM_CHANNELS].getVoltage();
+        auto att = params[PARAM_NUM_CHANNELS_ATT].getValue();
+        auto cv = 8.f * inputs[INPUT_NUM_CHANNELS].getVoltage() / 10.f;
         // channels are indexed maths style on the chip, not CS style
-        return rack::math::clamp(param + cv, 1.f, 8.f);
+        return rack::math::clamp(param + att * cv, 1.f, 8.f);
     }
 
     /// Return the wave-table parameter.
@@ -148,9 +152,10 @@ struct Chip106 : Module {
     ///
     inline float getWavetable() {
         auto param = params[PARAM_WAVETABLE].getValue();
-        auto cv = inputs[INPUT_WAVETABLE].getVoltage();
+        auto att = params[PARAM_WAVETABLE_ATT].getValue();
+        auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
-        return rack::math::clamp(param + cv, 1.f, 5.f) - 1;
+        return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
     }
 
     /// Return the frequency parameter for the given channel.
@@ -278,14 +283,14 @@ struct Chip106 : Module {
             // get the second waveform data
             auto nibbleHi1 = values[wavetable1][2 * i];
             auto nibbleLo1 = values[wavetable1][2 * i + 1];
-            // floating point interpolation for a nicer sound
+            // floating point interpolation
             uint8_t nibbleHi = (nibbleHi0 + interpolate * nibbleHi1);
             uint8_t nibbleLo = (nibbleLo0 + interpolate * nibbleLo1);
             // combine the two nibbles into a byte for the RAM
             apu.write_data(0, (nibbleHi << 4) | nibbleLo);
         }
         // get the number of active channels from the panel
-        uint8_t num_channels = getActiveChannels();
+        int num_channels = getActiveChannels();
         // set the frequency for all channels on the chip
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
             setFrequency(i, num_channels);
@@ -294,8 +299,8 @@ struct Chip106 : Module {
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
             outputs[i].setVoltage(getAudioOut(i));
-            auto light = lights[LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1];
-            light.setSmoothBrightness(i < num_channels, args.sampleTime);
+            auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
+            lights[light].setSmoothBrightness(i < num_channels, args.sampleTime);
         }
     }
 
@@ -377,9 +382,11 @@ struct Chip106Widget : ModuleWidget {
         }
         // channel select
         addParam(createParam<Rogan3PSNES>(Vec(157, 38), module, Chip106::PARAM_NUM_CHANNELS));
+        addParam(createParam<Rogan1PSNES>(Vec(157, 50), module, Chip106::PARAM_NUM_CHANNELS_ATT));
         addInput(createInput<PJ301MPort>(Vec(166, 95), module, Chip106::INPUT_NUM_CHANNELS));
         // wave-table morph
         addParam(createParam<Rogan3PSNES>(Vec(157, 148), module, Chip106::PARAM_WAVETABLE));
+        addParam(createParam<Rogan1PSNES>(Vec(157, 160), module, Chip106::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(166, 205), module, Chip106::INPUT_WAVETABLE));
         // individual channel controls
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {

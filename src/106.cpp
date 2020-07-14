@@ -382,12 +382,12 @@ struct Chip106Widget : ModuleWidget {
         }
         // channel select
         addParam(createParam<Rogan3PSNES>(Vec(157, 38), module, Chip106::PARAM_NUM_CHANNELS));
-        addParam(createParam<Rogan1PSNES>(Vec(157, 50), module, Chip106::PARAM_NUM_CHANNELS_ATT));
-        addInput(createInput<PJ301MPort>(Vec(166, 95), module, Chip106::INPUT_NUM_CHANNELS));
+        addParam(createParam<Rogan1PSNES>(Vec(163, 88), module, Chip106::PARAM_NUM_CHANNELS_ATT));
+        addInput(createInput<PJ301MPort>(Vec(166, 126), module, Chip106::INPUT_NUM_CHANNELS));
         // wave-table morph
-        addParam(createParam<Rogan3PSNES>(Vec(157, 148), module, Chip106::PARAM_WAVETABLE));
-        addParam(createParam<Rogan1PSNES>(Vec(157, 160), module, Chip106::PARAM_WAVETABLE_ATT));
-        addInput(createInput<PJ301MPort>(Vec(166, 205), module, Chip106::INPUT_WAVETABLE));
+        addParam(createParam<Rogan3PSNES>(Vec(157, 183), module, Chip106::PARAM_WAVETABLE));
+        addParam(createParam<Rogan1PSNES>(Vec(163, 233), module, Chip106::PARAM_WAVETABLE_ATT));
+        addInput(createInput<PJ301MPort>(Vec(166, 271), module, Chip106::INPUT_WAVETABLE));
         // individual channel controls
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 35 + i * 41), module, Chip106::INPUT_VOCT + i    ));

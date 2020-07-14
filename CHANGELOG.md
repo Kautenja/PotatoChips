@@ -29,3 +29,9 @@
     - wave-table editor
     - waveform morph with 5 tables
     - all 8 channels active
+
+### 1.3.1 (2020-07-14)
+
+- performance improvements
+    - CV acquisition at _1/16x_ sample rate
+    - LED update at _1/128x_ sample rate

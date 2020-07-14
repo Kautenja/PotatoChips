@@ -20,7 +20,7 @@
 #define DSP_KONAMI_SCC_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 #include <string.h>
 
 class Scc_Apu {
@@ -67,7 +67,7 @@ private:
 	osc_t oscs [osc_count];
 	blip_time_t last_time;
 	unsigned char regs [reg_count];
-	BLIPSynth<BLIPQuality::Medium, 1> synth;
+	BLIPSynth<blip_med_quality, 1> synth;
 
 	void run_until( blip_time_t );
 };

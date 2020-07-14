@@ -19,7 +19,7 @@
 #ifndef NES_VRC6_APU_HPP_
 #define NES_VRC6_APU_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 /// An oscillator based on the Konami VRC6 synthesis chip.
 class VRC6 {
@@ -152,9 +152,9 @@ class VRC6 {
     cpu_time_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
-    BLIPSynth<BLIPQuality::Medium, 31> saw_synth;
+    BLIPSynth<blip_med_quality, 31> saw_synth;
     /// a BLIP synthesizer for the square waveform
-    BLIPSynth<BLIPQuality::Good, 15> square_synth;
+    BLIPSynth<blip_good_quality, 15> square_synth;
 
     /// Run VRC6 until specified time.
     ///

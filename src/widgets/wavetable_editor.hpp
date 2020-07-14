@@ -164,13 +164,15 @@ struct WaveTableEditor : rack::OpaqueWidget {
         nvgSave(args.vg);
         nvgBeginPath(args.vg);
         nvgScissor(args.vg, x, y, box.size.x, box.size.y);
-        nvgMoveTo(args.vg, 0, box.size.y);
+        // get the start pixel for the path (first sample in the table)
+        auto startPixel = box.size.y * (bit_depth - waveform[0]) / static_cast<float>(bit_depth);
+        nvgMoveTo(args.vg, 0, startPixel);
         for (uint32_t i = 0; i < length; i++) {
             auto pixelX = box.size.x * i / static_cast<float>(length);
             auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
             nvgLineTo(args.vg, pixelX, pixelY);
         }
-        nvgMoveTo(args.vg, 0, box.size.y);
+        nvgMoveTo(args.vg, 0, startPixel);
         nvgStrokeColor(args.vg, fill);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);

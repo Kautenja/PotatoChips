@@ -92,6 +92,9 @@ struct Chip2A03 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr;
 
@@ -104,6 +107,7 @@ struct Chip2A03 : Module {
         configParam(PARAM_FREQ3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
         configParam(PARAM_PW0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW1,     0,    3,   2,   "Pulse 2 Duty Cycle");
+        cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < APU::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -249,15 +253,17 @@ struct Chip2A03 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // process input triggers
-        lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-        // process the data on the chip
-        channel0_pulse();
-        channel1_pulse();
-        channel2_triangle();
-        channel3_noise();
-        // enable all four channels
-        apu.write_register(0, SND_CHN, 0b00001111);
+        if (cvDivider.process()) {  // process the CV inputs to the chip
+            lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            // process the data on the chip
+            channel0_pulse();
+            channel1_pulse();
+            channel2_triangle();
+            channel3_noise();
+            // enable all four channels
+            apu.write_register(0, SND_CHN, 0b00001111);
+        }
+        // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < APU::OSC_COUNT; i++)
             buf[i].end_frame(cycles_per_sample);

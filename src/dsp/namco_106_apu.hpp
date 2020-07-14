@@ -91,13 +91,13 @@ class Namco106 {
     ///
     inline void end_frame(cpu_time_t time) {
         if (time > last_time) run_until(time);
+        assert(last_time >= time);
         last_time -= time;
-        assert(last_time >= 0);
     }
 
     /// Write data to the register pointed to by the address register.
     /// Read/write data register is at 0x4800
-    enum { data_reg_addr = 0x4800 };
+    // enum { data_reg_addr = 0x4800 };
     inline void write_data(cpu_time_t time, int data) {
         run_until(time);
         access() = data;
@@ -108,6 +108,7 @@ class Namco106 {
 
     /// Set the address register to a new value.
     /// Write-only address register is at 0xF800
+    // enum { addr_reg_addr = 0xF800 };
     inline void write_addr(int value) { addr_reg = value; }
 
  private:
@@ -158,8 +159,8 @@ class Namco106 {
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
-            if (!output)
-                continue;
+            if (!output) continue;
+            // output->set_modified();
 
             auto time = output->resampled_time(last_time) + osc.delay;
             auto end_time = output->resampled_time(nes_end_time);
@@ -174,12 +175,11 @@ class Namco106 {
                     continue;
 
                 int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
-                if (!freq)
-                    continue;
-                BLIPBuffer::resampled_time_t period =
-                        output->resampled_duration(983040) / freq * active_oscs;
+                // prevent low frequencies from excessively delaying freq changes
+                if (freq < 64 * active_oscs) continue;
+                auto period = output->resampled_duration(983040) / freq * active_oscs;
 
-                int wave_size = (8 - ((osc_reg[4] >> 2) & 7)) * 4;
+                int wave_size = 32 - (osc_reg [4] >> 2 & 7) * 4;
                 if (!wave_size)
                     continue;
 
@@ -189,10 +189,8 @@ class Namco106 {
                 do {
                     // read wave sample
                     int addr = wave_pos + osc_reg[6];
-                    int sample = reg[addr >> 1];
+                    int sample = reg[addr >> 1] >> (addr << 2 & 4);
                     wave_pos++;
-                    if (addr & 1)
-                        sample >>= 4;
                     sample = (sample & 15) * volume;
 
                     // output impulse if amplitude changed

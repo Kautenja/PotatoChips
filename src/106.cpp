@@ -313,7 +313,7 @@ struct Chip106 : Module {
     void onRandomize() override {
         for (int table = 0; table < num_wavetables; table++) {
             for (int sample = 0; sample < num_samples; sample++) {
-                values[table][sample] = random::u32() % 15;
+                values[table][sample] = random::u32() % bit_depth;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
                     auto last = values[table][sample - 1];

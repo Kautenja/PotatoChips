@@ -19,7 +19,7 @@
 #include "components.hpp"
 #include "widgets/wavetable_editor.hpp"
 #include "dsp/namco_106_apu.hpp"
-#include <iostream>
+#include <cstring>
 
 /// Addresses to the registers for channel 1. To get channel \f$n\f$,
 /// multiply by \f$8n\f$.
@@ -33,6 +33,12 @@ enum Namco106Registers {
     PHASE_HIGH,
     WAVE_ADDRESS,
     VOLUME
+};
+
+/// the default values for the wave-table
+const uint8_t default_values[32] = {
+    0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
+    0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
 };
 
 // ---------------------------------------------------------------------------
@@ -81,30 +87,16 @@ struct Chip106 : Module {
     /// the number of samples in the wave-table
     static constexpr auto num_samples = 32;
     /// the samples in the wave-table (1)
-    uint8_t values0[num_samples] = {
-        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-    };
+    uint8_t values0[num_samples];
     /// the samples in the wave-table (2)
-    uint8_t values1[num_samples] = {
-        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-    };
+    uint8_t values1[num_samples];
     /// the samples in the wave-table (3)
-    uint8_t values2[num_samples] = {
-        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-    };
+    uint8_t values2[num_samples];
     /// the samples in the wave-table (4)
-    uint8_t values3[num_samples] = {
-        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-    };
+    uint8_t values3[num_samples];
     /// the samples in the wave-table (5)
-    uint8_t values4[num_samples] = {
-        0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-        0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-    };
+    uint8_t values4[num_samples];
+
     // the number of editors on the module
     static constexpr int num_wavetables = 5;
     /// the wave-tables to morph between
@@ -132,6 +124,9 @@ struct Chip106 : Module {
             apu.osc_output(i, &buf[i]);
             buf[i].set_clock_rate(CLOCK_RATE);
         }
+        // set the wave-forms to the default values
+        for (int i = 0; i < num_wavetables; i++)
+            memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -308,6 +303,12 @@ struct Chip106 : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override { new_sample_rate = true; }
 
+    /// Respond to the user resetting the module with the "Initialize" action.
+    void onReset() override {
+        for (int i = 0; i < num_wavetables; i++)
+            memcpy(values[i], default_values, num_samples);
+    }
+
     /// Convert the module's state to a JSON object.
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
@@ -352,7 +353,7 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // if the module is displaying in/being rendered for the library, the
         // module will be null and a dummy waveform is displayed
-        static uint8_t default_values[Chip106::num_samples] = {
+        static uint8_t library_values[Chip106::num_samples] = {
             0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
             0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
         };
@@ -367,8 +368,8 @@ struct Chip106Widget : ModuleWidget {
         };
         // add wave-table editors
         for (int i = 0; i < Chip106::num_wavetables; i++) {
-            // get the wavetable buffer for this editor
-            uint8_t* wavetable = module ? &module_->values[i][0] : &default_values[0];
+            // get the wave-table buffer for this editor
+            uint8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,             // wave-table buffer

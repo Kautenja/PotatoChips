@@ -87,6 +87,9 @@ struct ChipVRC6 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
     /// Initialize a new VRC6 Chip module.
     ChipVRC6() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -98,6 +101,7 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL0,  0.f,  1.f, 0.5f,  "Pulse 1 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL1,  0.f,  1.f, 0.5f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
+        cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < VRC6::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -299,10 +303,15 @@ struct ChipVRC6 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // process the data on the chip
-        channel0_pulse(); channel1_pulse(); channel2_saw();
+        if (cvDivider.process()) {  // process the CV inputs to the chip
+            channel0_pulse();
+            channel1_pulse();
+            channel2_saw();
+        }
+        // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < VRC6::OSC_COUNT; i++) buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < VRC6::OSC_COUNT; i++)
+            buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
         outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
         outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));

@@ -6,10 +6,10 @@
 [BuildServer]:  https://travis-ci.org/Kautenja/PotatoChips
 
 These retro sound chips are so good,
-[I eat 'em like they're potato chips.][sam-hyde]
-They're just so addicting.
+[I eat 'em like they're potato chips.][SamHyde-PotatoChips]
+They're just so addicting!
 
-[sam-hyde]: https://www.youtube.com/watch?v=lL5M-vXq58c
+[SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <p align="center">
 <img alt="Plugin1" src="manual/PotatoChips-Plugin1.svg" height="380px">
@@ -38,8 +38,9 @@ in this emulation.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf) for more
-information about the features of this module.
+See the [Manual][2A03] for more information about the features of this module.
+
+[2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
 
 ## VRC6
 
@@ -61,8 +62,9 @@ pulse wave generators, and a quantized saw wave generator.
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf) for more
-information about the features of this module.
+See the [Manual][VRC6] for more information about the features of this module.
+
+[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 
 ## FME7
 
@@ -80,8 +82,9 @@ pulse wave generators are implemented currently.
 -   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf) for more
-information about the features of this module.
+See the [Manual][FME7] for more information about the features of this module.
+
+[FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 
 ## 106
 
@@ -100,16 +103,17 @@ channels.
 
 -   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
     of 4 bits and table size of 32 samples
--   **Waveform morph:** 5 banks of wave-tables to morph between using linear
-    interpolation
+-   **Waveform morph:** 5 banks of wave-tables to morph between using 32-bit
+    floating point linear interpolation (not very retro, but it sounds nice)
 -   **Frequency control:** 18-bit frequency control with linear frequency modulation
 -   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
 -   **Namco 106 compute limitation:** activating each additional channel (up
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.
 
-See the [Manual](https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf) for
-more information about the features of this module.
+See the [Manual][106] for more information about the features of this module.
+
+[106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
 ## Acknowledgments
 

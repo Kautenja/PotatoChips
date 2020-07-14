@@ -309,6 +309,21 @@ struct Chip106 : Module {
             memcpy(values[i], default_values, num_samples);
     }
 
+    /// Respond to the user randomizing the module with the "Randomize" action.
+    void onRandomize() override {
+        for (int table = 0; table < num_wavetables; table++) {
+            for (int sample = 0; sample < num_samples; sample++) {
+                values[table][sample] = random::u32() % 15;
+                // interpolate between random samples to smooth slightly
+                if (sample > 0) {
+                    auto last = values[table][sample - 1];
+                    auto next = values[table][sample];
+                    values[table][sample] = (last + next) / 2;
+                }
+            }
+        }
+    }
+
     /// Convert the module's state to a JSON object.
     json_t* dataToJson() override {
         json_t* rootJ = json_object();

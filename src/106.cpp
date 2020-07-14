@@ -138,6 +138,7 @@ struct Chip106 : Module {
     inline uint8_t getActiveChannels() {
         auto param = params[PARAM_NUM_CHANNELS].getValue();
         auto att = params[PARAM_NUM_CHANNELS_ATT].getValue();
+        // get the CV as 1V per channel
         auto cv = 8.f * inputs[INPUT_NUM_CHANNELS].getVoltage() / 10.f;
         // channels are indexed maths style on the chip, not CS style
         return rack::math::clamp(param + att * cv, 1.f, 8.f);
@@ -150,6 +151,7 @@ struct Chip106 : Module {
     inline float getWavetable() {
         auto param = params[PARAM_WAVETABLE].getValue();
         auto att = params[PARAM_WAVETABLE_ATT].getValue();
+        // get the CV as 1V per wave-table
         auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
         return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;

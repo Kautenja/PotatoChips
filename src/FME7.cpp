@@ -53,6 +53,9 @@ struct ChipFME7 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -62,6 +65,7 @@ struct ChipFME7 : Module {
         configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level",     "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level",     "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
+        cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < FME7::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
@@ -148,10 +152,13 @@ struct ChipFME7 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // process the data on the chip
-        for (int i = 0; i < FME7::OSC_COUNT; i++) pulse(i);
+        if (cvDivider.process()) {  // process the CV inputs to the chip
+            for (int i = 0; i < FME7::OSC_COUNT; i++)
+                pulse(i);
+        }
+        // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < FME7::OSC_COUNT; i++) {
+        for (int i = 0; i < FME7::OSC_COUNT; i++) {  // set outputs
             buf[i].end_frame(cycles_per_sample);
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
         }

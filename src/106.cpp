@@ -20,6 +20,7 @@
 #include "widgets/wavetable_editor.hpp"
 #include "dsp/namco_106_apu.hpp"
 #include <cstring>
+#include <iostream>
 
 /// Addresses to the registers for channel 1. To get channel \f$n\f$,
 /// multiply by \f$8n\f$.
@@ -82,6 +83,11 @@ struct Chip106 : Module {
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+    // a clock divider for running LED updates slower than audio rate
+    dsp::ClockDivider lightsDivider;
+
     /// the bit-depth of the wave-table
     static constexpr auto bit_depth = 15;
     /// the number of samples in the wave-table
@@ -113,8 +119,10 @@ struct Chip106 : Module {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels");
         configParam(PARAM_NUM_CHANNELS_ATT, -1, 1, 0, "Active Channels Attenuverter");
-        configParam(PARAM_WAVETABLE, 1, 5, 1, "Waveform Morph");
-        configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Waveform Morph Attenuverter");
+        configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
+        configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
+        cvDivider.setDivision(16);
+        lightsDivider.setDivision(128);
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
             auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
@@ -254,6 +262,8 @@ struct Chip106 : Module {
         return Vpp * output_buffer[0] / divisor;
     }
 
+    int num_channels = 1;
+
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
@@ -268,37 +278,44 @@ struct Chip106 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // write the waveform data to the chip's RAM
-        auto wavetable = getWavetable();
-        int wavetable0 = floor(wavetable);
-        int wavetable1 = ceil(wavetable);
-        float interpolate = wavetable - wavetable0;
-        for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
-            apu.write_addr(i);
-            // get the first waveform data
-            auto nibbleHi0 = values[wavetable0][2 * i];
-            auto nibbleLo0 = values[wavetable0][2 * i + 1];
-            // get the second waveform data
-            auto nibbleHi1 = values[wavetable1][2 * i];
-            auto nibbleLo1 = values[wavetable1][2 * i + 1];
-            // floating point interpolation
-            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-            // combine the two nibbles into a byte for the RAM
-            apu.write_data(0, (nibbleHi << 4) | nibbleLo);
+        if (cvDivider.process()) {
+            // write the waveform data to the chip's RAM
+            auto wavetable = getWavetable();
+            int wavetable0 = floor(wavetable);
+            int wavetable1 = ceil(wavetable);
+            float interpolate = wavetable - wavetable0;
+            for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
+                apu.write_addr(i);
+                // get the first waveform data
+                auto nibbleHi0 = values[wavetable0][2 * i];
+                auto nibbleLo0 = values[wavetable0][2 * i + 1];
+                // get the second waveform data
+                auto nibbleHi1 = values[wavetable1][2 * i];
+                auto nibbleLo1 = values[wavetable1][2 * i + 1];
+                // floating point interpolation
+                uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+                uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+                // combine the two nibbles into a byte for the RAM
+                apu.write_data(0, (nibbleHi << 4) | nibbleLo);
+            }
+            // get the number of active channels from the panel
+            num_channels = getActiveChannels();
+            // set the frequency for all channels on the chip
+            for (int i = 0; i < Namco106::OSC_COUNT; i++)
+                setFrequency(i, num_channels);
         }
-        // get the number of active channels from the panel
-        int num_channels = getActiveChannels();
-        // set the frequency for all channels on the chip
-        for (int i = 0; i < Namco106::OSC_COUNT; i++)
-            setFrequency(i, num_channels);
-        // set the output from the oscillators on the chip
+        // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+        for (int i = 0; i < Namco106::OSC_COUNT; i++) {  // set outputs
             buf[i].end_frame(cycles_per_sample);
             outputs[i].setVoltage(getAudioOut(i));
-            auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
-            lights[light].setSmoothBrightness(i < num_channels, args.sampleTime);
+        }
+        // set the channel lights if the light divider is high
+        if (lightsDivider.process()) {
+            for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+                auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
+                lights[light].setSmoothBrightness(i < num_channels, args.sampleTime * lightsDivider.getDivision());
+            }
         }
     }
 

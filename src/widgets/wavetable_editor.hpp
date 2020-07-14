@@ -154,7 +154,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // draw the background
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x-1, y-1, box.size.x+2, box.size.y+2, corner_radius);
+        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
         nvgClosePath(args.vg);
@@ -179,7 +179,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         // draw the border
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x-1, y-1, box.size.x+2, box.size.y+2, corner_radius);
+        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
         nvgStrokeColor(args.vg, border);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);

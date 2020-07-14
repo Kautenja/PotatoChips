@@ -13,9 +13,6 @@ They're just so addicting.
 
 <p align="center">
 <img alt="Plugin1" src="manual/PotatoChips-Plugin1.svg" height="380px">
-</p>
-
-<p align="center">
 <img alt="Plugin2" src="manual/PotatoChips-Plugin2.svg" height="380px">
 </p>
 

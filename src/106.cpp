@@ -125,8 +125,10 @@ struct Chip106 : Module {
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {
-            configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Channel Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME + i, 0, 15, 15, "Channel Volume",  "%", 0, 100.f / 15.f);
+            auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
+            configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
+            configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
             apu.osc_output(i, &buf[i]);
             buf[i].set_clock_rate(CLOCK_RATE);
         }

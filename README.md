@@ -22,7 +22,7 @@ original chip featured a DMC loader for playing samples that has been omitted
 in this emulation.
 
 <p align="center">
-<img alt="2A03" src="manual/2A03/img/2A03-Module.svg" height="380px">
+<img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
 </p>
 
 ### Features
@@ -46,7 +46,7 @@ Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two
 pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg" height="380px">
+<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
 </p>
 
 ### Features
@@ -71,7 +71,7 @@ pulse wave generators, a noise generator, and an envelope generator. Only the
 pulse wave generators are implemented currently.
 
 <p align="center">
-<img alt="FME7" src="manual/FME7/img/FME7-Module.svg" height="380px">
+<img alt="FME7" src="manual/FME7/img/FME7-Module.svg">
 </p>
 
 ### Features
@@ -93,7 +93,7 @@ bank of five 32-sample wave-tables to act as the waveform for all eight
 channels.
 
 <p align="center">
-<img alt="106" src="manual/106/img/106-Module.svg" height="380px">
+<img alt="106" src="manual/106/img/106-Module.svg">
 </p>
 
 ### Features

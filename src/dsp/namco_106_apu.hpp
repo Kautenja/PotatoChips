@@ -183,7 +183,7 @@ class Namco106 {
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
                 // calculate the period of the waveform
-                auto period = ((osc_reg[4] >> 2)) * output->resampled_duration(15 * 65536 * active_oscs / freq) / wave_size;
+                auto period = output->resampled_duration(((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) / wave_size;
                 // backup the amplitude and position
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;

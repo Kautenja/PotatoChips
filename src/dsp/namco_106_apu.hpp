@@ -155,7 +155,7 @@ class Namco106 {
     /// @param time the number of elapsed cycles
     ///
     void run_until(cpu_time_t nes_end_time) {
-        int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
+        unsigned int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
@@ -166,46 +166,44 @@ class Namco106 {
             auto end_time = output->resampled_time(nes_end_time);
             osc.delay = 0;
             if (time < end_time) {
+                // get the register bank for this oscillator
                 const uint8_t* osc_reg = &reg[i * 8 + 0x40];
-                if (!(osc_reg[4] & 0xe0))
-                    continue;
-
+                // get the volume for this voice
                 int volume = osc_reg[7] & 15;
-                if (!volume)
+                if (!volume)  // no sound when volume is 0
                     continue;
-
-                int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
+                // calculate the length of the waveform from the L value
+                int wave_size = 256 - (osc_reg[4] & 0b11111100);
+                if (!wave_size)  // no sound when wave size is 0
+                    continue;
+                // calculate the 18-bit frequency
+                uint32_t freq = (static_cast<uint32_t>(osc_reg[4] & 0b11) << 16) |
+                                (static_cast<uint32_t>(osc_reg[2]       ) <<  8) |
+                                 static_cast<uint32_t>(osc_reg[0]       );
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
-                auto period = output->resampled_duration(983040) / freq * active_oscs;
-
-                int wave_size = 32 - (osc_reg [4] >> 2 & 7) * 4;
-                if (!wave_size)
-                    continue;
-
+                // calculate the period of the waveform
+                auto period = output->resampled_duration(((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) / wave_size;
+                // backup the amplitude and position
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;
-
-                do {
+                do {  // process the samples on the voice
                     // read wave sample
                     int addr = wave_pos + osc_reg[6];
                     int sample = reg[addr >> 1] >> (addr << 2 & 4);
                     wave_pos++;
                     sample = (sample & 15) * volume;
-
                     // output impulse if amplitude changed
                     int delta = sample - last_amp;
                     if (delta) {
                         last_amp = sample;
                         synth.offset_resampled(time, delta, output);
                     }
-
                     // next sample
                     time += period;
-                    if (wave_pos >= wave_size)
-                        wave_pos = 0;
+                    if (wave_pos >= wave_size) wave_pos = 0;
                 } while (time < end_time);
-
+                // update position and amplitude
                 osc.wave_pos = wave_pos;
                 osc.last_amp = last_amp;
             }

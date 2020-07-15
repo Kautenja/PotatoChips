@@ -35,3 +35,7 @@
 - performance improvements
     - CV acquisition at _1/16x_ sample rate
     - LED update at _1/128x_ sample rate
+
+### 1.3.2 (2020-07-14)
+
+- fix issue where oscillator increased in pitch when increasing sampling rate

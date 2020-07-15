@@ -166,16 +166,15 @@ class Namco106 {
             auto end_time = output->resampled_time(nes_end_time);
             osc.delay = 0;
             if (time < end_time) {
+                // get the register bank for this oscillator
                 const uint8_t* osc_reg = &reg[i * 8 + 0x40];
-                if (!(osc_reg[4] & 0xe0))
-                    continue;
-
+                // get the volume for this voice
                 int volume = osc_reg[7] & 15;
-                if (!volume)
+                if (!volume)  // no sound when volume is 0
                     continue;
-
-                int wave_size = 4 * (64 - (osc_reg[4] >> 2));
-                if (!wave_size)
+                // calculate the length of the waveform from the L value
+                int wave_size = 256 - (osc_reg[4] & 0b11111100);
+                if (!wave_size)  // no sound when wave size is 0
                     continue;
                 // calculate the 18-bit frequency
                 uint32_t freq = (static_cast<uint32_t>(osc_reg[4] & 0b11) << 16) |
@@ -184,31 +183,27 @@ class Namco106 {
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
                 // calculate the period of the waveform
-                auto period = output->resampled_duration(15 * 65536 * active_oscs / freq);
-
+                auto period = ((osc_reg[4] >> 2)) * output->resampled_duration(15 * 65536 * active_oscs / freq) / wave_size;
+                // backup the amplitude and position
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;
-
-                do {
+                do {  // process the samples on the voice
                     // read wave sample
                     int addr = wave_pos + osc_reg[6];
                     int sample = reg[addr >> 1] >> (addr << 2 & 4);
                     wave_pos++;
                     sample = (sample & 15) * volume;
-
                     // output impulse if amplitude changed
                     int delta = sample - last_amp;
                     if (delta) {
                         last_amp = sample;
                         synth.offset_resampled(time, delta, output);
                     }
-
                     // next sample
                     time += period;
-                    if (wave_pos >= wave_size)
-                        wave_pos = 0;
+                    if (wave_pos >= wave_size) wave_pos = 0;
                 } while (time < end_time);
-
+                // update position and amplitude
                 osc.wave_pos = wave_pos;
                 osc.last_amp = last_amp;
             }

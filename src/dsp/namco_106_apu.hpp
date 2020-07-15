@@ -155,7 +155,7 @@ class Namco106 {
     /// @param time the number of elapsed cycles
     ///
     void run_until(cpu_time_t nes_end_time) {
-        int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
+        unsigned int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
@@ -177,10 +177,13 @@ class Namco106 {
                 int wave_size = 4 * (64 - (osc_reg[4] >> 2));
                 if (!wave_size)
                     continue;
-
-                int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
+                // calculate the 18-bit frequency
+                uint32_t freq = (static_cast<uint32_t>(osc_reg[4] & 0b11) << 16) |
+                                (static_cast<uint32_t>(osc_reg[2]       ) <<  8) |
+                                 static_cast<uint32_t>(osc_reg[0]       );
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
+                // calculate the period of the waveform
                 auto period = output->resampled_duration(15 * 65536 * active_oscs / freq);
 
                 int last_amp = osc.last_amp;

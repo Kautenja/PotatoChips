@@ -181,9 +181,9 @@ struct Chip106 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr auto wave_length = 64 - (num_samples / 4);
-        // changing num_channels to 1 allows the standard 103 function where
-        // additional channels reduce the frequency of all channels
-        freq *= (wave_length * 1 * 15.f * 65536.f) / CLOCK_RATE;
+        // ignoring num_channels in the calculation allows the standard 103
+        // function where additional channels reduce the frequency of all
+        freq *= (wave_length * 15.f * 65536.f) / buf[0].get_clock_rate();
         // clamp within the legal bounds for the frequency value
         freq = rack::clamp(freq, 4.f, 262143.f);
         // convert the frequency to a 32-bit value

@@ -1,4 +1,6 @@
-# Potato Chips
+<p align="center">
+<img alt="Potato Chips" src="manual/PotatoChips-SocialMedia.svg">
+</p>
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
@@ -10,10 +12,6 @@ These retro sound chips are so good,
 They're just so addicting!
 
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
-
-<p align="center">
-<img alt="Potato Chips" src="manual/PotatoChips-SocialMedia.svg">
-</p>
 
 ## 2A03
 

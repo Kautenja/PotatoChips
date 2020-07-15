@@ -45,17 +45,16 @@ class BLIPBuffer {
     /// sets the buffer length to 0 and returns error string or propagates
     /// exception if compiler supports it.
     const char* set_sample_rate(int32_t new_rate) {
-        unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - WIDEST_IMPULSE - 64;
+        static constexpr unsigned new_size = (UINT_MAX >> BLIP_BUFFER_ACCURACY) + 1 - WIDEST_IMPULSE - 64;
 
         if (buffer_size_ != new_size) {
             delete[] buffer_;
             buffer_ = NULL;  // allow for exception in allocation below
-            buffer_size_ = 0;
             offset_ = 0;
             buffer_ = new buf_t_[new_size + WIDEST_IMPULSE];
+            buffer_size_ = new_size;
         }
 
-        buffer_size_ = new_size;
         length_ = new_size * 1000 / new_rate - 1;
 
         samples_per_sec = new_rate;

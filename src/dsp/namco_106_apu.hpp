@@ -174,14 +174,14 @@ class Namco106 {
                 if (!volume)
                     continue;
 
-                int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
-                // prevent low frequencies from excessively delaying freq changes
-                if (freq < 64 * active_oscs) continue;
-                auto period = output->resampled_duration(983040) / freq * active_oscs;
-
                 int wave_size = 4 * (64 - (osc_reg[4] >> 2));
                 if (!wave_size)
                     continue;
+
+                int32_t freq = (osc_reg[4] & 3) * 0x10000 + osc_reg[2] * 0x100L + osc_reg[0];
+                // prevent low frequencies from excessively delaying freq changes
+                if (freq < 64 * active_oscs) continue;
+                auto period = output->resampled_duration(15 * 65536 * active_oscs / freq);
 
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;

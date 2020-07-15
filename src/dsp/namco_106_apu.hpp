@@ -179,7 +179,7 @@ class Namco106 {
                 if (freq < 64 * active_oscs) continue;
                 auto period = output->resampled_duration(983040) / freq * active_oscs;
 
-                int wave_size = 32 - (osc_reg [4] >> 2 & 7) * 4;
+                int wave_size = 4 * (64 - (osc_reg[4] >> 2));
                 if (!wave_size)
                     continue;
 

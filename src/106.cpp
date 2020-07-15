@@ -20,7 +20,6 @@
 #include "widgets/wavetable_editor.hpp"
 #include "dsp/namco_106_apu.hpp"
 #include <cstring>
-#include <iostream>
 
 /// Addresses to the registers for channel 1. To get channel \f$n\f$,
 /// multiply by \f$8n\f$.

@@ -180,7 +180,7 @@ struct Chip106 : Module {
         freq += FM_SCALE * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
-        auto wave_length = 64 - (num_samples / 4);
+        static constexpr auto wave_length = 64 - (num_samples / 4);
         // changing num_channels to 1 allows the standard 103 function where
         // additional channels reduce the frequency of all channels
         freq *= (wave_length * 1 * 15.f * 65536.f) / CLOCK_RATE;

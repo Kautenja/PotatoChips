@@ -105,19 +105,8 @@ class BLIPBuffer {
     ///
     inline uint32_t sample_rate() const { return sample_rate_; }
 
-    /// @brief Return the length of the buffer in milliseconds.
-    ///
-    /// @returns the length of the buffer in milliseconds (1/1000 sec)
-    ///
-    inline uint32_t length() const { return length_; }
-
-    /// @brief Set the number of source time units per second.
-    ///
-    /// @param TODO:
-    ///
-    inline void set_clock_rate(long cps) {
-
-    }
+    /// TODO: remove
+    inline void set_clock_rate(long cps) { }
 
     /// @brief Return the number of source time units per second.
     ///
@@ -126,13 +115,10 @@ class BLIPBuffer {
     inline uint32_t get_clock_rate() const { return 768000; }
 
     /// @brief End current time frame of specified duration and make its
-    /// samples available (along with any still-unread samples).
+    /// samples available (along with any still-unread samples). Begins a new
+    /// time frame at the end of the current frame.
     ///
-    /// @param time the number of source cycles to complete the frame
-    /// @details
-    /// Begins a new time frame at the end of the current frame.
-    ///
-    inline void end_frame(blip_time_t time) {
+    inline void end_frame(blip_time_t) {
         offset_ = 1 << BLIP_BUFFER_ACCURACY;
         // time outside buffer length
         assert(samples_count() <= (long) buffer_size_);

@@ -139,7 +139,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[0].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -195,7 +195,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[1].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -249,7 +249,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;

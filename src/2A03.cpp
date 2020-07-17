@@ -122,7 +122,7 @@ struct Chip2A03 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + 0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 11-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[0].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
@@ -151,7 +151,7 @@ struct Chip2A03 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + 1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[1].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         apu.write_register(0, PULSE1_LO, freq11bit & 0b11111111);
@@ -180,7 +180,7 @@ struct Chip2A03 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         apu.write_register(0, TRI_LO, freq11bit & 0b11111111);

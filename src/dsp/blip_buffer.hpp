@@ -187,9 +187,7 @@ class BLIPBuffer {
     /// samples available (along with any still-unread samples). Begins a new
     /// time frame at the end of the current frame.
     ///
-    inline void end_frame(blip_time_t) {
-        offset_ = 1 << BLIP_BUFFER_ACCURACY;
-    }
+    inline void end_frame() { offset_ = 1 << BLIP_BUFFER_ACCURACY; }
 
     /// @brief Return the number of samples available for reading.
     ///

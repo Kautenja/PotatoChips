@@ -299,18 +299,33 @@ public:
 
     // Update amplitude of waveform at given time. Using this requires a separate
     // BLIPSynth for each waveform.
-    void update(blip_time_t time, int amplitude);
+    // void update(blip_time_t time, int amplitude);
+    inline void update(blip_time_t time, int amplitude) {
+        int delta = amplitude - impl.last_amp;
+        impl.last_amp = amplitude;
+        offset_resampled(time * impl.buf->factor_ + impl.buf->offset_, delta, impl.buf);
+    }
 
-// Low-level interface
+// ---------------------------------------------------------------------------
+// MARK: Low-level interface
+// TODO: document
+// ---------------------------------------------------------------------------
 
-    // Add an amplitude transition of specified delta, optionally into specified buffer
-    // rather than the one set with output(). Delta can be positive or negative.
-    // The actual change in amplitude is delta * (volume / range)
-    void offset(blip_time_t, int delta, BLIPBuffer*) const;
-    void offset(blip_time_t t, int delta) const { offset(t, delta, impl.buf); }
+    /// Add an amplitude transition of specified delta, optionally into
+    /// specified buffer rather than the one set with output(). Delta can be
+    /// positive or negative. The actual change in amplitude is
+    /// delta * (volume / range)
+    inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
+        offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
+    }
 
-    // Works directly in terms of fractional output samples. Contact author for more info.
-    void offset_resampled(blip_resampled_time_t, int delta, BLIPBuffer*) const;
+    inline void offset(blip_time_t time, int delta) const {
+        offset(time, delta, impl.buf);
+    }
+
+    /// Works directly in terms of fractional output samples. Contact Shay Green
+    /// for more info.
+    void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* buf) const;
 
 private:
 #if BLIP_BUFFER_FAST
@@ -439,7 +454,9 @@ private:
     blip_long accum;
 };
 
-// End of public interface
+// ---------------------------------------------------------------------------
+// MARK: End of public interface
+// ---------------------------------------------------------------------------
 
 #include <assert.h>
 
@@ -549,24 +566,6 @@ inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t tim
 
 #undef BLIP_FWD
 #undef BLIP_REV
-
-template<int quality,int range>
-#if BLIP_BUFFER_FAST
-    inline
-#endif
-void BLIPSynth<quality,range>::offset(blip_time_t t, int delta, BLIPBuffer* buf) const {
-    offset_resampled(t * buf->factor_ + buf->offset_, delta, buf);
-}
-
-template<int quality,int range>
-#if BLIP_BUFFER_FAST
-    inline
-#endif
-void BLIPSynth<quality,range>::update(blip_time_t t, int amp) {
-    int delta = amp - impl.last_amp;
-    impl.last_amp = amp;
-    offset_resampled(t * impl.buf->factor_ + impl.buf->offset_, delta, impl.buf);
-}
 
 int const blip_max_length = 0;
 int const blip_default_length = 250;

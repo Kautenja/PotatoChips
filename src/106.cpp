@@ -304,7 +304,7 @@ struct Chip106 : Module {
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < Namco106::OSC_COUNT; i++) {  // set outputs
-            buf[i].end_frame(cycles_per_sample);
+            buf[i].end_frame();
             outputs[i].setVoltage(getAudioOut(i));
         }
         // set the channel lights if the light divider is high

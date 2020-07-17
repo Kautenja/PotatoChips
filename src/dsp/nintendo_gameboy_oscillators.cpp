@@ -153,7 +153,7 @@ void Gb_Square::run( blip_time_t time, blip_time_t end_time, int playing )
             if ( phase == 0 || phase == duty )
             {
                 delta = -delta;
-                synth->offset_inline( time, delta, output );
+                synth->offset( time, delta, output );
             }
             time += period;
         }
@@ -290,7 +290,7 @@ void Gb_Wave::run( blip_time_t time, blip_time_t end_time, int playing )
             if ( delta )
             {
                 last_amp = amp;
-                synth->offset_inline( time, delta, output );
+                synth->offset( time, delta, output );
             }
             time += period;
         }

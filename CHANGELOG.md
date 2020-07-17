@@ -1,46 +1,53 @@
 ### 1.0.0 (2020-06-22)
 
-- 2A03 implementation
+-   2A03 implementation
 
 ### 1.1.0 (2020-06-23)
 
-- VRC6 implementation
+-   VRC6 implementation
 
 ### 1.1.1 (2020-06-23)
 
-- minor improvements and optimizations
+-   minor improvements and optimizations
 
 ### 1.1.2 (2020-06-30)
 
-- minor improvements and optimizations
+-   minor improvements and optimizations
 
 ### 1.2.0 (2020-07-09)
 
-- FME7 implementation
+-   FME7 implementation
 
 ### 1.2.1 (2020-07-09)
 
-- fix issues with FME7 panel
+-   fix issues with FME7 panel
 
 ### 1.3.0 (2020-07-14)
 
-- 106 Module
-    - new panel design
-    - wave-table editor
-    - waveform morph with 5 tables
-    - all 8 channels active
+-   106 Module
+    -   new panel design
+    -   wave-table editor
+    -   waveform morph with 5 tables
+    -   all 8 channels active
 
 ### 1.3.1 (2020-07-14)
 
-- performance improvements
-    - CV acquisition at _1/16x_ sample rate
-    - LED update at _1/128x_ sample rate
+-   performance improvements
+    -   CV acquisition at _1/16x_ sample rate
+    -   LED update at _1/128x_ sample rate
 
 ### 1.3.2 (2020-07-14)
 
-- fix issue where oscillator increased in pitch when increasing sampling rate
-- fix issue where 106 was not tuned to C4
+-   fix issue where oscillator increased in pitch when increasing sampling rate
+-   fix issue where 106 was not tuned to C4
 
 ### 1.3.3 (2020-07-15)
 
-- minor optimizations to 106
+-   minor optimizations to 106
+
+### 1.3.4 (2020-07-17)
+
+-   update Blip_Buffer to 0.4.1 and refactor
+-   fix "click" from sample rates: 44.1kHz, 88.2kHz, etc.
+-   fix issue where 2A03, VRC6, FME7 were detuned at sample rates:
+    44.1kHz, 88.2kHz, etc.

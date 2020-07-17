@@ -20,7 +20,7 @@
 #define GENERAL_INSTRUMENT_AY_3_8910_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 class Ay_Apu {
  public:
@@ -84,7 +84,7 @@ private:
     void write_data_( int addr, int data );
 public:
     enum { amp_range = 255 };
-    BLIPSynth<BLIPQuality::Good, 1> synth_;
+    BLIPSynth<blip_good_quality, 1> synth_;
 };
 
 inline void Ay_Apu::volume( double v ) { synth_.volume( 0.7 / osc_count / amp_range * v ); }

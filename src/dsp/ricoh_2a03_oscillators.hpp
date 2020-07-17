@@ -19,7 +19,7 @@
 #ifndef NES_OSCILLATORS_HPP_
 #define NES_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 #include <functional>
 
 /// CPU clock cycle count
@@ -97,7 +97,7 @@ struct Pulse : Envelope {
     int phase;
     int sweep_delay;
 
-    typedef BLIPSynth<BLIPQuality::Good, 15> Synth;
+    typedef BLIPSynth<blip_good_quality, 15> Synth;
     // shared between squares
     const Synth* synth;
 
@@ -132,7 +132,6 @@ struct Pulse : Envelope {
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-
         const int volume = this->volume();
         const int period = this->period();
         int offset = period >> (regs[1] & shift_mask);
@@ -179,7 +178,7 @@ struct Pulse : Envelope {
                     phase = (phase + 1) & (phase_range - 1);
                     if (phase == 0 || phase == duty) {
                         delta = -delta;
-                        synth->offset_inline(time, delta, output);
+                        synth->offset(time, delta, output);
                     }
                     time += timer_period;
                 } while (time < end_time);
@@ -202,7 +201,7 @@ struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
-    BLIPSynth<BLIPQuality::Good, 15> synth;
+    BLIPSynth<blip_good_quality, 15> synth;
 
     inline int calc_amp() const {
         int amp = phase_range - phase;
@@ -213,7 +212,6 @@ struct Triangle : Oscillator {
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-
         // TODO: track phase when period < 3
         // TODO: Output 7.5 on dac when period < 2? More accurate,
         //       but results in more clicks.
@@ -241,7 +239,7 @@ struct Triangle : Oscillator {
                     phase = phase_range;
                     volume = -volume;
                 } else {
-                    synth.offset_inline(time, volume, output);
+                    synth.offset(time, volume, output);
                 }
 
                 time += timer_period;
@@ -279,11 +277,10 @@ static constexpr int16_t noise_period_table[16] = {
 /// The noise oscillator from the NES.
 struct Noise : Envelope {
     int noise;
-    BLIPSynth<BLIPQuality::Medium, 15> synth;
+    BLIPSynth<blip_med_quality, 15> synth;
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-
         const int volume = this->volume();
         int amp = (noise & 1) ? volume : 0;
         int delta = update_amp(amp);

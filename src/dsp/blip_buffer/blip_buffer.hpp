@@ -351,17 +351,18 @@ public:
 };
 
 class BLIPSynth_ {
-public:
+ public:
     BLIPBuffer* buf;
     int last_amp;
     int delta_factor;
 
     void volume_unit(double);
-    BLIPSynth_(short* impulses, int width);
+    BLIPSynth_(int16_t* impulses, int width);
     void treble_eq(blip_eq_t const&);
-private:
+
+ private:
     double volume_unit_;
-    short* const impulses;
+    int16_t* const impulses;
     int const width;
     blip_long kernel_unit;
     int impulses_size() const { return blip_res / 2 * width + 1; }
@@ -446,7 +447,7 @@ class BLIPSynth {
     BLIPSynth_Fast_ impl;
 #else
     BLIPSynth_ impl;
-    typedef short imp_t;
+    typedef int16_t imp_t;
     imp_t impulses [blip_res * (quality / 2) + 1];
  public:
     BLIPSynth() : impl(impulses, quality) { }

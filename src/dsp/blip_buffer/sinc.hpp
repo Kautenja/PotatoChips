@@ -2,6 +2,7 @@
 #ifndef BLIP_BUFFER_SINC_HPP_
 #define BLIP_BUFFER_SINC_HPP_
 
+#include <cstdint>
 #include <cmath>
 
 /// the constant value for Pi
@@ -17,7 +18,7 @@ static constexpr double BLARGG_PI = 3.1415926535897932384626433832795029;
 ///
 static void gen_sinc(
     float* out,
-    int count,
+    uint32_t count,
     double oversample,
     double treble,
     double cutoff
@@ -33,7 +34,7 @@ static void gen_sinc(
     double const rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
     double const pow_a_n = pow(rolloff, maxh - maxh * cutoff);
     double const to_angle = BLARGG_PI / 2 / maxh / oversample;
-    for (int i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         double angle = ((i - count) * 2 + 1) * to_angle;
         double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
         double cos_nc_angle = cos(maxh * cutoff * angle);

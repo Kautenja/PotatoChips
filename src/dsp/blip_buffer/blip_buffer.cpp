@@ -47,6 +47,9 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     sample_rate_ = samples_per_sec;
     bass_freq(bass_freq_);
 
+    uint32_t cycles_per_sample = 768000 / samples_per_sec;
+    factor_ = clock_rate_factor(clock_rate_ = cycles_per_sample * samples_per_sec);
+
     clear();
 
     return SampleRateStatus::Success;

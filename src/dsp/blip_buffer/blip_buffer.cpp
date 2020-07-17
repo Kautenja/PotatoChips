@@ -32,36 +32,7 @@ BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
     delta_factor = 0;
 }
 
-#undef PI
-#define PI 3.1415926535897932384626433832795029
-
-static void gen_sinc(float* out, int count, double oversample, double treble, double cutoff) {
-    if (cutoff >= 0.999)
-        cutoff = 0.999;
-    if (treble < -300.0)
-        treble = -300.0;
-    if (treble > 5.0)
-        treble = 5.0;
-
-    static constexpr double maxh = 4096.0;
-    double const rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
-    double const pow_a_n = pow(rolloff, maxh - maxh * cutoff);
-    double const to_angle = PI / 2 / maxh / oversample;
-    for (int i = 0; i < count; i++) {
-        double angle = ((i - count) * 2 + 1) * to_angle;
-        double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
-        double cos_nc_angle = cos(maxh * cutoff * angle);
-        double cos_nc1_angle = cos((maxh * cutoff - 1.0) * angle);
-        double cos_angle = cos(angle);
-
-        c = c * pow_a_n - rolloff * cos_nc1_angle + cos_nc_angle;
-        double d = 1.0 + rolloff * (rolloff - cos_angle - cos_angle);
-        double b = 2.0 - cos_angle - cos_angle;
-        double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
-
-        out[i] = (float) ((a * d + c * b) / (b * d)); // a / b + c / d
-    }
-}
+#include "sinc.hpp"
 
 void blip_eq_t::generate(float* out, int count) const {
     // lower cutoff freq for narrow kernels with their wider transition band
@@ -71,13 +42,12 @@ void blip_eq_t::generate(float* out, int count) const {
     if (cutoff_freq)
         oversample = half_rate / cutoff_freq;
     double cutoff = rolloff_freq * oversample / half_rate;
-
+    // generate a sinc
     gen_sinc(out, count, blip_res * oversample, treble, cutoff);
-
     // apply (half of) hamming window
-    double to_fraction = PI / (count - 1);
+    double to_fraction = BLARGG_PI / (count - 1);
     for (int i = count; i--;)
-        out[i] *= 0.54f - 0.46f * (float) cos(i * to_fraction);
+        out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
 }
 
 void BLIPSynth_::adjust_impulse() {

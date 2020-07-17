@@ -212,7 +212,7 @@ class BLIPBuffer {
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
         *output = sample;
-        read_accum_temp += *buffer_temp++ - (read_accum_temp >> (bass_shift_));
+        read_accum_temp += *buffer_temp - (read_accum_temp >> (bass_shift_));
         // update the accumulator
         reader_accum_ = read_accum_temp;
         // TODO: remove

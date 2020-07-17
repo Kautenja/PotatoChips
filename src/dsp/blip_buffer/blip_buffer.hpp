@@ -215,12 +215,12 @@ class BLIPBuffer {
         offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
     }
 
-    inline blip_resampled_time_t resampled_duration(int t) const {
-        return t * factor_;
+    inline blip_resampled_time_t resampled_duration(int time) const {
+        return time * factor_;
     }
 
-    inline blip_resampled_time_t resampled_time(blip_time_t t) const {
-        return t * factor_ + offset_;
+    inline blip_resampled_time_t resampled_time(blip_time_t time) const {
+        return time * factor_ + offset_;
     }
 
  public:
@@ -244,7 +244,7 @@ class BLIPBuffer {
     BLIPBuffer(const BLIPBuffer&);
 
     /// Disable the assignment operator
-    BLIPBuffer& operator = (const BLIPBuffer&);
+    BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
     typedef blip_time_t buf_t_;

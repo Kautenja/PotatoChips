@@ -202,13 +202,6 @@ class BLIPBuffer {
         bass_shift_ = shift;
     }
 
-    /// @brief Return the number of samples delay from synthesis to samples
-    /// available.
-    ///
-    /// @returns the number of samples delay from synthesis to samples available
-    ///
-    inline int output_latency() const { return blip_widest_impulse_ / 2; }
-
 // ---------------------------------------------------------------------------
 // TODO: not documented yet
 // ---------------------------------------------------------------------------

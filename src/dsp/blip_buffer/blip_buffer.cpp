@@ -21,23 +21,24 @@
 #endif
 
 long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, bool stereo) {
-    int const bass = BLIP_READER_BASS(*this);
-    BLIP_READER_BEGIN(reader, *this);
+    int const bass = this->bass_shift_;
+    const BLIPBuffer::buf_t_* BLIP_RESTRICT reader_reader_buf = this->buffer_;
+    blip_long reader_reader_accum = this->reader_accum_;
     if (!stereo) {
-        blip_long s = BLIP_READER_READ(reader);
+        blip_long s = reader_reader_accum >> (blip_sample_bits - 16);
         if ((blip_sample_t) s != s)
             s = 0x7FFF - (s >> 24);
         *out++ = (blip_sample_t) s;
-        BLIP_READER_NEXT(reader, bass);
+        reader_reader_accum += *reader_reader_buf++ - (reader_reader_accum >> (bass));
     } else {
-        blip_long s = BLIP_READER_READ(reader);
+        blip_long s = reader_reader_accum >> (blip_sample_bits - 16);
         if ((blip_sample_t) s != s)
             s = 0x7FFF - (s >> 24);
         *out = (blip_sample_t) s;
         out += 2;
-        BLIP_READER_NEXT(reader, bass);
+        reader_reader_accum += *reader_reader_buf++ - (reader_reader_accum >> (bass));
     }
-    BLIP_READER_END(reader, *this);
+    this->reader_accum_ = reader_reader_accum;
     // TODO: remove
     remove_samples(1);
     // TODO: return the sample

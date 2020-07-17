@@ -231,9 +231,8 @@ struct Chip2A03 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < APU::OSC_COUNT; i++) {
+            for (int i = 0; i < APU::OSC_COUNT; i++)
                 buf[i].set_sample_rate(args.sampleRate);
-            }
             // clear the new sample rate flag
             new_sample_rate = false;
         }
@@ -249,13 +248,10 @@ struct Chip2A03 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < APU::OSC_COUNT; i++)
+        for (int i = 0; i < APU::OSC_COUNT; i++) {
             buf[i].end_frame(cycles_per_sample);
-        // set the output from the oscillators
-        outputs[OUTPUT_CHANNEL + 0].setVoltage(getAudioOut(0));
-        outputs[OUTPUT_CHANNEL + 1].setVoltage(getAudioOut(1));
-        outputs[OUTPUT_CHANNEL + 2].setVoltage(getAudioOut(2));
-        outputs[OUTPUT_CHANNEL + 3].setVoltage(getAudioOut(3));
+            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        }
     }
 
     /// Respond to the change of sample rate in the engine.

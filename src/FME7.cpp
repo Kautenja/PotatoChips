@@ -142,9 +142,8 @@ struct ChipFME7 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < FME7::OSC_COUNT; i++) {
+            for (int i = 0; i < FME7::OSC_COUNT; i++)
                 buf[i].set_sample_rate(args.sampleRate);
-            }
             // clear the new sample rate flag
             new_sample_rate = false;
         }

@@ -406,13 +406,18 @@ class BLIPSynth {
 
  private:
 #if BLIP_BUFFER_FAST
+    /// the BLIP engine
     BLIPSynth_Fast_ impl;
 #else
+    /// the BLIP engine
     BLIPSynth_ impl;
+    /// TODO
     blip_sample_t impulses[blip_res * (quality / 2) + 1];
+
  public:
+    /// Initialize a new BLIPSynth.
     BLIPSynth() : impl(impulses, quality) { }
-#endif
+#endif  // BLIP_BUFFER_FAST
 };
 
 /// Low-pass equalization parameters
@@ -420,15 +425,15 @@ class blip_eq_t {
  private:
     /// BLIPSynth_ is a friend to access the private generate function
     friend class BLIPSynth_;
-    /// Logarithmic rolloff to treble dB at half sampling rate. Negative values
-    /// reduce treble, small positive values (0 to 5.0) increase treble.
+    /// Logarithmic roll-off to treble dB at half sampling rate. Negative
+    /// values reduce treble, small positive values (0 to 5.0) increase treble.
     double treble;
     /// TODO:
-    long rolloff_freq;
+    uint32_t rolloff_freq;
     /// TODO:
-    long sample_rate;
+    uint32_t sample_rate;
     /// TODO:
-    long cutoff_freq;
+    uint32_t cutoff_freq;
 
     /// TODO:
     ///
@@ -437,7 +442,7 @@ class blip_eq_t {
     /// @details
     /// for usage within instances of BLIPSynth_
     ///
-    void generate(float* out, int count) const {
+    void generate(float* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
         // (8 points->1.49, 16 points->1.15)
         double oversample = blip_res * 2.25 / count + 0.85;
@@ -449,7 +454,7 @@ class blip_eq_t {
         gen_sinc(out, count, blip_res * oversample, treble, cutoff);
         // apply (half of) hamming window
         double to_fraction = BLARGG_PI / (count - 1);
-        for (int i = count; i--;)
+        for (uint32_t i = count; i--;)
             out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
     }
 
@@ -460,14 +465,14 @@ class blip_eq_t {
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
     /// treble.
     /// @param rolloff_freq TODO:
-    /// @param sample_rate TODO:
+    /// @param sample_rate the sample rate the engine is running at
     /// @param cutoff_freq TODO:
     ///
     blip_eq_t(
         double treble,
-        long rolloff_freq = 0,
-        long sample_rate = 44100,
-        long cutoff_freq = 0
+        uint32_t rolloff_freq = 0,
+        uint32_t sample_rate = 44100,
+        uint32_t cutoff_freq = 0
     ) :
         treble(treble),
         rolloff_freq(rolloff_freq),

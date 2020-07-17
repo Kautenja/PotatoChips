@@ -253,9 +253,13 @@ class BLIPBuffer {
 // TODO: not documented yet
 // ---------------------------------------------------------------------------
 
-    void set_modified() { modified_ = 1; }
+    inline void set_modified() { modified_ = 1; }
 
-    int clear_modified() { int b = modified_; modified_ = 0; return b; }
+    inline int clear_modified() {
+        int b = modified_;
+        modified_ = 0;
+        return b;
+    }
 
     typedef blip_ulong blip_resampled_time_t;
 
@@ -265,11 +269,11 @@ class BLIPBuffer {
         offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
     }
 
-    blip_resampled_time_t resampled_duration(int t) const {
+    inline blip_resampled_time_t resampled_duration(int t) const {
         return t * factor_;
     }
 
-    blip_resampled_time_t resampled_time(blip_time_t t) const {
+    inline blip_resampled_time_t resampled_time(blip_time_t t) const {
         return t * factor_ + offset_;
     }
 

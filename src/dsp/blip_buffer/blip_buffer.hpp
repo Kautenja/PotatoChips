@@ -36,6 +36,13 @@ class BLIPBuffer {
  public:
     typedef const char* blargg_err_t;
 
+    /// The result from setting the sample rate to a new value
+    enum class SampleRateStatus {
+        Success = 0,  // setting the sample rate succeeded
+        OutOfMemory,  // ran out of resources for buffer
+        SilentBuffer  // attempting to resize silent buffer
+    };
+
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
@@ -44,19 +51,22 @@ class BLIPBuffer {
     /// @returns NULL on success, otherwise if there isn't enough memory,
     /// returns error without affecting current buffer setup.
     ///
-    blargg_err_t set_sample_rate(long samples_per_sec, int buffer_length = 1000 / 4);
+    SampleRateStatus set_sample_rate(
+        uint32_t samples_per_sec,
+        uint32_t buffer_length = 1000 / 4
+    );
 
     /// @brief Return the current output sample rate.
     ///
     /// @returns the audio sample rate
     ///
-    long sample_rate() const;
+    inline uint32_t sample_rate() const { return sample_rate_; }
 
     /// @brief Return the length of the buffer in milliseconds.
     ///
     /// @returns the length of the buffer in milliseconds (1/1000 sec)
     ///
-    int length() const;
+    inline uint32_t length() const { return length_; }
 
     /// @brief Set the number of source time units per second.
     ///
@@ -200,10 +210,10 @@ class BLIPBuffer {
     int bass_shift_;
 
  private:
-    long sample_rate_;
+    uint32_t sample_rate_;
     long clock_rate_;
     int bass_freq_;
-    int length_;
+    uint32_t length_;
     int modified_;
     friend class BLIPReader;
 };
@@ -225,41 +235,42 @@ class BLIPBuffer {
     #endif
 #endif
 
-    // Internal
-    typedef blip_ulong blip_resampled_time_t;
-    int const blip_widest_impulse_ = 16;
-    int const blip_buffer_extra_ = blip_widest_impulse_ + 2;
-    int const blip_res = 1 << BLIP_PHASE_BITS;
-    class blip_eq_t;
+// Internal
+typedef blip_ulong blip_resampled_time_t;
+int const blip_widest_impulse_ = 16;
+int const blip_buffer_extra_ = blip_widest_impulse_ + 2;
+int const blip_res = 1 << BLIP_PHASE_BITS;
 
-    class BLIPSynth_Fast_ {
-    public:
-        BLIPBuffer* buf;
-        int last_amp;
-        int delta_factor;
+class blip_eq_t;
 
-        void volume_unit(double);
-        BLIPSynth_Fast_();
-        void treble_eq(blip_eq_t const&) { }
-    };
+class BLIPSynth_Fast_ {
+public:
+    BLIPBuffer* buf;
+    int last_amp;
+    int delta_factor;
 
-    class BLIPSynth_ {
-    public:
-        BLIPBuffer* buf;
-        int last_amp;
-        int delta_factor;
+    void volume_unit(double);
+    BLIPSynth_Fast_();
+    void treble_eq(blip_eq_t const&) { }
+};
 
-        void volume_unit(double);
-        BLIPSynth_(short* impulses, int width);
-        void treble_eq(blip_eq_t const&);
-    private:
-        double volume_unit_;
-        short* const impulses;
-        int const width;
-        blip_long kernel_unit;
-        int impulses_size() const { return blip_res / 2 * width + 1; }
-        void adjust_impulse();
-    };
+class BLIPSynth_ {
+public:
+    BLIPBuffer* buf;
+    int last_amp;
+    int delta_factor;
+
+    void volume_unit(double);
+    BLIPSynth_(short* impulses, int width);
+    void treble_eq(blip_eq_t const&);
+private:
+    double volume_unit_;
+    short* const impulses;
+    int const width;
+    blip_long kernel_unit;
+    int impulses_size() const { return blip_res / 2 * width + 1; }
+    void adjust_impulse();
+};
 
 // Quality level. Start with blip_good_quality.
 const int blip_med_quality  = 8;
@@ -546,9 +557,7 @@ inline blip_eq_t::blip_eq_t(double t, long rf, long sr, long cf) :
     sample_rate(sr),
     cutoff_freq(cf) { }
 
-inline int  BLIPBuffer::length() const         { return length_; }
 inline long BLIPBuffer::samples_count() const  { return (long) (offset_ >> BLIP_BUFFER_ACCURACY); }
-inline long BLIPBuffer::sample_rate() const    { return sample_rate_; }
 inline int  BLIPBuffer::output_latency() const { return blip_widest_impulse_ / 2; }
 inline long BLIPBuffer::get_clock_rate() const     { return clock_rate_; }
 inline void BLIPBuffer::set_clock_rate(long cps) { factor_ = clock_rate_factor(clock_rate_ = cps); }

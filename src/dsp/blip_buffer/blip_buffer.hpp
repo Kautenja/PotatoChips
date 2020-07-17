@@ -120,7 +120,7 @@ class BLIPBuffer {
     ///
     /// @returns the number of source time units per second
     ///
-    inline long get_clock_rate() const { return clock_rate_; }
+    inline uint32_t get_clock_rate() const { return clock_rate_; }
 
     /// @brief End current time frame of specified duration and make its
     /// samples available (along with any still-unread samples).
@@ -277,7 +277,7 @@ class BLIPBuffer {
         return t * factor_ + offset_;
     }
 
-    inline blip_resampled_time_t clock_rate_factor(long clock_rate) const {
+    inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
         double ratio = (double) sample_rate_ / clock_rate;
         blip_long factor = (blip_long) floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
         // fails if clock/output ratio is too large
@@ -330,7 +330,7 @@ class BLIPBuffer {
 
  private:
     uint32_t sample_rate_;
-    long clock_rate_;
+    uint32_t clock_rate_;
     int bass_freq_;
     uint32_t length_;
     int modified_;

@@ -169,7 +169,11 @@ class BLIPBuffer {
         // calculate the time factor based on the clock_rate and sample_rate
         factor_ = clock_rate_factor(clock_rate_);
         // clear the buffer
-        clear();
+        offset_ = 0;
+        reader_accum_ = 0;
+        if (buffer_) {
+            memset(buffer_, 0, (buffer_size_ + blip_buffer_extra_) * sizeof (buf_t_));
+        }
         // return success flag
         return SampleRateStatus::Success;
     }
@@ -237,20 +241,6 @@ class BLIPBuffer {
             long remain = samples_count() + blip_buffer_extra_;
             memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
             memset(buffer_ + remain, 0, count * sizeof *buffer_);
-        }
-    }
-
-    /// @brief Remove all available samples and clear buffer to silence.
-    ///
-    /// @param entire_buffer is false, clears out any samples waiting rather
-    /// than the entire buffer.
-    ///
-    inline void clear(bool entire_buffer = true) {
-        offset_      = 0;
-        reader_accum_ = 0;
-        if (buffer_) {
-            long count = (entire_buffer ? buffer_size_ : samples_count());
-            memset(buffer_, 0, (count + blip_buffer_extra_) * sizeof (buf_t_));
         }
     }
 

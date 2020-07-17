@@ -275,8 +275,11 @@ struct Chip106 : Module {
         if (cvDivider.process()) {
             // write the waveform data to the chip's RAM
             auto wavetable = getWavetable();
+            // calculate the address of the base waveform in the table
             int wavetable0 = floor(wavetable);
+            // calculate the address of the next waveform in the table
             int wavetable1 = ceil(wavetable);
+            // calculate floating point offset between the base and next table
             float interpolate = wavetable - wavetable0;
             for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
                 apu.write_addr(i);

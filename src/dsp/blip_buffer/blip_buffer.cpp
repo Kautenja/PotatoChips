@@ -73,8 +73,7 @@ long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples
         BLIP_READER_BEGIN(reader, *this);
 
         if (!stereo) {
-            for (blip_long n = count; n; --n)
-            {
+            for (blip_long n = count; n; --n) {
                 blip_long s = BLIP_READER_READ(reader);
                 if ((blip_sample_t) s != s)
                     s = 0x7FFF - (s >> 24);
@@ -84,8 +83,7 @@ long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples
         }
         else
         {
-            for (blip_long n = count; n; --n)
-            {
+            for (blip_long n = count; n; --n) {
                 blip_long s = BLIP_READER_READ(reader);
                 if ((blip_sample_t) s != s)
                     s = 0x7FFF - (s >> 24);
@@ -196,12 +194,7 @@ void BLIPSynth_::adjust_impulse() {
         if (p == p2)
             error /= 2; // phase = 0.5 impulse uses same half for both sides
         impulses [size - blip_res + p] += (blip_sample_t) error;
-        //printf("error: %ld\n", error);
     }
-
-    //for (int i = blip_res; i--; printf("\n"))
-    //  for (int j = 0; j < width / 2; j++)
-    //      printf("%5ld,", impulses [j * blip_res + i + 1]);
 }
 
 void BLIPSynth_::treble_eq(blip_eq_t const& eq) {
@@ -225,8 +218,8 @@ void BLIPSynth_::treble_eq(blip_eq_t const& eq) {
     for (i = 0; i < half_size; i++)
         total += fimpulse [blip_res + i];
 
-    //double const base_unit = 44800.0 - 128 * 18; // allows treble up to +0 dB
-    //double const base_unit = 37888.0; // allows treble to +5 dB
+    // double const base_unit = 44800.0 - 128 * 18; // allows treble up to +0 dB
+    // double const base_unit = 37888.0; // allows treble to +5 dB
     double const base_unit = 32768.0; // necessary for blip_unscaled to work
     double rescale = base_unit / 2 / total;
     kernel_unit = (long) base_unit;
@@ -263,17 +256,14 @@ void BLIPSynth_::volume_unit(double new_unit) {
             int shift = 0;
 
             // if unit is really small, might need to attenuate kernel
-            while (factor < 2.0)
-            {
+            while (factor < 2.0) {
                 shift++;
                 factor *= 2.0;
             }
 
-            if (shift)
-            {
+            if (shift) {
                 kernel_unit >>= shift;
                 assert(kernel_unit > 0); // fails if volume unit is too low
-
                 // keep values positive to avoid round-towards-zero of sign-preserving
                 // right shift for negative values
                 long offset = 0x8000 + (1 << (shift - 1));
@@ -284,7 +274,6 @@ void BLIPSynth_::volume_unit(double new_unit) {
             }
         }
         delta_factor = (int) floor(factor + 0.5);
-        //printf("delta_factor: %d, kernel_unit: %d\n", delta_factor, kernel_unit);
     }
 }
 

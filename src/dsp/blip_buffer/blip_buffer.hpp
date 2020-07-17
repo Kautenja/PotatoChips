@@ -133,7 +133,6 @@ class BLIPBuffer {
     /// Begins a new time frame at the end of the current frame.
     ///
     inline void end_frame(blip_time_t time) {
-        // offset_ += time * factor_;
         offset_ = 65536;
         // time outside buffer length
         assert(samples_count() <= (long) buffer_size_);
@@ -244,13 +243,6 @@ class BLIPBuffer {
         unsigned long first_sample = offset_ >> BLIP_BUFFER_ACCURACY;
         return (long) (last_sample - first_sample);
     }
-
-    /// @brief Mix 'count' samples from the given buffer into this buffer.
-    ///
-    /// @param buf the buffer to mix samples from into this buffer
-    /// @param count the number of samples to mix from `buf` into this buffer
-    ///
-    void mix_samples(blip_sample_t const* buf, long count);
 
 // ---------------------------------------------------------------------------
 // TODO: not documented yet

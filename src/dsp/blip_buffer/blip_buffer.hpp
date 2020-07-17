@@ -210,41 +210,6 @@ class BLIPBuffer {
     inline int output_latency() const { return blip_widest_impulse_ / 2; }
 
 // ---------------------------------------------------------------------------
-// MARK: Experimental features
-// ---------------------------------------------------------------------------
-
-    /// @brief Return the number of clocks needed until `count` samples will be
-    /// available.
-    ///
-    /// @param count the number of samples to convert to clock cycles
-    /// @returns the number of clock cycles needed to produce `count` samples.
-    /// If buffer can't even hold `count` samples, returns number of clocks
-    /// until buffer becomes full.
-    ///
-    inline blip_time_t count_clocks(long count) const {
-        if (!factor_) {  // sample rate and clock rates must be set first
-            assert(0);
-            return 0;
-        }
-        if (count > buffer_size_) count = buffer_size_;
-        blip_resampled_time_t time = (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
-        return (blip_time_t) ((time - offset_ + factor_ - 1) / factor_);
-    }
-
-    /// @brief Return the number of raw samples that can be mixed within frame
-    /// of given `duration`.
-    ///
-    /// @param duration the duration of the frame to mix raw sample into
-    /// @returns the number of raw samples that can be mixed within frame
-    /// of given `duration`
-    ///
-    inline long count_samples(blip_time_t duration) const {
-        unsigned long last_sample  = resampled_time(duration) >> BLIP_BUFFER_ACCURACY;
-        unsigned long first_sample = offset_ >> BLIP_BUFFER_ACCURACY;
-        return (long) (last_sample - first_sample);
-    }
-
-// ---------------------------------------------------------------------------
 // TODO: not documented yet
 // ---------------------------------------------------------------------------
 

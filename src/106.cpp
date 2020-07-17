@@ -131,7 +131,6 @@ struct Chip106 : Module {
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
             configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
             apu.osc_output(i, &buf[i]);
-            buf[i].set_clock_rate(CLOCK_RATE);
         }
         // set the wave-forms to the default values
         for (int i = 0; i < num_wavetables; i++)
@@ -272,7 +271,6 @@ struct Chip106 : Module {
             // update the buffer for each channel
             for (int i = 0; i < Namco106::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

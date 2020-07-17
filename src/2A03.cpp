@@ -99,7 +99,6 @@ struct Chip2A03 : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < APU::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
-            buf[i].set_clock_rate(CLOCK_RATE);
         }
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
@@ -236,7 +235,6 @@ struct Chip2A03 : Module {
             // update the buffer for each channel
             for (int i = 0; i < APU::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

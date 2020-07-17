@@ -104,8 +104,11 @@ struct Chip2A03 : Module {
         apu.volume(3.f);
     }
 
-    /// Process pulse wave (channel 0).
-    void channel0_pulse() {
+    /// Process pulse wave for given channel.
+    ///
+    /// @param channel the channel to process the pulse wave for
+    ///
+    void channel_pulse(int channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
@@ -115,55 +118,28 @@ struct Chip2A03 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 0].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 0].getVoltage();
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 0].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to 11-bit
-        freq = (buf[0].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        // write the frequency to the low and high registers
-        apu.write_register(0, PULSE0_LO, freq11bit & 0b11111111);
-        apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
-        // set the pulse width of the pulse wave (high 2 bits) and set the
-        // volume to a constant level
-        auto pw = static_cast<uint8_t>(params[PARAM_PW + 0].getValue()) << 6;
-        apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
-    }
-
-    /// Process pulse wave (channel 1).
-    void channel1_pulse() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 1023;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 1].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 1].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 1].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[1].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
-        apu.write_register(0, PULSE1_LO, freq11bit & 0b11111111);
-        apu.write_register(0, PULSE1_HI, (freq11bit & 0b0000011100000000) >> 8);
+        // - there are 4 registers per pulse channel, multiply channel by 4 to
+        //   produce an offset between registers based on channel index
+        apu.write_register(0, PULSE0_LO + 4 * channel, freq11bit & 0b11111111);
+        apu.write_register(0, PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
         // volume to a constant level
-        auto pw = static_cast<uint8_t>(params[PARAM_PW + 1].getValue()) << 6;
-        apu.write_register(0, PULSE1_VOL, pw + 0b00011111);
+        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
+        apu.write_register(0, PULSE0_VOL + 4 * channel, pw + 0b00011111);
     }
 
     /// Process triangle wave (channel 2).
-    void channel2_triangle() {
+    void channel_triangle() {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ11BIT_MIN = 2;
         // the maximal value for the frequency register
@@ -190,7 +166,7 @@ struct Chip2A03 : Module {
     }
 
     /// Process noise (channel 3).
-    void channel3_noise() {
+    void channel_noise() {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
@@ -239,10 +215,10 @@ struct Chip2A03 : Module {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
-            channel0_pulse();
-            channel1_pulse();
-            channel2_triangle();
-            channel3_noise();
+            channel_pulse(0);
+            channel_pulse(1);
+            channel_triangle();
+            channel_noise();
             // enable all four channels
             apu.write_register(0, SND_CHN, 0b00001111);
         }

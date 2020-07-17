@@ -20,32 +20,6 @@
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
 
-// BLIPSynth_
-
-BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
-    volume_unit_ = 0.0;
-    kernel_unit = 0;
-    buf = 0;
-    last_amp = 0;
-    delta_factor = 0;
-}
-
-void BLIPSynth_::adjust_impulse() {
-    // sum pairs for each phase and add error correction to end of first half
-    int const size = impulses_size();
-    for (int p = blip_res; p-- >= blip_res / 2;) {
-        int p2 = blip_res - 2 - p;
-        long error = kernel_unit;
-        for (int i = 1; i < size; i += blip_res) {
-            error -= impulses[i + p ];
-            error -= impulses[i + p2];
-        }
-        if (p == p2)
-            error /= 2; // phase = 0.5 impulse uses same half for both sides
-        impulses[size - blip_res + p] += (blip_sample_t) error;
-    }
-}
-
 void BLIPSynth_::treble_eq(blip_eq_t const& eq) {
     float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 

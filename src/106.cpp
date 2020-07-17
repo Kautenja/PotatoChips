@@ -131,7 +131,6 @@ struct Chip106 : Module {
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
             configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
             apu.osc_output(i, &buf[i]);
-            buf[i].set_clock_rate(CLOCK_RATE);
         }
         // set the wave-forms to the default values
         for (int i = 0; i < num_wavetables; i++)
@@ -254,11 +253,9 @@ struct Chip106 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        auto samples = buf[channel].samples_count();
-        if (samples == 0) return 0.f;
         // copy the buffer to a local vector and return the first sample
-        std::vector<int16_t> output_buffer(samples);
-        buf[channel].read_samples(&output_buffer[0], samples);
+        std::vector<int16_t> output_buffer(1);
+        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
         return Vpp * output_buffer[0] / divisor;
     }
@@ -272,7 +269,6 @@ struct Chip106 : Module {
             // update the buffer for each channel
             for (int i = 0; i < Namco106::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

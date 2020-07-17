@@ -75,11 +75,9 @@ static constexpr uint8_t blip_sample_bits = 30;
 /// optimal code at the cost of having no bass control
 static constexpr uint32_t blip_reader_default_bass = 9;
 
-/// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
+/// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  public:
-    typedef const char* blargg_err_t;
-
     /// The result from setting the sample rate to a new value
     enum class SampleRateStatus {
         Success = 0,  // setting the sample rate succeeded
@@ -103,21 +101,7 @@ class BLIPBuffer {
     ///
     /// @returns the audio sample rate
     ///
-    inline uint32_t sample_rate() const { return sample_rate_; }
-
-    /// @brief Return the length of the buffer in milliseconds.
-    ///
-    /// @returns the length of the buffer in milliseconds (1/1000 sec)
-    ///
-    inline uint32_t length() const { return length_; }
-
-    /// @brief Set the number of source time units per second.
-    ///
-    /// @param TODO:
-    ///
-    inline void set_clock_rate(long cps) {
-        factor_ = clock_rate_factor(clock_rate_ = cps);
-    }
+    inline uint32_t get_sample_rate() const { return sample_rate_; }
 
     /// @brief Return the number of source time units per second.
     ///
@@ -126,14 +110,11 @@ class BLIPBuffer {
     inline uint32_t get_clock_rate() const { return clock_rate_; }
 
     /// @brief End current time frame of specified duration and make its
-    /// samples available (along with any still-unread samples).
+    /// samples available (along with any still-unread samples). Begins a new
+    /// time frame at the end of the current frame.
     ///
-    /// @param time the number of source cycles to complete the frame
-    /// @details
-    /// Begins a new time frame at the end of the current frame.
-    ///
-    inline void end_frame(blip_time_t time) {
-        offset_ += time * factor_;
+    inline void end_frame(blip_time_t) {
+        offset_ = 1 << BLIP_BUFFER_ACCURACY;
         // time outside buffer length
         assert(samples_count() <= (long) buffer_size_);
     }
@@ -146,17 +127,15 @@ class BLIPBuffer {
         return (long) (offset_ >> BLIP_BUFFER_ACCURACY);
     }
 
-    /// @brief Read at most `max_samples` out of this buffer into `dest` and
-    /// remove them from the buffer.
+    /// @brief Read out of this buffer into `dest` and remove them from the buffer.
     ///
     /// @param dest the destination to push samples from the buffer into
-    /// @param max_samples the maximal number of samples to read into the buffer
     /// @param stereo if true increments `dest` one extra time after writing
     /// each sample to allow easy interleaving of two channels into a stereo
     /// output buffer.
     /// @returns the number of samples actually read and removed
     ///
-    long read_samples(blip_sample_t* dest, long max_samples, bool stereo = false);
+    long read_samples(blip_sample_t* dest, bool stereo = false);
 
     /// @brief Remove samples from those waiting to be read.
     ///
@@ -202,55 +181,6 @@ class BLIPBuffer {
         bass_shift_ = shift;
     }
 
-    /// @brief Return the number of samples delay from synthesis to samples
-    /// available.
-    ///
-    /// @returns the number of samples delay from synthesis to samples available
-    ///
-    inline int output_latency() const { return blip_widest_impulse_ / 2; }
-
-// ---------------------------------------------------------------------------
-// MARK: Experimental features
-// ---------------------------------------------------------------------------
-
-    /// @brief Return the number of clocks needed until `count` samples will be
-    /// available.
-    ///
-    /// @param count the number of samples to convert to clock cycles
-    /// @returns the number of clock cycles needed to produce `count` samples.
-    /// If buffer can't even hold `count` samples, returns number of clocks
-    /// until buffer becomes full.
-    ///
-    inline blip_time_t count_clocks(long count) const {
-        if (!factor_) {  // sample rate and clock rates must be set first
-            assert(0);
-            return 0;
-        }
-        if (count > buffer_size_) count = buffer_size_;
-        blip_resampled_time_t time = (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
-        return (blip_time_t) ((time - offset_ + factor_ - 1) / factor_);
-    }
-
-    /// @brief Return the number of raw samples that can be mixed within frame
-    /// of given `duration`.
-    ///
-    /// @param duration the duration of the frame to mix raw sample into
-    /// @returns the number of raw samples that can be mixed within frame
-    /// of given `duration`
-    ///
-    inline long count_samples(blip_time_t duration) const {
-        unsigned long last_sample  = resampled_time(duration) >> BLIP_BUFFER_ACCURACY;
-        unsigned long first_sample = offset_ >> BLIP_BUFFER_ACCURACY;
-        return (long) (last_sample - first_sample);
-    }
-
-    /// @brief Mix 'count' samples from the given buffer into this buffer.
-    ///
-    /// @param buf the buffer to mix samples from into this buffer
-    /// @param count the number of samples to mix from `buf` into this buffer
-    ///
-    void mix_samples(blip_sample_t const* buf, long count);
-
 // ---------------------------------------------------------------------------
 // TODO: not documented yet
 // ---------------------------------------------------------------------------
@@ -263,12 +193,12 @@ class BLIPBuffer {
         offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
     }
 
-    inline blip_resampled_time_t resampled_duration(int t) const {
-        return t * factor_;
+    inline blip_resampled_time_t resampled_duration(int time) const {
+        return time * factor_;
     }
 
-    inline blip_resampled_time_t resampled_time(blip_time_t t) const {
-        return t * factor_ + offset_;
+    inline blip_resampled_time_t resampled_time(blip_time_t time) const {
+        return time * factor_ + offset_;
     }
 
     inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
@@ -281,16 +211,15 @@ class BLIPBuffer {
 
  public:
     /// Initialize a new BLIP Buffer.
-    BLIPBuffer() : factor_(std::numeric_limits<blip_ulong>::max()),
+    BLIPBuffer() :
+        factor_(1),
         offset_(0),
         buffer_(0),
         buffer_size_(0),
         reader_accum_(0),
         bass_shift_(0),
         sample_rate_(0),
-        clock_rate_(0),
-        bass_freq_(16),
-        length_(0) { }
+        bass_freq_(16) { }
 
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer_); }
@@ -300,7 +229,7 @@ class BLIPBuffer {
     BLIPBuffer(const BLIPBuffer&);
 
     /// Disable the assignment operator
-    BLIPBuffer& operator = (const BLIPBuffer&);
+    BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
     typedef blip_time_t buf_t_;
@@ -315,7 +244,6 @@ class BLIPBuffer {
     uint32_t sample_rate_;
     uint32_t clock_rate_;
     int bass_freq_;
-    uint32_t length_;
 };
 
 class blip_eq_t;

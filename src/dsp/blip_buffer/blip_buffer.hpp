@@ -171,9 +171,6 @@ class BLIPBuffer {
         // clear the buffer
         offset_ = 0;
         reader_accum_ = 0;
-        if (buffer_) {
-            memset(buffer_, 0, (buffer_size_ + blip_buffer_extra_) * sizeof (buf_t_));
-        }
         // return success flag
         return SampleRateStatus::Success;
     }

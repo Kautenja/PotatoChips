@@ -192,7 +192,6 @@ void Ay_Apu::run_until( blip_time_t final_end_time )
         BLIPBuffer* const osc_output = osc->output;
         if ( !osc_output )
             continue;
-        // osc_output->set_modified();
 
         // period
         int half_vol = 0;

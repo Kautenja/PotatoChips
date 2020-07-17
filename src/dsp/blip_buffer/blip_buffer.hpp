@@ -184,7 +184,6 @@ class BLIPBuffer {
     inline void clear(bool entire_buffer = true) {
         offset_      = 0;
         reader_accum_ = 0;
-        modified_    = 0;
         if (buffer_) {
             long count = (entire_buffer ? buffer_size_ : samples_count());
             memset(buffer_, 0, (count + blip_buffer_extra_) * sizeof (buf_t_));
@@ -260,14 +259,6 @@ class BLIPBuffer {
 // TODO: not documented yet
 // ---------------------------------------------------------------------------
 
-    inline void set_modified() { modified_ = 1; }
-
-    inline int clear_modified() {
-        int b = modified_;
-        modified_ = 0;
-        return b;
-    }
-
     typedef blip_ulong blip_resampled_time_t;
 
     inline void remove_silence(long count) {
@@ -329,7 +320,6 @@ class BLIPBuffer {
     uint32_t clock_rate_;
     int bass_freq_;
     uint32_t length_;
-    int modified_;
 };
 
 class blip_eq_t;

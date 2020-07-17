@@ -34,7 +34,6 @@ void Scc_Apu::run_until( blip_time_t end_time )
 		BLIPBuffer* const output = osc.output;
 		if ( !output )
 			continue;
-		// output->set_modified();
 
 		blip_time_t period = (regs [0x80 + index * 2 + 1] & 0x0F) * 0x100 +
 				regs [0x80 + index * 2] + 1;

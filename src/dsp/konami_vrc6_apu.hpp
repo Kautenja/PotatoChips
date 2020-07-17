@@ -176,7 +176,6 @@ class VRC6 {
     void run_square(VRC6_Oscillator& osc, cpu_time_t end_time) {
         BLIPBuffer* output = osc.output;
         if (!output) return;
-        output->set_modified();
 
         int volume = osc.regs[0] & 15;
         if (!(osc.regs[2] & 0x80)) volume = 0;
@@ -223,7 +222,6 @@ class VRC6 {
         VRC6_Oscillator& osc = oscs[2];
         BLIPBuffer* output = osc.output;
         if (!output) return;
-        output->set_modified();
 
         int amp = osc.amp;
         int amp_step = osc.regs[0] & 0x3F;

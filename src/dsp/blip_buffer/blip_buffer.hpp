@@ -287,21 +287,58 @@ class blip_eq_t;
 /// A more accurate implementation of BLIP synthesizer logic.
 class BLIPSynth_ {
  public:
+    /// TODO:
     BLIPBuffer* buf;
+    /// TODO:
     int last_amp;
+    /// TODO:
     int delta_factor;
 
-    void volume_unit(double);
-    BLIPSynth_(blip_sample_t* impulses, int width);
-    void treble_eq(blip_eq_t const&);
+    /// TODO:
+    void volume_unit(double new_unit);
+
+    /// TODO:
+    BLIPSynth_(blip_sample_t* p, int w) :
+        buf(0),
+        last_amp(0),
+        delta_factor(0),
+        volume_unit_(0.0),
+        impulses(p),
+        width(w),
+        kernel_unit(0) { }
+
+    /// TODO:
+    void treble_eq(blip_eq_t const& eq);
 
  private:
+    /// TODO:
     double volume_unit_;
+    /// TODO:
     blip_sample_t* const impulses;
+    /// TODO:
     int const width;
+    /// TODO:
     blip_long kernel_unit;
+
+    /// TODO:
     inline int impulses_size() const { return blip_res / 2 * width + 1; }
-    void adjust_impulse();
+
+    /// TODO:
+    void adjust_impulse() {
+        // sum pairs for each phase and add error correction to end of first half
+        int const size = impulses_size();
+        for (int p = blip_res; p-- >= blip_res / 2;) {
+            int p2 = blip_res - 2 - p;
+            long error = kernel_unit;
+            for (int i = 1; i < size; i += blip_res) {
+                error -= impulses[i + p ];
+                error -= impulses[i + p2];
+            }
+            if (p == p2)  // phase = 0.5 impulse uses same half for both sides
+                error /= 2;
+            impulses[size - blip_res + p] += (blip_sample_t) error;
+        }
+    }
 };
 
 // Quality level. Start with blip_good_quality.

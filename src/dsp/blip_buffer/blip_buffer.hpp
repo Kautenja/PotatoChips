@@ -17,6 +17,7 @@
 #ifndef BLIP_BUFFER_HPP_
 #define BLIP_BUFFER_HPP_
 
+#include "sinc.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -416,34 +417,62 @@ class BLIPSynth {
 
 /// Low-pass equalization parameters
 class blip_eq_t {
- public:
+ private:
+    /// BLIPSynth_ is a friend to access the private generate function
+    friend class BLIPSynth_;
     /// Logarithmic rolloff to treble dB at half sampling rate. Negative values
     /// reduce treble, small positive values (0 to 5.0) increase treble.
-    blip_eq_t(double treble_db) :
-        treble(treble_db),
-        rolloff_freq(0),
-        sample_rate(44100),
-        cutoff_freq(0) { }
+    double treble;
+    /// TODO:
+    long rolloff_freq;
+    /// TODO:
+    long sample_rate;
+    /// TODO:
+    long cutoff_freq;
 
-    // See blip_buffer.txt
+    /// TODO:
+    ///
+    /// @param out TODO:
+    /// @param count TODO:
+    /// @details
+    /// for usage within instances of BLIPSynth_
+    ///
+    void generate(float* out, int count) const {
+        // lower cutoff freq for narrow kernels with their wider transition band
+        // (8 points->1.49, 16 points->1.15)
+        double oversample = blip_res * 2.25 / count + 0.85;
+        double half_rate = sample_rate * 0.5;
+        if (cutoff_freq)
+            oversample = half_rate / cutoff_freq;
+        double cutoff = rolloff_freq * oversample / half_rate;
+        // generate a sinc
+        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
+        // apply (half of) hamming window
+        double to_fraction = BLARGG_PI / (count - 1);
+        for (int i = count; i--;)
+            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
+    }
+
+ public:
+    /// TODO:
+    ///
+    /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
+    /// Negative values reduce treble, small positive values (0 to 5.0) increase
+    /// treble.
+    /// @param rolloff_freq TODO:
+    /// @param sample_rate TODO:
+    /// @param cutoff_freq TODO:
+    ///
     blip_eq_t(
         double treble,
-        long rolloff_freq,
-        long sample_rate,
-        long cutoff_freq
+        long rolloff_freq = 0,
+        long sample_rate = 44100,
+        long cutoff_freq = 0
     ) :
         treble(treble),
         rolloff_freq(rolloff_freq),
         sample_rate(sample_rate),
         cutoff_freq(cutoff_freq) { }
-
- private:
-    double treble;
-    long rolloff_freq;
-    long sample_rate;
-    long cutoff_freq;
-    void generate(float* out, int count) const;
-    friend class BLIPSynth_;
 };
 
 // ---------------------------------------------------------------------------

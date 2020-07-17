@@ -118,7 +118,6 @@ class BLIPBuffer {
     inline void set_clock_rate(long cps) {
         clock_rate_ = cps;
         factor_ = 1;
-        // factor_ = clock_rate_factor(clock_rate_ = cps);
     }
 
     /// @brief Return the number of source time units per second.
@@ -222,14 +221,6 @@ class BLIPBuffer {
 
     inline blip_resampled_time_t resampled_time(blip_time_t t) const {
         return t * factor_ + offset_;
-    }
-
-    inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
-        double ratio = (double) sample_rate_ / clock_rate;
-        blip_long factor = (blip_long) floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-        // fails if clock/output ratio is too large
-        assert(factor > 0 || !sample_rate_);
-        return (blip_resampled_time_t) factor;
     }
 
  public:

@@ -105,9 +105,6 @@ class BLIPBuffer {
     ///
     inline uint32_t sample_rate() const { return sample_rate_; }
 
-    /// TODO: remove
-    inline void set_clock_rate(long cps) { }
-
     /// @brief Return the number of source time units per second.
     ///
     /// @returns the number of source time units per second

@@ -209,7 +209,7 @@ class BLIPBuffer {
     ///
     long read_samples(blip_sample_t* BLIP_RESTRICT output) {
         // create a temporary pointer to the buffer that can be mutated
-        const BLIPBuffer::buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
+        const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator
         blip_long read_accum_temp = reader_accum_;
         // get the sample from the accumulator

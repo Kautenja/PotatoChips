@@ -380,15 +380,17 @@ class blip_eq_t {
     }
 };
 
-// Quality level. Start with blip_good_quality.
-const int blip_med_quality  = 8;
-const int blip_good_quality = 12;
-const int blip_high_quality = 16;
+/// Quality level. Start with blip_good_quality.
+enum BlipQuality {
+    blip_med_quality  = 8,
+    blip_good_quality = 12,
+    blip_high_quality = 16
+};
 
 /// Range specifies the greatest expected change in amplitude. Calculate it
 /// by finding the difference between the maximum and minimum expected
 /// amplitudes (max - min).
-template<int quality, int range>
+template<BlipQuality quality, int range>
 class BLIPSynth {
  private:
     /// TODO:

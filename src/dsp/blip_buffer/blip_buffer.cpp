@@ -75,7 +75,7 @@ void BLIPBuffer::clear(int entire_buffer) {
     }
 }
 
-BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long new_rate, int msec) {
+BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long samples_per_sec, int buffer_length) {
     if (buffer_size_ == silent_buf_size) {
         assert(0);
         return "Internal (tried to resize Silent_BLIPBuffer)";
@@ -83,8 +83,8 @@ BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long new_rate, int msec) {
 
     // start with maximum length that resampled time can represent
     long new_size = (ULONG_MAX >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
-    if (msec != blip_max_length) {
-        long s = (new_rate * (msec + 1) + 999) / 1000;
+    if (buffer_length != blip_max_length) {
+        long s = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
         if (s < new_size)
             new_size = s;
         else
@@ -102,10 +102,10 @@ BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long new_rate, int msec) {
     assert(buffer_size_ != silent_buf_size);
 
     // update things based on the sample rate
-    sample_rate_ = new_rate;
-    length_ = new_size * 1000 / new_rate - 1;
-    if (msec)
-        assert(length_ == msec); // ensure length is same as that passed in
+    sample_rate_ = samples_per_sec;
+    length_ = new_size * 1000 / samples_per_sec - 1;
+    if (buffer_length)
+        assert(length_ == buffer_length); // ensure length is same as that passed in
     if (clock_rate_)
         set_clock_rate(clock_rate_);
     bass_freq(bass_freq_);

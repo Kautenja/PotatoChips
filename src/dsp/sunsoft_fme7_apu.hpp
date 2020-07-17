@@ -151,7 +151,7 @@ class FME7 {
 					do
 					{
 						delta = -delta;
-						synth.offset_inline( time, delta, osc_output );
+						synth.offset( time, delta, osc_output );
 						time += period;
 					}
 					while ( time < end_time );

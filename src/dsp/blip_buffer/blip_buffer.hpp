@@ -214,14 +214,6 @@ public:
     // Works directly in terms of fractional output samples. Contact author for more info.
     void offset_resampled( blip_resampled_time_t, int delta, BLIPBuffer* ) const;
 
-    // Same as offset(), except code is inlined for higher performance
-    void offset_inline( blip_time_t t, int delta, BLIPBuffer* buf ) const {
-        offset_resampled( t * buf->factor_ + buf->offset_, delta, buf );
-    }
-    void offset_inline( blip_time_t t, int delta ) const {
-        offset_resampled( t * impl.buf->factor_ + impl.buf->offset_, delta, impl.buf );
-    }
-
 private:
 #if BLIP_BUFFER_FAST
     BLIPSynth_Fast_ impl;

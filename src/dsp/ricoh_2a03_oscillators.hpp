@@ -179,7 +179,7 @@ struct Pulse : Envelope {
                     phase = (phase + 1) & (phase_range - 1);
                     if (phase == 0 || phase == duty) {
                         delta = -delta;
-                        synth->offset_inline(time, delta, output);
+                        synth->offset(time, delta, output);
                     }
                     time += timer_period;
                 } while (time < end_time);
@@ -241,7 +241,7 @@ struct Triangle : Oscillator {
                     phase = phase_range;
                     volume = -volume;
                 } else {
-                    synth.offset_inline(time, volume, output);
+                    synth.offset(time, volume, output);
                 }
 
                 time += timer_period;

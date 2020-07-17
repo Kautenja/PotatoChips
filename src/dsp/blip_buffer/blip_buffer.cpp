@@ -29,18 +29,17 @@
 
 int const silent_buf_size = 1;  // size used for Silent_BLIPBuffer
 
-BLIPBuffer::BLIPBuffer() {
-    factor_       = LONG_MAX;
-    offset_       = 0;
-    buffer_       = 0;
-    buffer_size_  = 0;
-    sample_rate_  = 0;
-    reader_accum_ = 0;
-    bass_shift_   = 0;
-    clock_rate_   = 0;
-    bass_freq_    = 16;
-    length_       = 0;
-
+BLIPBuffer::BLIPBuffer() :
+    factor_(std::numeric_limits<blip_ulong>::max()),
+    offset_(0),
+    buffer_(0),
+    buffer_size_(0),
+    reader_accum_(0),
+    bass_shift_(0),
+    sample_rate_(0),
+    clock_rate_(0),
+    bass_freq_(16),
+    length_(0) {
     // assumptions code makes about implementation-defined features
     #ifndef NDEBUG
         // right shift of negative value preserves sign
@@ -49,8 +48,8 @@ BLIPBuffer::BLIPBuffer() {
 
         // casting to short truncates to 16 bits and sign-extends
         i = 0x18000;
-        assert((short) i == -0x8000);
-    #endif
+        assert(static_cast<int16_t>(i) == -0x8000);
+    #endif  // NDEBUG
 }
 
 BLIPBuffer::~BLIPBuffer() {

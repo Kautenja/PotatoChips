@@ -58,10 +58,10 @@ static constexpr int blip_buffer_extra_ = blip_widest_impulse_ + 2;
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
-static constexpr int blip_max_length = 0;
+static constexpr uint32_t blip_max_length = 0;
 
 /// TODO:
-static constexpr int blip_default_length = 250;
+static constexpr uint32_t blip_default_length = 250;
 
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {

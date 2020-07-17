@@ -173,35 +173,24 @@ class BLIPBuffer {
     /// @brief Read out of this buffer into `dest` and remove them from the buffer.
     ///
     /// @param output the output array to push samples from the buffer into
-    /// @param stereo if true increments `dest` one extra time after writing
-    /// each sample to allow easy interleaving of two channels into a stereo
-    /// output buffer.
     /// @returns the number of samples actually read and removed
     ///
-    long read_samples(blip_sample_t* BLIP_RESTRICT output, bool stereo = false) {
+    long read_samples(blip_sample_t* BLIP_RESTRICT output) {
         // create a temporary pointer to the buffer that can be mutated
         const BLIPBuffer::buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator
         blip_long read_accum_temp = reader_accum_;
-        if (!stereo) {  // monophonic buffer
-            blip_long s = read_accum_temp >> (blip_sample_bits - 16);
-            if ((blip_sample_t) s != s)
-                s = 0x7FFF - (s >> 24);
-            *output = (blip_sample_t) s;
-            // output = out + 1;
-            read_accum_temp += *buffer_temp++ - (read_accum_temp >> (bass_shift_));
-        } else {  // stereo buffer
-            blip_long s = read_accum_temp >> (blip_sample_bits - 16);
-            if ((blip_sample_t) s != s)
-                s = 0x7FFF - (s >> 24);
-            *output = (blip_sample_t) s;
-            // output = out + 2;
-            read_accum_temp += *buffer_temp++ - (read_accum_temp >> (bass_shift_));
+        // get the sample from the accumulator
+        blip_long s = read_accum_temp >> (blip_sample_bits - 16);
+        if ((blip_sample_t) s != s) {
+            s = 0x7FFF - (s >> 24);
         }
+        *output = (blip_sample_t) s;
+        read_accum_temp += *buffer_temp++ - (read_accum_temp >> (bass_shift_));
         // update the accumulator
         reader_accum_ = read_accum_temp;
         // TODO: remove
-        remove_samples(1);
+        remove_samples(samples_count());
         // TODO: return the sample
         return 1;
     }

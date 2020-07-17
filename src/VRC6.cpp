@@ -105,7 +105,6 @@ struct ChipVRC6 : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < VRC6::OSC_COUNT; i++) {
             apu.osc_output(i, &buf[i]);
-            buf[i].set_clock_rate(CLOCK_RATE);
         }
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
@@ -140,7 +139,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[0].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -196,7 +195,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[1].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -250,7 +249,7 @@ struct ChipVRC6 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
         uint8_t lo = freq12bit & 0b11111111;
@@ -280,11 +279,9 @@ struct ChipVRC6 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        auto samples = buf[channel].samples_count();
-        if (samples == 0) return 0.f;
         // copy the buffer to  a local vector and return the first sample
-        std::vector<int16_t> output_buffer(samples);
-        buf[channel].read_samples(&output_buffer[0], samples);
+        std::vector<int16_t> output_buffer(1);
+        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
         return Vpp * output_buffer[0] / divisor;
     }
@@ -298,7 +295,6 @@ struct ChipVRC6 : Module {
             // update the buffer for each channel
             for (int i = 0; i < VRC6::OSC_COUNT; i++) {
                 buf[i].set_sample_rate(args.sampleRate);
-                buf[i].set_clock_rate(cycles_per_sample * args.sampleRate);
             }
             // clear the new sample rate flag
             new_sample_rate = false;

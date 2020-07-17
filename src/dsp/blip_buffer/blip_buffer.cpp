@@ -45,75 +45,45 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
 
     // update things based on the sample rate
     sample_rate_ = samples_per_sec;
-    length_ = new_size * 1000 / samples_per_sec - 1;
-    if (buffer_length)  // ensure length is same as that passed in
-        assert(length_ == buffer_length);
-    if (clock_rate_)  // reset clock rate if one is set
-        set_clock_rate(clock_rate_);
     bass_freq(bass_freq_);
+
+    uint32_t cycles_per_sample = 768000 / samples_per_sec;
+    factor_ = clock_rate_factor(clock_rate_ = cycles_per_sample * samples_per_sec);
 
     clear();
 
     return SampleRateStatus::Success;
 }
 
-long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples, bool stereo) {
-    long count = samples_count();
-    if (count > max_samples)
-        count = max_samples;
-
-    if (count) {
-        int const bass = BLIP_READER_BASS(*this);
-        BLIP_READER_BEGIN(reader, *this);
-
-        if (!stereo) {
-            for (blip_long n = count; n; --n) {
-                blip_long s = BLIP_READER_READ(reader);
-                if ((blip_sample_t) s != s)
-                    s = 0x7FFF - (s >> 24);
-                *out++ = (blip_sample_t) s;
-                BLIP_READER_NEXT(reader, bass);
-            }
-        }
-        else
-        {
-            for (blip_long n = count; n; --n) {
-                blip_long s = BLIP_READER_READ(reader);
-                if ((blip_sample_t) s != s)
-                    s = 0x7FFF - (s >> 24);
-                *out = (blip_sample_t) s;
-                out += 2;
-                BLIP_READER_NEXT(reader, bass);
-            }
-        }
-        BLIP_READER_END(reader, *this);
-
-        remove_samples(count);
+long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, bool stereo) {
+    int const bass = BLIP_READER_BASS(*this);
+    BLIP_READER_BEGIN(reader, *this);
+    if (!stereo) {
+        blip_long s = BLIP_READER_READ(reader);
+        if ((blip_sample_t) s != s)
+            s = 0x7FFF - (s >> 24);
+        *out++ = (blip_sample_t) s;
+        BLIP_READER_NEXT(reader, bass);
+    } else {
+        blip_long s = BLIP_READER_READ(reader);
+        if ((blip_sample_t) s != s)
+            s = 0x7FFF - (s >> 24);
+        *out = (blip_sample_t) s;
+        out += 2;
+        BLIP_READER_NEXT(reader, bass);
     }
-    return count;
-}
-
-void BLIPBuffer::mix_samples(blip_sample_t const* in, long count) {
-    buf_t_* out = buffer_ + (offset_ >> BLIP_BUFFER_ACCURACY) + blip_widest_impulse_ / 2;
-
-    int const sample_shift = blip_sample_bits - 16;
-    int prev = 0;
-    while (count--) {
-        blip_long s = (blip_long) *in++ << sample_shift;
-        *out += s - prev;
-        prev = s;
-        ++out;
-    }
-    *out -= prev;
+    BLIP_READER_END(reader, *this);
+    // TODO: remove
+    remove_samples(1);
+    // TODO: return the sample
+    return 1;
 }
 
 // BLIPSynth_
 
 #if !BLIP_BUFFER_FAST
 
-BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :
-    impulses(p),
-    width(w) {
+BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
     volume_unit_ = 0.0;
     kernel_unit = 0;
     buf = 0;
@@ -127,13 +97,12 @@ BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :
 static void gen_sinc(float* out, int count, double oversample, double treble, double cutoff) {
     if (cutoff >= 0.999)
         cutoff = 0.999;
-
     if (treble < -300.0)
         treble = -300.0;
     if (treble > 5.0)
         treble = 5.0;
 
-    double const maxh = 4096.0;
+    static constexpr double maxh = 4096.0;
     double const rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
     double const pow_a_n = pow(rolloff, maxh - maxh * cutoff);
     double const to_angle = PI / 2 / maxh / oversample;

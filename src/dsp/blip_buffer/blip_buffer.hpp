@@ -103,7 +103,7 @@ class BLIPBuffer {
     ///
     /// @returns the audio sample rate
     ///
-    inline uint32_t sample_rate() const { return sample_rate_; }
+    inline uint32_t get_sample_rate() const { return sample_rate_; }
 
     /// @brief Return the number of source time units per second.
     ///

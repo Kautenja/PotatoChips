@@ -323,7 +323,6 @@ class BLIPBuffer {
     int bass_freq_;
     uint32_t length_;
     int modified_;
-    friend class BLIPReader;
 };
 
 class blip_eq_t;
@@ -530,43 +529,9 @@ int const blip_reader_default_bass = 9;
 #define BLIP_READER_END(name, blip_buffer) \
     (void) ((blip_buffer).reader_accum_ = name##_reader_accum)
 
-
-// Compatibility with older version
-const long blip_unscaled = 65535;
-const int blip_low_quality  = blip_med_quality;
-const int blip_best_quality = blip_high_quality;
-
-/// Deprecated; use BLIP_READER macros as follows:
-/// BLIPReader r; r.begin(buf); -> BLIP_READER_BEGIN(r, buf);
-/// int bass = r.begin(buf)      -> BLIP_READER_BEGIN(r, buf); int bass = BLIP_READER_BASS(buf);
-/// r.read()                       -> BLIP_READER_READ(r)
-/// r.read_raw()                   -> BLIP_READER_READ_RAW(r)
-/// r.next(bass)                 -> BLIP_READER_NEXT(r, bass)
-/// r.next()                       -> BLIP_READER_NEXT(r, blip_reader_default_bass)
-/// r.end(buf)                   -> BLIP_READER_END(r, buf)
-class BLIPReader {
- public:
-    inline int begin(const BLIPBuffer& blip_buf) {
-        buf = blip_buf.buffer_;
-        accum = blip_buf.reader_accum_;
-        return blip_buf.bass_shift_;
-    }
-
-    blip_long read() const          { return accum >> (blip_sample_bits - 16); }
-    blip_long read_raw() const      { return accum; }
-    void next(int bass_shift = 9)         { accum += *buf++ - (accum >> bass_shift); }
-    void end(BLIPBuffer& b)              { b.reader_accum_ = accum; }
-
-private:
-    const BLIPBuffer::buf_t_* buf;
-    blip_long accum;
-};
-
 // ---------------------------------------------------------------------------
 // MARK: End of public interface
 // ---------------------------------------------------------------------------
-
-#include <assert.h>
 
 template<int quality,int range>
 inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t time,

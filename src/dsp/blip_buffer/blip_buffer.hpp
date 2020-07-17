@@ -17,21 +17,20 @@
 #ifndef BLIP_BUFFER_HPP_
 #define BLIP_BUFFER_HPP_
 
-// internal
-#include <limits.h>
-#if INT_MAX >= 0x7FFFFFFF
-    typedef int blip_long;
-    typedef unsigned blip_ulong;
-#else
-    typedef long blip_long;
-    typedef unsigned long blip_ulong;
-#endif
+#include <cstdint>
 
-// Time unit at source clock rate
+/// a 32-bit signed value
+typedef int32_t blip_long;
+
+/// a 32-bit unsigned value
+typedef uint32_t blip_ulong;
+
+/// a time unit at source clock rate
 typedef blip_long blip_time_t;
 
 // Output samples are 16-bit signed, with a range of -32768 to 32767
 typedef short blip_sample_t;
+
 enum { blip_sample_max = 32767 };
 
 class BLIPBuffer {

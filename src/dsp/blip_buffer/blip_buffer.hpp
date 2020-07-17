@@ -282,7 +282,111 @@ class BLIPBuffer {
     }
 };
 
-class blip_eq_t;
+class BLIPSynth_;
+
+/// Low-pass equalization parameters
+class blip_eq_t {
+ private:
+    /// BLIPSynth_ is a friend to access the private generate function
+    friend class BLIPSynth_;
+    /// the constant value for Pi
+    static constexpr double pi = 3.1415926535897932384626433832795029;
+    /// Logarithmic roll-off to treble dB at half sampling rate. Negative
+    /// values reduce treble, small positive values (0 to 5.0) increase treble.
+    double treble;
+    /// TODO:
+    uint32_t rolloff_freq;
+    /// the sample rate the engine is running at
+    uint32_t sample_rate;
+    /// TODO:
+    uint32_t cutoff_freq;
+
+    /// Generate a sinc.
+    ///
+    /// @param out TODO:
+    /// @param count TODO:
+    /// @param oversample TODO:
+    /// @param treble Logarithmic roll-off to treble dB at half sampling rate.
+    /// Negative values reduce treble, small positive values (0 to 5.0)
+    /// increase treble.
+    /// @param cutoff TODO:
+    ///
+    static inline void gen_sinc(
+        float* out,
+        uint32_t count,
+        double oversample,
+        double treble,
+        double cutoff
+    ) {
+        if (cutoff >= 0.999) cutoff = 0.999;
+        if (treble < -300.0) treble = -300.0;
+        if (treble > 5.0)    treble = 5.0;
+        static constexpr double maxh = 4096.0;
+        const double rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
+        const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
+        const double to_angle = pi / 2 / maxh / oversample;
+        for (uint32_t i = 0; i < count; i++) {
+            double angle = ((i - count) * 2 + 1) * to_angle;
+            double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
+            double cos_nc_angle = cos(maxh * cutoff * angle);
+            double cos_nc1_angle = cos((maxh * cutoff - 1.0) * angle);
+            double cos_angle = cos(angle);
+            c = c * pow_a_n - rolloff * cos_nc1_angle + cos_nc_angle;
+            double d = 1.0 + rolloff * (rolloff - cos_angle - cos_angle);
+            double b = 2.0 - cos_angle - cos_angle;
+            double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
+            // a / b + c / d
+            out[i] = (float) ((a * d + c * b) / (b * d));
+        }
+    }
+
+    /// Generate sinc values into an output buffer with given quantity.
+    ///
+    /// @param out the output buffer to equalize
+    /// @param count the number of samples to generate
+    /// @details
+    /// for usage within instances of BLIPSynth_
+    ///
+    inline void generate(float* out, uint32_t count) const {
+        // lower cutoff freq for narrow kernels with their wider transition band
+        // (8 points->1.49, 16 points->1.15)
+        // double oversample = blip_res * 2.25 / count + 0.85;
+        double half_rate = sample_rate * 0.5;
+        // if (cutoff_freq)
+        //     oversample = half_rate / cutoff_freq;
+        double oversample = cutoff_freq ?
+            half_rate / cutoff_freq :
+            blip_res * 2.25 / count + 0.85;
+        double cutoff = rolloff_freq * oversample / half_rate;
+        // generate a sinc
+        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
+        // apply (half of) hamming window
+        double to_fraction = pi / (count - 1);
+        for (uint32_t i = count; i--;)
+            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
+    }
+
+ public:
+    /// Initialize a new blip_eq_t.
+    ///
+    /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
+    /// Negative values reduce treble, small positive values (0 to 5.0) increase
+    /// treble.
+    /// @param rolloff_freq TODO:
+    /// @param sample_rate the sample rate the engine is running at
+    /// @param cutoff_freq TODO:
+    ///
+    blip_eq_t(
+        double treble,
+        uint32_t rolloff_freq = 0,
+        uint32_t sample_rate = 44100,
+        uint32_t cutoff_freq = 0
+    ) :
+        treble(treble),
+        rolloff_freq(rolloff_freq),
+        sample_rate(sample_rate),
+        cutoff_freq(cutoff_freq) { }
+};
 
 /// A more accurate implementation of BLIP synthesizer logic.
 class BLIPSynth_ {
@@ -423,110 +527,6 @@ class BLIPSynth {
  public:
     /// Initialize a new BLIPSynth.
     BLIPSynth() : impl(impulses, quality) { }
-};
-
-/// Low-pass equalization parameters
-class blip_eq_t {
- private:
-    /// BLIPSynth_ is a friend to access the private generate function
-    friend class BLIPSynth_;
-    /// the constant value for Pi
-    static constexpr double pi = 3.1415926535897932384626433832795029;
-    /// Logarithmic roll-off to treble dB at half sampling rate. Negative
-    /// values reduce treble, small positive values (0 to 5.0) increase treble.
-    double treble;
-    /// TODO:
-    uint32_t rolloff_freq;
-    /// the sample rate the engine is running at
-    uint32_t sample_rate;
-    /// TODO:
-    uint32_t cutoff_freq;
-
-    /// Generate a sinc.
-    ///
-    /// @param out TODO:
-    /// @param count TODO:
-    /// @param oversample TODO:
-    /// @param treble Logarithmic roll-off to treble dB at half sampling rate.
-    /// Negative values reduce treble, small positive values (0 to 5.0)
-    /// increase treble.
-    /// @param cutoff TODO:
-    ///
-    static inline void gen_sinc(
-        float* out,
-        uint32_t count,
-        double oversample,
-        double treble,
-        double cutoff
-    ) {
-        if (cutoff >= 0.999) cutoff = 0.999;
-        if (treble < -300.0) treble = -300.0;
-        if (treble > 5.0)    treble = 5.0;
-        static constexpr double maxh = 4096.0;
-        const double rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
-        const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
-        const double to_angle = pi / 2 / maxh / oversample;
-        for (uint32_t i = 0; i < count; i++) {
-            double angle = ((i - count) * 2 + 1) * to_angle;
-            double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
-            double cos_nc_angle = cos(maxh * cutoff * angle);
-            double cos_nc1_angle = cos((maxh * cutoff - 1.0) * angle);
-            double cos_angle = cos(angle);
-            c = c * pow_a_n - rolloff * cos_nc1_angle + cos_nc_angle;
-            double d = 1.0 + rolloff * (rolloff - cos_angle - cos_angle);
-            double b = 2.0 - cos_angle - cos_angle;
-            double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
-            // a / b + c / d
-            out[i] = (float) ((a * d + c * b) / (b * d));
-        }
-    }
-
-    /// Generate sinc values into an output buffer with given quantity.
-    ///
-    /// @param out the output buffer to equalize
-    /// @param count the number of samples to generate
-    /// @details
-    /// for usage within instances of BLIPSynth_
-    ///
-    inline void generate(float* out, uint32_t count) const {
-        // lower cutoff freq for narrow kernels with their wider transition band
-        // (8 points->1.49, 16 points->1.15)
-        // double oversample = blip_res * 2.25 / count + 0.85;
-        double half_rate = sample_rate * 0.5;
-        // if (cutoff_freq)
-        //     oversample = half_rate / cutoff_freq;
-        double oversample = cutoff_freq ?
-            half_rate / cutoff_freq :
-            blip_res * 2.25 / count + 0.85;
-        double cutoff = rolloff_freq * oversample / half_rate;
-        // generate a sinc
-        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
-        // apply (half of) hamming window
-        double to_fraction = pi / (count - 1);
-        for (uint32_t i = count; i--;)
-            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
-    }
-
- public:
-    /// Initialize a new blip_eq_t.
-    ///
-    /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
-    /// Negative values reduce treble, small positive values (0 to 5.0) increase
-    /// treble.
-    /// @param rolloff_freq TODO:
-    /// @param sample_rate the sample rate the engine is running at
-    /// @param cutoff_freq TODO:
-    ///
-    blip_eq_t(
-        double treble,
-        uint32_t rolloff_freq = 0,
-        uint32_t sample_rate = 44100,
-        uint32_t cutoff_freq = 0
-    ) :
-        treble(treble),
-        rolloff_freq(rolloff_freq),
-        sample_rate(sample_rate),
-        cutoff_freq(cutoff_freq) { }
 };
 
 // ---------------------------------------------------------------------------

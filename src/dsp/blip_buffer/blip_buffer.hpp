@@ -71,9 +71,6 @@ static constexpr uint32_t blip_default_length = 250;
 /// TODO:
 static constexpr uint8_t blip_sample_bits = 30;
 
-/// size used for Silent_BLIPBuffer
-static constexpr uint32_t silent_buf_size = 1;
-
 /// Constant value to use instead of BLIP_READER_BASS(), for slightly more
 /// optimal code at the cost of having no bass control
 static constexpr uint32_t blip_reader_default_bass = 9;
@@ -86,8 +83,7 @@ class BLIPBuffer {
     /// The result from setting the sample rate to a new value
     enum class SampleRateStatus {
         Success = 0,  // setting the sample rate succeeded
-        OutOfMemory,  // ran out of resources for buffer
-        SilentBuffer  // attempting to resize silent buffer
+        OutOfMemory   // ran out of resources for buffer
     };
 
     /// @brief Set the output sample rate and buffer length in milliseconds.
@@ -297,7 +293,7 @@ class BLIPBuffer {
         length_(0) { }
 
     /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer() { if (buffer_size_ != silent_buf_size) free(buffer_); }
+    ~BLIPBuffer() { free(buffer_); }
 
  private:
     /// Disable the copy constructor.

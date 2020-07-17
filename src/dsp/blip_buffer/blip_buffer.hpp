@@ -87,7 +87,41 @@ static constexpr uint32_t MAX_RESAMPLED_TIME =
 
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
+ private:
+    /// The sample rate to generate samples from the buffer at
+    uint32_t sample_rate_ = 0;
+    /// The clock rate of the chip to emulate
+    uint32_t clock_rate_ = 0;
+    /// the frequency of the high-pass filter (TODO: in Hz?)
+    int bass_freq_ = 16;
+
+    /// Disable the copy constructor.
+    BLIPBuffer(const BLIPBuffer&);
+
+    /// Disable the assignment operator
+    BLIPBuffer& operator=(const BLIPBuffer&);
+
  public:
+    typedef blip_time_t buf_t_;
+    /// TODO:
+    blip_ulong factor_ = 1;
+    /// TODO:
+    blip_resampled_time_t offset_ = 0;
+    /// TODO:
+    buf_t_* buffer_ = 0;
+    /// TODO:
+    uint32_t buffer_size_ = 0;
+    /// TODO:
+    blip_long reader_accum_ = 0;
+    /// TODO:
+    int bass_shift_ = 0;
+
+    /// Initialize a new BLIP Buffer.
+    BLIPBuffer() { }
+
+    /// Destroy an existing BLIP Buffer.
+    ~BLIPBuffer() { free(buffer_); }
+
     /// The result from setting the sample rate to a new value
     enum class SampleRateStatus {
         Success = 0,               // setting the sample rate succeeded
@@ -158,8 +192,6 @@ class BLIPBuffer {
     ///
     inline void end_frame(blip_time_t) {
         offset_ = 1 << BLIP_BUFFER_ACCURACY;
-        // time outside buffer length
-        assert(samples_count() <= buffer_size_);
     }
 
     /// @brief Return the number of samples available for reading.
@@ -266,42 +298,6 @@ class BLIPBuffer {
         assert(factor > 0 || !sample_rate_);
         return (blip_resampled_time_t) factor;
     }
-
- public:
-    /// Initialize a new BLIP Buffer.
-    BLIPBuffer() :
-        factor_(1),
-        offset_(0),
-        buffer_(0),
-        buffer_size_(0),
-        reader_accum_(0),
-        bass_shift_(0),
-        sample_rate_(0),
-        bass_freq_(16) { }
-
-    /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer() { free(buffer_); }
-
- private:
-    /// Disable the copy constructor.
-    BLIPBuffer(const BLIPBuffer&);
-
-    /// Disable the assignment operator
-    BLIPBuffer& operator=(const BLIPBuffer&);
-
- public:
-    typedef blip_time_t buf_t_;
-    blip_ulong factor_;
-    blip_resampled_time_t offset_;
-    buf_t_* buffer_;
-    uint32_t buffer_size_;
-    blip_long reader_accum_;
-    int bass_shift_;
-
- private:
-    uint32_t sample_rate_;
-    uint32_t clock_rate_;
-    int bass_freq_;
 };
 
 class blip_eq_t;

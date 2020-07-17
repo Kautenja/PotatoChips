@@ -39,12 +39,12 @@ class BLIPBuffer {
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
-    /// @param msec_length length of the buffer in milliseconds (1/1000 sec).
+    /// @param buffer_length length of the buffer in milliseconds (1/1000 sec).
     /// defaults to 250, i.e., 1/4 sec.
     /// @returns NULL on success, otherwise if there isn't enough memory,
     /// returns error without affecting current buffer setup.
     ///
-    blargg_err_t set_sample_rate(long samples_per_sec, int msec_length = 1000 / 4);
+    blargg_err_t set_sample_rate(long samples_per_sec, int buffer_length = 1000 / 4);
 
     /// @brief Return the current output sample rate.
     ///

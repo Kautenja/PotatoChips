@@ -68,6 +68,9 @@ static constexpr uint32_t blip_max_length = 0;
 /// TODO:
 static constexpr uint32_t blip_default_length = 250;
 
+/// TODO:
+static constexpr uint8_t blip_sample_bits = 30;
+
 /// size used for Silent_BLIPBuffer
 static constexpr uint32_t silent_buf_size = 1;
 
@@ -327,17 +330,29 @@ class BLIPBuffer {
 
 class blip_eq_t;
 
+/// A faster implementation of BLIP synthesizer logic.
 class BLIPSynth_Fast_ {
-public:
-    BLIPBuffer* buf;
-    int last_amp;
-    int delta_factor;
+ public:
+    /// TODO:
+    BLIPBuffer* buf = 0;
+    /// TODO:
+    int last_amp = 0;
+    /// TODO:
+    int delta_factor = 0;
 
-    void volume_unit(double);
-    BLIPSynth_Fast_();
-    void treble_eq(blip_eq_t const&) { }
+    /// Initialize a new fast BLIP synthesizer
+    BLIPSynth_Fast_() { }
+
+    /// set the volume unit to a new value.
+    inline void volume_unit(double new_unit) {
+        delta_factor = int (new_unit * (1L << blip_sample_bits) + 0.5);
+    }
+
+    /// Set the treble EQ to a new value (ignore).
+    inline void treble_eq(blip_eq_t const&) { }
 };
 
+/// A more accurate implementation of BLIP synthesizer logic.
 class BLIPSynth_ {
  public:
     BLIPBuffer* buf;
@@ -472,8 +487,6 @@ class blip_eq_t {
     void generate(float* out, int count) const;
     friend class BLIPSynth_;
 };
-
-int const blip_sample_bits = 30;
 
 // Dummy BLIPBuffer to direct sound output to, for easy muting without
 // having to stop sound code.

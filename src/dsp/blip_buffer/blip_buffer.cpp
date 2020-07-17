@@ -122,16 +122,6 @@ void BLIPBuffer::mix_samples(blip_sample_t const* in, long count) {
 
 // BLIPSynth_
 
-BLIPSynth_Fast_::BLIPSynth_Fast_() {
-    buf = 0;
-    last_amp = 0;
-    delta_factor = 0;
-}
-
-void BLIPSynth_Fast_::volume_unit(double new_unit) {
-    delta_factor = int (new_unit * (1L << blip_sample_bits) + 0.5);
-}
-
 #if !BLIP_BUFFER_FAST
 
 BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :

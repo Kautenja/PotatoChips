@@ -20,7 +20,7 @@
 #define DSP_NEC_TURBO_GRAFX_16_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 struct Hes_Osc
 {

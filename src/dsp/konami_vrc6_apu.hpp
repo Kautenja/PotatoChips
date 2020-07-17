@@ -19,7 +19,7 @@
 #ifndef NES_VRC6_APU_HPP_
 #define NES_VRC6_APU_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 /// An oscillator based on the Konami VRC6 synthesis chip.
 class VRC6 {

@@ -20,7 +20,7 @@
 #define GENERAL_INSTRUMENT_AY_3_8910_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 class Ay_Apu {
  public:

@@ -19,7 +19,7 @@
 #ifndef DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 #define DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 struct Sms_Osc
 {

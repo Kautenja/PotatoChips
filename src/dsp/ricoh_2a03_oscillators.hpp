@@ -19,7 +19,7 @@
 #ifndef NES_OSCILLATORS_HPP_
 #define NES_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 #include <functional>
 
 /// CPU clock cycle count

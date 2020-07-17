@@ -1,4 +1,4 @@
-// Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
+// Band-limited sound synthesis buffer (forked from Blip_Buffer 0.4.1).
 // Copyright 2020 Christian Kauten
 // Copyright 2003-2006 Shay Green
 //

@@ -89,7 +89,7 @@ void Sms_Square::run( blip_time_t time, blip_time_t end_time )
 			do
 			{
 				delta = -delta;
-				synth->offset_inline( time, delta, output );
+				synth->offset( time, delta, output );
 				time += period;
 				phase ^= 1;
 			}
@@ -147,7 +147,7 @@ void Sms_Noise::run( blip_time_t time, blip_time_t end_time )
 			if ( changed & 2 ) // true if bits 0 and 1 differ
 			{
 				delta = -delta;
-				synth.offset_inline( time, delta, output );
+				synth.offset( time, delta, output );
 			}
 			time += period;
 		}

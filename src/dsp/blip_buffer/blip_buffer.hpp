@@ -373,25 +373,47 @@ const int blip_med_quality  = 8;
 const int blip_good_quality = 12;
 const int blip_high_quality = 16;
 
-// Range specifies the greatest expected change in amplitude. Calculate it
-// by finding the difference between the maximum and minimum expected
-// amplitudes (max - min).
-template<int quality,int range>
+/// Range specifies the greatest expected change in amplitude. Calculate it
+/// by finding the difference between the maximum and minimum expected
+/// amplitudes (max - min).
+template<int quality, int range>
 class BLIPSynth {
-public:
-    // Set overall volume of waveform
-    void volume(double v) { impl.volume_unit(v * (1.0 / (range < 0 ? -range : range))); }
+ public:
+    /// Set overall volume of waveform.
+    ///
+    /// @param volume TODO:
+    ///
+    inline void volume(double volume) {
+        impl.volume_unit(volume * (1.0 / (range < 0 ? -range : range)));
+    }
 
-    // Configure low-pass filter (see blip_buffer.txt)
-    void treble_eq(blip_eq_t const& eq)       { impl.treble_eq(eq); }
+    /// Configure low-pass filter (see blip_buffer.txt).
+    ///
+    /// @param eq TODO:
+    ///
+    inline void treble_eq(blip_eq_t const& eq) { impl.treble_eq(eq); }
 
-    // Get/set BLIPBuffer used for output
-    BLIPBuffer* output() const                 { return impl.buf; }
-    void output(BLIPBuffer* b)               { impl.buf = b; impl.last_amp = 0; }
+    /// Get the BLIPBuffer used for output.
+    ///
+    /// @returns the BLIPBuffer that this synthesizer is outputting to
+    ///
+    inline BLIPBuffer* output() const { return impl.buf; }
 
-    // Update amplitude of waveform at given time. Using this requires a separate
-    // BLIPSynth for each waveform.
-    // void update(blip_time_t time, int amplitude);
+    /// Set the BLIPBuffer used for output.
+    ///
+    /// @param buffer the BLIPBuffer that this synthesizer is outputting to
+    ///
+    inline void output(BLIPBuffer* buffer) {
+        impl.buf = buffer;
+        impl.last_amp = 0;
+    }
+
+    /// Update amplitude of waveform at given time. Using this requires a
+    /// separate BLIPSynth for each waveform.
+    ///
+    /// @param time TODO:
+    /// @param amplitude TODO:
+    ///
     inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - impl.last_amp;
         impl.last_amp = amplitude;
@@ -419,14 +441,14 @@ public:
     /// for more info.
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* buf) const;
 
-private:
+ private:
 #if BLIP_BUFFER_FAST
     BLIPSynth_Fast_ impl;
 #else
     BLIPSynth_ impl;
     typedef short imp_t;
     imp_t impulses [blip_res * (quality / 2) + 1];
-public:
+ public:
     BLIPSynth() : impl(impulses, quality) { }
 #endif
 };

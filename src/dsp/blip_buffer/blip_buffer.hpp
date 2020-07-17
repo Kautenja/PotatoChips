@@ -449,29 +449,6 @@ class blip_eq_t {
     friend class BLIPSynth_;
 };
 
-// Begin reading from buffer. Name should be unique to the current block.
-#define BLIP_READER_BEGIN(name, blip_buffer) \
-    const BLIPBuffer::buf_t_* BLIP_RESTRICT name##_reader_buf = (blip_buffer).buffer_;\
-    blip_long name##_reader_accum = (blip_buffer).reader_accum_
-
-// Get value to pass to BLIP_READER_NEXT()
-#define BLIP_READER_BASS(blip_buffer) ((blip_buffer).bass_shift_)
-
-// Current sample
-#define BLIP_READER_READ(name)        (name##_reader_accum >> (blip_sample_bits - 16))
-
-// Current raw sample in full internal resolution
-#define BLIP_READER_READ_RAW(name)    (name##_reader_accum)
-
-// Advance to next sample
-#define BLIP_READER_NEXT(name, bass) \
-    (void) (name##_reader_accum += *name##_reader_buf++ - (name##_reader_accum >> (bass)))
-
-// End reading samples from buffer. The number of samples read must now be
-// removed using BLIPBuffer::remove_samples().
-#define BLIP_READER_END(name, blip_buffer) \
-    (void) ((blip_buffer).reader_accum_ = name##_reader_accum)
-
 // ---------------------------------------------------------------------------
 // MARK: End of public interface
 // ---------------------------------------------------------------------------

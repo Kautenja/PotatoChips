@@ -134,7 +134,7 @@ void BLIPSynth_Fast_::volume_unit(double new_unit) {
 
 #if !BLIP_BUFFER_FAST
 
-BLIPSynth_::BLIPSynth_(int16_t* p, int w) :
+BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :
     impulses(p),
     width(w) {
     volume_unit_ = 0.0;
@@ -205,7 +205,7 @@ void BLIPSynth_::adjust_impulse() {
         }
         if (p == p2)
             error /= 2; // phase = 0.5 impulse uses same half for both sides
-        impulses [size - blip_res + p] += (int16_t) error;
+        impulses [size - blip_res + p] += (blip_sample_t) error;
         //printf("error: %ld\n", error);
     }
 
@@ -246,7 +246,7 @@ void BLIPSynth_::treble_eq(blip_eq_t const& eq) {
     double next = 0.0;
     int const impulses_size = this->impulses_size();
     for (i = 0; i < impulses_size; i++) {
-        impulses [i] = (int16_t) floor((next - sum) * rescale + 0.5);
+        impulses [i] = (blip_sample_t) floor((next - sum) * rescale + 0.5);
         sum += fimpulse [i];
         next += fimpulse [i + blip_res];
     }
@@ -289,7 +289,7 @@ void BLIPSynth_::volume_unit(double new_unit) {
                 long offset = 0x8000 + (1 << (shift - 1));
                 long offset2 = 0x8000 >> shift;
                 for (int i = impulses_size(); i--;)
-                    impulses [i] = (int16_t) (((impulses [i] + offset) >> shift) - offset2);
+                    impulses [i] = (blip_sample_t) (((impulses [i] + offset) >> shift) - offset2);
                 adjust_impulse();
             }
         }

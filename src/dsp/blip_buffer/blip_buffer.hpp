@@ -296,18 +296,7 @@ class BLIPBuffer {
         sample_rate_(0),
         clock_rate_(0),
         bass_freq_(16),
-        length_(0) {
-        // // assumptions code makes about implementation-defined features
-        // #ifndef NDEBUG
-        //     // right shift of negative value preserves sign
-        //     buf_t_ i = -0x7FFFFFFE;
-        //     assert((i >> 1) == -0x3FFFFFFF);
-
-        //     // casting to short truncates to 16 bits and sign-extends
-        //     i = 0x18000;
-        //     assert(static_cast<int16_t>(i) == -0x8000);
-        // #endif  // NDEBUG
-        }
+        length_(0) { }
 
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { if (buffer_size_ != silent_buf_size) free(buffer_); }
@@ -357,12 +346,12 @@ class BLIPSynth_ {
     int delta_factor;
 
     void volume_unit(double);
-    BLIPSynth_(int16_t* impulses, int width);
+    BLIPSynth_(blip_sample_t* impulses, int width);
     void treble_eq(blip_eq_t const&);
 
  private:
     double volume_unit_;
-    int16_t* const impulses;
+    blip_sample_t* const impulses;
     int const width;
     blip_long kernel_unit;
     int impulses_size() const { return blip_res / 2 * width + 1; }
@@ -447,8 +436,7 @@ class BLIPSynth {
     BLIPSynth_Fast_ impl;
 #else
     BLIPSynth_ impl;
-    typedef int16_t imp_t;
-    imp_t impulses [blip_res * (quality / 2) + 1];
+    blip_sample_t impulses [blip_res * (quality / 2) + 1];
  public:
     BLIPSynth() : impl(impulses, quality) { }
 #endif
@@ -608,7 +596,7 @@ inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t tim
     int const rev = fwd + quality - 2;
     int const mid = quality / 2 - 1;
 
-    imp_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
+    blip_sample_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
 
     #if defined (_M_IX86) || defined (_M_IA64) || defined (__i486__) || \
             defined (__x86_64__) || defined (__ia64__) || defined (__i386__)

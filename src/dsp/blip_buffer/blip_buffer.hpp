@@ -490,10 +490,13 @@ class blip_eq_t {
     void generate(float* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
         // (8 points->1.49, 16 points->1.15)
-        double oversample = blip_res * 2.25 / count + 0.85;
+        // double oversample = blip_res * 2.25 / count + 0.85;
         double half_rate = sample_rate * 0.5;
-        if (cutoff_freq)
-            oversample = half_rate / cutoff_freq;
+        // if (cutoff_freq)
+        //     oversample = half_rate / cutoff_freq;
+        double oversample = cutoff_freq ?
+            half_rate / cutoff_freq :
+            blip_res * 2.25 / count + 0.85;
         double cutoff = rolloff_freq * oversample / half_rate;
         // generate a sinc
         gen_sinc(out, count, blip_res * oversample, treble, cutoff);

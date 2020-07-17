@@ -32,24 +32,6 @@ BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
     delta_factor = 0;
 }
 
-#include "sinc.hpp"
-
-void blip_eq_t::generate(float* out, int count) const {
-    // lower cutoff freq for narrow kernels with their wider transition band
-    // (8 points->1.49, 16 points->1.15)
-    double oversample = blip_res * 2.25 / count + 0.85;
-    double half_rate = sample_rate * 0.5;
-    if (cutoff_freq)
-        oversample = half_rate / cutoff_freq;
-    double cutoff = rolloff_freq * oversample / half_rate;
-    // generate a sinc
-    gen_sinc(out, count, blip_res * oversample, treble, cutoff);
-    // apply (half of) hamming window
-    double to_fraction = BLARGG_PI / (count - 1);
-    for (int i = count; i--;)
-        out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
-}
-
 void BLIPSynth_::adjust_impulse() {
     // sum pairs for each phase and add error correction to end of first half
     int const size = impulses_size();

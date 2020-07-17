@@ -19,19 +19,17 @@
 
 #include <cstdint>
 
-/// a 32-bit signed value
+/// A 32-bit signed value
 typedef int32_t blip_long;
 
-/// a 32-bit unsigned value
+/// A 32-bit unsigned value
 typedef uint32_t blip_ulong;
 
-/// a time unit at source clock rate
+/// A time unit at source clock rate
 typedef blip_long blip_time_t;
 
-// Output samples are 16-bit signed, with a range of -32768 to 32767
-typedef short blip_sample_t;
-
-enum { blip_sample_max = 32767 };
+/// An output sample type for 16-bit signed samples [-32768, 32767]
+typedef int16_t blip_sample_t;
 
 class BLIPBuffer {
 public:

@@ -18,6 +18,8 @@
 #define BLIP_BUFFER_HPP_
 
 #include <cstdint>
+#include <cstdlib>
+#include <limits>
 
 /// A 32-bit signed value
 typedef int32_t blip_long;
@@ -62,6 +64,9 @@ static constexpr uint32_t blip_max_length = 0;
 
 /// TODO:
 static constexpr uint32_t blip_default_length = 250;
+
+/// size used for Silent_BLIPBuffer
+static constexpr uint32_t silent_buf_size = 1;
 
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {
@@ -224,10 +229,30 @@ class BLIPBuffer {
 
  public:
     /// Initialize a new BLIP Buffer.
-    BLIPBuffer();
+    BLIPBuffer() : factor_(std::numeric_limits<blip_ulong>::max()),
+        offset_(0),
+        buffer_(0),
+        buffer_size_(0),
+        reader_accum_(0),
+        bass_shift_(0),
+        sample_rate_(0),
+        clock_rate_(0),
+        bass_freq_(16),
+        length_(0) {
+        // // assumptions code makes about implementation-defined features
+        // #ifndef NDEBUG
+        //     // right shift of negative value preserves sign
+        //     buf_t_ i = -0x7FFFFFFE;
+        //     assert((i >> 1) == -0x3FFFFFFF);
+
+        //     // casting to short truncates to 16 bits and sign-extends
+        //     i = 0x18000;
+        //     assert(static_cast<int16_t>(i) == -0x8000);
+        // #endif  // NDEBUG
+        }
 
     /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer();
+    ~BLIPBuffer() { if (buffer_size_ != silent_buf_size) free(buffer_); }
 
  private:
     /// Disable the copy constructor.

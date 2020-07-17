@@ -24,11 +24,6 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     uint32_t samples_per_sec,
     uint32_t buffer_length
 ) {
-    if (buffer_size_ == silent_buf_size) {
-        assert(0);
-        return SampleRateStatus::SilentBuffer;
-    }
-
     // start with maximum length that re-sampled time can represent
     uint32_t new_size = (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
     if (buffer_length != blip_max_length) {
@@ -47,7 +42,6 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     }
 
     buffer_size_ = new_size;
-    assert(buffer_size_ != silent_buf_size);
 
     // update things based on the sample rate
     sample_rate_ = samples_per_sec;
@@ -100,11 +94,6 @@ long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples
 }
 
 void BLIPBuffer::mix_samples(blip_sample_t const* in, long count) {
-    if (buffer_size_ == silent_buf_size) {
-        assert(0);
-        return;
-    }
-
     buf_t_* out = buffer_ + (offset_ >> BLIP_BUFFER_ACCURACY) + blip_widest_impulse_ / 2;
 
     int const sample_shift = blip_sample_bits - 16;

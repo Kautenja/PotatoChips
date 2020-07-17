@@ -52,40 +52,28 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     return SampleRateStatus::Success;
 }
 
-long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples, bool stereo) {
-    long count = samples_count();
-    if (count > max_samples)
-        count = max_samples;
-
-    if (count) {
-        int const bass = BLIP_READER_BASS(*this);
-        BLIP_READER_BEGIN(reader, *this);
-
-        if (!stereo) {
-            for (blip_long n = count; n; --n) {
-                blip_long s = BLIP_READER_READ(reader);
-                if ((blip_sample_t) s != s)
-                    s = 0x7FFF - (s >> 24);
-                *out++ = (blip_sample_t) s;
-                BLIP_READER_NEXT(reader, bass);
-            }
-        }
-        else
-        {
-            for (blip_long n = count; n; --n) {
-                blip_long s = BLIP_READER_READ(reader);
-                if ((blip_sample_t) s != s)
-                    s = 0x7FFF - (s >> 24);
-                *out = (blip_sample_t) s;
-                out += 2;
-                BLIP_READER_NEXT(reader, bass);
-            }
-        }
-        BLIP_READER_END(reader, *this);
-
-        remove_samples(count);
+long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, bool stereo) {
+    int const bass = BLIP_READER_BASS(*this);
+    BLIP_READER_BEGIN(reader, *this);
+    if (!stereo) {
+        blip_long s = BLIP_READER_READ(reader);
+        if ((blip_sample_t) s != s)
+            s = 0x7FFF - (s >> 24);
+        *out++ = (blip_sample_t) s;
+        BLIP_READER_NEXT(reader, bass);
+    } else {
+        blip_long s = BLIP_READER_READ(reader);
+        if ((blip_sample_t) s != s)
+            s = 0x7FFF - (s >> 24);
+        *out = (blip_sample_t) s;
+        out += 2;
+        BLIP_READER_NEXT(reader, bass);
     }
-    return count;
+    BLIP_READER_END(reader, *this);
+    // TODO: remove
+    remove_samples(1);
+    // TODO: return the sample
+    return 1;
 }
 
 // BLIPSynth_

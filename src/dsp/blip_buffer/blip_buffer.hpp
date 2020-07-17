@@ -128,17 +128,15 @@ class BLIPBuffer {
         return (long) (offset_ >> BLIP_BUFFER_ACCURACY);
     }
 
-    /// @brief Read at most `max_samples` out of this buffer into `dest` and
-    /// remove them from the buffer.
+    /// @brief Read out of this buffer into `dest` and remove them from the buffer.
     ///
     /// @param dest the destination to push samples from the buffer into
-    /// @param max_samples the maximal number of samples to read into the buffer
     /// @param stereo if true increments `dest` one extra time after writing
     /// each sample to allow easy interleaving of two channels into a stereo
     /// output buffer.
     /// @returns the number of samples actually read and removed
     ///
-    long read_samples(blip_sample_t* dest, long max_samples, bool stereo = false);
+    long read_samples(blip_sample_t* dest, bool stereo = false);
 
     /// @brief Remove samples from those waiting to be read.
     ///

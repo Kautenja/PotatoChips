@@ -282,13 +282,9 @@ class BLIPBuffer {
     }
 };
 
-class BLIPSynth_;
-
 /// Low-pass equalization parameters
 class blip_eq_t {
  private:
-    /// BLIPSynth_ is a friend to access the private generate function
-    friend class BLIPSynth_;
     /// the constant value for Pi
     static constexpr double pi = 3.1415926535897932384626433832795029;
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
@@ -340,32 +336,6 @@ class blip_eq_t {
         }
     }
 
-    /// Generate sinc values into an output buffer with given quantity.
-    ///
-    /// @param out the output buffer to equalize
-    /// @param count the number of samples to generate
-    /// @details
-    /// for usage within instances of BLIPSynth_
-    ///
-    inline void generate(float* out, uint32_t count) const {
-        // lower cutoff freq for narrow kernels with their wider transition band
-        // (8 points->1.49, 16 points->1.15)
-        // double oversample = blip_res * 2.25 / count + 0.85;
-        double half_rate = sample_rate * 0.5;
-        // if (cutoff_freq)
-        //     oversample = half_rate / cutoff_freq;
-        double oversample = cutoff_freq ?
-            half_rate / cutoff_freq :
-            blip_res * 2.25 / count + 0.85;
-        double cutoff = rolloff_freq * oversample / half_rate;
-        // generate a sinc
-        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
-        // apply (half of) hamming window
-        double to_fraction = pi / (count - 1);
-        for (uint32_t i = count; i--;)
-            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
-    }
-
  public:
     /// Initialize a new blip_eq_t.
     ///
@@ -386,22 +356,51 @@ class blip_eq_t {
         rolloff_freq(rolloff_freq),
         sample_rate(sample_rate),
         cutoff_freq(cutoff_freq) { }
+
+    /// Generate sinc values into an output buffer with given quantity.
+    ///
+    /// @param out the output buffer to equalize
+    /// @param count the number of samples to generate
+    /// @details
+    /// for usage within instances of BLIPSynth_
+    ///
+    inline void _generate(float* out, uint32_t count) const {
+        // lower cutoff freq for narrow kernels with their wider transition band
+        // (8 points->1.49, 16 points->1.15)
+        double half_rate = sample_rate * 0.5;
+        double oversample = cutoff_freq ?
+            half_rate / cutoff_freq :
+            blip_res * 2.25 / count + 0.85;
+        double cutoff = rolloff_freq * oversample / half_rate;
+        // generate a sinc
+        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
+        // apply (half of) hamming window
+        double to_fraction = pi / (count - 1);
+        for (uint32_t i = count; i--;)
+            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
+    }
 };
 
-/// A more accurate implementation of BLIP synthesizer logic.
-class BLIPSynth_ {
+// Quality level. Start with blip_good_quality.
+const int blip_med_quality  = 8;
+const int blip_good_quality = 12;
+const int blip_high_quality = 16;
+
+/// Range specifies the greatest expected change in amplitude. Calculate it
+/// by finding the difference between the maximum and minimum expected
+/// amplitudes (max - min).
+template<int quality, int range>
+class BLIPSynth {
  private:
     /// TODO:
     double volume_unit_;
     /// TODO:
-    blip_sample_t* const impulses;
-    /// TODO:
-    int const width;
+    blip_sample_t impulses[blip_res * (quality / 2) + 1];
     /// TODO:
     blip_long kernel_unit;
 
     /// TODO:
-    inline int impulses_size() const { return blip_res / 2 * width + 1; }
+    inline int impulses_size() const { return blip_res / 2 * quality + 1; }
 
     /// TODO:
     void adjust_impulse() {
@@ -429,17 +428,16 @@ class BLIPSynth_ {
     int delta_factor;
 
     /// TODO:
-    BLIPSynth_(blip_sample_t* p, int w) :
+    BLIPSynth() :
         volume_unit_(0.0),
-        impulses(p),
-        width(w),
         kernel_unit(0),
         buf(0),
         last_amp(0),
         delta_factor(0) { }
 
     /// TODO:
-    void volume_unit(double new_unit) {
+    void volume(double new_unit) {
+        new_unit = new_unit * (1.0 / (range < 0 ? -range : range));
         if (new_unit != volume_unit_) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
@@ -477,8 +475,8 @@ class BLIPSynth_ {
     void treble_eq(blip_eq_t const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 
-        int const half_size = blip_res / 2 * (width - 1);
-        eq.generate(&fimpulse[blip_res], half_size);
+        int const half_size = blip_res / 2 * (quality - 1);
+        eq._generate(&fimpulse[blip_res], half_size);
 
         int i;
 
@@ -516,51 +514,23 @@ class BLIPSynth_ {
         double vol = volume_unit_;
         if (vol) {
             volume_unit_ = 0.0;
-            volume_unit(vol);
+            volume(vol);
         }
-    }
-};
-
-// Quality level. Start with blip_good_quality.
-const int blip_med_quality  = 8;
-const int blip_good_quality = 12;
-const int blip_high_quality = 16;
-
-/// Range specifies the greatest expected change in amplitude. Calculate it
-/// by finding the difference between the maximum and minimum expected
-/// amplitudes (max - min).
-template<int quality, int range>
-class BLIPSynth {
- public:
-    /// Set overall volume of waveform.
-    ///
-    /// @param volume TODO:
-    ///
-    inline void volume(double volume) {
-        impl.volume_unit(volume * (1.0 / (range < 0 ? -range : range)));
-    }
-
-    /// Configure low-pass filter (see blip_buffer.txt).
-    ///
-    /// @param eq TODO:
-    ///
-    inline void treble_eq(blip_eq_t const& eq) {
-        impl.treble_eq(eq);
     }
 
     /// Get the BLIPBuffer used for output.
     ///
     /// @returns the BLIPBuffer that this synthesizer is outputting to
     ///
-    inline BLIPBuffer* output() const { return impl.buf; }
+    inline BLIPBuffer* output() const { return buf; }
 
     /// Set the BLIPBuffer used for output.
     ///
     /// @param buffer the BLIPBuffer that this synthesizer is outputting to
     ///
     inline void output(BLIPBuffer* buffer) {
-        impl.buf = buffer;
-        impl.last_amp = 0;
+        buf = buffer;
+        last_amp = 0;
     }
 
     /// Update amplitude of waveform at given time. Using this requires a
@@ -570,9 +540,9 @@ class BLIPSynth {
     /// @param amplitude TODO:
     ///
     inline void update(blip_time_t time, int amplitude) {
-        int delta = amplitude - impl.last_amp;
-        impl.last_amp = amplitude;
-        offset_resampled(time * impl.buf->factor_ + impl.buf->offset_, delta, impl.buf);
+        int delta = amplitude - last_amp;
+        last_amp = amplitude;
+        offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
     }
 
 // ---------------------------------------------------------------------------
@@ -589,22 +559,12 @@ class BLIPSynth {
     }
 
     inline void offset(blip_time_t time, int delta) const {
-        offset(time, delta, impl.buf);
+        offset(time, delta, buf);
     }
 
     /// Works directly in terms of fractional output samples. Contact Shay Green
     /// for more info.
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* buf) const;
-
- private:
-    /// the BLIP engine
-    BLIPSynth_ impl;
-    /// TODO
-    blip_sample_t impulses[blip_res * (quality / 2) + 1];
-
- public:
-    /// Initialize a new BLIPSynth.
-    BLIPSynth() : impl(impulses, quality) { }
 };
 
 // ---------------------------------------------------------------------------
@@ -620,7 +580,7 @@ inline void BLIPSynth<quality, range>::offset_resampled(
     // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code
     // or the need for a longer buffer as set by set_sample_rate().
     assert((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
-    delta *= impl.delta_factor;
+    delta *= delta_factor;
     blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
     int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 

@@ -75,26 +75,29 @@ void BLIPBuffer::clear(int entire_buffer) {
     }
 }
 
-BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long samples_per_sec, int buffer_length) {
+BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
+    uint32_t samples_per_sec,
+    uint32_t buffer_length
+) {
     if (buffer_size_ == silent_buf_size) {
         assert(0);
-        return "Internal (tried to resize Silent_BLIPBuffer)";
+        return SampleRateStatus::SilentBuffer;
     }
 
-    // start with maximum length that resampled time can represent
-    long new_size = (ULONG_MAX >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
+    // start with maximum length that re-sampled time can represent
+    uint32_t new_size = (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
     if (buffer_length != blip_max_length) {
-        long s = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
+        uint32_t s = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
         if (s < new_size)
             new_size = s;
-        else
-            assert(0); // fails if requested buffer length exceeds limit
+        else  // fails if requested buffer length exceeds limit
+            assert(0);
     }
 
     if (buffer_size_ != new_size) {
         void* p = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
         if (!p)
-            return "Out of memory";
+            return SampleRateStatus::OutOfMemory;
         buffer_ = (buf_t_*) p;
     }
 
@@ -112,7 +115,7 @@ BLIPBuffer::blargg_err_t BLIPBuffer::set_sample_rate(long samples_per_sec, int b
 
     clear();
 
-    return 0; // success
+    return SampleRateStatus::Success;
 }
 
 blip_resampled_time_t BLIPBuffer::clock_rate_factor(long rate) const {

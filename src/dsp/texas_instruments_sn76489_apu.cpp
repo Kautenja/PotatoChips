@@ -89,7 +89,7 @@ void Sms_Square::run( blip_time_t time, blip_time_t end_time )
 			do
 			{
 				delta = -delta;
-				synth->offset_inline( time, delta, output );
+				synth->offset( time, delta, output );
 				time += period;
 				phase ^= 1;
 			}
@@ -147,7 +147,7 @@ void Sms_Noise::run( blip_time_t time, blip_time_t end_time )
 			if ( changed & 2 ) // true if bits 0 and 1 differ
 			{
 				delta = -delta;
-				synth.offset_inline( time, delta, output );
+				synth.offset( time, delta, output );
 			}
 			time += period;
 		}
@@ -245,7 +245,6 @@ void Sms_Apu::run_until( blip_time_t end_time )
 			Sms_Osc& osc = *oscs [i];
 			if ( osc.output )
 			{
-				// osc.output->set_modified();
 				if ( i < 3 )
 					squares [i].run( last_time, end_time );
 				else
@@ -283,7 +282,6 @@ void Sms_Apu::write_ggstereo( blip_time_t time, int data )
 		{
 			if ( old_output )
 			{
-				// old_output->set_modified();
 				square_synth.offset( time, -osc.last_amp, old_output );
 			}
 			osc.last_amp = 0;

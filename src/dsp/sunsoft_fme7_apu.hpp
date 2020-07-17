@@ -19,7 +19,7 @@
 #ifndef NES_FME7_APU_HPP_
 #define NES_FME7_APU_HPP_
 
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 /// the IO registers on the FME7.
 enum IORegisters {
@@ -102,7 +102,7 @@ class FME7 {
 	} oscs [OSC_COUNT];
 	blip_time_t last_time;
 
-	BLIPSynth<BLIPQuality::Good, 1> synth;
+	BLIPSynth<blip_good_quality, 1> synth;
 
 	void run_until(blip_time_t end_time) {
 		// require( end_time >= last_time );
@@ -116,7 +116,6 @@ class FME7 {
 			BLIPBuffer* const osc_output = oscs [index].output;
 			if ( !osc_output )
 				continue;
-			// osc_output->set_modified();
 
 			// period
 			int const period_factor = 16;
@@ -151,7 +150,7 @@ class FME7 {
 					do
 					{
 						delta = -delta;
-						synth.offset_inline( time, delta, osc_output );
+						synth.offset( time, delta, osc_output );
 						time += period;
 					}
 					while ( time < end_time );

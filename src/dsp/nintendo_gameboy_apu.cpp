@@ -148,7 +148,6 @@ void Gb_Apu::run_until( blip_time_t end_time )
 			Gb_Osc& osc = *oscs [i];
 			if ( osc.output )
 			{
-				// osc.output->set_modified(); // TODO: misses optimization opportunities?
 				int playing = false;
 				if ( osc.enabled && osc.volume &&
 						(!(osc.regs [4] & osc.len_enabled_mask) || osc.length) )

@@ -20,7 +20,7 @@
 #define DSP_ATARI_POKEY_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_synth.hpp"
+#include "blip_buffer/blip_buffer.hpp"
 
 class Sap_Apu_Impl;
 
@@ -70,7 +70,7 @@ private:
 // Common tables and BLIPSynth that can be shared among multiple Sap_Apu objects
 class Sap_Apu_Impl {
 public:
-	BLIPSynth<BLIPQuality::Good, 1> synth;
+	BLIPSynth<blip_good_quality, 1> synth;
 
 	Sap_Apu_Impl();
 	void volume( double d ) { synth.volume( 1.0 / Sap_Apu::osc_count / 30 * d ); }

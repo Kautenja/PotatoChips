@@ -75,7 +75,7 @@ static constexpr uint8_t blip_sample_bits = 30;
 /// optimal code at the cost of having no bass control
 static constexpr uint32_t blip_reader_default_bass = 9;
 
-/// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
+/// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  public:
     /// The result from setting the sample rate to a new value
@@ -213,8 +213,7 @@ class BLIPBuffer {
         reader_accum_(0),
         bass_shift_(0),
         sample_rate_(0),
-        bass_freq_(16),
-        length_(0) { }
+        bass_freq_(16) { }
 
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer_); }
@@ -237,7 +236,6 @@ class BLIPBuffer {
  private:
     uint32_t sample_rate_;
     int bass_freq_;
-    uint32_t length_;
 };
 
 class blip_eq_t;

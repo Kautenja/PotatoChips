@@ -45,9 +45,6 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
 
     // update things based on the sample rate
     sample_rate_ = samples_per_sec;
-    length_ = new_size * 1000 / samples_per_sec - 1;
-    if (buffer_length)  // ensure length is same as that passed in
-        assert(length_ == buffer_length);
     bass_freq(bass_freq_);
 
     clear();

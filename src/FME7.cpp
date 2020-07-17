@@ -100,7 +100,7 @@ struct ChipFME7 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = CLOCK_RATE / (CLOCK_DIVISION * freq);
+        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
         uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
         // write the registers with the frequency data
         apu.write_latch(PULSE_A_LO + 2 * channel);

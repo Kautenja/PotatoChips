@@ -31,28 +31,37 @@ typedef blip_long blip_time_t;
 /// An output sample type for 16-bit signed samples [-32768, 32767]
 typedef int16_t blip_sample_t;
 
-// Number of bits in resample ratio fraction. Higher values give a more accurate ratio
-// but reduce maximum buffer size.
-#ifndef BLIP_BUFFER_ACCURACY
-    #define BLIP_BUFFER_ACCURACY 16
-#endif
-
-// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results in
-// noticeable broadband noise when synthesizing high frequency square waves.
-// Affects size of BLIPSynth objects since they store the waveform directly.
-#ifndef BLIP_PHASE_BITS
-    #if BLIP_BUFFER_FAST
-        #define BLIP_PHASE_BITS 8
-    #else
-        #define BLIP_PHASE_BITS 6
-    #endif
-#endif
-
-// Internal
+/// TODO:
 typedef blip_ulong blip_resampled_time_t;
-int const blip_widest_impulse_ = 16;
-int const blip_buffer_extra_ = blip_widest_impulse_ + 2;
-int const blip_res = 1 << BLIP_PHASE_BITS;
+
+/// The number of bits in re-sampled ratio fraction. Higher values give a more
+/// accurate ratio but reduce maximum buffer size.
+static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
+
+/// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
+/// in noticeable broadband noise when synthesizing high frequency square
+/// waves. Affects size of BLIPSynth objects since they store the waveform
+/// directly.
+#if BLIP_BUFFER_FAST
+static constexpr uint8_t BLIP_PHASE_BITS = 8;
+#else
+static constexpr uint8_t BLIP_PHASE_BITS = 6;
+#endif  // BLIP_BUFFER_FAST
+
+/// TODO:
+static constexpr int blip_widest_impulse_ = 16;
+
+/// TODO:
+static constexpr int blip_buffer_extra_ = blip_widest_impulse_ + 2;
+
+/// TODO:
+static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
+
+/// TODO:
+static constexpr int blip_max_length = 0;
+
+/// TODO:
+static constexpr int blip_default_length = 250;
 
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {
@@ -566,8 +575,5 @@ inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t tim
 
 #undef BLIP_FWD
 #undef BLIP_REV
-
-int const blip_max_length = 0;
-int const blip_default_length = 250;
 
 #endif  // BLIP_BUFFER_HPP_

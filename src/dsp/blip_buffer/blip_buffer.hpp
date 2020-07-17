@@ -79,6 +79,12 @@ static constexpr uint32_t blip_reader_default_bass = 9;
 static constexpr uint32_t MAX_RESAMPLED_TIME =
     (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
 
+#if defined (__GNUC__) || _MSC_VER >= 1100
+    #define BLIP_RESTRICT __restrict
+#else
+    #define BLIP_RESTRICT
+#endif
+
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  public:
@@ -100,7 +106,39 @@ class BLIPBuffer {
     SampleRateStatus set_sample_rate(
         uint32_t samples_per_sec,
         uint32_t buffer_length = 1000 / 4
-    );
+    ) {
+        // check the size parameter
+        uint32_t new_size = MAX_RESAMPLED_TIME;
+        if (buffer_length != blip_max_length) {
+            uint32_t size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
+            if (size >= new_size)  // fails if requested length exceeds limit
+                return SampleRateStatus::BufferLengthExceedsLimit;
+            new_size = size;
+        }
+        // resize the buffer
+        if (buffer_size_ != new_size) {
+            void* p = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
+            // if the reallocation failed, return an out of memory flag
+            if (!p) return SampleRateStatus::OutOfMemory;
+            // update the buffer and buffer size
+            buffer_ = (buf_t_*) p;
+            buffer_size_ = new_size;
+        }
+        // update instance variables based on the new sample rate
+        sample_rate_ = samples_per_sec;
+        // update the high-pass filter
+        bass_freq(bass_freq_);
+        // calculate the number of cycles per sample (round by truncation)
+        uint32_t cycles_per_sample = 768000 / samples_per_sec;
+        // re-calculate the clock rate with rounding error accounted for
+        clock_rate_ = cycles_per_sample * samples_per_sec;
+        // calculate the time factor based on the clock_rate and sample_rate
+        factor_ = clock_rate_factor(clock_rate_);
+        // clear the buffer
+        clear();
+        // return success flag
+        return SampleRateStatus::Success;
+    }
 
     /// @brief Return the current output sample rate.
     ///
@@ -121,15 +159,15 @@ class BLIPBuffer {
     inline void end_frame(blip_time_t) {
         offset_ = 1 << BLIP_BUFFER_ACCURACY;
         // time outside buffer length
-        assert(samples_count() <= (long) buffer_size_);
+        assert(samples_count() <= buffer_size_);
     }
 
     /// @brief Return the number of samples available for reading.
     ///
     /// @returns the number of samples available for reading from the buffer
     ///
-    inline long samples_count() const {
-        return (long) (offset_ >> BLIP_BUFFER_ACCURACY);
+    inline uint32_t samples_count() const {
+        return offset_ >> BLIP_BUFFER_ACCURACY;
     }
 
     /// @brief Read out of this buffer into `dest` and remove them from the buffer.
@@ -241,7 +279,7 @@ class BLIPBuffer {
     blip_ulong factor_;
     blip_resampled_time_t offset_;
     buf_t_* buffer_;
-    blip_long buffer_size_;
+    uint32_t buffer_size_;
     blip_long reader_accum_;
     int bass_shift_;
 
@@ -411,12 +449,6 @@ class blip_eq_t {
     friend class BLIPSynth_;
 };
 
-#if defined (__GNUC__) || _MSC_VER >= 1100
-    #define BLIP_RESTRICT __restrict
-#else
-    #define BLIP_RESTRICT
-#endif
-
 // Begin reading from buffer. Name should be unique to the current block.
 #define BLIP_READER_BEGIN(name, blip_buffer) \
     const BLIPBuffer::buf_t_* BLIP_RESTRICT name##_reader_buf = (blip_buffer).buffer_;\
@@ -452,7 +484,7 @@ inline void BLIPSynth<quality, range>::offset_resampled(
 ) const {
     // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code
     // or the need for a longer buffer as set by set_sample_rate().
-    assert((blip_long) (time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
+    assert((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
     delta *= impl.delta_factor;
     blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
     int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));

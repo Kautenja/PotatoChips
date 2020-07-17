@@ -20,43 +20,6 @@
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
 
-BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
-    uint32_t samples_per_sec,
-    uint32_t buffer_length
-) {
-    // check the size parameter
-    uint32_t new_size = MAX_RESAMPLED_TIME;
-    if (buffer_length != blip_max_length) {
-        uint32_t size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
-        if (size >= new_size)  // fails if requested length exceeds limit
-            return SampleRateStatus::BufferLengthExceedsLimit;
-        new_size = size;
-    }
-    // resize the buffer
-    if (buffer_size_ != new_size) {
-        void* p = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
-        // if the reallocation failed, return an out of memory flag
-        if (!p) return SampleRateStatus::OutOfMemory;
-        // update the buffer and buffer size
-        buffer_ = (buf_t_*) p;
-        buffer_size_ = new_size;
-    }
-    // update instance variables based on the new sample rate
-    sample_rate_ = samples_per_sec;
-    // update the high-pass filter
-    bass_freq(bass_freq_);
-    // calculate the number of cycles per sample (round by truncation)
-    uint32_t cycles_per_sample = 768000 / samples_per_sec;
-    // re-calculate the clock rate with rounding error accounted for
-    clock_rate_ = cycles_per_sample * samples_per_sec;
-    // calculate the time factor based on the clock_rate and sample_rate
-    factor_ = clock_rate_factor(clock_rate_);
-    // clear the buffer
-    clear();
-    // return success flag
-    return SampleRateStatus::Success;
-}
-
 long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, bool stereo) {
     int const bass = BLIP_READER_BASS(*this);
     BLIP_READER_BEGIN(reader, *this);

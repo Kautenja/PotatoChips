@@ -95,9 +95,7 @@ long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples
 
 #if !BLIP_BUFFER_FAST
 
-BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :
-    impulses(p),
-    width(w) {
+BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
     volume_unit_ = 0.0;
     kernel_unit = 0;
     buf = 0;
@@ -111,13 +109,12 @@ BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) :
 static void gen_sinc(float* out, int count, double oversample, double treble, double cutoff) {
     if (cutoff >= 0.999)
         cutoff = 0.999;
-
     if (treble < -300.0)
         treble = -300.0;
     if (treble > 5.0)
         treble = 5.0;
 
-    double const maxh = 4096.0;
+    static constexpr double maxh = 4096.0;
     double const rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
     double const pow_a_n = pow(rolloff, maxh - maxh * cutoff);
     double const to_angle = PI / 2 / maxh / oversample;

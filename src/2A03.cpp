@@ -97,9 +97,7 @@ struct Chip2A03 : Module {
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < APU::OSC_COUNT; i++) {
-            apu.osc_output(i, &buf[i]);
-        }
+        for (int i = 0; i < APU::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }

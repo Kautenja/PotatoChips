@@ -53,30 +53,18 @@ enum IORegisters {
 /// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
     enum ParamIds {
-        PARAM_FREQ0,
-        PARAM_FREQ1,
-        PARAM_FREQ2,
-        PARAM_FREQ3,
-        PARAM_PW0,
-        PARAM_PW1,
+        ENUMS(PARAM_FREQ, APU::OSC_COUNT),
+        ENUMS(PARAM_PW, 2),
         PARAM_COUNT
     };
     enum InputIds {
-        INPUT_VOCT0,
-        INPUT_VOCT1,
-        INPUT_VOCT2,
-        INPUT_VOCT3,
-        INPUT_FM0,
-        INPUT_FM1,
-        INPUT_FM2,
+        ENUMS(INPUT_VOCT, APU::OSC_COUNT),
+        ENUMS(INPUT_FM, 3),
         INPUT_LFSR,
         INPUT_COUNT
     };
     enum OutputIds {
-        OUTPUT_CHANNEL0,
-        OUTPUT_CHANNEL1,
-        OUTPUT_CHANNEL2,
-        OUTPUT_CHANNEL3,
+        ENUMS(OUTPUT_CHANNEL, APU::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
@@ -101,12 +89,12 @@ struct Chip2A03 : Module {
     /// Initialize a new 2A03 Chip module.
     Chip2A03() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
-        configParam(PARAM_PW0,     0,    3,   2,   "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW1,     0,    3,   2,   "Pulse 2 Duty Cycle");
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
+        configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < APU::OSC_COUNT; i++) {
@@ -128,11 +116,11 @@ struct Chip2A03 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ0].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT0].getVoltage();
+        float pitch = params[PARAM_FREQ + 0].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 0].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM0].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 0].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 11-bit
         freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
@@ -142,7 +130,7 @@ struct Chip2A03 : Module {
         apu.write_register(0, PULSE0_HI, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
         // volume to a constant level
-        auto pw = static_cast<uint8_t>(params[PARAM_PW0].getValue()) << 6;
+        auto pw = static_cast<uint8_t>(params[PARAM_PW + 0].getValue()) << 6;
         apu.write_register(0, PULSE0_VOL, pw + 0b00011111);
     }
 
@@ -157,11 +145,11 @@ struct Chip2A03 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ1].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT1].getVoltage();
+        float pitch = params[PARAM_FREQ + 1].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 1].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM1].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 1].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
@@ -171,7 +159,7 @@ struct Chip2A03 : Module {
         apu.write_register(0, PULSE1_HI, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
         // volume to a constant level
-        auto pw = static_cast<uint8_t>(params[PARAM_PW1].getValue()) << 6;
+        auto pw = static_cast<uint8_t>(params[PARAM_PW + 1].getValue()) << 6;
         apu.write_register(0, PULSE1_VOL, pw + 0b00011111);
     }
 
@@ -186,11 +174,11 @@ struct Chip2A03 : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ2].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT2].getVoltage();
+        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + 2].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM2].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (CLOCK_RATE / (CLOCK_DIVISION * freq)) - 1;
@@ -209,11 +197,11 @@ struct Chip2A03 : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 15;
         // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_VOCT3].getVoltage());
-        auto pitch = abs(inputs[INPUT_VOCT3].getVoltage() / 100.f);
+        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
+        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
         // convert the pitch to frequency based on standard exponential scale
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_FREQ3].getValue();
+        freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
         apu.write_register(0, NOISE_HI, 0);
@@ -268,10 +256,10 @@ struct Chip2A03 : Module {
         for (int i = 0; i < APU::OSC_COUNT; i++)
             buf[i].end_frame(cycles_per_sample);
         // set the output from the oscillators
-        outputs[OUTPUT_CHANNEL0].setVoltage(getAudioOut(0));
-        outputs[OUTPUT_CHANNEL1].setVoltage(getAudioOut(1));
-        outputs[OUTPUT_CHANNEL2].setVoltage(getAudioOut(2));
-        outputs[OUTPUT_CHANNEL3].setVoltage(getAudioOut(3));
+        outputs[OUTPUT_CHANNEL + 0].setVoltage(getAudioOut(0));
+        outputs[OUTPUT_CHANNEL + 1].setVoltage(getAudioOut(1));
+        outputs[OUTPUT_CHANNEL + 2].setVoltage(getAudioOut(2));
+        outputs[OUTPUT_CHANNEL + 3].setVoltage(getAudioOut(3));
     }
 
     /// Respond to the change of sample rate in the engine.
@@ -294,29 +282,29 @@ struct Chip2A03Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, Chip2A03::INPUT_VOCT0));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, Chip2A03::INPUT_VOCT1));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, Chip2A03::INPUT_VOCT2));
-        addInput(createInput<PJ301MPort>(Vec(20, 329), module, Chip2A03::INPUT_VOCT3));
+        addInput(createInput<PJ301MPort>(Vec(20, 74), module, Chip2A03::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(20, 159), module, Chip2A03::INPUT_VOCT + 1));
+        addInput(createInput<PJ301MPort>(Vec(20, 244), module, Chip2A03::INPUT_VOCT + 2));
+        addInput(createInput<PJ301MPort>(Vec(20, 329), module, Chip2A03::INPUT_VOCT + 3));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, Chip2A03::INPUT_FM0));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, Chip2A03::INPUT_FM1));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, Chip2A03::INPUT_FM2));
+        addInput(createInput<PJ301MPort>(Vec(25, 32), module, Chip2A03::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(25, 118), module, Chip2A03::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(25, 203), module, Chip2A03::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, Chip2A03::PARAM_FREQ0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, Chip2A03::PARAM_FREQ1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, Chip2A03::PARAM_FREQ2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, Chip2A03::PARAM_FREQ3));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, Chip2A03::PARAM_FREQ + 0));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, Chip2A03::PARAM_FREQ + 1));
+        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, Chip2A03::PARAM_FREQ + 2));
+        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, Chip2A03::PARAM_FREQ + 3));
         // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, Chip2A03::PARAM_PW0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, Chip2A03::PARAM_PW1));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, Chip2A03::PARAM_PW + 0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, Chip2A03::PARAM_PW + 1));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, Chip2A03::INPUT_LFSR));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74), module, Chip2A03::OUTPUT_CHANNEL0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, Chip2A03::OUTPUT_CHANNEL1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, Chip2A03::OUTPUT_CHANNEL2));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, Chip2A03::OUTPUT_CHANNEL3));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, Chip2A03::OUTPUT_CHANNEL + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, Chip2A03::OUTPUT_CHANNEL + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, Chip2A03::OUTPUT_CHANNEL + 2));
+        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, Chip2A03::OUTPUT_CHANNEL + 3));
     }
 };
 

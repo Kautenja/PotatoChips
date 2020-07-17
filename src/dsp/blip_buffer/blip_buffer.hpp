@@ -33,7 +33,7 @@ typedef uint32_t blip_ulong;
 /// A time unit at source clock rate
 typedef blip_long blip_time_t;
 
-/// An output sample type for 16-bit signed samples [-32768, 32767]
+/// An output sample type for 16-bit signed samples[-32768, 32767]
 typedef int16_t blip_sample_t;
 
 /// TODO:
@@ -73,6 +73,10 @@ static constexpr uint8_t blip_sample_bits = 30;
 
 /// size used for Silent_BLIPBuffer
 static constexpr uint32_t silent_buf_size = 1;
+
+/// Constant value to use instead of BLIP_READER_BASS(), for slightly more
+/// optimal code at the cost of having no bass control
+static constexpr uint32_t blip_reader_default_bass = 9;
 
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {
@@ -368,7 +372,7 @@ class BLIPSynth_ {
     blip_sample_t* const impulses;
     int const width;
     blip_long kernel_unit;
-    int impulses_size() const { return blip_res / 2 * width + 1; }
+    inline int impulses_size() const { return blip_res / 2 * width + 1; }
     void adjust_impulse();
 };
 
@@ -450,7 +454,7 @@ class BLIPSynth {
     BLIPSynth_Fast_ impl;
 #else
     BLIPSynth_ impl;
-    blip_sample_t impulses [blip_res * (quality / 2) + 1];
+    blip_sample_t impulses[blip_res * (quality / 2) + 1];
  public:
     BLIPSynth() : impl(impulses, quality) { }
 #endif
@@ -488,32 +492,11 @@ class blip_eq_t {
     friend class BLIPSynth_;
 };
 
-// Dummy BLIPBuffer to direct sound output to, for easy muting without
-// having to stop sound code.
-class Silent_BLIPBuffer : public BLIPBuffer {
-    buf_t_ buf [blip_buffer_extra_ + 1];
-
- public:
-    // The following cannot be used (an assertion will fail if attempted):
-    blargg_err_t set_sample_rate(long samples_per_sec, int msec_length);
-    blip_time_t count_clocks(long count) const;
-    void mix_samples(blip_sample_t const* buf, long count);
-
-    Silent_BLIPBuffer() : BLIPBuffer::BLIPBuffer() {
-        factor_      = 0;
-        buffer_      = buf;
-        buffer_size_ = silent_buf_size;
-        memset(buf, 0, sizeof buf); // in case machine takes exception for signed overflow
-    }
-};
-
-    #if defined (__GNUC__) || _MSC_VER >= 1100
-        #define BLIP_RESTRICT __restrict
-    #else
-        #define BLIP_RESTRICT
-    #endif
-
-// Optimized reading from BLIPBuffer, for use in custom sample output
+#if defined (__GNUC__) || _MSC_VER >= 1100
+    #define BLIP_RESTRICT __restrict
+#else
+    #define BLIP_RESTRICT
+#endif
 
 // Begin reading from buffer. Name should be unique to the current block.
 #define BLIP_READER_BEGIN(name, blip_buffer) \
@@ -522,10 +505,6 @@ class Silent_BLIPBuffer : public BLIPBuffer {
 
 // Get value to pass to BLIP_READER_NEXT()
 #define BLIP_READER_BASS(blip_buffer) ((blip_buffer).bass_shift_)
-
-// Constant value to use instead of BLIP_READER_BASS(), for slightly more optimal
-// code at the cost of having no bass control
-int const blip_reader_default_bass = 9;
 
 // Current sample
 #define BLIP_READER_READ(name)        (name##_reader_accum >> (blip_sample_bits - 16))
@@ -537,8 +516,8 @@ int const blip_reader_default_bass = 9;
 #define BLIP_READER_NEXT(name, bass) \
     (void) (name##_reader_accum += *name##_reader_buf++ - (name##_reader_accum >> (bass)))
 
-// End reading samples from buffer. The number of samples read must now be removed
-// using BLIPBuffer::remove_samples().
+// End reading samples from buffer. The number of samples read must now be
+// removed using BLIPBuffer::remove_samples().
 #define BLIP_READER_END(name, blip_buffer) \
     (void) ((blip_buffer).reader_accum_ = name##_reader_accum)
 
@@ -546,29 +525,32 @@ int const blip_reader_default_bass = 9;
 // MARK: End of public interface
 // ---------------------------------------------------------------------------
 
-template<int quality,int range>
-inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t time,
-        int delta, BLIPBuffer* blip_buf) const {
-    // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code or the
-    // need for a longer buffer as set by set_sample_rate().
+template<int quality, int range>
+inline void BLIPSynth<quality, range>::offset_resampled(
+    blip_resampled_time_t time,
+    int delta,
+    BLIPBuffer* blip_buf
+) const {
+    // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code
+    // or the need for a longer buffer as set by set_sample_rate().
     assert((blip_long) (time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
     delta *= impl.delta_factor;
     blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
     int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
 #if BLIP_BUFFER_FAST
-    blip_long left = buf [0] + delta;
+    blip_long left = buf[0] + delta;
 
     // Kind of crappy, but doing shift after multiply results in overflow.
     // Alternate way of delaying multiply by delta_factor results in worse
     // sub-sample resolution.
     blip_long right = (delta >> BLIP_PHASE_BITS) * phase;
     left  -= right;
-    right += buf [1];
+    right += buf[1];
 
-    buf [0] = left;
-    buf [1] = right;
-#else
+    buf[0] = left;
+    buf[1] = right;
+#else  // BLIP_BUFFER_FAST (falsem)
 
     int const fwd = (blip_widest_impulse_ - quality) / 2;
     int const rev = fwd + quality - 2;
@@ -576,13 +558,17 @@ inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t tim
 
     blip_sample_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
 
-    #if defined (_M_IX86) || defined (_M_IA64) || defined (__i486__) || \
-            defined (__x86_64__) || defined (__ia64__) || defined (__i386__)
+    #if defined (_M_IX86)    || \
+        defined (_M_IA64)    || \
+        defined (__i486__)   || \
+        defined (__x86_64__) || \
+        defined (__ia64__)   || \
+        defined (__i386__)  // CISC
 
     // straight forward implementation resulted in better code on GCC for x86
 
     #define ADD_IMP(out, in) \
-        buf [out] += (blip_long) imp [blip_res * (in)] * delta
+        buf[out] += (blip_long) imp[blip_res * (in)] * delta
 
     #define BLIP_FWD(i) {\
         ADD_IMP(fwd     + i, i    );\
@@ -607,47 +593,46 @@ inline void BLIPSynth<quality,range>::offset_resampled(blip_resampled_time_t tim
         ADD_IMP(rev    , 1);
         ADD_IMP(rev + 1, 0);
 
-    #else
+    #else  // CISC (false)
 
     // for RISC processors, help compiler by reading ahead of writes
 
     #define BLIP_FWD(i) {\
-        blip_long t0 =                       i0 * delta + buf [fwd     + i];\
-        blip_long t1 = imp [blip_res * (i + 1)] * delta + buf [fwd + 1 + i];\
-        i0 =           imp [blip_res * (i + 2)];\
-        buf [fwd     + i] = t0;\
-        buf [fwd + 1 + i] = t1;\
+        blip_long t0 =                       i0 * delta + buf[fwd     + i];\
+        blip_long t1 = imp[blip_res * (i + 1)] * delta + buf[fwd + 1 + i];\
+        i0 =           imp[blip_res * (i + 2)];\
+        buf[fwd     + i] = t0;\
+        buf[fwd + 1 + i] = t1;\
     }
     #define BLIP_REV(r) {\
-        blip_long t0 =                 i0 * delta + buf [rev     - r];\
-        blip_long t1 = imp [blip_res * r] * delta + buf [rev + 1 - r];\
-        i0 =           imp [blip_res * (r - 1)];\
-        buf [rev     - r] = t0;\
-        buf [rev + 1 - r] = t1;\
+        blip_long t0 =                 i0 * delta + buf[rev     - r];\
+        blip_long t1 = imp[blip_res * r] * delta + buf[rev + 1 - r];\
+        i0 =           imp[blip_res * (r - 1)];\
+        buf[rev     - r] = t0;\
+        buf[rev + 1 - r] = t1;\
     }
 
         blip_long i0 = *imp;
         BLIP_FWD(0)
         if (quality > 8 ) BLIP_FWD(2)
         if (quality > 12) BLIP_FWD(4) {
-            blip_long t0 =                   i0 * delta + buf [fwd + mid - 1];
-            blip_long t1 = imp [blip_res * mid] * delta + buf [fwd + mid    ];
+            blip_long t0 =                   i0 * delta + buf[fwd + mid - 1];
+            blip_long t1 = imp[blip_res * mid] * delta + buf[fwd + mid    ];
             imp = impulses + phase;
-            i0 = imp [blip_res * mid];
-            buf [fwd + mid - 1] = t0;
-            buf [fwd + mid    ] = t1;
+            i0 = imp[blip_res * mid];
+            buf[fwd + mid - 1] = t0;
+            buf[fwd + mid    ] = t1;
         }
         if (quality > 12) BLIP_REV(6)
         if (quality > 8 ) BLIP_REV(4)
         BLIP_REV(2)
 
-        blip_long t0 =   i0 * delta + buf [rev    ];
-        blip_long t1 = *imp * delta + buf [rev + 1];
-        buf [rev    ] = t0;
-        buf [rev + 1] = t1;
-    #endif
-
-#endif
+        blip_long t0 =   i0 * delta + buf[rev    ];
+        blip_long t1 = *imp * delta + buf[rev + 1];
+        buf[rev    ] = t0;
+        buf[rev + 1] = t1;
+    #endif  // CISC
+#endif  // BLIP_BUFFER_FAST
 }
 
 #undef BLIP_FWD

@@ -78,6 +78,8 @@ struct Chip106 : Module {
     BLIPBuffer buf[Namco106::OSC_COUNT];
     /// The 106 instance to synthesize sound with
     Namco106 apu;
+    /// the number of active channels
+    int num_channels = 1;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -260,8 +262,6 @@ struct Chip106 : Module {
         // convert the 16-bit sample to 10Vpp floating point
         return Vpp * output_buffer[0] / divisor;
     }
-
-    int num_channels = 1;
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {

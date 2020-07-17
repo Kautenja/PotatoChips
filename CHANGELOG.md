@@ -40,3 +40,7 @@
 
 - fix issue where oscillator increased in pitch when increasing sampling rate
 - fix issue where 106 was not tuned to C4
+
+### 1.3.3 (2020-07-15)
+
+- minor optimizations to 106

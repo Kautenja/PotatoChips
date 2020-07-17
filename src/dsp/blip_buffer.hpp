@@ -280,7 +280,7 @@ class BLIPBuffer {
     }
 };
 
-/// Low-pass equalization parameters
+/// Low-pass equalization parameters and logic.
 class blip_eq_t {
  private:
     /// the constant value for Pi
@@ -297,8 +297,8 @@ class blip_eq_t {
 
     /// Generate a sinc.
     ///
-    /// @param out TODO:
-    /// @param count TODO:
+    /// @param out the output buffer to generate sinc values into
+    /// @param count the number of samples to generate
     /// @param oversample TODO:
     /// @param treble Logarithmic roll-off to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0)
@@ -316,7 +316,8 @@ class blip_eq_t {
         if (treble < -300.0) treble = -300.0;
         if (treble > 5.0)    treble = 5.0;
         static constexpr double maxh = 4096.0;
-        const double rolloff = pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
+        const double rolloff =
+            pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
         const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
         const double to_angle = pi / 2 / maxh / oversample;
         for (uint32_t i = 0; i < count; i++) {
@@ -330,7 +331,7 @@ class blip_eq_t {
             double b = 2.0 - cos_angle - cos_angle;
             double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
             // a / b + c / d
-            out[i] = (float) ((a * d + c * b) / (b * d));
+            out[i] = (a * d + c * b) / (b * d);
         }
     }
 
@@ -344,7 +345,7 @@ class blip_eq_t {
     /// @param sample_rate the sample rate the engine is running at
     /// @param cutoff_freq TODO:
     ///
-    blip_eq_t(
+    explicit blip_eq_t(
         double treble,
         uint32_t rolloff_freq = 0,
         uint32_t sample_rate = 44100,
@@ -375,7 +376,7 @@ class blip_eq_t {
         // apply (half of) hamming window
         double to_fraction = pi / (count - 1);
         for (uint32_t i = count; i--;)
-            out[i] *= 0.54f - 0.46f * static_cast<float>(cos(i * to_fraction));
+            out[i] *= 0.54f - 0.46f * cos(i * to_fraction);
     }
 };
 
@@ -439,7 +440,7 @@ class BLIPSynth {
         if (new_unit != volume_unit_) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
-                treble_eq(-8.0);
+                treble_eq(blip_eq_t(-8.0));
 
             volume_unit_ = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;

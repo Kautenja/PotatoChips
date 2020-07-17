@@ -75,13 +75,18 @@ static constexpr uint8_t blip_sample_bits = 30;
 /// optimal code at the cost of having no bass control
 static constexpr uint32_t blip_reader_default_bass = 9;
 
+/// maximal length that re-sampled time can represent
+static constexpr uint32_t MAX_RESAMPLED_TIME =
+    (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
+
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  public:
     /// The result from setting the sample rate to a new value
     enum class SampleRateStatus {
-        Success = 0,  // setting the sample rate succeeded
-        OutOfMemory   // ran out of resources for buffer
+        Success = 0,               // setting the sample rate succeeded
+        BufferLengthExceedsLimit,  // requested length exceeds limit
+        OutOfMemory                // ran out of resources for buffer
     };
 
     /// @brief Set the output sample rate and buffer length in milliseconds.

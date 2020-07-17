@@ -213,11 +213,10 @@ class BLIPBuffer {
         // get the current accumulator
         blip_long read_accum_temp = reader_accum_;
         // get the sample from the accumulator
-        blip_long s = read_accum_temp >> (blip_sample_bits - 16);
-        if ((blip_sample_t) s != s) {
-            s = 0x7FFF - (s >> 24);
-        }
-        *output = (blip_sample_t) s;
+        blip_long sample = read_accum_temp >> (blip_sample_bits - 16);
+        if (static_cast<blip_sample_t>(sample) != sample)
+            sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
+        *output = sample;
         read_accum_temp += *buffer_temp++ - (read_accum_temp >> (bass_shift_));
         // update the accumulator
         reader_accum_ = read_accum_temp;

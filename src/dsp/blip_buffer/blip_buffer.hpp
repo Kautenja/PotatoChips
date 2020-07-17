@@ -31,6 +31,29 @@ typedef blip_long blip_time_t;
 /// An output sample type for 16-bit signed samples [-32768, 32767]
 typedef int16_t blip_sample_t;
 
+// Number of bits in resample ratio fraction. Higher values give a more accurate ratio
+// but reduce maximum buffer size.
+#ifndef BLIP_BUFFER_ACCURACY
+    #define BLIP_BUFFER_ACCURACY 16
+#endif
+
+// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results in
+// noticeable broadband noise when synthesizing high frequency square waves.
+// Affects size of BLIPSynth objects since they store the waveform directly.
+#ifndef BLIP_PHASE_BITS
+    #if BLIP_BUFFER_FAST
+        #define BLIP_PHASE_BITS 8
+    #else
+        #define BLIP_PHASE_BITS 6
+    #endif
+#endif
+
+// Internal
+typedef blip_ulong blip_resampled_time_t;
+int const blip_widest_impulse_ = 16;
+int const blip_buffer_extra_ = blip_widest_impulse_ + 2;
+int const blip_res = 1 << BLIP_PHASE_BITS;
+
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {
  public:
@@ -72,13 +95,15 @@ class BLIPBuffer {
     ///
     /// @param TODO:
     ///
-    void set_clock_rate(long);
+    inline void set_clock_rate(long cps) {
+        factor_ = clock_rate_factor(clock_rate_ = cps);
+    }
 
     /// @brief Return the number of source time units per second.
     ///
     /// @returns the number of source time units per second
     ///
-    long get_clock_rate() const;
+    inline long get_clock_rate() const { return clock_rate_; }
 
     /// @brief End current time frame of specified duration and make its
     /// samples available (along with any still-unread samples).
@@ -93,7 +118,9 @@ class BLIPBuffer {
     ///
     /// @returns the number of samples available for reading from the buffer
     ///
-    long samples_count() const;
+    inline long samples_count() const {
+        return (long) (offset_ >> BLIP_BUFFER_ACCURACY);
+    }
 
     /// @brief Read at most `max_samples` out of this buffer into `dest` and
     /// remove them from the buffer.
@@ -132,7 +159,7 @@ class BLIPBuffer {
     ///
     /// @returns the number of samples delay from synthesis to samples available
     ///
-    int output_latency() const;
+    inline int output_latency() const { return blip_widest_impulse_ / 2; }
 
 // ---------------------------------------------------------------------------
 // MARK: Experimental features
@@ -218,29 +245,6 @@ class BLIPBuffer {
     friend class BLIPReader;
 };
 
-// Number of bits in resample ratio fraction. Higher values give a more accurate ratio
-// but reduce maximum buffer size.
-#ifndef BLIP_BUFFER_ACCURACY
-    #define BLIP_BUFFER_ACCURACY 16
-#endif
-
-// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results in
-// noticeable broadband noise when synthesizing high frequency square waves.
-// Affects size of BLIPSynth objects since they store the waveform directly.
-#ifndef BLIP_PHASE_BITS
-    #if BLIP_BUFFER_FAST
-        #define BLIP_PHASE_BITS 8
-    #else
-        #define BLIP_PHASE_BITS 6
-    #endif
-#endif
-
-// Internal
-typedef blip_ulong blip_resampled_time_t;
-int const blip_widest_impulse_ = 16;
-int const blip_buffer_extra_ = blip_widest_impulse_ + 2;
-int const blip_res = 1 << BLIP_PHASE_BITS;
-
 class blip_eq_t;
 
 class BLIPSynth_Fast_ {
@@ -320,17 +324,30 @@ public:
 #endif
 };
 
-// Low-pass equalization parameters
+/// Low-pass equalization parameters
 class blip_eq_t {
-public:
-    // Logarithmic rolloff to treble dB at half sampling rate. Negative values reduce
-    // treble, small positive values (0 to 5.0) increase treble.
-    blip_eq_t(double treble_db = 0);
+ public:
+    /// Logarithmic rolloff to treble dB at half sampling rate. Negative values
+    /// reduce treble, small positive values (0 to 5.0) increase treble.
+    blip_eq_t(double treble_db) :
+        treble(treble_db),
+        rolloff_freq(0),
+        sample_rate(44100),
+        cutoff_freq(0) { }
 
     // See blip_buffer.txt
-    blip_eq_t(double treble, long rolloff_freq, long sample_rate, long cutoff_freq = 0);
+    blip_eq_t(
+        double treble,
+        long rolloff_freq,
+        long sample_rate,
+        long cutoff_freq
+    ) :
+        treble(treble),
+        rolloff_freq(rolloff_freq),
+        sample_rate(sample_rate),
+        cutoff_freq(cutoff_freq) { }
 
-private:
+ private:
     double treble;
     long rolloff_freq;
     long sample_rate;
@@ -345,7 +362,8 @@ int const blip_sample_bits = 30;
 // having to stop sound code.
 class Silent_BLIPBuffer : public BLIPBuffer {
     buf_t_ buf [blip_buffer_extra_ + 1];
-public:
+
+ public:
     // The following cannot be used (an assertion will fail if attempted):
     blargg_err_t set_sample_rate(long samples_per_sec, int msec_length);
     blip_time_t count_clocks(long count) const;
@@ -395,17 +413,22 @@ const long blip_unscaled = 65535;
 const int blip_low_quality  = blip_med_quality;
 const int blip_best_quality = blip_high_quality;
 
-// Deprecated; use BLIP_READER macros as follows:
-// BLIPReader r; r.begin(buf); -> BLIP_READER_BEGIN(r, buf);
-// int bass = r.begin(buf)      -> BLIP_READER_BEGIN(r, buf); int bass = BLIP_READER_BASS(buf);
-// r.read()                       -> BLIP_READER_READ(r)
-// r.read_raw()                   -> BLIP_READER_READ_RAW(r)
-// r.next(bass)                 -> BLIP_READER_NEXT(r, bass)
-// r.next()                       -> BLIP_READER_NEXT(r, blip_reader_default_bass)
-// r.end(buf)                   -> BLIP_READER_END(r, buf)
+/// Deprecated; use BLIP_READER macros as follows:
+/// BLIPReader r; r.begin(buf); -> BLIP_READER_BEGIN(r, buf);
+/// int bass = r.begin(buf)      -> BLIP_READER_BEGIN(r, buf); int bass = BLIP_READER_BASS(buf);
+/// r.read()                       -> BLIP_READER_READ(r)
+/// r.read_raw()                   -> BLIP_READER_READ_RAW(r)
+/// r.next(bass)                 -> BLIP_READER_NEXT(r, bass)
+/// r.next()                       -> BLIP_READER_NEXT(r, blip_reader_default_bass)
+/// r.end(buf)                   -> BLIP_READER_END(r, buf)
 class BLIPReader {
-public:
-    int begin(BLIPBuffer&);
+ public:
+    inline int begin(const BLIPBuffer& blip_buf) {
+        buf = blip_buf.buffer_;
+        accum = blip_buf.reader_accum_;
+        return blip_buf.bass_shift_;
+    }
+
     blip_long read() const          { return accum >> (blip_sample_bits - 16); }
     blip_long read_raw() const      { return accum; }
     void next(int bass_shift = 9)         { accum += *buf++ - (accum >> bass_shift); }
@@ -543,29 +566,6 @@ void BLIPSynth<quality,range>::update(blip_time_t t, int amp) {
     int delta = amp - impl.last_amp;
     impl.last_amp = amp;
     offset_resampled(t * impl.buf->factor_ + impl.buf->offset_, delta, impl.buf);
-}
-
-inline blip_eq_t::blip_eq_t(double t) :
-    treble(t),
-    rolloff_freq(0),
-    sample_rate(44100),
-    cutoff_freq(0) { }
-
-inline blip_eq_t::blip_eq_t(double t, long rf, long sr, long cf) :
-    treble(t),
-    rolloff_freq(rf),
-    sample_rate(sr),
-    cutoff_freq(cf) { }
-
-inline long BLIPBuffer::samples_count() const  { return (long) (offset_ >> BLIP_BUFFER_ACCURACY); }
-inline int  BLIPBuffer::output_latency() const { return blip_widest_impulse_ / 2; }
-inline long BLIPBuffer::get_clock_rate() const     { return clock_rate_; }
-inline void BLIPBuffer::set_clock_rate(long cps) { factor_ = clock_rate_factor(clock_rate_ = cps); }
-
-inline int BLIPReader::begin(BLIPBuffer& blip_buf) {
-    buf = blip_buf.buffer_;
-    accum = blip_buf.reader_accum_;
-    return blip_buf.bass_shift_;
 }
 
 int const blip_max_length = 0;

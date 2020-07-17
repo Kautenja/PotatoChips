@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 
 /// A 32-bit signed value
@@ -418,7 +419,12 @@ class Silent_BLIPBuffer : public BLIPBuffer {
     blip_time_t count_clocks(long count) const;
     void mix_samples(blip_sample_t const* buf, long count);
 
-    Silent_BLIPBuffer();
+    Silent_BLIPBuffer() : BLIPBuffer::BLIPBuffer() {
+        factor_      = 0;
+        buffer_      = buf;
+        buffer_size_ = silent_buf_size;
+        memset(buf, 0, sizeof buf); // in case machine takes exception for signed overflow
+    }
 };
 
     #if defined (__GNUC__) || _MSC_VER >= 1100

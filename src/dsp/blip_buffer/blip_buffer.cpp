@@ -17,19 +17,11 @@
 #include "blip_buffer.hpp"
 
 #include <assert.h>
-#include <string.h>
 #include <math.h>
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
-
-Silent_BLIPBuffer::Silent_BLIPBuffer() {
-    factor_      = 0;
-    buffer_      = buf;
-    buffer_size_ = silent_buf_size;
-    memset(buf, 0, sizeof buf); // in case machine takes exception for signed overflow
-}
 
 void BLIPBuffer::clear(int entire_buffer) {
     offset_      = 0;

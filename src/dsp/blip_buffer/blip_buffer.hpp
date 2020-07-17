@@ -78,8 +78,6 @@ static constexpr uint32_t blip_reader_default_bass = 9;
 /// A Band-limited sound synthesis buffer (BLIPBuffer 0.4.1).
 class BLIPBuffer {
  public:
-    typedef const char* blargg_err_t;
-
     /// The result from setting the sample rate to a new value
     enum class SampleRateStatus {
         Success = 0,  // setting the sample rate succeeded

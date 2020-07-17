@@ -22,8 +22,6 @@
 
 // BLIPSynth_
 
-#if !BLIP_BUFFER_FAST
-
 BLIPSynth_::BLIPSynth_(blip_sample_t* p, int w) : impulses(p), width(w) {
     volume_unit_ = 0.0;
     kernel_unit = 0;
@@ -127,5 +125,3 @@ void BLIPSynth_::volume_unit(double new_unit) {
         delta_factor = (int) floor(factor + 0.5);
     }
 }
-
-#endif  // !BLIP_BUFFER_FAST

@@ -47,11 +47,7 @@ static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
 /// in noticeable broadband noise when synthesizing high frequency square
 /// waves. Affects size of BLIPSynth objects since they store the waveform
 /// directly.
-#if BLIP_BUFFER_FAST
-static constexpr uint8_t BLIP_PHASE_BITS = 8;
-#else
 static constexpr uint8_t BLIP_PHASE_BITS = 6;
-#endif  // BLIP_BUFFER_FAST
 
 /// TODO:
 static constexpr int blip_widest_impulse_ = 16;
@@ -288,28 +284,6 @@ class BLIPBuffer {
 
 class blip_eq_t;
 
-/// A faster implementation of BLIP synthesizer logic.
-class BLIPSynth_Fast_ {
- public:
-    /// TODO:
-    BLIPBuffer* buf = 0;
-    /// TODO:
-    int last_amp = 0;
-    /// TODO:
-    int delta_factor = 0;
-
-    /// Initialize a new fast BLIP synthesizer
-    BLIPSynth_Fast_() { }
-
-    /// set the volume unit to a new value.
-    inline void volume_unit(double new_unit) {
-        delta_factor = int (new_unit * (1L << blip_sample_bits) + 0.5);
-    }
-
-    /// Set the treble EQ to a new value (ignore).
-    inline void treble_eq(blip_eq_t const&) { }
-};
-
 /// A more accurate implementation of BLIP synthesizer logic.
 class BLIPSynth_ {
  public:
@@ -404,10 +378,6 @@ class BLIPSynth {
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* buf) const;
 
  private:
-#if BLIP_BUFFER_FAST
-    /// the BLIP engine
-    BLIPSynth_Fast_ impl;
-#else
     /// the BLIP engine
     BLIPSynth_ impl;
     /// TODO
@@ -416,7 +386,6 @@ class BLIPSynth {
  public:
     /// Initialize a new BLIPSynth.
     BLIPSynth() : impl(impulses, quality) { }
-#endif  // BLIP_BUFFER_FAST
 };
 
 /// Low-pass equalization parameters
@@ -540,20 +509,6 @@ inline void BLIPSynth<quality, range>::offset_resampled(
     blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
     int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
-#if BLIP_BUFFER_FAST
-    blip_long left = buf[0] + delta;
-
-    // Kind of crappy, but doing shift after multiply results in overflow.
-    // Alternate way of delaying multiply by delta_factor results in worse
-    // sub-sample resolution.
-    blip_long right = (delta >> BLIP_PHASE_BITS) * phase;
-    left  -= right;
-    right += buf[1];
-
-    buf[0] = left;
-    buf[1] = right;
-#else  // BLIP_BUFFER_FAST (false)
-
     int const fwd = (blip_widest_impulse_ - quality) / 2;
     int const rev = fwd + quality - 2;
     int const mid = quality / 2 - 1;
@@ -634,7 +589,6 @@ inline void BLIPSynth<quality, range>::offset_resampled(
         buf[rev    ] = t0;
         buf[rev + 1] = t1;
     #endif  // CISC
-#endif  // BLIP_BUFFER_FAST
 }
 
 #undef BLIP_FWD

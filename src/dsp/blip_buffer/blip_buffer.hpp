@@ -116,7 +116,9 @@ class BLIPBuffer {
     /// @param TODO:
     ///
     inline void set_clock_rate(long cps) {
-        factor_ = clock_rate_factor(clock_rate_ = cps);
+        clock_rate_ = cps;
+        factor_ = 1;
+        // factor_ = clock_rate_factor(clock_rate_ = cps);
     }
 
     /// @brief Return the number of source time units per second.
@@ -232,7 +234,7 @@ class BLIPBuffer {
 
  public:
     /// Initialize a new BLIP Buffer.
-    BLIPBuffer() : factor_(std::numeric_limits<blip_ulong>::max()),
+    BLIPBuffer() : factor_(1),
         offset_(0),
         buffer_(0),
         buffer_size_(0),

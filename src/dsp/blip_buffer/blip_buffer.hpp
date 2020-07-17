@@ -109,6 +109,7 @@ class BLIPBuffer {
     ///
     /// @returns the number of source time units per second
     ///
+    __attribute__((deprecated))
     inline uint32_t get_clock_rate() const { return 768000; }
 
     /// @brief End current time frame of specified duration and make its

@@ -133,7 +133,7 @@ class BLIPBuffer {
     /// Begins a new time frame at the end of the current frame.
     ///
     inline void end_frame(blip_time_t time) {
-        offset_ = 65536;
+        offset_ = 1 << BLIP_BUFFER_ACCURACY;
         // time outside buffer length
         assert(samples_count() <= (long) buffer_size_);
     }

@@ -16,22 +16,9 @@
 
 #include "blip_buffer.hpp"
 
-#include <assert.h>
-#include <math.h>
-
 #ifdef BLARGG_ENABLE_OPTIMIZER
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
-
-void BLIPBuffer::clear(int entire_buffer) {
-    offset_      = 0;
-    reader_accum_ = 0;
-    modified_    = 0;
-    if (buffer_) {
-        long count = (entire_buffer ? buffer_size_ : samples_count());
-        memset(buffer_, 0, (count + blip_buffer_extra_) * sizeof (buf_t_));
-    }
-}
 
 BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     uint32_t samples_per_sec,
@@ -74,62 +61,6 @@ BLIPBuffer::SampleRateStatus BLIPBuffer::set_sample_rate(
     clear();
 
     return SampleRateStatus::Success;
-}
-
-blip_resampled_time_t BLIPBuffer::clock_rate_factor(long rate) const {
-    double ratio = (double) sample_rate_ / rate;
-    blip_long factor = (blip_long) floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-    assert(factor > 0 || !sample_rate_); // fails if clock/output ratio is too large
-    return (blip_resampled_time_t) factor;
-}
-
-void BLIPBuffer::bass_freq(int freq) {
-    bass_freq_ = freq;
-    int shift = 31;
-    if (freq > 0) {
-        shift = 13;
-        long f = (freq << 16) / sample_rate_;
-        while ((f >>= 1) && --shift) { }
-    }
-    bass_shift_ = shift;
-}
-
-void BLIPBuffer::end_frame(blip_time_t t) {
-    offset_ += t * factor_;
-    assert(samples_count() <= (long) buffer_size_); // time outside buffer length
-}
-
-void BLIPBuffer::remove_silence(long count) {
-    assert(count <= samples_count()); // tried to remove more samples than available
-    offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
-}
-
-long BLIPBuffer::count_samples(blip_time_t t) const {
-    unsigned long last_sample  = resampled_time(t) >> BLIP_BUFFER_ACCURACY;
-    unsigned long first_sample = offset_ >> BLIP_BUFFER_ACCURACY;
-    return (long) (last_sample - first_sample);
-}
-
-blip_time_t BLIPBuffer::count_clocks(long count) const {
-    if (!factor_) {
-        assert(0); // sample rate and clock rates must be set first
-        return 0;
-    }
-
-    if (count > buffer_size_)
-        count = buffer_size_;
-    blip_resampled_time_t time = (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
-    return (blip_time_t) ((time - offset_ + factor_ - 1) / factor_);
-}
-
-void BLIPBuffer::remove_samples(long count) {
-    if (count) {
-        remove_silence(count);
-        // copy remaining samples to beginning and clear old samples
-        long remain = samples_count() + blip_buffer_extra_;
-        memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
-        memset(buffer_ + remain, 0, count * sizeof *buffer_);
-    }
 }
 
 // BLIPSynth_
@@ -311,7 +242,7 @@ void BLIPSynth_::volume_unit(double new_unit) {
 }
 #endif
 
-long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples, int stereo) {
+long BLIPBuffer::read_samples(blip_sample_t* BLIP_RESTRICT out, long max_samples, bool stereo) {
     long count = samples_count();
     if (count > max_samples)
         count = max_samples;

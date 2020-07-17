@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
+#include <cmath>
 #include <limits>
 
 /// A 32-bit signed value
@@ -127,7 +129,11 @@ class BLIPBuffer {
     /// @details
     /// Begins a new time frame at the end of the current frame.
     ///
-    void end_frame(blip_time_t time);
+    inline void end_frame(blip_time_t time) {
+        offset_ += time * factor_;
+        // time outside buffer length
+        assert(samples_count() <= (long) buffer_size_);
+    }
 
     /// @brief Return the number of samples available for reading.
     ///
@@ -147,27 +153,52 @@ class BLIPBuffer {
     /// output buffer.
     /// @returns the number of samples actually read and removed
     ///
-    long read_samples(blip_sample_t* dest, long max_samples, int stereo = 0);
+    long read_samples(blip_sample_t* dest, long max_samples, bool stereo = false);
 
     /// @brief Remove samples from those waiting to be read.
     ///
     /// @param count the number of samples to remove from the buffer
     ///
-    void remove_samples(long count);
+    inline void remove_samples(long count) {
+        if (count) {
+            remove_silence(count);
+            // copy remaining samples to beginning and clear old samples
+            long remain = samples_count() + blip_buffer_extra_;
+            memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
+            memset(buffer_ + remain, 0, count * sizeof *buffer_);
+        }
+    }
 
     /// @brief Remove all available samples and clear buffer to silence.
     ///
     /// @param entire_buffer is false, clears out any samples waiting rather
     /// than the entire buffer.
     ///
-    void clear(int entire_buffer = 1);
+    inline void clear(bool entire_buffer = true) {
+        offset_      = 0;
+        reader_accum_ = 0;
+        modified_    = 0;
+        if (buffer_) {
+            long count = (entire_buffer ? buffer_size_ : samples_count());
+            memset(buffer_, 0, (count + blip_buffer_extra_) * sizeof (buf_t_));
+        }
+    }
 
     /// @brief Set frequency high-pass filter frequency, where higher values
     /// reduce the bass more.
     ///
     /// @param frequency TODO:
     ///
-    void bass_freq(int frequency);
+    inline void bass_freq(int frequency) {
+        bass_freq_ = frequency;
+        int shift = 31;
+        if (frequency > 0) {
+            shift = 13;
+            long f = (frequency << 16) / sample_rate_;
+            while ((f >>= 1) && --shift) { }
+        }
+        bass_shift_ = shift;
+    }
 
     /// @brief Return the number of samples delay from synthesis to samples
     /// available.
@@ -188,7 +219,15 @@ class BLIPBuffer {
     /// If buffer can't even hold `count` samples, returns number of clocks
     /// until buffer becomes full.
     ///
-    blip_time_t count_clocks(long count) const;
+    inline blip_time_t count_clocks(long count) const {
+        if (!factor_) {  // sample rate and clock rates must be set first
+            assert(0);
+            return 0;
+        }
+        if (count > buffer_size_) count = buffer_size_;
+        blip_resampled_time_t time = (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
+        return (blip_time_t) ((time - offset_ + factor_ - 1) / factor_);
+    }
 
     /// @brief Return the number of raw samples that can be mixed within frame
     /// of given `duration`.
@@ -197,7 +236,11 @@ class BLIPBuffer {
     /// @returns the number of raw samples that can be mixed within frame
     /// of given `duration`
     ///
-    long count_samples(blip_time_t duration) const;
+    inline long count_samples(blip_time_t duration) const {
+        unsigned long last_sample  = resampled_time(duration) >> BLIP_BUFFER_ACCURACY;
+        unsigned long first_sample = offset_ >> BLIP_BUFFER_ACCURACY;
+        return (long) (last_sample - first_sample);
+    }
 
     /// @brief Mix 'count' samples from the given buffer into this buffer.
     ///
@@ -216,7 +259,11 @@ class BLIPBuffer {
 
     typedef blip_ulong blip_resampled_time_t;
 
-    void remove_silence(long count);
+    inline void remove_silence(long count) {
+        // tried to remove more samples than available
+        assert(count <= samples_count());
+        offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
+    }
 
     blip_resampled_time_t resampled_duration(int t) const {
         return t * factor_;
@@ -226,7 +273,13 @@ class BLIPBuffer {
         return t * factor_ + offset_;
     }
 
-    blip_resampled_time_t clock_rate_factor(long clock_rate) const;
+    inline blip_resampled_time_t clock_rate_factor(long clock_rate) const {
+        double ratio = (double) sample_rate_ / clock_rate;
+        blip_long factor = (blip_long) floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        // fails if clock/output ratio is too large
+        assert(factor > 0 || !sample_rate_);
+        return (blip_resampled_time_t) factor;
+    }
 
  public:
     /// Initialize a new BLIP Buffer.

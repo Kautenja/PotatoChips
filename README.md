@@ -1,4 +1,6 @@
-# Potato Chips
+<p align="center">
+<img alt="Potato Chips" src="manual/PotatoChips-SocialMedia.svg">
+</p>
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
 
@@ -11,11 +13,6 @@ They're just so addicting!
 
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
-<p align="center">
-<img alt="Plugin1" src="manual/PotatoChips-Plugin1.svg" height="380px">
-<img alt="Plugin2" src="manual/PotatoChips-Plugin2.svg" height="380px">
-</p>
-
 ## 2A03
 
 2A03 is an emulation of the Ricoh 2A03 audio processing unit from the Nintendo
@@ -25,7 +22,7 @@ original chip featured a DMC loader for playing samples that has been omitted
 in this emulation.
 
 <p align="center">
-<img alt="2A03" src="manual/2A03/img/2A03-Module.svg" height="380px">
+<img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
 </p>
 
 ### Features
@@ -49,7 +46,7 @@ Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two
 pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg" height="380px">
+<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
 </p>
 
 ### Features
@@ -74,7 +71,7 @@ pulse wave generators, a noise generator, and an envelope generator. Only the
 pulse wave generators are implemented currently.
 
 <p align="center">
-<img alt="FME7" src="manual/FME7/img/FME7-Module.svg" height="380px">
+<img alt="FME7" src="manual/FME7/img/FME7-Module.svg">
 </p>
 
 ### Features
@@ -96,7 +93,7 @@ bank of five 32-sample wave-tables to act as the waveform for all eight
 channels.
 
 <p align="center">
-<img alt="106" src="manual/106/img/106-Module.svg" height="380px">
+<img alt="106" src="manual/106/img/106-Module.svg">
 </p>
 
 ### Features

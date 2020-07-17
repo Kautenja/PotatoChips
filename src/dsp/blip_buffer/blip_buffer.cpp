@@ -14,48 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "blip_buffer.hpp"
 
 #include <assert.h>
-#include <limits.h>
 #include <string.h>
-#include <stdlib.h>
 #include <math.h>
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
-
-int const silent_buf_size = 1;  // size used for Silent_BLIPBuffer
-
-BLIPBuffer::BLIPBuffer() :
-    factor_(std::numeric_limits<blip_ulong>::max()),
-    offset_(0),
-    buffer_(0),
-    buffer_size_(0),
-    reader_accum_(0),
-    bass_shift_(0),
-    sample_rate_(0),
-    clock_rate_(0),
-    bass_freq_(16),
-    length_(0) {
-    // assumptions code makes about implementation-defined features
-    #ifndef NDEBUG
-        // right shift of negative value preserves sign
-        buf_t_ i = -0x7FFFFFFE;
-        assert((i >> 1) == -0x3FFFFFFF);
-
-        // casting to short truncates to 16 bits and sign-extends
-        i = 0x18000;
-        assert(static_cast<int16_t>(i) == -0x8000);
-    #endif  // NDEBUG
-}
-
-BLIPBuffer::~BLIPBuffer() {
-    if (buffer_size_ != silent_buf_size)
-        free(buffer_);
-}
 
 Silent_BLIPBuffer::Silent_BLIPBuffer() {
     factor_      = 0;

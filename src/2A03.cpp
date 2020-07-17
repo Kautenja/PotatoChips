@@ -217,11 +217,9 @@ struct Chip2A03 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        auto samples = buf[channel].samples_count();
-        if (samples == 0) return 0.f;
         // copy the buffer to a local vector and return the first sample
-        std::vector<int16_t> output_buffer(samples);
-        buf[channel].read_samples(&output_buffer[0], samples);
+        std::vector<int16_t> output_buffer(1);
+        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
         return Vpp * output_buffer[0] / divisor;
     }

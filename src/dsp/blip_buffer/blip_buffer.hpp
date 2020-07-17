@@ -430,15 +430,15 @@ class blip_eq_t {
     double treble;
     /// TODO:
     uint32_t rolloff_freq;
-    /// TODO:
+    /// the sample rate the engine is running at
     uint32_t sample_rate;
     /// TODO:
     uint32_t cutoff_freq;
 
-    /// TODO:
+    /// Generate sinc values into an output buffer with given quantity.
     ///
-    /// @param out TODO:
-    /// @param count TODO:
+    /// @param out the output buffer to equalize
+    /// @param count the number of samples to generate
     /// @details
     /// for usage within instances of BLIPSynth_
     ///
@@ -459,7 +459,7 @@ class blip_eq_t {
     }
 
  public:
-    /// TODO:
+    /// Initialize a new blip_eq_t.
     ///
     /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
@@ -509,7 +509,7 @@ inline void BLIPSynth<quality, range>::offset_resampled(
 
     buf[0] = left;
     buf[1] = right;
-#else  // BLIP_BUFFER_FAST (falsem)
+#else  // BLIP_BUFFER_FAST (false)
 
     int const fwd = (blip_widest_impulse_ - quality) / 2;
     int const rev = fwd + quality - 2;

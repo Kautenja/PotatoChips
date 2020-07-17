@@ -19,7 +19,7 @@
 #ifndef NES_FME7_APU_HPP_
 #define NES_FME7_APU_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 /// the IO registers on the FME7.
 enum IORegisters {

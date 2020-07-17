@@ -19,7 +19,7 @@
 #ifndef NES_NAMCO106_APU_HPP_
 #define NES_NAMCO106_APU_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 /// An oscillator based on the Namco 106 synthesis chip.
 class Namco106 {

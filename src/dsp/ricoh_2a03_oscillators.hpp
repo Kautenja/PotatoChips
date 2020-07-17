@@ -132,7 +132,6 @@ struct Pulse : Envelope {
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-        output->set_modified();
         const int volume = this->volume();
         const int period = this->period();
         int offset = period >> (regs[1] & shift_mask);
@@ -213,7 +212,6 @@ struct Triangle : Oscillator {
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-        output->set_modified();
         // TODO: track phase when period < 3
         // TODO: Output 7.5 on dac when period < 2? More accurate,
         //       but results in more clicks.
@@ -283,7 +281,6 @@ struct Noise : Envelope {
 
     void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
         if (!output) return;
-        output->set_modified();
         const int volume = this->volume();
         int amp = (noise & 1) ? volume : 0;
         int delta = update_amp(amp);

@@ -160,7 +160,6 @@ class Namco106 {
             Namco106_Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
             if (!output) continue;
-            output->set_modified();
 
             auto time = output->resampled_time(last_time) + osc.delay;
             auto end_time = output->resampled_time(nes_end_time);

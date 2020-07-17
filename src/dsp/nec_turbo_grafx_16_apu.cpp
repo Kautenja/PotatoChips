@@ -84,7 +84,6 @@ void Hes_Osc::run_until( synth_t& synth_, blip_time_t end_time )
 			int delta = dac * volume_0 - last_amp [0];
 			if ( delta )
 				synth_.offset( last_time, delta, osc_outputs_0 );
-			// osc_outputs_0->set_modified();
 		}
 
 		BLIPBuffer* const osc_outputs_1 = outputs [1];
@@ -94,7 +93,6 @@ void Hes_Osc::run_until( synth_t& synth_, blip_time_t end_time )
 			int delta = dac * volume_1 - last_amp [1];
 			if ( delta )
 				synth_.offset( last_time, delta, osc_outputs_1 );
-			// osc_outputs_1->set_modified();
 		}
 
 		blip_time_t time = last_time + delay;

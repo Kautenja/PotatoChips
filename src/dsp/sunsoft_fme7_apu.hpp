@@ -116,7 +116,6 @@ class FME7 {
 			BLIPBuffer* const osc_output = oscs [index].output;
 			if ( !osc_output )
 				continue;
-			// osc_output->set_modified();
 
 			// period
 			int const period_factor = 16;

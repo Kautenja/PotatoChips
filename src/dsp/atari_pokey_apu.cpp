@@ -149,8 +149,6 @@ void Sap_Apu::run_until( blip_time_t end_time )
 		BLIPBuffer* output = osc->output;
 		if ( output )
 		{
-			// output->set_modified();
-
 			int const osc_control = osc->regs [1]; // cache
 			int volume = (osc_control & 0x0F) * 2;
 			if ( !volume || osc_control & 0x10 || // silent, DAC mode, or inaudible frequency

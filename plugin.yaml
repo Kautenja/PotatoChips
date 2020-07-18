@@ -10,23 +10,28 @@ authorUrl: https://kautenja.github.io/
 sourceUrl: https://github.com/Kautenja/PotatoChips
 changelogUrl: https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md
 modules:
-  - slug: 2A03
-    name: 2A03
-    description: An emulation of the Ricoh 2A03 audio processing unit.
-    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
-    tags:
-      - Oscillator
-      - Noise
+  # - slug: Pokey
+  #   name: Pokey
+  #   description: An emulation of the Atari Pokey audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pokey.pdf
+  #   tags:
+  #     - Oscillator
+  # - slug: Ay3_8910
+  #   name: Ay3 8910
+  #   description: An emulation of the General Instrument Ay3-8910 audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/Ay3_8910.pdf
+  #   tags:
+  #     - Oscillator
+  # - slug: SCC
+  #   name: SCC
+  #   description: An emulation of the Konami SCC audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
+  #   tags:
+  #     - Oscillator
   - slug: VRC6
     name: VRC6
     description: An emulation of the Konami VRC6 audio processing unit.
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
-    tags:
-      - Oscillator
-  - slug: FME7
-    name: FME7
-    description: An emulation of the Sunsoft FME-7 audio processing unit.
-    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
     tags:
       - Oscillator
   - slug: '106'
@@ -35,3 +40,48 @@ modules:
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
     tags:
       - Oscillator
+  # - slug: TurboGrafx16
+  #   name: Turbo Grafx 16
+  #   description: An emulation of the NEC Turbo Grafx 16 audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
+  #   tags:
+  #     - Oscillator
+  # - slug: GBS
+  #   name: GBS
+  #   description: An emulation of the Nintendo Gameboy Sound System audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
+  #   tags:
+  #     - Oscillator
+  #     - Noise
+  # - slug: S_SMP
+  #   name: S-SMP
+  #   description: An emulation of the Sony S-SMP audio processing unit from the Nintendo SNES.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
+  #   tags:
+  #     - Oscillator
+  #     - Echo
+  - slug: 2A03
+    name: 2A03
+    description: An emulation of the Ricoh 2A03 audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
+    tags:
+      - Oscillator
+      - Noise
+  - slug: FME7
+    name: FME7
+    description: An emulation of the Sunsoft FME-7 audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
+    tags:
+      - Oscillator
+  # - slug: SN76489
+  #   name: SN76489
+  #   description: An emulation of the Texas Instruments SN76489 audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf
+  #   tags:
+  #     - Oscillator
+  # - slug: 2413
+  #   name: 2413
+  #   description: An emulation of the Yamaha YM2413 audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf
+  #   tags:
+  #     - Oscillator

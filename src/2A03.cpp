@@ -20,7 +20,7 @@
 #include "dsp/ricoh_2a03_apu.hpp"
 
 /// the IO registers on the APU
-enum IORegisters {
+enum Richo2A03_Registers {
     PULSE0_VOL =     0x4000,
     PULSE0_SWEEP =   0x4001,
     PULSE0_LO =      0x4002,

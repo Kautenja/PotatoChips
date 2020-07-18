@@ -20,7 +20,7 @@
 #include "dsp/konami_vrc6_apu.hpp"
 
 /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
-enum IORegisters {
+enum KonamiVRC6_Registers {
     PULSE_DUTY_VOLUME = 0,
     PULSE_PERIOD_LOW  = 1,
     PULSE_PERIOD_HIGH = 2,

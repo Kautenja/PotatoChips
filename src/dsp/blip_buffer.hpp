@@ -231,8 +231,6 @@ class BLIPBuffer {
 // TODO: not documented yet
 // ---------------------------------------------------------------------------
 
-    typedef blip_ulong blip_resampled_time_t;
-
     inline blip_resampled_time_t resampled_duration(int time) const {
         return time * factor_;
     }

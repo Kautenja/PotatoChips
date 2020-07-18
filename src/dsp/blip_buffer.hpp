@@ -189,20 +189,12 @@ class BLIPBuffer {
     ///
     inline void end_frame() { offset_ = 1 << BLIP_BUFFER_ACCURACY; }
 
-    /// @brief Return the number of samples available for reading.
-    ///
-    /// @returns the number of samples available for reading from the buffer
-    ///
-    inline uint32_t samples_count() const {
-        return offset_ >> BLIP_BUFFER_ACCURACY;
-    }
-
     /// @brief Read out of this buffer into `dest` and remove them from the buffer.
     ///
     /// @param output the output array to push samples from the buffer into
-    /// @returns the number of samples actually read and removed
+    /// @returns the sample
     ///
-    long read_samples(blip_sample_t* BLIP_RESTRICT output) {
+    blip_sample_t read_sample() {
         // create a temporary pointer to the buffer that can be mutated
         const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator
@@ -211,14 +203,13 @@ class BLIPBuffer {
         blip_long sample = read_accum_temp >> (blip_sample_bits - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
-        *output = sample;
         read_accum_temp += *buffer_temp - (read_accum_temp >> (bass_shift_));
         // update the accumulator
         reader_accum_ = read_accum_temp;
         // TODO: remove
-        remove_samples(samples_count());
+        remove_samples(1);
         // TODO: return the sample
-        return 1;
+        return sample;
     }
 
     /// @brief Remove samples from those waiting to be read.
@@ -229,7 +220,7 @@ class BLIPBuffer {
         if (count) {
             remove_silence(count);
             // copy remaining samples to beginning and clear old samples
-            long remain = samples_count() + blip_buffer_extra_;
+            long remain = 1 + blip_buffer_extra_;
             memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
             memset(buffer_ + remain, 0, count * sizeof *buffer_);
         }
@@ -259,7 +250,6 @@ class BLIPBuffer {
 
     inline void remove_silence(long count) {
         // tried to remove more samples than available
-        assert(count <= samples_count());
         offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
     }
 

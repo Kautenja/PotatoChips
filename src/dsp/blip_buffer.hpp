@@ -201,9 +201,10 @@ class BLIPBuffer {
         // TODO: remove
         // -------------------------------------------------------------------
         // copy remaining samples to beginning and clear old samples
-        long remain = 1 + blip_buffer_extra_;
-        memmove(buffer_, buffer_ + 1, remain * sizeof *buffer_);
-        memset(buffer_ + remain, 0, 1 * sizeof *buffer_);
+        static constexpr auto count = 1;
+        long remain = count + blip_buffer_extra_;
+        memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
+        memset(buffer_ + remain, 0, count * sizeof *buffer_);
         // -------------------------------------------------------------------
         return sample;
     }

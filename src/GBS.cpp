@@ -97,9 +97,8 @@ struct ChipGBS : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        std::cout << freq11bit << std::endl;
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
@@ -114,7 +113,7 @@ struct ChipGBS : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ11BIT_MAX = 1023;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
+        static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
 
@@ -136,18 +135,19 @@ struct ChipGBS : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        // uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        uint16_t freq11bit = freq;
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        apu.write_register(0, WAVE_FREQ_LO,  freq11bit & 0b0000000011111111);
-        apu.write_register(0, WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, (freq11bit & 0b0000011100000000) >> 8);
+        apu.write_register(0, WAVE_FREQ_LO,  freq11bit & 0xff);
+        apu.write_register(0, WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, freq11bit >> 8 | 0x80);
 
         for (int i = 0; i < 32 / 2; i++) {
             uint8_t nibbleHi = sine_wave[2 * i];
             uint8_t nibbleLo = sine_wave[2 * i + 1];
             // combine the two nibbles into a byte for the RAM
-            apu.write_register(0, WAVE_TABLE_VALUES, (nibbleHi << 4) | nibbleLo);
+            apu.write_register(0, WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
         }
     }
 
@@ -199,7 +199,6 @@ struct ChipGBS : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-
             // process the data on the chip
             apu.write_register(0, POWER_CONTROL_STATUS, 0b10000000);
             apu.write_register(0, STEREO_ENABLES, 0b01110111);
@@ -208,13 +207,6 @@ struct ChipGBS : Module {
             channel_pulse(1);
             channel_wave();
             channel_noise();
-
-            // Start a new random tone
-            // apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD, 0x80 );
-            // int freq = (rand() & 0x3ff) + 0x300;
-            // apu.write_register(0, PULSE0_FREQ_LO, freq & 0xff );
-            // apu.write_register(0, PULSE0_START_VOLUME, 0xf1 );
-            // apu.write_register(0, PULSE0_TRIG_LENGTH_ENABLE_HI, (freq >> 8) | 0x80 );
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);

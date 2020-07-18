@@ -76,18 +76,18 @@ struct ChipGBS : Module {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 1023;
+        static constexpr float FREQ11BIT_MAX = 2035;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
 
         // set the pulse width of the pulse wave (high 2 bits)
-        // auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        // apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
+        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
+        apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
 
-        // set the volume
-        apu.write_register(0, PULSE0_START_VOLUME + 5 * channel, 0b11110000);
+        // set the volume of the pulse wave, high 4 bits, envelope add mode on
+        apu.write_register(0, PULSE0_START_VOLUME + 5 * channel, 0b11111000);
 
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
@@ -99,11 +99,13 @@ struct ChipGBS : Module {
         // convert the frequency to an 11-bit value
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+        std::cout << freq11bit << std::endl;
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        apu.write_register(0, PULSE0_FREQ_LO               + 5 * channel,  freq11bit & 0b0000000011111111);
-        apu.write_register(0, PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit & 0b0000011100000000) >> 8);
+        // int freq_ = freq;//(rand() & 0x3ff) + 0x300;
+        apu.write_register(0, PULSE0_FREQ_LO               + 5 * channel, freq11bit & 0xff );
+        apu.write_register(0, PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit >> 8) | 0x80 );
     }
 
     void channel_wave() {
@@ -186,25 +188,33 @@ struct ChipGBS : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
+        uint32_t cycles_per_sample = 4194304 / args.sampleRate;
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
             for (int i = 0; i < Gb_Apu::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
+                buf[i].set_sample_rate(args.sampleRate, 4194304);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+
             // process the data on the chip
-            // channel_pulse(0);
-            // channel_pulse(1);
-            // channel_wave();
-            // channel_noise();
-            apu.write_register(0, STEREO_VOLUME, 0b11111111);
-            // apu.write_register(0, STEREO_ENABLES, 0b11111111);
             apu.write_register(0, POWER_CONTROL_STATUS, 0b10000000);
+            apu.write_register(0, STEREO_ENABLES, 0b01110111);
+            apu.write_register(0, STEREO_VOLUME, 0b11111111);
+            channel_pulse(0);
+            channel_pulse(1);
+            channel_wave();
+            channel_noise();
+
+            // Start a new random tone
+            // apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD, 0x80 );
+            // int freq = (rand() & 0x3ff) + 0x300;
+            // apu.write_register(0, PULSE0_FREQ_LO, freq & 0xff );
+            // apu.write_register(0, PULSE0_START_VOLUME, 0xf1 );
+            // apu.write_register(0, PULSE0_TRIG_LENGTH_ENABLE_HI, (freq >> 8) | 0x80 );
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);

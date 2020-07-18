@@ -25,33 +25,35 @@
 /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
 enum GBS_Registers {
     // Pulse 0
-    PULSE0_SWEEP_PERIOD = 0xFF10,
-    PULSE0_DUTY_LENGTH_LOAD,
-    PULSE0_START_VOLUME,
-    PULSE0_FREQ_LO,
-    PULSE0_TRIG_LENGTH_ENABLE_HI,
+    PULSE0_SWEEP_PERIOD               = 0xFF10,
+    PULSE0_DUTY_LENGTH_LOAD           = 0xFF11,
+    PULSE0_START_VOLUME               = 0xFF12,
+    PULSE0_FREQ_LO                    = 0xFF13,
+    PULSE0_TRIG_LENGTH_ENABLE_HI      = 0xFF14,
     // Pulse 1
-    PULSE1_DUTY_LENGTH_LOAD = 0xFF16,
-    PULSE1_START_VOLUME,
-    PULSE1_FREQ_LO,
-    PULSE1_TRIG_LENGTH_ENABLE_FREQ_HI,
+    // PULSE1_UNUSED                     = 0xFF15,
+    PULSE1_DUTY_LENGTH_LOAD           = 0xFF16,
+    PULSE1_START_VOLUME               = 0xFF17,
+    PULSE1_FREQ_LO                    = 0xFF18,
+    PULSE1_TRIG_LENGTH_ENABLE_FREQ_HI = 0xFF19,
     // Wave
-    WAVE_DAC_POWER,
-    WAVE_LENGTH_LOAD,
-    WAVE_VOLUME_CODE,
-    WAVE_FREQ_LO,
-    WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
+    WAVE_DAC_POWER                    = 0xFF1A,
+    WAVE_LENGTH_LOAD                  = 0xFF1B,
+    WAVE_VOLUME_CODE                  = 0xFF1C,
+    WAVE_FREQ_LO                      = 0xFF1D,
+    WAVE_TRIG_LENGTH_ENABLE_FREQ_HI   = 0xFF1E,
     // Noise
-    NOISE_LENGTH_LOAD = 0xFF20,
-    NOISE_START_VOLUME,
-    NOISE_CLOCK_SHIFT,
-    NOISE_TRIG_LENGTH_ENABLE,
+    // NOISE_UNUSED                      = 0xFF1F,
+    NOISE_LENGTH_LOAD                 = 0xFF20,
+    NOISE_START_VOLUME                = 0xFF21,
+    NOISE_CLOCK_SHIFT                 = 0xFF22,
+    NOISE_TRIG_LENGTH_ENABLE          = 0xFF23,
     // Control / Status
-    STEREO_VOLUME,
-    STEREO_ENABLES,
-    POWER_CONTROL_STATUS,
-    // wavetable
-    WAVE_TABLE_VALUES = 0xFF30
+    STEREO_VOLUME                     = 0xFF24,
+    STEREO_ENABLES                    = 0xFF25,
+    POWER_CONTROL_STATUS              = 0xFF26,
+    // wave-table for wave channel
+    WAVE_TABLE_VALUES                 = 0xFF30
 };
 
 /// the default values for the wave-table

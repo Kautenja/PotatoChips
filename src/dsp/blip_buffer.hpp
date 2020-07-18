@@ -206,24 +206,16 @@ class BLIPBuffer {
         read_accum_temp += *buffer_temp - (read_accum_temp >> (bass_shift_));
         // update the accumulator
         reader_accum_ = read_accum_temp;
+        // -------------------------------------------------------------------
         // TODO: remove
-        remove_samples(1);
-        // TODO: return the sample
+        // -------------------------------------------------------------------
+        offset_ -= 1 << BLIP_BUFFER_ACCURACY;
+        // copy remaining samples to beginning and clear old samples
+        long remain = 1 + blip_buffer_extra_;
+        memmove(buffer_, buffer_ + 1, remain * sizeof *buffer_);
+        memset(buffer_ + remain, 0, 1 * sizeof *buffer_);
+        // -------------------------------------------------------------------
         return sample;
-    }
-
-    /// @brief Remove samples from those waiting to be read.
-    ///
-    /// @param count the number of samples to remove from the buffer
-    ///
-    inline void remove_samples(long count) {
-        if (count) {
-            remove_silence(count);
-            // copy remaining samples to beginning and clear old samples
-            long remain = 1 + blip_buffer_extra_;
-            memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
-            memset(buffer_ + remain, 0, count * sizeof *buffer_);
-        }
     }
 
     /// @brief Set frequency high-pass filter frequency, where higher values
@@ -247,11 +239,6 @@ class BLIPBuffer {
 // ---------------------------------------------------------------------------
 
     typedef blip_ulong blip_resampled_time_t;
-
-    inline void remove_silence(long count) {
-        // tried to remove more samples than available
-        offset_ -= (blip_resampled_time_t) count << BLIP_BUFFER_ACCURACY;
-    }
 
     inline blip_resampled_time_t resampled_duration(int time) const {
         return time * factor_;

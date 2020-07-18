@@ -21,8 +21,18 @@
 
 #include "blip_buffer.hpp"
 
+/// the IO registers on the VRC6 chip (altered for VRC6 implementation).
+enum KonamiVRC6_Registers {
+    PULSE_DUTY_VOLUME = 0,
+    PULSE_PERIOD_LOW  = 1,
+    PULSE_PERIOD_HIGH = 2,
+    SAW_VOLUME        = 0,
+    SAW_PERIOD_LOW    = 1,
+    SAW_PERIOD_HIGH   = 2,
+};
+
 /// An oscillator based on the Konami VRC6 synthesis chip.
-class VRC6 {
+class KonamiVRC6 {
  public:
     /// CPU clock cycle count
     typedef int32_t cpu_time_t;
@@ -34,7 +44,7 @@ class VRC6 {
     static constexpr int REG_COUNT = 3;
 
     /// Initialize a new VRC6 chip emulator.
-    VRC6() { output(NULL); volume(1.0); reset(); }
+    KonamiVRC6() { output(NULL); volume(1.0); reset(); }
 
     /// Reset internal frame counter, registers, and all oscillators.
     inline void reset() {
@@ -120,12 +130,12 @@ class VRC6 {
 
  private:
     /// Disable the public copy constructor.
-    VRC6(const VRC6&);
+    KonamiVRC6(const KonamiVRC6&);
 
     /// Disable the public assignment operator.
-    VRC6& operator = (const VRC6&);
+    KonamiVRC6& operator = (const KonamiVRC6&);
 
-    /// An oscillator on the VRC6 chip.
+    /// An oscillator on the KonamiVRC6 chip.
     struct VRC6_Oscillator {
         /// the internal registers for the oscillator
         uint8_t regs[3];

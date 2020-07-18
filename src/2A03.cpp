@@ -19,33 +19,6 @@
 #include "components.hpp"
 #include "dsp/ricoh_2a03_apu.hpp"
 
-/// the IO registers on the APU
-enum Richo2A03_Registers {
-    PULSE0_VOL =     0x4000,
-    PULSE0_SWEEP =   0x4001,
-    PULSE0_LO =      0x4002,
-    PULSE0_HI =      0x4003,
-    PULSE1_VOL =     0x4004,
-    PULSE1_SWEEP =   0x4005,
-    PULSE1_LO =      0x4006,
-    PULSE1_HI =      0x4007,
-    TRI_LINEAR =     0x4008,
-    APU_UNUSED1 =    0x4009,  // may be used for memory clearing loops
-    TRI_LO =         0x400A,
-    TRI_HI =         0x400B,
-    NOISE_VOL =      0x400C,
-    APU_UNUSED2 =    0x400D,  // may be used for memory clearing loops
-    NOISE_LO =       0x400E,
-    NOISE_HI =       0x400F,
-    DMC_FREQ =       0x4010,
-    DMC_RAW =        0x4011,
-    DMC_START =      0x4012,
-    DMC_LEN =        0x4013,
-    SND_CHN =        0x4015,
-    JOY1 =           0x4016,  // unused for APU
-    STATUS =         0x4017,
-};
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

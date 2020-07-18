@@ -17,7 +17,6 @@
 //
 
 #include "general_instrument_ay_3_8910_apu.hpp"
-#include "blargg_source.h"
 
 // Emulation inaccuracies:
 // * Noise isn't run when not in use

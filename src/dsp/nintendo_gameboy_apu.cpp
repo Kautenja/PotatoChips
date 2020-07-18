@@ -19,7 +19,6 @@
 #include "nintendo_gameboy_apu.hpp"
 #include <algorithm>
 #include <cstring>
-#include "blargg_source.h"
 
 unsigned const vol_reg    = 0xFF24;
 unsigned const status_reg = 0xFF26;

@@ -18,7 +18,6 @@
 
 #include "nintendo_gameboy_apu.hpp"
 #include <cstring>
-#include "blargg_source.h"
 
 void Gb_Osc::reset() {
     delay = 0;

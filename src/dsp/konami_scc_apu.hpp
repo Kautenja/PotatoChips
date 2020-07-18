@@ -21,7 +21,7 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
-#include <string.h>
+#include <cstring>
 
 class Scc_Apu {
 public:

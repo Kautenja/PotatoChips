@@ -17,7 +17,6 @@
 //
 
 #include "texas_instruments_sn76489_apu.hpp"
-#include "blargg_source.h"
 
 Sms_Osc::Sms_Osc()
 {

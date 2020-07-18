@@ -18,7 +18,6 @@
 
 #include "nec_turbo_grafx_16_apu.hpp"
 #include <cstring>
-#include "blargg_source.h"
 
 bool const center_waves = true; // reduces asymmetry and clamping when starting notes
 

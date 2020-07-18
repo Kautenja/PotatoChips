@@ -20,8 +20,7 @@
 
 #include "nintendo_snes_spc_dsp.hpp"
 #include "blargg_endian.h"
-#include <string.h>
-#include "blargg_source.h"
+#include <cstring>
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
 	#include BLARGG_ENABLE_OPTIMIZER

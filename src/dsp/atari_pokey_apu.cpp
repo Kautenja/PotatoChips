@@ -18,7 +18,6 @@
 
 #include "atari_pokey_apu.hpp"
 #include <string.h>
-#include "blargg_source.h"
 
 int const max_frequency = 12000; // pure waves above this frequency are silenced
 

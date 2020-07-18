@@ -20,7 +20,47 @@
 #define DSP_NINTENDO_GAMEBOY_APU_HPP_
 
 #include "nintendo_gameboy_oscillators.hpp"
+#include <iostream>
 
+/// Registers for the Nintendo GameBoy Sound System (GBS) APU.
+enum GBS_Registers {
+    // Pulse 0
+    PULSE0_SWEEP_PERIOD = 0xFF10,
+    PULSE0_DUTY_LENGTH_LOAD,
+    PULSE0_START_VOLUME,
+    PULSE0_FREQ_LO,
+    PULSE0_TRIG_LENGTH_ENABLE_HI,
+    // Pulse 1
+    PULSE1_DUTY_LENGTH_LOAD = 0xFF16,
+    PULSE1_START_VOLUME,
+    PULSE1_FREQ_LO,
+    PULSE1_TRIG_LENGTH_ENABLE_FREQ_HI,
+    // Wave
+    WAVE_DAC_POWER,
+    WAVE_LENGTH_LOAD,
+    WAVE_VOLUME_CODE,
+    WAVE_FREQ_LO,
+    WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
+    // Noise
+    NOISE_LENGTH_LOAD = 0xFF20,
+    NOISE_START_VOLUME,
+    NOISE_CLOCK_SHIFT,
+    NOISE_TRIG_LENGTH_ENABLE,
+    // Control / Status
+    STEREO_VOLUME,
+    STEREO_ENABLES,
+    POWER_CONTROL_STATUS,
+    // wavetable
+    WAVE_TABLE_VALUES = 0xFF30
+};
+
+/// the default values for the wave-table
+const uint8_t sine_wave[32] = {
+    0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
+    0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
+};
+
+/// The Nintendo GameBoy Sound System (GBS) Audio Processing Unit (APU).
 class Gb_Apu {
  public:
     Gb_Apu();

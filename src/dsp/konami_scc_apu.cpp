@@ -17,7 +17,6 @@
 //
 
 #include "konami_scc_apu.hpp"
-#include "blargg_source.h"
 
 // Tones above this frequency are treated as disabled tone at half volume.
 // Power of two is more efficient (avoids division).

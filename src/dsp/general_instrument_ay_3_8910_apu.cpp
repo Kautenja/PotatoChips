@@ -122,12 +122,12 @@ void Ay_Apu::write_data_( int addr, int data )
 {
     assert( (unsigned) addr < reg_count );
 
-    if ( (unsigned) addr >= 14 )
-    {
-        #ifdef dprintf
-            dprintf( "Wrote to I/O port %02X\n", (int) addr );
-        #endif
-    }
+    // if ( (unsigned) addr >= 14 )
+    // {
+    //     #ifdef dprintf
+    //         dprintf( "Wrote to I/O port %02X\n", (int) addr );
+    //     #endif
+    // }
 
     // envelope mode
     if ( addr == 13 )

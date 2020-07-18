@@ -179,7 +179,7 @@ Sms_Apu::~Sms_Apu()
 
 void Sms_Apu::volume(double vol)
 {
-    vol *= 0.85 / (osc_count * 64 * 2);
+    vol *= 0.85 / (OSC_COUNT * 64 * 2);
     square_synth.volume(vol);
     noise.synth.volume(vol);
 }
@@ -192,7 +192,7 @@ void Sms_Apu::treble_eq(const blip_eq_t& eq)
 
 void Sms_Apu::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    assert((unsigned) index < osc_count);
+    assert((unsigned) index < OSC_COUNT);
     assert((center && left && right) || (!center && !left && !right));
     Sms_Osc& osc = *oscs [index];
     osc.outputs [1] = right;
@@ -203,7 +203,7 @@ void Sms_Apu::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBu
 
 void Sms_Apu::output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    for (int i = 0; i < osc_count; i++)
+    for (int i = 0; i < OSC_COUNT; i++)
         osc_output(i, center, left, right);
 }
 
@@ -239,7 +239,7 @@ void Sms_Apu::run_until(blip_time_t end_time)
     if (end_time > last_time)
     {
         // run oscillators
-        for (int i = 0; i < osc_count; ++i)
+        for (int i = 0; i < OSC_COUNT; ++i)
         {
             Sms_Osc& osc = *oscs [i];
             if (osc.output)
@@ -270,7 +270,7 @@ void Sms_Apu::write_ggstereo(blip_time_t time, int data)
 
     run_until(time);
 
-    for (int i = 0; i < osc_count; i++)
+    for (int i = 0; i < OSC_COUNT; i++)
     {
         Sms_Osc& osc = *oscs [i];
         int flags = data >> i;

@@ -77,8 +77,6 @@ struct ChipGBS : Module {
         static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
         static constexpr float FREQ11BIT_MAX = 2035;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // set the pulse width of the pulse wave (high 2 bits)
@@ -93,13 +91,10 @@ struct ChipGBS : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 11-bit value
-        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        // int freq_ = freq;//(rand() & 0x3ff) + 0x300;
         apu.write_register(0, PULSE0_FREQ_LO               + 5 * channel, freq11bit & 0xff );
         apu.write_register(0, PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit >> 8) | 0x80 );
     }
@@ -108,9 +103,7 @@ struct ChipGBS : Module {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ11BIT_MIN = 8;
         // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 1023;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
+        static constexpr float FREQ11BIT_MAX = 2035;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // turn on the DAC for the channel
@@ -125,10 +118,7 @@ struct ChipGBS : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = buf[2].get_clock_rate() / (CLOCK_DIVISION * freq);
-        // TODO: determine range
-        // uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        uint16_t freq11bit = freq;
+        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index

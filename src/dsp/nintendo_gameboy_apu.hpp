@@ -22,7 +22,8 @@
 #include "nintendo_gameboy_oscillators.hpp"
 
 class Gb_Apu {
-public:
+ public:
+    Gb_Apu();
 
     // Set overall volume of all oscillators, where 1.0 is full volume
     void volume(double);
@@ -35,23 +36,27 @@ public:
 
     // Assign all oscillator outputs to specified buffer(s). If buffer
     // is NULL, silences all oscillators.
-    void output(BLIPBuffer* mono);
     void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    inline void output(BLIPBuffer* mono) {
+        output(mono, mono, mono);
+    }
 
     // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
     // which refer to Square 1, Square 2, Wave, and Noise. If buffer is NULL,
     // silences oscillator.
-    enum { osc_count = 4 };
-    void osc_output(int index, BLIPBuffer* mono);
+    enum { OSC_COUNT = 4 };
     void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    inline void osc_output(int index, BLIPBuffer* mono) {
+        osc_output(index, mono, mono, mono);
+    }
 
     // Reset oscillators and internal state
     void reset();
 
-    // Reads and writes at addr must satisfy start_addr <= addr <= end_addr
-    enum { start_addr = 0xFF10 };
-    enum { end_addr   = 0xFF3F };
-    enum { register_count = end_addr - start_addr + 1 };
+    // Reads and writes at addr must satisfy ADDR_START <= addr <= ADDR_END
+    enum { ADDR_START = 0xFF10 };
+    enum { ADDR_END   = 0xFF3F };
+    enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
 
     // Write 'data' to address at specified time
     void write_register(blip_time_t, unsigned addr, int data);
@@ -65,40 +70,41 @@ public:
 
     void set_tempo(double);
 
-public:
-    Gb_Apu();
-private:
+ private:
     // noncopyable
     Gb_Apu(const Gb_Apu&);
     Gb_Apu& operator = (const Gb_Apu&);
 
-    Gb_Osc*     oscs [osc_count];
-    blip_time_t   next_frame_time;
-    blip_time_t   last_time;
+    Gb_Osc* oscs[OSC_COUNT];
+    blip_time_t next_frame_time;
+    blip_time_t last_time;
     blip_time_t frame_period;
-    double      volume_unit;
-    int         frame_count;
+    double volume_unit;
+    int frame_count;
 
-    Gb_Square   square1;
-    Gb_Square   square2;
-    Gb_Wave     wave;
-    Gb_Noise    noise;
-    uint8_t regs [register_count];
-    Gb_Square::Synth square_synth; // used by squares
-    Gb_Wave::Synth   other_synth;  // used by wave and noise
+    Gb_Square square1;
+    Gb_Square square2;
+    Gb_Wave wave;
+    Gb_Noise noise;
+    uint8_t regs[REGISTER_COUNT];
+    // used by squares
+    Gb_Square::Synth square_synth;
+    // used by wave and noise
+    Gb_Wave::Synth other_synth;
 
     void update_volume();
     void run_until(blip_time_t);
     void write_osc(int index, int reg, int data);
 };
 
-inline void Gb_Apu::output(BLIPBuffer* b) { output(b, b, b); }
+// inline void Gb_Apu::output(BLIPBuffer* b)
 
-inline void Gb_Apu::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
+// inline void Gb_Apu::osc_output(int i, BLIPBuffer* b) {
+//     osc_output(i, b, b, b);
+// }
 
-inline void Gb_Apu::volume(double vol)
-{
-    volume_unit = 0.60 / osc_count / 15 /*steps*/ / 2 /*?*/ / 8 /*master vol range*/ * vol;
+inline void Gb_Apu::volume(double vol) {
+    volume_unit = 0.60 / OSC_COUNT / 15 /*steps*/ / 2 /*?*/ / 8 /*master vol range*/ * vol;
     update_volume();
 }
 

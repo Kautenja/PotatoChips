@@ -56,9 +56,6 @@ struct ChipVRC6 : Module {
         LIGHT_COUNT
     };
 
-    /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 768000;
-
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[VRC6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with

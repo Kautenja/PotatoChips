@@ -183,18 +183,17 @@ class BLIPBuffer {
     ///
     inline uint32_t get_clock_rate() const { return clock_rate_; }
 
-    /// @brief End current time frame of specified duration and make its
-    /// samples available (along with any still-unread samples). Begins a new
-    /// time frame at the end of the current frame.
-    ///
-    inline void end_frame() { offset_ = 1 << BLIP_BUFFER_ACCURACY; }
-
     /// @brief Read out of this buffer into `dest` and remove them from the buffer.
     ///
     /// @param output the output array to push samples from the buffer into
     /// @returns the sample
     ///
     blip_sample_t read_sample() {
+        // -------------------------------------------------------------------
+        // TODO: remove
+        // -------------------------------------------------------------------
+        offset_ = 1 << BLIP_BUFFER_ACCURACY;
+        // -------------------------------------------------------------------
         // create a temporary pointer to the buffer that can be mutated
         const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator

@@ -219,10 +219,8 @@ struct Chip2A03 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < APU::OSC_COUNT; i++) {
-            buf[i].end_frame();
+        for (int i = 0; i < APU::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
-        }
     }
 
     /// Respond to the change of sample rate in the engine.

@@ -19,33 +19,6 @@
 #include "components.hpp"
 #include "dsp/ricoh_2a03_apu.hpp"
 
-/// the IO registers on the APU
-enum IORegisters {
-    PULSE0_VOL =     0x4000,
-    PULSE0_SWEEP =   0x4001,
-    PULSE0_LO =      0x4002,
-    PULSE0_HI =      0x4003,
-    PULSE1_VOL =     0x4004,
-    PULSE1_SWEEP =   0x4005,
-    PULSE1_LO =      0x4006,
-    PULSE1_HI =      0x4007,
-    TRI_LINEAR =     0x4008,
-    APU_UNUSED1 =    0x4009,  // may be used for memory clearing loops
-    TRI_LO =         0x400A,
-    TRI_HI =         0x400B,
-    NOISE_VOL =      0x400C,
-    APU_UNUSED2 =    0x400D,  // may be used for memory clearing loops
-    NOISE_LO =       0x400E,
-    NOISE_HI =       0x400F,
-    DMC_FREQ =       0x4010,
-    DMC_RAW =        0x4011,
-    DMC_START =      0x4012,
-    DMC_LEN =        0x4013,
-    SND_CHN =        0x4015,
-    JOY1 =           0x4016,  // unused for APU
-    STATUS =         0x4017,
-};
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -53,29 +26,26 @@ enum IORegisters {
 /// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, APU::OSC_COUNT),
+        ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, APU::OSC_COUNT),
+        ENUMS(INPUT_VOCT, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
         INPUT_LFSR,
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, APU::OSC_COUNT),
+        ENUMS(OUTPUT_CHANNEL, Ricoh2A03::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
 
-    /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 768000;
-
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[APU::OSC_COUNT];
+    BLIPBuffer buf[Ricoh2A03::OSC_COUNT];
     /// The 2A03 instance to synthesize sound with
-    APU apu;
+    Ricoh2A03 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -97,7 +67,7 @@ struct Chip2A03 : Module {
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < APU::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -191,11 +161,8 @@ struct Chip2A03 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // copy the buffer to a local vector and return the first sample
-        std::vector<int16_t> output_buffer(1);
-        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * output_buffer[0] / divisor;
+        return Vpp * buf[channel].read_sample() / divisor;
     }
 
     /// Process a sample.
@@ -205,8 +172,8 @@ struct Chip2A03 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < APU::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate);
+            for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
@@ -222,10 +189,8 @@ struct Chip2A03 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < APU::OSC_COUNT; i++) {
-            buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
-        }
     }
 
     /// Respond to the change of sample rate in the engine.

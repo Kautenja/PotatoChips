@@ -22,8 +22,35 @@
 #include "ricoh_2a03_oscillators.hpp"
 #include <cassert>
 
-/// An oscillator based on the NES 2A03 synthesis chip.
-class APU {
+/// the IO registers on the APU
+enum Richo2A03_Registers {
+    PULSE0_VOL =     0x4000,
+    PULSE0_SWEEP =   0x4001,
+    PULSE0_LO =      0x4002,
+    PULSE0_HI =      0x4003,
+    PULSE1_VOL =     0x4004,
+    PULSE1_SWEEP =   0x4005,
+    PULSE1_LO =      0x4006,
+    PULSE1_HI =      0x4007,
+    TRI_LINEAR =     0x4008,
+    APU_UNUSED1 =    0x4009,  // may be used for memory clearing loops
+    TRI_LO =         0x400A,
+    TRI_HI =         0x400B,
+    NOISE_VOL =      0x400C,
+    APU_UNUSED2 =    0x400D,  // may be used for memory clearing loops
+    NOISE_LO =       0x400E,
+    NOISE_HI =       0x400F,
+    DMC_FREQ =       0x4010,
+    DMC_RAW =        0x4011,
+    DMC_START =      0x4012,
+    DMC_LEN =        0x4013,
+    SND_CHN =        0x4015,
+    JOY1 =           0x4016,  // unused for APU
+    STATUS =         0x4017,
+};
+
+/// An oscillator based on the Ricoh 2A03 synthesis chip.
+class Ricoh2A03 {
  public:
     /// the number of oscillators on the VRC6 chip
     static constexpr int OSC_COUNT = 4;
@@ -33,7 +60,7 @@ class APU {
     static constexpr int ADDR_END   = 0x4017;
 
     /// Initialize a new APU.
-    APU() {
+    Ricoh2A03() {
         pulse1.synth = pulse2.synth = &square_synth;
         output(NULL);
         volume(1.0);
@@ -104,7 +131,7 @@ class APU {
     ///       3) Noise.
     ///
     inline void osc_output(int osc, BLIPBuffer* buf) {
-        assert(0 <= osc && osc < OSC_COUNT && "APU::osc_output(): Index out of range");
+        assert(0 <= osc && osc < OSC_COUNT && "Ricoh2A03::osc_output(): Index out of range");
         oscs[osc]->output = buf;
     }
 
@@ -186,10 +213,10 @@ class APU {
 
  private:
     /// Disable the public copy constructor.
-    APU(const APU&);
+    Ricoh2A03(const Ricoh2A03&);
 
     /// Disable the public assignment operator.
-    APU& operator=(const APU&);
+    Ricoh2A03& operator=(const Ricoh2A03&);
 
     /// the channel 0 pulse wave generator
     Pulse pulse1;

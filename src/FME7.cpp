@@ -42,13 +42,10 @@ struct ChipFME7 : Module {
     };
     enum LightIds { LIGHT_COUNT };
 
-    /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 768000;
-
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[FME7::OSC_COUNT];
+    BLIPBuffer buf[SunSoftFME7::OSC_COUNT];
     /// The FME7 instance to synthesize sound with
-    FME7 apu;
+    SunSoftFME7 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -67,7 +64,7 @@ struct ChipFME7 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < FME7::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -126,11 +123,8 @@ struct ChipFME7 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // copy the buffer to a local vector and return the first sample
-        std::vector<int16_t> output_buffer(1);
-        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * output_buffer[0] / divisor;
+        return Vpp * buf[channel].read_sample() / divisor;
     }
 
     /// Process a sample.
@@ -140,21 +134,19 @@ struct ChipFME7 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < FME7::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate);
+            for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int i = 0; i < FME7::OSC_COUNT; i++)
+            for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
                 pulse(i);
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < FME7::OSC_COUNT; i++) {  // set outputs
-            buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
-        }
     }
 
     /// Respond to the change of sample rate in the engine.

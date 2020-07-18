@@ -1,4 +1,4 @@
-// An oscillator based on the Sunsoft FME7 synthesis chip.
+// An oscillator based on the Sunsoft SunSoftFME7 synthesis chip.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -16,13 +16,13 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef NES_FME7_APU_HPP_
-#define NES_FME7_APU_HPP_
+#ifndef NES_SunSoftFME7_APU_HPP_
+#define NES_SunSoftFME7_APU_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
-/// the IO registers on the FME7.
-enum IORegisters {
+/// the IO registers on the SunSoftFME7.
+enum SunSoftSunSoftFME7_Registers {
     PULSE_A_LO   = 0x00,
     PULSE_A_HI   = 0x01,
     PULSE_B_LO   = 0x02,
@@ -55,7 +55,7 @@ static constexpr unsigned char amp_table[16] =
 	#undef ENTRY
 };
 
-class FME7 {
+class SunSoftFME7 {
  private:
 	enum { reg_count = 14 };
 	uint8_t regs [reg_count];
@@ -89,12 +89,12 @@ class FME7 {
 	void write_data( blip_time_t, int data );
 
  public:
-	FME7();
+	SunSoftFME7();
 
  private:
 	// noncopyable
-	FME7( const FME7& );
-	FME7& operator = ( const FME7& );
+	SunSoftFME7( const SunSoftFME7& );
+	SunSoftFME7& operator = ( const SunSoftFME7& );
 
 	struct {
 		BLIPBuffer* output;
@@ -105,7 +105,7 @@ class FME7 {
 	BLIPSynth<blip_good_quality, 1> synth;
 
 	void run_until(blip_time_t end_time) {
-		// require( end_time >= last_time );
+		// assert( end_time >= last_time );
 
 		for ( int index = 0; index < OSC_COUNT; index++ )
 		{
@@ -174,52 +174,52 @@ class FME7 {
 	}
 };
 
-inline void FME7::volume( double v )
+inline void SunSoftFME7::volume( double v )
 {
 	synth.volume( 0.38 / amp_range * v ); // to do: fine-tune
 }
 
-inline void FME7::treble_eq( blip_eq_t const& eq )
+inline void SunSoftFME7::treble_eq( blip_eq_t const& eq )
 {
 	synth.treble_eq( eq );
 }
 
-inline void FME7::osc_output( int i, BLIPBuffer* buf )
+inline void SunSoftFME7::osc_output( int i, BLIPBuffer* buf )
 {
 	assert( (unsigned) i < OSC_COUNT );
 	oscs [i].output = buf;
 }
 
-inline void FME7::output( BLIPBuffer* buf )
+inline void SunSoftFME7::output( BLIPBuffer* buf )
 {
 	for ( int i = 0; i < OSC_COUNT; i++ )
 		osc_output( i, buf );
 }
 
-inline FME7::FME7()
+inline SunSoftFME7::SunSoftFME7()
 {
 	output( NULL );
 	volume( 1.0 );
 	reset();
 }
 
-inline void FME7::write_latch( int data ) { latch = data; }
+inline void SunSoftFME7::write_latch( int data ) { latch = data; }
 
-inline void FME7::write_data( blip_time_t time, int data )
+inline void SunSoftFME7::write_data( blip_time_t time, int data )
 {
-	if ( (unsigned) latch >= reg_count )
-	{
-		#ifdef dprintf
-			dprintf( "FME7 write to %02X (past end of sound registers)\n", (int) latch );
-		#endif
-		return;
-	}
+	// if ( (unsigned) latch >= reg_count )
+	// {
+	// 	#ifdef dprintf
+	// 		dprintf( "SunSoftFME7 write to %02X (past end of sound registers)\n", (int) latch );
+	// 	#endif
+	// 	return;
+	// }
 
 	run_until( time );
 	regs [latch] = data;
 }
 
-inline void FME7::end_frame( blip_time_t time )
+inline void SunSoftFME7::end_frame( blip_time_t time )
 {
 	if ( time > last_time )
 		run_until( time );

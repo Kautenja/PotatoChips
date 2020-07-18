@@ -18,125 +18,6 @@
 
 #include "texas_instruments_sn76489_apu.hpp"
 
-TexasInstrumentsSN76489_Osc::TexasInstrumentsSN76489_Osc() {
-    output = 0;
-    outputs[0] = 0; // always stays NULL
-    outputs[1] = 0;
-    outputs[2] = 0;
-    outputs[3] = 0;
-}
-
-void TexasInstrumentsSN76489_Osc::reset() {
-    delay = 0;
-    last_amp = 0;
-    volume = 0;
-    output_select = 3;
-    output = outputs[3];
-}
-
-// TexasInstrumentsSN76489_Square
-
-inline void TexasInstrumentsSN76489_Square::reset() {
-    period = 0;
-    phase = 0;
-    TexasInstrumentsSN76489_Osc::reset();
-}
-
-void TexasInstrumentsSN76489_Square::run(blip_time_t time, blip_time_t end_time) {
-    if (!volume || period <= 128) {
-        // ignore 16kHz and higher
-        if (last_amp) {
-            synth->offset(time, -last_amp, output);
-            last_amp = 0;
-        }
-        time += delay;
-        if (!period) {
-            time = end_time;
-        } else if (time < end_time) {
-            // keep calculating phase
-            int count = (end_time - time + period - 1) / period;
-            phase = (phase + count) & 1;
-            time += count * period;
-        }
-    } else {
-        int amp = phase ? volume : -volume;
-        {
-            int delta = amp - last_amp;
-            if (delta) {
-                last_amp = amp;
-                synth->offset(time, delta, output);
-            }
-        }
-
-        time += delay;
-        if (time < end_time) {
-            BLIPBuffer* const output = this->output;
-            int delta = amp * 2;
-            do {
-                delta = -delta;
-                synth->offset(time, delta, output);
-                time += period;
-                phase ^= 1;
-            } while (time < end_time);
-            this->last_amp = phase ? volume : -volume;
-        }
-    }
-    delay = time - end_time;
-}
-
-// TexasInstrumentsSN76489_Noise
-
-static int const noise_periods[3] = { 0x100, 0x200, 0x400 };
-
-inline void TexasInstrumentsSN76489_Noise::reset() {
-    period = &noise_periods[0];
-    shifter = 0x8000;
-    feedback = 0x9000;
-    TexasInstrumentsSN76489_Osc::reset();
-}
-
-void TexasInstrumentsSN76489_Noise::run(blip_time_t time, blip_time_t end_time) {
-    int amp = volume;
-    if (shifter & 1)
-        amp = -amp;
-
-    {
-        int delta = amp - last_amp;
-        if (delta) {
-            last_amp = amp;
-            synth.offset(time, delta, output);
-        }
-    }
-
-    time += delay;
-    if (!volume)
-        time = end_time;
-
-    if (time < end_time) {
-        BLIPBuffer* const output = this->output;
-        unsigned shifter = this->shifter;
-        int delta = amp * 2;
-        int period = *this->period * 2;
-        if (!period)
-            period = 16;
-
-        do {
-            int changed = shifter + 1;
-            shifter = (feedback & -(shifter & 1)) ^ (shifter >> 1);
-            if (changed & 2) // true if bits 0 and 1 differ
-            {
-                delta = -delta;
-                synth.offset(time, delta, output);
-            }
-            time += period;
-        } while (time < end_time);
-
-        this->shifter = shifter;
-        this->last_amp = delta >> 1;
-    }
-    delay = time - end_time;
-}
-
 // TexasInstrumentsSN76489
 
 TexasInstrumentsSN76489::TexasInstrumentsSN76489() {
@@ -164,19 +45,15 @@ void TexasInstrumentsSN76489::treble_eq(const blip_eq_t& eq) {
     noise.synth.treble_eq(eq);
 }
 
-void TexasInstrumentsSN76489::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+void TexasInstrumentsSN76489::osc_output(int index, BLIPBuffer* output) {
     assert((unsigned) index < OSC_COUNT);
-    assert((center && left && right) || (!center && !left && !right));
     TexasInstrumentsSN76489_Osc& osc = *oscs[index];
-    osc.outputs[1] = right;
-    osc.outputs[2] = left;
-    osc.outputs[3] = center;
-    osc.output = osc.outputs[osc.output_select];
+    osc.output = output;
 }
 
-void TexasInstrumentsSN76489::output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+void TexasInstrumentsSN76489::output(BLIPBuffer* output) {
     for (int i = 0; i < OSC_COUNT; i++)
-        osc_output(i, center, left, right);
+        osc_output(i, output);
 }
 
 void TexasInstrumentsSN76489::reset(unsigned feedback, int noise_width) {

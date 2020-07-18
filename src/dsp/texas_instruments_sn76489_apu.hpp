@@ -59,14 +59,14 @@ public:
     // Assign all oscillator outputs to specified buffer(s). If buffer
     // is NULL, silences all oscillators.
     void output(BLIPBuffer* mono);
-    void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    // void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
 
     // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
     // which refer to Square 1, Square 2, Square 3, and Noise. If buffer is NULL,
     // silences oscillator.
     enum { OSC_COUNT = 4 };
     void osc_output(int index, BLIPBuffer* mono);
-    void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    // void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
 
     // Reset oscillators and internal state
     void reset(unsigned noise_feedback = 0, int noise_width = 0);
@@ -105,8 +105,8 @@ struct sms_apu_state_t {
     unsigned char latch;
 };
 
-inline void TexasInstrumentsSN76489::output(BLIPBuffer* b) { output(b, b, b); }
+// inline void TexasInstrumentsSN76489::output(BLIPBuffer* b) { output(b, b, b); }
 
-inline void TexasInstrumentsSN76489::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
+// inline void TexasInstrumentsSN76489::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_

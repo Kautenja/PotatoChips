@@ -62,7 +62,7 @@ struct ChipGBS : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
+        configParam(PARAM_FREQ + 3,   0,    7,   4,   "Noise Period", "", 0, 1, -7);
         configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
@@ -155,10 +155,9 @@ struct ChipGBS : Module {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 15;
+        static constexpr float FREQ_MAX = 7;
 
-        // apu.write_register(0, NOISE_LENGTH_LOAD, 0b00001111);
-        apu.write_register(0, NOISE_START_VOLUME, 0b11110000);
+        apu.write_register(0, NOISE_START_VOLUME, 0b11111000);
 
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
@@ -167,9 +166,9 @@ struct ChipGBS : Module {
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write_register(0, NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 + period);
+        apu.write_register(0, NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | period);
 
-        apu.write_register(0, NOISE_TRIG_LENGTH_ENABLE, 0b00000000);
+        apu.write_register(0, NOISE_TRIG_LENGTH_ENABLE, 0x80);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -201,7 +200,7 @@ struct ChipGBS : Module {
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
             apu.write_register(0, POWER_CONTROL_STATUS, 0b10000000);
-            apu.write_register(0, STEREO_ENABLES, 0b01110111);
+            apu.write_register(0, STEREO_ENABLES, 0b11111111);
             apu.write_register(0, STEREO_VOLUME, 0b11111111);
             channel_pulse(0);
             channel_pulse(1);

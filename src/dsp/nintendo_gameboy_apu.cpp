@@ -35,7 +35,7 @@ Gb_Apu::Gb_Apu()
     oscs [2] = &wave;
     oscs [3] = &noise;
 
-    for (int i = 0; i < osc_count; i++)
+    for (int i = 0; i < OSC_COUNT; i++)
     {
         Gb_Osc& osc = *oscs [i];
         osc.regs = &regs [i * 5];
@@ -59,7 +59,7 @@ void Gb_Apu::treble_eq(const blip_eq_t& eq)
 
 void Gb_Apu::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    assert((unsigned) index < osc_count);
+    assert((unsigned) index < OSC_COUNT);
     assert((center && left && right) || (!center && !left && !right));
     Gb_Osc& osc = *oscs [index];
     osc.outputs [1] = right;
@@ -70,7 +70,7 @@ void Gb_Apu::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuf
 
 void Gb_Apu::output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    for (int i = 0; i < osc_count; i++)
+    for (int i = 0; i < OSC_COUNT; i++)
         osc_output(i, center, left, right);
 }
 
@@ -78,7 +78,7 @@ void Gb_Apu::update_volume()
 {
     // TODO: doesn't handle differing left/right global volume (support would
     // require modification to all oscillator code)
-    int data = regs [vol_reg - start_addr];
+    int data = regs [vol_reg - ADDR_START];
     double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
     square_synth.volume(vol);
     other_synth.volume(vol);
@@ -116,10 +116,10 @@ void Gb_Apu::reset()
     wave.wave_pos = 0;
 
     // avoid click at beginning
-    regs [vol_reg - start_addr] = 0x77;
+    regs [vol_reg - ADDR_START] = 0x77;
     update_volume();
 
-    regs [status_reg - start_addr] = 0x01; // force power
+    regs [status_reg - ADDR_START] = 0x01; // force power
     write_register(0, status_reg, 0x00);
 
     static unsigned char const initial_wave [] = {
@@ -142,7 +142,7 @@ void Gb_Apu::run_until(blip_time_t end_time)
             time = end_time;
 
         // run oscillators
-        for (int i = 0; i < osc_count; ++i)
+        for (int i = 0; i < OSC_COUNT; ++i)
         {
             Gb_Osc& osc = *oscs [i];
             if (osc.output)
@@ -203,8 +203,8 @@ void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
 {
     assert((unsigned) data < 0x100);
 
-    int reg = addr - start_addr;
-    if ((unsigned) reg >= register_count)
+    int reg = addr - ADDR_START;
+    if ((unsigned) reg >= REGISTER_COUNT)
         return;
 
     run_until(time);
@@ -219,7 +219,7 @@ void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
     else if (addr == vol_reg && data != old_reg) // global volume
     {
         // return all oscs to 0
-        for (int i = 0; i < osc_count; i++)
+        for (int i = 0; i < OSC_COUNT; i++)
         {
             Gb_Osc& osc = *oscs [i];
             int amp = osc.last_amp;
@@ -240,11 +240,11 @@ void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
     }
     else if (addr == 0xFF25 || addr == status_reg)
     {
-        int mask = (regs [status_reg - start_addr] & 0x80) ? ~0 : 0;
-        int flags = regs [0xFF25 - start_addr] & mask;
+        int mask = (regs [status_reg - ADDR_START] & 0x80) ? ~0 : 0;
+        int flags = regs [0xFF25 - ADDR_START] & mask;
 
         // left/right assignments
-        for (int i = 0; i < osc_count; i++)
+        for (int i = 0; i < OSC_COUNT; i++)
         {
             Gb_Osc& osc = *oscs [i];
             osc.enabled &= mask;
@@ -267,8 +267,8 @@ void Gb_Apu::write_register(blip_time_t time, unsigned addr, int data)
             {
                 for (unsigned i = 0; i < sizeof powerup_regs; i++)
                 {
-                    if (i != status_reg - start_addr)
-                        write_register(time, i + start_addr, powerup_regs [i]);
+                    if (i != status_reg - ADDR_START)
+                        write_register(time, i + ADDR_START, powerup_regs [i]);
                 }
             }
             else
@@ -289,14 +289,14 @@ int Gb_Apu::read_register(blip_time_t time, unsigned addr)
 {
     run_until(time);
 
-    int index = addr - start_addr;
-    assert((unsigned) index < register_count);
+    int index = addr - ADDR_START;
+    assert((unsigned) index < REGISTER_COUNT);
     int data = regs [index];
 
     if (addr == status_reg)
     {
         data = (data & 0x80) | 0x70;
-        for (int i = 0; i < osc_count; i++)
+        for (int i = 0; i < OSC_COUNT; i++)
         {
             const Gb_Osc& osc = *oscs [i];
             if (osc.enabled && (osc.length || !(osc.regs [4] & osc.len_enabled_mask)))

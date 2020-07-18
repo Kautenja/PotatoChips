@@ -29,6 +29,16 @@
       ]
     },
     {
+      "slug": "GBS",
+      "name": "GBS",
+      "description": "An emulation of the Nintendo Gameboy Sound System audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf",
+      "tags": [
+        "Oscillator",
+        "Noise"
+      ]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 audio processing unit.",

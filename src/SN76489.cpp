@@ -75,11 +75,11 @@ struct ChipSN76489 : Module {
     ///
     void channel_pulse(int channel) {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 8;
+        static constexpr float FREQ10BIT_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 1023;
+        static constexpr float FREQ10BIT_MAX = 1023;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
+        static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
@@ -90,14 +90,16 @@ struct ChipSN76489 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-
-        // write the frequency to the low and high registers
-        // - there are 4 registers per pulse channel, multiply channel by 4 to
-        //   produce an offset between registers based on channel index
-        // apu.write_register(0, PULSE0_LO + 4 * channel, freq11bit & 0b11111111);
-        // apu.write_register(0, PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
+        uint16_t freq10bit = rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
+        // calculate the high and low bytes from the 10-bit frequency
+        uint8_t hi = 0b00001111 & freq10bit;
+        uint8_t lo = 0b00111111 & (freq10bit >> 4);
+        // write the data to the chip
+        const auto channel_opcode_offset = (2 * channel) << 4;
+        apu.write_data(0, TONE_1_FREQUENCY + channel_opcode_offset | hi);
+        apu.write_data(0, lo);
+        apu.write_data(0, TONE_1_ATTENUATION + channel_opcode_offset | 0b00000110);
     }
 
     /// Process noise (channel 3).
@@ -117,6 +119,8 @@ struct ChipSN76489 : Module {
         // apu.write_register(0, NOISE_HI, 0);
         // // set the volume to a constant level
         // apu.write_register(0, NOISE_VOL, 0b00011111);
+        apu.write_data(0, NOISE_CONTROL | 0b00000000);
+        apu.write_data(0, NOISE_ATTENUATION | 0b00000110);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -146,28 +150,10 @@ struct ChipSN76489 : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             // process the data on the chip
-
-            apu.write_data(0, TONE_1_FREQUENCY | 0b00000001);
-            apu.write_data(0, 0b00111111);
-            apu.write_data(0, TONE_1_ATTENUATION | 0b00000110);
-
-            apu.write_data(0, TONE_2_FREQUENCY | 0b00000001);
-            apu.write_data(0, 0b00111111);
-            apu.write_data(0, TONE_2_ATTENUATION | 0b00000110);
-
-            apu.write_data(0, TONE_3_FREQUENCY | 0b00000001);
-            apu.write_data(0, 0b00111111);
-            apu.write_data(0, TONE_3_ATTENUATION | 0b00000110);
-
-            // apu.write_data(0, NOISE_CONTROL | 0b00000000);
-            apu.write_data(0, NOISE_ATTENUATION | 0b00000110);
-
-            // channel_pulse(0);
-            // channel_pulse(1);
-            // channel_pulse(2);
-            // channel_noise();
-            // enable all four channels
-            // apu.write_register(0, SND_CHN, 0b00001111);
+            channel_pulse(0);
+            channel_pulse(1);
+            channel_pulse(2);
+            channel_noise();
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);

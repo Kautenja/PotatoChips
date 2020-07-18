@@ -48,39 +48,116 @@ static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
 class TexasInstrumentsSN76489 {
 public:
     // Set overall volume of all oscillators, where 1.0 is full volume
-    void volume(double);
+    void volume(double vol) {
+        vol *= 0.85 / (OSC_COUNT * 64 * 2);
+        square_synth.volume(vol);
+        noise.synth.volume(vol);
+    }
 
     // Set treble equalization
-    void treble_eq(const blip_eq_t&);
+    void treble_eq(const blip_eq_t& eq) {
+        square_synth.treble_eq(eq);
+        noise.synth.treble_eq(eq);
+    }
 
-    // Outputs can be assigned to a single buffer for mono output, or to three
-    // buffers for stereo output (using Stereo_Buffer to do the mixing).
-
-    // Assign all oscillator outputs to specified buffer(s). If buffer
+    // Assign all oscillator outputs to specified buffer. If buffer
     // is NULL, silences all oscillators.
-    void output(BLIPBuffer* mono);
-    // void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    void output(BLIPBuffer* output) {
+        for (int i = 0; i < OSC_COUNT; i++)
+            osc_output(i, output);
+    }
 
-    // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
-    // which refer to Square 1, Square 2, Square 3, and Noise. If buffer is NULL,
-    // silences oscillator.
+    // Assign single oscillator output to buffer. If buffer
+    // is NULL, silences the given oscillator.
     enum { OSC_COUNT = 4 };
-    void osc_output(int index, BLIPBuffer* mono);
-    // void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    void osc_output(int index, BLIPBuffer* output) {
+        assert((unsigned) index < OSC_COUNT);
+        TexasInstrumentsSN76489_Osc& osc = *oscs[index];
+        osc.output = output;
+    }
 
     // Reset oscillators and internal state
-    void reset(unsigned noise_feedback = 0, int noise_width = 0);
+    void reset(unsigned feedback = 0, int noise_width = 0) {
+        last_time = 0;
+        latch = 0;
+
+        if (!feedback || !noise_width) {
+            feedback = 0x0009;
+            noise_width = 16;
+        }
+        // convert to "Galios configuration"
+        looped_feedback = 1 << (noise_width - 1);
+        noise_feedback  = 0;
+        while (noise_width--) {
+            noise_feedback = (noise_feedback << 1) | (feedback & 1);
+            feedback >>= 1;
+        }
+
+        squares[0].reset();
+        squares[1].reset();
+        squares[2].reset();
+        noise.reset();
+    }
 
     // Write to data port
-    void write_data(blip_time_t, int);
+    void write_data(blip_time_t time, int data) {
+        static constexpr unsigned char volumes[16] = {
+            64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
+        };
+
+        assert((unsigned) data <= 0xFF);
+
+        run_until(time);
+
+        if (data & 0x80)
+            latch = data;
+
+        int index = (latch >> 5) & 3;
+        if (latch & 0x10) {
+            oscs[index]->volume = volumes[data & 15];
+        }
+        else if (index < 3) {
+            TexasInstrumentsSN76489_Square& sq = squares[index];
+            if (data & 0x80)
+                sq.period = (sq.period & 0xFF00) | (data << 4 & 0x00FF);
+            else
+                sq.period = (sq.period & 0x00FF) | (data << 8 & 0x3F00);
+        }
+        else
+        {
+            int select = data & 3;
+            if (select < 3)
+                noise.period = &noise_periods[select];
+            else
+                noise.period = &squares[2].period;
+
+            noise.feedback = (data & 0x04) ? noise_feedback : looped_feedback;
+            noise.shifter = 0x8000;
+        }
+    }
 
     // Run all oscillators up to specified time, end current frame, then
     // start a new frame at time 0.
-    void end_frame(blip_time_t);
+    inline void end_frame(blip_time_t end_time) {
+        if (end_time > last_time) run_until(end_time);
+        assert(last_time >= end_time);
+        last_time -= end_time;
+    }
 
  public:
-    TexasInstrumentsSN76489();
-    ~TexasInstrumentsSN76489();
+    /// Create a new instance of TexasInstrumentsSN76489.
+    TexasInstrumentsSN76489() {
+        for (int i = 0; i < 3; i++) {
+            squares[i].synth = &square_synth;
+            oscs[i] = &squares[i];
+        }
+        oscs[3] = &noise;
+        volume(1.0);
+        reset();
+    }
+
+    /// Destroy this instance of TexasInstrumentsSN76489.
+    ~TexasInstrumentsSN76489() { }
 
  private:
     /// Disable the copy constructor.
@@ -97,16 +174,27 @@ public:
     unsigned    noise_feedback;
     unsigned    looped_feedback;
 
-    void run_until(blip_time_t);
+    void run_until(blip_time_t end_time) {
+        assert(end_time >= last_time); // end_time must not be before previous time
+        if (end_time > last_time) {
+            // run oscillators
+            for (int i = 0; i < OSC_COUNT; ++i) {
+                TexasInstrumentsSN76489_Osc& osc = *oscs[i];
+                if (osc.output) {
+                    if (i < 3)
+                        squares[i].run(last_time, end_time);
+                    else
+                        noise.run(last_time, end_time);
+                }
+            }
+            last_time = end_time;
+        }
+    }
 };
 
 struct sms_apu_state_t {
     unsigned char regs [8] [2];
     unsigned char latch;
 };
-
-// inline void TexasInstrumentsSN76489::output(BLIPBuffer* b) { output(b, b, b); }
-
-// inline void TexasInstrumentsSN76489::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_

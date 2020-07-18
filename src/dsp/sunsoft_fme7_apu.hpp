@@ -22,7 +22,7 @@
 #include "blip_buffer.hpp"
 
 /// the IO registers on the FME7.
-enum IORegisters {
+enum SunSoftFME7_Registers {
     PULSE_A_LO   = 0x00,
     PULSE_A_HI   = 0x01,
     PULSE_B_LO   = 0x02,

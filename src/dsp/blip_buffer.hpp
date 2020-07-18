@@ -126,6 +126,7 @@ class BLIPBuffer {
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
+    /// @param clock_cycles_per_sec the number of source clock cycles per second
     /// @param buffer_length length of the buffer in milliseconds (1/1000 sec).
     /// defaults to 250, i.e., 1/4 sec.
     /// @returns NULL on success, otherwise if there isn't enough memory,

@@ -44,7 +44,7 @@ struct Sms_Square : Sms_Osc
     const Synth* synth;
 
     void reset();
-    void run( blip_time_t, blip_time_t );
+    void run(blip_time_t, blip_time_t);
 };
 
 struct Sms_Noise : Sms_Osc
@@ -57,7 +57,7 @@ struct Sms_Noise : Sms_Osc
     Synth synth;
 
     void reset();
-    void run( blip_time_t, blip_time_t );
+    void run(blip_time_t, blip_time_t);
 };
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_

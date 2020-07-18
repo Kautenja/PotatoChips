@@ -51,3 +51,7 @@
 -   fix "click" from sample rates: 44.1kHz, 88.2kHz, etc.
 -   fix issue where 2A03, VRC6, FME7 were detuned at sample rates:
     44.1kHz, 88.2kHz, etc.
+
+### 1.3.5 (2020-07-17)
+
+-   refactor BLIPBuffer to be more C++17-ish and CPU friendly

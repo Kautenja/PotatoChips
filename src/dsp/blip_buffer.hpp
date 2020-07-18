@@ -102,8 +102,6 @@ class BLIPBuffer {
     /// TODO:
     blip_ulong factor_ = 1;
     /// TODO:
-    blip_resampled_time_t offset_ = 0;
-    /// TODO:
     buf_t_* buffer_ = 0;
     /// TODO:
     uint32_t buffer_size_ = 0;
@@ -165,7 +163,6 @@ class BLIPBuffer {
         // calculate the time factor based on the clock_rate and sample_rate
         factor_ = clock_rate_factor(clock_rate_);
         // clear the buffer
-        offset_ = 0;
         reader_accum_ = 0;
         // return success flag
         return SampleRateStatus::Success;
@@ -189,11 +186,6 @@ class BLIPBuffer {
     /// @returns the sample
     ///
     blip_sample_t read_sample() {
-        // -------------------------------------------------------------------
-        // TODO: remove
-        // -------------------------------------------------------------------
-        offset_ = 1 << BLIP_BUFFER_ACCURACY;
-        // -------------------------------------------------------------------
         // create a temporary pointer to the buffer that can be mutated
         const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator
@@ -208,7 +200,6 @@ class BLIPBuffer {
         // -------------------------------------------------------------------
         // TODO: remove
         // -------------------------------------------------------------------
-        offset_ -= 1 << BLIP_BUFFER_ACCURACY;
         // copy remaining samples to beginning and clear old samples
         long remain = 1 + blip_buffer_extra_;
         memmove(buffer_, buffer_ + 1, remain * sizeof *buffer_);
@@ -244,7 +235,7 @@ class BLIPBuffer {
     }
 
     inline blip_resampled_time_t resampled_time(blip_time_t time) const {
-        return time * factor_ + offset_;
+        return time * factor_;
     }
 
     inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
@@ -519,7 +510,7 @@ class BLIPSynth {
     inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
-        offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
+        offset_resampled(time * buf->factor_, delta, buf);
     }
 
 // ---------------------------------------------------------------------------
@@ -532,7 +523,7 @@ class BLIPSynth {
     /// positive or negative. The actual change in amplitude is
     /// delta * (volume / range)
     inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
-        offset_resampled(time * buf->factor_ + buf->offset_, delta, buf);
+        offset_resampled(time * buf->factor_, delta, buf);
     }
 
     inline void offset(blip_time_t time, int delta) const {

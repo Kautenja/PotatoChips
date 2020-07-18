@@ -35,6 +35,7 @@ struct ChipSN76489 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(PARAM_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
+        PARAM_LFSR,
         PARAM_COUNT
     };
     enum InputIds {
@@ -71,6 +72,7 @@ struct ChipSN76489 : Module {
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Tone 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 3, 0, 3, 0, "Noise Control", "");
+        configParam(PARAM_LFSR, 0, 1, 0, "LFSR Polarity", "");
         configParam(PARAM_ATTENUATION + 0, 0, 1, 0.5, "Tone 1 Attenuation", "%", 0, 100);
         configParam(PARAM_ATTENUATION + 1, 0, 1, 0.5, "Tone 2 Attenuation", "%", 0, 100);
         configParam(PARAM_ATTENUATION + 2, 0, 1, 0.5, "Tone 3 Attenuation", "%", 0, 100);
@@ -145,10 +147,11 @@ struct ChipSN76489 : Module {
         if (inputs[INPUT_VOCT + 3].isConnected())
             freq *= inputs[INPUT_VOCT + 3].getVoltage() / 3.f;
         uint8_t period = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        if (period != noise_period or update_noise_control != lfsr.state) {
-            apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | !lfsr.state * NOISE_FEEDBACK);
+        bool state = params[PARAM_LFSR].getValue() - !lfsr.state;
+        if (period != noise_period or update_noise_control != state) {
+            apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);
             noise_period = period;
-            update_noise_control = lfsr.state;
+            update_noise_control = state;
         }
 
         // get the attenuation from the parameter knob
@@ -244,6 +247,7 @@ struct ChipSN76489Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipSN76489::PARAM_FREQ + 3));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipSN76489::INPUT_LFSR));
+        addParam(createParam<CKSS>(Vec(24, 300), module, ChipSN76489::PARAM_LFSR));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));

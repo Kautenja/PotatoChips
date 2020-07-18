@@ -25,6 +25,13 @@
 
 /// A Ricoh SN76489 Chip module.
 struct ChipSN76489 : Module {
+ private:
+    /// whether to update the noise control (based on LFSR update)
+    bool update_noise_control = false;
+    /// the current noise period
+    uint8_t noise_period = 0;
+
+ public:
     enum ParamIds {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(PARAM_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
@@ -121,9 +128,6 @@ struct ChipSN76489 : Module {
         apu.write_data(0, (TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
-    bool update_noise_control = false;
-    uint8_t noise_period = 0;
-
     /// Process noise (channel 3).
     void channel_noise() {
         // the minimal value for the frequency register to produce sound
@@ -146,12 +150,6 @@ struct ChipSN76489 : Module {
             noise_period = period;
             update_noise_control = lfsr.state;
         }
-        // apu.write_register(0, NOISE_LO, 0b10000000 + period);
-        // apu.write_register(0, NOISE_HI, 0);
-        // // set the volume to a constant level
-        // apu.write_register(0, NOISE_VOL, 0b00011111);
-
-        // apu.write_data(0, NOISE_CONTROL | 0b00000000);
 
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_ATTENUATION + 3].getValue();

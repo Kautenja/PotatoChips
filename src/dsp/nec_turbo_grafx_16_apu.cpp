@@ -58,7 +58,7 @@ void Hes_Apu::reset()
 
 void Hes_Apu::osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right )
 {
-	require( (unsigned) index < osc_count );
+	assert( (unsigned) index < osc_count );
 	oscs [index].chans [0] = center;
 	oscs [index].chans [1] = left;
 	oscs [index].chans [2] = right;

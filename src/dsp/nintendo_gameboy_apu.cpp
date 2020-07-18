@@ -60,8 +60,8 @@ void Gb_Apu::treble_eq( const blip_eq_t& eq )
 
 void Gb_Apu::osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right )
 {
-	require( (unsigned) index < osc_count );
-	require( (center && left && right) || (!center && !left && !right) );
+	assert( (unsigned) index < osc_count );
+	assert( (center && left && right) || (!center && !left && !right) );
 	Gb_Osc& osc = *oscs [index];
 	osc.outputs [1] = right;
 	osc.outputs [2] = left;
@@ -132,7 +132,7 @@ void Gb_Apu::reset()
 
 void Gb_Apu::run_until( blip_time_t end_time )
 {
-	require( end_time >= last_time ); // end_time must not be before previous time
+	assert( end_time >= last_time ); // end_time must not be before previous time
 	if ( end_time == last_time )
 		return;
 
@@ -202,7 +202,7 @@ void Gb_Apu::end_frame( blip_time_t end_time )
 
 void Gb_Apu::write_register( blip_time_t time, unsigned addr, int data )
 {
-	require( (unsigned) data < 0x100 );
+	assert( (unsigned) data < 0x100 );
 
 	int reg = addr - start_addr;
 	if ( (unsigned) reg >= register_count )
@@ -291,7 +291,7 @@ int Gb_Apu::read_register( blip_time_t time, unsigned addr )
 	run_until( time );
 
 	int index = addr - start_addr;
-	require( (unsigned) index < register_count );
+	assert( (unsigned) index < register_count );
 	int data = regs [index];
 
 	if ( addr == status_reg )

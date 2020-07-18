@@ -1,4 +1,4 @@
-// Sega Master System SN76489 PSG sound chip emulator
+// Sega Master System SN76489 programmable sound generator sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,7 +21,20 @@
 
 #include "texas_instruments_sn76489_oscillators.hpp"
 
-class Sms_Apu {
+/// the registers on the SN76489
+enum TexasInstrumentsSN76489_Registers {
+    TONE_1_FREQUENCY   = 0b10000000,
+    TONE_1_ATTENUATION = 0b10010000,
+    TONE_2_FREQUENCY   = 0b10100000,
+    TONE_2_ATTENUATION = 0b10110000,
+    TONE_3_FREQUENCY   = 0b11000000,
+    TONE_3_ATTENUATION = 0b11010000,
+    NOISE_CONTROL      = 0b11100000,
+    NOISE_ATTENUATION  = 0b11110000
+};
+
+/// Sega Master System SN76489 programmable sound generator sound chip emulator.
+class TexasInstrumentsSN76489 {
 public:
     // Set overall volume of all oscillators, where 1.0 is full volume
     void volume(double);
@@ -57,34 +70,35 @@ public:
     // start a new frame at time 0.
     void end_frame(blip_time_t);
 
-public:
-    Sms_Apu();
-    ~Sms_Apu();
-private:
-    // noncopyable
-    Sms_Apu(const Sms_Apu&);
-    Sms_Apu& operator = (const Sms_Apu&);
+ public:
+    TexasInstrumentsSN76489();
+    ~TexasInstrumentsSN76489();
 
-    Sms_Osc*    oscs [OSC_COUNT];
-    Sms_Square  squares [3];
-    Sms_Square::Synth square_synth; // used by squares
+ private:
+    /// Disable the copy constructor.
+    TexasInstrumentsSN76489(const TexasInstrumentsSN76489&);
+    /// Disable the assignment operator
+    TexasInstrumentsSN76489& operator = (const TexasInstrumentsSN76489&);
+
+    TexasInstrumentsSN76489_Osc*    oscs [OSC_COUNT];
+    TexasInstrumentsSN76489_Square  squares [3];
+    TexasInstrumentsSN76489_Square::Synth square_synth; // used by squares
     blip_time_t last_time;
     int         latch;
-    Sms_Noise   noise;
+    TexasInstrumentsSN76489_Noise   noise;
     unsigned    noise_feedback;
     unsigned    looped_feedback;
 
     void run_until(blip_time_t);
 };
 
-struct sms_apu_state_t
-{
+struct sms_apu_state_t {
     unsigned char regs [8] [2];
     unsigned char latch;
 };
 
-inline void Sms_Apu::output(BLIPBuffer* b) { output(b, b, b); }
+inline void TexasInstrumentsSN76489::output(BLIPBuffer* b) { output(b, b, b); }
 
-inline void Sms_Apu::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
+inline void TexasInstrumentsSN76489::osc_output(int i, BLIPBuffer* b) { osc_output(i, b, b, b); }
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_

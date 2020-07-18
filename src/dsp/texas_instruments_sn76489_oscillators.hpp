@@ -1,4 +1,4 @@
-// Private oscillators used by Sms_Apu
+// Private oscillators used by TexasInstrumentsSN76489.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,7 +21,7 @@
 
 #include "blip_buffer.hpp"
 
-struct Sms_Osc
+struct TexasInstrumentsSN76489_Osc
 {
     BLIPBuffer* outputs [4]; // NULL, right, left, center
     BLIPBuffer* output;
@@ -31,11 +31,11 @@ struct Sms_Osc
     int last_amp;
     int volume;
 
-    Sms_Osc();
+    TexasInstrumentsSN76489_Osc();
     void reset();
 };
 
-struct Sms_Square : Sms_Osc
+struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc
 {
     int period;
     int phase;
@@ -47,7 +47,7 @@ struct Sms_Square : Sms_Osc
     void run(blip_time_t, blip_time_t);
 };
 
-struct Sms_Noise : Sms_Osc
+struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc
 {
     const int* period;
     unsigned shifter;

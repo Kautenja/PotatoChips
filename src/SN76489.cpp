@@ -26,25 +26,25 @@
 /// A Ricoh SN76489 Chip module.
 struct ChipSN76489 : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, Sms_Apu::OSC_COUNT),
-        ENUMS(PARAM_ATTENUATION, Sms_Apu::OSC_COUNT),
+        ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(PARAM_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, Sms_Apu::OSC_COUNT),
+        ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, Sms_Apu::OSC_COUNT),
+        ENUMS(OUTPUT_CHANNEL, TexasInstrumentsSN76489::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[Sms_Apu::OSC_COUNT];
+    BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
     /// The SN76489 instance to synthesize sound with
-    Sms_Apu apu;
+    TexasInstrumentsSN76489 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -64,7 +64,7 @@ struct ChipSN76489 : Module {
         // configParam(PARAM_ATTENUATION + 2,   0,   1,    0.5, "Tone 3 Attenuation",  "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < Sms_Apu::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -92,6 +92,7 @@ struct ChipSN76489 : Module {
         // convert the frequency to an 11-bit value
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
+
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
@@ -138,23 +139,39 @@ struct ChipSN76489 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < Sms_Apu::OSC_COUNT; i++)
+            for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
                 buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             // process the data on the chip
-            channel_pulse(0);
-            channel_pulse(1);
-            channel_pulse(2);
-            channel_noise();
+
+            apu.write_data(0, TONE_1_FREQUENCY | 0b00000001);
+            apu.write_data(0, 0b00111111);
+            apu.write_data(0, TONE_1_ATTENUATION | 0b00000110);
+
+            apu.write_data(0, TONE_2_FREQUENCY | 0b00000001);
+            apu.write_data(0, 0b00111111);
+            apu.write_data(0, TONE_2_ATTENUATION | 0b00000110);
+
+            apu.write_data(0, TONE_3_FREQUENCY | 0b00000001);
+            apu.write_data(0, 0b00111111);
+            apu.write_data(0, TONE_3_ATTENUATION | 0b00000110);
+
+            // apu.write_data(0, NOISE_CONTROL | 0b00000000);
+            apu.write_data(0, NOISE_ATTENUATION | 0b00000110);
+
+            // channel_pulse(0);
+            // channel_pulse(1);
+            // channel_pulse(2);
+            // channel_noise();
             // enable all four channels
             // apu.write_register(0, SND_CHN, 0b00001111);
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Sms_Apu::OSC_COUNT; i++)
+        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 

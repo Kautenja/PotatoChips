@@ -17,10 +17,18 @@
 
 #include "rack.hpp"
 
+#ifndef PLUGIN_HPP_
+#define PLUGIN_HPP_
+
 using namespace rack;
+
+/// the base clock rate of the VCV Rack environment
+static constexpr uint32_t CLOCK_RATE = 768000;
 
 extern rack::Plugin* plugin_instance;
 extern rack::Model *modelChip2A03;
 extern rack::Model *modelChipVRC6;
 extern rack::Model *modelChip106;
 extern rack::Model *modelChipFME7;
+
+#endif  // PLUGIN_HPP_

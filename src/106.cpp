@@ -71,9 +71,6 @@ struct Chip106 : Module {
         LIGHT_COUNT
     };
 
-    /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 768000;
-
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[Namco106::OSC_COUNT];
     /// The 106 instance to synthesize sound with

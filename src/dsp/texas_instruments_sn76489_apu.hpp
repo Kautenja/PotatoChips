@@ -60,9 +60,6 @@ public:
     // Reset oscillators and internal state
     void reset(unsigned noise_feedback = 0, int noise_width = 0);
 
-    // Write GameGear left/right assignment byte
-    void write_ggstereo(blip_time_t, int);
-
     // Write to data port
     void write_data(blip_time_t, int);
 

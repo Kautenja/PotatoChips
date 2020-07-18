@@ -226,26 +226,6 @@ void TexasInstrumentsSN76489::end_frame(blip_time_t end_time) {
     last_time -= end_time;
 }
 
-void TexasInstrumentsSN76489::write_ggstereo(blip_time_t time, int data) {
-    assert((unsigned) data <= 0xFF);
-
-    run_until(time);
-
-    for (int i = 0; i < OSC_COUNT; i++) {
-        TexasInstrumentsSN76489_Osc& osc = *oscs[i];
-        int flags = data >> i;
-        BLIPBuffer* old_output = osc.output;
-        osc.output_select = (flags >> 3 & 2) | (flags & 1);
-        osc.output = osc.outputs[osc.output_select];
-        if (osc.output != old_output && osc.last_amp) {
-            if (old_output) {
-                square_synth.offset(time, -osc.last_amp, old_output);
-            }
-            osc.last_amp = 0;
-        }
-    }
-}
-
 // volumes[i] = 64 * pow(1.26, 15 - i) / pow(1.26, 15)
 static unsigned char const volumes[16] = {
     64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0

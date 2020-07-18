@@ -20,7 +20,8 @@
 #define DSP_NINTENDO_GAMEBOY_APU_HPP_
 
 #include "nintendo_gameboy_oscillators.hpp"
-#include <iostream>
+#include <algorithm>
+#include <cstring>
 
 /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
 enum GBS_Registers {
@@ -65,20 +66,56 @@ const uint8_t sine_wave[32] = {
 /// The Nintendo GameBoy Sound System (GBS) Audio Processing Unit (APU).
 class Gb_Apu {
  public:
-    Gb_Apu();
+    Gb_Apu() {
+        square1.synth = &square_synth;
+        square2.synth = &square_synth;
+        wave.synth  = &other_synth;
+        noise.synth = &other_synth;
+
+        oscs [0] = &square1;
+        oscs [1] = &square2;
+        oscs [2] = &wave;
+        oscs [3] = &noise;
+
+        for (int i = 0; i < OSC_COUNT; i++) {
+            Gb_Osc& osc = *oscs [i];
+            osc.regs = &regs [i * 5];
+            osc.output = 0;
+            osc.outputs [0] = 0;
+            osc.outputs [1] = 0;
+            osc.outputs [2] = 0;
+            osc.outputs [3] = 0;
+        }
+
+        set_tempo(1.0);
+        volume(1.0);
+        reset();
+    }
 
     // Set overall volume of all oscillators, where 1.0 is full volume
-    void volume(double);
+    void volume(double vol) {
+        // 15: steps
+        // 2: ?
+        // 8: master volume range
+        volume_unit = 0.60 / OSC_COUNT / 15 / 2 / 8 * vol;
+        update_volume();
+    }
 
     // Set treble equalization
-    void treble_eq(const blip_eq_t&);
+    void treble_eq(const blip_eq_t& eq) {
+        square_synth.treble_eq(eq);
+        other_synth.treble_eq(eq);
+    }
 
     // Outputs can be assigned to a single buffer for mono output, or to three
     // buffers for stereo output (using Stereo_Buffer to do the mixing).
 
     // Assign all oscillator outputs to specified buffer(s). If buffer
     // is NULL, silences all oscillators.
-    void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    inline void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, center, left, right);
+    }
+
     inline void output(BLIPBuffer* mono) {
         output(mono, mono, mono);
     }
@@ -87,13 +124,46 @@ class Gb_Apu {
     // which refer to Square 1, Square 2, Wave, and Noise. If buffer is NULL,
     // silences oscillator.
     enum { OSC_COUNT = 4 };
-    void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        assert((unsigned) index < OSC_COUNT);
+        assert((center && left && right) || (!center && !left && !right));
+        Gb_Osc& osc = *oscs [index];
+        osc.outputs [1] = right;
+        osc.outputs [2] = left;
+        osc.outputs [3] = center;
+        osc.output = osc.outputs [osc.output_select];
+    }
+
     inline void osc_output(int index, BLIPBuffer* mono) {
         osc_output(index, mono, mono, mono);
     }
 
     // Reset oscillators and internal state
-    void reset();
+    void reset() {
+        next_frame_time = 0;
+        last_time       = 0;
+        frame_count     = 0;
+
+        square1.reset();
+        square2.reset();
+        wave.reset();
+        noise.reset();
+        noise.bits = 1;
+        wave.wave_pos = 0;
+
+        // avoid click at beginning
+        regs [STEREO_VOLUME - ADDR_START] = 0x77;
+        update_volume();
+
+        regs [POWER_CONTROL_STATUS - ADDR_START] = 0x01; // force power
+        write_register(0, POWER_CONTROL_STATUS, 0x00);
+
+        static constexpr uint8_t initial_wave [] = {
+            0x84,0x40,0x43,0xAA,0x2D,0x78,0x92,0x3C, // wave table
+            0x60,0x59,0x59,0xB0,0x34,0xB8,0x2E,0xDA
+        };
+        memcpy(wave.wave, initial_wave, sizeof wave.wave);
+    }
 
     // Reads and writes at addr must satisfy ADDR_START <= addr <= ADDR_END
     enum { ADDR_START = 0xFF10 };
@@ -101,16 +171,126 @@ class Gb_Apu {
     enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
 
     // Write 'data' to address at specified time
-    void write_register(blip_time_t, unsigned addr, int data);
+    void write_register(blip_time_t time, unsigned addr, int data) {
+        static constexpr unsigned char powerup_regs[0x20] = {
+            0x80,0x3F,0x00,0xFF,0xBF,                     // square 1
+            0xFF,0x3F,0x00,0xFF,0xBF,                     // square 2
+            0x7F,0xFF,0x9F,0xFF,0xBF,                     // wave
+            0xFF,0xFF,0x00,0x00,0xBF,                     // noise
+            0x00,                                         // left/right enables
+            0x77,                                         // master volume
+            0x80,                                         // power
+            0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // wave-table
+        };
+
+        assert((unsigned) data < 0x100);
+
+        int reg = addr - ADDR_START;
+        if ((unsigned) reg >= REGISTER_COUNT)
+            return;
+
+        run_until(time);
+
+        int old_reg = regs [reg];
+        regs [reg] = data;
+
+        if (addr < STEREO_VOLUME) {
+            write_osc(reg / 5, reg, data);
+        } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
+            // return all oscs to 0
+            for (int i = 0; i < OSC_COUNT; i++) {
+                Gb_Osc& osc = *oscs [i];
+                int amp = osc.last_amp;
+                osc.last_amp = 0;
+                if (amp && osc.enabled && osc.output)
+                    other_synth.offset(time, -amp, osc.output);
+            }
+
+            if (wave.outputs [3])
+                other_synth.offset(time, 30, wave.outputs [3]);
+
+            update_volume();
+
+            if (wave.outputs [3])
+                other_synth.offset(time, -30, wave.outputs [3]);
+
+            // oscs will update with new amplitude when next run
+        } else if (addr == 0xFF25 || addr == POWER_CONTROL_STATUS) {
+            int mask = (regs [POWER_CONTROL_STATUS - ADDR_START] & 0x80) ? ~0 : 0;
+            int flags = regs [0xFF25 - ADDR_START] & mask;
+
+            // left/right assignments
+            for (int i = 0; i < OSC_COUNT; i++) {
+                Gb_Osc& osc = *oscs [i];
+                osc.enabled &= mask;
+                int bits = flags >> i;
+                BLIPBuffer* old_output = osc.output;
+                osc.output_select = (bits >> 3 & 2) | (bits & 1);
+                osc.output = osc.outputs [osc.output_select];
+                if (osc.output != old_output) {
+                    int amp = osc.last_amp;
+                    osc.last_amp = 0;
+                    if (amp && old_output)
+                        other_synth.offset(time, -amp, old_output);
+                }
+            }
+
+            if (addr == POWER_CONTROL_STATUS && data != old_reg) {
+                if (!(data & 0x80)) {
+                    for (unsigned i = 0; i < sizeof powerup_regs; i++) {
+                        if (i != POWER_CONTROL_STATUS - ADDR_START)
+                            write_register(time, i + ADDR_START, powerup_regs [i]);
+                    }
+                }
+                // else {
+                //     std::cout << "APU powered on\n" << std::endl;
+                // }
+            }
+        } else if (addr >= 0xFF30) {
+            int index = (addr & 0x0F) * 2;
+            wave.wave [index] = data >> 4;
+            wave.wave [index + 1] = data & 0x0F;
+        }
+    }
 
     // Read from address at specified time
-    int read_register(blip_time_t, unsigned addr);
+    int read_register(blip_time_t time, unsigned addr) {
+        run_until(time);
+
+        int index = addr - ADDR_START;
+        assert((unsigned) index < REGISTER_COUNT);
+        int data = regs [index];
+
+        if (addr == POWER_CONTROL_STATUS) {
+            data = (data & 0x80) | 0x70;
+            for (int i = 0; i < OSC_COUNT; i++) {
+                const Gb_Osc& osc = *oscs [i];
+                if (osc.enabled && (osc.length || !(osc.regs [4] & osc.len_enabled_mask)))
+                    data |= 1 << i;
+            }
+        }
+
+        return data;
+    }
 
     // Run all oscillators up to specified time, end current time frame, then
     // start a new frame at time 0.
-    void end_frame(blip_time_t);
+    void end_frame(blip_time_t end_time) {
+        if (end_time > last_time)
+            run_until(end_time);
 
-    void set_tempo(double);
+        assert(next_frame_time >= end_time);
+        next_frame_time -= end_time;
+
+        assert(last_time >= end_time);
+        last_time -= end_time;
+    }
+
+    void set_tempo(double tempo_division) {
+        frame_period = 4194304 / 256; // 256 Hz
+        if (tempo_division != 1.0)
+            frame_period = blip_time_t (frame_period / tempo_division);
+    }
 
  private:
     // noncopyable
@@ -134,20 +314,68 @@ class Gb_Apu {
     // used by wave and noise
     Gb_Wave::Synth other_synth;
 
-    void update_volume();
-    void run_until(blip_time_t);
+    void update_volume() {
+        // TODO: doesn't handle differing left/right global volume (support would
+        // require modification to all oscillator code)
+        int data = regs [STEREO_VOLUME - ADDR_START];
+        double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
+        square_synth.volume(vol);
+        other_synth.volume(vol);
+    }
+
+    void run_until(blip_time_t end_time) {
+        assert(end_time >= last_time); // end_time must not be before previous time
+        if (end_time == last_time)
+            return;
+
+        while (true) {
+            blip_time_t time = next_frame_time;
+            if (time > end_time)
+                time = end_time;
+
+            // run oscillators
+            for (int i = 0; i < OSC_COUNT; ++i) {
+                Gb_Osc& osc = *oscs [i];
+                if (osc.output) {
+                    int playing = false;
+                    if (osc.enabled && osc.volume &&
+                            (!(osc.regs [4] & osc.len_enabled_mask) || osc.length))
+                        playing = -1;
+                    switch (i) {
+                    case 0: square1.run(last_time, time, playing); break;
+                    case 1: square2.run(last_time, time, playing); break;
+                    case 2: wave   .run(last_time, time, playing); break;
+                    case 3: noise  .run(last_time, time, playing); break;
+                    }
+                }
+            }
+            last_time = time;
+
+            if (time == end_time)
+                break;
+
+            next_frame_time += frame_period;
+
+            // 256 Hz actions
+            square1.clock_length();
+            square2.clock_length();
+            wave.clock_length();
+            noise.clock_length();
+
+            frame_count = (frame_count + 1) & 3;
+            if (frame_count == 0) {
+                // 64 Hz actions
+                square1.clock_envelope();
+                square2.clock_envelope();
+                noise.clock_envelope();
+            }
+
+            if (frame_count & 1)
+                square1.clock_sweep(); // 128 Hz action
+        }
+    }
+
     void write_osc(int index, int reg, int data);
 };
-
-// inline void Gb_Apu::output(BLIPBuffer* b)
-
-// inline void Gb_Apu::osc_output(int i, BLIPBuffer* b) {
-//     osc_output(i, b, b, b);
-// }
-
-inline void Gb_Apu::volume(double vol) {
-    volume_unit = 0.60 / OSC_COUNT / 15 /*steps*/ / 2 /*?*/ / 8 /*master vol range*/ * vol;
-    update_volume();
-}
 
 #endif  // DSP_NINTENDO_GAMEBOY_APU_HPP_

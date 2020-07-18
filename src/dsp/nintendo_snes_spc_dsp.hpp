@@ -24,29 +24,29 @@
 class Spc_Dsp {
  public:
     // Keeps pointer to 64K ram
-    Spc_Dsp( uint8_t* ram );
+    Spc_Dsp(uint8_t* ram);
 
     // Mute voice n if bit n (1 << n) of mask is clear.
     enum { voice_count = 8 };
-    void mute_voices( int mask );
+    void mute_voices(int mask);
 
     // Clear state and silence everything.
     void reset();
 
     // Set gain, where 1.0 is normal. When greater than 1.0, output is clamped to
     // the 16-bit sample range.
-    void set_gain( double );
+    void set_gain(double);
 
     // If true, prevent channels and global volumes from being phase-negated
-    void disable_surround( bool disable );
+    void disable_surround(bool disable);
 
     // Read/write register 'n', where n ranges from 0 to register_count - 1.
     enum { register_count = 128 };
-    int  read ( int n );
-    void write( int n, int );
+    int  read (int n);
+    void write(int n, int);
 
     // Run DSP for 'count' samples. Write resulting samples to 'buf' if not NULL.
-    void run( long count, short* buf = NULL );
+    void run(long count, short* buf = NULL);
 
 
 // End of public interface
@@ -148,16 +148,16 @@ private:
 
     voice_t voice_state [voice_count];
 
-    int clock_envelope( int );
+    int clock_envelope(int);
 };
 
-inline void Spc_Dsp::disable_surround( bool disable ) { surround_threshold = disable ? 0 : -0x7FFF; }
+inline void Spc_Dsp::disable_surround(bool disable) { surround_threshold = disable ? 0 : -0x7FFF; }
 
-inline void Spc_Dsp::set_gain( double v ) { emu_gain = (int) (v * (1 << emu_gain_bits)); }
+inline void Spc_Dsp::set_gain(double v) { emu_gain = (int) (v * (1 << emu_gain_bits)); }
 
-inline int Spc_Dsp::read( int i )
+inline int Spc_Dsp::read(int i)
 {
-    assert( (unsigned) i < register_count );
+    assert((unsigned) i < register_count);
     return reg [i];
 }
 

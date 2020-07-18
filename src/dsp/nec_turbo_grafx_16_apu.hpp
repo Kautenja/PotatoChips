@@ -43,24 +43,24 @@ struct Hes_Osc
     enum { amp_range = 0x8000 };
     typedef BLIPSynth<blip_med_quality,1> synth_t;
 
-    void run_until( synth_t& synth, blip_time_t );
+    void run_until(synth_t& synth, blip_time_t);
 };
 
 class Hes_Apu {
 public:
-    void treble_eq( blip_eq_t const& );
-    void volume( double );
+    void treble_eq(blip_eq_t const&);
+    void volume(double);
 
     enum { osc_count = 6 };
-    void osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right );
+    void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
 
     void reset();
 
     enum { start_addr = 0x0800 };
     enum { end_addr   = 0x0809 };
-    void write_data( blip_time_t, int addr, int data );
+    void write_data(blip_time_t, int addr, int data);
 
-    void end_frame( blip_time_t );
+    void end_frame(blip_time_t);
 
 public:
     Hes_Apu();
@@ -70,12 +70,12 @@ private:
     int balance;
     Hes_Osc::synth_t synth;
 
-    void balance_changed( Hes_Osc& );
+    void balance_changed(Hes_Osc&);
     void recalc_chans();
 };
 
-inline void Hes_Apu::volume( double v ) { synth.volume( 1.8 / osc_count / Hes_Osc::amp_range * v ); }
+inline void Hes_Apu::volume(double v) { synth.volume(1.8 / osc_count / Hes_Osc::amp_range * v); }
 
-inline void Hes_Apu::treble_eq( blip_eq_t const& eq ) { synth.treble_eq( eq ); }
+inline void Hes_Apu::treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
 
 #endif  // DSP_NEC_TURBO_GRAFX_16_APU_HPP_

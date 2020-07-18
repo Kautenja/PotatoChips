@@ -29,15 +29,15 @@ class Sap_Apu_Impl;
 class Sap_Apu {
 public:
     enum { osc_count = 4 };
-    void osc_output( int index, BLIPBuffer* );
+    void osc_output(int index, BLIPBuffer*);
 
-    void reset( Sap_Apu_Impl* );
+    void reset(Sap_Apu_Impl*);
 
     enum { start_addr = 0xD200 };
     enum { end_addr   = 0xD209 };
-    void write_data( blip_time_t, unsigned addr, int data );
+    void write_data(blip_time_t, unsigned addr, int data);
 
-    void end_frame( blip_time_t );
+    void end_frame(blip_time_t);
 
 public:
     Sap_Apu();
@@ -61,7 +61,7 @@ private:
     int control;
 
     void calc_periods();
-    void run_until( blip_time_t );
+    void run_until(blip_time_t);
 
     enum { poly4_len  = (1L <<  4) - 1 };
     enum { poly9_len  = (1L <<  9) - 1 };
@@ -75,7 +75,7 @@ public:
     BLIPSynth<blip_good_quality, 1> synth;
 
     Sap_Apu_Impl();
-    void volume( double d ) { synth.volume( 1.0 / Sap_Apu::osc_count / 30 * d ); }
+    void volume(double d) { synth.volume(1.0 / Sap_Apu::osc_count / 30 * d); }
 
 private:
     typedef unsigned char byte;
@@ -85,9 +85,9 @@ private:
     friend class Sap_Apu;
 };
 
-inline void Sap_Apu::osc_output( int i, BLIPBuffer* b )
+inline void Sap_Apu::osc_output(int i, BLIPBuffer* b)
 {
-    assert( (unsigned) i < osc_count );
+    assert((unsigned) i < osc_count);
     oscs [i].output = b;
 }
 

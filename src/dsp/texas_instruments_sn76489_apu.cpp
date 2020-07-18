@@ -45,22 +45,22 @@ inline void Sms_Square::reset()
     Sms_Osc::reset();
 }
 
-void Sms_Square::run( blip_time_t time, blip_time_t end_time )
+void Sms_Square::run(blip_time_t time, blip_time_t end_time)
 {
-    if ( !volume || period <= 128 )
+    if (!volume || period <= 128)
     {
         // ignore 16kHz and higher
-        if ( last_amp )
+        if (last_amp)
         {
-            synth->offset( time, -last_amp, output );
+            synth->offset(time, -last_amp, output);
             last_amp = 0;
         }
         time += delay;
-        if ( !period )
+        if (!period)
         {
             time = end_time;
         }
-        else if ( time < end_time )
+        else if (time < end_time)
         {
             // keep calculating phase
             int count = (end_time - time + period - 1) / period;
@@ -73,26 +73,26 @@ void Sms_Square::run( blip_time_t time, blip_time_t end_time )
         int amp = phase ? volume : -volume;
         {
             int delta = amp - last_amp;
-            if ( delta )
+            if (delta)
             {
                 last_amp = amp;
-                synth->offset( time, delta, output );
+                synth->offset(time, delta, output);
             }
         }
 
         time += delay;
-        if ( time < end_time )
+        if (time < end_time)
         {
             BLIPBuffer* const output = this->output;
             int delta = amp * 2;
             do
             {
                 delta = -delta;
-                synth->offset( time, delta, output );
+                synth->offset(time, delta, output);
                 time += period;
                 phase ^= 1;
             }
-            while ( time < end_time );
+            while (time < end_time);
             this->last_amp = phase ? volume : -volume;
         }
     }
@@ -111,46 +111,46 @@ inline void Sms_Noise::reset()
     Sms_Osc::reset();
 }
 
-void Sms_Noise::run( blip_time_t time, blip_time_t end_time )
+void Sms_Noise::run(blip_time_t time, blip_time_t end_time)
 {
     int amp = volume;
-    if ( shifter & 1 )
+    if (shifter & 1)
         amp = -amp;
 
     {
         int delta = amp - last_amp;
-        if ( delta )
+        if (delta)
         {
             last_amp = amp;
-            synth.offset( time, delta, output );
+            synth.offset(time, delta, output);
         }
     }
 
     time += delay;
-    if ( !volume )
+    if (!volume)
         time = end_time;
 
-    if ( time < end_time )
+    if (time < end_time)
     {
         BLIPBuffer* const output = this->output;
         unsigned shifter = this->shifter;
         int delta = amp * 2;
         int period = *this->period * 2;
-        if ( !period )
+        if (!period)
             period = 16;
 
         do
         {
             int changed = shifter + 1;
             shifter = (feedback & -(shifter & 1)) ^ (shifter >> 1);
-            if ( changed & 2 ) // true if bits 0 and 1 differ
+            if (changed & 2) // true if bits 0 and 1 differ
             {
                 delta = -delta;
-                synth.offset( time, delta, output );
+                synth.offset(time, delta, output);
             }
             time += period;
         }
-        while ( time < end_time );
+        while (time < end_time);
 
         this->shifter = shifter;
         this->last_amp = delta >> 1;
@@ -162,14 +162,14 @@ void Sms_Noise::run( blip_time_t time, blip_time_t end_time )
 
 Sms_Apu::Sms_Apu()
 {
-    for ( int i = 0; i < 3; i++ )
+    for (int i = 0; i < 3; i++)
     {
         squares [i].synth = &square_synth;
         oscs [i] = &squares [i];
     }
     oscs [3] = &noise;
 
-    volume( 1.0 );
+    volume(1.0);
     reset();
 }
 
@@ -177,23 +177,23 @@ Sms_Apu::~Sms_Apu()
 {
 }
 
-void Sms_Apu::volume( double vol )
+void Sms_Apu::volume(double vol)
 {
     vol *= 0.85 / (osc_count * 64 * 2);
-    square_synth.volume( vol );
-    noise.synth.volume( vol );
+    square_synth.volume(vol);
+    noise.synth.volume(vol);
 }
 
-void Sms_Apu::treble_eq( const blip_eq_t& eq )
+void Sms_Apu::treble_eq(const blip_eq_t& eq)
 {
-    square_synth.treble_eq( eq );
-    noise.synth.treble_eq( eq );
+    square_synth.treble_eq(eq);
+    noise.synth.treble_eq(eq);
 }
 
-void Sms_Apu::osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right )
+void Sms_Apu::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    assert( (unsigned) index < osc_count );
-    assert( (center && left && right) || (!center && !left && !right) );
+    assert((unsigned) index < osc_count);
+    assert((center && left && right) || (!center && !left && !right));
     Sms_Osc& osc = *oscs [index];
     osc.outputs [1] = right;
     osc.outputs [2] = left;
@@ -201,18 +201,18 @@ void Sms_Apu::osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPB
     osc.output = osc.outputs [osc.output_select];
 }
 
-void Sms_Apu::output( BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right )
+void Sms_Apu::output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right)
 {
-    for ( int i = 0; i < osc_count; i++ )
-        osc_output( i, center, left, right );
+    for (int i = 0; i < osc_count; i++)
+        osc_output(i, center, left, right);
 }
 
-void Sms_Apu::reset( unsigned feedback, int noise_width )
+void Sms_Apu::reset(unsigned feedback, int noise_width)
 {
     last_time = 0;
     latch = 0;
 
-    if ( !feedback || !noise_width )
+    if (!feedback || !noise_width)
     {
         feedback = 0x0009;
         noise_width = 16;
@@ -220,7 +220,7 @@ void Sms_Apu::reset( unsigned feedback, int noise_width )
     // convert to "Galios configuration"
     looped_feedback = 1 << (noise_width - 1);
     noise_feedback  = 0;
-    while ( noise_width-- )
+    while (noise_width--)
     {
         noise_feedback = (noise_feedback << 1) | (feedback & 1);
         feedback >>= 1;
@@ -232,22 +232,22 @@ void Sms_Apu::reset( unsigned feedback, int noise_width )
     noise.reset();
 }
 
-void Sms_Apu::run_until( blip_time_t end_time )
+void Sms_Apu::run_until(blip_time_t end_time)
 {
-    assert( end_time >= last_time ); // end_time must not be before previous time
+    assert(end_time >= last_time); // end_time must not be before previous time
 
-    if ( end_time > last_time )
+    if (end_time > last_time)
     {
         // run oscillators
-        for ( int i = 0; i < osc_count; ++i )
+        for (int i = 0; i < osc_count; ++i)
         {
             Sms_Osc& osc = *oscs [i];
-            if ( osc.output )
+            if (osc.output)
             {
-                if ( i < 3 )
-                    squares [i].run( last_time, end_time );
+                if (i < 3)
+                    squares [i].run(last_time, end_time);
                 else
-                    noise.run( last_time, end_time );
+                    noise.run(last_time, end_time);
             }
         }
 
@@ -255,62 +255,62 @@ void Sms_Apu::run_until( blip_time_t end_time )
     }
 }
 
-void Sms_Apu::end_frame( blip_time_t end_time )
+void Sms_Apu::end_frame(blip_time_t end_time)
 {
-    if ( end_time > last_time )
-        run_until( end_time );
+    if (end_time > last_time)
+        run_until(end_time);
 
-    assert( last_time >= end_time );
+    assert(last_time >= end_time);
     last_time -= end_time;
 }
 
-void Sms_Apu::write_ggstereo( blip_time_t time, int data )
+void Sms_Apu::write_ggstereo(blip_time_t time, int data)
 {
-    assert( (unsigned) data <= 0xFF );
+    assert((unsigned) data <= 0xFF);
 
-    run_until( time );
+    run_until(time);
 
-    for ( int i = 0; i < osc_count; i++ )
+    for (int i = 0; i < osc_count; i++)
     {
         Sms_Osc& osc = *oscs [i];
         int flags = data >> i;
         BLIPBuffer* old_output = osc.output;
         osc.output_select = (flags >> 3 & 2) | (flags & 1);
         osc.output = osc.outputs [osc.output_select];
-        if ( osc.output != old_output && osc.last_amp )
+        if (osc.output != old_output && osc.last_amp)
         {
-            if ( old_output )
+            if (old_output)
             {
-                square_synth.offset( time, -osc.last_amp, old_output );
+                square_synth.offset(time, -osc.last_amp, old_output);
             }
             osc.last_amp = 0;
         }
     }
 }
 
-// volumes [i] = 64 * pow( 1.26, 15 - i ) / pow( 1.26, 15 )
+// volumes [i] = 64 * pow(1.26, 15 - i) / pow(1.26, 15)
 static unsigned char const volumes [16] = {
     64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
 };
 
-void Sms_Apu::write_data( blip_time_t time, int data )
+void Sms_Apu::write_data(blip_time_t time, int data)
 {
-    assert( (unsigned) data <= 0xFF );
+    assert((unsigned) data <= 0xFF);
 
-    run_until( time );
+    run_until(time);
 
-    if ( data & 0x80 )
+    if (data & 0x80)
         latch = data;
 
     int index = (latch >> 5) & 3;
-    if ( latch & 0x10 )
+    if (latch & 0x10)
     {
         oscs [index]->volume = volumes [data & 15];
     }
-    else if ( index < 3 )
+    else if (index < 3)
     {
         Sms_Square& sq = squares [index];
-        if ( data & 0x80 )
+        if (data & 0x80)
             sq.period = (sq.period & 0xFF00) | (data << 4 & 0x00FF);
         else
             sq.period = (sq.period & 0x00FF) | (data << 8 & 0x3F00);
@@ -318,7 +318,7 @@ void Sms_Apu::write_data( blip_time_t time, int data )
     else
     {
         int select = data & 3;
-        if ( select < 3 )
+        if (select < 3)
             noise.period = &noise_periods [select];
         else
             noise.period = &squares [2].period;

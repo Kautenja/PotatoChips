@@ -30,22 +30,22 @@ class Ym2413_Emu  {
 
     // Set output sample rate and chip clock rates, in Hz. Returns non-zero
     // if error.
-    int set_rate( double sample_rate, double clock_rate );
+    int set_rate(double sample_rate, double clock_rate);
 
     // Reset to power-up state
     void reset();
 
     // Mute voice n if bit n (1 << n) of mask is set
     enum { channel_count = 14 };
-    void mute_voices( int mask );
+    void mute_voices(int mask);
 
     // Write 'data' to 'addr'
-    void write( int addr, int data );
+    void write(int addr, int data);
 
     // Run and write pair_count samples to output
     typedef short sample_t;
     enum { out_chan_count = 2 }; // stereo
-    void run( int pair_count, sample_t* out );
+    void run(int pair_count, sample_t* out);
 };
 
 #endif  // DSP_YM2413_APU_HPP_

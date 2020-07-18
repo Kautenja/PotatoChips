@@ -20,73 +20,75 @@
 #define DSP_ATARI_POKEY_APU_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
+
+typedef unsigned char byte;
 
 class Sap_Apu_Impl;
 
 class Sap_Apu {
 public:
-	enum { osc_count = 4 };
-	void osc_output( int index, BLIPBuffer* );
+    enum { osc_count = 4 };
+    void osc_output(int index, BLIPBuffer*);
 
-	void reset( Sap_Apu_Impl* );
+    void reset(Sap_Apu_Impl*);
 
-	enum { start_addr = 0xD200 };
-	enum { end_addr   = 0xD209 };
-	void write_data( blip_time_t, unsigned addr, int data );
+    enum { start_addr = 0xD200 };
+    enum { end_addr   = 0xD209 };
+    void write_data(blip_time_t, unsigned addr, int data);
 
-	void end_frame( blip_time_t );
+    void end_frame(blip_time_t);
 
 public:
-	Sap_Apu();
+    Sap_Apu();
 private:
-	struct osc_t
-	{
-		unsigned char regs [2];
-		unsigned char phase;
-		unsigned char invert;
-		int last_amp;
-		blip_time_t delay;
-		blip_time_t period; // always recalculated before use; here for convenience
-		BLIPBuffer* output;
-	};
-	osc_t oscs [osc_count];
-	Sap_Apu_Impl* impl;
-	blip_time_t last_time;
-	int poly5_pos;
-	int poly4_pos;
-	int polym_pos;
-	int control;
+    struct osc_t
+    {
+        unsigned char regs [2];
+        unsigned char phase;
+        unsigned char invert;
+        int last_amp;
+        blip_time_t delay;
+        blip_time_t period; // always recalculated before use; here for convenience
+        BLIPBuffer* output;
+    };
+    osc_t oscs [osc_count];
+    Sap_Apu_Impl* impl;
+    blip_time_t last_time;
+    int poly5_pos;
+    int poly4_pos;
+    int polym_pos;
+    int control;
 
-	void calc_periods();
-	void run_until( blip_time_t );
+    void calc_periods();
+    void run_until(blip_time_t);
 
-	enum { poly4_len  = (1L <<  4) - 1 };
-	enum { poly9_len  = (1L <<  9) - 1 };
-	enum { poly17_len = (1L << 17) - 1 };
-	friend class Sap_Apu_Impl;
+    enum { poly4_len  = (1L <<  4) - 1 };
+    enum { poly9_len  = (1L <<  9) - 1 };
+    enum { poly17_len = (1L << 17) - 1 };
+    friend class Sap_Apu_Impl;
 };
 
 // Common tables and BLIPSynth that can be shared among multiple Sap_Apu objects
 class Sap_Apu_Impl {
 public:
-	BLIPSynth<blip_good_quality, 1> synth;
+    BLIPSynth<blip_good_quality, 1> synth;
 
-	Sap_Apu_Impl();
-	void volume( double d ) { synth.volume( 1.0 / Sap_Apu::osc_count / 30 * d ); }
+    Sap_Apu_Impl();
+    void volume(double d) { synth.volume(1.0 / Sap_Apu::osc_count / 30 * d); }
 
 private:
-	typedef unsigned char byte;
-	byte poly4  [Sap_Apu::poly4_len  / 8 + 1];
-	byte poly9  [Sap_Apu::poly9_len  / 8 + 1];
-	byte poly17 [Sap_Apu::poly17_len / 8 + 1];
-	friend class Sap_Apu;
+    typedef unsigned char byte;
+    byte poly4  [Sap_Apu::poly4_len  / 8 + 1];
+    byte poly9  [Sap_Apu::poly9_len  / 8 + 1];
+    byte poly17 [Sap_Apu::poly17_len / 8 + 1];
+    friend class Sap_Apu;
 };
 
-inline void Sap_Apu::osc_output( int i, BLIPBuffer* b )
+inline void Sap_Apu::osc_output(int i, BLIPBuffer* b)
 {
-	assert( (unsigned) i < osc_count );
-	oscs [i].output = b;
+    assert((unsigned) i < osc_count);
+    oscs [i].output = b;
 }
 
 #endif  // DSP_ATARI_POKEY_APU_HPP_

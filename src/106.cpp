@@ -21,20 +21,6 @@
 #include "dsp/namco_106_apu.hpp"
 #include <cstring>
 
-/// Addresses to the registers for channel 1. To get channel \f$n\f$,
-/// multiply by \f$8n\f$.
-enum Namco106Registers {
-    REGS_PER_VOICE = 8,
-    FREQ_LOW = 0x40,
-    PHASE_LOW,
-    FREQ_MEDIUM,
-    PHASE_MEDIUM,
-    FREQ_HIGH,
-    PHASE_HIGH,
-    WAVE_ADDRESS,
-    VOLUME
-};
-
 /// the default values for the wave-table
 const uint8_t default_values[32] = {
     0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
@@ -70,9 +56,6 @@ struct Chip106 : Module {
         ENUMS(LIGHT_CHANNEL, Namco106::OSC_COUNT),
         LIGHT_COUNT
     };
-
-    /// the clock rate of the module
-    static constexpr uint64_t CLOCK_RATE = 768000;
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[Namco106::OSC_COUNT];
@@ -253,11 +236,8 @@ struct Chip106 : Module {
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // copy the buffer to a local vector and return the first sample
-        std::vector<int16_t> output_buffer(1);
-        buf[channel].read_samples(&output_buffer[0]);
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * output_buffer[0] / divisor;
+        return Vpp * buf[channel].read_sample() / divisor;
     }
 
     /// Process a sample.
@@ -268,7 +248,7 @@ struct Chip106 : Module {
         if (new_sample_rate) {
             // update the buffer for each channel
             for (int i = 0; i < Namco106::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate);
+                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
@@ -303,10 +283,8 @@ struct Chip106 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < Namco106::OSC_COUNT; i++) {  // set outputs
-            buf[i].end_frame(cycles_per_sample);
+        for (int i = 0; i < Namco106::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
-        }
         // set the channel lights if the light divider is high
         if (lightsDivider.process()) {
             for (int i = 0; i < Namco106::OSC_COUNT; i++) {

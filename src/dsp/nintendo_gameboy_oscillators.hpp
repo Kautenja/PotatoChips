@@ -20,79 +20,79 @@
 #define DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
 
 #include "blargg_common.h"
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 struct Gb_Osc
 {
-	enum { trigger = 0x80 };
-	enum { len_enabled_mask = 0x40 };
+    enum { trigger = 0x80 };
+    enum { len_enabled_mask = 0x40 };
 
-	BLIPBuffer* outputs [4]; // NULL, right, left, center
-	BLIPBuffer* output;
-	int output_select;
-	uint8_t* regs; // osc's 5 registers
+    BLIPBuffer* outputs [4]; // NULL, right, left, center
+    BLIPBuffer* output;
+    int output_select;
+    uint8_t* regs; // osc's 5 registers
 
-	int delay;
-	int last_amp;
-	int volume;
-	int length;
-	int enabled;
+    int delay;
+    int last_amp;
+    int volume;
+    int length;
+    int enabled;
 
-	void reset();
-	void clock_length();
-	int frequency() const { return (regs [4] & 7) * 0x100 + regs [3]; }
+    void reset();
+    void clock_length();
+    int frequency() const { return (regs [4] & 7) * 0x100 + regs [3]; }
 };
 
 struct Gb_Env : Gb_Osc
 {
-	int env_delay;
+    int env_delay;
 
-	void reset();
-	void clock_envelope();
-	bool write_register( int, int );
+    void reset();
+    void clock_envelope();
+    bool write_register(int, int);
 };
 
 struct Gb_Square : Gb_Env
 {
-	enum { period_mask = 0x70 };
-	enum { shift_mask  = 0x07 };
+    enum { period_mask = 0x70 };
+    enum { shift_mask  = 0x07 };
 
-	typedef BLIPSynth<blip_good_quality, 1> Synth;
-	Synth const* synth;
-	int sweep_delay;
-	int sweep_freq;
-	int phase;
+    typedef BLIPSynth<blip_good_quality, 1> Synth;
+    Synth const* synth;
+    int sweep_delay;
+    int sweep_freq;
+    int phase;
 
-	void reset();
-	void clock_sweep();
-	void run( blip_time_t, blip_time_t, int playing );
+    void reset();
+    void clock_sweep();
+    void run(blip_time_t, blip_time_t, int playing);
 };
 
 struct Gb_Noise : Gb_Env
 {
-	typedef BLIPSynth<blip_med_quality, 1> Synth;
-	Synth const* synth;
-	unsigned bits;
+    typedef BLIPSynth<blip_med_quality, 1> Synth;
+    Synth const* synth;
+    unsigned bits;
 
-	void run( blip_time_t, blip_time_t, int playing );
+    void run(blip_time_t, blip_time_t, int playing);
 };
 
 struct Gb_Wave : Gb_Osc
 {
-	typedef BLIPSynth<blip_med_quality, 1> Synth;
-	Synth const* synth;
-	int wave_pos;
-	enum { wave_size = 32 };
-	uint8_t wave [wave_size];
+    typedef BLIPSynth<blip_med_quality, 1> Synth;
+    Synth const* synth;
+    int wave_pos;
+    enum { wave_size = 32 };
+    uint8_t wave [wave_size];
 
-	void write_register( int, int );
-	void run( blip_time_t, blip_time_t, int playing );
+    void write_register(int, int);
+    void run(blip_time_t, blip_time_t, int playing);
 };
 
 inline void Gb_Env::reset()
 {
-	env_delay = 0;
-	Gb_Osc::reset();
+    env_delay = 0;
+    Gb_Osc::reset();
 }
 
 #endif  // DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_

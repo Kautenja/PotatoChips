@@ -19,45 +19,45 @@
 #ifndef DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 #define DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_
 
-#include "blip_buffer/blip_buffer.hpp"
+#include "blip_buffer.hpp"
 
 struct Sms_Osc
 {
-	BLIPBuffer* outputs [4]; // NULL, right, left, center
-	BLIPBuffer* output;
-	int output_select;
+    BLIPBuffer* outputs [4]; // NULL, right, left, center
+    BLIPBuffer* output;
+    int output_select;
 
-	int delay;
-	int last_amp;
-	int volume;
+    int delay;
+    int last_amp;
+    int volume;
 
-	Sms_Osc();
-	void reset();
+    Sms_Osc();
+    void reset();
 };
 
 struct Sms_Square : Sms_Osc
 {
-	int period;
-	int phase;
+    int period;
+    int phase;
 
-	typedef BLIPSynth<blip_good_quality, 1> Synth;
-	const Synth* synth;
+    typedef BLIPSynth<blip_good_quality, 1> Synth;
+    const Synth* synth;
 
-	void reset();
-	void run( blip_time_t, blip_time_t );
+    void reset();
+    void run(blip_time_t, blip_time_t);
 };
 
 struct Sms_Noise : Sms_Osc
 {
-	const int* period;
-	unsigned shifter;
-	unsigned feedback;
+    const int* period;
+    unsigned shifter;
+    unsigned feedback;
 
-	typedef BLIPSynth<blip_med_quality, 1> Synth;
-	Synth synth;
+    typedef BLIPSynth<blip_med_quality, 1> Synth;
+    Synth synth;
 
-	void reset();
-	void run( blip_time_t, blip_time_t );
+    void reset();
+    void run(blip_time_t, blip_time_t);
 };
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_

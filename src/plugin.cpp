@@ -28,6 +28,6 @@ void init(Plugin* instance) {
     plugin_instance = instance;
     instance->addModel(modelChip2A03);
     instance->addModel(modelChipVRC6);
-    instance->addModel(modelChip106);
     instance->addModel(modelChipFME7);
+    instance->addModel(modelChip106);
 }

@@ -21,8 +21,7 @@
 
 #include "blip_buffer.hpp"
 
-struct TexasInstrumentsSN76489_Osc
-{
+struct TexasInstrumentsSN76489_Osc {
     BLIPBuffer* outputs [4]; // NULL, right, left, center
     BLIPBuffer* output;
     int output_select;
@@ -35,8 +34,7 @@ struct TexasInstrumentsSN76489_Osc
     void reset();
 };
 
-struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc
-{
+struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc {
     int period;
     int phase;
 
@@ -47,8 +45,7 @@ struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc
     void run(blip_time_t, blip_time_t);
 };
 
-struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc
-{
+struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc {
     const int* period;
     unsigned shifter;
     unsigned feedback;

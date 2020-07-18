@@ -33,6 +33,17 @@ enum TexasInstrumentsSN76489_Registers {
     NOISE_ATTENUATION  = 0b11110000
 };
 
+/// the values for the linear feedback shift register to take.
+enum TexasInstrumentsSN76489_LFSR_Values {
+    N_512    = 0b00,  // N / 512
+    N_1024   = 0b01,  // N / 1024
+    N_2048   = 0b10,  // N / 2048
+    N_TONE_3 = 0b11   // Tone Generator # Output
+};
+
+/// the FB bit in the Noise control register
+static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
+
 /// Sega Master System SN76489 programmable sound generator sound chip emulator.
 class TexasInstrumentsSN76489 {
 public:

@@ -33,6 +33,7 @@ struct ChipSN76489 : Module {
     enum InputIds {
         ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
+        ENUMS(INPUT_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -58,10 +59,11 @@ struct ChipSN76489 : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Tone 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Tone 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Control", "", 0, 1, -15);
-        // configParam(PARAM_ATTENUATION + 0,   0,   1,    0.5, "Tone 1 Attenuation",  "%", 0, 100);
-        // configParam(PARAM_ATTENUATION + 1,   0,   1,    0.5, "Tone 2 Attenuation",  "%", 0, 100);
-        // configParam(PARAM_ATTENUATION + 2,   0,   1,    0.5, "Tone 3 Attenuation",  "%", 0, 100);
+        configParam(PARAM_FREQ + 3, 0, 3, 0, "Noise Control", "");
+        configParam(PARAM_ATTENUATION + 0, 0, 1, 0.5, "Tone 1 Attenuation", "%", 0, 100);
+        configParam(PARAM_ATTENUATION + 1, 0, 1, 0.5, "Tone 2 Attenuation", "%", 0, 100);
+        configParam(PARAM_ATTENUATION + 2, 0, 1, 0.5, "Tone 3 Attenuation", "%", 0, 100);
+        configParam(PARAM_ATTENUATION + 3, 0, 1, 0.5, "Noise Attenuation",  "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
@@ -82,6 +84,11 @@ struct ChipSN76489 : Module {
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
+        // the minimal value for the volume width register
+        static constexpr float ATT_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float ATT_MAX = 15;
+
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -93,13 +100,21 @@ struct ChipSN76489 : Module {
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
         uint16_t freq10bit = rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
         // calculate the high and low bytes from the 10-bit frequency
-        uint8_t hi = 0b00001111 & freq10bit;
-        uint8_t lo = 0b00111111 & (freq10bit >> 4);
+        uint8_t lo = 0b00001111 & freq10bit;
+        uint8_t hi = 0b00111111 & (freq10bit >> 4);
         // write the data to the chip
         const auto channel_opcode_offset = (2 * channel) << 4;
-        apu.write_data(0, TONE_1_FREQUENCY + channel_opcode_offset | hi);
-        apu.write_data(0, lo);
-        apu.write_data(0, TONE_1_ATTENUATION + channel_opcode_offset | 0b00000110);
+        apu.write_data(0, (TONE_1_FREQUENCY + channel_opcode_offset) | lo);
+        apu.write_data(0, hi);
+
+        // get the attenuation from the parameter knob
+        auto attenuationParam = params[PARAM_ATTENUATION + channel].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_ATTENUATION + channel].isConnected())
+            attenuationParam *= inputs[INPUT_ATTENUATION + channel].getVoltage() / 2.f;
+        // get the 8-bit attenuation clamped within legal limits
+        uint8_t attenuation = rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        apu.write_data(0, (TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
     /// Process noise (channel 3).
@@ -107,20 +122,34 @@ struct ChipSN76489 : Module {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 15;
-        // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
-        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
-        // convert the pitch to frequency based on standard exponential scale
-        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_FREQ + 3].getValue();
+        static constexpr float FREQ_MAX = 3;
+        // the minimal value for the volume width register
+        static constexpr float ATT_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float ATT_MAX = 15;
+
+        // get the attenuation from the parameter knob
+        float freq = params[PARAM_FREQ + 3].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_VOCT + 3].isConnected())
+            freq *= inputs[INPUT_VOCT + 3].getVoltage() / 3.f;
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+
         // apu.write_register(0, NOISE_LO, 0b10000000 + period);
         // apu.write_register(0, NOISE_HI, 0);
         // // set the volume to a constant level
         // apu.write_register(0, NOISE_VOL, 0b00011111);
-        apu.write_data(0, NOISE_CONTROL | 0b00000000);
-        apu.write_data(0, NOISE_ATTENUATION | 0b00000110);
+
+        // apu.write_data(0, NOISE_CONTROL | 0b00000000);
+
+        // get the attenuation from the parameter knob
+        auto attenuationParam = params[PARAM_ATTENUATION + 3].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_ATTENUATION + 3].isConnected())
+            attenuationParam *= inputs[INPUT_ATTENUATION + 3].getVoltage() / 2.f;
+        // get the 8-bit attenuation clamped within legal limits
+        uint8_t attenuation = rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        apu.write_data(0, NOISE_ATTENUATION | attenuation);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -185,6 +214,15 @@ struct ChipSN76489Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(20, 159), module, ChipSN76489::INPUT_VOCT + 1));
         addInput(createInput<PJ301MPort>(Vec(20, 244), module, ChipSN76489::INPUT_VOCT + 2));
         addInput(createInput<PJ301MPort>(Vec(20, 329), module, ChipSN76489::INPUT_VOCT + 3));
+        // Attenuators
+        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipSN76489::PARAM_ATTENUATION + 0));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipSN76489::PARAM_ATTENUATION + 1));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipSN76489::PARAM_ATTENUATION + 2));
+        addParam(createParam<Rogan0PSNES>(Vec(103, 350), module, ChipSN76489::PARAM_ATTENUATION + 3));
+        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, ChipSN76489::INPUT_ATTENUATION + 0));
+        addInput(createInput<PJ301MPort>(Vec(102, 146),  module, ChipSN76489::INPUT_ATTENUATION + 1));
+        addInput(createInput<PJ301MPort>(Vec(102, 255),  module, ChipSN76489::INPUT_ATTENUATION + 2));
+        addInput(createInput<PJ301MPort>(Vec(102, 320),  module, ChipSN76489::INPUT_ATTENUATION + 3));
         // FM inputs
         addInput(createInput<PJ301MPort>(Vec(25, 32), module, ChipSN76489::INPUT_FM + 0));
         addInput(createInput<PJ301MPort>(Vec(25, 118), module, ChipSN76489::INPUT_FM + 1));

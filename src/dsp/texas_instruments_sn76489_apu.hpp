@@ -40,7 +40,7 @@ public:
     // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
     // which refer to Square 1, Square 2, Square 3, and Noise. If buffer is NULL,
     // silences oscillator.
-    enum { osc_count = 4 };
+    enum { OSC_COUNT = 4 };
     void osc_output(int index, BLIPBuffer* mono);
     void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
 
@@ -65,7 +65,7 @@ private:
     Sms_Apu(const Sms_Apu&);
     Sms_Apu& operator = (const Sms_Apu&);
 
-    Sms_Osc*    oscs [osc_count];
+    Sms_Osc*    oscs [OSC_COUNT];
     Sms_Square  squares [3];
     Sms_Square::Synth square_synth; // used by squares
     blip_time_t last_time;

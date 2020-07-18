@@ -73,12 +73,12 @@ modules:
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
     tags:
       - Oscillator
-  # - slug: SN76489
-  #   name: SN76489
-  #   description: An emulation of the Texas Instruments SN76489 audio processing unit.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf
-  #   tags:
-  #     - Oscillator
+  - slug: SN76489
+    name: SN76489
+    description: An emulation of the Texas Instruments SN76489 audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf
+    tags:
+      - Oscillator
   # - slug: 2413
   #   name: 2413
   #   description: An emulation of the Yamaha YM2413 audio processing unit.

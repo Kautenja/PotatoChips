@@ -164,7 +164,7 @@ int const tone_off  = 0x01;
 
 void Ay_Apu::run_until( blip_time_t final_end_time )
 {
-    require( final_end_time >= last_time );
+    assert( final_end_time >= last_time );
 
     // noise period and initial values
     blip_time_t const noise_period_factor = period_factor * 2; // verified

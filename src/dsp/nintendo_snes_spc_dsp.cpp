@@ -69,7 +69,7 @@ void Spc_Dsp::reset()
 
 void Spc_Dsp::write( int i, int data )
 {
-	require( (unsigned) i < register_count );
+	assert( (unsigned) i < register_count );
 
 	reg [i] = data;
 	int high = i >> 4;

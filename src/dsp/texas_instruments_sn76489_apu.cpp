@@ -193,8 +193,8 @@ void Sms_Apu::treble_eq( const blip_eq_t& eq )
 
 void Sms_Apu::osc_output( int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right )
 {
-	require( (unsigned) index < osc_count );
-	require( (center && left && right) || (!center && !left && !right) );
+	assert( (unsigned) index < osc_count );
+	assert( (center && left && right) || (!center && !left && !right) );
 	Sms_Osc& osc = *oscs [index];
 	osc.outputs [1] = right;
 	osc.outputs [2] = left;
@@ -235,7 +235,7 @@ void Sms_Apu::reset( unsigned feedback, int noise_width )
 
 void Sms_Apu::run_until( blip_time_t end_time )
 {
-	require( end_time >= last_time ); // end_time must not be before previous time
+	assert( end_time >= last_time ); // end_time must not be before previous time
 
 	if ( end_time > last_time )
 	{
@@ -267,7 +267,7 @@ void Sms_Apu::end_frame( blip_time_t end_time )
 
 void Sms_Apu::write_ggstereo( blip_time_t time, int data )
 {
-	require( (unsigned) data <= 0xFF );
+	assert( (unsigned) data <= 0xFF );
 
 	run_until( time );
 
@@ -296,7 +296,7 @@ static unsigned char const volumes [16] = {
 
 void Sms_Apu::write_data( blip_time_t time, int data )
 {
-	require( (unsigned) data <= 0xFF );
+	assert( (unsigned) data <= 0xFF );
 
 	run_until( time );
 

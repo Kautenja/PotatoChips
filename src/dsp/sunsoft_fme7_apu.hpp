@@ -105,7 +105,7 @@ class SunSoftFME7 {
 	BLIPSynth<blip_good_quality, 1> synth;
 
 	void run_until(blip_time_t end_time) {
-		// require( end_time >= last_time );
+		// assert( end_time >= last_time );
 
 		for ( int index = 0; index < OSC_COUNT; index++ )
 		{

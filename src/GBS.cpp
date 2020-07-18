@@ -156,9 +156,8 @@ struct ChipGBS : Module {
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 7;
-
+        // set the volume for the channel
         apu.write_register(0, NOISE_START_VOLUME, 0b11111000);
-
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
@@ -167,7 +166,7 @@ struct ChipGBS : Module {
         freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         apu.write_register(0, NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | period);
-
+        // enable the channel
         apu.write_register(0, NOISE_TRIG_LENGTH_ENABLE, 0x80);
     }
 

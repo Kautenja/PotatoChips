@@ -22,6 +22,8 @@
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
 
+typedef unsigned char byte;
+
 class Sap_Apu_Impl;
 
 class Sap_Apu {

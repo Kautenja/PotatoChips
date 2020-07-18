@@ -22,6 +22,8 @@
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
 
+typedef unsigned char byte;
+
 class Ay_Apu {
  public:
     // Set buffer to generate all sound into, or disable sound if NULL

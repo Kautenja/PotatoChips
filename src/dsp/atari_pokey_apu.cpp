@@ -210,7 +210,7 @@ void Sap_Apu::run_until( blip_time_t end_time )
 
 					// square/poly5 wave
 					blargg_ulong wave = poly5;
-					check( poly5 & 1 ); // low bit is set for pure wave
+					require( poly5 & 1 ); // low bit is set for pure wave
 					int poly5_inc = 0;
 					if ( !(osc_control & 0x80) )
 					{

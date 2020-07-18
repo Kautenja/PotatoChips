@@ -19,16 +19,6 @@
 #include "components.hpp"
 #include "dsp/konami_vrc6_apu.hpp"
 
-/// the IO registers on the VRC6 chip (altered for VRC6 implementation).
-enum KonamiVRC6_Registers {
-    PULSE_DUTY_VOLUME = 0,
-    PULSE_PERIOD_LOW  = 1,
-    PULSE_PERIOD_HIGH = 2,
-    SAW_VOLUME        = 0,
-    SAW_PERIOD_LOW    = 1,
-    SAW_PERIOD_HIGH   = 2,
-};
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -36,20 +26,20 @@ enum KonamiVRC6_Registers {
 /// A Konami VRC6 Chip module.
 struct ChipVRC6 : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, VRC6::OSC_COUNT),
+        ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
-        ENUMS(PARAM_LEVEL, VRC6::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, KonamiVRC6::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, VRC6::OSC_COUNT),
-        ENUMS(INPUT_FM, VRC6::OSC_COUNT),
+        ENUMS(INPUT_VOCT, KonamiVRC6::OSC_COUNT),
+        ENUMS(INPUT_FM, KonamiVRC6::OSC_COUNT),
         ENUMS(INPUT_PW, 2),
-        ENUMS(INPUT_LEVEL, VRC6::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, KonamiVRC6::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, VRC6::OSC_COUNT),
+        ENUMS(OUTPUT_CHANNEL, KonamiVRC6::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -57,9 +47,9 @@ struct ChipVRC6 : Module {
     };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[VRC6::OSC_COUNT];
+    BLIPBuffer buf[KonamiVRC6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with
-    VRC6 apu;
+    KonamiVRC6 apu;
 
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
@@ -80,7 +70,7 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < VRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }
@@ -210,7 +200,7 @@ struct ChipVRC6 : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < VRC6::OSC_COUNT; i++)
+            for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
                 buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
@@ -222,7 +212,7 @@ struct ChipVRC6 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < VRC6::OSC_COUNT; i++)
+        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 

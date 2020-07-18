@@ -49,8 +49,8 @@ enum Richo2A03_Registers {
     STATUS =         0x4017,
 };
 
-/// An oscillator based on the NES 2A03 synthesis chip.
-class APU {
+/// An oscillator based on the Ricoh 2A03 synthesis chip.
+class Ricoh2A03 {
  public:
     /// the number of oscillators on the VRC6 chip
     static constexpr int OSC_COUNT = 4;
@@ -60,7 +60,7 @@ class APU {
     static constexpr int ADDR_END   = 0x4017;
 
     /// Initialize a new APU.
-    APU() {
+    Ricoh2A03() {
         pulse1.synth = pulse2.synth = &square_synth;
         output(NULL);
         volume(1.0);
@@ -131,7 +131,7 @@ class APU {
     ///       3) Noise.
     ///
     inline void osc_output(int osc, BLIPBuffer* buf) {
-        assert(0 <= osc && osc < OSC_COUNT && "APU::osc_output(): Index out of range");
+        assert(0 <= osc && osc < OSC_COUNT && "Ricoh2A03::osc_output(): Index out of range");
         oscs[osc]->output = buf;
     }
 
@@ -213,10 +213,10 @@ class APU {
 
  private:
     /// Disable the public copy constructor.
-    APU(const APU&);
+    Ricoh2A03(const Ricoh2A03&);
 
     /// Disable the public assignment operator.
-    APU& operator=(const APU&);
+    Ricoh2A03& operator=(const Ricoh2A03&);
 
     /// the channel 0 pulse wave generator
     Pulse pulse1;

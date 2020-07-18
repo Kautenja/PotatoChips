@@ -81,14 +81,11 @@ struct ChipGBS : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-
         // set the pulse width of the pulse wave (high 2 bits)
         auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
         apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
-
         // set the volume of the pulse wave, high 4 bits, envelope add mode on
         apu.write_register(0, PULSE0_START_VOLUME + 5 * channel, 0b11111000);
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -97,7 +94,7 @@ struct ChipGBS : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
+        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
@@ -116,16 +113,10 @@ struct ChipGBS : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-
+        // turn on the DAC for the channel
         apu.write_register(0, WAVE_DAC_POWER, 0b10000000);
-
-        // set the pulse width of the pulse wave (high 2 bits)
-        // auto pw = static_cast<uint8_t>(params[PARAM_PW + 2].getValue()) << 6;
-        // apu.write_register(0, PULSE0_DUTY_LENGTH_LOAD, pw);
-
         // set the volume
         apu.write_register(0, WAVE_VOLUME_CODE, 0b00100000);
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + 2].getVoltage();
@@ -134,7 +125,8 @@ struct ChipGBS : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        freq = buf[2].get_clock_rate() / (CLOCK_DIVISION * freq);
+        // TODO: determine range
         // uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         uint16_t freq11bit = freq;
         // write the frequency to the low and high registers
@@ -142,7 +134,7 @@ struct ChipGBS : Module {
         //   produce an offset between registers based on channel index
         apu.write_register(0, WAVE_FREQ_LO,  freq11bit & 0xff);
         apu.write_register(0, WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, freq11bit >> 8 | 0x80);
-
+        // write the wave-table for the channel
         for (int i = 0; i < 32 / 2; i++) {
             uint8_t nibbleHi = sine_wave[2 * i];
             uint8_t nibbleLo = sine_wave[2 * i + 1];

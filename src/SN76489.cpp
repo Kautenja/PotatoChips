@@ -34,6 +34,7 @@ struct ChipSN76489 : Module {
         ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
         ENUMS(INPUT_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
+        INPUT_LFSR,
         INPUT_COUNT
     };
     enum OutputIds {
@@ -52,6 +53,9 @@ struct ChipSN76489 : Module {
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
+
+    /// a Schmitt Trigger for handling inputs to the LFSR port
+    dsp::BooleanTrigger lfsr;
 
     /// Initialize a new SN76489 Chip module.
     ChipSN76489() {
@@ -117,6 +121,9 @@ struct ChipSN76489 : Module {
         apu.write_data(0, (TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
+    bool update_noise_control = false;
+    uint8_t noise_period = 0;
+
     /// Process noise (channel 3).
     void channel_noise() {
         // the minimal value for the frequency register to produce sound
@@ -133,8 +140,12 @@ struct ChipSN76489 : Module {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_VOCT + 3].isConnected())
             freq *= inputs[INPUT_VOCT + 3].getVoltage() / 3.f;
-        uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-
+        uint8_t period = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        if (period != noise_period or update_noise_control != lfsr.state) {
+            apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | !lfsr.state * NOISE_FEEDBACK);
+            noise_period = period;
+            update_noise_control = lfsr.state;
+        }
         // apu.write_register(0, NOISE_LO, 0b10000000 + period);
         // apu.write_register(0, NOISE_HI, 0);
         // // set the volume to a constant level
@@ -178,6 +189,7 @@ struct ChipSN76489 : Module {
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
+            lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
             channel_pulse(0);
             channel_pulse(1);
@@ -232,6 +244,8 @@ struct ChipSN76489Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipSN76489::PARAM_FREQ + 1));
         addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipSN76489::PARAM_FREQ + 2));
         addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipSN76489::PARAM_FREQ + 3));
+        // LFSR switch
+        addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipSN76489::INPUT_LFSR));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));

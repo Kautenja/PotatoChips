@@ -133,6 +133,7 @@ class BLIPBuffer {
     ///
     SampleRateStatus set_sample_rate(
         uint32_t samples_per_sec,
+        uint32_t clock_cycles_per_sec,
         uint32_t buffer_length = 1000 / 4
     ) {
         // check the size parameter
@@ -157,7 +158,7 @@ class BLIPBuffer {
         // update the high-pass filter
         bass_freq(bass_freq_);
         // calculate the number of cycles per sample (round by truncation)
-        uint32_t cycles_per_sample = 768000 / samples_per_sec;
+        uint32_t cycles_per_sample = clock_cycles_per_sec / samples_per_sec;
         // re-calculate the clock rate with rounding error accounted for
         clock_rate_ = cycles_per_sample * samples_per_sec;
         // calculate the time factor based on the clock_rate and sample_rate

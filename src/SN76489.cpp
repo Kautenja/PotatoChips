@@ -145,7 +145,7 @@ struct ChipSN76489 : Module {
         float freq = params[PARAM_FREQ + 3].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_VOCT + 3].isConnected())
-            freq *= inputs[INPUT_VOCT + 3].getVoltage() / 3.f;
+            freq += inputs[INPUT_VOCT + 3].getVoltage() / 2.f;
         uint8_t period = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         bool state = params[PARAM_LFSR].getValue() - !lfsr.state;
         if (period != noise_period or update_noise_control != state) {

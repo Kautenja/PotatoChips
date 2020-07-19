@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "widgets/wavetable_editor.hpp"
+#include "widget/wavetable_editor.hpp"
 #include "dsp/namco_106_apu.hpp"
 #include <cstring>
 

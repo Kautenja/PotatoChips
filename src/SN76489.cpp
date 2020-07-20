@@ -1,4 +1,4 @@
-// A Ricoh SN76489 Chip module.
+// A Texas Instruments SN76489 Chip module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Ricoh SN76489 Chip module.
+/// A Texas Instruments SN76489 Chip module.
 struct ChipSN76489 : Module {
  private:
     /// whether to update the noise control (based on LFSR update)
@@ -31,20 +31,39 @@ struct ChipSN76489 : Module {
     /// the current noise period
     uint8_t noise_period = 0;
 
+    /// a signal flag for detecting sample rate changes
+    bool new_sample_rate = true;
+
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
+    /// The SN76489 instance to synthesize sound with
+    TexasInstrumentsSN76489 apu;
+
+    /// a Schmitt Trigger for handling inputs to the LFSR port
+    dsp::BooleanTrigger lfsr;
+
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
+    /// a VU meter for keeping track of the channel levels
+    dsp::VuMeter2 chMeters[TexasInstrumentsSN76489::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
+
  public:
     enum ParamIds {
-        ENUMS(PARAM_FREQ, 3),
+        ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT - 1),
         PARAM_NOISE_PERIOD,
-        ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_LFSR,
+        ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, 3),
+        ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT - 1),
         INPUT_NOISE_PERIOD,
-        ENUMS(INPUT_FM, 3),
-        ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_LFSR,
+        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -55,23 +74,6 @@ struct ChipSN76489 : Module {
         ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         LIGHT_COUNT
     };
-
-    dsp::VuMeter2 chMeters[TexasInstrumentsSN76489::OSC_COUNT];
-    dsp::ClockDivider lightDivider;
-
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
-    /// The SN76489 instance to synthesize sound with
-    TexasInstrumentsSN76489 apu;
-
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
-    // a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr;
 
     /// Initialize a new SN76489 Chip module.
     ChipSN76489() {
@@ -86,11 +88,11 @@ struct ChipSN76489 : Module {
         configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Tone 3 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Noise Level",  "%", 0, 100);
         cvDivider.setDivision(16);
+        lightDivider.setDivision(512);
         // set the output buffer for each individual voice
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
-        lightDivider.setDivision(512);
     }
 
     /// Process pulse wave for given channel.
@@ -208,13 +210,13 @@ struct ChipSN76489 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
+        // set the output voltages (and process the levels in VU)
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             auto channelOutput = getAudioOut(i);
             chMeters[i].process(args.sampleTime, channelOutput / 5.f);
             outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
         }
-        // level lights
-        if (lightDivider.process()) {
+        if (lightDivider.process()) {  // update the mixer lights
             for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
                 // auto b = outputs[OUTPUT_CHANNEL + i].getVoltage();

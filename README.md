@@ -13,6 +13,13 @@ They're just so addicting!
 
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: 2A03 -->
+<!-- ------------------------------------------------------------ -->
+
+<details>
+<summary>2A03</summary>
+    
 ## 2A03
 
 2A03 is an emulation of the Ricoh 2A03 audio processing unit from the Nintendo
@@ -39,6 +46,15 @@ See the [Manual][2A03] for more information about the features of this module.
 
 [2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
 
+</details>
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: VRC6 -->
+<!-- ------------------------------------------------------------ -->
+
+<details>
+<summary>VRC6</summary>
+
 ## VRC6
 
 VRC6 is an emulation of the Konami VRC6 audio processing unit from the
@@ -63,6 +79,15 @@ See the [Manual][VRC6] for more information about the features of this module.
 
 [VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 
+</details>
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: FME7 -->
+<!-- ------------------------------------------------------------ -->
+
+<details>
+<summary>FME7</summary>
+    
 ## FME7
 
 FME7 is an emulation of the Sunsoft FME7 audio processing unit from the
@@ -83,6 +108,15 @@ See the [Manual][FME7] for more information about the features of this module.
 
 [FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 
+</details>
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: 106 -->
+<!-- ------------------------------------------------------------ -->
+
+<details>
+<summary>106</summary>
+    
 ## 106
 
 106 is an emulation of the Namco 106 audio processing unit from the
@@ -112,6 +146,15 @@ See the [Manual][106] for more information about the features of this module.
 
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
+</details>
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: SN76489 -->
+<!-- ------------------------------------------------------------ -->
+
+<details>
+<summary>SN76489</summary>
+    
 ## SN76489
 
 SN76489 is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
@@ -139,7 +182,4 @@ See the [Manual][SN76489] for more information about the features of this module
 [TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
 [SN76489]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SN76489.pdf
 
-## Acknowledgments
-
-The code for the module is derived from the NES synthesis library,
-[Nes_Snd_Emu](https://github.com/jamesathey/Nes_Snd_Emu).
+</details>

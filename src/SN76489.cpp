@@ -27,19 +27,21 @@
 struct ChipSN76489 : Module {
  private:
     /// whether to update the noise control (based on LFSR update)
-    bool update_noise_control = false;
+    bool update_noise_control = true;
     /// the current noise period
     uint8_t noise_period = 0;
 
  public:
     enum ParamIds {
-        ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(PARAM_FREQ, 3),
+        PARAM_NOISE_PERIOD,
         ENUMS(PARAM_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_LFSR,
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(INPUT_VOCT, 3),
+        INPUT_NOISE_PERIOD,
         ENUMS(INPUT_FM, 3),
         ENUMS(INPUT_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_LFSR,
@@ -71,8 +73,8 @@ struct ChipSN76489 : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Tone 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Tone 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3, 0, 3, 0, "Noise Control", "");
-        configParam(PARAM_LFSR, 0, 1, 0, "LFSR Polarity", "");
+        configParam(PARAM_NOISE_PERIOD, 0, 3, 0, "Noise Control", "");
+        configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         configParam(PARAM_ATTENUATION + 0, 0, 1, 0.5, "Tone 1 Attenuation", "%", 0, 100);
         configParam(PARAM_ATTENUATION + 1, 0, 1, 0.5, "Tone 2 Attenuation", "%", 0, 100);
         configParam(PARAM_ATTENUATION + 2, 0, 1, 0.5, "Tone 3 Attenuation", "%", 0, 100);
@@ -142,12 +144,12 @@ struct ChipSN76489 : Module {
         static constexpr float ATT_MAX = 15;
 
         // get the attenuation from the parameter knob
-        float freq = params[PARAM_FREQ + 3].getValue();
+        float freq = params[PARAM_NOISE_PERIOD].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOCT + 3].isConnected())
-            freq += inputs[INPUT_VOCT + 3].getVoltage() / 2.f;
+        if (inputs[INPUT_NOISE_PERIOD].isConnected())
+            freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
         uint8_t period = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        bool state = params[PARAM_LFSR].getValue() - !lfsr.state;
+        bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
         if (period != noise_period or update_noise_control != state) {
             apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);
             noise_period = period;
@@ -223,36 +225,37 @@ struct ChipSN76489Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, ChipSN76489::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, ChipSN76489::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, ChipSN76489::INPUT_VOCT + 2));
-        addInput(createInput<PJ301MPort>(Vec(20, 329), module, ChipSN76489::INPUT_VOCT + 3));
+        addInput(createInput<PJ301MPort>(Vec(19, 73),  module, ChipSN76489::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(19, 158), module, ChipSN76489::INPUT_VOCT + 1));
+        addInput(createInput<PJ301MPort>(Vec(19, 243), module, ChipSN76489::INPUT_VOCT + 2));
         // Attenuators
-        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipSN76489::PARAM_ATTENUATION + 0));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipSN76489::PARAM_ATTENUATION + 1));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipSN76489::PARAM_ATTENUATION + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 350), module, ChipSN76489::PARAM_ATTENUATION + 3));
-        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, ChipSN76489::INPUT_ATTENUATION + 0));
-        addInput(createInput<PJ301MPort>(Vec(102, 146),  module, ChipSN76489::INPUT_ATTENUATION + 1));
-        addInput(createInput<PJ301MPort>(Vec(102, 255),  module, ChipSN76489::INPUT_ATTENUATION + 2));
-        addInput(createInput<PJ301MPort>(Vec(102, 320),  module, ChipSN76489::INPUT_ATTENUATION + 3));
+        // addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipSN76489::PARAM_ATTENUATION + 0));
+        // addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipSN76489::PARAM_ATTENUATION + 1));
+        // addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipSN76489::PARAM_ATTENUATION + 2));
+        // addParam(createParam<Rogan0PSNES>(Vec(103, 350), module, ChipSN76489::PARAM_ATTENUATION + 3));
+        addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_ATTENUATION + 0));
+        addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_ATTENUATION + 1));
+        addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_ATTENUATION + 2));
+        addInput(createInput<PJ301MPort>(Vec(135, 283),  module, ChipSN76489::INPUT_ATTENUATION + 3));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, ChipSN76489::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, ChipSN76489::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, ChipSN76489::INPUT_FM + 2));
+        addInput(createInput<PJ301MPort>(Vec(19, 38),  module, ChipSN76489::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(19, 123), module, ChipSN76489::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(19, 208), module, ChipSN76489::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipSN76489::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipSN76489::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipSN76489::PARAM_FREQ + 2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipSN76489::PARAM_FREQ + 3));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 39),  module, ChipSN76489::PARAM_FREQ + 0));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 124), module, ChipSN76489::PARAM_FREQ + 1));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 209), module, ChipSN76489::PARAM_FREQ + 2));
+        // noise period
+        addParam(createParam<Rogan1PWhite>(Vec(64, 296), module, ChipSN76489::PARAM_NOISE_PERIOD));
+        addInput(createInput<PJ301MPort>(Vec(76, 332),   module, ChipSN76489::INPUT_NOISE_PERIOD));
         // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipSN76489::INPUT_LFSR));
-        addParam(createParam<CKSS>(Vec(24, 300), module, ChipSN76489::PARAM_LFSR));
+        addParam(createParam<CKSS>(Vec(22, 288),       module, ChipSN76489::PARAM_LFSR));
+        addInput(createInput<PJ301MPort>(Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, ChipSN76489::OUTPUT_CHANNEL + 2));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, ChipSN76489::OUTPUT_CHANNEL + 3));
+        addOutput(createOutput<PJ301MPort>(Vec(137, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(137, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(137, 244), module, ChipSN76489::OUTPUT_CHANNEL + 2));
+        addOutput(createOutput<PJ301MPort>(Vec(137, 329), module, ChipSN76489::OUTPUT_CHANNEL + 3));
     }
 };
 

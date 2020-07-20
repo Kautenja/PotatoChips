@@ -263,10 +263,10 @@ struct ChipSN76489Widget : ModuleWidget {
         addParam(createParam<CKSS>(Vec(22, 288),       module, ChipSN76489::PARAM_LFSR));
         addInput(createInput<PJ301MPort>(Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
         // Level
-        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0, ChipSN76489::LIGHTS_LEVEL + 0));
-        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1, ChipSN76489::LIGHTS_LEVEL + 1));
-        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2, ChipSN76489::LIGHTS_LEVEL + 2));
-        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3, ChipSN76489::LIGHTS_LEVEL + 3));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0, ChipSN76489::LIGHTS_LEVEL + 0));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1, ChipSN76489::LIGHTS_LEVEL + 1));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2, ChipSN76489::LIGHTS_LEVEL + 2));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3, ChipSN76489::LIGHTS_LEVEL + 3));
         addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_LEVEL + 0));
         addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_LEVEL + 1));
         addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_LEVEL + 2));

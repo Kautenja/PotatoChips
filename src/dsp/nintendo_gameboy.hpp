@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_NINTENDO_GAMEBOY_APU_HPP_
-#define DSP_NINTENDO_GAMEBOY_APU_HPP_
+#ifndef DSP_NINTENDO_GAMEBOY_HPP_
+#define DSP_NINTENDO_GAMEBOY_HPP_
 
 #include "nintendo_gameboy_oscillators.hpp"
 
@@ -102,4 +102,4 @@ inline void Gb_Apu::volume(double vol)
     update_volume();
 }
 
-#endif  // DSP_NINTENDO_GAMEBOY_APU_HPP_
+#endif  // DSP_NINTENDO_GAMEBOY_HPP_

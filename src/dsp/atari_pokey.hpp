@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_ATARI_POKEY_APU_HPP_
-#define DSP_ATARI_POKEY_APU_HPP_
+#ifndef DSP_ATARI_POKEY_HPP_
+#define DSP_ATARI_POKEY_HPP_
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
@@ -91,4 +91,4 @@ inline void Sap_Apu::osc_output(int i, BLIPBuffer* b)
     oscs [i].output = b;
 }
 
-#endif  // DSP_ATARI_POKEY_APU_HPP_
+#endif  // DSP_ATARI_POKEY_HPP_

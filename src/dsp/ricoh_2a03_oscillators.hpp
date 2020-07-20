@@ -16,8 +16,8 @@
 // derived from: Nes_Snd_Emu 0.1.7
 //
 
-#ifndef NES_OSCILLATORS_HPP_
-#define NES_OSCILLATORS_HPP_
+#ifndef DSP_RICOH_2A03_OSCILLATORS_HPP_
+#define DSP_RICOH_2A03_OSCILLATORS_HPP_
 
 #include "blip_buffer.hpp"
 #include <functional>
@@ -341,4 +341,4 @@ struct Noise : Envelope {
     }
 };
 
-#endif  // NES_OSCILLATORS_HPP_
+#endif  // DSP_RICOH_2A03_OSCILLATORS_HPP_

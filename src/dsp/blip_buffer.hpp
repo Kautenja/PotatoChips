@@ -14,8 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BLIP_BUFFER_HPP_
-#define BLIP_BUFFER_HPP_
+#ifndef DSP_BLIP_BUFFER_HPP_
+#define DSP_BLIP_BUFFER_HPP_
 
 #include <cstdint>
 #include <cstdlib>
@@ -627,4 +627,4 @@ class BLIPSynth {
     }
 };
 
-#endif  // BLIP_BUFFER_HPP_
+#endif  // DSP_BLIP_BUFFER_HPP_

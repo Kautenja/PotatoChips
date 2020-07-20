@@ -115,9 +115,9 @@ See the [Manual][106] for more information about the features of this module.
 ## SN76489
 
 SN76489 is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
-processing unit from the Sega Master System for VCV Rack. The SN76489 chip
-contains three pulse waveform generators and a noise generator that selects
-between white-noise and periodic noise (LFSR).
+processing unit from the [Sega Master System][SegaMasterSystem] for VCV Rack.
+The SN76489 chip contains three pulse waveform generators and a noise generator
+that selects between white-noise and periodic noise (LFSR).
 
 <p align="center">
 <img alt="SN76489" src="manual/SN76489/img/SN76489-Module.svg">
@@ -135,6 +135,7 @@ between white-noise and periodic noise (LFSR).
 
 See the [Manual][SN76489] for more information about the features of this module.
 
+[SegaMasterSystem]: https://en.wikipedia.org/wiki/Master_System
 [TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
 [SN76489]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SN76489.pdf
 

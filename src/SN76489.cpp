@@ -51,7 +51,13 @@ struct ChipSN76489 : Module {
         ENUMS(OUTPUT_CHANNEL, TexasInstrumentsSN76489::OSC_COUNT),
         OUTPUT_COUNT
     };
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds {
+        ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
+        LIGHT_COUNT
+    };
+
+    dsp::VuMeter2 chMeters[TexasInstrumentsSN76489::OSC_COUNT];
+    dsp::ClockDivider lightDivider;
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
@@ -84,6 +90,7 @@ struct ChipSN76489 : Module {
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        lightDivider.setDivision(512);
     }
 
     /// Process pulse wave for given channel.
@@ -201,8 +208,19 @@ struct ChipSN76489 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
+            auto channelOutput = getAudioOut(i);
+            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
+            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        }
+        // level lights
+        if (lightDivider.process()) {
+            for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
+                float b = chMeters[i].getBrightness(-24.f, 0.f);
+                // auto b = outputs[OUTPUT_CHANNEL + i].getVoltage();
+                lights[LIGHTS_LEVEL + i].setBrightness(b);
+            }
+        }
     }
 
     /// Respond to the change of sample rate in the engine.
@@ -243,10 +261,10 @@ struct ChipSN76489Widget : ModuleWidget {
         addParam(createParam<CKSS>(Vec(22, 288),       module, ChipSN76489::PARAM_LFSR));
         addInput(createInput<PJ301MPort>(Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
         // Level
-        addParam(createParam<Rogan0PSNES>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0));
-        addParam(createParam<Rogan0PSNES>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1));
-        addParam(createParam<Rogan0PSNES>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3));
+        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0, ChipSN76489::LIGHTS_LEVEL + 0));
+        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1, ChipSN76489::LIGHTS_LEVEL + 1));
+        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2, ChipSN76489::LIGHTS_LEVEL + 2));
+        addParam(createLightParam<rack::LEDLightSlider<GreenLight>>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3, ChipSN76489::LIGHTS_LEVEL + 3));
         addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_LEVEL + 0));
         addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_LEVEL + 1));
         addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_LEVEL + 2));

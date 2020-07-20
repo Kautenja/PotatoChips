@@ -370,8 +370,8 @@
                 <path d="M72,213.75 L41.5,213.75" id="Line-3-Copy-5" stroke="#37FFDB" stroke-width="5" stroke-linecap="square"></path>
                 <path d="M72.5,299 L42,299" id="Line-3-Copy-6" stroke="#37FFDB" stroke-width="5" stroke-linecap="square"></path>
                 <path d="M72.25,32.5 L72.5,297.5" id="Line-3-Copy-8" stroke="#37FFDB" stroke-width="5" stroke-linecap="square"></path>
-                <text id="7" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#37FFDB">
-                    <tspan x="70.8261719" y="23">7</tspan>
+                <text id="8" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#37FFDB">
+                    <tspan x="70.8261719" y="23">8</tspan>
                 </text>
             </g>
             <g id="Level" transform="translate(168.000000, 2.000000)">
@@ -384,20 +384,20 @@
                 <path d="M76,221.5 L54.5,221.5" id="Line-3-Copy-7" stroke="#16AAFE" stroke-width="5" stroke-linecap="square"></path>
                 <path d="M76,307.5 L54.5,307.5" id="Line-3-Copy-9" stroke="#16AAFE" stroke-width="5" stroke-linecap="square"></path>
                 <path d="M78.5,31.5 L79.5,307.5" id="Line-3-Copy-8" stroke="#16AAFE" stroke-width="5" stroke-linecap="square"></path>
-                <text id="4" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#16AAFE">
-                    <tspan x="71.8261719" y="23">4</tspan>
+                <text id="7" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#16AAFE">
+                    <tspan x="71.8261719" y="23">7</tspan>
                 </text>
             </g>
             <g id="Noise-Input" transform="translate(15.000000, 322.000000)">
-                <text id="6" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#8F00FF">
-                    <tspan x="8.82617188" y="23">6</tspan>
+                <text id="5" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#8F00FF">
+                    <tspan x="8.82617188" y="23">5</tspan>
                 </text>
                 <rect id="Rectangle-Copy-7" stroke="#8F00FF" stroke-width="5" x="52" y="6" width="40" height="30"></rect>
                 <path d="M48.25,13.375 L34.75,13.625" id="Line-3-Copy-5" stroke="#8F00FF" stroke-width="5" stroke-linecap="square"></path>
             </g>
             <g id="Noise-Switch" transform="translate(15.000000, 287.000000)">
-                <text id="5" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#1F00FF">
-                    <tspan x="8.82617188" y="25">5</tspan>
+                <text id="4" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#1F00FF">
+                    <tspan x="8.82617188" y="25">4</tspan>
                 </text>
                 <rect id="Rectangle-Copy-7" stroke="#1F00FF" stroke-width="5" x="52" y="0" width="40" height="30"></rect>
                 <path d="M48.25,15.375 L34.75,15.625" id="Line-3-Copy-5" stroke="#1F00FF" stroke-width="5" stroke-linecap="square"></path>
@@ -427,12 +427,16 @@
                 </text>
             </g>
             <g id="Frequency" transform="translate(65.000000, 3.000000)">
-                <rect id="Rectangle-Copy-4" stroke="#C0AFFF" stroke-width="5" x="46" y="22" width="52" height="338"></rect>
+                <rect id="Rectangle-Copy-4" stroke="#C0AFFF" stroke-width="5" x="46" y="22" width="52" height="256"></rect>
                 <path d="M46,21.75 L29.5,21.5" id="Line-3-Copy-11" stroke="#C0AFFF" stroke-width="5" stroke-linecap="square"></path>
                 <text id="1" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#C0AFFF">
                     <tspan x="8.82617188" y="23">1</tspan>
                 </text>
             </g>
         </g>
+        <rect id="Rectangle" stroke="#FF7A00" stroke-width="5" x="106" y="306" width="52" height="64"></rect>
+        <text id="6" font-family="Helvetica-Bold, Helvetica" font-size="24" font-weight="bold" fill="#FF7A00">
+            <tspan x="102.826172" y="391">6</tspan>
+        </text>
     </g>
 </svg>

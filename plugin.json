@@ -53,7 +53,8 @@
       "description": "An emulation of the Texas Instruments SN76489 audio processing unit from the Sega Master System (SMS).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf",
       "tags": [
-        "Oscillator"
+        "Oscillator",
+        "Noise"
       ]
     }
   ]

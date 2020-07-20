@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/ricoh_2a03_apu.hpp"
+#include "dsp/ricoh_2a03.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

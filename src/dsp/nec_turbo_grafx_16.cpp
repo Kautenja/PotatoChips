@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "nec_turbo_grafx_16_apu.hpp"
+#include "nec_turbo_grafx_16.hpp"
 #include <cstring>
 
 bool const center_waves = true; // reduces asymmetry and clamping when starting notes

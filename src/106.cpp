@@ -18,7 +18,7 @@
 #include "plugin.hpp"
 #include "components.hpp"
 #include "widget/wavetable_editor.hpp"
-#include "dsp/namco_106_apu.hpp"
+#include "dsp/namco_106.hpp"
 #include <cstring>
 
 /// the default values for the wave-table

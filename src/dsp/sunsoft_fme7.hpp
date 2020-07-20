@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef NES_SunSoftFME7_APU_HPP_
-#define NES_SunSoftFME7_APU_HPP_
+#ifndef DSP_SUNSOFT_FME7_HPP_
+#define DSP_SUNSOFT_FME7_HPP_
 
 #include "blip_buffer.hpp"
 

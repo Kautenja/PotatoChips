@@ -20,8 +20,8 @@
 // Version 1.4 (final beta)
 //
 
-#ifndef DSP_YM2612_APU_HPP_
-#define DSP_YM2612_APU_HPP_
+#ifndef DSP_YM2612_HPP_
+#define DSP_YM2612_HPP_
 
 struct Ym2612_Impl;
 
@@ -55,4 +55,4 @@ class Ym2612_Emu  {
     void run(int pair_count, sample_t* out);
 };
 
-#endif  // DSP_YM2612_APU_HPP_
+#endif  // DSP_YM2612_HPP_

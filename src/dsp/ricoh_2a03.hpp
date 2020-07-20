@@ -16,8 +16,8 @@
 // derived from: Nes_Snd_Emu 0.1.7
 //
 
-#ifndef NES_2A03_APU_HPP_
-#define NES_2A03_APU_HPP_
+#ifndef DSP_2A03_HPP_
+#define DSP_2A03_HPP_
 
 #include "ricoh_2a03_oscillators.hpp"
 #include <cassert>
@@ -325,4 +325,4 @@ class Ricoh2A03 {
     }
 };
 
-#endif  // NES_2A03_APU_HPP_
+#endif  // DSP_2A03_HPP_

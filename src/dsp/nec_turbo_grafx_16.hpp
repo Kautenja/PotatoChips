@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_NEC_TURBO_GRAFX_16_APU_HPP_
-#define DSP_NEC_TURBO_GRAFX_16_APU_HPP_
+#ifndef DSP_NEC_TURBO_GRAFX_16_HPP_
+#define DSP_NEC_TURBO_GRAFX_16_HPP_
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
@@ -78,4 +78,4 @@ inline void Hes_Apu::volume(double v) { synth.volume(1.8 / osc_count / Hes_Osc::
 
 inline void Hes_Apu::treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
 
-#endif  // DSP_NEC_TURBO_GRAFX_16_APU_HPP_
+#endif  // DSP_NEC_TURBO_GRAFX_16_HPP_

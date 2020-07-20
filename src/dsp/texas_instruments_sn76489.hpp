@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_
-#define DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_
+#ifndef DSP_TEXAS_INSTRUMENTS_SN76489_HPP_
+#define DSP_TEXAS_INSTRUMENTS_SN76489_HPP_
 
 #include "texas_instruments_sn76489_oscillators.hpp"
 
@@ -197,4 +197,4 @@ struct sms_apu_state_t {
     unsigned char latch;
 };
 
-#endif  // DSP_TEXAS_INSTRUMENTS_SN76489_APU_HPP_
+#endif  // DSP_TEXAS_INSTRUMENTS_SN76489_HPP_

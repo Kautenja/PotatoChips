@@ -16,8 +16,8 @@
 // derived from: Nes_Snd_Emu 0.1.7
 //
 
-#ifndef NES_NAMCO106_APU_HPP_
-#define NES_NAMCO106_APU_HPP_
+#ifndef DSP_NAMCO106_HPP_
+#define DSP_NAMCO106_HPP_
 
 #include "blip_buffer.hpp"
 
@@ -228,4 +228,4 @@ class Namco106 {
     }
 };
 
-#endif  // NES_NAMCO106_APU_HPP_
+#endif  // DSP_NAMCO106_HPP_

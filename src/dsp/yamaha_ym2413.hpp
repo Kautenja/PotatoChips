@@ -18,8 +18,8 @@
 // Version 0.61
 //
 
-#ifndef DSP_YM2413_APU_HPP_
-#define DSP_YM2413_APU_HPP_
+#ifndef DSP_YM2413_HPP_
+#define DSP_YM2413_HPP_
 
 class Ym2413_Emu  {
     struct OPLL* opll;
@@ -48,5 +48,5 @@ class Ym2413_Emu  {
     void run(int pair_count, sample_t* out);
 };
 
-#endif  // DSP_YM2413_APU_HPP_
+#endif  // DSP_YM2413_HPP_
 

@@ -79,6 +79,7 @@ modules:
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf
     tags:
       - Oscillator
+      - Noise
   # - slug: 2413
   #   name: 2413
   #   description: An emulation of the Yamaha YM2413 audio processing unit.

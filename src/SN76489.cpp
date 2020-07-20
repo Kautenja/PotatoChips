@@ -73,7 +73,7 @@ struct ChipSN76489 : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Tone 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Tone 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD, 0, 3, 0, "Noise Control", "");
+        configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         configParam(PARAM_LEVEL + 0, 0, 1, 0.5, "Tone 1 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Tone 2 Level", "%", 0, 100);
@@ -148,7 +148,7 @@ struct ChipSN76489 : Module {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
-        uint8_t period = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        uint8_t period = FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
         bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
         if (period != noise_period or update_noise_control != state) {
             apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);

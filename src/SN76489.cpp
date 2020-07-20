@@ -35,7 +35,7 @@ struct ChipSN76489 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, 3),
         PARAM_NOISE_PERIOD,
-        ENUMS(PARAM_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_LFSR,
         PARAM_COUNT
     };
@@ -43,7 +43,7 @@ struct ChipSN76489 : Module {
         ENUMS(INPUT_VOCT, 3),
         INPUT_NOISE_PERIOD,
         ENUMS(INPUT_FM, 3),
-        ENUMS(INPUT_ATTENUATION, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_LFSR,
         INPUT_COUNT
     };
@@ -75,10 +75,10 @@ struct ChipSN76489 : Module {
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_NOISE_PERIOD, 0, 3, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
-        configParam(PARAM_ATTENUATION + 0, 0, 1, 0.5, "Tone 1 Attenuation", "%", 0, 100);
-        configParam(PARAM_ATTENUATION + 1, 0, 1, 0.5, "Tone 2 Attenuation", "%", 0, 100);
-        configParam(PARAM_ATTENUATION + 2, 0, 1, 0.5, "Tone 3 Attenuation", "%", 0, 100);
-        configParam(PARAM_ATTENUATION + 3, 0, 1, 0.5, "Noise Attenuation",  "%", 0, 100);
+        configParam(PARAM_LEVEL + 0, 0, 1, 0.5, "Tone 1 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Tone 2 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Tone 3 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Noise Level",  "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
@@ -123,12 +123,12 @@ struct ChipSN76489 : Module {
         apu.write_data(0, hi);
 
         // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_ATTENUATION + channel].getValue();
+        auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_ATTENUATION + channel].isConnected())
-            attenuationParam *= inputs[INPUT_ATTENUATION + channel].getVoltage() / 2.f;
+        if (inputs[INPUT_LEVEL + channel].isConnected())
+            attenuationParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit attenuation clamped within legal limits
-        uint8_t attenuation = rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
         apu.write_data(0, (TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
@@ -157,12 +157,12 @@ struct ChipSN76489 : Module {
         }
 
         // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_ATTENUATION + 3].getValue();
+        auto attenuationParam = params[PARAM_LEVEL + 3].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_ATTENUATION + 3].isConnected())
-            attenuationParam *= inputs[INPUT_ATTENUATION + 3].getVoltage() / 2.f;
+        if (inputs[INPUT_LEVEL + 3].isConnected())
+            attenuationParam *= inputs[INPUT_LEVEL + 3].getVoltage() / 2.f;
         // get the 8-bit attenuation clamped within legal limits
-        uint8_t attenuation = rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
         apu.write_data(0, NOISE_ATTENUATION | attenuation);
     }
 
@@ -228,15 +228,6 @@ struct ChipSN76489Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(19, 73),  module, ChipSN76489::INPUT_VOCT + 0));
         addInput(createInput<PJ301MPort>(Vec(19, 158), module, ChipSN76489::INPUT_VOCT + 1));
         addInput(createInput<PJ301MPort>(Vec(19, 243), module, ChipSN76489::INPUT_VOCT + 2));
-        // Attenuators
-        // addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipSN76489::PARAM_ATTENUATION + 0));
-        // addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipSN76489::PARAM_ATTENUATION + 1));
-        // addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipSN76489::PARAM_ATTENUATION + 2));
-        // addParam(createParam<Rogan0PSNES>(Vec(103, 350), module, ChipSN76489::PARAM_ATTENUATION + 3));
-        addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_ATTENUATION + 0));
-        addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_ATTENUATION + 1));
-        addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_ATTENUATION + 2));
-        addInput(createInput<PJ301MPort>(Vec(135, 283),  module, ChipSN76489::INPUT_ATTENUATION + 3));
         // FM inputs
         addInput(createInput<PJ301MPort>(Vec(19, 38),  module, ChipSN76489::INPUT_FM + 0));
         addInput(createInput<PJ301MPort>(Vec(19, 123), module, ChipSN76489::INPUT_FM + 1));
@@ -251,6 +242,15 @@ struct ChipSN76489Widget : ModuleWidget {
         // LFSR switch
         addParam(createParam<CKSS>(Vec(22, 288),       module, ChipSN76489::PARAM_LFSR));
         addInput(createInput<PJ301MPort>(Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
+        // Level
+        addParam(createParam<Rogan0PSNES>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0));
+        addParam(createParam<Rogan0PSNES>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1));
+        addParam(createParam<Rogan0PSNES>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2));
+        addParam(createParam<Rogan0PSNES>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3));
+        addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_LEVEL + 0));
+        addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_LEVEL + 1));
+        addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_LEVEL + 2));
+        addInput(createInput<PJ301MPort>(Vec(135, 283),  module, ChipSN76489::INPUT_LEVEL + 3));
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(137, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(137, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));

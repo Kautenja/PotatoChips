@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/texas_instruments_sn76489_apu.hpp"
+#include "dsp/texas_instruments_sn76489.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

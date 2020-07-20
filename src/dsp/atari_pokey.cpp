@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "atari_pokey_apu.hpp"
+#include "atari_pokey.hpp"
 #include <string.h>
 
 int const max_frequency = 12000; // pure waves above this frequency are silenced

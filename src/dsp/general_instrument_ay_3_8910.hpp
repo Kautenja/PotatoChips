@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef GENERAL_INSTRUMENT_AY_3_8910_APU_HPP_
-#define GENERAL_INSTRUMENT_AY_3_8910_APU_HPP_
+#ifndef DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
+#define DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
@@ -121,4 +121,4 @@ inline void Ay_Apu::end_frame(blip_time_t time)
     last_time -= time;
 }
 
-#endif  // GENERAL_INSTRUMENT_AY_3_8910_APU_HPP_
+#endif  // DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_

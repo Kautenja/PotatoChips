@@ -16,8 +16,8 @@
 // derived from: Nes_Snd_Emu 0.1.7
 //
 
-#ifndef NES_VRC6_APU_HPP_
-#define NES_VRC6_APU_HPP_
+#ifndef DSP_VRC6_HPP_
+#define DSP_VRC6_HPP_
 
 #include "blip_buffer.hpp"
 
@@ -270,4 +270,4 @@ class KonamiVRC6 {
     }
 };
 
-#endif  // NES_VRC6_APU_HPP_
+#endif  // DSP_VRC6_HPP_

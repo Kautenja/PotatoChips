@@ -90,7 +90,8 @@ struct ChipSN76489 : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
-        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }

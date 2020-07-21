@@ -124,26 +124,26 @@ class TexasInstrumentsSN76489 {
         noise.synth.treble_eq(equalizer);
     }
 
-    /// Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
-    ///
-    /// @param output the BLIPBuffer to output the all the voices to
-    ///
-    inline void output(BLIPBuffer* output) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, output);
-    }
-
     /// Assign single oscillator output to buffer. If buffer is NULL, silences
     /// the given oscillator.
     ///
     /// @param index the index of the oscillator to set the output for
-    /// @param output the BLIPBuffer to output the given voice to
+    /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     ///
-    inline int osc_output(unsigned index, BLIPBuffer* output) {
+    inline int set_output(unsigned index, BLIPBuffer* buffer) {
         if (index >= OSC_COUNT) return 1;
-        oscs[index]->output = output;
+        oscs[index]->output = buffer;
         return 0;
+    }
+
+    /// Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
     }
 
     /// Reset oscillators and internal state.

@@ -29,6 +29,15 @@
       ]
     },
     {
+      "slug": "TURBO_GRAFX_16",
+      "name": "Turbo Grafx 16",
+      "description": "An emulation of the NEC Turbo Grafx 16 audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf",
+      "tags": [
+        "Oscillator"
+      ]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 audio processing unit from the Nintendo Entertainment System (NES).",

@@ -37,5 +37,7 @@ extern rack::Model *modelChipFME7;
 extern rack::Model *modelChip106;
 // the global instance of each the SN76489 module
 extern rack::Model *modelChipSN76489;
+// the global instance of each the POKEY module
+extern rack::Model *modelChipPOKEY;
 
 #endif  // PLUGIN_HPP_

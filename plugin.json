@@ -11,6 +11,15 @@
   "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md",
   "modules": [
     {
+      "slug": "POKEY",
+      "name": "POKEY",
+      "description": "An emulation of the Atari POKEY audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf",
+      "tags": [
+        "Oscillator"
+      ]
+    },
+    {
       "slug": "VRC6",
       "name": "VRC6",
       "description": "An emulation of the Konami VRC6 audio processing unit.",

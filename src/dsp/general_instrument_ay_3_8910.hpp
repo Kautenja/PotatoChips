@@ -93,6 +93,7 @@ class GeneralInstrumentAy_3_8910 {
     /// Power of two is more efficient (avoids division).
     static constexpr unsigned INAUDIBLE_FREQ = 16384;
 
+    // TODO: change to be class level (static constexpr fails on windows tho)
     /// With channels tied together and 1K resistor to ground (as datasheet
     /// recommends), output nearly matches logarithmic curve as claimed. Approx.
     /// 1.5 dB per step.
@@ -105,6 +106,7 @@ class GeneralInstrumentAy_3_8910 {
     #undef ENTRY
     };
 
+    // TODO: change to be class level (static constexpr fails on windows tho)
     /// TODO:
     const uint8_t MODES[8] = {
     #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)

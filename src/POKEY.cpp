@@ -19,6 +19,8 @@
 #include "components.hpp"
 #include "dsp/atari_pokey.hpp"
 
+// TODO: replace with logic from SN76489 and AY-3-8910 for boolean triggers
+
 /// a trigger for a button with a CV input.
 struct CVButtonTrigger {
     /// the trigger for the button

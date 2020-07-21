@@ -40,12 +40,12 @@ class GeneralInstrumentAy_3_8910 {
 
     /// the register on the chipm
     enum Registers {
-        PERIOD_CH_A_HI,
         PERIOD_CH_A_LO,
-        PERIOD_CH_B_HI,
+        PERIOD_CH_A_HI,
         PERIOD_CH_B_LO,
-        PERIOD_CH_C_HI,
+        PERIOD_CH_B_HI,
         PERIOD_CH_C_LO,
+        PERIOD_CH_C_HI,
         NOISE_PERIOD,
         CHANNEL_ENABLES,
         VOLUME_CH_A,
@@ -53,7 +53,7 @@ class GeneralInstrumentAy_3_8910 {
         VOLUME_CH_C,
         PERIOD_ENVELOPE_LO,
         PERIOD_ENVELOPE_HI,
-        ENVELOPE_CHARACTERISTICS,
+        ENVELOPE_SHAPE,
         // IO_PORT_A,
         // IO_PORT_B
     };

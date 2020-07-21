@@ -70,13 +70,7 @@ class AtariPOKEY {
         AUDC3  = 0xD205,
         AUDF4  = 0xD206,
         AUDC4  = 0xD207,
-        AUDCTL = 0xD208,
-        // STIMER = 0xD209,
-        // SKREST = 0xD20A,
-        // POTGO  = 0xD20B,
-        // SEROUT = 0xD20D,
-        // IRQEN  = 0xD20E,
-        // SKCTL  = 0xD20F
+        AUDCTL = 0xD208
     };
 
     /// TODO:

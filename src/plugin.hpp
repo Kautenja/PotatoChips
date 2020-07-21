@@ -37,6 +37,8 @@ extern rack::Model *modelChipFME7;
 extern rack::Model *modelChip106;
 // the global instance of each the SN76489 module
 extern rack::Model *modelChipSN76489;
+// the global instance of each the AY-3-8910 module
+extern rack::Model *modelChipAY_3_8910;
 // the global instance of each the POKEY module
 extern rack::Model *modelChipPOKEY;
 

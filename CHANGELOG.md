@@ -67,3 +67,7 @@
 ### 1.5.0 (2020-07-21)
 
 -   Atari POKEY module
+
+### 1.6.0 (2020-07-21)
+
+-   General Instrument AY-3-8910 module

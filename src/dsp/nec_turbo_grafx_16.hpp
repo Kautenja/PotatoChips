@@ -21,27 +21,46 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
+#include <cstring>
 
+/// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 struct NECTurboGrafx16_Oscillator {
+    /// TODO:
     unsigned char wave[32];
+    /// TODO:
     short volume[2];
+    /// TODO:
     int last_amp[2];
+    /// TODO:
     int delay;
+    /// TODO:
     int period;
+    /// TODO:
     unsigned char noise;
+    /// TODO:
     unsigned char phase;
+    /// TODO:
     unsigned char balance;
+    /// TODO:
     unsigned char dac;
+    /// TODO:
     blip_time_t last_time;
 
+    /// TODO:
     BLIPBuffer* outputs[2];
+    /// TODO:
     BLIPBuffer* chans[3];
+    /// TODO:
     unsigned noise_lfsr;
+    /// TODO:
     unsigned char control;
 
-    enum { amp_range = 0x8000 };
+    /// TODO:
+    enum { AMP_RANGE = 0x8000 };
+    /// TODO:
     typedef BLIPSynth<blip_med_quality,1> synth_t;
 
+    /// TODO:
     void run_until(synth_t& synth_, blip_time_t end_time) {
         BLIPBuffer* const osc_outputs_0 = outputs[0]; // cache often-used values
         if (osc_outputs_0 && control & 0x80) {
@@ -142,6 +161,64 @@ class NECTurboGrafx16 {
     /// TODO:
     static constexpr int ADDR_END   = 0x0809;
 
+ private:
+    /// reduces asymmetry and clamping when starting notes
+    static constexpr bool CENTER_WAVES = true;
+
+    /// TODO:
+    NECTurboGrafx16_Oscillator oscs[OSC_COUNT];
+    /// TODO:
+    int latch;
+    /// TODO:
+    int balance;
+    /// TODO:
+    NECTurboGrafx16_Oscillator::synth_t synth;
+
+    /// TODO:
+    void balance_changed(NECTurboGrafx16_Oscillator& osc) {
+        static const short log_table[32] = {  // ~1.5 db per step
+            #define ENTRY(factor) short (factor * NECTurboGrafx16_Oscillator::AMP_RANGE / 31.0 + 0.5)
+            ENTRY(0.000000), ENTRY(0.005524), ENTRY(0.006570), ENTRY(0.007813),
+            ENTRY(0.009291), ENTRY(0.011049), ENTRY(0.013139), ENTRY(0.015625),
+            ENTRY(0.018581), ENTRY(0.022097), ENTRY(0.026278), ENTRY(0.031250),
+            ENTRY(0.037163), ENTRY(0.044194), ENTRY(0.052556), ENTRY(0.062500),
+            ENTRY(0.074325), ENTRY(0.088388), ENTRY(0.105112), ENTRY(0.125000),
+            ENTRY(0.148651), ENTRY(0.176777), ENTRY(0.210224), ENTRY(0.250000),
+            ENTRY(0.297302), ENTRY(0.353553), ENTRY(0.420448), ENTRY(0.500000),
+            ENTRY(0.594604), ENTRY(0.707107), ENTRY(0.840896), ENTRY(1.000000),
+            #undef ENTRY
+        };
+
+        int vol = (osc.control & 0x1F) - 0x1E * 2;
+
+        int left  = vol + (osc.balance >> 3 & 0x1E) + (balance >> 3 & 0x1E);
+        if (left  < 0) left  = 0;
+
+        int right = vol + (osc.balance << 1 & 0x1E) + (balance << 1 & 0x1E);
+        if (right < 0) right = 0;
+
+        left  = log_table[left ];
+        right = log_table[right];
+
+        // optimizing for the common case of being centered also allows easy
+        // panning using Effects_Buffer
+        osc.outputs[0] = osc.chans[0];  // center
+        osc.outputs[1] = 0;
+        if (left != right) {
+            osc.outputs[0] = osc.chans[1];  // left
+            osc.outputs[1] = osc.chans[2];  // right
+        }
+
+        if (CENTER_WAVES) {
+            osc.last_amp[0] += (left  - osc.volume[0]) * 16;
+            osc.last_amp[1] += (right - osc.volume[1]) * 16;
+        }
+
+        osc.volume[0] = left;
+        osc.volume[1] = right;
+    }
+
+ public:
     /// Initialize a new Turbo Grafx 16 chip.
     NECTurboGrafx16() {
         NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
@@ -161,7 +238,7 @@ class NECTurboGrafx16 {
     /// @param level the value to set the volume to
     ///
     inline void volume(double level) {
-        synth.volume(1.8 / OSC_COUNT / NECTurboGrafx16_Oscillator::amp_range * level);
+        synth.volume(1.8 / OSC_COUNT / NECTurboGrafx16_Oscillator::AMP_RANGE * level);
     }
 
     /// Set treble equalization for the synthesizers.
@@ -284,25 +361,6 @@ class NECTurboGrafx16 {
             osc->last_time -= end_time;
         } while (osc != oscs);
     }
-
- private:
-    /// reduces asymmetry and clamping when starting notes
-    static constexpr bool CENTER_WAVES = true;
-
-    /// TODO:
-    NECTurboGrafx16_Oscillator oscs[OSC_COUNT];
-    /// TODO:
-    int latch;
-    /// TODO:
-    int balance;
-    /// TODO:
-    NECTurboGrafx16_Oscillator::synth_t synth;
-
-    /// TODO:
-    void balance_changed(NECTurboGrafx16_Oscillator&);
-
-    /// TODO:
-    void recalc_chans();
 };
 
 #endif  // DSP_NEC_TURBO_GRAFX_16_HPP_

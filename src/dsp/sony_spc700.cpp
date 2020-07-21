@@ -26,25 +26,22 @@
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
 
-SPC700::SPC700(uint8_t* ram_) : ram(ram_)
-{
+SPC700::SPC700(uint8_t* ram_) : ram(ram_) {
     set_gain(1.0);
     mute_voices(0);
     disable_surround(false);
 
-    assert(offsetof (globals_t,unused9 [2]) == register_count);
-    assert(sizeof (voice) == register_count);
+    assert(offsetof (globals_t,unused9[2]) == REGISTER_COUNT);
+    assert(sizeof (voice) == REGISTER_COUNT);
     blargg_verify_byte_order();
 }
 
-void SPC700::mute_voices(int mask)
-{
-    for (int i = 0; i < voice_count; i++)
-        voice_state [i].enabled = (mask >> i & 1) ? 31 : 7;
+void SPC700::mute_voices(int mask) {
+    for (int i = 0; i < VOICE_COUNT; i++)
+        voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
-void SPC700::reset()
-{
+void SPC700::reset() {
     keys = 0;
     echo_ptr = 0;
     noise_count = 0;
@@ -54,48 +51,43 @@ void SPC700::reset()
     g.flags = 0xE0; // reset, mute, echo off
     g.key_ons = 0;
 
-    for (int i = 0; i < voice_count; i++)
-    {
-        voice_t& v = voice_state [i];
+    for (int i = 0; i < VOICE_COUNT; i++) {
+        voice_t& v = voice_state[i];
         v.on_cnt = 0;
-        v.volume [0] = 0;
-        v.volume [1] = 0;
+        v.volume[0] = 0;
+        v.volume[1] = 0;
         v.envstate = state_release;
     }
 
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void SPC700::write(int i, int data)
-{
-    assert((unsigned) i < register_count);
+void SPC700::write(int i, int data) {
+    assert((unsigned) i < REGISTER_COUNT);
 
-    reg [i] = data;
+    reg[i] = data;
     int high = i >> 4;
-    switch (i & 0x0F)
-    {
+    switch (i & 0x0F) {
         // voice volume
         case 0:
         case 1: {
-            short* volume = voice_state [high].volume;
-            int left  = (int8_t) reg [i & ~1];
-            int right = (int8_t) reg [i |  1];
-            volume [0] = left;
-            volume [1] = right;
+            short* volume = voice_state[high].volume;
+            int left  = (int8_t) reg[i & ~1];
+            int right = (int8_t) reg[i |  1];
+            volume[0] = left;
+            volume[1] = right;
             // kill surround only if enabled and signs of volumes differ
-            if (left * right < surround_threshold)
-            {
+            if (left * right < surround_threshold) {
                 if (left < 0)
-                    volume [0] = -left;
+                    volume[0] = -left;
                 else
-                    volume [1] = -right;
+                    volume[1] = -right;
             }
             break;
         }
-
         // fir coefficients
         case 0x0F:
-            fir_coeff [high] = (int8_t) data; // sign-extend
+            fir_coeff[high] = (int8_t) data; // sign-extend
             break;
     }
 }
@@ -105,8 +97,7 @@ void SPC700::write(int i, int data)
 // The counter starts at 30720 (0x7800). Each count divides exactly into
 // 0x7800 without remainder.
 const int env_rate_init = 0x7800;
-static short const env_rates [0x20] =
-{
+static const short env_rates[0x20] = {
     0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
     0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
     0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
@@ -115,26 +106,20 @@ static short const env_rates [0x20] =
 
 const int env_range = 0x800;
 
-inline int SPC700::clock_envelope(int v)
-{                               /* Return value is current
-                                 * ENVX */
-    raw_voice_t& raw_voice = this->voice [v];
-    voice_t& voice = voice_state [v];
+inline int SPC700::clock_envelope(int v) {
+    raw_voice_t& raw_voice = this->voice[v];
+    voice_t& voice = voice_state[v];
 
     int envx = voice.envx;
-    if (voice.envstate == state_release)
-    {
-        /*
-         * Docs: "When in the state of "key off". the "click" sound is
-         * prevented by the addition of the fixed value 1/256" WTF???
-         * Alright, I'm going to choose to interpret that this way:
-         * When a note is keyed off, start the RELEASE state, which
-         * subtracts 1/256th each sample period (32kHz).  Note there's
-         * no need for a count because it always happens every update.
-         */
+    if (voice.envstate == state_release) {
+        // Docs: "When in the state of "key off". the "click" sound is
+        // prevented by the addition of the fixed value 1/256" WTF???
+        // Alright, I'm going to choose to interpret that this way:
+        // When a note is keyed off, start the RELEASE state, which
+        // subtracts 1/256th each sample period (32kHz).  Note there's
+        // no need for a count because it always happens every update.
         envx -= env_range / 256;
-        if (envx <= 0)
-        {
+        if (envx <= 0) {
             envx = 0;
             keys &= ~(1 << v);
             return -1;
@@ -145,28 +130,21 @@ inline int SPC700::clock_envelope(int v)
     }
 
     int cnt = voice.envcnt;
-    int adsr1 = raw_voice.adsr [0];
-    if (adsr1 & 0x80)
-    {
-        switch (voice.envstate)
-        {
+    int adsr1 = raw_voice.adsr[0];
+    if (adsr1 & 0x80) {
+        switch (voice.envstate) {
             case state_attack: {
                 // increase envelope by 1/64 each step
                 int t = adsr1 & 15;
-                if (t == 15)
-                {
+                if (t == 15) {
                     envx += env_range / 2;
-                }
-                else
-                {
-                    cnt -= env_rates [t * 2 + 1];
-                    if (cnt > 0)
-                        break;
+                } else {
+                    cnt -= env_rates[t * 2 + 1];
+                    if (cnt > 0) break;
                     envx += env_range / 64;
                     cnt = env_rate_init;
                 }
-                if (envx >= env_range)
-                {
+                if (envx >= env_range) {
                     envx = env_range - 1;
                     voice.envstate = state_decay;
                 }
@@ -175,18 +153,17 @@ inline int SPC700::clock_envelope(int v)
             }
 
             case state_decay: {
-                // Docs: "DR... [is multiplied] by the fixed value
+                // Docs: "DR...[is multiplied] by the fixed value
                 // 1-1/256." Well, at least that makes some sense.
                 // Multiplying ENVX by 255/256 every time DECAY is
                 // updated.
-                cnt -= env_rates [((adsr1 >> 3) & 0xE) + 0x10];
-                if (cnt <= 0)
-                {
+                cnt -= env_rates[((adsr1 >> 3) & 0xE) + 0x10];
+                if (cnt <= 0) {
                     cnt = env_rate_init;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
                 }
-                int sustain_level = raw_voice.adsr [1] >> 5;
+                int sustain_level = raw_voice.adsr[1] >> 5;
 
                 if (envx <= (sustain_level + 1) * 0x100)
                     voice.envstate = state_sustain;
@@ -194,12 +171,11 @@ inline int SPC700::clock_envelope(int v)
             }
 
             case state_sustain:
-                // Docs: "SR [is multiplied] by the fixed value 1-1/256."
+                // Docs: "SR[is multiplied] by the fixed value 1-1/256."
                 // Multiplying ENVX by 255/256 every time SUSTAIN is
                 // updated.
-                cnt -= env_rates [raw_voice.adsr [1] & 0x1F];
-                if (cnt <= 0)
-                {
+                cnt -= env_rates[raw_voice.adsr[1] & 0x1F];
+                if (cnt <= 0) {
                     cnt = env_rate_init;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
@@ -210,35 +186,28 @@ inline int SPC700::clock_envelope(int v)
                 // handled above
                 break;
         }
-    }
-    else
-    {                           /* GAIN mode is set */
-        /*
-         * Note: if the game switches between ADSR and GAIN modes
-         * partway through, should the count be reset, or should it
-         * continue from where it was? Does the DSP actually watch for
-         * that bit to change, or does it just go along with whatever
-         * it sees when it performs the update? I'm going to assume
-         * the latter and not update the count, unless I see a game
-         * that obviously wants the other behavior.  The effect would
-         * be pretty subtle, in any case.
-         */
+    } else {  /* GAIN mode is set */
+        // Note: if the game switches between ADSR and GAIN modes
+        // partway through, should the count be reset, or should it
+        // continue from where it was? Does the DSP actually watch for
+        // that bit to change, or does it just go along with whatever
+        // it sees when it performs the update? I'm going to assume
+        // the latter and not update the count, unless I see a game
+        // that obviously wants the other behavior.  The effect would
+        // be pretty subtle, in any case.
         int t = raw_voice.gain;
-        if (t < 0x80)
-        {
+        if (t < 0x80) {
             envx = voice.envx = t << 4;
         }
-        else switch (t >> 5)
-        {
+        else switch (t >> 5) {
         case 4:         /* Docs: "Decrease (linear): Subtraction
                              * of the fixed value 1/64." */
-            cnt -= env_rates [t & 0x1F];
+            cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
             envx -= env_range / 64;
-            if (envx < 0)
-            {
+            if (envx < 0) {
                 envx = 0;
                 if (voice.envstate == state_attack)
                     voice.envstate = state_decay;
@@ -248,13 +217,12 @@ inline int SPC700::clock_envelope(int v)
         case 5:         /* Docs: "Drecrease <sic> (exponential):
                              * Multiplication by the fixed value
                              * 1-1/256." */
-            cnt -= env_rates [t & 0x1F];
+            cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
             envx -= ((envx - 1) >> 8) + 1;
-            if (envx < 0)
-            {
+            if (envx < 0) {
                 envx = 0;
                 if (voice.envstate == state_attack)
                     voice.envstate = state_decay;
@@ -263,7 +231,7 @@ inline int SPC700::clock_envelope(int v)
             break;
         case 6:         /* Docs: "Increase (linear): Addition of
                              * the fixed value 1/64." */
-            cnt -= env_rates [t & 0x1F];
+            cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
@@ -275,7 +243,7 @@ inline int SPC700::clock_envelope(int v)
         case 7:         /* Docs: "Increase (bent line): Addition
                              * of the constant 1/64 up to .75 of the
                              * constaint <sic> 1/256 from .75 to 1." */
-            cnt -= env_rates [t & 0x1F];
+            cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
@@ -295,15 +263,13 @@ inline int SPC700::clock_envelope(int v)
 }
 
 // Clamp n into range -32768 <= n <= 32767
-inline int clamp_16(int n)
-{
+inline int clamp_16(int n) {
     if ((int16_t) n != n)
         n = int16_t (0x7FFF - (n >> 31));
     return n;
 }
 
-void SPC700::run(long count, short* out_buf)
-{
+void SPC700::run(long count, short* out_buf) {
     // to do: make clock_envelope() inline so that this becomes a leaf function?
 
     // Should we just fill the buffer with silence? Flags won't be cleared
@@ -312,11 +278,11 @@ void SPC700::run(long count, short* out_buf)
         reset();
 
     struct src_dir {
-        char start [2];
-        char loop [2];
+        char start[2];
+        char loop[2];
     };
 
-    const src_dir* const sd = (src_dir*) &ram [g.wave_page * 0x100];
+    const src_dir* const sd = (src_dir*) &ram[g.wave_page * 0x100];
 
     int left_volume  = g.left_volume;
     int right_volume = g.right_volume;
@@ -325,8 +291,7 @@ void SPC700::run(long count, short* out_buf)
     left_volume  *= emu_gain;
     right_volume *= emu_gain;
 
-    while (--count >= 0)
-    {
+    while (--count >= 0) {
         // Here we check for keys on/off.  Docs say that successive writes
         // to KON/KOF must be separated by at least 2 Ts periods or risk
         // being neglected.  Therefore DSP only looks at these during an
@@ -336,15 +301,11 @@ void SPC700::run(long count, short* out_buf)
 
         g.wave_ended &= ~g.key_ons; // Keying on a voice resets that bit in ENDX.
 
-        if (g.noise_enables)
-        {
-            noise_count -= env_rates [g.flags & 0x1F];
-            if (noise_count <= 0)
-            {
+        if (g.noise_enables) {
+            noise_count -= env_rates[g.flags & 0x1F];
+            if (noise_count <= 0) {
                 noise_count = env_rate_init;
-
                 noise_amp = int16_t (noise * 2);
-
                 // TODO: switch to Galios style
                 int feedback = (noise << 13) ^ (noise << 14);
                 noise = (feedback & 0x4000) | (noise >> 1);
@@ -359,24 +320,23 @@ void SPC700::run(long count, short* out_buf)
         int echor = 0;
         int left = 0;
         int right = 0;
-        for (int vidx = 0; vidx < voice_count; vidx++)
-        {
+        for (int vidx = 0; vidx < VOICE_COUNT; vidx++) {
             const int vbit = 1 << vidx;
-            raw_voice_t& raw_voice = voice [vidx];
-            voice_t& voice = voice_state [vidx];
+            raw_voice_t& raw_voice = voice[vidx];
+            voice_t& voice = voice_state[vidx];
 
-            if (voice.on_cnt && !--voice.on_cnt)
-            {
+            if (voice.on_cnt && !--voice.on_cnt) {
                 // key on
                 keys |= vbit;
-                voice.addr = GET_LE16(sd [raw_voice.waveform].start);
+                voice.addr = GET_LE16(sd[raw_voice.waveform].start);
                 voice.block_remain = 1;
                 voice.envx = 0;
                 voice.block_header = 0;
-                voice.fraction = 0x3FFF; // decode three samples immediately
-                voice.interp0 = 0; // BRR decoder filter uses previous two samples
+                // decode three samples immediately
+                voice.fraction = 0x3FFF;
+                // BRR decoder filter uses previous two samples
+                voice.interp0 = 0;
                 voice.interp1 = 0;
-
                 // NOTE: Real SNES does *not* appear to initialize the
                 // envelope counter to anything in particular. The first
                 // cycle always seems to come at a random time sooner than
@@ -387,23 +347,20 @@ void SPC700::run(long count, short* out_buf)
                 voice.envstate = state_attack;
             }
 
-            if (g.key_ons & vbit & ~g.key_offs)
-            {
+            if (g.key_ons & vbit & ~g.key_offs) {
                 // voice doesn't come on if key off is set
                 g.key_ons &= ~vbit;
                 voice.on_cnt = 8;
             }
 
-            if (keys & g.key_offs & vbit)
-            {
+            if (keys & g.key_offs & vbit) {
                 // key off
                 voice.envstate = state_release;
                 voice.on_cnt = 0;
             }
 
             int envx;
-            if (!(keys & vbit) || (envx = clock_envelope(vidx)) < 0)
-            {
+            if (!(keys & vbit) || (envx = clock_envelope(vidx)) < 0) {
                 raw_voice.envx = 0;
                 raw_voice.outx = 0;
                 prev_outx = 0;
@@ -411,54 +368,42 @@ void SPC700::run(long count, short* out_buf)
             }
 
             // Decode samples when fraction >= 1.0 (0x1000)
-            for (int n = voice.fraction >> 12; --n >= 0;)
-            {
-                if (!--voice.block_remain)
-                {
-                    if (voice.block_header & 1)
-                    {
+            for (int n = voice.fraction >> 12; --n >= 0;) {
+                if (!--voice.block_remain) {
+                    if (voice.block_header & 1) {
                         g.wave_ended |= vbit;
-
-                        if (voice.block_header & 2)
-                        {
+                        if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
-                            voice.addr = GET_LE16(sd [raw_voice.waveform].loop);
-                        }
-                        else
-                        {
+                            voice.addr = GET_LE16(sd[raw_voice.waveform].loop);
+                        } else {
                             // first block was end block; don't play anything (verified)
                             goto sample_ended; // to do: find alternative to goto
                         }
                     }
-
-                    voice.block_header = ram [voice.addr++];
-                    voice.block_remain = 16; // nybbles
+                    voice.block_header = ram[voice.addr++];
+                    voice.block_remain = 16;  // nibbles
                 }
 
                 // if next block has end flag set, *this* block ends *early* (verified)
-                if (voice.block_remain == 9 && (ram [voice.addr + 5] & 3) == 1 &&
-                        (voice.block_header & 3) != 3)
-                {
+                if (voice.block_remain == 9 && (ram[voice.addr + 5] & 3) == 1 &&
+                        (voice.block_header & 3) != 3) {
             sample_ended:
                     g.wave_ended |= vbit;
                     keys &= ~vbit;
                     raw_voice.envx = 0;
                     voice.envx = 0;
                     // add silence samples to interpolation buffer
-                    do
-                    {
+                    do {
                         voice.interp3 = voice.interp2;
                         voice.interp2 = voice.interp1;
                         voice.interp1 = voice.interp0;
                         voice.interp0 = 0;
-                    }
-                    while (--n >= 0);
+                    } while (--n >= 0);
                     break;
                 }
 
-                int delta = ram [voice.addr];
-                if (voice.block_remain & 1)
-                {
+                int delta = ram[voice.addr];
+                if (voice.block_remain & 1) {
                     delta <<= 4; // use lower nybble
                     voice.addr++;
                 }
@@ -480,23 +425,17 @@ void SPC700::run(long count, short* out_buf)
                 // One, two and three point IIR filters
                 int smp1 = voice.interp0;
                 int smp2 = voice.interp1;
-                if (voice.block_header & 8)
-                {
+                if (voice.block_header & 8) {
                     delta += smp1;
                     delta -= smp2 >> 1;
-                    if (!(voice.block_header & 4))
-                    {
+                    if (!(voice.block_header & 4)) {
                         delta += (-smp1 - (smp1 >> 1)) >> 5;
                         delta += smp2 >> 5;
-                    }
-                    else
-                    {
+                    } else {
                         delta += (-smp1 * 13) >> 7;
                         delta += (smp2 + (smp2 >> 1)) >> 4;
                     }
-                }
-                else if (voice.block_header & 4)
-                {
+                } else if (voice.block_header & 4) {
                     delta += smp1 >> 1;
                     delta += (-smp1) >> 5;
                 }
@@ -517,11 +456,11 @@ void SPC700::run(long count, short* out_buf)
             voice.fraction = (voice.fraction & 0x0FFF) + rate;
             const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
             const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255*4 - index));
-            int s = ((table  [0] * voice.interp3) >> 12) +
-                    ((table  [1] * voice.interp2) >> 12) +
-                    ((table2 [1] * voice.interp1) >> 12);
+            int s = ((table[0] * voice.interp3) >> 12) +
+                    ((table[1] * voice.interp2) >> 12) +
+                    ((table2[1] * voice.interp1) >> 12);
             s = (int16_t) (s * 2);
-            s += (table2 [0] * voice.interp0) >> 11 & ~1;
+            s += (table2[0] * voice.interp0) >> 11 & ~1;
             int output = clamp_16(s);
             if (g.noise_enables & vbit)
                 output = noise_amp;
@@ -531,12 +470,11 @@ void SPC700::run(long count, short* out_buf)
 
             // output and apply muting (by setting voice.enabled to 31)
             // if voice is externally disabled (not a SNES feature)
-            int l = (voice.volume [0] * output) >> voice.enabled;
-            int r = (voice.volume [1] * output) >> voice.enabled;
+            int l = (voice.volume[0] * output) >> voice.enabled;
+            int r = (voice.volume[1] * output) >> voice.enabled;
             prev_outx = output;
             raw_voice.outx = int8_t (output >> 8);
-            if (g.echo_ons & vbit)
-            {
+            if (g.echo_ons & vbit) {
                 echol += l;
                 echor += r;
             }
@@ -546,14 +484,14 @@ void SPC700::run(long count, short* out_buf)
         // end of channel loop
 
         // main volume control
-        left  = (left  * left_volume) >> (7 + emu_gain_bits);
-        right = (right * right_volume) >> (7 + emu_gain_bits);
+        left  = (left  * left_volume) >> (7 + EMU_GAIN_BITS);
+        right = (right * right_volume) >> (7 + EMU_GAIN_BITS);
 
         // Echo FIR filter
 
         // read feedback from echo buffer
         int echo_ptr = this->echo_ptr;
-        uint8_t* echo_buf = &ram [(g.echo_page * 0x100 + echo_ptr) & 0xFFFF];
+        uint8_t* echo_buf = &ram[(g.echo_page * 0x100 + echo_ptr) & 0xFFFF];
         echo_ptr += 4;
         if (echo_ptr >= (g.echo_delay & 15) * 0x800)
             echo_ptr = 0;
@@ -563,46 +501,44 @@ void SPC700::run(long count, short* out_buf)
 
         // put samples in history ring buffer
         const int fir_offset = this->fir_offset;
-        short (*fir_pos) [2] = &fir_buf [fir_offset];
+        short (*fir_pos)[2] = &fir_buf[fir_offset];
         this->fir_offset = (fir_offset + 7) & 7; // move backwards one step
-        fir_pos [0] [0] = (short) fb_left;
-        fir_pos [0] [1] = (short) fb_right;
-        fir_pos [8] [0] = (short) fb_left; // duplicate at +8 eliminates wrap checking below
-        fir_pos [8] [1] = (short) fb_right;
+        fir_pos[0][0] = (short) fb_left;
+        fir_pos[0][1] = (short) fb_right;
+        fir_pos[8][0] = (short) fb_left; // duplicate at +8 eliminates wrap checking below
+        fir_pos[8][1] = (short) fb_right;
 
         // FIR
-        fb_left =       fb_left * fir_coeff [7] +
-                fir_pos [1] [0] * fir_coeff [6] +
-                fir_pos [2] [0] * fir_coeff [5] +
-                fir_pos [3] [0] * fir_coeff [4] +
-                fir_pos [4] [0] * fir_coeff [3] +
-                fir_pos [5] [0] * fir_coeff [2] +
-                fir_pos [6] [0] * fir_coeff [1] +
-                fir_pos [7] [0] * fir_coeff [0];
+        fb_left =       fb_left * fir_coeff[7] +
+                fir_pos[1][0] * fir_coeff[6] +
+                fir_pos[2][0] * fir_coeff[5] +
+                fir_pos[3][0] * fir_coeff[4] +
+                fir_pos[4][0] * fir_coeff[3] +
+                fir_pos[5][0] * fir_coeff[2] +
+                fir_pos[6][0] * fir_coeff[1] +
+                fir_pos[7][0] * fir_coeff[0];
 
-        fb_right =     fb_right * fir_coeff [7] +
-                fir_pos [1] [1] * fir_coeff [6] +
-                fir_pos [2] [1] * fir_coeff [5] +
-                fir_pos [3] [1] * fir_coeff [4] +
-                fir_pos [4] [1] * fir_coeff [3] +
-                fir_pos [5] [1] * fir_coeff [2] +
-                fir_pos [6] [1] * fir_coeff [1] +
-                fir_pos [7] [1] * fir_coeff [0];
+        fb_right =     fb_right * fir_coeff[7] +
+                fir_pos[1][1] * fir_coeff[6] +
+                fir_pos[2][1] * fir_coeff[5] +
+                fir_pos[3][1] * fir_coeff[4] +
+                fir_pos[4][1] * fir_coeff[3] +
+                fir_pos[5][1] * fir_coeff[2] +
+                fir_pos[6][1] * fir_coeff[1] +
+                fir_pos[7][1] * fir_coeff[0];
 
         left  += (fb_left  * g.left_echo_volume) >> 14;
         right += (fb_right * g.right_echo_volume) >> 14;
 
         // echo buffer feedback
-        if (!(g.flags & 0x20))
-        {
+        if (!(g.flags & 0x20)) {
             echol += (fb_left  * g.echo_feedback) >> 14;
             echor += (fb_right * g.echo_feedback) >> 14;
             SET_LE16(echo_buf    , clamp_16(echol));
             SET_LE16(echo_buf + 2, clamp_16(echor));
         }
 
-        if (out_buf)
-        {
+        if (out_buf) {
             // write final samples
 
             left  = clamp_16(left );
@@ -610,28 +546,26 @@ void SPC700::run(long count, short* out_buf)
 
             int mute = g.flags & 0x40;
 
-            out_buf [0] = (short) left;
-            out_buf [1] = (short) right;
+            out_buf[0] = (short) left;
+            out_buf[1] = (short) right;
             out_buf += 2;
 
             // muting
-            if (mute)
-            {
-                out_buf [-2] = 0;
-                out_buf [-1] = 0;
+            if (mute) {
+                out_buf[-2] = 0;
+                out_buf[-1] = 0;
             }
         }
     }
 }
 
 // Base normal_gauss table is almost exactly (with an error of 0 or -1 for each entry):
-// int normal_gauss [512];
-// normal_gauss [i] = exp((i-511)*(i-511)*-9.975e-6)*pow(sin(0.00307096*i),1.7358)*1304.45
+// int normal_gauss[512];
+// normal_gauss[i] = exp((i-511)*(i-511)*-9.975e-6)*pow(sin(0.00307096*i),1.7358)*1304.45
 
 // Interleved gauss table (to improve cache coherency).
-// gauss [i * 2 + j] = normal_gauss [(1 - j) * 256 + i]
-const int16_t SPC700::gauss [512] =
-{
+// gauss[i * 2 + j] = normal_gauss[(1 - j) * 256 + i]
+const int16_t SPC700::gauss[512] = {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,
  311,1298, 307,1297, 304,1297, 300,1296, 297,1295, 293,1294, 290,1293, 286,1292,

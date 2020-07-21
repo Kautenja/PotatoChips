@@ -294,7 +294,7 @@ struct ChipPOKEYWidget : ModuleWidget {
         }
         // global control
         for (int i = 0; i < 8; i++) {
-            addParam(createParam<CKSS>(Vec(211, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
             addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, ChipPOKEY::INPUT_CONTROL + i));
         }
     }

@@ -66,13 +66,13 @@ class TexasInstrumentsSN76489 {
     };
 
     /// the last time the oscillators were updated
-    blip_time_t last_time;
+    blip_time_t last_time = 0;
     /// the value of the latch register
-    int latch;
+    int latch = 0;
     /// the value of the LFSR noise
-    unsigned noise_feedback;
+    unsigned noise_feedback = 0;
     /// the value of the white noise
-    unsigned looped_feedback;
+    unsigned looped_feedback = 0;
 
     /// Run the oscillators until the given end time.
     ///

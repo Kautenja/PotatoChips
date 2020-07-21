@@ -70,50 +70,50 @@ struct ChipAY_3_8910 : Module {
         apu.volume(3.f);
     }
 
-    // /// Process pulse wave for the given channel.
-    // ///
-    // /// @param channel the index of the channel to process
-    // ///
-    // inline void pulse(int channel) {
-    //     // the minimal value for the frequency register to produce sound
-    //     static constexpr float FREQ12BIT_MIN = 4;
-    //     // the maximal value for the frequency register
-    //     static constexpr float FREQ12BIT_MAX = 8191;
-    //     // the clock division of the oscillator relative to the CPU
-    //     static constexpr auto CLOCK_DIVISION = 32;
-    //     // the constant modulation factor
-    //     static constexpr auto MOD_FACTOR = 10.f;
-    //     // the minimal value for the volume width register
-    //     static constexpr float LEVEL_MIN = 0;
-    //     // the maximal value for the volume width register
-    //     static constexpr float LEVEL_MAX = 13;
+    /// Process pulse wave for the given channel.
+    ///
+    /// @param channel the index of the channel to process
+    ///
+    inline void process_channel(int channel) {
+        // TODO update min max for Freq and Level
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ12BIT_MIN = 4;
+        // the maximal value for the frequency register
+        static constexpr float FREQ12BIT_MAX = 8191;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 32;
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float LEVEL_MAX = 13;
 
-    //     // get the pitch from the parameter and control voltage
-    //     float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT + channel].getVoltage();
-    //     // convert the pitch to frequency based on standard exponential scale
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     // convert the frequency to 12-bit
-    //     freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
-    //     uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-    //     // write the registers with the frequency data
-    //     apu.write_latch(PULSE_A_LO + 2 * channel);
-    //     apu.write_data(0, freq12bit & 0b11111111);
-    //     apu.write_latch(PULSE_A_HI + 2 * channel);
-    //     apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
+        // get the pitch from the parameter and control voltage
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to 12-bit
+        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
+        uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+        // write the registers with the frequency data
+        auto lo =  freq12bit & 0b0000000011111111;
+        apu.write(channel + GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO, lo);
+        auto hi = (freq12bit & 0b0000111100000000) >> 8;
+        apu.write(channel + GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI, hi);
 
-    //     // get the level from the parameter knob
-    //     auto levelParam = params[PARAM_LEVEL + channel].getValue();
-    //     // apply the control voltage to the level
-    //     if (inputs[INPUT_LEVEL + channel].isConnected())
-    //         levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
-    //     // get the 8-bit level clamped within legal limits
-    //     uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
-    //     apu.write_latch(PULSE_A_ENV + channel);
-    //     apu.write_data(0, level);
-    // }
+        // get the level from the parameter knob
+        auto levelParam = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the level
+        if (inputs[INPUT_LEVEL + channel].isConnected())
+            levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
+        apu.write(channel + GeneralInstrumentAy_3_8910::VOLUME_CH_A, level << 2);
+    }
 
     /// Return a 10V signed sample from the FME7.
     ///
@@ -140,10 +140,15 @@ struct ChipAY_3_8910 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // if (cvDivider.process()) {  // process the CV inputs to the chip
-        //     for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
-        //         pulse(i);
-        // }
+        if (cvDivider.process()) {  // process the CV inputs to the chip
+            for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+                process_channel(i);
+            }
+            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b11111111);
+            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b10101011);
+            apu.write(GeneralInstrumentAy_3_8910::ENVELOPE_CHARACTERISTICS, 0b10101011);
+        }
+
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)

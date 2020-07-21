@@ -18,67 +18,18 @@
 
 #include "general_instrument_ay_3_8910.hpp"
 
-// Emulation inaccuracies:
-// * Noise isn't run when not in use
-// * Changes to envelope and noise periods are delayed until next reload
-// * Super-sonic tone should attenuate output to about 60%, not 50%
-
-// Tones above this frequency are treated as disabled tone at half volume.
-// Power of two is more efficient (avoids division).
-unsigned const inaudible_freq = 16384;
-
-static uint8_t const amp_table[16] = {
-#define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
-    // With channels tied together and 1K resistor to ground (as datasheet recommends),
-    // output nearly matches logarithmic curve as claimed. Approx. 1.5 dB per step.
-    ENTRY(0.000000),ENTRY(0.007813),ENTRY(0.011049),ENTRY(0.015625),
-    ENTRY(0.022097),ENTRY(0.031250),ENTRY(0.044194),ENTRY(0.062500),
-    ENTRY(0.088388),ENTRY(0.125000),ENTRY(0.176777),ENTRY(0.250000),
-    ENTRY(0.353553),ENTRY(0.500000),ENTRY(0.707107),ENTRY(1.000000),
-
-    /*
-    // Measured from an AY-3-8910A chip with date code 8611.
-
-    // Direct voltages without any load (very linear)
-    ENTRY(0.000000),ENTRY(0.046237),ENTRY(0.064516),ENTRY(0.089785),
-    ENTRY(0.124731),ENTRY(0.173118),ENTRY(0.225806),ENTRY(0.329032),
-    ENTRY(0.360215),ENTRY(0.494624),ENTRY(0.594624),ENTRY(0.672043),
-    ENTRY(0.766129),ENTRY(0.841935),ENTRY(0.926882),ENTRY(1.000000),
-    // With only some load
-    ENTRY(0.000000),ENTRY(0.011940),ENTRY(0.017413),ENTRY(0.024876),
-    ENTRY(0.036318),ENTRY(0.054229),ENTRY(0.072637),ENTRY(0.122388),
-    ENTRY(0.174129),ENTRY(0.239303),ENTRY(0.323881),ENTRY(0.410945),
-    ENTRY(0.527363),ENTRY(0.651741),ENTRY(0.832338),ENTRY(1.000000),
-    */
-#undef ENTRY
-};
-
-static uint8_t const modes[8] = {
-#define MODE(a0,a1, b0,b1, c0,c1) \
-        (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
-    MODE(1,0, 1,0, 1,0),
-    MODE(1,0, 0,0, 0,0),
-    MODE(1,0, 0,1, 1,0),
-    MODE(1,0, 1,1, 1,1),
-    MODE(0,1, 0,1, 0,1),
-    MODE(0,1, 1,1, 1,1),
-    MODE(0,1, 1,0, 0,1),
-    MODE(0,1, 0,0, 0,0),
-#undef MODE
-};
-
 GeneralInstrumentAy_3_8910::GeneralInstrumentAy_3_8910() {
     // build full table of the upper 8 envelope waveforms
     for (int m = 8; m--;) {
         uint8_t* out = env.modes[m];
-        int flags = modes[m];
+        int flags = MODES[m];
         for (int x = 3; --x >= 0;) {
             int amp = flags & 1;
             int end = flags >> 1 & 1;
             int step = end - amp;
             amp *= 15;
             for (int y = 16; --y >= 0;) {
-                *out++ = amp_table[amp];
+                *out++ = AMP_TABLE[amp];
                 amp += step;
             }
             flags >>= 2;
@@ -116,9 +67,6 @@ void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
     // two after it
 }
 
-int const noise_off = 0x08;
-int const tone_off  = 0x01;
-
 void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
     assert(final_end_time >= last_time);
 
@@ -151,17 +99,17 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
         // period
         int half_vol = 0;
         blip_time_t inaudible_period = (blargg_ulong) (osc_output->get_clock_rate() +
-                inaudible_freq) / (inaudible_freq * 2);
-        if (osc->period <= inaudible_period && !(osc_mode & tone_off)) {
+                INAUDIBLE_FREQ) / (INAUDIBLE_FREQ * 2);
+        if (osc->period <= inaudible_period && !(osc_mode & TONE_OFF)) {
             half_vol = 1; // Actually around 60%, but 50% is close enough
-            osc_mode |= tone_off;
+            osc_mode |= TONE_OFF;
         }
 
         // envelope
         blip_time_t start_time = last_time;
         blip_time_t end_time   = final_end_time;
         int const vol_mode = regs[0x08 + index];
-        int volume = amp_table[vol_mode & 0x0F] >> half_vol;
+        int volume = AMP_TABLE[vol_mode & 0x0F] >> half_vol;
         int osc_env_pos = env.pos;
         if (vol_mode & 0x10) {
             volume = env.wave[osc_env_pos] >> half_vol;
@@ -171,16 +119,16 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                 if (end_time >= final_end_time)
                     end_time = final_end_time;
             } else if (!volume) {
-                osc_mode = noise_off | tone_off;
+                osc_mode = NOISE_OFF | TONE_OFF;
             }
         } else if (!volume) {
-            osc_mode = noise_off | tone_off;
+            osc_mode = NOISE_OFF | TONE_OFF;
         }
 
         // tone time
         blip_time_t const period = osc->period;
         blip_time_t time = start_time + osc->delay;
-        if (osc_mode & tone_off) {  // maintain tone's phase when off
+        if (osc_mode & TONE_OFF) {  // maintain tone's phase when off
             blargg_long count = (final_end_time - time + period - 1) / period;
             time += count * period;
             osc->phase ^= count & 1;
@@ -189,7 +137,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
         // noise time
         blip_time_t ntime = final_end_time;
         blargg_ulong noise_lfsr = 1;
-        if (!(osc_mode & noise_off)) {
+        if (!(osc_mode & NOISE_OFF)) {
             ntime = start_time + old_noise_delay;
             noise_lfsr = old_noise_lfsr;
         }
@@ -226,7 +174,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                 // so we can avoid using last_amp every time to calculate the delta.
                 int delta = amp * 2 - volume;
                 int delta_non_zero = delta != 0;
-                int phase = osc->phase | (osc_mode & tone_off); assert(tone_off == 0x01);
+                int phase = osc->phase | (osc_mode & TONE_OFF); assert(TONE_OFF == 0x01);
                 do {
                     // run noise
                     blip_time_t end = end_time;
@@ -273,7 +221,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                 } while (time < end_time || ntime < end_time);
 
                 osc->last_amp = (delta + volume) >> 1;
-                if (!(osc_mode & tone_off))
+                if (!(osc_mode & TONE_OFF))
                     osc->phase = phase;
             }
 
@@ -292,7 +240,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
         }
         osc->delay = time - final_end_time;
 
-        if (!(osc_mode & noise_off)) {
+        if (!(osc_mode & NOISE_OFF)) {
             noise.delay = ntime - final_end_time;
             noise.lfsr = noise_lfsr;
         }

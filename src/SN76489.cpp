@@ -224,7 +224,6 @@ struct ChipSN76489 : Module {
         if (lightDivider.process()) {  // update the mixer lights
             for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
-                // auto b = outputs[OUTPUT_CHANNEL + i].getVoltage();
                 lights[LIGHTS_LEVEL + i].setBrightness(b);
             }
         }

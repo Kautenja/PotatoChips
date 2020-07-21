@@ -38,6 +38,26 @@ class GeneralInstrumentAy_3_8910 {
     /// the range of the amplifier on the chip
     enum { AMP_RANGE = 255 };
 
+    /// the register on the chipm
+    enum Registers {
+        PERIOD_CH_A_LO = 0,
+        PERIOD_CH_B_LO,
+        PERIOD_CH_C_LO,
+        PERIOD_ENVELOPE_LO,
+        PERIOD_CH_A_HI,
+        PERIOD_CH_B_HI,
+        PERIOD_CH_C_HI,
+        PERIOD_ENVELOPE_HI,
+        CHANNEL_ENABLES,
+        NOISE_PERIOD,
+        ENVELOPE_CHARACTERISTICS,
+        VOLUME_CH_A,
+        VOLUME_CH_B,
+        VOLUME_CH_C,
+        // IO_PORT_A,
+        // IO_PORT_B
+    };
+
  private:
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
@@ -121,7 +141,7 @@ class GeneralInstrumentAy_3_8910 {
     /// @param addr the address to write the data to
     /// @param data the data to write to the given address
     ///
-    void write_data_(int addr, int data) {
+    void _write(int addr, int data) {
         assert((unsigned) addr < REG_COUNT);
         // envelope mode
         if (addr == 13) {
@@ -428,7 +448,7 @@ class GeneralInstrumentAy_3_8910 {
 
         for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
         regs[7] = 0xFF;
-        write_data_(13, 0);
+        _write(13, 0);
     }
 
     /// Write to the data port.
@@ -437,7 +457,7 @@ class GeneralInstrumentAy_3_8910 {
     ///
     inline void write(int addr, int data) {
         run_until(0);
-        write_data_(addr, data);
+        _write(addr, data);
     }
 
     /// Run all oscillators up to specified time, end current frame, then

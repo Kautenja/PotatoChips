@@ -27,8 +27,6 @@
 // Power of two is more efficient (avoids division).
 unsigned const inaudible_freq = 16384;
 
-int const period_factor = 16;
-
 static uint8_t const amp_table[16] = {
 #define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
     // With channels tied together and 1K resistor to ground (as datasheet recommends),
@@ -66,6 +64,7 @@ static uint8_t const modes[8] = {
     MODE(0,1, 1,1, 1,1),
     MODE(0,1, 1,0, 0,1),
     MODE(0,1, 0,0, 0,0),
+#undef MODE
 };
 
 GeneralInstrumentAy_3_8910::GeneralInstrumentAy_3_8910() {
@@ -86,28 +85,9 @@ GeneralInstrumentAy_3_8910::GeneralInstrumentAy_3_8910() {
         }
     }
 
-    output(0);
+    set_output(0);
     volume(1.0);
     reset();
-}
-
-void GeneralInstrumentAy_3_8910::reset() {
-    last_time   = 0;
-    noise.delay = 0;
-    noise.lfsr  = 1;
-
-    osc_t* osc = &oscs[OSC_COUNT];
-    do {
-        osc--;
-        osc->period   = period_factor;
-        osc->delay    = 0;
-        osc->last_amp = 0;
-        osc->phase    = 0;
-    } while (osc != oscs);
-
-    for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
-    regs[7] = 0xFF;
-    write_data_(13, 0);
 }
 
 void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
@@ -125,8 +105,8 @@ void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
     // handle period changes accurately
     int i = addr >> 1;
     if (i < OSC_COUNT) {
-        blip_time_t period = (regs[i * 2 + 1] & 0x0F) * (0x100L * period_factor) + regs[i * 2] * period_factor;
-        if (!period) period = period_factor;
+        blip_time_t period = (regs[i * 2 + 1] & 0x0F) * (0x100L * PERIOD_FACTOR) + regs[i * 2] * PERIOD_FACTOR;
+        if (!period) period = PERIOD_FACTOR;
         // adjust time of next timer expiration based on change in period
         osc_t& osc = oscs[i];
         if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
@@ -143,7 +123,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
     assert(final_end_time >= last_time);
 
     // noise period and initial values
-    blip_time_t const noise_period_factor = period_factor * 2; // verified
+    blip_time_t const noise_period_factor = PERIOD_FACTOR * 2; // verified
     blip_time_t noise_period = (regs[6] & 0x1F) * noise_period_factor;
     if (!noise_period)
         noise_period = noise_period_factor;
@@ -151,7 +131,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
     blargg_ulong const old_noise_lfsr = noise.lfsr;
 
     // envelope period
-    blip_time_t const env_period_factor = period_factor * 2; // verified
+    blip_time_t const env_period_factor = PERIOD_FACTOR * 2; // verified
     blip_time_t env_period = (regs[12] * 0x100L + regs[11]) * env_period_factor;
     if (!env_period)
         env_period = env_period_factor; // same as period 1 on my AY chip
@@ -234,7 +214,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                 int delta = amp - osc->last_amp;
                 if (delta) {
                     osc->last_amp = amp;
-                    synth_.offset(start_time, delta, osc_output);
+                    synth.offset(start_time, delta, osc_output);
                 }
             }
 
@@ -257,7 +237,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                             noise_lfsr = (-(noise_lfsr & 1) & 0x12000) ^ (noise_lfsr >> 1);
                             if (changed & 2) {
                                 delta = -delta;
-                                synth_.offset(ntime, delta, osc_output);
+                                synth.offset(ntime, delta, osc_output);
                             }
                             ntime += noise_period;
                         }
@@ -275,7 +255,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
                     if (noise_lfsr & delta_non_zero) {
                         while (time < end) {
                             delta = -delta;
-                            synth_.offset(time, delta, osc_output);
+                            synth.offset(time, delta, osc_output);
                             time += period;
                             //phase ^= 1;
                         }

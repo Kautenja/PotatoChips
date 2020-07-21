@@ -64,7 +64,8 @@ struct ChipAY_3_8910 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
     }

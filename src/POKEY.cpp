@@ -69,7 +69,7 @@ struct ChipPOKEY : Module {
         // set the output buffer for each individual voice
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
     }
 
     // /// Process pulse wave for given channel.

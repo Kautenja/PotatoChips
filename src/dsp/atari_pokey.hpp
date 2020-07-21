@@ -87,13 +87,13 @@ class AtariPOKEY {
     enum { poly17_len = (1L << 17) - 1 };
 
     /// Common tables and BLIPSynth that can be shared among AtariPOKEY objects.
-    class AtariPOKEYEngine {
+    class Engine {
      public:
-        /// TODO:
+        /// the synthesizer for the Atari POKEY engine
         BLIPSynth<blip_good_quality, 1> synth;
 
-        /// TODO:
-        AtariPOKEYEngine() {
+        /// Initialize a new Atari POKEY engine data structure.
+        Engine() {
             gen_poly(POLY_MASK( 4, 1, 0), sizeof poly4,  poly4 );
             gen_poly(POLY_MASK( 9, 5, 0), sizeof poly9,  poly9 );
             gen_poly(POLY_MASK(17, 5, 0), sizeof poly17, poly17);
@@ -106,9 +106,12 @@ class AtariPOKEY {
             //     rev |= (n >> i & 1) << (poly5_len - i);
         }
 
-        /// TODO:
-        inline void volume(double d) {
-            synth.volume(1.0 / OSC_COUNT / 30 * d);
+        /// Set the volume of the synthesizer, where 1.0 is full volume.
+        ///
+        /// @param level the value to set the volume to
+        ///
+        inline void set_volume(double level) {
+            synth.volume(1.0 / OSC_COUNT / 30 * level);
         }
 
      private:
@@ -119,7 +122,7 @@ class AtariPOKEY {
         /// TODO:
         uint8_t poly17[poly17_len / 8 + 1];
 
-        /// TODO:
+        // friend the container class to access member data
         friend class AtariPOKEY;
     };
 
@@ -147,7 +150,7 @@ class AtariPOKEY {
     /// TODO:
     osc_t oscs[OSC_COUNT];
     /// TODO:
-    AtariPOKEYEngine* impl;
+    Engine* impl;
     /// TODO:
     blip_time_t last_time;
     /// TODO:
@@ -188,7 +191,7 @@ class AtariPOKEY {
     void run_until(blip_time_t end_time) {
         calc_periods();
         // cache
-        AtariPOKEYEngine* const impl = this->impl;
+        Engine* const impl = this->impl;
 
         // 17/9-bit poly selection
         uint8_t const* polym = impl->poly17;
@@ -339,14 +342,14 @@ class AtariPOKEY {
     /// Initialize a new Atari POKEY chip emulator.
     AtariPOKEY() {
         set_output(0);
-        reset(new AtariPOKEYEngine);
+        reset(new Engine);
     }
 
     /// Set overall volume of all oscillators, where 1.0 is full volume
     ///
     /// @param level the value to set the volume to
     ///
-    inline void volume(double level) { impl->volume(level); }
+    inline void set_volume(double level) { impl->set_volume(level); }
 
     /// Assign single oscillator output to buffer. If buffer is NULL, silences
     /// the given oscillator.
@@ -371,10 +374,10 @@ class AtariPOKEY {
 
     /// Reset oscillators and internal state.
     ///
-    /// @param new_impl TODO:
+    /// @param new_engine the engine to use after resetting the chip
     ///
-    inline void reset(AtariPOKEYEngine* new_impl) {
-        impl = new_impl;
+    inline void reset(Engine* new_engine) {
+        impl = new_engine;
         last_time = 0;
         poly5_pos = 0;
         poly4_pos = 0;

@@ -23,31 +23,6 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-// /// a trigger for a button with a CV input.
-// struct CVButtonTrigger {
-//     /// the trigger for the button
-//     dsp::SchmittTrigger buttonTrigger;
-//     /// the trigger for the CV
-//     dsp::SchmittTrigger cvTrigger;
-
-//     /// Process the input signals.
-//     ///
-//     /// @param button the value of the button signal [0, 1]
-//     /// @param cv the value of the CV signal [-10, 10]
-//     /// @returns true if either signal crossed a rising edge
-//     ///
-//     inline bool process(float button, float cv) {
-//         bool buttonPress = buttonTrigger.process(button);
-//         bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
-//         return buttonPress or cvGate;
-//     }
-
-//     /// Return a boolean determining if either the button or CV gate is high.
-//     inline bool isHigh() {
-//         return buttonTrigger.isHigh() or cvTrigger.isHigh();
-//     }
-// };
-
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
     enum ParamIds {

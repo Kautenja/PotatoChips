@@ -58,7 +58,12 @@ class TexasInstrumentsSN76489 {
     /// the noise generator
     TexasInstrumentsSN76489_Noise noise;
     /// The oscillators on the chip
-    TexasInstrumentsSN76489_Osc* oscs[OSC_COUNT];
+    TexasInstrumentsSN76489_Osc* oscs[OSC_COUNT] {
+        &squares[0],
+        &squares[1],
+        &squares[2],
+        &noise
+    };
 
     /// the last time the oscillators were updated
     blip_time_t last_time;
@@ -92,13 +97,13 @@ class TexasInstrumentsSN76489 {
 
  public:
     /// Create a new instance of TexasInstrumentsSN76489.
-    TexasInstrumentsSN76489() {
-        for (int i = 0; i < 3; i++) {
-            squares[i].synth = &square_synth;
-            oscs[i] = &squares[i];
-        }
-        oscs[3] = &noise;
-        volume(1.0);
+    ///
+    /// @param level the value to set the volume to
+    ///
+    explicit TexasInstrumentsSN76489(double level = 1.0) {
+        // set the synthesizer for each pulse waveform generator
+        for (int i = 0; i < 3; i++) squares[i].synth = &square_synth;
+        volume(level);
         reset();
     }
 

@@ -82,7 +82,7 @@ struct ChipAY_3_8910 : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ12BIT_MAX = 8191;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
+        static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
@@ -106,14 +106,15 @@ struct ChipAY_3_8910 : Module {
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 13;
+        static constexpr float LEVEL_MAX = 15;
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + channel].isConnected())
             levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit level clamped within legal limits
-        return rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
+        uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
+        return 0b00010000 | level;
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -142,20 +143,40 @@ struct ChipAY_3_8910 : Module {
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+            // frequency
+            for (int i = 0; i < 1; i++) {
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
                 apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + i, lo);
                 auto hi = (freq & 0b0000111100000000) >> 8;
                 apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + i, hi);
-                auto level = getLevel(i) << 2;
+                auto level = getLevel(i);
                 apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }
             // 5-bit noise period
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b01011);
-            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b11111111);
-
-            apu.write(GeneralInstrumentAy_3_8910::ENVELOPE_CHARACTERISTICS, 0b10101011);
+            // mixer bits:
+            // - enable input B
+            // - enable input A
+            // - enable Noise C
+            // - enable Noise B
+            // - enable Noise A
+            // - enable Tone C
+            // - enable Tone B
+            // - enable Tone A
+            //
+            // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111111);
+            // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00000111);
+            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
+            // enveloper period
+            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
+            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b10101011);
+            // envelope shape bits
+            // - continue
+            // - attack
+            // - alternate
+            // - hold
+            apu.write(GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE, 0b00000000);
         }
 
         // process audio samples on the chip engine

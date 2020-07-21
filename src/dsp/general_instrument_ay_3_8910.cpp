@@ -29,8 +29,8 @@ unsigned const inaudible_freq = 16384;
 
 int const period_factor = 16;
 
-static byte const amp_table [16] = {
-#define ENTRY(n) byte (n * Ay_Apu::amp_range + 0.5)
+static uint8_t const amp_table[16] = {
+#define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::amp_range + 0.5)
     // With channels tied together and 1K resistor to ground (as datasheet recommends),
     // output nearly matches logarithmic curve as claimed. Approx. 1.5 dB per step.
     ENTRY(0.000000),ENTRY(0.007813),ENTRY(0.011049),ENTRY(0.015625),
@@ -55,7 +55,7 @@ static byte const amp_table [16] = {
 #undef ENTRY
 };
 
-static byte const modes [8] = {
+static uint8_t const modes[8] = {
 #define MODE(a0,a1, b0,b1, c0,c1) \
         (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
     MODE(1,0, 1,0, 1,0),
@@ -68,21 +68,18 @@ static byte const modes [8] = {
     MODE(0,1, 0,0, 0,0),
 };
 
-Ay_Apu::Ay_Apu() {
+GeneralInstrumentAy_3_8910::GeneralInstrumentAy_3_8910() {
     // build full table of the upper 8 envelope waveforms
-    for (int m = 8; m--;)
-    {
-        byte* out = env.modes [m];
-        int flags = modes [m];
-        for (int x = 3; --x >= 0;)
-        {
+    for (int m = 8; m--;) {
+        uint8_t* out = env.modes[m];
+        int flags = modes[m];
+        for (int x = 3; --x >= 0;) {
             int amp = flags & 1;
             int end = flags >> 1 & 1;
             int step = end - amp;
             amp *= 15;
-            for (int y = 16; --y >= 0;)
-            {
-                *out++ = amp_table [amp];
+            for (int y = 16; --y >= 0;) {
+                *out++ = amp_table[amp];
                 amp += step;
             }
             flags >>= 2;
@@ -94,80 +91,60 @@ Ay_Apu::Ay_Apu() {
     reset();
 }
 
-void Ay_Apu::reset()
-{
+void GeneralInstrumentAy_3_8910::reset() {
     last_time   = 0;
     noise.delay = 0;
     noise.lfsr  = 1;
 
-    osc_t* osc = &oscs [osc_count];
-    do
-    {
+    osc_t* osc = &oscs[osc_count];
+    do {
         osc--;
         osc->period   = period_factor;
         osc->delay    = 0;
         osc->last_amp = 0;
         osc->phase    = 0;
-    }
-    while (osc != oscs);
+    } while (osc != oscs);
 
-    for (int i = sizeof regs; --i >= 0;)
-        regs [i] = 0;
-    regs [7] = 0xFF;
+    for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
+    regs[7] = 0xFF;
     write_data_(13, 0);
 }
 
-void Ay_Apu::write_data_(int addr, int data)
-{
+void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
     assert((unsigned) addr < reg_count);
-
-    // if ((unsigned) addr >= 14)
-    // {
-    //     #ifdef dprintf
-    //         dprintf("Wrote to I/O port %02X\n", (int) addr);
-    //     #endif
-    // }
-
     // envelope mode
-    if (addr == 13)
-    {
+    if (addr == 13) {
         if (!(data & 8)) // convert modes 0-7 to proper equivalents
             data = (data & 4) ? 15 : 9;
-        env.wave = env.modes [data - 7];
+        env.wave = env.modes[data - 7];
         env.pos = -48;
-        env.delay = 0; // will get set to envelope period in run_until()
+        // will get set to envelope period in run_until()
+        env.delay = 0;
     }
-    regs [addr] = data;
-
+    regs[addr] = data;
     // handle period changes accurately
     int i = addr >> 1;
-    if (i < osc_count)
-    {
-        blip_time_t period = (regs [i * 2 + 1] & 0x0F) * (0x100L * period_factor) +
-                regs [i * 2] * period_factor;
-        if (!period)
-            period = period_factor;
-
+    if (i < osc_count) {
+        blip_time_t period = (regs[i * 2 + 1] & 0x0F) * (0x100L * period_factor) + regs[i * 2] * period_factor;
+        if (!period) period = period_factor;
         // adjust time of next timer expiration based on change in period
-        osc_t& osc = oscs [i];
-        if ((osc.delay += period - osc.period) < 0)
-            osc.delay = 0;
+        osc_t& osc = oscs[i];
+        if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
         osc.period = period;
     }
-
-    // TODO: same as above for envelope timer, and it also has a divide by two after it
+    // TODO: same as above for envelope timer, and it also has a divide by
+    // two after it
 }
 
 int const noise_off = 0x08;
 int const tone_off  = 0x01;
 
-void Ay_Apu::run_until(blip_time_t final_end_time)
-{
+void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
     assert(final_end_time >= last_time);
 
     // noise period and initial values
     blip_time_t const noise_period_factor = period_factor * 2; // verified
-    blip_time_t noise_period = (regs [6] & 0x1F) * noise_period_factor;
+    blip_time_t noise_period = (regs[6] & 0x1F) * noise_period_factor;
     if (!noise_period)
         noise_period = noise_period_factor;
     blip_time_t const old_noise_delay = noise.delay;
@@ -175,17 +152,16 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
 
     // envelope period
     blip_time_t const env_period_factor = period_factor * 2; // verified
-    blip_time_t env_period = (regs [12] * 0x100L + regs [11]) * env_period_factor;
+    blip_time_t env_period = (regs[12] * 0x100L + regs[11]) * env_period_factor;
     if (!env_period)
         env_period = env_period_factor; // same as period 1 on my AY chip
     if (!env.delay)
         env.delay = env_period;
 
     // run each osc separately
-    for (int index = 0; index < osc_count; index++)
-    {
-        osc_t* const osc = &oscs [index];
-        int osc_mode = regs [7] >> index;
+    for (int index = 0; index < osc_count; index++) {
+        osc_t* const osc = &oscs[index];
+        int osc_mode = regs[7] >> index;
 
         // output
         BLIPBuffer* const osc_output = osc->output;
@@ -196,8 +172,7 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
         int half_vol = 0;
         blip_time_t inaudible_period = (blargg_ulong) (osc_output->get_clock_rate() +
                 inaudible_freq) / (inaudible_freq * 2);
-        if (osc->period <= inaudible_period && !(osc_mode & tone_off))
-        {
+        if (osc->period <= inaudible_period && !(osc_mode & tone_off)) {
             half_vol = 1; // Actually around 60%, but 50% is close enough
             osc_mode |= tone_off;
         }
@@ -205,37 +180,27 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
         // envelope
         blip_time_t start_time = last_time;
         blip_time_t end_time   = final_end_time;
-        int const vol_mode = regs [0x08 + index];
-        int volume = amp_table [vol_mode & 0x0F] >> half_vol;
+        int const vol_mode = regs[0x08 + index];
+        int volume = amp_table[vol_mode & 0x0F] >> half_vol;
         int osc_env_pos = env.pos;
-        if (vol_mode & 0x10)
-        {
-            volume = env.wave [osc_env_pos] >> half_vol;
+        if (vol_mode & 0x10) {
+            volume = env.wave[osc_env_pos] >> half_vol;
             // use envelope only if it's a repeating wave or a ramp that hasn't finished
-            if (!(regs [13] & 1) || osc_env_pos < -32)
-            {
+            if (!(regs[13] & 1) || osc_env_pos < -32) {
                 end_time = start_time + env.delay;
                 if (end_time >= final_end_time)
                     end_time = final_end_time;
-
-                //if (!(regs [12] | regs [11]))
-                //  dprintf("Used envelope period 0\n");
-            }
-            else if (!volume)
-            {
+            } else if (!volume) {
                 osc_mode = noise_off | tone_off;
             }
-        }
-        else if (!volume)
-        {
+        } else if (!volume) {
             osc_mode = noise_off | tone_off;
         }
 
         // tone time
         blip_time_t const period = osc->period;
         blip_time_t time = start_time + osc->delay;
-        if (osc_mode & tone_off) // maintain tone's phase when off
-        {
+        if (osc_mode & tone_off) {  // maintain tone's phase when off
             blargg_long count = (final_end_time - time + period - 1) / period;
             time += count * period;
             osc->phase ^= count & 1;
@@ -244,12 +209,9 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
         // noise time
         blip_time_t ntime = final_end_time;
         blargg_ulong noise_lfsr = 1;
-        if (!(osc_mode & noise_off))
-        {
+        if (!(osc_mode & noise_off)) {
             ntime = start_time + old_noise_delay;
             noise_lfsr = old_noise_lfsr;
-            //if ((regs [6] & 0x1F) == 0)
-            //  dprintf("Used noise period 0\n");
         }
 
         // The following efficiently handles several cases (least demanding first):
@@ -263,16 +225,14 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
         // This loop only runs one iteration if envelope is disabled. If envelope
         // is being used as a waveform (tone and noise disabled), this loop will
         // still be reasonably efficient since the bulk of it will be skipped.
-        while (1)
-        {
+        while (1) {
             // current amplitude
             int amp = 0;
             if ((osc_mode | osc->phase) & 1 & (osc_mode >> 3 | noise_lfsr))
                 amp = volume;
             {
                 int delta = amp - osc->last_amp;
-                if (delta)
-                {
+                if (delta) {
                     osc->last_amp = amp;
                     synth_.offset(start_time, delta, osc_output);
                 }
@@ -281,34 +241,27 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
             // Run wave and noise interleved with each catching up to the other.
             // If one or both are disabled, their "current time" will be past end time,
             // so there will be no significant performance hit.
-            if (ntime < end_time || time < end_time)
-            {
+            if (ntime < end_time || time < end_time) {
                 // Since amplitude was updated above, delta will always be +/- volume,
                 // so we can avoid using last_amp every time to calculate the delta.
                 int delta = amp * 2 - volume;
                 int delta_non_zero = delta != 0;
                 int phase = osc->phase | (osc_mode & tone_off); assert(tone_off == 0x01);
-                do
-                {
+                do {
                     // run noise
                     blip_time_t end = end_time;
                     if (end_time > time) end = time;
-                    if (phase & delta_non_zero)
-                    {
-                        while (ntime <= end) // must advance *past* time to avoid hang
-                        {
+                    if (phase & delta_non_zero) {
+                        while (ntime <= end) {  // must advance *past* time to avoid hang
                             int changed = noise_lfsr + 1;
                             noise_lfsr = (-(noise_lfsr & 1) & 0x12000) ^ (noise_lfsr >> 1);
-                            if (changed & 2)
-                            {
+                            if (changed & 2) {
                                 delta = -delta;
                                 synth_.offset(ntime, delta, osc_output);
                             }
                             ntime += noise_period;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         // 20 or more noise periods on average for some music
                         blargg_long remain = end - ntime;
                         blargg_long count = remain / noise_period;
@@ -319,10 +272,8 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
                     // run tone
                     end = end_time;
                     if (end_time > ntime) end = ntime;
-                    if (noise_lfsr & delta_non_zero)
-                    {
-                        while (time < end)
-                        {
+                    if (noise_lfsr & delta_non_zero) {
+                        while (time < end) {
                             delta = -delta;
                             synth_.offset(time, delta, osc_output);
                             time += period;
@@ -331,20 +282,15 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
                         //assert(phase == (delta > 0));
                         phase = unsigned (-delta) >> (CHAR_BIT * sizeof (unsigned) - 1);
                         // (delta > 0)
-                    }
-                    else
-                    {
+                    } else {
                         // loop usually runs less than once
                         //SUB_CASE_COUNTER((time < end) * (end - time + period - 1) / period);
-
-                        while (time < end)
-                        {
+                        while (time < end) {
                             time += period;
                             phase ^= 1;
                         }
                     }
-                }
-                while (time < end_time || ntime < end_time);
+                } while (time < end_time || ntime < end_time);
 
                 osc->last_amp = (delta + volume) >> 1;
                 if (!(osc_mode & tone_off))
@@ -352,12 +298,12 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
             }
 
             if (end_time >= final_end_time)
-                break; // breaks first time when envelope is disabled
+                break;  // breaks first time when envelope is disabled
 
             // next envelope step
             if (++osc_env_pos >= 0)
                 osc_env_pos -= 32;
-            volume = env.wave [osc_env_pos] >> half_vol;
+            volume = env.wave[osc_env_pos] >> half_vol;
 
             start_time = end_time;
             end_time += env_period;
@@ -366,8 +312,7 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
         }
         osc->delay = time - final_end_time;
 
-        if (!(osc_mode & noise_off))
-        {
+        if (!(osc_mode & noise_off)) {
             noise.delay = ntime - final_end_time;
             noise.lfsr = noise_lfsr;
         }
@@ -377,8 +322,7 @@ void Ay_Apu::run_until(blip_time_t final_end_time)
 
     // maintain envelope phase
     blip_time_t remain = final_end_time - last_time - env.delay;
-    if (remain >= 0)
-    {
+    if (remain >= 0) {
         blargg_long count = (remain + env_period) / env_period;
         env.pos += count;
         if (env.pos >= 0)

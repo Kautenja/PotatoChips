@@ -155,8 +155,10 @@ class GeneralInstrumentAy_3_8910 {
         // handle period changes accurately
         int i = addr >> 1;
         if (i < OSC_COUNT) {
-            blip_time_t period = (regs[i * 2 + 1] & 0x0F) * (0x100L * PERIOD_FACTOR) + regs[i * 2] * PERIOD_FACTOR;
-            if (!period) period = PERIOD_FACTOR;
+            blip_time_t period = (regs[i * 2 + 1] & 0x0F) * 0x100L + regs[i * 2];
+            // period *= PERIOD_FACTOR;
+            // if (!period) period = PERIOD_FACTOR;
+            if (period < PERIOD_FACTOR) period = PERIOD_FACTOR;
             // adjust time of next timer expiration based on change in period
             osc_t& osc = oscs[i];
             if ((osc.delay += period - osc.period) < 0) osc.delay = 0;

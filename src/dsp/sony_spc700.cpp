@@ -1,4 +1,4 @@
-// Super Nintendo (SNES) SPC DSP emulator
+// Sony SPC700 DSP emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2002 Brad Martin
@@ -18,7 +18,7 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#include "nintendo_snes_spc_dsp.hpp"
+#include "sony_spc700.hpp"
 #include "blargg_endian.h"
 #include <cstring>
 
@@ -26,7 +26,7 @@
     #include BLARGG_ENABLE_OPTIMIZER
 #endif
 
-Spc_Dsp::Spc_Dsp(uint8_t* ram_) : ram(ram_)
+SPC700::SPC700(uint8_t* ram_) : ram(ram_)
 {
     set_gain(1.0);
     mute_voices(0);
@@ -37,13 +37,13 @@ Spc_Dsp::Spc_Dsp(uint8_t* ram_) : ram(ram_)
     blargg_verify_byte_order();
 }
 
-void Spc_Dsp::mute_voices(int mask)
+void SPC700::mute_voices(int mask)
 {
     for (int i = 0; i < voice_count; i++)
         voice_state [i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
-void Spc_Dsp::reset()
+void SPC700::reset()
 {
     keys = 0;
     echo_ptr = 0;
@@ -66,7 +66,7 @@ void Spc_Dsp::reset()
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void Spc_Dsp::write(int i, int data)
+void SPC700::write(int i, int data)
 {
     assert((unsigned) i < register_count);
 
@@ -115,7 +115,7 @@ static short const env_rates [0x20] =
 
 const int env_range = 0x800;
 
-inline int Spc_Dsp::clock_envelope(int v)
+inline int SPC700::clock_envelope(int v)
 {                               /* Return value is current
                                  * ENVX */
     raw_voice_t& raw_voice = this->voice [v];
@@ -302,7 +302,7 @@ inline int clamp_16(int n)
     return n;
 }
 
-void Spc_Dsp::run(long count, short* out_buf)
+void SPC700::run(long count, short* out_buf)
 {
     // to do: make clock_envelope() inline so that this becomes a leaf function?
 
@@ -630,7 +630,7 @@ void Spc_Dsp::run(long count, short* out_buf)
 
 // Interleved gauss table (to improve cache coherency).
 // gauss [i * 2 + j] = normal_gauss [(1 - j) * 256 + i]
-const int16_t Spc_Dsp::gauss [512] =
+const int16_t SPC700::gauss [512] =
 {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,

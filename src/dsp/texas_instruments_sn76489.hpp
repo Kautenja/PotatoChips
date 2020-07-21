@@ -177,12 +177,11 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param data the byte to write to the data port
     ///
-    void write_data(blip_time_t time, uint8_t data) {
+    void write_data(uint8_t data) {
         // the possible volume values
         static constexpr unsigned char volumes[16] = {
             64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
         };
-        run_until(time);
         // set the latch if the MSB is high
         if (data & 0x80) latch = data;
         // get the index of the register

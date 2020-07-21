@@ -23,30 +23,30 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// a trigger for a button with a CV input.
-struct CVButtonTrigger {
-    /// the trigger for the button
-    dsp::SchmittTrigger buttonTrigger;
-    /// the trigger for the CV
-    dsp::SchmittTrigger cvTrigger;
+// /// a trigger for a button with a CV input.
+// struct CVButtonTrigger {
+//     /// the trigger for the button
+//     dsp::SchmittTrigger buttonTrigger;
+//     /// the trigger for the CV
+//     dsp::SchmittTrigger cvTrigger;
 
-    /// Process the input signals.
-    ///
-    /// @param button the value of the button signal [0, 1]
-    /// @param cv the value of the CV signal [-10, 10]
-    /// @returns true if either signal crossed a rising edge
-    ///
-    inline bool process(float button, float cv) {
-        bool buttonPress = buttonTrigger.process(button);
-        bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
-        return buttonPress or cvGate;
-    }
+//     /// Process the input signals.
+//     ///
+//     /// @param button the value of the button signal [0, 1]
+//     /// @param cv the value of the CV signal [-10, 10]
+//     /// @returns true if either signal crossed a rising edge
+//     ///
+//     inline bool process(float button, float cv) {
+//         bool buttonPress = buttonTrigger.process(button);
+//         bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
+//         return buttonPress or cvGate;
+//     }
 
-    /// Return a boolean determining if either the button or CV gate is high.
-    inline bool isHigh() {
-        return buttonTrigger.isHigh() or cvTrigger.isHigh();
-    }
-};
+//     /// Return a boolean determining if either the button or CV gate is high.
+//     inline bool isHigh() {
+//         return buttonTrigger.isHigh() or cvTrigger.isHigh();
+//     }
+// };
 
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
@@ -72,7 +72,7 @@ struct ChipAY_3_8910 : Module {
     enum LightIds { LIGHT_COUNT };
 
     /// a Schmitt Trigger for handling player 1 button inputs
-    CVButtonTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[GeneralInstrumentAy_3_8910::OSC_COUNT];
@@ -163,28 +163,23 @@ struct ChipAY_3_8910 : Module {
     ///
     inline uint8_t getNoise() { return getFrequency(2) >> 3; }
 
-    /// Return the control byte.
+    /// Return the mixer byte.
     ///
-    /// @returns the 8-bit control byte from parameters and CV inputs
+    /// @returns the 8-bit mixer byte from parameters and CV inputs
     ///
     inline uint8_t getMixer() {
-        uint8_t controlByte = 0;
+        uint8_t mixerByte = 0;
         for (std::size_t i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-            // process the voltage with the Schmitt Trigger
-            mixerTriggers[2 * i].process(
-                params[PARAM_TONE + i].getValue(),
-                inputs[INPUT_TONE + i].getVoltage()
-            );
-            // the position for the current button's index
-            controlByte |= mixerTriggers[2 * i].isHigh() << i;
-            mixerTriggers[2 * i + 1].process(
-                params[PARAM_NOISE + i].getValue(),
-                inputs[INPUT_NOISE + i].getVoltage()
-            );
-            // the position for the current button's index
-            controlByte |= mixerTriggers[2 * i + 1].isHigh() << (i + 3);
+            // process the tone trigger
+            mixerTriggers[2 * i].process(rescale(inputs[INPUT_TONE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            bool toneState = (1 - params[PARAM_TONE + i].getValue()) - !mixerTriggers[2 * i].state;
+            mixerByte |= toneState << i;
+            // process the noise trigger
+            mixerTriggers[2 * i + 1].process(rescale(inputs[INPUT_NOISE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            bool noiseState = (1 - params[PARAM_NOISE + i].getValue()) - !mixerTriggers[2 * i + 1].state;
+            mixerByte |= noiseState << (i + 3);
         }
-        return controlByte;
+        return mixerByte;
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -225,7 +220,7 @@ struct ChipAY_3_8910 : Module {
             }
             // set the 5-bit noise value based on the channel 3 parameter
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise());
-            // TODO: 6-channel boolean mixer
+            // set the 6-channel boolean mixer (tone and noise for each channel)
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer());
             // envelope period (TODO: fix envelop in engine)
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);

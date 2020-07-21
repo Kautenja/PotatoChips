@@ -97,7 +97,7 @@ struct ChipPOKEY : Module {
         apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
 
         // auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        // apu.write(AUDC1 + 2 * channel, pw + 0b00011111);
+        apu.write(AtariPOKEY::AUDC1 + 2 * channel, 0b11101111);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -127,6 +127,7 @@ struct ChipPOKEY : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) channel(i);
+            apu.write(AtariPOKEY::AUDCTL, 0b00001111);
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);

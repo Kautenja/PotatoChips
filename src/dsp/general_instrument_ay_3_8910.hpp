@@ -38,16 +38,16 @@ class GeneralInstrumentAy_3_8910 {
     /// the range of the amplifier on the chip
     enum { AMP_RANGE = 255 };
 
-    /// the register on the chipm
+    /// the register on the chip
     enum Registers {
-        PERIOD_CH_A_LO,
-        PERIOD_CH_A_HI,
-        PERIOD_CH_B_LO,
-        PERIOD_CH_B_HI,
-        PERIOD_CH_C_LO,
-        PERIOD_CH_C_HI,
-        NOISE_PERIOD,
-        CHANNEL_ENABLES,
+        PERIOD_CH_A_LO,   // the low 8 bits of the 12 bit frequency for channel A
+        PERIOD_CH_A_HI,   // the high 4 bits of the 12 bit frequency for channel A
+        PERIOD_CH_B_LO,   // the low 8 bits of the 12 bit frequency for channel B
+        PERIOD_CH_B_HI,   // the high 4 bits of the 12 bit frequency for channel B
+        PERIOD_CH_C_LO,   // the low 8 bits of the 12 bit frequency for channel C
+        PERIOD_CH_C_HI,   // the high 4 bits of the 12 bit frequency for channel C
+        NOISE_PERIOD,     // the 5-bit noise period
+        CHANNEL_ENABLES,  // the 8-bit control register
         VOLUME_CH_A,
         VOLUME_CH_B,
         VOLUME_CH_C,
@@ -178,7 +178,7 @@ class GeneralInstrumentAy_3_8910 {
 
         // noise period and initial values
         blip_time_t const noise_period_factor = PERIOD_FACTOR * 2; // verified
-        blip_time_t noise_period = (regs[6] & 0x1F) * noise_period_factor;
+        blip_time_t noise_period = (regs[NOISE_PERIOD] & 0x1F) * noise_period_factor;
         if (!noise_period)
             noise_period = noise_period_factor;
         blip_time_t const old_noise_delay = noise.delay;
@@ -186,7 +186,7 @@ class GeneralInstrumentAy_3_8910 {
 
         // envelope period
         blip_time_t const env_period_factor = PERIOD_FACTOR * 2; // verified
-        blip_time_t env_period = (regs[12] * 0x100L + regs[11]) * env_period_factor;
+        blip_time_t env_period = (regs[PERIOD_ENVELOPE_HI] * 0x100L + regs[PERIOD_ENVELOPE_LO]) * env_period_factor;
         if (!env_period)
             env_period = env_period_factor; // same as period 1 on my AY chip
         if (!env.delay)
@@ -195,7 +195,7 @@ class GeneralInstrumentAy_3_8910 {
         // run each osc separately
         for (int index = 0; index < OSC_COUNT; index++) {
             osc_t* const osc = &oscs[index];
-            int osc_mode = regs[7] >> index;
+            int osc_mode = regs[CHANNEL_ENABLES] >> index;
 
             // output
             BLIPBuffer* const osc_output = osc->output;
@@ -220,7 +220,7 @@ class GeneralInstrumentAy_3_8910 {
             if (vol_mode & 0x10) {
                 volume = env.wave[osc_env_pos] >> half_vol;
                 // use envelope only if it's a repeating wave or a ramp that hasn't finished
-                if (!(regs[13] & 1) || osc_env_pos < -32) {
+                if (!(regs[ENVELOPE_SHAPE] & 1) || osc_env_pos < -32) {
                     end_time = start_time + env.delay;
                     if (end_time >= final_end_time)
                         end_time = final_end_time;
@@ -449,7 +449,7 @@ class GeneralInstrumentAy_3_8910 {
         } while (osc != oscs);
 
         for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
-        regs[7] = 0xFF;
+        regs[CHANNEL_ENABLES] = 0xFF;
         _write(13, 0);
     }
 

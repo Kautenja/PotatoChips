@@ -58,6 +58,10 @@ class GeneralInstrumentAy_3_8910 {
         // IO_PORT_B
     };
 
+    /// the flag bit for turning on the envelope for a channel's VOLUME_CH_#
+    /// register
+    static constexpr int ENVELOPE_ON  = 0b00010000;
+
  private:
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
@@ -95,9 +99,9 @@ class GeneralInstrumentAy_3_8910 {
     };
 
     /// the noise off flag bit
-    static constexpr int NOISE_OFF = 0x08;
+    static constexpr int NOISE_OFF    = 0x08;
     /// the tone off flag bit
-    static constexpr int TONE_OFF  = 0x01;
+    static constexpr int TONE_OFF     = 0x01;
 
     /// the oscillator type on the chip for the 5 channels
     struct osc_t {

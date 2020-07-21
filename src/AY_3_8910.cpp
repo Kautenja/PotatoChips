@@ -114,7 +114,7 @@ struct ChipAY_3_8910 : Module {
             levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
-        return 0b00010000 | level;
+        return level;
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -168,9 +168,9 @@ struct ChipAY_3_8910 : Module {
             // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111111);
             // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00000111);
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
-            // enveloper period
-            apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
-            apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b10101011);
+            // envelope period
+            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
+            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
             // envelope shape bits
             // - continue
             // - attack

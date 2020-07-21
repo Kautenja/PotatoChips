@@ -96,7 +96,7 @@ class GeneralInstrumentAy_3_8910 {
     /// With channels tied together and 1K resistor to ground (as datasheet
     /// recommends), output nearly matches logarithmic curve as claimed. Approx.
     /// 1.5 dB per step.
-    static constexpr uint8_t AMP_TABLE[16] = {
+    const uint8_t AMP_TABLE[16] = {
     #define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
         ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
         ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
@@ -106,7 +106,7 @@ class GeneralInstrumentAy_3_8910 {
     };
 
     /// TODO:
-    static constexpr uint8_t MODES[8] = {
+    const uint8_t MODES[8] = {
     #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
         MODE(1,0, 1,0, 1,0),
         MODE(1,0, 0,0, 0,0),

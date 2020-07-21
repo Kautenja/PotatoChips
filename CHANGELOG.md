@@ -63,3 +63,11 @@
 ### 1.4.1 (2020-07-20)
 
 -   fix issue where CV controlled SN76489 VCA wouldn't return to 0
+
+### 1.5.0 (2020-07-21)
+
+-   Atari POKEY module
+
+### 1.6.0 (2020-07-21)
+
+-   General Instrument AY-3-8910 module

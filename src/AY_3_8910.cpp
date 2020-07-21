@@ -46,9 +46,6 @@ struct ChipAY_3_8910 : Module {
     };
     enum LightIds { LIGHT_COUNT };
 
-    /// a Schmitt Trigger for handling player 1 button inputs
-    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
-
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[GeneralInstrumentAy_3_8910::OSC_COUNT];
     /// The General Instrument AY-3-8910 instance to synthesize sound with
@@ -59,6 +56,9 @@ struct ChipAY_3_8910 : Module {
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
+
+    /// triggers for handling inputs to the tone and noise enable switches
+    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// Initialize a new FME7 Chip module.
     ChipAY_3_8910() {

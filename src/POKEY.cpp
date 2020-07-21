@@ -34,6 +34,7 @@ struct ChipPOKEY : Module {
     enum InputIds {
         ENUMS(INPUT_VOCT, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_FM, AtariPOKEY::OSC_COUNT),
+        ENUMS(INPUT_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_LEVEL, AtariPOKEY::OSC_COUNT),
         INPUT_COUNT
     };
@@ -57,6 +58,11 @@ struct ChipPOKEY : Module {
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
+    /// a VU meter for keeping track of the channel levels
+    dsp::VuMeter2 chMeters[AtariPOKEY::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
+
     /// Initialize a new POKEY Chip module.
     ChipPOKEY() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -73,6 +79,7 @@ struct ChipPOKEY : Module {
         configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Channel 3 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Channel 4 Level",  "%", 0, 100);
         cvDivider.setDivision(16);
+        lightDivider.setDivision(512);
         // set the output buffer for each individual voice
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
@@ -92,10 +99,14 @@ struct ChipPOKEY : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // the minimal value for the volume width register
+        // the minimal value for the volume register
         static constexpr float ATT_MIN = 0;
-        // the maximal value for the volume width register
+        // the maximal value for the volume register
         static constexpr float ATT_MAX = 15;
+        // the minimal value for the noise register
+        static constexpr float NOISE_MIN = 0;
+        // the maximal value for the noise register
+        static constexpr float NOISE_MAX = 7;
 
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
@@ -111,20 +122,29 @@ struct ChipPOKEY : Module {
         //   produce an offset between registers based on channel index
         apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
 
-        auto noise = static_cast<uint8_t>(params[PARAM_NOISE + channel].getValue()) << 5;
-
-        // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
+        // get the noise from the parameter knob
+        auto noiseParam = params[PARAM_NOISE + channel].getValue();
+        // apply the control voltage to the level
+        if (inputs[INPUT_NOISE + channel].isConnected()) {
+            auto cv = 1.f - rack::clamp(inputs[INPUT_NOISE + channel].getVoltage() / 10.f, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
-            attenuationParam *= 2 * cv;
+            noiseParam *= 2 * cv;
         }
-        // get the 8-bit attenuation clamped within legal limits
-        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        // get the noise parameter from the knob
+        uint8_t noise = rack::clamp(noiseParam, NOISE_MIN, NOISE_MAX);
 
-        apu.write(AtariPOKEY::AUDC1 + 2 * channel, noise | 0b00001111);
+        // get the level from the parameter knob
+        auto levelParam = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the level
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = rack::clamp(inputs[INPUT_LEVEL + channel].getVoltage() / 10.f, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            levelParam *= 2 * cv;
+        }
+        // get the 8-bit level clamped within legal limits
+        uint8_t level = rack::clamp(ATT_MAX * levelParam, ATT_MIN, ATT_MAX);
+
+        apu.write(AtariPOKEY::AUDC1 + 2 * channel, (noise << 5) | level);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -158,8 +178,17 @@ struct ChipPOKEY : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+            auto channelOutput = getAudioOut(i);
+            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
+            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        }
+        if (lightDivider.process()) {  // update the mixer lights
+            for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+                float b = chMeters[i].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_LEVEL + i].setBrightness(b);
+            }
+        }
     }
 
     /// Respond to the change of sample rate in the engine.
@@ -192,15 +221,19 @@ struct ChipPOKEYWidget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(19, 208), module, ChipPOKEY::INPUT_FM + 2));
         addInput(createInput<PJ301MPort>(Vec(19, 293), module, ChipPOKEY::INPUT_FM + 3));
         // Frequency parameters
-        addParam(createParam<Rogan3PBlue>(Vec(46, 39),  module, ChipPOKEY::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PBlue>(Vec(46, 123), module, ChipPOKEY::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PBlue>(Vec(46, 208), module, ChipPOKEY::PARAM_FREQ + 2));
-        addParam(createParam<Rogan3PBlue>(Vec(46, 294), module, ChipPOKEY::PARAM_FREQ + 3));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 39),  module, ChipPOKEY::PARAM_FREQ + 0));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 123), module, ChipPOKEY::PARAM_FREQ + 1));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 208), module, ChipPOKEY::PARAM_FREQ + 2));
+        addParam(createParam<Rogan5PSGray>(Vec(46, 294), module, ChipPOKEY::PARAM_FREQ + 3));
         // Noise
-        addParam(createParam<Rogan1PRed>(Vec(102, 30),  module, ChipPOKEY::PARAM_NOISE + 0));
-        addParam(createParam<Rogan1PRed>(Vec(102, 115), module, ChipPOKEY::PARAM_NOISE + 1));
-        addParam(createParam<Rogan1PRed>(Vec(102, 200), module, ChipPOKEY::PARAM_NOISE + 2));
-        addParam(createParam<Rogan1PRed>(Vec(102, 285), module, ChipPOKEY::PARAM_NOISE + 3));
+        addParam(createParam<Rogan1PRed>(Vec(109, 30),  module, ChipPOKEY::PARAM_NOISE + 0));
+        addParam(createParam<Rogan1PRed>(Vec(109, 115), module, ChipPOKEY::PARAM_NOISE + 1));
+        addParam(createParam<Rogan1PRed>(Vec(109, 200), module, ChipPOKEY::PARAM_NOISE + 2));
+        addParam(createParam<Rogan1PRed>(Vec(109, 285), module, ChipPOKEY::PARAM_NOISE + 3));
+        addInput(createInput<PJ301MPort>(Vec(116, 71),  module, ChipPOKEY::INPUT_NOISE + 0));
+        addInput(createInput<PJ301MPort>(Vec(116, 158), module, ChipPOKEY::INPUT_NOISE + 1));
+        addInput(createInput<PJ301MPort>(Vec(116, 241), module, ChipPOKEY::INPUT_NOISE + 2));
+        addInput(createInput<PJ301MPort>(Vec(116, 326), module, ChipPOKEY::INPUT_NOISE + 3));
         // Level
         addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24),  module, ChipPOKEY::PARAM_LEVEL + 0, ChipPOKEY::LIGHTS_LEVEL + 0));
         addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 109), module, ChipPOKEY::PARAM_LEVEL + 1, ChipPOKEY::LIGHTS_LEVEL + 1));

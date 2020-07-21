@@ -19,48 +19,6 @@
 #include "nec_turbo_grafx_16.hpp"
 #include <cstring>
 
-bool const center_waves = true; // reduces asymmetry and clamping when starting notes
-
-NECTurboGrafx16::NECTurboGrafx16() {
-    NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
-    do {
-        osc--;
-        osc->outputs[0] = 0;
-        osc->outputs[1] = 0;
-        osc->chans[0] = 0;
-        osc->chans[1] = 0;
-        osc->chans[2] = 0;
-    } while (osc != oscs);
-    reset();
-}
-
-void NECTurboGrafx16::reset() {
-    latch = 0;
-    balance = 0xFF;
-
-    NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
-    do {
-        osc--;
-        memset(osc, 0, offsetof (NECTurboGrafx16_Oscillator,outputs));
-        osc->noise_lfsr = 1;
-        osc->control = 0x40;
-        osc->balance = 0xFF;
-    } while (osc != oscs);
-}
-
-void NECTurboGrafx16::osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
-    assert((unsigned) index < OSC_COUNT);
-    oscs[index].chans[0] = center;
-    oscs[index].chans[1] = left;
-    oscs[index].chans[2] = right;
-
-    NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
-    do {
-        osc--;
-        balance_changed(*osc);
-    } while (osc != oscs);
-}
-
 void NECTurboGrafx16_Oscillator::run_until(synth_t& synth_, blip_time_t end_time) {
     BLIPBuffer* const osc_outputs_0 = outputs[0]; // cache often-used values
     if (osc_outputs_0 && control & 0x80) {
@@ -151,7 +109,7 @@ void NECTurboGrafx16_Oscillator::run_until(synth_t& synth_, blip_time_t end_time
 }
 
 void NECTurboGrafx16::balance_changed(NECTurboGrafx16_Oscillator& osc) {
-    static short const log_table[32] = {  // ~1.5 db per step
+    static const short log_table[32] = {  // ~1.5 db per step
         #define ENTRY(factor) short (factor * NECTurboGrafx16_Oscillator::amp_range / 31.0 + 0.5)
         ENTRY(0.000000), ENTRY(0.005524), ENTRY(0.006570), ENTRY(0.007813),
         ENTRY(0.009291), ENTRY(0.011049), ENTRY(0.013139), ENTRY(0.015625),
@@ -184,7 +142,7 @@ void NECTurboGrafx16::balance_changed(NECTurboGrafx16_Oscillator& osc) {
         osc.outputs[1] = osc.chans[2];  // right
     }
 
-    if (center_waves) {
+    if (CENTER_WAVES) {
         osc.last_amp[0] += (left  - osc.volume[0]) * 16;
         osc.last_amp[1] += (right - osc.volume[1]) * 16;
     }
@@ -242,14 +200,4 @@ void NECTurboGrafx16::write_data(int addr, int data) {
             break;
         }
     }
-}
-
-void NECTurboGrafx16::end_frame(blip_time_t end_time) {
-    NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
-    do {
-        osc--;
-        if (end_time > osc->last_time) osc->run_until(synth, end_time);
-        assert(osc->last_time >= end_time);
-        osc->last_time -= end_time;
-    } while (osc != oscs);
 }

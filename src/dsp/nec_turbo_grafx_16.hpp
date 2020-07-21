@@ -56,7 +56,18 @@ class NECTurboGrafx16 {
     static constexpr int ADDR_END   = 0x0809;
 
     /// Initialize a new Turbo Grafx 16 chip.
-    NECTurboGrafx16();
+    NECTurboGrafx16() {
+        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        do {
+            osc--;
+            osc->outputs[0] = 0;
+            osc->outputs[1] = 0;
+            osc->chans[0] = 0;
+            osc->chans[1] = 0;
+            osc->chans[2] = 0;
+        } while (osc != oscs);
+        reset();
+    }
 
     /// Set overall volume of all oscillators, where 1.0 is full volume
     ///
@@ -81,7 +92,17 @@ class NECTurboGrafx16 {
     /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     ///
-    void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
+    inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        assert((unsigned) index < OSC_COUNT);
+        oscs[index].chans[0] = center;
+        oscs[index].chans[1] = left;
+        oscs[index].chans[2] = right;
+        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        do {
+            osc--;
+            balance_changed(*osc);
+        } while (osc != oscs);
+    }
 
     /// Assign all oscillator outputs to specified buffer. If buffer
     /// is NULL, silences all oscillators.
@@ -93,7 +114,19 @@ class NECTurboGrafx16 {
     // }
 
     /// Reset oscillators and internal state.
-    void reset();
+    inline void reset() {
+        latch = 0;
+        balance = 0xFF;
+
+        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        do {
+            osc--;
+            memset(osc, 0, offsetof(NECTurboGrafx16_Oscillator, outputs));
+            osc->noise_lfsr = 1;
+            osc->control = 0x40;
+            osc->balance = 0xFF;
+        } while (osc != oscs);
+    }
 
     /// Write to the data port.
     ///
@@ -106,9 +139,20 @@ class NECTurboGrafx16 {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    void end_frame(blip_time_t);
+    inline void end_frame(blip_time_t end_time) {
+        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        do {
+            osc--;
+            if (end_time > osc->last_time) osc->run_until(synth, end_time);
+            assert(osc->last_time >= end_time);
+            osc->last_time -= end_time;
+        } while (osc != oscs);
+    }
 
  private:
+    /// reduces asymmetry and clamping when starting notes
+    static constexpr bool CENTER_WAVES = true;
+
     /// TODO:
     NECTurboGrafx16_Oscillator oscs[OSC_COUNT];
     /// TODO:

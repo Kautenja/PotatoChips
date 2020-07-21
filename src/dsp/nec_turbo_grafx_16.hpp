@@ -237,7 +237,7 @@ class NECTurboGrafx16 {
     ///
     /// @param level the value to set the volume to
     ///
-    inline void volume(double level) {
+    inline void set_volume(double level) {
         synth.volume(1.8 / OSC_COUNT / NECTurboGrafx16_Oscillator::AMP_RANGE * level);
     }
 
@@ -256,7 +256,7 @@ class NECTurboGrafx16 {
     /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     ///
-    inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+    inline void set_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
         assert((unsigned) index < OSC_COUNT);
         oscs[index].chans[0] = center;
         oscs[index].chans[1] = left;

@@ -29,6 +29,7 @@ struct ChipPOKEY : Module {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_LEVEL, AtariPOKEY::OSC_COUNT),
+        ENUMS(PARAM_CONTROL, 8),
         PARAM_COUNT
     };
     enum InputIds {
@@ -36,6 +37,7 @@ struct ChipPOKEY : Module {
         ENUMS(INPUT_FM, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_LEVEL, AtariPOKEY::OSC_COUNT),
+        ENUMS(INPUT_CONTROL, 8),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -78,6 +80,14 @@ struct ChipPOKEY : Module {
         configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Channel 2 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Channel 3 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Channel 4 Level",  "%", 0, 100);
+        configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
+        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2", "");
+        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1", "");
+        configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");
+        configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");
+        configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
+        configParam(PARAM_CONTROL + 6, 0, 1, 0, "Ch. 1 Base Frequency", "");
+        configParam(PARAM_CONTROL + 7, 0, 1, 0, "LFSR", "");
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
@@ -243,6 +253,11 @@ struct ChipPOKEYWidget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(172, 113),   module, ChipPOKEY::INPUT_LEVEL + 1));
         addInput(createInput<PJ301MPort>(Vec(172, 198),   module, ChipPOKEY::INPUT_LEVEL + 2));
         addInput(createInput<PJ301MPort>(Vec(172, 283),   module, ChipPOKEY::INPUT_LEVEL + 3));
+        // Control
+        for (int i = 0; i < 8; i++) {
+            addParam(createParam<CKSS>(Vec(211, 33 + i * 43), module, ChipPOKEY::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * 43), module, ChipPOKEY::INPUT_CONTROL + i));
+        }
         // channel outputs
         addOutput(createOutput<PJ301MPort>(Vec(175, 74),  module, ChipPOKEY::OUTPUT_CHANNEL + 0));
         addOutput(createOutput<PJ301MPort>(Vec(175, 159), module, ChipPOKEY::OUTPUT_CHANNEL + 1));

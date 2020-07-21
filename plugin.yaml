@@ -10,12 +10,12 @@ authorUrl: https://kautenja.github.io/
 sourceUrl: https://github.com/Kautenja/PotatoChips
 changelogUrl: https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md
 modules:
-  # - slug: Pokey
-  #   name: Pokey
-  #   description: An emulation of the Atari Pokey audio processing unit.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pokey.pdf
-  #   tags:
-  #     - Oscillator
+  - slug: POKEY
+    name: POKEY
+    description: An emulation of the Atari POKEY audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+    tags:
+      - Oscillator
   # - slug: Ay3_8910
   #   name: Ay3 8910
   #   description: An emulation of the General Instrument Ay3-8910 audio processing unit.

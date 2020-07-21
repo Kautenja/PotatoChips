@@ -319,12 +319,18 @@ class AtariPOKEY {
         polym_pos += duration;
     }
 
-    /// TODO:
-    friend class AtariPOKEYEngine;
-
  public:
     /// Initialize a new Atari POKEY chip emulator.
-    AtariPOKEY() : impl(0) { set_output(0); }
+    AtariPOKEY() {
+        set_output(0);
+        reset(new AtariPOKEYEngine);
+    }
+
+    /// Set overall volume of all oscillators, where 1.0 is full volume
+    ///
+    /// @param level the value to set the volume to
+    ///
+    inline void volume(double level) { impl->volume(level); }
 
     /// Assign single oscillator output to buffer. If buffer is NULL, silences
     /// the given oscillator.

@@ -156,10 +156,18 @@ class GeneralInstrumentAy_3_8910 {
         }
         regs[addr] = data;
         // handle period changes accurately
+        // get the oscillator index by dividing by 2. there are two registers
+        // for each oscillator to represent the 12-bit period across a 16-bit
+        // value (with 4 unused bits)
         int i = addr >> 1;
-        if (i < OSC_COUNT) {
+        if (i < OSC_COUNT) {  // i refers to i'th oscillator's period registers
+            // get the period from the two registers. the first register
+            // contains the low 8 bits and the second register contains the
+            // high 4 bits
             blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
+            // multiply by PERIOD_FACTOR to calculate the internal period value
             period <<= PERIOD_SHIFTS;
+            // if the period is zero, set to the minimal value of PERIOD_FACTOR
             if (!period) period = PERIOD_FACTOR;
             // adjust time of next timer expiration based on change in period
             osc_t& osc = oscs[i];

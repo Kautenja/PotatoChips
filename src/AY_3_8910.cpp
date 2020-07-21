@@ -28,12 +28,16 @@ struct ChipAY_3_8910 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -62,6 +66,12 @@ struct ChipAY_3_8910 : Module {
         configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.9f, "Pulse A Level",     "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.9f, "Pulse B Level",     "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.9f, "Pulse C Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_TONE + 0, 0, 1, 0, "Pulse A Tone Enabled", "");
+        configParam(PARAM_TONE + 1, 0, 1, 0, "Pulse B Tone Enabled", "");
+        configParam(PARAM_TONE + 2, 0, 1, 0, "Pulse C Tone Enabled", "");
+        configParam(PARAM_NOISE + 0, 0, 1, 0, "Pulse A Noise Enabled", "");
+        configParam(PARAM_NOISE + 1, 0, 1, 0, "Pulse B Noise Enabled", "");
+        configParam(PARAM_NOISE + 2, 0, 1, 0, "Pulse C Noise Enabled", "");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
@@ -117,6 +127,14 @@ struct ChipAY_3_8910 : Module {
         return level;
     }
 
+    /// Return the noise period.
+    ///
+    /// @returns the period for the noise oscillator
+    /// @details
+    /// Returns a frequency based on the knob for channel 3
+    ///
+    inline uint8_t getNoise() { return getFrequency(2) >> 7; }
+
     /// Return a 10V signed sample from the FME7.
     ///
     /// @param channel the channel to get the audio sample for
@@ -153,8 +171,8 @@ struct ChipAY_3_8910 : Module {
                 auto level = getLevel(i);
                 apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }
-            // TODO: 5-bit noise period
-            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b01011);
+            // set the 5-bit noise value based on the channel 3 parameter
+            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise());
             // TODO: 6-channel boolean mixer
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
             // envelope period (TODO: fix envelop in engine)
@@ -193,11 +211,15 @@ struct ChipAY_3_8910Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111),  module, ChipAY_3_8910::INPUT_FM       + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT      + i));
             addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111),  module, ChipAY_3_8910::PARAM_FREQ     + i));
+            addParam(createParam<CKSS>(          Vec(144,  29  + i * 111),  module, ChipAY_3_8910::PARAM_TONE    + i));
+            addInput(createInput<PJ301MPort>(    Vec(147,  53 + i * 111), module, ChipAY_3_8910::INPUT_TONE      + i));
+            addParam(createParam<CKSS>(          Vec(138,  105  + i * 111),  module, ChipAY_3_8910::PARAM_NOISE  + i));
+            addInput(createInput<PJ301MPort>(    Vec(175,  65 + i * 111), module, ChipAY_3_8910::INPUT_NOISE     + i));
             addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111),  module, ChipAY_3_8910::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111),  module, ChipAY_3_8910::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_CHANNEL  + i));
         }
     }
 };

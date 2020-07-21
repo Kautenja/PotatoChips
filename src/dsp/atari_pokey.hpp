@@ -60,6 +60,25 @@ class AtariPOKEY {
     /// the end address of the RAM on the chip
     enum { ADDR_END   = 0xD209 };
 
+    /// the registers on the POKEY
+    enum AtariPOKEY_Registers {
+        AUDF1  = 0xD200,
+        AUDC1  = 0xD201,
+        AUDF2  = 0xD202,
+        AUDC2  = 0xD203,
+        AUDF3  = 0xD204,
+        AUDC3  = 0xD205,
+        AUDF4  = 0xD206,
+        AUDC4  = 0xD207,
+        AUDCTL = 0xD208,
+        STIMER = 0xD209,
+        // SKREST = 0xD20A,
+        // POTGO  = 0xD20B,
+        // SEROUT = 0xD20D,
+        // IRQEN  = 0xD20E,
+        // SKCTL  = 0xD20F
+    };
+
     /// TODO:
     enum { poly4_len  = (1L <<  4) - 1 };
     /// TODO:
@@ -78,16 +97,13 @@ class AtariPOKEY {
             gen_poly(POLY_MASK( 4, 1, 0), sizeof poly4,  poly4 );
             gen_poly(POLY_MASK( 9, 5, 0), sizeof poly9,  poly9 );
             gen_poly(POLY_MASK(17, 5, 0), sizeof poly17, poly17);
-
-            if (0) {  // comment out to recalculate poly5 constant
-                uint8_t poly5[4];
-                gen_poly(POLY_MASK( 5, 2, 0), sizeof poly5,  poly5 );
-                blargg_ulong n = poly5[3] * 0x1000000L + poly5[2] * 0x10000L +
-                        poly5[1] * 0x100L + poly5[0];
-                blargg_ulong rev = n & 1;
-                for (int i = 1; i < poly5_len; i++)
-                    rev |= (n >> i & 1) << (poly5_len - i);
-            }
+            // comment out to recalculate poly5 constant
+            // uint8_t poly5[4];
+            // gen_poly(POLY_MASK( 5, 2, 0), sizeof poly5,  poly5 );
+            // blargg_ulong n = poly5[3] * 0x1000000L + poly5[2] * 0x10000L + poly5[1] * 0x100L + poly5[0];
+            // blargg_ulong rev = n & 1;
+            // for (int i = 1; i < poly5_len; i++)
+            //     rev |= (n >> i & 1) << (poly5_len - i);
         }
 
         /// TODO:

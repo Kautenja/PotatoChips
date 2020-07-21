@@ -155,7 +155,7 @@ struct ChipAY_3_8910 : Module {
             }
             // TODO: 5-bit noise period
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b01011);
-            // mixer bits:
+            // TODO: 6-channel boolean mixer
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
             // envelope period (TODO: fix envelop in engine)
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);

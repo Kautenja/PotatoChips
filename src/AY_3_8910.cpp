@@ -23,6 +23,31 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
+/// a trigger for a button with a CV input.
+struct CVButtonTrigger {
+    /// the trigger for the button
+    dsp::SchmittTrigger buttonTrigger;
+    /// the trigger for the CV
+    dsp::SchmittTrigger cvTrigger;
+
+    /// Process the input signals.
+    ///
+    /// @param button the value of the button signal [0, 1]
+    /// @param cv the value of the CV signal [-10, 10]
+    /// @returns true if either signal crossed a rising edge
+    ///
+    inline bool process(float button, float cv) {
+        bool buttonPress = buttonTrigger.process(button);
+        bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
+        return buttonPress or cvGate;
+    }
+
+    /// Return a boolean determining if either the button or CV gate is high.
+    inline bool isHigh() {
+        return buttonTrigger.isHigh() or cvTrigger.isHigh();
+    }
+};
+
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
     enum ParamIds {
@@ -45,6 +70,9 @@ struct ChipAY_3_8910 : Module {
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
+
+    /// a Schmitt Trigger for handling player 1 button inputs
+    CVButtonTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[GeneralInstrumentAy_3_8910::OSC_COUNT];
@@ -69,9 +97,9 @@ struct ChipAY_3_8910 : Module {
         configParam(PARAM_TONE + 0, 0, 1, 0, "Pulse A Tone Enabled", "");
         configParam(PARAM_TONE + 1, 0, 1, 0, "Pulse B Tone Enabled", "");
         configParam(PARAM_TONE + 2, 0, 1, 0, "Pulse C Tone Enabled", "");
-        configParam(PARAM_NOISE + 0, 0, 1, 0, "Pulse A Noise Enabled", "");
-        configParam(PARAM_NOISE + 1, 0, 1, 0, "Pulse B Noise Enabled", "");
-        configParam(PARAM_NOISE + 2, 0, 1, 0, "Pulse C Noise Enabled", "");
+        configParam(PARAM_NOISE + 0, 0, 1, 1, "Pulse A Noise Enabled", "");
+        configParam(PARAM_NOISE + 1, 0, 1, 1, "Pulse B Noise Enabled", "");
+        configParam(PARAM_NOISE + 2, 0, 1, 1, "Pulse C Noise Enabled", "");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
@@ -133,7 +161,31 @@ struct ChipAY_3_8910 : Module {
     /// @details
     /// Returns a frequency based on the knob for channel 3
     ///
-    inline uint8_t getNoise() { return getFrequency(2) >> 7; }
+    inline uint8_t getNoise() { return getFrequency(2) >> 3; }
+
+    /// Return the control byte.
+    ///
+    /// @returns the 8-bit control byte from parameters and CV inputs
+    ///
+    inline uint8_t getMixer() {
+        uint8_t controlByte = 0;
+        for (std::size_t i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+            // process the voltage with the Schmitt Trigger
+            mixerTriggers[2 * i].process(
+                params[PARAM_TONE + i].getValue(),
+                inputs[INPUT_TONE + i].getVoltage()
+            );
+            // the position for the current button's index
+            controlByte |= mixerTriggers[2 * i].isHigh() << i;
+            mixerTriggers[2 * i + 1].process(
+                params[PARAM_NOISE + i].getValue(),
+                inputs[INPUT_NOISE + i].getVoltage()
+            );
+            // the position for the current button's index
+            controlByte |= mixerTriggers[2 * i + 1].isHigh() << (i + 3);
+        }
+        return controlByte;
+    }
 
     /// Return a 10V signed sample from the FME7.
     ///
@@ -174,7 +226,7 @@ struct ChipAY_3_8910 : Module {
             // set the 5-bit noise value based on the channel 3 parameter
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise());
             // TODO: 6-channel boolean mixer
-            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
+            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer());
             // envelope period (TODO: fix envelop in engine)
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);

@@ -26,18 +26,18 @@
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, 3),
-        ENUMS(PARAM_LEVEL, 3),
+        ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, 3),
-        ENUMS(INPUT_FM, 3),
-        ENUMS(INPUT_LEVEL, 3),
+        ENUMS(INPUT_VOCT, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, 3),
+        ENUMS(OUTPUT_CHANNEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
@@ -59,9 +59,9 @@ struct ChipAY_3_8910 : Module {
         configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.9f, "Pulse A Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.9f, "Pulse B Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.9f, "Pulse C Level",     "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
@@ -153,32 +153,19 @@ struct ChipAY_3_8910 : Module {
                 auto level = getLevel(i);
                 apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }
-            // 5-bit noise period
+            // TODO: 5-bit noise period
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b01011);
             // mixer bits:
-            // - enable input B
-            // - enable input A
-            // - enable Noise C
-            // - enable Noise B
-            // - enable Noise A
-            // - enable Tone C
-            // - enable Tone B
-            // - enable Tone A
-            //
-            // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111111);
-            // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00000111);
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
-            // envelope period
+            // envelope period (TODO: fix envelop in engine)
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
-            // envelope shape bits
-            // - continue
-            // - attack
-            // - alternate
-            // - hold
-            apu.write(GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE, 0b00000000);
+            // envelope shape bits (TODO: fix envelop in engine)
+            // apu.write(
+            //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
+            //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_NONE
+            // );
         }
-
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)

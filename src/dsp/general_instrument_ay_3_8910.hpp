@@ -40,20 +40,20 @@ class GeneralInstrumentAy_3_8910 {
 
     /// the register on the chipm
     enum Registers {
-        PERIOD_CH_A_LO = 0,
-        PERIOD_CH_B_LO,
-        PERIOD_CH_C_LO,
-        PERIOD_ENVELOPE_LO,
         PERIOD_CH_A_HI,
+        PERIOD_CH_A_LO,
         PERIOD_CH_B_HI,
+        PERIOD_CH_B_LO,
         PERIOD_CH_C_HI,
-        PERIOD_ENVELOPE_HI,
-        CHANNEL_ENABLES,
+        PERIOD_CH_C_LO,
         NOISE_PERIOD,
-        ENVELOPE_CHARACTERISTICS,
+        CHANNEL_ENABLES,
         VOLUME_CH_A,
         VOLUME_CH_B,
         VOLUME_CH_C,
+        PERIOD_ENVELOPE_LO,
+        PERIOD_ENVELOPE_HI,
+        ENVELOPE_CHARACTERISTICS,
         // IO_PORT_A,
         // IO_PORT_B
     };
@@ -143,8 +143,7 @@ class GeneralInstrumentAy_3_8910 {
     ///
     void _write(int addr, int data) {
         assert((unsigned) addr < REG_COUNT);
-        // envelope mode
-        if (addr == 13) {
+        if (addr == 13) {  // envelope mode
             if (!(data & 8)) // convert modes 0-7 to proper equivalents
                 data = (data & 4) ? 15 : 9;
             env.wave = env.modes[data - 7];

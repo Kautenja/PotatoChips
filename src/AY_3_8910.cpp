@@ -144,7 +144,7 @@ struct ChipAY_3_8910 : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             // frequency
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
                 apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + i, lo);
@@ -169,8 +169,8 @@ struct ChipAY_3_8910 : Module {
             // apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00000111);
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b00111000);
             // enveloper period
-            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
-            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b10101011);
+            apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
+            apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b10101011);
             // envelope shape bits
             // - continue
             // - attack

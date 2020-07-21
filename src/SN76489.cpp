@@ -128,8 +128,8 @@ struct ChipSN76489 : Module {
         uint8_t hi = 0b00111111 & (freq10bit >> 4);
         // write the data to the chip
         const auto channel_opcode_offset = (2 * channel) << 4;
-        apu.write_data(0, (TONE_1_FREQUENCY + channel_opcode_offset) | lo);
-        apu.write_data(0, hi);
+        apu.write_data((TONE_1_FREQUENCY + channel_opcode_offset) | lo);
+        apu.write_data(hi);
 
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
@@ -138,7 +138,7 @@ struct ChipSN76489 : Module {
             attenuationParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write_data(0, (TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
+        apu.write_data((TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
     /// Process noise (channel 3).
@@ -160,7 +160,7 @@ struct ChipSN76489 : Module {
         uint8_t period = FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
         bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
         if (period != noise_period or update_noise_control != state) {
-            apu.write_data(0, NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);
+            apu.write_data(NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);
             noise_period = period;
             update_noise_control = state;
         }
@@ -172,7 +172,7 @@ struct ChipSN76489 : Module {
             attenuationParam *= inputs[INPUT_LEVEL + 3].getVoltage() / 2.f;
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write_data(0, NOISE_ATTENUATION | attenuation);
+        apu.write_data(NOISE_ATTENUATION | attenuation);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -190,8 +190,6 @@ struct ChipSN76489 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
@@ -209,7 +207,7 @@ struct ChipSN76489 : Module {
             channel_noise();
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         // set the output voltages (and process the levels in VU)
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             auto channelOutput = getAudioOut(i);

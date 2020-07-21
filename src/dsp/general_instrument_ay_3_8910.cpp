@@ -30,7 +30,7 @@ unsigned const inaudible_freq = 16384;
 int const period_factor = 16;
 
 static uint8_t const amp_table[16] = {
-#define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::amp_range + 0.5)
+#define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
     // With channels tied together and 1K resistor to ground (as datasheet recommends),
     // output nearly matches logarithmic curve as claimed. Approx. 1.5 dB per step.
     ENTRY(0.000000),ENTRY(0.007813),ENTRY(0.011049),ENTRY(0.015625),
@@ -96,7 +96,7 @@ void GeneralInstrumentAy_3_8910::reset() {
     noise.delay = 0;
     noise.lfsr  = 1;
 
-    osc_t* osc = &oscs[osc_count];
+    osc_t* osc = &oscs[OSC_COUNT];
     do {
         osc--;
         osc->period   = period_factor;
@@ -111,7 +111,7 @@ void GeneralInstrumentAy_3_8910::reset() {
 }
 
 void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
-    assert((unsigned) addr < reg_count);
+    assert((unsigned) addr < REG_COUNT);
     // envelope mode
     if (addr == 13) {
         if (!(data & 8)) // convert modes 0-7 to proper equivalents
@@ -124,7 +124,7 @@ void GeneralInstrumentAy_3_8910::write_data_(int addr, int data) {
     regs[addr] = data;
     // handle period changes accurately
     int i = addr >> 1;
-    if (i < osc_count) {
+    if (i < OSC_COUNT) {
         blip_time_t period = (regs[i * 2 + 1] & 0x0F) * (0x100L * period_factor) + regs[i * 2] * period_factor;
         if (!period) period = period_factor;
         // adjust time of next timer expiration based on change in period
@@ -159,7 +159,7 @@ void GeneralInstrumentAy_3_8910::run_until(blip_time_t final_end_time) {
         env.delay = env_period;
 
     // run each osc separately
-    for (int index = 0; index < osc_count; index++) {
+    for (int index = 0; index < OSC_COUNT; index++) {
         osc_t* const osc = &oscs[index];
         int osc_mode = regs[7] >> index;
 

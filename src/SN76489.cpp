@@ -135,8 +135,11 @@ struct ChipSN76489 : Module {
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected())
-            attenuationParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            attenuationParam *= 2 * cv;
+        }
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
         apu.write_data((TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
@@ -169,8 +172,11 @@ struct ChipSN76489 : Module {
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_LEVEL + 3].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + 3].isConnected())
-            attenuationParam *= inputs[INPUT_LEVEL + 3].getVoltage() / 2.f;
+        if (inputs[INPUT_LEVEL + 3].isConnected()) {
+            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            attenuationParam *= 2 * cv;
+        }
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
         apu.write_data(NOISE_ATTENUATION | attenuation);

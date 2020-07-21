@@ -61,6 +61,9 @@ class GeneralInstrumentAy_3_8910 {
  private:
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
+    /// the number of bits to shift for faster multiplying / dividing by
+    /// PERIOD_FACTOR (which is a factor of 2)
+    static constexpr int PERIOD_SHIFTS = 4;
     /// Tones above this frequency are treated as disabled tone at half volume.
     /// Power of two is more efficient (avoids division).
     static constexpr unsigned INAUDIBLE_FREQ = 16384;
@@ -155,11 +158,9 @@ class GeneralInstrumentAy_3_8910 {
         // handle period changes accurately
         int i = addr >> 1;
         if (i < OSC_COUNT) {
-            // TODO: is this correct?
-            blip_time_t period = (regs[i * 2 + 1] & 0x0F) * 0x100L + regs[i * 2];
-            // period *= PERIOD_FACTOR;
-            // if (!period) period = PERIOD_FACTOR;
-            if (period < PERIOD_FACTOR) period = PERIOD_FACTOR;
+            blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
+            period <<= PERIOD_SHIFTS;
+            if (!period) period = PERIOD_FACTOR;
             // adjust time of next timer expiration based on change in period
             osc_t& osc = oscs[i];
             if ((osc.delay += period - osc.period) < 0) osc.delay = 0;

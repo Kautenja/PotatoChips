@@ -82,7 +82,7 @@ struct ChipAY_3_8910 : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ12BIT_MAX = 8191;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
+        static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage

@@ -1,4 +1,4 @@
-// Sony SPC700 DSP emulator.
+// Sony SPC700 emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -16,12 +16,12 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_NINTENDO_SNES_SPC_DSP_HPP_
-#define DSP_NINTENDO_SNES_SPC_DSP_HPP_
+#ifndef DSP_SONY_SPC700_HPP_
+#define DSP_SONY_SPC700_HPP_
 
 #include "blargg_common.h"
 
-/// Sony SPC700 DSP emulator.
+/// Sony SPC700 emulator.
 class SPC700 {
  public:
     enum { VOICE_COUNT = 8 };
@@ -165,4 +165,4 @@ class SPC700 {
     void run(long count, short* buf = NULL);
 };
 
-#endif  // DSP_NINTENDO_SNES_SPC_DSP_HPP_
+#endif  // DSP_SONY_SPC700_HPP_

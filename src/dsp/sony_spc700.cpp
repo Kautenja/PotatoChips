@@ -1,4 +1,4 @@
-// Sony SPC700 DSP emulator.
+// Sony SPC700 emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2002 Brad Martin

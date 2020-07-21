@@ -19,6 +19,31 @@
 #include "components.hpp"
 #include "dsp/atari_pokey.hpp"
 
+/// a trigger for a button with a CV input.
+struct CVButtonTrigger {
+    /// the trigger for the button
+    dsp::SchmittTrigger buttonTrigger;
+    /// the trigger for the CV
+    dsp::SchmittTrigger cvTrigger;
+
+    /// Process the input signals.
+    ///
+    /// @param button the value of the button signal [0, 1]
+    /// @param cv the value of the CV signal [-10, 10]
+    /// @returns true if either signal crossed a rising edge
+    ///
+    inline bool process(float button, float cv) {
+        bool buttonPress = buttonTrigger.process(button);
+        bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
+        return buttonPress or cvGate;
+    }
+
+    /// Return a boolean determining if either the button or CV gate is high.
+    inline bool isHigh() {
+        return buttonTrigger.isHigh() or cvTrigger.isHigh();
+    }
+};
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -54,6 +79,9 @@ struct ChipPOKEY : Module {
     /// The POKEY instance to synthesize sound with
     AtariPOKEY apu;
 
+    /// a Schmitt Trigger for handling player 1 button inputs
+    CVButtonTrigger controlTriggers[8];
+
     /// a signal flag for detecting sample rate changes
     bool new_sample_rate = true;
 
@@ -81,8 +109,8 @@ struct ChipPOKEY : Module {
         configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Channel 3 Level", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Channel 4 Level",  "%", 0, 100);
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
-        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2", "");
-        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1", "");
+        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from 3", "");
+        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from 3", "");
         configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");
         configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");
         configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
@@ -96,11 +124,12 @@ struct ChipPOKEY : Module {
         apu.set_volume(3.f);
     }
 
-    /// Process pulse wave for given channel.
+    /// Return the frequency for the given channel.
     ///
-    /// @param channel the channel to process the pulse wave for
+    /// @param channel the channel to return the frequency for
+    /// @returns the 8-bit frequency value from parameters and CV inputs
     ///
-    void channel(int channel) {
+    inline uint8_t getFrequency(int channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ8BIT_MIN = 0;
         // the maximal value for the frequency register
@@ -109,15 +138,6 @@ struct ChipPOKEY : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // the minimal value for the volume register
-        static constexpr float ATT_MIN = 0;
-        // the maximal value for the volume register
-        static constexpr float ATT_MAX = 15;
-        // the minimal value for the noise register
-        static constexpr float NOISE_MIN = 0;
-        // the maximal value for the noise register
-        static constexpr float NOISE_MAX = 7;
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -125,13 +145,21 @@ struct ChipPOKEY : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 8-bit value
+        // calculate the frequency based on the clock division
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
-        uint8_t freq8bit = rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
-        // - there are 2 registers per channel, multiply first channel by 2 to
-        //   produce an offset between registers based on channel index
-        apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
+        return rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
+    }
 
+    /// Return the noise for the given channel.
+    ///
+    /// @param channel the channel to return the noise for
+    /// @returns the 3-bit noise value from parameters and CV inputs
+    ///
+    inline uint8_t getNoise(int channel) {
+        // the minimal value for the noise register
+        static constexpr float NOISE_MIN = 0;
+        // the maximal value for the noise register
+        static constexpr float NOISE_MAX = 7;
         // get the noise from the parameter knob
         auto noiseParam = params[PARAM_NOISE + channel].getValue();
         // apply the control voltage to the level
@@ -140,9 +168,19 @@ struct ChipPOKEY : Module {
             cv = roundf(100.f * cv) / 100.f;
             noiseParam *= 2 * cv;
         }
-        // get the noise parameter from the knob
-        uint8_t noise = rack::clamp(noiseParam, NOISE_MIN, NOISE_MAX);
+        return rack::clamp(noiseParam, NOISE_MIN, NOISE_MAX);
+    }
 
+    /// Return the level for the given channel.
+    ///
+    /// @param channel the channel to return the level for
+    /// @returns the 4-bit level value from parameters and CV inputs
+    ///
+    inline uint8_t getLevel(int channel) {
+        // the minimal value for the volume register
+        static constexpr float ATT_MIN = 0;
+        // the maximal value for the volume register
+        static constexpr float ATT_MAX = 15;
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
@@ -151,10 +189,25 @@ struct ChipPOKEY : Module {
             cv = roundf(100.f * cv) / 100.f;
             levelParam *= 2 * cv;
         }
-        // get the 8-bit level clamped within legal limits
-        uint8_t level = rack::clamp(ATT_MAX * levelParam, ATT_MIN, ATT_MAX);
+        return rack::clamp(ATT_MAX * levelParam, ATT_MIN, ATT_MAX);
+    }
 
-        apu.write(AtariPOKEY::AUDC1 + 2 * channel, (noise << 5) | level);
+    /// Return the control byte.
+    ///
+    /// @returns the 8-bit control byte from parameters and CV inputs
+    ///
+    uint8_t getControl() {
+        uint8_t controlByte = 0;
+        for (std::size_t bit = 0; bit < 8; bit++) {
+            // process the voltage with the Schmitt Trigger
+            controlTriggers[bit].process(
+                params[PARAM_CONTROL + bit].getValue(),
+                inputs[INPUT_CONTROL + bit].getVoltage()
+            );
+            // the position for the current button's index
+            controlByte |= controlTriggers[bit].isHigh() << bit;
+        }
+        return controlByte;
     }
 
     /// Return a 10V signed sample from the APU.
@@ -177,24 +230,31 @@ struct ChipPOKEY : Module {
         // check for sample rate changes from the engine to send to the chip
         if (new_sample_rate) {
             // update the buffer for each channel
-            for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++)
+            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++)
                 buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
             // clear the new sample rate flag
             new_sample_rate = false;
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) channel(i);
-            // apu.write(AtariPOKEY::AUDCTL, 0b00001111);
+            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+                // there are 2 registers per channel, multiply first channel
+                // by 2 to produce an offset between registers based on channel
+                // index. the 3 noise bit occupy the MSB of the control register
+                apu.write(AtariPOKEY::AUDF1 + 2 * i, getFrequency(i));
+                apu.write(AtariPOKEY::AUDC1 + 2 * i, (getNoise(i) << 5) | getLevel(i));
+            }
+            // write the control byte to the chip
+            apu.write(AtariPOKEY::AUDCTL, getControl());
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
-        for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+        for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
             auto channelOutput = getAudioOut(i);
             chMeters[i].process(args.sampleTime, channelOutput / 5.f);
             outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
         }
         if (lightDivider.process()) {  // update the mixer lights
-            for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
                 lights[LIGHTS_LEVEL + i].setBrightness(b);
             }

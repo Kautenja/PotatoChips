@@ -73,6 +73,9 @@ class AtariPOKEY {
         AUDCTL = 0xD208
     };
 
+    /// the number of registers per voice on the chip
+    static constexpr int REGS_PER_VOICE = 2;
+
     /// TODO:
     enum { poly4_len  = (1L <<  4) - 1 };
     /// TODO:

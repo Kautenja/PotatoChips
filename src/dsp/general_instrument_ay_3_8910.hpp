@@ -26,11 +26,11 @@
 class GeneralInstrumentAy_3_8910 {
  public:
     /// the number of oscillators on the chip
-    enum { osc_count = 3 };
+    enum { OSC_COUNT = 3 };
     /// the number of registers on the chip
-    enum { reg_count = 16 };
+    enum { REG_COUNT = 16 };
     /// TODO:
-    enum { amp_range = 255 };
+    enum { AMP_RANGE = 255 };
     /// TODO:
     BLIPSynth<blip_good_quality, 1> synth_;
 
@@ -47,11 +47,11 @@ class GeneralInstrumentAy_3_8910 {
         short phase;
         /// TODO:
         BLIPBuffer* output;
-    } oscs[osc_count];
+    } oscs[OSC_COUNT];
     /// TODO:
     blip_time_t last_time;
     /// TODO:
-    uint8_t regs[reg_count];
+    uint8_t regs[REG_COUNT];
 
     /// TODO:
     struct {
@@ -77,7 +77,7 @@ class GeneralInstrumentAy_3_8910 {
     GeneralInstrumentAy_3_8910();
 
     // Set overall volume (default is 1.0)
-    inline void volume(double v) { synth_.volume(0.7 / osc_count / amp_range * v); }
+    inline void volume(double v) { synth_.volume(0.7 / OSC_COUNT / AMP_RANGE * v); }
 
     // Set treble equalization (see documentation)
     inline void treble_eq(blip_eq_t const& eq) { synth_.treble_eq(eq); }
@@ -85,7 +85,7 @@ class GeneralInstrumentAy_3_8910 {
     // Set sound output of specific oscillator to buffer, where index is
     // 0, 1, or 2. If buffer is NULL, the specified oscillator is muted.
     inline void osc_output(int i, BLIPBuffer* buf) {
-        assert((unsigned) i < osc_count);
+        assert((unsigned) i < OSC_COUNT);
         oscs[i].output = buf;
     }
 

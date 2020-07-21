@@ -54,13 +54,34 @@ class GeneralInstrumentAy_3_8910 {
         PERIOD_ENVELOPE_LO,
         PERIOD_ENVELOPE_HI,
         ENVELOPE_SHAPE,
-        // IO_PORT_A,
-        // IO_PORT_B
+        // IO_PORT_A,  // unused
+        // IO_PORT_B   // unused
     };
 
     /// the flag bit for turning on the envelope for a channel's VOLUME_CH_#
     /// register
-    static constexpr int ENVELOPE_ON  = 0b00010000;
+    static constexpr int PERIOD_CH_ENVELOPE_ON = 0b00010000;
+
+    enum ChannelEnableFlag {
+        CHANNEL_ENABLE_ALL_ON      = 0b00000000,
+        CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
+        CHANNEL_ENABLE_TONE_B_OFF  = 0b00000010,
+        CHANNEL_ENABLE_TONE_C_OFF  = 0b00000100,
+        CHANNEL_ENABLE_NOISE_A_OFF = 0b00001000,
+        CHANNEL_ENABLE_NOISE_B_OFF = 0b00010000,
+        CHANNEL_ENABLE_NOISE_C_OFF = 0b00100000,
+        // CHANNEL_ENABLE_PORT_A_OFF  = 0b01000000,  // unused
+        // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
+    };
+
+    // flags for the ENVELOPE_SHAPE register
+    enum EnvelopeShapeFlag {
+        ENVELOPE_SHAPE_NONE      = 0b0000,
+        ENVELOPE_SHAPE_HOLD      = 0b0001,
+        ENVELOPE_SHAPE_ALTERNATE = 0b0010,
+        ENVELOPE_SHAPE_ATTACK    = 0b0100,
+        ENVELOPE_SHAPE_CONTINUE  = 0b1000,
+    };
 
  private:
     /// TODO:

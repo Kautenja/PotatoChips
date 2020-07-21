@@ -155,6 +155,7 @@ class GeneralInstrumentAy_3_8910 {
         // handle period changes accurately
         int i = addr >> 1;
         if (i < OSC_COUNT) {
+            // TODO: is this correct?
             blip_time_t period = (regs[i * 2 + 1] & 0x0F) * 0x100L + regs[i * 2];
             // period *= PERIOD_FACTOR;
             // if (!period) period = PERIOD_FACTOR;

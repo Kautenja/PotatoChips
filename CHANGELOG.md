@@ -59,3 +59,7 @@
 ### 1.4.0 (2020-07-18)
 
 -   Texas Instruments SN76489 from Sega Master System
+
+### 1.4.1 (2020-07-20)
+
+-   fix issue where CV controlled SN76489 VCA wouldn't return to 0

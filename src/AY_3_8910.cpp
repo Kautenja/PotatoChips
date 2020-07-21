@@ -70,11 +70,12 @@ struct ChipAY_3_8910 : Module {
         apu.volume(3.f);
     }
 
-    /// Process pulse wave for the given channel.
+    /// Return the frequency for the given channel.
     ///
-    /// @param channel the index of the channel to process
+    /// @param channel the index of the channel to get the frequency of
+    /// @returns the 12-bit frequency in a 16-bit container
     ///
-    inline void process_channel(int channel) {
+    inline uint16_t getFrequency(int channel) {
         // TODO update min max for Freq and Level
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ12BIT_MIN = 4;
@@ -84,11 +85,6 @@ struct ChipAY_3_8910 : Module {
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
-        // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 13;
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -98,21 +94,26 @@ struct ChipAY_3_8910 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
-        uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-        // write the registers with the frequency data
-        auto lo =  freq12bit & 0b0000000011111111;
-        apu.write(channel + GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO, lo);
-        auto hi = (freq12bit & 0b0000111100000000) >> 8;
-        apu.write(channel + GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI, hi);
+        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+    }
 
+    /// Return the level for the given channel.
+    ///
+    /// @param channel the index of the channel to get the level of
+    /// @returns the 4-bit level value in an 8-bit container
+    ///
+    inline uint8_t getLevel(int channel) {
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float LEVEL_MAX = 13;
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + channel].isConnected())
             levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit level clamped within legal limits
-        uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
-        apu.write(channel + GeneralInstrumentAy_3_8910::VOLUME_CH_A, level << 2);
+        return rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -142,10 +143,18 @@ struct ChipAY_3_8910 : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-                process_channel(i);
+                auto freq = getFrequency(i);
+                auto lo =  freq & 0b0000000011111111;
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + i, lo);
+                auto hi = (freq & 0b0000111100000000) >> 8;
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + i, hi);
+                auto level = getLevel(i) << 2;
+                apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }
+            // 5-bit noise period
+            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b01011);
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, 0b11111111);
-            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, 0b10101011);
+
             apu.write(GeneralInstrumentAy_3_8910::ENVELOPE_CHARACTERISTICS, 0b10101011);
         }
 

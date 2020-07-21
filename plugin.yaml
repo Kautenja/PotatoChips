@@ -1,6 +1,6 @@
 ---
 slug: KautenjaDSP-PotatoChips
-version: '1.4.1'
+version: '1.6.0'
 license: GPL-3.0-or-later
 name: KautenjaDSP Potato Chips
 brand: KautenjaDSP
@@ -10,18 +10,18 @@ authorUrl: https://kautenja.github.io/
 sourceUrl: https://github.com/Kautenja/PotatoChips
 changelogUrl: https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md
 modules:
-  # - slug: Pokey
-  #   name: Pokey
-  #   description: An emulation of the Atari Pokey chip.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pokey.pdf
-  #   tags:
-  #     - Oscillator
-  # - slug: Ay3_8910
-  #   name: Ay3 8910
-  #   description: An emulation of the General Instrument Ay3-8910 chip.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/Ay3_8910.pdf
-  #   tags:
-  #     - Oscillator
+  - slug: AY_3_8910
+    name: AY-3-8910
+    description: An emulation of the General Instrument AY-3-8910 audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
+    tags:
+      - Oscillator
+  - slug: POKEY
+    name: POKEY
+    description: An emulation of the Atari POKEY audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+    tags:
+      - Oscillator
   - slug: SCC
     name: SCC
     description: An emulation of the Konami SCC chip.

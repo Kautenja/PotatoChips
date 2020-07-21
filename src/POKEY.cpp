@@ -27,7 +27,7 @@
 struct ChipPOKEY : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
-        ENUMS(PARAM_PW, 2),
+        ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
@@ -56,12 +56,14 @@ struct ChipPOKEY : Module {
     /// Initialize a new POKEY Chip module.
     ChipPOKEY() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
-        configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Pulse 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 3, -30.f, 30.f, 0.f, "Pulse 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_NOISE + 0, 0, 7, 7, "Pulse 1 Noise");
+        configParam(PARAM_NOISE + 1, 0, 7, 7, "Pulse 2 Noise");
+        configParam(PARAM_NOISE + 2, 0, 7, 7, "Pulse 3 Noise");
+        configParam(PARAM_NOISE + 3, 0, 7, 7, "Pulse 4 Noise");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
@@ -96,8 +98,8 @@ struct ChipPOKEY : Module {
         //   produce an offset between registers based on channel index
         apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
 
-        // auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write(AtariPOKEY::AUDC1 + 2 * channel, 0b11101111);
+        auto noise = static_cast<uint8_t>(params[PARAM_NOISE + channel].getValue()) << 5;
+        apu.write(AtariPOKEY::AUDC1 + 2 * channel, noise | 0b00001111);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -168,9 +170,11 @@ struct ChipPOKEYWidget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipPOKEY::PARAM_FREQ + 1));
         addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipPOKEY::PARAM_FREQ + 2));
         addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipPOKEY::PARAM_FREQ + 3));
-        // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, ChipPOKEY::PARAM_PW + 0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, ChipPOKEY::PARAM_PW + 1));
+        // Noise
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30),  module, ChipPOKEY::PARAM_NOISE + 0));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, ChipPOKEY::PARAM_NOISE + 1));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 200), module, ChipPOKEY::PARAM_NOISE + 2));
+        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 285), module, ChipPOKEY::PARAM_NOISE + 3));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipPOKEY::INPUT_LFSR));
         // channel outputs

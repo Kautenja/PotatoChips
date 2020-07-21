@@ -147,9 +147,9 @@ struct ChipAY_3_8910 : Module {
             for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + i, lo);
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + 2 * i, lo);
                 auto hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + i, hi);
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + 2 * i, hi);
                 auto level = getLevel(i);
                 apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }

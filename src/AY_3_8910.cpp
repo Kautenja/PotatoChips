@@ -204,29 +204,14 @@ struct ChipAY_3_8910Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 99),  module, ChipAY_3_8910::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(23, 211), module, ChipAY_3_8910::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(23, 320), module, ChipAY_3_8910::INPUT_VOCT + 2));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 56),  module, ChipAY_3_8910::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(23, 168), module, ChipAY_3_8910::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(23, 279), module, ChipAY_3_8910::INPUT_FM + 2));
-        // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, ChipAY_3_8910::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipAY_3_8910::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipAY_3_8910::PARAM_FREQ + 2));
-        // levels
-        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, ChipAY_3_8910::INPUT_LEVEL + 0));
-        addInput(createInput<PJ301MPort>(Vec(102, 146),  module, ChipAY_3_8910::INPUT_LEVEL + 1));
-        addInput(createInput<PJ301MPort>(Vec(102, 255),  module, ChipAY_3_8910::INPUT_LEVEL + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipAY_3_8910::PARAM_LEVEL + 0));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipAY_3_8910::PARAM_LEVEL + 1));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipAY_3_8910::PARAM_LEVEL + 2));
-        // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipAY_3_8910::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipAY_3_8910::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 324), module, ChipAY_3_8910::OUTPUT_CHANNEL + 2));
+        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(  Vec(23,  99 + i * 112),  module, ChipAY_3_8910::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(  Vec(23,  56 + i * 112),  module, ChipAY_3_8910::INPUT_FM       + i));
+            addParam(createParam<Rogan3PSNES>( Vec(54,  42 + i * 112),  module, ChipAY_3_8910::PARAM_FREQ     + i));
+            addInput(createInput<PJ301MPort>(  Vec(102, 36 + i * 112),  module, ChipAY_3_8910::INPUT_LEVEL    + i));
+            addParam(createParam<Rogan0PSNES>( Vec(103, 64 + i * 112),  module, ChipAY_3_8910::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(Vec(107, 104 + i * 112), module, ChipAY_3_8910::OUTPUT_CHANNEL + i));
+        }
     }
 };
 

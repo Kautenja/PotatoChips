@@ -28,19 +28,23 @@ struct ChipPOKEY : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, AtariPOKEY::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, AtariPOKEY::OSC_COUNT),
-        ENUMS(INPUT_FM, 3),
-        INPUT_LFSR,
+        ENUMS(INPUT_FM, AtariPOKEY::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, AtariPOKEY::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, AtariPOKEY::OSC_COUNT),
         OUTPUT_COUNT
     };
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds {
+        ENUMS(LIGHTS_LEVEL, AtariPOKEY::OSC_COUNT),
+        LIGHT_COUNT
+    };
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[AtariPOKEY::OSC_COUNT];
@@ -56,14 +60,18 @@ struct ChipPOKEY : Module {
     /// Initialize a new POKEY Chip module.
     ChipPOKEY() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Pulse 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3, -30.f, 30.f, 0.f, "Pulse 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE + 0, 0, 7, 7, "Pulse 1 Noise");
-        configParam(PARAM_NOISE + 1, 0, 7, 7, "Pulse 2 Noise");
-        configParam(PARAM_NOISE + 2, 0, 7, 7, "Pulse 3 Noise");
-        configParam(PARAM_NOISE + 3, 0, 7, 7, "Pulse 4 Noise");
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Channel 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Channel 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Channel 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 3, -30.f, 30.f, 0.f, "Channel 4 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_NOISE + 0, 0, 7, 7, "Channel 1 Noise");
+        configParam(PARAM_NOISE + 1, 0, 7, 7, "Channel 2 Noise");
+        configParam(PARAM_NOISE + 2, 0, 7, 7, "Channel 3 Noise");
+        configParam(PARAM_NOISE + 3, 0, 7, 7, "Channel 4 Noise");
+        configParam(PARAM_LEVEL + 0, 0, 1, 0.5, "Channel 1 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Channel 2 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Channel 3 Level", "%", 0, 100);
+        configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Channel 4 Level",  "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
@@ -84,6 +92,11 @@ struct ChipPOKEY : Module {
         static constexpr auto CLOCK_DIVISION = 16;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
+        // the minimal value for the volume width register
+        static constexpr float ATT_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float ATT_MAX = 15;
+
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -92,13 +105,25 @@ struct ChipPOKEY : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 8-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
         uint8_t freq8bit = rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
         // - there are 2 registers per channel, multiply first channel by 2 to
         //   produce an offset between registers based on channel index
         apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
 
         auto noise = static_cast<uint8_t>(params[PARAM_NOISE + channel].getValue()) << 5;
+
+        // get the attenuation from the parameter knob
+        auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            attenuationParam *= 2 * cv;
+        }
+        // get the 8-bit attenuation clamped within legal limits
+        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+
         apu.write(AtariPOKEY::AUDC1 + 2 * channel, noise | 0b00001111);
     }
 
@@ -129,7 +154,7 @@ struct ChipPOKEY : Module {
         }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) channel(i);
-            apu.write(AtariPOKEY::AUDCTL, 0b00001111);
+            // apu.write(AtariPOKEY::AUDCTL, 0b00001111);
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
@@ -157,31 +182,39 @@ struct ChipPOKEYWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, ChipPOKEY::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, ChipPOKEY::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, ChipPOKEY::INPUT_VOCT + 2));
-        addInput(createInput<PJ301MPort>(Vec(20, 329), module, ChipPOKEY::INPUT_VOCT + 3));
+        addInput(createInput<PJ301MPort>(Vec(19, 73),  module, ChipPOKEY::INPUT_VOCT + 0));
+        addInput(createInput<PJ301MPort>(Vec(19, 158), module, ChipPOKEY::INPUT_VOCT + 1));
+        addInput(createInput<PJ301MPort>(Vec(19, 243), module, ChipPOKEY::INPUT_VOCT + 2));
+        addInput(createInput<PJ301MPort>(Vec(19, 328), module, ChipPOKEY::INPUT_VOCT + 3));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, ChipPOKEY::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, ChipPOKEY::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, ChipPOKEY::INPUT_FM + 2));
+        addInput(createInput<PJ301MPort>(Vec(19, 38),  module, ChipPOKEY::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(19, 123), module, ChipPOKEY::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(19, 208), module, ChipPOKEY::INPUT_FM + 2));
+        addInput(createInput<PJ301MPort>(Vec(19, 293), module, ChipPOKEY::INPUT_FM + 3));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipPOKEY::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipPOKEY::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipPOKEY::PARAM_FREQ + 2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipPOKEY::PARAM_FREQ + 3));
+        addParam(createParam<Rogan3PBlue>(Vec(46, 39),  module, ChipPOKEY::PARAM_FREQ + 0));
+        addParam(createParam<Rogan3PBlue>(Vec(46, 123), module, ChipPOKEY::PARAM_FREQ + 1));
+        addParam(createParam<Rogan3PBlue>(Vec(46, 208), module, ChipPOKEY::PARAM_FREQ + 2));
+        addParam(createParam<Rogan3PBlue>(Vec(46, 294), module, ChipPOKEY::PARAM_FREQ + 3));
         // Noise
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30),  module, ChipPOKEY::PARAM_NOISE + 0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, ChipPOKEY::PARAM_NOISE + 1));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 200), module, ChipPOKEY::PARAM_NOISE + 2));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 285), module, ChipPOKEY::PARAM_NOISE + 3));
-        // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipPOKEY::INPUT_LFSR));
+        addParam(createParam<Rogan1PRed>(Vec(102, 30),  module, ChipPOKEY::PARAM_NOISE + 0));
+        addParam(createParam<Rogan1PRed>(Vec(102, 115), module, ChipPOKEY::PARAM_NOISE + 1));
+        addParam(createParam<Rogan1PRed>(Vec(102, 200), module, ChipPOKEY::PARAM_NOISE + 2));
+        addParam(createParam<Rogan1PRed>(Vec(102, 285), module, ChipPOKEY::PARAM_NOISE + 3));
+        // Level
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24),  module, ChipPOKEY::PARAM_LEVEL + 0, ChipPOKEY::LIGHTS_LEVEL + 0));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 109), module, ChipPOKEY::PARAM_LEVEL + 1, ChipPOKEY::LIGHTS_LEVEL + 1));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 194), module, ChipPOKEY::PARAM_LEVEL + 2, ChipPOKEY::LIGHTS_LEVEL + 2));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 279), module, ChipPOKEY::PARAM_LEVEL + 3, ChipPOKEY::LIGHTS_LEVEL + 3));
+        addInput(createInput<PJ301MPort>(Vec(172, 28),    module, ChipPOKEY::INPUT_LEVEL + 0));
+        addInput(createInput<PJ301MPort>(Vec(172, 113),   module, ChipPOKEY::INPUT_LEVEL + 1));
+        addInput(createInput<PJ301MPort>(Vec(172, 198),   module, ChipPOKEY::INPUT_LEVEL + 2));
+        addInput(createInput<PJ301MPort>(Vec(172, 283),   module, ChipPOKEY::INPUT_LEVEL + 3));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, ChipPOKEY::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipPOKEY::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, ChipPOKEY::OUTPUT_CHANNEL + 2));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, ChipPOKEY::OUTPUT_CHANNEL + 3));
+        addOutput(createOutput<PJ301MPort>(Vec(175, 74),  module, ChipPOKEY::OUTPUT_CHANNEL + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(175, 159), module, ChipPOKEY::OUTPUT_CHANNEL + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(175, 244), module, ChipPOKEY::OUTPUT_CHANNEL + 2));
+        addOutput(createOutput<PJ301MPort>(Vec(175, 329), module, ChipPOKEY::OUTPUT_CHANNEL + 3));
     }
 };
 

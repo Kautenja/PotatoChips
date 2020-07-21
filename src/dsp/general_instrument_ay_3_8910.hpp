@@ -22,7 +22,13 @@
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
 
-/// General Instrument AY-3-8910 sound chip emulator.
+/// @brief General Instrument AY-3-8910 sound chip emulator.
+/// @details
+/// Emulation inaccuracies:
+/// -   Noise isn't run when not in use
+/// -   Changes to envelope and noise periods are delayed until next reload
+/// -   Super-sonic tone should attenuate output to about 60%, not 50%
+///
 class GeneralInstrumentAy_3_8910 {
  public:
     /// the number of oscillators on the chip
@@ -35,6 +41,40 @@ class GeneralInstrumentAy_3_8910 {
  private:
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
+    /// Tones above this frequency are treated as disabled tone at half volume.
+    /// Power of two is more efficient (avoids division).
+    static constexpr unsigned INAUDIBLE_FREQ = 16384;
+
+    /// With channels tied together and 1K resistor to ground (as datasheet
+    /// recommends), output nearly matches logarithmic curve as claimed. Approx.
+    /// 1.5 dB per step.
+    static constexpr uint8_t AMP_TABLE[16] = {
+    #define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
+        ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
+        ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
+        ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
+        ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
+    #undef ENTRY
+    };
+
+    /// TODO:
+    static constexpr uint8_t MODES[8] = {
+    #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
+        MODE(1,0, 1,0, 1,0),
+        MODE(1,0, 0,0, 0,0),
+        MODE(1,0, 0,1, 1,0),
+        MODE(1,0, 1,1, 1,1),
+        MODE(0,1, 0,1, 0,1),
+        MODE(0,1, 1,1, 1,1),
+        MODE(0,1, 1,0, 0,1),
+        MODE(0,1, 0,0, 0,0),
+    #undef MODE
+    };
+
+    /// the noise off flag bit
+    static constexpr int NOISE_OFF = 0x08;
+    /// the tone off flag bit
+    static constexpr int TONE_OFF  = 0x01;
 
     /// the oscillator type on the chip for the 5 channels
     struct osc_t {

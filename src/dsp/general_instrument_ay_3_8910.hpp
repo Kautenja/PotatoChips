@@ -29,89 +29,143 @@ class GeneralInstrumentAy_3_8910 {
     enum { OSC_COUNT = 3 };
     /// the number of registers on the chip
     enum { REG_COUNT = 16 };
-    /// TODO:
+    /// the range of the amplifier on the chip
     enum { AMP_RANGE = 255 };
-    /// TODO:
-    BLIPSynth<blip_good_quality, 1> synth_;
 
  private:
     /// TODO:
+    static constexpr int PERIOD_FACTOR = 16;
+
+    /// the oscillator type on the chip for the 5 channels
     struct osc_t {
-        /// TODO:
+        /// the period of the oscillator
         blip_time_t period;
         /// TODO:
         blip_time_t delay;
-        /// TODO:
+        /// the value of the last output from the oscillator
         short last_amp;
-        /// TODO:
+        /// the current phase of the oscillator
         short phase;
-        /// TODO:
+        /// the buffer the oscillator writes samples to
         BLIPBuffer* output;
     } oscs[OSC_COUNT];
-    /// TODO:
+    /// the synthesizer shared by the 5 oscillator channels
+    BLIPSynth<blip_good_quality, 1> synth;
+    /// the last time the oscillators were updated
     blip_time_t last_time;
-    /// TODO:
+    /// the registers on teh chip
     uint8_t regs[REG_COUNT];
 
     /// TODO:
     struct {
+        /// TODO:
         blip_time_t delay;
+        /// TODO:
         blargg_ulong lfsr;
     } noise;
 
     /// TODO:
     struct {
+        /// TODO:
         blip_time_t delay;
+        /// TODO:
         uint8_t const* wave;
+        /// TODO:
         int pos;
-        uint8_t modes[8][48]; // values already passed through volume table
+        /// values already passed through volume table
+        uint8_t modes[8][48];
     } env;
 
-    /// TODO:
+    /// Write to the data port.
+    ///
+    /// @param addr the address to write the data to
+    /// @param data the data to write to the given address
+    ///
     void write_data_(int addr, int data);
 
-    /// TODO:
+    /// Run the oscillators until the given end time.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
     void run_until(blip_time_t);
 
  public:
+    /// Initialize a new General Instrument AY-3-8910.
     GeneralInstrumentAy_3_8910();
 
-    // Set overall volume (default is 1.0)
-    inline void volume(double v) { synth_.volume(0.7 / OSC_COUNT / AMP_RANGE * v); }
-
-    // Set treble equalization (see documentation)
-    inline void treble_eq(blip_eq_t const& eq) { synth_.treble_eq(eq); }
-
-    // Set sound output of specific oscillator to buffer, where index is
-    // 0, 1, or 2. If buffer is NULL, the specified oscillator is muted.
-    inline void osc_output(int i, BLIPBuffer* buf) {
-        assert((unsigned) i < OSC_COUNT);
-        oscs[i].output = buf;
+    /// Set overall volume of all oscillators, where 1.0 is full volume
+    ///
+    /// @param level the value to set the volume to
+    ///
+    inline void volume(double v) {
+        synth.volume(0.7 / OSC_COUNT / AMP_RANGE * v);
     }
 
-    // Set buffer to generate all sound into, or disable sound if NULL
-    inline void output(BLIPBuffer* buf) {
-        osc_output(0, buf);
-        osc_output(1, buf);
-        osc_output(2, buf);
+    /// Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    inline void treble_eq(blip_eq_t const& eq) {
+        synth.treble_eq(eq);
     }
 
-    // Reset sound chip
-    void reset();
+    /// Assign single oscillator output to buffer. If buffer is NULL, silences
+    /// the given oscillator.
+    ///
+    /// @param index the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    ///
+    inline void set_output(int index, BLIPBuffer* buffer) {
+        assert((unsigned) index < OSC_COUNT);
+        oscs[index].output = buffer;
+    }
 
-    // Write to register at specified time
-    inline void write(blip_time_t time, int addr, int data) {
-        run_until(time);
+    /// Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+    }
+
+    /// Reset oscillators and internal state.
+    inline void reset() {
+        last_time   = 0;
+        noise.delay = 0;
+        noise.lfsr  = 1;
+
+        osc_t* osc = &oscs[OSC_COUNT];
+        do {
+            osc--;
+            osc->period   = PERIOD_FACTOR;
+            osc->delay    = 0;
+            osc->last_amp = 0;
+            osc->phase    = 0;
+        } while (osc != oscs);
+
+        for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
+        regs[7] = 0xFF;
+        write_data_(13, 0);
+    }
+
+    /// Write to the data port.
+    ///
+    /// @param data the byte to write to the data port
+    ///
+    inline void write(int addr, int data) {
+        run_until(0);
         write_data_(addr, data);
     }
 
-    // Run sound to specified time, end current time frame, then start a new
-    // time frame at time 0. Time frames have no effect on emulation and each
-    // can be whatever length is convenient.
+    /// Run all oscillators up to specified time, end current frame, then
+    /// start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
     inline void end_frame(blip_time_t time) {
-        if (time > last_time)
-            run_until(time);
-
+        if (time > last_time) run_until(time);
         assert(last_time >= time);
         last_time -= time;
     }

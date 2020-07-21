@@ -53,9 +53,6 @@ struct ChipPOKEY : Module {
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr;
-
     /// Initialize a new POKEY Chip module.
     ChipPOKEY() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -72,85 +69,36 @@ struct ChipPOKEY : Module {
         apu.set_volume(3.f);
     }
 
-    // /// Process pulse wave for given channel.
-    // ///
-    // /// @param channel the channel to process the pulse wave for
-    // ///
-    // void channel_pulse(int channel) {
-    //     // the minimal value for the frequency register to produce sound
-    //     static constexpr float FREQ11BIT_MIN = 8;
-    //     // the maximal value for the frequency register
-    //     static constexpr float FREQ11BIT_MAX = 1023;
-    //     // the clock division of the oscillator relative to the CPU
-    //     static constexpr auto CLOCK_DIVISION = 16;
-    //     // the constant modulation factor
-    //     static constexpr auto MOD_FACTOR = 10.f;
-    //     // get the pitch from the parameter and control voltage
-    //     float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT + channel].getVoltage();
-    //     // convert the pitch to frequency based on standard exponential scale
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     // convert the frequency to an 11-bit value
-    //     freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-    //     uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-    //     // write the frequency to the low and high registers
-    //     // - there are 4 registers per pulse channel, multiply channel by 4 to
-    //     //   produce an offset between registers based on channel index
-    //     apu.write_register(0, PULSE0_LO + 4 * channel, freq11bit & 0b11111111);
-    //     apu.write_register(0, PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
-    //     // set the pulse width of the pulse wave (high 2 bits) and set the
-    //     // volume to a constant level
-    //     auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-    //     apu.write_register(0, PULSE0_VOL + 4 * channel, pw + 0b00011111);
-    // }
+    /// Process pulse wave for given channel.
+    ///
+    /// @param channel the channel to process the pulse wave for
+    ///
+    void channel(int channel) {
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ8BIT_MIN = 0;
+        // the maximal value for the frequency register
+        static constexpr float FREQ8BIT_MAX = 0xFF;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 16;
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to an 8-bit value
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        uint8_t freq8bit = rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
+        // - there are 2 registers per channel, multiply first channel by 2 to
+        //   produce an offset between registers based on channel index
+        apu.write(AtariPOKEY::AUDF1 + 2 * channel, freq8bit);
 
-    // /// Process triangle wave (channel 2).
-    // void channel_triangle() {
-    //     // the minimal value for the frequency register to produce sound
-    //     static constexpr float FREQ11BIT_MIN = 2;
-    //     // the maximal value for the frequency register
-    //     static constexpr float FREQ11BIT_MAX = 2047;
-    //     // the clock division of the oscillator relative to the CPU
-    //     static constexpr auto CLOCK_DIVISION = 32;
-    //     // the constant modulation factor
-    //     static constexpr auto MOD_FACTOR = 10.f;
-    //     // get the pitch from the parameter and control voltage
-    //     float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT + 2].getVoltage();
-    //     // convert the pitch to frequency based on standard exponential scale
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     // convert the frequency to an 11-bit value
-    //     freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-    //     uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-    //     // write the frequency to the low and high registers
-    //     apu.write_register(0, TRI_LO, freq11bit & 0b11111111);
-    //     apu.write_register(0, TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
-    //     // write the linear register to enable the oscillator
-    //     apu.write_register(0, TRI_LINEAR, 0b01111111);
-    // }
-
-    // /// Process noise (channel 3).
-    // void channel_noise() {
-    //     // the minimal value for the frequency register to produce sound
-    //     static constexpr float FREQ_MIN = 0;
-    //     // the maximal value for the frequency register
-    //     static constexpr float FREQ_MAX = 15;
-    //     // get the pitch / frequency of the oscillator
-    //     auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
-    //     auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
-    //     // convert the pitch to frequency based on standard exponential scale
-    //     auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-    //     freq += params[PARAM_FREQ + 3].getValue();
-    //     uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-    //     apu.write_register(0, NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
-    //     apu.write_register(0, NOISE_HI, 0);
-    //     // set the volume to a constant level
-    //     apu.write_register(0, NOISE_VOL, 0b00011111);
-    // }
+        // auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
+        // apu.write(AUDC1 + 2 * channel, pw + 0b00011111);
+    }
 
     /// Return a 10V signed sample from the APU.
     ///
@@ -177,16 +125,9 @@ struct ChipPOKEY : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // if (cvDivider.process()) {  // process the CV inputs to the chip
-        //     lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-        //     // process the data on the chip
-        //     channel_pulse(0);
-        //     channel_pulse(1);
-        //     channel_triangle();
-        //     channel_noise();
-        //     // enable all four channels
-        //     apu.write_register(0, SND_CHN, 0b00001111);
-        // }
+        if (cvDivider.process()) {  // process the CV inputs to the chip
+            for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) channel(i);
+        }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++)

@@ -392,7 +392,7 @@ class AtariPOKEY {
     /// @param addr the address to write the data to
     /// @param data the data to write to the given address
     ///
-    inline void write_data(unsigned addr, int data) {
+    inline void write(unsigned addr, int data) {
         run_until(0);
         int i = (addr ^ 0xD200) >> 1;
         if (i < OSC_COUNT) {

@@ -16,7 +16,7 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#include "nintendo_gameboy_apu.hpp"
+#include "nintendo_gameboy.hpp"
 #include <cstring>
 
 void Gb_Osc::reset() {

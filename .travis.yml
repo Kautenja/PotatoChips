@@ -50,7 +50,7 @@ env:
 install:
   - mkdir -p "${HOME}"/Rack
   - pushd "${HOME}"/Rack
-  - curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-1.1.4.zip
+  - curl -o Rack-SDK.zip https://vcvrack.com/downloads/Rack-SDK-1.1.6.zip
   - unzip Rack-SDK.zip
   - popd
 script:

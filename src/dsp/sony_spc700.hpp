@@ -1,4 +1,4 @@
-// Super Nintendo (SNES) SPC DSP emulator
+// Sony SPC700 DSP emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,10 +21,11 @@
 
 #include "blargg_common.h"
 
-class Spc_Dsp {
+/// Sony SPC700 DSP emulator.
+class SPC700 {
  public:
     // Keeps pointer to 64K ram
-    Spc_Dsp(uint8_t* ram);
+    SPC700(uint8_t* ram);
 
     // Mute voice n if bit n (1 << n) of mask is clear.
     enum { voice_count = 8 };
@@ -151,11 +152,11 @@ private:
     int clock_envelope(int);
 };
 
-inline void Spc_Dsp::disable_surround(bool disable) { surround_threshold = disable ? 0 : -0x7FFF; }
+inline void SPC700::disable_surround(bool disable) { surround_threshold = disable ? 0 : -0x7FFF; }
 
-inline void Spc_Dsp::set_gain(double v) { emu_gain = (int) (v * (1 << emu_gain_bits)); }
+inline void SPC700::set_gain(double v) { emu_gain = (int) (v * (1 << emu_gain_bits)); }
 
-inline int Spc_Dsp::read(int i)
+inline int SPC700::read(int i)
 {
     assert((unsigned) i < register_count);
     return reg [i];

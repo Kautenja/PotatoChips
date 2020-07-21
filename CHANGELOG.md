@@ -55,3 +55,11 @@
 ### 1.3.5 (2020-07-17)
 
 -   refactor BLIPBuffer to be more C++17-ish and CPU friendly
+
+### 1.4.0 (2020-07-18)
+
+-   Texas Instruments SN76489 from Sega Master System
+
+### 1.4.1 (2020-07-20)
+
+-   fix issue where CV controlled SN76489 VCA wouldn't return to 0

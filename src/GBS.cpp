@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/nintendo_gameboy_apu.hpp"
+#include "dsp/nintendo_gameboy.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/konami_vrc6_apu.hpp"
+#include "dsp/konami_vrc6.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

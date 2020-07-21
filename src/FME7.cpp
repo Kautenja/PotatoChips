@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "dsp/sunsoft_fme7_apu.hpp"
+#include "dsp/sunsoft_fme7.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

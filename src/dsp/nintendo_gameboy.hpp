@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_NINTENDO_GAMEBOY_APU_HPP_
-#define DSP_NINTENDO_GAMEBOY_APU_HPP_
+#ifndef DSP_NINTENDO_GAMEBOY_HPP_
+#define DSP_NINTENDO_GAMEBOY_HPP_
 
 #include "nintendo_gameboy_oscillators.hpp"
 #include <algorithm>
@@ -378,4 +378,4 @@ class Gb_Apu {
     void write_osc(int index, int reg, int data);
 };
 
-#endif  // DSP_NINTENDO_GAMEBOY_APU_HPP_
+#endif  // DSP_NINTENDO_GAMEBOY_HPP_

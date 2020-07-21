@@ -35,6 +35,8 @@ extern rack::Model *modelChipVRC6;
 extern rack::Model *modelChipFME7;
 // the global instance of each the 106 module
 extern rack::Model *modelChip106;
+// the global instance of each the SN76489 module
+extern rack::Model *modelChipSN76489;
 // the global instance of each the GBS module
 extern rack::Model *modelChipGBS;
 

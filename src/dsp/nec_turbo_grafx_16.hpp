@@ -1,4 +1,4 @@
-// Turbo Grafx 16 (PC Engine) PSG sound chip emulator
+// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -22,11 +22,10 @@
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
 
-struct Hes_Osc
-{
-    unsigned char wave [32];
-    short volume [2];
-    int last_amp [2];
+struct NECTurboGrafx16_Oscillator {
+    unsigned char wave[32];
+    short volume[2];
+    int last_amp[2];
     int delay;
     int period;
     unsigned char noise;
@@ -35,8 +34,8 @@ struct Hes_Osc
     unsigned char dac;
     blip_time_t last_time;
 
-    BLIPBuffer* outputs [2];
-    BLIPBuffer* chans [3];
+    BLIPBuffer* outputs[2];
+    BLIPBuffer* chans[3];
     unsigned noise_lfsr;
     unsigned char control;
 
@@ -46,36 +45,84 @@ struct Hes_Osc
     void run_until(synth_t& synth, blip_time_t);
 };
 
-class Hes_Apu {
-public:
-    void treble_eq(blip_eq_t const&);
-    void volume(double);
+/// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
+class NECTurboGrafx16 {
+ public:
+    /// TODO:
+    static constexpr int OSC_COUNT = 6;
+    /// TODO:
+    static constexpr int ADDR_START = 0x0800;
+    /// TODO:
+    static constexpr int ADDR_END   = 0x0809;
 
-    enum { osc_count = 6 };
+    /// Initialize a new Turbo Grafx 16 chip.
+    NECTurboGrafx16();
+
+    /// Set overall volume of all oscillators, where 1.0 is full volume
+    ///
+    /// @param level the value to set the volume to
+    ///
+    inline void volume(double level) {
+        synth.volume(1.8 / OSC_COUNT / NECTurboGrafx16_Oscillator::amp_range * level);
+    }
+
+    /// Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    inline void treble_eq(blip_eq_t const& equalizer) {
+        synth.treble_eq(equalizer);
+    }
+
+    /// Assign single oscillator output to buffer. If buffer is NULL, silences
+    /// the given oscillator.
+    ///
+    /// @param index the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    ///
     void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right);
 
+    /// Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the all the voices to
+    ///
+    // inline void set_output(BLIPBuffer* buffer) {
+    //     for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+    // }
+
+    /// Reset oscillators and internal state.
     void reset();
 
-    enum { start_addr = 0x0800 };
-    enum { end_addr   = 0x0809 };
-    void write_data(blip_time_t, int addr, int data);
+    /// Write to the data port.
+    ///
+    /// @param data the byte to write to the data port
+    ///
+    void write_data(int addr, int data);
 
+    /// Run all oscillators up to specified time, end current frame, then
+    /// start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
     void end_frame(blip_time_t);
 
-public:
-    Hes_Apu();
-private:
-    Hes_Osc oscs [osc_count];
+ private:
+    /// TODO:
+    NECTurboGrafx16_Oscillator oscs[OSC_COUNT];
+    /// TODO:
     int latch;
+    /// TODO:
     int balance;
-    Hes_Osc::synth_t synth;
+    /// TODO:
+    NECTurboGrafx16_Oscillator::synth_t synth;
 
-    void balance_changed(Hes_Osc&);
+    /// TODO:
+    void balance_changed(NECTurboGrafx16_Oscillator&);
+
+    /// TODO:
     void recalc_chans();
 };
-
-inline void Hes_Apu::volume(double v) { synth.volume(1.8 / osc_count / Hes_Osc::amp_range * v); }
-
-inline void Hes_Apu::treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
 
 #endif  // DSP_NEC_TURBO_GRAFX_16_HPP_

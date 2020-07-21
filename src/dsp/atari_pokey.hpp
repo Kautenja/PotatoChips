@@ -1,4 +1,4 @@
-// Atari POKEY sound chip emulator
+// Atari POKEY sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -50,8 +50,7 @@ inline blargg_ulong run_poly5(blargg_ulong in, int shift) {
 #define POLY_MASK(width, tap1, tap2) \
     ((1UL << (width - 1 - tap1)) | (1UL << (width - 1 - tap2)))
 
-class AtariPOKEYEngine;
-
+/// Atari POKEY sound chip emulator.
 class AtariPOKEY {
  public:
     /// the number of oscillators on the chip
@@ -61,65 +60,52 @@ class AtariPOKEY {
     /// the end address of the RAM on the chip
     enum { ADDR_END   = 0xD209 };
 
- public:
-    /// Initialize a new Atari POKEY chip emulator.
-    AtariPOKEY() : impl(0) { set_output(0); }
-
     /// TODO:
-    inline void osc_output(int index, BLIPBuffer* buffer) {
-        assert((unsigned) index < OSC_COUNT);
-        oscs[index].output = buffer;
-    }
-
-    /// Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
-    ///
-    /// @param buffer the BLIPBuffer to output the all the voices to
-    ///
-    inline void set_output(BLIPBuffer* buffer) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buffer);
-    }
-
+    enum { poly4_len  = (1L <<  4) - 1 };
     /// TODO:
-    inline void reset(AtariPOKEYEngine* new_impl) {
-        impl = new_impl;
-        last_time = 0;
-        poly5_pos = 0;
-        poly4_pos = 0;
-        polym_pos = 0;
-        control = 0;
-        for (int i = 0; i < OSC_COUNT; i++)
-            memset(&oscs[i], 0, offsetof(osc_t, output));
-    }
-
+    enum { poly9_len  = (1L <<  9) - 1 };
     /// TODO:
-    inline void write_data(unsigned addr, int data) {
-        run_until(0);
-        int i = (addr ^ 0xD200) >> 1;
-        if (i < OSC_COUNT) {
-            oscs[i].regs[addr & 1] = data;
-        } else if (addr == 0xD208) {
-            control = data;
-        } else if (addr == 0xD209) {
-            oscs[0].delay = 0;
-            oscs[1].delay = 0;
-            oscs[2].delay = 0;
-            oscs[3].delay = 0;
+    enum { poly17_len = (1L << 17) - 1 };
+
+    /// Common tables and BLIPSynth that can be shared among AtariPOKEY objects.
+    class AtariPOKEYEngine {
+     public:
+        /// TODO:
+        BLIPSynth<blip_good_quality, 1> synth;
+
+        /// TODO:
+        AtariPOKEYEngine() {
+            gen_poly(POLY_MASK( 4, 1, 0), sizeof poly4,  poly4 );
+            gen_poly(POLY_MASK( 9, 5, 0), sizeof poly9,  poly9 );
+            gen_poly(POLY_MASK(17, 5, 0), sizeof poly17, poly17);
+
+            if (0) {  // comment out to recalculate poly5 constant
+                uint8_t poly5[4];
+                gen_poly(POLY_MASK( 5, 2, 0), sizeof poly5,  poly5 );
+                blargg_ulong n = poly5[3] * 0x1000000L + poly5[2] * 0x10000L +
+                        poly5[1] * 0x100L + poly5[0];
+                blargg_ulong rev = n & 1;
+                for (int i = 1; i < poly5_len; i++)
+                    rev |= (n >> i & 1) << (poly5_len - i);
+            }
         }
-        /*
-        // TODO: are polynomials reset in this case?
-        else if (addr == 0xD20F) {
-            if ((data & 3) == 0)
-                polym_pos = 0;
-        }
-        */
-    }
 
-    /// TODO:
-    inline void end_frame(blip_time_t end_time) {
-        if (end_time > last_time) run_until(end_time);
-        last_time -= end_time;
-    }
+        /// TODO:
+        inline void volume(double d) {
+            synth.volume(1.0 / OSC_COUNT / 30 * d);
+        }
+
+     private:
+        /// TODO:
+        uint8_t poly4[poly4_len  / 8 + 1];
+        /// TODO:
+        uint8_t poly9[poly9_len  / 8 + 1];
+        /// TODO:
+        uint8_t poly17[poly17_len / 8 + 1];
+
+        /// TODO:
+        friend class AtariPOKEY;
+    };
 
  private:
     /// pure waves above this frequency are silenced
@@ -183,57 +169,235 @@ class AtariPOKEY {
     }
 
     /// TODO:
-    void run_until(blip_time_t);
+    void run_until(blip_time_t end_time) {
+        calc_periods();
+        // cache
+        AtariPOKEYEngine* const impl = this->impl;
 
-    /// TODO:
-    enum { poly4_len  = (1L <<  4) - 1 };
-    /// TODO:
-    enum { poly9_len  = (1L <<  9) - 1 };
-    /// TODO:
-    enum { poly17_len = (1L << 17) - 1 };
+        // 17/9-bit poly selection
+        uint8_t const* polym = impl->poly17;
+        int polym_len = poly17_len;
+        if (this->control & 0x80) {
+            polym_len = poly9_len;
+            polym = impl->poly9;
+        }
+        polym_pos %= polym_len;
+
+        for (int i = 0; i < OSC_COUNT; i++) {
+            osc_t* const osc = &oscs[i];
+            blip_time_t time = last_time + osc->delay;
+            blip_time_t const period = osc->period;
+
+            // output
+            BLIPBuffer* output = osc->output;
+            if (output) {
+                int const osc_control = osc->regs[1]; // cache
+                int volume = (osc_control & 0x0F) * 2;
+                if (!volume || osc_control & 0x10 || // silent, DAC mode, or inaudible frequency
+                        ((osc_control & 0xA0) == 0xA0 && period < 1789773 / 2 / MAX_FREQUENCY)) {
+                    if (!(osc_control & 0x10))
+                        volume >>= 1; // inaudible frequency = half volume
+
+                    int delta = volume - osc->last_amp;
+                    if (delta) {
+                        osc->last_amp = volume;
+                        impl->synth.offset(last_time, delta, output);
+                    }
+
+                    // TODO: doesn't maintain high pass flip-flop (very minor issue)
+                } else {
+                    // high pass
+                    static uint8_t const hipass_bits[OSC_COUNT] = { 1 << 2, 1 << 1, 0, 0 };
+                    blip_time_t period2 = 0; // unused if no high pass
+                    blip_time_t time2 = end_time;
+                    if (this->control & hipass_bits[i]) {
+                        period2 = osc[2].period;
+                        time2 = last_time + osc[2].delay;
+                        if (osc->invert) {
+                            // trick inner wave loop into inverting output
+                            osc->last_amp -= volume;
+                            volume = -volume;
+                        }
+                    }
+
+                    if (time < end_time || time2 < end_time) {
+                        // poly source
+                        static uint8_t const poly1[] = { 0x55, 0x55 }; // square wave
+                        uint8_t const* poly = poly1;
+                        int poly_len = 8 * sizeof poly1; // can be just 2 bits, but this is faster
+                        int poly_pos = osc->phase & 1;
+                        int poly_inc = 1;
+                        if (!(osc_control & 0x20)) {
+                            poly     = polym;
+                            poly_len = polym_len;
+                            poly_pos = polym_pos;
+                            if (osc_control & 0x40) {
+                                poly     = impl->poly4;
+                                poly_len = poly4_len;
+                                poly_pos = poly4_pos;
+                            }
+                            poly_inc = period % poly_len;
+                            poly_pos = (poly_pos + osc->delay) % poly_len;
+                        }
+                        poly_inc -= poly_len; // allows more optimized inner loop below
+
+                        // square/poly5 wave
+                        blargg_ulong wave = poly5;
+                        assert(poly5 & 1); // low bit is set for pure wave
+                        int poly5_inc = 0;
+                        if (!(osc_control & 0x80)) {
+                            wave = run_poly5(wave, (osc->delay + poly5_pos) % poly5_len);
+                            poly5_inc = period % poly5_len;
+                        }
+
+                        // Run wave and high pass interleved with each catching up to the other.
+                        // Disabled high pass has no performance effect since inner wave loop
+                        // makes no compromise for high pass, and only runs once in that case.
+                        int osc_last_amp = osc->last_amp;
+                        do {
+                            // run high pass
+                            if (time2 < time) {
+                                int delta = -osc_last_amp;
+                                if (volume < 0)
+                                    delta += volume;
+                                if (delta) {
+                                    osc_last_amp += delta - volume;
+                                    volume = -volume;
+                                    impl->synth.offset(time2, delta, output);
+                                }
+                            }
+                            // must advance *past* time to avoid hang
+                            while (time2 <= time) time2 += period2;
+                            // run wave
+                            blip_time_t end = end_time;
+                            if (end > time2) end = time2;
+                            while (time < end) {
+                                if (wave & 1) {
+                                    int amp = volume & -(poly[poly_pos >> 3] >> (poly_pos & 7) & 1);
+                                    if ((poly_pos += poly_inc) < 0)
+                                        poly_pos += poly_len;
+                                    int delta = amp - osc_last_amp;
+                                    if (delta) {
+                                        osc_last_amp = amp;
+                                        impl->synth.offset(time, delta, output);
+                                    }
+                                }
+                                wave = run_poly5(wave, poly5_inc);
+                                time += period;
+                            }
+                        } while (time < end_time || time2 < end_time);
+
+                        osc->phase = poly_pos;
+                        osc->last_amp = osc_last_amp;
+                    }
+
+                    osc->invert = 0;
+                    if (volume < 0) {
+                        // undo inversion trickery
+                        osc->last_amp -= volume;
+                        osc->invert = 1;
+                    }
+                }
+            }
+
+            // maintain divider
+            blip_time_t remain = end_time - time;
+            if (remain > 0) {
+                blargg_long count = (remain + period - 1) / period;
+                osc->phase ^= count;
+                time += count * period;
+            }
+            osc->delay = time - end_time;
+        }
+
+        // advance polies
+        blip_time_t duration = end_time - last_time;
+        last_time = end_time;
+        poly4_pos = (poly4_pos + duration) % poly4_len;
+        poly5_pos = (poly5_pos + duration) % poly5_len;
+        // will get %'d on next call
+        polym_pos += duration;
+    }
 
     /// TODO:
     friend class AtariPOKEYEngine;
-};
 
-/// Common tables and BLIPSynth that can be shared among AtariPOKEY objects.
-class AtariPOKEYEngine {
  public:
-    /// TODO:
-    BLIPSynth<blip_good_quality, 1> synth;
+    /// Initialize a new Atari POKEY chip emulator.
+    AtariPOKEY() : impl(0) { set_output(0); }
 
-    /// TODO:
-    AtariPOKEYEngine() {
-        gen_poly(POLY_MASK( 4, 1, 0), sizeof poly4,  poly4 );
-        gen_poly(POLY_MASK( 9, 5, 0), sizeof poly9,  poly9 );
-        gen_poly(POLY_MASK(17, 5, 0), sizeof poly17, poly17);
+    /// Assign single oscillator output to buffer. If buffer is NULL, silences
+    /// the given oscillator.
+    ///
+    /// @param index the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    ///
+    inline void set_output(int index, BLIPBuffer* buffer) {
+        assert((unsigned) index < OSC_COUNT);
+        oscs[index].output = buffer;
+    }
 
-        if (0) {  // comment out to recalculate poly5 constant
-            uint8_t poly5[4];
-            gen_poly(POLY_MASK( 5, 2, 0), sizeof poly5,  poly5 );
-            blargg_ulong n = poly5[3] * 0x1000000L + poly5[2] * 0x10000L +
-                    poly5[1] * 0x100L + poly5[0];
-            blargg_ulong rev = n & 1;
-            for (int i = 1; i < poly5_len; i++)
-                rev |= (n >> i & 1) << (poly5_len - i);
+    /// Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+    }
+
+    /// Reset oscillators and internal state.
+    ///
+    /// @param new_impl TODO:
+    ///
+    inline void reset(AtariPOKEYEngine* new_impl) {
+        impl = new_impl;
+        last_time = 0;
+        poly5_pos = 0;
+        poly4_pos = 0;
+        polym_pos = 0;
+        control = 0;
+        for (int i = 0; i < OSC_COUNT; i++)
+            memset(&oscs[i], 0, offsetof(osc_t, output));
+    }
+
+    /// Write to the data port.
+    ///
+    /// @param addr the address to write the data to
+    /// @param data the data to write to the given address
+    ///
+    inline void write_data(unsigned addr, int data) {
+        run_until(0);
+        int i = (addr ^ 0xD200) >> 1;
+        if (i < OSC_COUNT) {
+            oscs[i].regs[addr & 1] = data;
+        } else if (addr == 0xD208) {
+            control = data;
+        } else if (addr == 0xD209) {
+            oscs[0].delay = 0;
+            oscs[1].delay = 0;
+            oscs[2].delay = 0;
+            oscs[3].delay = 0;
         }
+        /*
+        // TODO: are polynomials reset in this case?
+        else if (addr == 0xD20F) {
+            if ((data & 3) == 0)
+                polym_pos = 0;
+        }
+        */
     }
 
-    /// TODO:
-    inline void volume(double d) {
-        synth.volume(1.0 / AtariPOKEY::OSC_COUNT / 30 * d);
+    /// Run all oscillators up to specified time, end current frame, then
+    /// start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    inline void end_frame(blip_time_t end_time) {
+        if (end_time > last_time) run_until(end_time);
+        last_time -= end_time;
     }
-
- private:
-    /// TODO:
-    uint8_t poly4[AtariPOKEY::poly4_len  / 8 + 1];
-    /// TODO:
-    uint8_t poly9[AtariPOKEY::poly9_len  / 8 + 1];
-    /// TODO:
-    uint8_t poly17[AtariPOKEY::poly17_len / 8 + 1];
-
-    /// TODO:
-    friend class AtariPOKEY;
 };
 
 #endif  // DSP_ATARI_POKEY_HPP_

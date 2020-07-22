@@ -68,8 +68,6 @@ struct ChipTurboGrafx16 : Module {
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
-    // a clock divider for running LED updates slower than audio rate
-    dsp::ClockDivider lightsDivider;
 
     /// the bit-depth of the wave-table
     static constexpr auto bit_depth = 15;
@@ -105,13 +103,12 @@ struct ChipTurboGrafx16 : Module {
         configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
         cvDivider.setDivision(16);
-        lightsDivider.setDivision(128);
         // set the output buffer for each individual voice
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
             auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
-            configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
+            configParam(PARAM_VOLUME + i, 0, 31, 31, descVol,  "%", 0, 100.f / 31.f);
             apu.set_output(i, &buf[i], &buf[i], &buf[i]);
         }
         // set the wave-forms to the default values
@@ -119,13 +116,19 @@ struct ChipTurboGrafx16 : Module {
             memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
+
+
+
+        // TODO: move
+        for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
             // select channel 0
-            apu.write(0x0800, 0);
+            apu.write(0x0800, i);
             // clear to write wave data
             apu.write(0x0804, 0b00000000);
             // write the wave-table
             for (int i = 0; i < num_samples / 2; i++)
                 apu.write(0x0806, values[0][i]);
+        }
     }
 
     // /// Return the active channels parameter.
@@ -181,26 +184,26 @@ struct ChipTurboGrafx16 : Module {
         return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
-    // /// Return the volume parameter for the given channel.
-    // ///
-    // /// @param channel the channel to get the volume parameter for
-    // /// @returns the volume parameter for the given channel. This includes
-    // /// the value of the knob and any CV modulation.
-    // ///
-    // inline uint8_t getVolume(uint8_t channel) {
-    //     // the minimal value for the volume width register
-    //     static constexpr float VOLUME_MIN = 0;
-    //     // the maximal value for the volume width register
-    //     static constexpr float VOLUME_MAX = 15;
-    //     // get the volume from the parameter knob
-    //     auto levelParam = params[PARAM_VOLUME + channel].getValue();
-    //     // apply the control voltage to the volume
-    //     static constexpr float FM_SCALE = 0.5f;
-    //     if (inputs[INPUT_VOLUME + channel].isConnected())
-    //         levelParam *= FM_SCALE * inputs[INPUT_VOLUME + channel].getVoltage();
-    //     // get the 8-bit volume clamped within legal limits
-    //     return rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
-    // }
+    /// Return the volume parameter for the given channel.
+    ///
+    /// @param channel the channel to get the volume parameter for
+    /// @returns the volume parameter for the given channel. This includes
+    /// the value of the knob and any CV modulation.
+    ///
+    inline uint8_t getVolume(uint8_t channel) {
+        // the minimal value for the volume width register
+        static constexpr float VOLUME_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float VOLUME_MAX = 31;
+        // get the volume from the parameter knob
+        auto levelParam = params[PARAM_VOLUME + channel].getValue();
+        // apply the control voltage to the volume
+        static constexpr float FM_SCALE = 0.5f;
+        if (inputs[INPUT_VOLUME + channel].isConnected())
+            levelParam *= FM_SCALE * inputs[INPUT_VOLUME + channel].getVoltage();
+        // get the 8-bit volume clamped within legal limits
+        return rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
+    }
 
     /// Return a 10V signed sample from the chip.
     ///
@@ -228,33 +231,26 @@ struct ChipTurboGrafx16 : Module {
             new_sample_rate = false;
         }
         if (cvDivider.process()) {
-            // // select channel 0
-            // apu.write(0x0800, 0);
-            // // clear to write wave data
-            // apu.write(0x0804, 0b01000000);
-            // // write the wave-table
-            // for (int i = 0; i < num_samples / 2; i++)
-            //     apu.write(0x0806, default_values[i]);
-
-            // select channel 0
-            apu.write(0x0800, 0);
-            // main amp
+            // set the main amplifier level
             apu.write(0x0801, 0b11111111);
-            // frequency lo
-            apu.write(0x0802, 0b1111);
-            // frequency hi
-            apu.write(0x0803, 0b11);
-            // channel level
-            apu.write(0x0804, 0b10011111);
-            // channel balance
-            apu.write(0x0805, 0b11111111);
-            // noise
-            // 0x0807
-            // LFO freq
-            // 0x0808
-            // LFO control
-            // 0x0809
-
+            // set the channel values
+            for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
+                // select the i'th channel
+                apu.write(0x0800, i);
+                // frequency
+                auto freq = getFrequency(i);
+                auto lo =  freq & 0b0000000011111111;
+                apu.write(0x0802, lo);
+                auto hi = (freq & 0b0000111100000000) >> 8;
+                apu.write(0x0803, hi);
+                // volume
+                auto volume = getVolume(i);
+                apu.write(0x0804, 0b10000000 | volume);
+                // balance
+                apu.write(0x0805, 0b11111111);
+                // noise
+                // apu.write(0x0807, 0b11111111);
+            }
 
             // // write the waveform data to the chip's RAM
             // auto wavetable = getWavetable();

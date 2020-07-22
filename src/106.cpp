@@ -240,8 +240,6 @@ struct Chip106 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         if (cvDivider.process()) {
             // write the waveform data to the chip's RAM
             auto wavetable = getWavetable();
@@ -272,7 +270,7 @@ struct Chip106 : Module {
                 setFrequency(i, num_channels);
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (int i = 0; i < Namco106::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
         // set the channel lights if the light divider is high

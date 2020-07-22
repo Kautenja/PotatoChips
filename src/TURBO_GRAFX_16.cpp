@@ -260,7 +260,7 @@ struct ChipTurboGrafx16 : Module {
             // int wavetable1 = ceil(wavetable);
             // // calculate floating point offset between the base and next table
             // float interpolate = wavetable - wavetable0;
-            // for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
+            // for (int i = 0; i < num_samples; i++) {  // iterate over nibbles
             //     apu.write_addr(i);
             //     // get the first waveform data
             //     auto nibbleHi0 = values[wavetable0][2 * i];

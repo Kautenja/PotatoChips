@@ -78,6 +78,7 @@ struct ChipAY_3_8910 : Module {
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        onSampleRateChange();
     }
 
     /// Return the frequency for the given channel.

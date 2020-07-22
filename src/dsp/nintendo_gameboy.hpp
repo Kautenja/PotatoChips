@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <cstring>
 
+// TODO: move into class definition
+
 /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
 enum GBS_Registers {
     // Pulse 0
@@ -56,6 +58,8 @@ enum GBS_Registers {
     // wave-table for wave channel
     WAVE_TABLE_VALUES                 = 0xFF30
 };
+
+// TODO: remove (use global wavetable header)
 
 /// the default values for the wave-table
 const uint8_t sine_wave[32] = {

@@ -31,9 +31,6 @@ struct ChipSN76489 : Module {
     /// the current noise period
     uint8_t noise_period = 0;
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
     /// The SN76489 instance to synthesize sound with
@@ -94,6 +91,7 @@ struct ChipSN76489 : Module {
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        onSampleRateChange();
     }
 
     /// Process pulse wave for given channel.
@@ -197,14 +195,6 @@ struct ChipSN76489 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {
-            // update the buffer for each channel
-            for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
@@ -230,7 +220,11 @@ struct ChipSN76489 : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        // update the buffer for each channel
+        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
 };
 
 // ---------------------------------------------------------------------------

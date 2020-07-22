@@ -22,9 +22,8 @@
 #include <cstring>
 
 /// the default values for the wave-table
-const uint8_t default_values[32] = {
-    0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-    0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
+const int8_t default_values[32] = {
+    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124
 };
 
 // ---------------------------------------------------------------------------
@@ -72,24 +71,24 @@ struct ChipSCC : Module {
     dsp::ClockDivider lightsDivider;
 
     /// the bit-depth of the wave-table
-    static constexpr auto bit_depth = 15;
+    static constexpr auto bit_depth = 255;
     /// the number of samples in the wave-table
     static constexpr auto num_samples = 32;
     /// the samples in the wave-table (1)
-    uint8_t values0[num_samples];
+    int8_t values0[num_samples];
     /// the samples in the wave-table (2)
-    uint8_t values1[num_samples];
+    int8_t values1[num_samples];
     /// the samples in the wave-table (3)
-    uint8_t values2[num_samples];
+    int8_t values2[num_samples];
     /// the samples in the wave-table (4)
-    uint8_t values3[num_samples];
+    int8_t values3[num_samples];
     /// the samples in the wave-table (5)
-    uint8_t values4[num_samples];
+    int8_t values4[num_samples];
 
     // the number of editors on the module
     static constexpr int num_wavetables = 5;
     /// the wave-tables to morph between
-    uint8_t* values[num_wavetables] = {
+    int8_t* values[num_wavetables] = {
         values0,
         values1,
         values2,
@@ -208,17 +207,6 @@ struct ChipSCC : Module {
             new_sample_rate = false;
         }
         if (cvDivider.process()) {
-            // frequency
-            for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
-                auto freq = getFrequency(i);
-                auto lo =  freq & 0b0000000011111111;
-                apu.write(KonamiSCC::FREQUENCY_CH_1_LO + 2 * i, lo);
-                auto hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(KonamiSCC::FREQUENCY_CH_1_HI + 2 * i, hi);
-                auto volume = getVolume(i);
-                apu.write(KonamiSCC::VOLUME_CH_1 + i, 0b0001000 | volume);
-            }
-
             // // write the waveform data to the chip's RAM
             // auto wavetable = getWavetable();
             // // calculate the address of the base waveform in the table
@@ -241,6 +229,17 @@ struct ChipSCC : Module {
             //     // combine the two nibbles into a byte for the RAM
             //     apu.write_data(0, (nibbleHi << 4) | nibbleLo);
             // }
+            // frequency
+            for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
+                auto freq = getFrequency(i);
+                auto lo =  freq & 0b0000000011111111;
+                apu.write(KonamiSCC::FREQUENCY_CH_1_LO + 2 * i, lo);
+                auto hi = (freq & 0b0000111100000000) >> 8;
+                apu.write(KonamiSCC::FREQUENCY_CH_1_HI + 2 * i, hi);
+                auto volume = getVolume(i);
+                apu.write(KonamiSCC::VOLUME_CH_1 + i, KonamiSCC::VOLUME_ON | volume);
+            }
+            apu.write(KonamiSCC::POWER, KonamiSCC::POWER_ALL_ON);
         }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
@@ -316,9 +315,8 @@ struct ChipSCCWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // if the module is displaying in/being rendered for the library, the
         // module will be null and a dummy waveform is displayed
-        static uint8_t library_values[ChipSCC::num_samples] = {
-            0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-            0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
+        static int8_t library_values[ChipSCC::num_samples] = {
+            0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124
         };
         auto module_ = reinterpret_cast<ChipSCC*>(this->module);
         // the fill colors for the wave-table editor lines
@@ -332,9 +330,9 @@ struct ChipSCCWidget : ModuleWidget {
         // add wave-table editors
         for (int i = 0; i < ChipSCC::num_wavetables; i++) {
             // get the wave-table buffer for this editor
-            uint8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
+            int8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
             // setup a table editor for the buffer
-            auto table_editor = new WaveTableEditor<uint8_t>(
+            auto table_editor = new WaveTableEditor<int8_t>(
                 wavetable,             // wave-table buffer
                 ChipSCC::num_samples,  // wave-table length
                 ChipSCC::bit_depth,    // waveform bit depth

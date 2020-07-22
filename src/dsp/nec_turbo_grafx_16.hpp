@@ -294,9 +294,10 @@ class NECTurboGrafx16 {
 
     /// Write to the data port.
     ///
+    /// @param addr the address to write the data to
     /// @param data the byte to write to the data port
     ///
-    void write_data(int addr, int data) {
+    void write(int addr, int data) {
         static constexpr auto time = 0;
         if (addr == 0x800) {
             latch = data & 7;

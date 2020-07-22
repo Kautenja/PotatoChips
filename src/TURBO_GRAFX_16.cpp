@@ -119,6 +119,13 @@ struct ChipTurboGrafx16 : Module {
             memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
+            // select channel 0
+            apu.write(0x0800, 0);
+            // clear to write wave data
+            apu.write(0x0804, 0b00000000);
+            // write the wave-table
+            for (int i = 0; i < num_samples / 2; i++)
+                apu.write(0x0806, values[0][i]);
     }
 
     // /// Return the active channels parameter.
@@ -147,34 +154,32 @@ struct ChipTurboGrafx16 : Module {
     //     return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
     // }
 
-    // /// Return the frequency parameter for the given channel.
-    // ///
-    // /// @param channel the channel to get the frequency parameter for
-    // /// @returns the frequency parameter for the given channel. This includes
-    // /// the value of the knob and any CV modulation.
-    // ///
-    // inline uint32_t getFrequency(uint8_t channel) {
-    //     // get the frequency of the oscillator from the parameter and CVs
-    //     float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-    //     pitch += inputs[INPUT_VOCT + channel].getVoltage();
-    //     float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-    //     static constexpr float FM_SCALE = 5.f;
-    //     freq += FM_SCALE * inputs[INPUT_FM + channel].getVoltage();
-    //     freq = rack::clamp(freq, 0.0f, 20000.0f);
-    //     // convert the frequency to the 8-bit value for the oscillator
-    //     static constexpr auto wave_length = 64 - (num_samples / 4);
-    //     // ignoring num_channels in the calculation allows the standard 103
-    //     // function where additional channels reduce the frequency of all
-    //     freq *= (wave_length * 15.f * 65536.f) / buf[0].get_clock_rate();
-    //     // clamp within the legal bounds for the frequency value
-    //     freq = rack::clamp(freq, 4.f, 262143.f);
-    //     // convert the frequency to a 32-bit value
-    //     auto freq18bit = static_cast<uint32_t>(freq);
-    //     // OR the waveform length into the high 6 bits of "frequency Hi"
-    //     // register, which is the third bite, i.e. shift left 2 + 16
-    //     freq18bit |= wave_length << 18;
-    //     return freq18bit;
-    // }
+    /// Return the frequency for the given channel.
+    ///
+    /// @param channel the index of the channel to get the frequency of
+    /// @returns the 12-bit frequency in a 16-bit container
+    ///
+    inline uint16_t getFrequency(int channel) {
+        // TODO update min max for Freq and Level
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ12BIT_MIN = 4;
+        // the maximal value for the frequency register
+        static constexpr float FREQ12BIT_MAX = 8191;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 32;
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to 12-bit
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+    }
 
     // /// Return the volume parameter for the given channel.
     // ///
@@ -195,35 +200,6 @@ struct ChipTurboGrafx16 : Module {
     //         levelParam *= FM_SCALE * inputs[INPUT_VOLUME + channel].getVoltage();
     //     // get the 8-bit volume clamped within legal limits
     //     return rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
-    // }
-
-    // /// Set the frequency for a given channel.
-    // ///
-    // /// @param channel the channel to set the frequency for
-    // /// @param channels the number of enabled channels in [1, 8]
-    // ///
-    // void setFrequency(uint8_t channel, uint8_t channels = 1) {
-    //     // extract the low, medium, and high frequency register values
-    //     auto freq = getFrequency(channel);
-    //     // FREQUENCY LOW
-    //     uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-    //     apu.write_addr(FREQ_LOW + REGS_PER_VOICE * channel);
-    //     apu.write_data(0, low);
-    //     // FREQUENCY MEDIUM
-    //     uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-    //     apu.write_addr(FREQ_MEDIUM + REGS_PER_VOICE * channel);
-    //     apu.write_data(0, med);
-    //     // WAVEFORM LENGTH + FREQUENCY HIGH
-    //     uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-    //     apu.write_addr(FREQ_HIGH + REGS_PER_VOICE * channel);
-    //     apu.write_data(0, hig);
-    //     // WAVE ADDRESS
-    //     apu.write_addr(WAVE_ADDRESS + REGS_PER_VOICE * channel);
-    //     apu.write_data(0, 0);
-    //     // VOLUME (and channel selection on channel 8, this has no effect on
-    //     // other channels, so the check logic is skipped)
-    //     apu.write_addr(VOLUME + REGS_PER_VOICE * channel);
-    //     apu.write_data(0, ((channels - 1) << 4) | getVolume(channel));
     // }
 
     /// Return a 10V signed sample from the chip.
@@ -251,46 +227,62 @@ struct ChipTurboGrafx16 : Module {
             // clear the new sample rate flag
             new_sample_rate = false;
         }
-        // if (cvDivider.process()) {
-        //     // write the waveform data to the chip's RAM
-        //     auto wavetable = getWavetable();
-        //     // calculate the address of the base waveform in the table
-        //     int wavetable0 = floor(wavetable);
-        //     // calculate the address of the next waveform in the table
-        //     int wavetable1 = ceil(wavetable);
-        //     // calculate floating point offset between the base and next table
-        //     float interpolate = wavetable - wavetable0;
-        //     for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
-        //         apu.write_addr(i);
-        //         // get the first waveform data
-        //         auto nibbleHi0 = values[wavetable0][2 * i];
-        //         auto nibbleLo0 = values[wavetable0][2 * i + 1];
-        //         // get the second waveform data
-        //         auto nibbleHi1 = values[wavetable1][2 * i];
-        //         auto nibbleLo1 = values[wavetable1][2 * i + 1];
-        //         // floating point interpolation
-        //         uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-        //         uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-        //         // combine the two nibbles into a byte for the RAM
-        //         apu.write_data(0, (nibbleHi << 4) | nibbleLo);
-        //     }
-        //     // get the number of active channels from the panel
-        //     num_channels = getActiveChannels();
-        //     // set the frequency for all channels on the chip
-        //     for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
-        //         setFrequency(i, num_channels);
-        // }
+        if (cvDivider.process()) {
+            // // select channel 0
+            // apu.write(0x0800, 0);
+            // // clear to write wave data
+            // apu.write(0x0804, 0b01000000);
+            // // write the wave-table
+            // for (int i = 0; i < num_samples / 2; i++)
+            //     apu.write(0x0806, default_values[i]);
+
+            // select channel 0
+            apu.write(0x0800, 0);
+            // main amp
+            apu.write(0x0801, 0b11111111);
+            // frequency lo
+            apu.write(0x0802, 0b1111);
+            // frequency hi
+            apu.write(0x0803, 0b11);
+            // channel level
+            apu.write(0x0804, 0b10011111);
+            // channel balance
+            apu.write(0x0805, 0b11111111);
+            // noise
+            // 0x0807
+            // LFO freq
+            // 0x0808
+            // LFO control
+            // 0x0809
+
+
+            // // write the waveform data to the chip's RAM
+            // auto wavetable = getWavetable();
+            // // calculate the address of the base waveform in the table
+            // int wavetable0 = floor(wavetable);
+            // // calculate the address of the next waveform in the table
+            // int wavetable1 = ceil(wavetable);
+            // // calculate floating point offset between the base and next table
+            // float interpolate = wavetable - wavetable0;
+            // for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
+            //     apu.write_addr(i);
+            //     // get the first waveform data
+            //     auto nibbleHi0 = values[wavetable0][2 * i];
+            //     auto nibbleLo0 = values[wavetable0][2 * i + 1];
+            //     // get the second waveform data
+            //     auto nibbleHi1 = values[wavetable1][2 * i];
+            //     auto nibbleLo1 = values[wavetable1][2 * i + 1];
+            //     // floating point interpolation
+            //     uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+            //     uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+            //     // combine the two nibbles into a byte for the RAM
+            //     apu.write_data(0, (nibbleHi << 4) | nibbleLo);
+            // }
+        }
         // process audio samples on the chip engine
         apu.end_frame(cycles_per_sample);
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
-        // // set the channel lights if the light divider is high
-        // if (lightsDivider.process()) {
-        //     for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
-        //         auto light = LIGHT_CHANNEL + NECTurboGrafx16::OSC_COUNT - i - 1;
-        //         lights[light].setSmoothBrightness(i < num_channels, args.sampleTime * lightsDivider.getDivision());
-        //     }
-        // }
     }
 
     /// Respond to the change of sample rate in the engine.

@@ -66,8 +66,12 @@
 
 ### 1.5.0 (2020-07-21)
 
--   Atari POKEY module
+-   Atari POKEY module (alpha)
 
 ### 1.6.0 (2020-07-21)
 
--   General Instrument AY-3-8910 module
+-   General Instrument AY-3-8910 module (alpha)
+
+### 1.7.0 (2020-07-21)
+
+-   Konami SCC module (alpha)

@@ -61,6 +61,12 @@ class KonamiSCC {
         POWER,
     };
 
+    /// a flag to indicate that the volume is on
+    static constexpr uint8_t VOLUME_ON    = 0b00010000;
+
+    /// a flag for the power register to indicate that all 5 channels are on
+    static constexpr uint8_t POWER_ALL_ON = 0b00011111;
+
  private:
     /// the range of the amplifier on the chip
     enum { AMP_RANGE = 0x8000 };

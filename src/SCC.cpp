@@ -120,18 +120,18 @@ struct ChipSCC : Module {
         apu.set_volume(3.f);
     }
 
-    // /// Return the wave-table parameter.
-    // ///
-    // /// @returns the floating index of the wave-table table in [0, 4]
-    // ///
-    // inline float getWavetable() {
-    //     auto param = params[PARAM_WAVETABLE].getValue();
-    //     auto att = params[PARAM_WAVETABLE_ATT].getValue();
-    //     // get the CV as 1V per wave-table
-    //     auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
-    //     // wave-tables are indexed maths style on panel, subtract 1 for CS style
-    //     return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
-    // }
+    /// Return the wave-table parameter.
+    ///
+    /// @returns the floating index of the wave-table table in [0, 4]
+    ///
+    inline float getWavetable() {
+        auto param = params[PARAM_WAVETABLE].getValue();
+        auto att = params[PARAM_WAVETABLE_ATT].getValue();
+        // get the CV as 1V per wave-table
+        auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
+        // wave-tables are indexed maths style on panel, subtract 1 for CS style
+        return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
+    }
 
     /// Return the frequency for the given channel.
     ///
@@ -207,28 +207,27 @@ struct ChipSCC : Module {
             new_sample_rate = false;
         }
         if (cvDivider.process()) {
-            // // write the waveform data to the chip's RAM
-            // auto wavetable = getWavetable();
-            // // calculate the address of the base waveform in the table
-            // int wavetable0 = floor(wavetable);
-            // // calculate the address of the next waveform in the table
-            // int wavetable1 = ceil(wavetable);
-            // // calculate floating point offset between the base and next table
-            // float interpolate = wavetable - wavetable0;
-            // for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
-            //     apu.write_addr(i);
-            //     // get the first waveform data
-            //     auto nibbleHi0 = values[wavetable0][2 * i];
-            //     auto nibbleLo0 = values[wavetable0][2 * i + 1];
-            //     // get the second waveform data
-            //     auto nibbleHi1 = values[wavetable1][2 * i];
-            //     auto nibbleLo1 = values[wavetable1][2 * i + 1];
-            //     // floating point interpolation
-            //     uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-            //     uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-            //     // combine the two nibbles into a byte for the RAM
-            //     apu.write_data(0, (nibbleHi << 4) | nibbleLo);
-            // }
+            // write the waveform data to the chip's RAM
+            auto wavetable = getWavetable();
+            // calculate the address of the base waveform in the table
+            int wavetable0 = floor(wavetable);
+            // calculate the address of the next waveform in the table
+            int wavetable1 = ceil(wavetable);
+            // calculate floating point offset between the base and next table
+            float interpolate = wavetable - wavetable0;
+            for (int i = 0; i < num_samples / 2; i++) {  // iterate over samples
+                // get the first waveform data
+                auto sample0 = values[wavetable0][i];
+                // get the second waveform data
+                auto sample1 = values[wavetable1][i];
+                // floating point interpolation
+                uint8_t sample = ((1.f - interpolate) * sample0 + interpolate * sample1);
+                // write the waveform to the chip
+                apu.write(KonamiSCC::WAVEFORM_CH_1 + i, sample);
+                apu.write(KonamiSCC::WAVEFORM_CH_2 + i, sample);
+                apu.write(KonamiSCC::WAVEFORM_CH_3 + i, sample);
+                apu.write(KonamiSCC::WAVEFORM_CH_4 + i, sample);
+            }
             // frequency
             for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
                 auto freq = getFrequency(i);

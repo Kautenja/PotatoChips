@@ -67,6 +67,7 @@ struct ChipGBS : Module {
         for (int i = 0; i < Gb_Apu::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        onSampleRateChange();
     }
 
     void channel_pulse(int channel) {

@@ -126,8 +126,8 @@ struct ChipTurboGrafx16 : Module {
             // clear to write wave data
             apu.write(0x0804, 0b00000000);
             // write the wave-table
-            for (int i = 0; i < num_samples / 2; i++)
-                apu.write(0x0806, values[0][i]);
+            for (int sample = 0; sample < num_samples; sample++)
+                apu.write(0x0806, values[0][sample]);
         }
     }
 

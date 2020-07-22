@@ -19,8 +19,7 @@
 #ifndef DSP_SONY_SPC700_HPP_
 #define DSP_SONY_SPC700_HPP_
 
-#include <cstdint>
-#include <cassert>
+#include "blargg_common.h"
 
 /// Sony SPC700 emulator.
 class SPC700 {

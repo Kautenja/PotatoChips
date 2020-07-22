@@ -215,7 +215,7 @@ struct ChipSCC : Module {
             int wavetable1 = ceil(wavetable);
             // calculate floating point offset between the base and next table
             float interpolate = wavetable - wavetable0;
-            for (int i = 0; i < num_samples / 2; i++) {  // iterate over samples
+            for (int i = 0; i < num_samples; i++) {  // iterate over samples
                 // get the first waveform data
                 auto sample0 = values[wavetable0][i];
                 // get the second waveform data

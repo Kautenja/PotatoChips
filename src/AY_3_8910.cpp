@@ -51,9 +51,6 @@ struct ChipAY_3_8910 : Module {
     /// The General Instrument AY-3-8910 instance to synthesize sound with
     GeneralInstrumentAy_3_8910 apu;
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
@@ -174,14 +171,6 @@ struct ChipAY_3_8910 : Module {
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
         uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {
-            // update the buffer for each channel
-            for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             // frequency
             for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
@@ -213,7 +202,11 @@ struct ChipAY_3_8910 : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        // update the buffer for each channel
+        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
 };
 
 // ---------------------------------------------------------------------------

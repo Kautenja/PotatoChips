@@ -39,6 +39,8 @@ extern rack::Model *modelChip106;
 extern rack::Model *modelChipSN76489;
 // the global instance of each the GBS module
 extern rack::Model *modelChipGBS;
+// the global instance of each the TurboGrafx16 module
+extern rack::Model *modelChipTurboGrafx16;
 // the global instance of each the SCC module
 extern rack::Model *modelChipSCC;
 // the global instance of each the AY-3-8910 module

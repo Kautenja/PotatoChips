@@ -56,6 +56,15 @@
       ]
     },
     {
+      "slug": "TURBO_GRAFX_16",
+      "name": "Turbo Grafx 16",
+      "description": "An emulation of the NEC Turbo Grafx 16 audio processing unit.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf",
+      "tags": [
+        "Oscillator"
+      ]
+    },
+    {
       "slug": "GBS",
       "name": "GBS",
       "description": "An emulation of the Nintendo Gameboy Sound System audio processing unit.",

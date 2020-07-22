@@ -1,4 +1,4 @@
-// An oscillator based on the Namco 106 synthesis chip.
+// An emulation of the Namco 106 synthesis chip.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -16,8 +16,8 @@
 // derived from: Nes_Snd_Emu 0.1.7
 //
 
-#ifndef DSP_NAMCO106_HPP_
-#define DSP_NAMCO106_HPP_
+#ifndef DSP_NAMCO_106_HPP_
+#define DSP_NAMCO_106_HPP_
 
 #include "blip_buffer.hpp"
 
@@ -37,7 +37,7 @@ enum Namco106_Registers {
     VOLUME
 };
 
-/// An oscillator based on the Namco 106 synthesis chip.
+/// An emulation of the Namco 106 synthesis chip.
 class Namco106 {
  public:
     /// CPU clock cycle count
@@ -228,4 +228,4 @@ class Namco106 {
     }
 };
 
-#endif  // DSP_NAMCO106_HPP_
+#endif  // DSP_NAMCO_106_HPP_

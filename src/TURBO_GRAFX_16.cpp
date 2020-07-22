@@ -131,19 +131,6 @@ struct ChipTurboGrafx16 : Module {
         }
     }
 
-    // /// Return the active channels parameter.
-    // ///
-    // /// @returns the active channel count in [1, 8]
-    // ///
-    // inline uint8_t getActiveChannels() {
-    //     auto param = params[PARAM_NUM_CHANNELS].getValue();
-    //     auto att = params[PARAM_NUM_CHANNELS_ATT].getValue();
-    //     // get the CV as 1V per channel
-    //     auto cv = 8.f * inputs[INPUT_NUM_CHANNELS].getVoltage() / 10.f;
-    //     // channels are indexed maths style on the chip, not CS style
-    //     return rack::math::clamp(param + att * cv, 1.f, 8.f);
-    // }
-
     // /// Return the wave-table parameter.
     // ///
     // /// @returns the floating index of the wave-table table in [0, 4]

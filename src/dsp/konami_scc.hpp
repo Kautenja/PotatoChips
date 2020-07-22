@@ -29,10 +29,37 @@
 /// Konami SCC sound chip emulator.
 class KonamiSCC {
  public:
-    /// TODO:
+    /// the number of oscillators on the chip
     enum { OSC_COUNT = 5 };
-    /// TODO:
+    /// the number of registers on the chip
     enum { REGISTER_COUNT = 0x90 };
+
+    /// the size of the wave-tables on the chip in bytes
+    int static constexpr WAVE_SIZE = 32;
+
+    /// the registers on the Konami SCC
+    enum Registers {
+        WAVEFORM_CH_1,
+        WAVEFORM_CH_2     = 1 * WAVE_SIZE,
+        WAVEFORM_CH_3     = 2 * WAVE_SIZE,
+        WAVEFORM_CH_4     = 3 * WAVE_SIZE,
+        FREQUENCY_CH_1_LO = 4 * WAVE_SIZE,
+        FREQUENCY_CH_1_HI,
+        FREQUENCY_CH_2_LO,
+        FREQUENCY_CH_2_HI,
+        FREQUENCY_CH_3_LO,
+        FREQUENCY_CH_3_HI,
+        FREQUENCY_CH_4_LO,
+        FREQUENCY_CH_4_HI,
+        FREQUENCY_CH_5_LO,
+        FREQUENCY_CH_5_HI,
+        VOLUME_CH_1,
+        VOLUME_CH_2,
+        VOLUME_CH_3,
+        VOLUME_CH_4,
+        VOLUME_CH_5,
+        POWER,
+    };
 
  private:
     /// the range of the amplifier on the chip
@@ -40,8 +67,6 @@ class KonamiSCC {
     /// Tones above this frequency are treated as disabled tone at half volume.
     /// Power of two is more efficient (avoids division).
     unsigned static constexpr INAUDIBLE_FREQ = AMP_RANGE / 2;
-    /// TODO:
-    int static constexpr WAVE_SIZE = 0x20;
 
     /// An oscillators on the chip.
     struct osc_t {

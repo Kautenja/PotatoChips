@@ -84,9 +84,6 @@ struct ChipPOKEY : Module {
     /// a Schmitt Trigger for handling player 1 button inputs
     CVButtonTrigger controlTriggers[8];
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
@@ -124,6 +121,7 @@ struct ChipPOKEY : Module {
         for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
+        onSampleRateChange();
     }
 
     /// Return the frequency for the given channel.
@@ -229,13 +227,6 @@ struct ChipPOKEY : Module {
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
         uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {  // update the sample rate for each channel
-            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
                 // there are 2 registers per channel, multiply first channel
@@ -263,7 +254,11 @@ struct ChipPOKEY : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        // update the sample rate for each channel
+        for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
 };
 
 // ---------------------------------------------------------------------------

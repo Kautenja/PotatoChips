@@ -51,9 +51,6 @@ struct ChipVRC6 : Module {
     /// The VRC6 instance to synthesize sound with
     KonamiVRC6 apu;
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
@@ -73,6 +70,7 @@ struct ChipVRC6 : Module {
         for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        onSampleRateChange();
     }
 
     /// Process square wave for given channel.
@@ -197,14 +195,6 @@ struct ChipVRC6 : Module {
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
         uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {
-            // update the buffer for each channel
-            for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             channel_pulse(0);
             channel_pulse(1);
@@ -217,7 +207,11 @@ struct ChipVRC6 : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        // update the buffer for each channel
+        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
 };
 
 // ---------------------------------------------------------------------------

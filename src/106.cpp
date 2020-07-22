@@ -64,9 +64,6 @@ struct Chip106 : Module {
     /// the number of active channels
     int num_channels = 1;
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
     // a clock divider for running LED updates slower than audio rate
@@ -120,6 +117,7 @@ struct Chip106 : Module {
             memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
+        onSampleRateChange();
     }
 
     /// Return the active channels parameter.
@@ -244,14 +242,6 @@ struct Chip106 : Module {
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
         uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {
-            // update the buffer for each channel
-            for (int i = 0; i < Namco106::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, CLOCK_RATE);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {
             // write the waveform data to the chip's RAM
             auto wavetable = getWavetable();
@@ -295,7 +285,10 @@ struct Chip106 : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        for (int i = 0; i < Namco106::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
 
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {

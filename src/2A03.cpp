@@ -165,8 +165,6 @@ struct Chip2A03 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
@@ -178,7 +176,7 @@ struct Chip2A03 : Module {
             apu.write_register(0, SND_CHN, 0b00001111);
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }

@@ -193,15 +193,13 @@ struct ChipVRC6 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         if (cvDivider.process()) {  // process the CV inputs to the chip
             channel_pulse(0);
             channel_pulse(1);
             channel_saw();
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }

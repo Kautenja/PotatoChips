@@ -205,8 +205,6 @@ struct ChipTurboGrafx16 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         if (cvDivider.process()) {
             // set the main amplifier level
             apu.write(0x0801, 0b11111111);
@@ -253,7 +251,7 @@ struct ChipTurboGrafx16 : Module {
             // }
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
     }

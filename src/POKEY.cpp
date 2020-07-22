@@ -225,8 +225,6 @@ struct ChipPOKEY : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        // calculate the number of clock cycles on the chip per audio sample
-        uint32_t cycles_per_sample = CLOCK_RATE / args.sampleRate;
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
                 // there are 2 registers per channel, multiply first channel
@@ -239,7 +237,7 @@ struct ChipPOKEY : Module {
             apu.write(AtariPOKEY::AUDCTL, getControl());
         }
         // process audio samples on the chip engine
-        apu.end_frame(cycles_per_sample);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // set outputs
             auto channelOutput = getAudioOut(i);
             chMeters[i].process(args.sampleTime, channelOutput / 5.f);

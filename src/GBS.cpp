@@ -47,9 +47,6 @@ struct ChipGBS : Module {
     /// The GBS instance to synthesize sound with
     Gb_Apu apu;
 
-    /// a signal flag for detecting sample rate changes
-    bool new_sample_rate = true;
-
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
@@ -169,14 +166,6 @@ struct ChipGBS : Module {
     void process(const ProcessArgs &args) override {
         // calculate the number of clock cycles on the chip per audio sample
         uint32_t cycles_per_sample = 4194304 / args.sampleRate;
-        // check for sample rate changes from the engine to send to the chip
-        if (new_sample_rate) {
-            // update the buffer for each channel
-            for (int i = 0; i < Gb_Apu::OSC_COUNT; i++)
-                buf[i].set_sample_rate(args.sampleRate, 4194304);
-            // clear the new sample rate flag
-            new_sample_rate = false;
-        }
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
@@ -195,7 +184,11 @@ struct ChipGBS : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override { new_sample_rate = true; }
+    inline void onSampleRateChange() override {
+        // update the buffer for each channel
+        for (int i = 0; i < Gb_Apu::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), 4194304);
+    }
 };
 
 // ---------------------------------------------------------------------------

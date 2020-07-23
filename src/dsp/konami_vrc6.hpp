@@ -1,4 +1,4 @@
-// A Konami VRC6 chip emulator.
+// Konami VRC6 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -22,7 +22,7 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
-/// @brief A Konami VRC6 chip emulator.
+/// @brief Konami VRC6 chip emulator.
 /// @details
 /// the frequency scaling feature is not implemented in the emulation, i.e.,
 /// register 0x9003 is invalid in this emulation

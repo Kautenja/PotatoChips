@@ -1,4 +1,4 @@
-// Texas Instruments SN76489 programmable sound generator sound chip emulator.
+// Texas Instruments SN76489 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,7 +21,7 @@
 
 #include "texas_instruments_sn76489_oscillators.hpp"
 
-/// Texas Instruments SN76489 programmable sound generator sound chip emulator.
+/// Texas Instruments SN76489 chip emulator.
 class TexasInstrumentsSN76489 {
  public:
     /// the number of oscillators on the chip

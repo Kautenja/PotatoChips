@@ -26,7 +26,7 @@
 // TODO: remove blargg_ulong
 // TODO: c-cast to static_cast
 
-/// Konami SCC sound chip emulator.
+/// @brief Konami SCC sound chip emulator.
 class KonamiSCC {
  public:
     /// the number of oscillators on the chip

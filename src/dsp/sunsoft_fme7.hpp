@@ -1,4 +1,4 @@
-// SunSoft FME7 sound chip emulator.
+// SunSoft FME7 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,7 +21,7 @@
 
 #include "blip_buffer.hpp"
 
-/// @brief SunSoft FME7 sound chip emulator.
+/// @brief SunSoft FME7 chip emulator.
 class SunSoftFME7 {
  public:
     /// the number of oscillators on the chip

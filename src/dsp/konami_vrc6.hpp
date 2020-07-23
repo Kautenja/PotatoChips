@@ -64,7 +64,7 @@ class KonamiVRC6 {
         BLIPBuffer* output;
         /// TODO: document
         int delay;
-        /// TODO: document
+        /// the last amplitude value output from the synthesizer
         int last_amp;
         /// the phase of the waveform
         int phase;

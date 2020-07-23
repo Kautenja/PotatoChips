@@ -50,13 +50,13 @@ class Ricoh2A03 {
         // APU_UNUSED2 =    0x400D,  // may be used for memory clearing loops
         NOISE_LO =       0x400E,
         NOISE_HI =       0x400F,
-        DMC_FREQ =       0x4010,
-        DMC_RAW =        0x4011,
-        DMC_START =      0x4012,
-        DMC_LEN =        0x4013,
+        // DMC_FREQ =       0x4010,
+        // DMC_RAW =        0x4011,
+        // DMC_START =      0x4012,
+        // DMC_LEN =        0x4013,
         SND_CHN =        0x4015,
         // JOY1 =           0x4016,  // unused for APU
-        STATUS =         0x4017,
+        // STATUS =         0x4017,
     };
 
     /// Initialize a new APU.

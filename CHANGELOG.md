@@ -63,6 +63,7 @@
 ### 1.4.1 (2020-07-20)
 
 -   fix issue where CV controlled SN76489 VCA wouldn't return to 0
+-   fix issue where amplifier for FME7 wasn't allowed full gain
 
 ### 1.5.0 (2020-07-21)
 

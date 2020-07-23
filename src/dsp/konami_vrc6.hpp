@@ -61,9 +61,19 @@ class KonamiVRC6 {
 
  private:
     /// An oscillator on the KonamiVRC6 chip.
-    struct VRC6_Oscillator {
+    struct Oscillator {
+        /// the register addresses for the oscillator
+        enum Register {
+            /// the volume register for pulse waveform generator 0
+            VOLUME      = 0,
+            /// the low period register for pulse waveform generator 0
+            PERIOD_LOW  = 1,
+            /// the high period register for pulse waveform generator 0
+            PERIOD_HIGH = 2,
+        };
+
         /// the internal registers for the oscillator
-        uint8_t regs[3];
+        uint8_t regs[REG_COUNT];
         /// the output buffer to write samples to
         BLIPBuffer* output;
         /// TODO: document
@@ -76,13 +86,15 @@ class KonamiVRC6 {
         int amp;
 
         /// Return the period of the waveform.
-        inline int period() const {
-            return (regs[2] & 0x0f) * 0x100L + regs[1] + 1;
+        inline uint16_t period() const {
+            // turn the low and high period registers into the 12-bit period
+            // value
+            return ((regs[PERIOD_HIGH] & 0x0f) << 8) | regs[PERIOD_LOW] + 1;
         }
     };
 
     /// the oscillators on the chip
-    VRC6_Oscillator oscs[OSC_COUNT];
+    Oscillator oscs[OSC_COUNT];
     /// the time after the last run_until call
     blip_time_t last_time = 0;
 
@@ -109,15 +121,15 @@ class KonamiVRC6 {
     /// @param osc the oscillator to run
     /// @param time the number of elapsed cycles
     ///
-    void run_square(VRC6_Oscillator& osc, blip_time_t end_time) {
+    void run_square(Oscillator& osc, blip_time_t end_time) {
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
-        int volume = osc.regs[0] & 15;
-        if (!(osc.regs[2] & 0x80)) volume = 0;
+        int volume = osc.regs[Oscillator::VOLUME] & 15;
+        if (!(osc.regs[Oscillator::PERIOD_HIGH] & 0x80)) volume = 0;
 
-        int gate = osc.regs[0] & 0x80;
-        int duty = ((osc.regs[0] >> 4) & 7) + 1;
+        int gate = osc.regs[Oscillator::VOLUME] & 0x80;
+        int duty = ((osc.regs[Oscillator::VOLUME] >> 4) & 7) + 1;
         int delta = ((gate || osc.phase < duty) ? volume : 0) - osc.last_amp;
         blip_time_t time = last_time;
         if (delta) {
@@ -155,16 +167,16 @@ class KonamiVRC6 {
     /// @param time the number of elapsed cycles
     ///
     void run_saw(blip_time_t end_time) {
-        VRC6_Oscillator& osc = oscs[2];
+        Oscillator& osc = oscs[2];
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
         int amp = osc.amp;
-        int amp_step = osc.regs[0] & 0x3F;
+        int amp_step = osc.regs[Oscillator::VOLUME] & 0x3F;
         blip_time_t time = last_time;
         int last_amp = osc.last_amp;
 
-        if (!(osc.regs[2] & 0x80) || !(amp_step | amp)) {
+        if (!(osc.regs[Oscillator::PERIOD_HIGH] & 0x80) || !(amp_step | amp)) {
             osc.delay = 0;
             int delta = (amp >> 3) - last_amp;
             last_amp = amp >> 3;
@@ -259,7 +271,7 @@ class KonamiVRC6 {
     inline void reset() {
         last_time = 0;
         for (unsigned i = 0; i < OSC_COUNT; i++) {
-            VRC6_Oscillator& osc = oscs[i];
+            Oscillator& osc = oscs[i];
             for (unsigned j = 0; j < REG_COUNT; j++)
                 osc.regs[j] = 0;
             osc.delay = 0;

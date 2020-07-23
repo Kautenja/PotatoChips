@@ -51,7 +51,6 @@
           "value": 1.0
         }
       ],
-      "bypass": true,
       "leftModuleId": 70,
       "rightModuleId": 1,
       "pos": [
@@ -259,7 +258,7 @@
         },
         {
           "id": 5,
-          "value": 0.894499958
+          "value": 0.834499896
         },
         {
           "id": 6,

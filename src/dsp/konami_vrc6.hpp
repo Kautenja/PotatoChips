@@ -26,32 +26,34 @@
 class KonamiVRC6 {
  public:
     /// the number of oscillators on the VRC6 chip
-    static constexpr int OSC_COUNT = 3;
+    static constexpr unsigned OSC_COUNT = 3;
     /// the number of registers per oscillator
-    static constexpr int REG_COUNT = 3;
+    static constexpr unsigned REG_COUNT = 3;
 
-    /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
-    // enum Registers {
-    //     PULSE0_DUTY_VOLUME = 0x9000,
-    //     PULSE0_PERIOD_LOW  = 0x9001,
-    //     PULSE0_PERIOD_HIGH = 0x9002,
-    //     PULSE1_DUTY_VOLUME = 0xA000,
-    //     PULSE1_PERIOD_LOW  = 0xA001,
-    //     PULSE1_PERIOD_HIGH = 0xA002,
-    //     SAW_VOLUME         = 0xB000,
-    //     SAW_PERIOD_LOW     = 0xB001,
-    //     SAW_PERIOD_HIGH    = 0xB002,
-    // };
-
-    /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
-    enum Registers {
-        PULSE_DUTY_VOLUME = 0,
-        PULSE_PERIOD_LOW  = 1,
-        PULSE_PERIOD_HIGH = 2,
-        SAW_VOLUME        = 0,
-        SAW_PERIOD_LOW    = 1,
-        SAW_PERIOD_HIGH   = 2,
+    /// the IO registers on the VRC6 chip.
+    enum Registers : uint16_t {
+        /// the volume register for pulse waveform generator 0
+        PULSE0_DUTY_VOLUME = 0x9000,
+        /// the low period register for pulse waveform generator 0
+        PULSE0_PERIOD_LOW  = 0x9001,
+        /// the high period register for pulse waveform generator 0
+        PULSE0_PERIOD_HIGH = 0x9002,
+        /// the volume register for pulse waveform generator 1
+        PULSE1_DUTY_VOLUME = 0xA000,
+        /// the low period register for pulse waveform generator 1
+        PULSE1_PERIOD_LOW  = 0xA001,
+        /// the high period register for pulse waveform generator 1
+        PULSE1_PERIOD_HIGH = 0xA002,
+        /// the volume register for quantized saw waveform generator
+        SAW_VOLUME         = 0xB000,
+        /// the low period register for quantized saw waveform generator
+        SAW_PERIOD_LOW     = 0xB001,
+        /// the high period register for quantized saw waveform generator
+        SAW_PERIOD_HIGH    = 0xB002,
     };
+
+    /// the number of registers per oscillator voice
+    static constexpr uint16_t REGS_PER_OSC = 0x1000;
 
  private:
     /// An oscillator on the KonamiVRC6 chip.
@@ -85,19 +87,20 @@ class KonamiVRC6 {
     /// a BLIP synthesizer for the square waveform
     BLIPSynth<blip_good_quality, 15> square_synth;
 
-    /// Run VRC6 until specified time.
+    /// @brief Run VRC6 until specified time.
     ///
     /// @param time the number of elapsed cycles
     ///
     void run_until(blip_time_t time) {
-        assert(time >= last_time);
+        if (time < last_time)
+            throw Exception("end_time must be >= last_time");
         run_square(oscs[0], time);
         run_square(oscs[1], time);
         run_saw(time);
         last_time = time;
     }
 
-    /// Run a square waveform until specified time.
+    /// @brief Run a square waveform until specified time.
     ///
     /// @param osc the oscillator to run
     /// @param time the number of elapsed cycles
@@ -143,7 +146,7 @@ class KonamiVRC6 {
         }
     }
 
-    /// Run a saw waveform until specified time.
+    /// @brief Run a saw waveform until specified time.
     ///
     /// @param time the number of elapsed cycles
     ///
@@ -212,7 +215,7 @@ class KonamiVRC6 {
     /// If buffer is NULL, the specified oscillator is muted and emulation
     /// accuracy is reduced.
     ///
-    inline void set_output(int channel, BLIPBuffer* buffer) {
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
         if (channel >= OSC_COUNT)  // make sure the channel is within bounds
             throw ChannelOutOfBoundsException(channel, OSC_COUNT);
         oscs[channel].output = buffer;
@@ -224,7 +227,7 @@ class KonamiVRC6 {
     /// @param buffer the single buffer to output the all the voices to
     ///
     inline void set_output(BLIPBuffer* buffer) {
-        for (int channel = 0; channel < OSC_COUNT; channel++)
+        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
             set_output(channel, buffer);
     }
 
@@ -251,9 +254,10 @@ class KonamiVRC6 {
     /// @brief Reset internal frame counter, registers, and all oscillators.
     inline void reset() {
         last_time = 0;
-        for (int i = 0; i < OSC_COUNT; i++) {
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
             VRC6_Oscillator& osc = oscs[i];
-            for (int j = 0; j < REG_COUNT; j++) osc.regs[j] = 0;
+            for (unsigned j = 0; j < REG_COUNT; j++)
+                osc.regs[j] = 0;
             osc.delay = 0;
             osc.last_amp = 0;
             osc.phase = 1;
@@ -263,17 +267,27 @@ class KonamiVRC6 {
 
     /// @brief Write a value to the given oscillator's register.
     ///
-    /// @param time the number of elapsed cycles
-    /// @param osc_index the index of the oscillator
-    /// @param reg the index of the synthesizer's register
+    /// @param address the register address to write to
     /// @param data the data to write to the register value
     ///
-    inline void write(int osc_index, int reg, int data) {
+    inline void write(uint16_t address, uint8_t data) {
+        // the number of elapsed cycles
         static constexpr blip_time_t time = 0;
-        assert((unsigned) osc_index < OSC_COUNT);
-        assert((unsigned) reg < REG_COUNT);
+        // run the emulator up to the given time
         run_until(time);
-        oscs[osc_index].regs[reg] = data;
+        // get the register number from the address (lowest 2 bits). all 12
+        // bits are gathered for error handling
+        uint8_t register_address = address & 0b111111111111;
+        // get the oscillator index from the address (lowest 2 bits of highest
+        // nibble). the lowest 3 bits are taken for error handling. the MSB is
+        // always 1, but this is not validated with error handling.
+        uint8_t oscillator_index = ((address >> 12) & 0b111) - 1;
+        if (oscillator_index >= OSC_COUNT)  // invalid oscillator index
+            throw ChannelOutOfBoundsException(oscillator_index, OSC_COUNT);
+        if (register_address >= REG_COUNT)  // invalid register address
+            throw AddressSpaceException<uint16_t>(register_address, 0, REG_COUNT);
+        // set the value for the oscillator index and register address
+        oscs[oscillator_index].regs[register_address] = data;
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,
@@ -284,7 +298,6 @@ class KonamiVRC6 {
     inline void end_frame(blip_time_t time) {
         if (time > last_time) run_until(time);
         last_time -= time;
-        assert(last_time >= 0);
     }
 };
 

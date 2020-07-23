@@ -407,6 +407,12 @@ class GeneralInstrumentAy_3_8910 {
         last_time = final_end_time;
     }
 
+    /// Disable the copy constructor.
+    GeneralInstrumentAy_3_8910(const GeneralInstrumentAy_3_8910&);
+
+    /// Disable the assignment operator.
+    GeneralInstrumentAy_3_8910& operator=(const GeneralInstrumentAy_3_8910&);
+
  public:
     /// Initialize a new General Instrument AY-3-8910.
     GeneralInstrumentAy_3_8910() {

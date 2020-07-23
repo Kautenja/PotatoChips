@@ -21,16 +21,13 @@
 
 #include "blip_buffer.hpp"
 
-/// SunSoft FME7 sound chip emulator.
+/// @brief SunSoft FME7 sound chip emulator.
 class SunSoftFME7 {
  public:
     /// the number of oscillators on the chip
     enum { OSC_COUNT = 3 };
     /// the number of registers on the chip
     enum { REG_COUNT = 14 };
-    /// the range of the amplifier on the chip. It could be any potential
-    /// value; 192 gives best error / quality trade-off
-    enum { AMP_RANGE = 192 };
 
     /// the IO registers on the chip.
     enum Registers {
@@ -53,12 +50,9 @@ class SunSoftFME7 {
     };
 
  private:
-    /// the registers on the chip
-    uint8_t regs[REG_COUNT];
-    /// the phases of the oscillators
-    uint8_t phases[3];  // 0 or 1
-    /// delays for the oscillators
-    uint16_t delays[3];
+    /// the range of the amplifier on the chip. It could be any potential
+    /// value; 192 gives best error / quality trade-off
+    enum { AMP_RANGE = 192 };
 
     /// the table of volume levels for the amplifier
     const uint8_t AMP_TABLE[16] = {
@@ -69,6 +63,13 @@ class SunSoftFME7 {
         ENTRY(0.3534), ENTRY(0.4998), ENTRY(0.7070), ENTRY(1.0000)
         #undef ENTRY
     };
+
+    /// the registers on the chip
+    uint8_t regs[REG_COUNT];
+    /// the value of the pulse waveform generators
+    bool phases[3] = {false, false, false};
+    /// delays for the oscillators
+    uint16_t delays[3] = {0, 0, 0};
 
  public:
     /// Initialize a new SunSoft FME7 chip emulator.
@@ -113,6 +114,7 @@ class SunSoftFME7 {
 
     /// Reset oscillators and internal state.
     inline void reset() {
+        memset(regs, 0, sizeof regs);
         last_time = 0;
         for (int i = 0; i < OSC_COUNT; i++)
             oscs[i].last_amp = 0;

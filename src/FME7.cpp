@@ -84,7 +84,7 @@ struct ChipFME7 : Module {
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 13;
+        static constexpr float LEVEL_MAX = 15;
 
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;

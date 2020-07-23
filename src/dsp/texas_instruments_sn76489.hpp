@@ -203,7 +203,7 @@ class TexasInstrumentsSN76489 {
         } else {  // noise
             int select = data & 3;
             if (select < 3)
-                noise.period = &noise_periods[select];
+                noise.period = &TexasInstrumentsSN76489_Noise::noise_periods[select];
             else
                 noise.period = &squares[2].period;
             noise.feedback = (data & 0x04) ? noise_feedback : looped_feedback;

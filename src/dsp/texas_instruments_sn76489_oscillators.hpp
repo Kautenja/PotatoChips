@@ -99,10 +99,9 @@ struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc {
     }
 };
 
-/// the possible noise periods
-static constexpr int noise_periods[3] = {0x100, 0x200, 0x400};
-
 struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc {
+    /// the possible noise periods
+    static const int noise_periods[3];
     /// the period of the oscillator
     const int* period = &noise_periods[0];
     /// the shift value
@@ -164,5 +163,7 @@ struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc {
         delay = time - end_time;
     }
 };
+
+const int TexasInstrumentsSN76489_Noise::noise_periods[3] = {0x100, 0x200, 0x400};
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_OSCILLATORS_HPP_

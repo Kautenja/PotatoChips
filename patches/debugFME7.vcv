@@ -8,13 +8,14 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 70,
       "data": {
         "audio": {
           "driver": 5,
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 44100,
+          "sampleRate": 96000,
           "blockSize": 256
         }
       },
@@ -70,10 +71,10 @@
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
-        "lastMod": 0,
+        "lastMod": 123,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -151,7 +152,7 @@
         },
         {
           "id": 3,
-          "value": 0.5
+          "value": 0.731000006
         },
         {
           "id": 4,
@@ -267,6 +268,18 @@
         26,
         1
       ]
+    },
+    {
+      "id": 70,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "leftModuleId": 1,
+      "pos": [
+        38,
+        0
+      ]
     }
   ],
   "cables": [
@@ -357,6 +370,22 @@
       "inputModuleId": 2,
       "inputId": 3,
       "color": "#0c8e15"
+    },
+    {
+      "id": 177,
+      "outputModuleId": 64,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 180,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 64,
+      "inputId": 3,
+      "color": "#c91847"
     }
   ]
 }

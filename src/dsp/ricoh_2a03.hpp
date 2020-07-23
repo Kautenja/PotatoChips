@@ -36,8 +36,8 @@ class Ricoh2A03 {
 
     /// the indexes of the channels on the chip
     enum Channel {
-        PULSE_0 = 0,
-        PULSE_1,
+        PULSE0,
+        PULSE1,
         TRIANGLE,
         NOISE
     };
@@ -61,14 +61,14 @@ class Ricoh2A03 {
         /// the frequency (high 3-bits) for pulse waveform generator 1
         PULSE1_HI =      0x4007,
         /// the linear counter for the triangle waveform generator
-        TRI_LINEAR =     0x4008,
+        TRIANGLE_LINEAR =     0x4008,
         /// an unnecessary register that may be used for memory clearing loops
         /// by application code (NES ROMs)
         // APU_UNUSED1 =    0x4009,
         /// the frequency (low 8-bits) for triangle waveform generator
-        TRI_LO =         0x400A,
+        TRIANGLE_LO =         0x400A,
         /// the frequency (high 3-bits) for triangle waveform generator
-        TRI_HI =         0x400B,
+        TRIANGLE_HI =         0x400B,
         /// the volume register for the noise generator
         NOISE_VOL =      0x400C,
         /// an unnecessary register that may be used for memory clearing loops

@@ -20,10 +20,6 @@
 #define DSP_RICOH_2A03_OSCILLATORS_HPP_
 
 #include "blip_buffer.hpp"
-#include <functional>
-
-/// 16-bit memory address
-typedef int16_t nes_cpu_addr_t;
 
 /// An abstract base type for NES oscillators.
 struct Oscillator {

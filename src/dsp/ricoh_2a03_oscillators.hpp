@@ -23,8 +23,11 @@
 
 /// An abstract base type for NES oscillators.
 struct Oscillator {
+    /// the registers for the oscillator
     unsigned char regs[4];
+    /// boolean flags determining if a given register was written to
     bool reg_written[4];
+    /// the output buffer for the oscillator
     BLIPBuffer* output;
     /// length counter (0 if unused by oscillator)
     int length_counter;
@@ -33,19 +36,27 @@ struct Oscillator {
     /// last amplitude oscillator was outputting
     int last_amp;
 
+    /// TODO:
     inline void clock_length(int halt_mask) {
         if (length_counter && !(regs[0] & halt_mask)) length_counter--;
     }
 
+    /// Return the current period the oscillator is set to.
     inline int period() const {
         return (regs[3] & 7) * 0x100 + (regs[2] & 0xff);
     }
 
+    /// Reset the oscillator to it initial state.
     inline void reset() {
         delay = 0;
         last_amp = 0;
     }
 
+    /// Update the waveform for the oscillator with the given amplitude.
+    ///
+    /// @param amp the amplitude for the current sample
+    /// @returns the change in amplitude between amp and the last set amplitude
+    ///
     inline int update_amp(int amp) {
         int delta = amp - last_amp;
         last_amp = amp;
@@ -55,9 +66,12 @@ struct Oscillator {
 
 /// An envelope-based NES oscillator
 struct Envelope : Oscillator {
+    /// the value of the envelope
     int envelope;
+    /// TODO:
     int env_delay;
 
+    /// Clock the envelope.
     void clock_envelope() {
         int period = regs[0] & 15;
         if (reg_written[3]) {
@@ -71,11 +85,13 @@ struct Envelope : Oscillator {
         }
     }
 
+    /// Return the current volume output from the envelope.
     inline int volume() const {
         return length_counter == 0 ?
             0 : (regs[0] & 0x10) ? (regs[0] & 15) : envelope;
     }
 
+    /// Reset the envelope to its default state
     inline void reset() {
         envelope = 0;
         env_delay = 0;

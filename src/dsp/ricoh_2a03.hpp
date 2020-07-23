@@ -95,15 +95,15 @@ class Ricoh2A03 {
 
  private:
     /// the channel 0 pulse wave generator
-    Pulse pulse1;
+    Pulse pulse0;
     /// the channel 1 pulse wave generator
-    Pulse pulse2;
+    Pulse pulse1;
     /// the channel 2 triangle wave generator
     Noise noise;
     /// the channel 3 noise generator
     Triangle triangle;
     /// pointers to the oscillators
-    Oscillator* oscs[OSC_COUNT] = { &pulse1, &pulse2, &triangle, &noise };
+    Oscillator* oscs[OSC_COUNT] = { &pulse0, &pulse1, &triangle, &noise };
 
     /// has been run until this time in current frame
     blip_time_t last_time;
@@ -138,8 +138,8 @@ class Ricoh2A03 {
             frame_delay -= time - last_time;
 
             // run oscs to present
+            pulse0.run(last_time, time);
             pulse1.run(last_time, time);
-            pulse2.run(last_time, time);
             triangle.run(last_time, time);
             noise.run(last_time, time);
             last_time = time;
@@ -153,14 +153,14 @@ class Ricoh2A03 {
                 case 0:  // fall through
                 case 2:
                     // clock length and sweep on frames 0 and 2
+                    pulse0.clock_length(0x20);
                     pulse1.clock_length(0x20);
-                    pulse2.clock_length(0x20);
                     noise.clock_length(0x20);
                     // different bit for halt flag on triangle
                     triangle.clock_length(0x80);
 
-                    pulse1.clock_sweep(-1);
-                    pulse2.clock_sweep(0);
+                    pulse0.clock_sweep(-1);
+                    pulse1.clock_sweep(0);
                     break;
                 case 1:
                     // frame 1 is slightly shorter
@@ -175,8 +175,8 @@ class Ricoh2A03 {
             }
             // clock envelopes and linear counter every frame
             triangle.clock_linear_counter();
+            pulse0.clock_envelope();
             pulse1.clock_envelope();
-            pulse2.clock_envelope();
             noise.clock_envelope();
         }
     }
@@ -191,7 +191,7 @@ class Ricoh2A03 {
     /// @brief Initialize a new Ricoh 2A03 emulator.
     Ricoh2A03() {
         // pulse 1 and 2 share the same synthesizer
-        pulse1.synth = pulse2.synth = &square_synth;
+        pulse0.synth = pulse1.synth = &square_synth;
         set_output();
         set_volume();
         reset();
@@ -252,8 +252,8 @@ class Ricoh2A03 {
         // TODO: time pal frame periods exactly
         frame_period = pal_timing ? 8314 : 7458;
 
+        pulse0.reset();
         pulse1.reset();
-        pulse2.reset();
         triangle.reset();
         noise.reset();
 

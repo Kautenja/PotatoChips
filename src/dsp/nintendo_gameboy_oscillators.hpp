@@ -19,7 +19,6 @@
 #ifndef DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
 #define DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_
 
-#include "blargg_common.h"
 #include "blip_buffer.hpp"
 
 struct NintendoGBS_Oscillator {

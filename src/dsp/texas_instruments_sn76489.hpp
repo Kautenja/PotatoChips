@@ -20,6 +20,7 @@
 #define DSP_TEXAS_INSTRUMENTS_SN76489_HPP_
 
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
 /// Texas Instruments SN76489 chip emulator.
 class TexasInstrumentsSN76489 {
@@ -237,8 +238,8 @@ class TexasInstrumentsSN76489 {
     /// @param end_time the time to run the oscillators until
     ///
     void run_until(blip_time_t end_time) {
-        // end_time must not be before previous time
-        assert(end_time >= last_time);
+        if (end_time < last_time)
+            throw Exception("end_time must be >= last_time");
         if (end_time > last_time) {  // run oscillators if time is different
             if (pulses[0].output) pulses[0].run(last_time, end_time);
             if (pulses[1].output) pulses[1].run(last_time, end_time);
@@ -255,11 +256,8 @@ class TexasInstrumentsSN76489 {
     TexasInstrumentsSN76489& operator=(const TexasInstrumentsSN76489&);
 
  public:
-    /// Create a new instance of TexasInstrumentsSN76489.
-    ///
-    /// @param level the value to set the volume to
-    ///
-    explicit TexasInstrumentsSN76489(double level = 1.0) {
+    /// @brief Create a new instance of TexasInstrumentsSN76489.
+    TexasInstrumentsSN76489() {
         // set the synthesizer for each pulse waveform generator
         for (int i = 0; i < 3; i++) pulses[i].synth = &square_synth;
         set_output(NULL);
@@ -267,12 +265,36 @@ class TexasInstrumentsSN76489 {
         reset();
     }
 
-    /// Destroy this instance of TexasInstrumentsSN76489.
-    ~TexasInstrumentsSN76489() { }
-
-    /// Set overall volume of all oscillators, where 1.0 is full volume
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
     ///
-    /// @param level the value to set the volume to
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    /// @details
+    /// If buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
+    ///
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel]->output = buffer;
+    }
+
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
+            set_output(channel, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
         level *= 0.85 / (OSC_COUNT * 64 * 2);
@@ -280,7 +302,7 @@ class TexasInstrumentsSN76489 {
         noise.synth.volume(level);
     }
 
-    /// Set treble equalization for the synthesizers.
+    /// @brief Set treble equalization for the synthesizers.
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
@@ -289,29 +311,7 @@ class TexasInstrumentsSN76489 {
         noise.synth.treble_eq(equalizer);
     }
 
-    /// Assign single oscillator output to buffer. If buffer is NULL, silences
-    /// the given oscillator.
-    ///
-    /// @param index the index of the oscillator to set the output for
-    /// @param buffer the BLIPBuffer to output the given voice to
-    /// @returns 0 if the output was set successfully, 1 if the index is invalid
-    ///
-    inline int set_output(unsigned index, BLIPBuffer* buffer) {
-        if (index >= OSC_COUNT) return 1;
-        oscs[index]->output = buffer;
-        return 0;
-    }
-
-    /// Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
-    ///
-    /// @param buffer the BLIPBuffer to output the all the voices to
-    ///
-    inline void set_output(BLIPBuffer* buffer) {
-        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
-    }
-
-    /// Reset oscillators and internal state.
+    /// @brief Reset oscillators and internal state.
     ///
     /// @param feedback TODO:
     /// @param noise_width TODO:
@@ -339,7 +339,7 @@ class TexasInstrumentsSN76489 {
     }
 
     // TODO: update with address / latch separated from data port
-    /// Write to the data port.
+    /// @brief Write to the data port.
     ///
     /// @param data the byte to write to the data port
     ///
@@ -371,18 +371,18 @@ class TexasInstrumentsSN76489 {
         }
     }
 
-    /// Run all oscillators up to specified time, end current frame, then
-    /// start a new frame at time 0.
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
     ///
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t end_time) {
         if (end_time > last_time) run_until(end_time);
-        assert(last_time >= end_time);
         last_time -= end_time;
     }
 };
 
+/// the possible noise periods
 const int TexasInstrumentsSN76489::Noise::noise_periods[3] = {0x100, 0x200, 0x400};
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_HPP_

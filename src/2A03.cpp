@@ -102,7 +102,7 @@ struct Chip2A03 : Module {
         // set the pulse width of the pulse wave (high 2 bits) and set the
         // volume to a constant level
         auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write(Ricoh2A03::PULSE0_VOL + 4 * channel, pw + 0b00011111);
+        apu.write(Ricoh2A03::PULSE0_VOL + 4 * channel, pw | 0b00011111);
     }
 
     /// Process triangle wave (channel 2).
@@ -145,7 +145,7 @@ struct Chip2A03 : Module {
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write(Ricoh2A03::NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
+        apu.write(Ricoh2A03::NOISE_LO, lfsr.isHigh() * 0b10000000 | period);
         apu.write(Ricoh2A03::NOISE_HI, 0);
         // set the volume to a constant level
         apu.write(Ricoh2A03::NOISE_VOL, 0b00011111);

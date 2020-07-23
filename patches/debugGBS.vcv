@@ -482,6 +482,30 @@
       "inputModuleId": 55,
       "inputId": 0,
       "color": "#c9b70e"
+    },
+    {
+      "id": 757,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 758,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 759,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 2,
+      "color": "#c9b70e"
     }
   ]
 }

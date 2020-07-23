@@ -179,7 +179,7 @@ class Ricoh2A03 {
     /// @param data the data to write to the register
     ///
     void write(nes_cpu_addr_t address, int data) {
-        static const nes_cpu_time_t time = 0;
+        static const blip_time_t time = 0;
         /// The length table to lookup length values from registers
         static constexpr unsigned char length_table[0x20] = {
             0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
@@ -241,7 +241,7 @@ class Ricoh2A03 {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    inline void end_frame(nes_cpu_time_t end_time) {
+    inline void end_frame(blip_time_t end_time) {
         if (end_time > last_time) run_until(end_time);
         // make times relative to new frame
         last_time -= end_time;
@@ -267,7 +267,7 @@ class Ricoh2A03 {
     Oscillator* oscs[OSC_COUNT] = { &pulse1, &pulse2, &triangle, &noise };
 
     /// has been run until this time in current frame
-    nes_cpu_time_t last_time;
+    blip_time_t last_time;
     /// TODO: document
     int frame_period;
     /// cycles until frame counter runs next
@@ -306,13 +306,13 @@ class Ricoh2A03 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(nes_cpu_time_t end_time) {
+    void run_until(blip_time_t end_time) {
         assert(end_time >= last_time);
         if (end_time == last_time) return;
 
         while (true) {
             // earlier of next frame time or end time
-            nes_cpu_time_t time = last_time + frame_delay;
+            blip_time_t time = last_time + frame_delay;
             if (time > end_time) time = end_time;
             frame_delay -= time - last_time;
 

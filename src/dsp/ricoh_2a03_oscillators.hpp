@@ -22,8 +22,6 @@
 #include "blip_buffer.hpp"
 #include <functional>
 
-/// CPU clock cycle count
-typedef int32_t nes_cpu_time_t;
 /// 16-bit memory address
 typedef int16_t nes_cpu_addr_t;
 
@@ -130,7 +128,7 @@ struct Pulse : Envelope {
         }
     }
 
-    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
+    void run(blip_time_t time, blip_time_t end_time) {
         if (!output) return;
         const int volume = this->volume();
         const int period = this->period();
@@ -149,7 +147,7 @@ struct Pulse : Envelope {
                 // maintain proper phase
                 int count = (end_time - time + timer_period - 1) / timer_period;
                 phase = (phase + count) & (phase_range - 1);
-                time += static_cast<nes_cpu_time_t>(count * timer_period);
+                time += static_cast<blip_time_t>(count * timer_period);
             }
         } else {
             // handle duty select
@@ -210,7 +208,7 @@ struct Triangle : Oscillator {
         return amp;
     }
 
-    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
+    void run(blip_time_t time, blip_time_t end_time) {
         if (!output) return;
         // TODO: track phase when period < 3
         // TODO: Output 7.5 on dac when period < 2? More accurate,
@@ -279,7 +277,7 @@ struct Noise : Envelope {
     int noise;
     BLIPSynth<blip_med_quality, 15> synth;
 
-    void run(nes_cpu_time_t time, nes_cpu_time_t end_time) {
+    void run(blip_time_t time, blip_time_t end_time) {
         if (!output) return;
         const int volume = this->volume();
         int amp = (noise & 1) ? volume : 0;

@@ -1,4 +1,4 @@
-// An oscillator based on the Konami VRC6 synthesis chip.
+// A Konami VRC6 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,27 +21,23 @@
 
 #include "blip_buffer.hpp"
 
-/// the IO registers on the VRC6 chip (altered for VRC6 implementation).
-enum KonamiVRC6_Registers {
-    PULSE_DUTY_VOLUME = 0,
-    PULSE_PERIOD_LOW  = 1,
-    PULSE_PERIOD_HIGH = 2,
-    SAW_VOLUME        = 0,
-    SAW_PERIOD_LOW    = 1,
-    SAW_PERIOD_HIGH   = 2,
-};
-
-/// An oscillator based on the Konami VRC6 synthesis chip.
+/// A Konami VRC6 chip emulator.
 class KonamiVRC6 {
  public:
-    /// CPU clock cycle count
-    typedef int32_t cpu_time_t;
-    /// 16-bit memory address
-    typedef int16_t cpu_addr_t;
     /// the number of oscillators on the VRC6 chip
     static constexpr int OSC_COUNT = 3;
     /// the number of registers per oscillator
     static constexpr int REG_COUNT = 3;
+
+    /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
+    enum Registers {
+        PULSE_DUTY_VOLUME = 0,
+        PULSE_PERIOD_LOW  = 1,
+        PULSE_PERIOD_HIGH = 2,
+        SAW_VOLUME        = 0,
+        SAW_PERIOD_LOW    = 1,
+        SAW_PERIOD_HIGH   = 2,
+    };
 
     /// Initialize a new VRC6 chip emulator.
     KonamiVRC6() { output(NULL); volume(1.0); reset(); }
@@ -108,7 +104,7 @@ class KonamiVRC6 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    inline void end_frame(cpu_time_t time) {
+    inline void end_frame(blip_time_t time) {
         if (time > last_time) run_until(time);
         last_time -= time;
         assert(last_time >= 0);
@@ -121,7 +117,7 @@ class KonamiVRC6 {
     /// @param reg the index of the synthesizer's register
     /// @param data the data to write to the register value
     ///
-    inline void write_osc(cpu_time_t time, int osc_index, int reg, int data) {
+    inline void write_osc(blip_time_t time, int osc_index, int reg, int data) {
         assert((unsigned) osc_index < OSC_COUNT);
         assert((unsigned) reg < REG_COUNT);
         run_until(time);
@@ -159,7 +155,7 @@ class KonamiVRC6 {
     /// the oscillators on the chip
     VRC6_Oscillator oscs[OSC_COUNT];
     /// the time after the last run_until call
-    cpu_time_t last_time = 0;
+    blip_time_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
     BLIPSynth<blip_med_quality, 31> saw_synth;
@@ -170,7 +166,7 @@ class KonamiVRC6 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(cpu_time_t time) {
+    void run_until(blip_time_t time) {
         assert(time >= last_time);
         run_square(oscs[0], time);
         run_square(oscs[1], time);
@@ -183,7 +179,7 @@ class KonamiVRC6 {
     /// @param osc the oscillator to run
     /// @param time the number of elapsed cycles
     ///
-    void run_square(VRC6_Oscillator& osc, cpu_time_t end_time) {
+    void run_square(VRC6_Oscillator& osc, blip_time_t end_time) {
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
@@ -193,7 +189,7 @@ class KonamiVRC6 {
         int gate = osc.regs[0] & 0x80;
         int duty = ((osc.regs[0] >> 4) & 7) + 1;
         int delta = ((gate || osc.phase < duty) ? volume : 0) - osc.last_amp;
-        cpu_time_t time = last_time;
+        blip_time_t time = last_time;
         if (delta) {
             osc.last_amp += delta;
             square_synth.offset(time, delta, output);
@@ -228,14 +224,14 @@ class KonamiVRC6 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_saw(cpu_time_t end_time) {
+    void run_saw(blip_time_t end_time) {
         VRC6_Oscillator& osc = oscs[2];
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
         int amp = osc.amp;
         int amp_step = osc.regs[0] & 0x3F;
-        cpu_time_t time = last_time;
+        blip_time_t time = last_time;
         int last_amp = osc.last_amp;
 
         if (!(osc.regs[2] & 0x80) || !(amp_step | amp)) {

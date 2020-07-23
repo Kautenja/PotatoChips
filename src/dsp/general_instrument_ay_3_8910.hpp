@@ -62,6 +62,7 @@ class GeneralInstrumentAy_3_8910 {
     /// register
     static constexpr int PERIOD_CH_ENVELOPE_ON = 0b00010000;
 
+    /// symbolic flags for enabling channels using the mixer register
     enum ChannelEnableFlag {
         CHANNEL_ENABLE_ALL_ON      = 0b00000000,
         CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
@@ -74,7 +75,7 @@ class GeneralInstrumentAy_3_8910 {
         // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
     };
 
-    // flags for the ENVELOPE_SHAPE register
+    /// symbolic flags for the ENVELOPE_SHAPE register
     enum EnvelopeShapeFlag {
         ENVELOPE_SHAPE_NONE      = 0b0000,
         ENVELOPE_SHAPE_HOLD      = 0b0001,
@@ -93,33 +94,13 @@ class GeneralInstrumentAy_3_8910 {
     /// Power of two is more efficient (avoids division).
     static constexpr unsigned INAUDIBLE_FREQ = 16384;
 
-    // TODO: change to be class level (static constexpr fails on windows tho)
     /// With channels tied together and 1K resistor to ground (as datasheet
     /// recommends), output nearly matches logarithmic curve as claimed. Approx.
     /// 1.5 dB per step.
-    const uint8_t AMP_TABLE[16] = {
-    #define ENTRY(n) uint8_t (n * GeneralInstrumentAy_3_8910::AMP_RANGE + 0.5)
-        ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
-        ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
-        ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
-        ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
-    #undef ENTRY
-    };
+    static const uint8_t AMP_TABLE[16];
 
-    // TODO: change to be class level (static constexpr fails on windows tho)
     /// TODO:
-    const uint8_t MODES[8] = {
-    #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
-        MODE(1,0, 1,0, 1,0),
-        MODE(1,0, 0,0, 0,0),
-        MODE(1,0, 0,1, 1,0),
-        MODE(1,0, 1,1, 1,1),
-        MODE(0,1, 0,1, 0,1),
-        MODE(0,1, 1,1, 1,1),
-        MODE(0,1, 1,0, 0,1),
-        MODE(0,1, 0,0, 0,0),
-    #undef MODE
-    };
+    static const uint8_t MODES[8];
 
     /// the noise off flag bit
     static constexpr int NOISE_OFF    = 0x08;
@@ -514,6 +495,32 @@ class GeneralInstrumentAy_3_8910 {
         assert(last_time >= time);
         last_time -= time;
     }
+};
+
+/// With channels tied together and 1K resistor to ground (as datasheet
+/// recommends), output nearly matches logarithmic curve as claimed. Approx.
+/// 1.5 dB per step.
+const uint8_t GeneralInstrumentAy_3_8910::AMP_TABLE[16] = {
+#define ENTRY(n) uint8_t (n * AMP_RANGE + 0.5)
+    ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
+    ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
+    ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
+    ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
+#undef ENTRY
+};
+
+/// TODO:
+const uint8_t GeneralInstrumentAy_3_8910::MODES[8] = {
+#define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
+    MODE(1,0, 1,0, 1,0),
+    MODE(1,0, 0,0, 0,0),
+    MODE(1,0, 0,1, 1,0),
+    MODE(1,0, 1,1, 1,1),
+    MODE(0,1, 0,1, 0,1),
+    MODE(0,1, 1,1, 1,1),
+    MODE(0,1, 1,0, 0,1),
+    MODE(0,1, 0,0, 0,0),
+#undef MODE
 };
 
 #endif  // DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_

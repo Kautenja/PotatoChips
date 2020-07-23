@@ -1,4 +1,4 @@
-// A Sunsoft 5B FME7 Chip module.
+// A SunSoft FME7 chip emulator module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -23,21 +23,21 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Sunsoft 5B (FME7) Chip module.
+/// A SunSoft FME7 chip emulator module.
 struct ChipFME7 : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, 3),
-        ENUMS(PARAM_LEVEL, 3),
+        ENUMS(PARAM_FREQ, SunSoftFME7::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, SunSoftFME7::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, 3),
-        ENUMS(INPUT_FM, 3),
-        ENUMS(INPUT_LEVEL, 3),
+        ENUMS(INPUT_VOCT, SunSoftFME7::OSC_COUNT),
+        ENUMS(INPUT_FM, SunSoftFME7::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, SunSoftFME7::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, 3),
+        ENUMS(OUTPUT_CHANNEL, SunSoftFME7::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
@@ -53,12 +53,12 @@ struct ChipFME7 : Module {
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
+        configParam(PARAM_FREQ + 0, -56.f, 56.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -56.f, 56.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -56.f, 56.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level", "%", 0.f, 100.f);
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level", "%", 0.f, 100.f);
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level", "%", 0.f, 100.f);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
@@ -68,48 +68,51 @@ struct ChipFME7 : Module {
         onSampleRateChange();
     }
 
-    /// Process pulse wave for the given channel.
+    /// Return the frequency for the given channel.
     ///
-    /// @param channel the index of the channel to process
+    /// @param channel the index of the channel to get the frequency of
+    /// @returns the 12-bit frequency in a 16-bit container
     ///
-    inline void pulse(int channel) {
+    inline uint16_t getFrequency(int channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ12BIT_MIN = 4;
         // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8191;
+        static constexpr float FREQ12BIT_MAX = 4067;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
-        // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 15;
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
+        // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
-        uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
-        // write the registers with the frequency data
-        uint8_t lo =  freq12bit & 0b11111111;
-        apu.write(SunSoftFME7::PULSE_A_LO + 2 * channel, lo);
-        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
-        apu.write(SunSoftFME7::PULSE_A_HI + 2 * channel, hi);
+        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+    }
 
+    /// Return the volume parameter for the given channel.
+    ///
+    /// @param channel the channel to get the volume parameter for
+    /// @returns the volume parameter for the given channel. This includes
+    /// the value of the knob and any CV modulation.
+    ///
+    inline uint8_t getVolume(uint8_t channel) {
+        // the minimal value for the volume width register
+        static constexpr float LEVEL_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float LEVEL_MAX = 15;
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + channel].isConnected())
             levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
-        // get the 8-bit level clamped within legal limits
-        uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
-        apu.write(SunSoftFME7::PULSE_A_ENV + channel, level);
+        // return the 8-bit level clamped within legal limits
+        return rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
     }
 
     /// Return a 10V signed sample from the FME7.
@@ -128,8 +131,16 @@ struct ChipFME7 : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
-                pulse(i);
+            for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
+                // frequency
+                auto freq = getFrequency(i);
+                uint8_t lo =  freq & 0b11111111;
+                apu.write(SunSoftFME7::PULSE_A_LO + 2 * i, lo);
+                uint8_t hi = (freq & 0b0000111100000000) >> 8;
+                apu.write(SunSoftFME7::PULSE_A_HI + 2 * i, hi);
+                // level
+                apu.write(SunSoftFME7::PULSE_A_ENV + i, getVolume(i));
+            }
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

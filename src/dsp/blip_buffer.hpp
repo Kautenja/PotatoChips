@@ -348,21 +348,24 @@ class blip_eq_t {
     }
 };
 
-/// Quality level. Start with blip_good_quality.
+/// the synthesis quality level. Start with blip_good_quality.
 enum BLIPQuality {
     blip_med_quality  = 8,
     blip_good_quality = 12,
     blip_high_quality = 16
 };
 
-/// Range specifies the greatest expected change in amplitude. Calculate it
-/// by finding the difference between the maximum and minimum expected
-/// amplitudes (max - min).
+/// @brief A digital synthesizer for arbitrary waveforms based on BLIP.
+/// @tparam quality the quality of the BLIP algorithm
+/// @tparam range specifies the greatest expected change in amplitude.
+/// Calculate it by finding the difference between the maximum and minimum
+/// expected amplitudes (max - min).
+///
 template<BLIPQuality quality, int range>
 class BLIPSynth {
  private:
     /// TODO:
-    double volume_unit_;
+    double volume_unit;
     /// TODO:
     blip_sample_t impulses[blip_res * (quality / 2) + 1];
     /// TODO:
@@ -389,30 +392,32 @@ class BLIPSynth {
     }
 
  public:
-    /// TODO:
+    /// the output buffer that the synthesizer writes samples to
     BLIPBuffer* buf;
-    /// TODO:
+    /// the last amplitude value (DPCM sample) to output from the synthesizer
     int last_amp;
     /// TODO:
     int delta_factor;
 
-    /// TODO:
+    /// Initialize a new BLIP synthesizer.
     BLIPSynth() :
-        volume_unit_(0.0),
+        volume_unit(0.0),
         kernel_unit(0),
         buf(0),
         last_amp(0),
-        delta_factor(0) { }
+        delta_factor(0) {
+        memset(impulses, 0, sizeof impulses);
+    }
 
     /// TODO:
     void volume(double new_unit) {
         new_unit = new_unit * (1.0 / (range < 0 ? -range : range));
-        if (new_unit != volume_unit_) {
+        if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
                 treble_eq(blip_eq_t(-8.0));
 
-            volume_unit_ = new_unit;
+            volume_unit = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
 
             if (factor > 0.0) {
@@ -480,22 +485,22 @@ class BLIPSynth {
         adjust_impulse();
 
         // volume might require rescaling
-        double vol = volume_unit_;
+        double vol = volume_unit;
         if (vol) {
-            volume_unit_ = 0.0;
+            volume_unit = 0.0;
             volume(vol);
         }
     }
 
-    /// Get the BLIPBuffer used for output.
+    /// Get the buffer used for output.
     ///
-    /// @returns the BLIPBuffer that this synthesizer is outputting to
+    /// @returns the buffer that this synthesizer is writing samples to
     ///
     inline BLIPBuffer* output() const { return buf; }
 
-    /// Set the BLIPBuffer used for output.
+    /// Set the buffer used for output.
     ///
-    /// @param buffer the BLIPBuffer that this synthesizer is outputting to
+    /// @param buffer the buffer that this synthesizer will write samples to
     ///
     inline void output(BLIPBuffer* buffer) {
         buf = buffer;
@@ -505,8 +510,8 @@ class BLIPSynth {
     /// Update amplitude of waveform at given time. Using this requires a
     /// separate BLIPSynth for each waveform.
     ///
-    /// @param time TODO:
-    /// @param amplitude TODO:
+    /// @param time the time of the sample
+    /// @param amplitude the amplitude of the waveform to synthesizer
     ///
     inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - last_amp;

@@ -31,6 +31,19 @@ class KonamiVRC6 {
     static constexpr int REG_COUNT = 3;
 
     /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
+    // enum Registers {
+    //     PULSE0_DUTY_VOLUME = 0x9000,
+    //     PULSE0_PERIOD_LOW  = 0x9001,
+    //     PULSE0_PERIOD_HIGH = 0x9002,
+    //     PULSE1_DUTY_VOLUME = 0xA000,
+    //     PULSE1_PERIOD_LOW  = 0xA001,
+    //     PULSE1_PERIOD_HIGH = 0xA002,
+    //     SAW_VOLUME         = 0xB000,
+    //     SAW_PERIOD_LOW     = 0xB001,
+    //     SAW_PERIOD_HIGH    = 0xB002,
+    // };
+
+    /// the IO registers on the VRC6 chip (altered for VRC6 implementation).
     enum Registers {
         PULSE_DUTY_VOLUME = 0,
         PULSE_PERIOD_LOW  = 1,
@@ -255,7 +268,8 @@ class KonamiVRC6 {
     /// @param reg the index of the synthesizer's register
     /// @param data the data to write to the register value
     ///
-    inline void write_osc(blip_time_t time, int osc_index, int reg, int data) {
+    inline void write(int osc_index, int reg, int data) {
+        static constexpr blip_time_t time = 0;
         assert((unsigned) osc_index < OSC_COUNT);
         assert((unsigned) reg < REG_COUNT);
         run_until(time);

@@ -1,4 +1,4 @@
-// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
+// Turbo Grafx 16 sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -23,7 +23,7 @@
 #include "blip_buffer.hpp"
 #include <cstring>
 
-/// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
+/// @brief Turbo Grafx 16 sound chip emulator.
 struct NECTurboGrafx16_Oscillator {
     /// TODO:
     unsigned char wave[32];

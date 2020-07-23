@@ -1,4 +1,4 @@
-// Nintendo Game Boy PAPU sound chip emulator
+// The Nintendo GameBoy Sound System (GBS) chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -31,7 +31,7 @@ const uint8_t sine_wave[32] = {
     0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
 };
 
-/// The Nintendo GameBoy Sound System (GBS) Audio Processing Unit (APU).
+/// @brief The Nintendo GameBoy Sound System (GBS) chip emulator.
 class NintendoGBS {
  public:
     /// the number of oscillators on the chip

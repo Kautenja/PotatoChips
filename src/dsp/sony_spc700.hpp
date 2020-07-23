@@ -21,7 +21,7 @@
 
 #include "blargg_common.h"
 
-/// Sony SPC700 emulator.
+/// @brief Sony SPC700 chip emulator.
 class SPC700 {
  public:
     enum { VOICE_COUNT = 8 };

@@ -1,4 +1,4 @@
-// Private oscillators used by Gb_Apu
+// Private oscillators used by NintendoGBS
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -19,7 +19,7 @@
 #include "nintendo_gameboy.hpp"
 #include <cstring>
 
-void Gb_Osc::reset() {
+void NintendoGBS_Oscillator::reset() {
     delay = 0;
     last_amp = 0;
     length = 0;
@@ -27,17 +27,15 @@ void Gb_Osc::reset() {
     output = outputs [output_select];
 }
 
-void Gb_Osc::clock_length() {
+void NintendoGBS_Oscillator::clock_length() {
     if ((regs [4] & len_enabled_mask) && length)
         length--;
 }
 
-// Gb_Env
+// NintendoGBS_Envelope
 
-void Gb_Env::clock_envelope()
-{
-    if (env_delay && !--env_delay)
-    {
+void NintendoGBS_Envelope::clock_envelope() {
+    if (env_delay && !--env_delay) {
         env_delay = regs [2] & 7;
         int v = volume - 1 + (regs [2] >> 2 & 2);
         if ((unsigned) v < 15)
@@ -45,22 +43,17 @@ void Gb_Env::clock_envelope()
     }
 }
 
-bool Gb_Env::write_register(int reg, int data)
-{
-    switch (reg)
-    {
+bool NintendoGBS_Envelope::write_register(int reg, int data) {
+    switch (reg) {
     case 1:
         length = 64 - (regs [1] & 0x3F);
         break;
-
     case 2:
         if (!(data >> 4))
             enabled = false;
         break;
-
     case 4:
-        if (data & trigger)
-        {
+        if (data & trigger) {
             env_delay = regs [2] & 7;
             volume = regs [2] >> 4;
             enabled = true;
@@ -72,21 +65,18 @@ bool Gb_Env::write_register(int reg, int data)
     return false;
 }
 
-// Gb_Square
+// NintendoGBS_Pulse
 
-void Gb_Square::reset()
-{
+void NintendoGBS_Pulse::reset() {
     phase = 0;
     sweep_freq = 0;
     sweep_delay = 0;
-    Gb_Env::reset();
+    NintendoGBS_Envelope::reset();
 }
 
-void Gb_Square::clock_sweep()
-{
+void NintendoGBS_Pulse::clock_sweep() {
     int sweep_period = (regs [0] & period_mask) >> 4;
-    if (sweep_period && sweep_delay && !--sweep_delay)
-    {
+    if (sweep_period && sweep_delay && !--sweep_delay) {
         sweep_delay = sweep_period;
         regs [3] = sweep_freq & 0xFF;
         regs [4] = (regs [4] & ~0x07) | (sweep_freq >> 8 & 0x07);
@@ -96,20 +86,16 @@ void Gb_Square::clock_sweep()
             offset = -offset;
         sweep_freq += offset;
 
-        if (sweep_freq < 0)
-        {
+        if (sweep_freq < 0) {
             sweep_freq = 0;
-        }
-        else if (sweep_freq >= 2048)
-        {
+        } else if (sweep_freq >= 2048) {
             sweep_delay = 0; // don't modify channel frequency any further
             sweep_freq = 2048; // silence sound immediately
         }
     }
 }
 
-void Gb_Square::run(blip_time_t time, blip_time_t end_time, int playing)
-{
+void NintendoGBS_Pulse::run(blip_time_t time, blip_time_t end_time, int playing) {
     if (sweep_freq == 2048)
         playing = false;
 
@@ -129,8 +115,7 @@ void Gb_Square::run(blip_time_t time, blip_time_t end_time, int playing)
 
     {
         int delta = amp - last_amp;
-        if (delta)
-        {
+        if (delta) {
             last_amp = amp;
             synth->offset(time, delta, output);
         }
@@ -140,8 +125,7 @@ void Gb_Square::run(blip_time_t time, blip_time_t end_time, int playing)
     if (!playing)
         time = end_time;
 
-    if (time < end_time)
-    {
+    if (time < end_time) {
         int const period = (2048 - frequency) * 4;
         BLIPBuffer* const output = this->output;
         int phase = this->phase;
@@ -164,10 +148,9 @@ void Gb_Square::run(blip_time_t time, blip_time_t end_time, int playing)
     delay = time - end_time;
 }
 
-// Gb_Noise
+// NintendoGBS_Noise
 
-void Gb_Noise::run(blip_time_t time, blip_time_t end_time, int playing)
-{
+void NintendoGBS_Noise::run(blip_time_t time, blip_time_t end_time, int playing) {
     int amp = volume & playing;
     int tap = 13 - (regs [3] & 8);
     if (bits >> tap & 2)
@@ -175,8 +158,7 @@ void Gb_Noise::run(blip_time_t time, blip_time_t end_time, int playing)
 
     {
         int delta = amp - last_amp;
-        if (delta)
-        {
+        if (delta) {
             last_amp = amp;
             synth->offset(time, delta, output);
         }
@@ -186,8 +168,7 @@ void Gb_Noise::run(blip_time_t time, blip_time_t end_time, int playing)
     if (!playing)
         time = end_time;
 
-    if (time < end_time)
-    {
+    if (time < end_time) {
         static unsigned char const table [8] = { 8, 16, 32, 48, 64, 80, 96, 112 };
         int period = table [regs [3] & 7] << (regs [3] >> 4);
 
@@ -219,12 +200,10 @@ void Gb_Noise::run(blip_time_t time, blip_time_t end_time, int playing)
     delay = time - end_time;
 }
 
-// Gb_Wave
+// NintendoGBS_Wave
 
-inline void Gb_Wave::write_register(int reg, int data)
-{
-    switch (reg)
-    {
+inline void NintendoGBS_Wave::write_register(int reg, int data) {
+    switch (reg) {
     case 0:
         if (!(data & 0x80))
             enabled = false;
@@ -239,8 +218,7 @@ inline void Gb_Wave::write_register(int reg, int data)
         break;
 
     case 4:
-        if (data & trigger & regs [0])
-        {
+        if (data & trigger & regs [0]) {
             wave_pos = 0;
             enabled = true;
             if (length == 0)
@@ -249,8 +227,7 @@ inline void Gb_Wave::write_register(int reg, int data)
     }
 }
 
-void Gb_Wave::run(blip_time_t time, blip_time_t end_time, int playing)
-{
+void NintendoGBS_Wave::run(blip_time_t time, blip_time_t end_time, int playing) {
     int volume_shift = (volume - 1) & 7; // volume = 0 causes shift = 7
     int frequency;
     {
@@ -264,8 +241,7 @@ void Gb_Wave::run(blip_time_t time, blip_time_t end_time, int playing)
         }
 
         int delta = amp - last_amp;
-        if (delta)
-        {
+        if (delta) {
             last_amp = amp;
             synth->offset(time, delta, output);
         }
@@ -275,8 +251,7 @@ void Gb_Wave::run(blip_time_t time, blip_time_t end_time, int playing)
     if (!playing)
         time = end_time;
 
-    if (time < end_time)
-    {
+    if (time < end_time) {
         BLIPBuffer* const output = this->output;
         int const period = (2048 - frequency) * 2;
         int wave_pos = (this->wave_pos + 1) & (wave_size - 1);
@@ -300,19 +275,16 @@ void Gb_Wave::run(blip_time_t time, blip_time_t end_time, int playing)
     delay = time - end_time;
 }
 
-// Gb_Apu::write_osc
+// NintendoGBS::write_osc
 
-void Gb_Apu::write_osc(int index, int reg, int data)
-{
+void NintendoGBS::write_osc(int index, int reg, int data) {
     reg -= index * 5;
-    Gb_Square* sq = &square2;
-    switch (index)
-    {
+    NintendoGBS_Pulse* sq = &square2;
+    switch (index) {
     case 0:
         sq = &square1;
     case 1:
-        if (sq->write_register(reg, data) && index == 0)
-        {
+        if (sq->write_register(reg, data) && index == 0) {
             square1.sweep_freq = square1.frequency();
             if ((regs [0] & sq->period_mask) && (regs [0] & sq->shift_mask))
             {

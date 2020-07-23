@@ -32,7 +32,7 @@ const uint8_t sine_wave[32] = {
 };
 
 /// The Nintendo GameBoy Sound System (GBS) Audio Processing Unit (APU).
-class Gb_Apu {
+class NintendoGBS {
  public:
     /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
     enum Registers {
@@ -68,25 +68,25 @@ class Gb_Apu {
         WAVE_TABLE_VALUES                 = 0xFF30
     };
 
-    Gb_Apu() {
+    NintendoGBS() {
         square1.synth = &square_synth;
         square2.synth = &square_synth;
         wave.synth  = &other_synth;
         noise.synth = &other_synth;
 
-        oscs [0] = &square1;
-        oscs [1] = &square2;
-        oscs [2] = &wave;
-        oscs [3] = &noise;
+        oscs[0] = &square1;
+        oscs[1] = &square2;
+        oscs[2] = &wave;
+        oscs[3] = &noise;
 
         for (int i = 0; i < OSC_COUNT; i++) {
-            Gb_Osc& osc = *oscs [i];
-            osc.regs = &regs [i * 5];
+            NintendoGBS_Oscillator& osc = *oscs[i];
+            osc.regs = &regs[i * 5];
             osc.output = 0;
-            osc.outputs [0] = 0;
-            osc.outputs [1] = 0;
-            osc.outputs [2] = 0;
-            osc.outputs [3] = 0;
+            osc.outputs[0] = 0;
+            osc.outputs[1] = 0;
+            osc.outputs[2] = 0;
+            osc.outputs[3] = 0;
         }
 
         set_tempo(1.0);
@@ -129,11 +129,11 @@ class Gb_Apu {
     inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
         assert((unsigned) index < OSC_COUNT);
         assert((center && left && right) || (!center && !left && !right));
-        Gb_Osc& osc = *oscs [index];
-        osc.outputs [1] = right;
-        osc.outputs [2] = left;
-        osc.outputs [3] = center;
-        osc.output = osc.outputs [osc.output_select];
+        NintendoGBS_Oscillator& osc = *oscs[index];
+        osc.outputs[1] = right;
+        osc.outputs[2] = left;
+        osc.outputs[3] = center;
+        osc.output = osc.outputs[osc.output_select];
     }
 
     inline void osc_output(int index, BLIPBuffer* mono) {
@@ -154,13 +154,13 @@ class Gb_Apu {
         wave.wave_pos = 0;
 
         // avoid click at beginning
-        regs [STEREO_VOLUME - ADDR_START] = 0x77;
+        regs[STEREO_VOLUME - ADDR_START] = 0x77;
         update_volume();
 
-        regs [POWER_CONTROL_STATUS - ADDR_START] = 0x01; // force power
+        regs[POWER_CONTROL_STATUS - ADDR_START] = 0x01; // force power
         write_register(0, POWER_CONTROL_STATUS, 0x00);
 
-        static constexpr uint8_t initial_wave [] = {
+        static constexpr uint8_t initial_wave[] = {
             0x84,0x40,0x43,0xAA,0x2D,0x78,0x92,0x3C, // wave table
             0x60,0x59,0x59,0xB0,0x34,0xB8,0x2E,0xDA
         };
@@ -193,42 +193,42 @@ class Gb_Apu {
 
         run_until(time);
 
-        int old_reg = regs [reg];
-        regs [reg] = data;
+        int old_reg = regs[reg];
+        regs[reg] = data;
 
         if (addr < STEREO_VOLUME) {
             write_osc(reg / 5, reg, data);
         } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
             // return all oscs to 0
             for (int i = 0; i < OSC_COUNT; i++) {
-                Gb_Osc& osc = *oscs [i];
+                NintendoGBS_Oscillator& osc = *oscs[i];
                 int amp = osc.last_amp;
                 osc.last_amp = 0;
                 if (amp && osc.enabled && osc.output)
                     other_synth.offset(time, -amp, osc.output);
             }
 
-            if (wave.outputs [3])
-                other_synth.offset(time, 30, wave.outputs [3]);
+            if (wave.outputs[3])
+                other_synth.offset(time, 30, wave.outputs[3]);
 
             update_volume();
 
-            if (wave.outputs [3])
-                other_synth.offset(time, -30, wave.outputs [3]);
+            if (wave.outputs[3])
+                other_synth.offset(time, -30, wave.outputs[3]);
 
             // oscs will update with new amplitude when next run
         } else if (addr == 0xFF25 || addr == POWER_CONTROL_STATUS) {
-            int mask = (regs [POWER_CONTROL_STATUS - ADDR_START] & 0x80) ? ~0 : 0;
-            int flags = regs [0xFF25 - ADDR_START] & mask;
+            int mask = (regs[POWER_CONTROL_STATUS - ADDR_START] & 0x80) ? ~0 : 0;
+            int flags = regs[0xFF25 - ADDR_START] & mask;
 
             // left/right assignments
             for (int i = 0; i < OSC_COUNT; i++) {
-                Gb_Osc& osc = *oscs [i];
+                NintendoGBS_Oscillator& osc = *oscs[i];
                 osc.enabled &= mask;
                 int bits = flags >> i;
                 BLIPBuffer* old_output = osc.output;
                 osc.output_select = (bits >> 3 & 2) | (bits & 1);
-                osc.output = osc.outputs [osc.output_select];
+                osc.output = osc.outputs[osc.output_select];
                 if (osc.output != old_output) {
                     int amp = osc.last_amp;
                     osc.last_amp = 0;
@@ -241,7 +241,7 @@ class Gb_Apu {
                 if (!(data & 0x80)) {
                     for (unsigned i = 0; i < sizeof powerup_regs; i++) {
                         if (i != POWER_CONTROL_STATUS - ADDR_START)
-                            write_register(time, i + ADDR_START, powerup_regs [i]);
+                            write_register(time, i + ADDR_START, powerup_regs[i]);
                     }
                 }
                 // else {
@@ -250,8 +250,8 @@ class Gb_Apu {
             }
         } else if (addr >= 0xFF30) {
             int index = (addr & 0x0F) * 2;
-            wave.wave [index] = data >> 4;
-            wave.wave [index + 1] = data & 0x0F;
+            wave.wave[index] = data >> 4;
+            wave.wave[index + 1] = data & 0x0F;
         }
     }
 
@@ -261,13 +261,13 @@ class Gb_Apu {
 
         int index = addr - ADDR_START;
         assert((unsigned) index < REGISTER_COUNT);
-        int data = regs [index];
+        int data = regs[index];
 
         if (addr == POWER_CONTROL_STATUS) {
             data = (data & 0x80) | 0x70;
             for (int i = 0; i < OSC_COUNT; i++) {
-                const Gb_Osc& osc = *oscs [i];
-                if (osc.enabled && (osc.length || !(osc.regs [4] & osc.len_enabled_mask)))
+                const NintendoGBS_Oscillator& osc = *oscs[i];
+                if (osc.enabled && (osc.length || !(osc.regs[4] & osc.len_enabled_mask)))
                     data |= 1 << i;
             }
         }
@@ -296,30 +296,30 @@ class Gb_Apu {
 
  private:
     // noncopyable
-    Gb_Apu(const Gb_Apu&);
-    Gb_Apu& operator = (const Gb_Apu&);
+    NintendoGBS(const NintendoGBS&);
+    NintendoGBS& operator = (const NintendoGBS&);
 
-    Gb_Osc* oscs[OSC_COUNT];
+    NintendoGBS_Oscillator* oscs[OSC_COUNT];
     blip_time_t next_frame_time;
     blip_time_t last_time;
     blip_time_t frame_period;
     double volume_unit;
     int frame_count;
 
-    Gb_Square square1;
-    Gb_Square square2;
-    Gb_Wave wave;
-    Gb_Noise noise;
+    NintendoGBS_Pulse square1;
+    NintendoGBS_Pulse square2;
+    NintendoGBS_Wave wave;
+    NintendoGBS_Noise noise;
     uint8_t regs[REGISTER_COUNT];
     // used by squares
-    Gb_Square::Synth square_synth;
+    NintendoGBS_Pulse::Synth square_synth;
     // used by wave and noise
-    Gb_Wave::Synth other_synth;
+    NintendoGBS_Wave::Synth other_synth;
 
     void update_volume() {
         // TODO: doesn't handle differing left/right global volume (support would
         // require modification to all oscillator code)
-        int data = regs [STEREO_VOLUME - ADDR_START];
+        int data = regs[STEREO_VOLUME - ADDR_START];
         double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
         square_synth.volume(vol);
         other_synth.volume(vol);
@@ -337,11 +337,11 @@ class Gb_Apu {
 
             // run oscillators
             for (int i = 0; i < OSC_COUNT; ++i) {
-                Gb_Osc& osc = *oscs [i];
+                NintendoGBS_Oscillator& osc = *oscs[i];
                 if (osc.output) {
                     int playing = false;
                     if (osc.enabled && osc.volume &&
-                            (!(osc.regs [4] & osc.len_enabled_mask) || osc.length))
+                            (!(osc.regs[4] & osc.len_enabled_mask) || osc.length))
                         playing = -1;
                     switch (i) {
                     case 0: square1.run(last_time, time, playing); break;

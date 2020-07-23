@@ -157,8 +157,8 @@ class NintendoGBS {
         regs[STEREO_VOLUME - ADDR_START] = 0x77;
         update_volume();
 
-        regs[POWER_CONTROL_STATUS - ADDR_START] = 0x01; // force power
-        write_register(0, POWER_CONTROL_STATUS, 0x00);
+        regs[POWER_CONTROL_STATUS - ADDR_START] = 0x01;  // force power
+        write(POWER_CONTROL_STATUS, 0x00);
 
         static constexpr uint8_t initial_wave[] = {
             0x84,0x40,0x43,0xAA,0x2D,0x78,0x92,0x3C, // wave table
@@ -173,7 +173,8 @@ class NintendoGBS {
     enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
 
     // Write 'data' to address at specified time
-    void write_register(blip_time_t time, unsigned addr, int data) {
+    void write(unsigned addr, int data) {
+        static constexpr int time = 0;
         static constexpr unsigned char powerup_regs[0x20] = {
             0x80,0x3F,0x00,0xFF,0xBF,                     // square 1
             0xFF,0x3F,0x00,0xFF,0xBF,                     // square 2
@@ -241,7 +242,7 @@ class NintendoGBS {
                 if (!(data & 0x80)) {
                     for (unsigned i = 0; i < sizeof powerup_regs; i++) {
                         if (i != POWER_CONTROL_STATUS - ADDR_START)
-                            write_register(time, i + ADDR_START, powerup_regs[i]);
+                            write(i + ADDR_START, powerup_regs[i]);
                     }
                 }
                 // else {

@@ -21,26 +21,6 @@
 
 #include "blip_buffer.hpp"
 
-/// the IO registers on the SunSoftFME7.
-enum SunSoftSunSoftFME7_Registers {
-    PULSE_A_LO   = 0x00,
-    PULSE_A_HI   = 0x01,
-    PULSE_B_LO   = 0x02,
-    PULSE_B_HI   = 0x03,
-    PULSE_C_LO   = 0x04,
-    PULSE_C_HI   = 0x05,
-    NOISE_PERIOD = 0x06,
-    NOISE_TONE   = 0x07,
-    PULSE_A_ENV  = 0x08,
-    PULSE_B_ENV  = 0x09,
-    PULSE_C_ENV  = 0x0A,
-    ENV_LO       = 0x0B,
-    ENV_HI       = 0x0C,
-    ENV_RESET    = 0x0D,
-    IO_PORT_A    = 0x0E,  // unused
-    IO_PORT_B    = 0x0F   // unused
-};
-
 /// SunSoft FME7 sound chip emulator.
 class SunSoftFME7 {
  public:
@@ -52,9 +32,27 @@ class SunSoftFME7 {
     /// value; 192 gives best error / quality trade-off
     enum { AMP_RANGE = 192 };
 
+    /// the IO registers on the chip.
+    enum Registers {
+        PULSE_A_LO   = 0x00,
+        PULSE_A_HI   = 0x01,
+        PULSE_B_LO   = 0x02,
+        PULSE_B_HI   = 0x03,
+        PULSE_C_LO   = 0x04,
+        PULSE_C_HI   = 0x05,
+        NOISE_PERIOD = 0x06,
+        NOISE_TONE   = 0x07,
+        PULSE_A_ENV  = 0x08,
+        PULSE_B_ENV  = 0x09,
+        PULSE_C_ENV  = 0x0A,
+        ENV_LO       = 0x0B,
+        ENV_HI       = 0x0C,
+        ENV_RESET    = 0x0D,
+        // IO_PORT_A    = 0x0E,  // unused
+        // IO_PORT_B    = 0x0F   // unused
+    };
+
  private:
-    /// the latch register on the chip
-    uint8_t latch;
     /// the registers on the chip
     uint8_t regs[REG_COUNT];
     /// the phases of the oscillators
@@ -120,28 +118,15 @@ class SunSoftFME7 {
             oscs[i].last_amp = 0;
     }
 
-    /// the mask for addresses
-    enum { ADDR_MASK = 0xE000 };
-    /// the mask for data input
-    enum { DATA_ADDR = 0xE000 };
-    /// the mask for the latch register
-    enum { LATCH_ADDR = 0xC000 };
-
-    /// Write to the latch port.
+    /// Write data to the chip port.
     ///
-    /// @param data the byte to write to the latch port
-    /// @details
-    /// (addr & ADDR_MASK) == LATCH_ADDR
-    ///
-    inline void write_latch(int data) { latch = data; }
-
-    /// Write to the data port.
-    ///
+    /// @param latch the byte to write to the latch port
     /// @param data the byte to write to the data port
-    /// @details
-    /// (addr & ADDR_MASK) == DATA_ADDR
     ///
-    inline void write_data(int data) {
+    /// @details
+    /// Sets the latch, then write the data to the appropriate address
+    ///
+    inline void write(uint8_t latch, uint8_t data) {
         run_until(0);
         regs[latch] = data;
     }
@@ -238,4 +223,4 @@ class SunSoftFME7 {
     }
 };
 
-#endif
+#endif  // DSP_SUNSOFT_FME7_HPP_

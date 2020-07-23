@@ -97,10 +97,10 @@ struct ChipFME7 : Module {
         freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
         uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
         // write the registers with the frequency data
-        apu.write_latch(PULSE_A_LO + 2 * channel);
-        apu.write_data(freq12bit & 0b11111111);
-        apu.write_latch(PULSE_A_HI + 2 * channel);
-        apu.write_data((freq12bit & 0b0000111100000000) >> 8);
+        uint8_t lo =  freq12bit & 0b11111111;
+        apu.write(SunSoftFME7::PULSE_A_LO + 2 * channel, lo);
+        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        apu.write(SunSoftFME7::PULSE_A_HI + 2 * channel, hi);
 
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
@@ -109,8 +109,7 @@ struct ChipFME7 : Module {
             levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
-        apu.write_latch(PULSE_A_ENV + channel);
-        apu.write_data(level);
+        apu.write(SunSoftFME7::PULSE_A_ENV + channel, level);
     }
 
     /// Return a 10V signed sample from the FME7.

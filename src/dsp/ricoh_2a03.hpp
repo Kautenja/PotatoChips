@@ -532,7 +532,7 @@ class Ricoh2A03 {
     Ricoh2A03() {
         // pulse 1 and 2 share the same synthesizer
         pulse0.synth = pulse1.synth = &square_synth;
-        set_output();
+        set_output(NULL);
         set_volume();
         reset();
     }
@@ -547,7 +547,7 @@ class Ricoh2A03 {
     /// If buffer is NULL, the specified oscillator is muted and emulation
     /// accuracy is reduced.
     ///
-    inline void set_output(unsigned channel, BLIPBuffer* buffer = NULL) {
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
         if (channel >= OSC_COUNT)  // make sure the channel is within bounds
             throw ChannelOutOfBoundsException(channel, OSC_COUNT);
         oscs[channel]->output = buffer;
@@ -558,7 +558,7 @@ class Ricoh2A03 {
     ///
     /// @param buffer the single buffer to output the all the voices to
     ///
-    inline void set_output(BLIPBuffer* buffer = NULL) {
+    inline void set_output(BLIPBuffer* buffer) {
         for (unsigned channel = 0; channel < OSC_COUNT; channel++)
             set_output(channel, buffer);
     }

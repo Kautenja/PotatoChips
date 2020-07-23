@@ -21,6 +21,7 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 #include <cstring>
 
 /// @brief Turbo Grafx 16 sound chip emulator.

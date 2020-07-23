@@ -21,6 +21,7 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
 /// @brief General Instrument AY-3-8910 sound chip emulator.
 /// @details

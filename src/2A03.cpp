@@ -64,7 +64,8 @@ struct Chip2A03 : Module {
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
         onSampleRateChange();
@@ -96,12 +97,12 @@ struct Chip2A03 : Module {
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        apu.write_register(0, Ricoh2A03::PULSE0_LO + 4 * channel, freq11bit & 0b11111111);
-        apu.write_register(0, Ricoh2A03::PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
+        apu.write(Ricoh2A03::PULSE0_LO + 4 * channel, freq11bit & 0b11111111);
+        apu.write(Ricoh2A03::PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
         // set the pulse width of the pulse wave (high 2 bits) and set the
         // volume to a constant level
         auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write_register(0, Ricoh2A03::PULSE0_VOL + 4 * channel, pw + 0b00011111);
+        apu.write(Ricoh2A03::PULSE0_VOL + 4 * channel, pw + 0b00011111);
     }
 
     /// Process triangle wave (channel 2).
@@ -125,10 +126,10 @@ struct Chip2A03 : Module {
         freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
         // write the frequency to the low and high registers
-        apu.write_register(0, Ricoh2A03::TRI_LO, freq11bit & 0b11111111);
-        apu.write_register(0, Ricoh2A03::TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
+        apu.write(Ricoh2A03::TRI_LO, freq11bit & 0b11111111);
+        apu.write(Ricoh2A03::TRI_HI, (freq11bit & 0b0000011100000000) >> 8);
         // write the linear register to enable the oscillator
-        apu.write_register(0, Ricoh2A03::TRI_LINEAR, 0b01111111);
+        apu.write(Ricoh2A03::TRI_LINEAR, 0b01111111);
     }
 
     /// Process noise (channel 3).
@@ -144,10 +145,10 @@ struct Chip2A03 : Module {
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write_register(0, Ricoh2A03::NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
-        apu.write_register(0, Ricoh2A03::NOISE_HI, 0);
+        apu.write(Ricoh2A03::NOISE_LO, lfsr.isHigh() * 0b10000000 + period);
+        apu.write(Ricoh2A03::NOISE_HI, 0);
         // set the volume to a constant level
-        apu.write_register(0, Ricoh2A03::NOISE_VOL, 0b00011111);
+        apu.write(Ricoh2A03::NOISE_VOL, 0b00011111);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -173,7 +174,7 @@ struct Chip2A03 : Module {
             channel_triangle();
             channel_noise();
             // enable all four channels
-            apu.write_register(0, Ricoh2A03::SND_CHN, 0b00001111);
+            apu.write(Ricoh2A03::SND_CHN, 0b00001111);
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

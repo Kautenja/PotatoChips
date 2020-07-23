@@ -1,4 +1,4 @@
-// An oscillator based on the NES 2A03 synthesis chip.
+// A Ricoh 2A03 sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -19,55 +19,91 @@
 #ifndef DSP_2A03_HPP_
 #define DSP_2A03_HPP_
 
+#include "exceptions.hpp"
 #include "ricoh_2a03_oscillators.hpp"
 #include <cassert>
 
-/// An oscillator based on the Ricoh 2A03 synthesis chip.
+/// @brief A Ricoh 2A03 sound chip emulator.
 class Ricoh2A03 {
  public:
     /// the number of oscillators on the chip
     static constexpr int OSC_COUNT = 4;
-    /// the first address of the APU RAM addresses
+    /// the first address of the RAM space
     static constexpr int ADDR_START = 0x4000;
-    /// the last address of the APU RAM addresses
+    /// the last address of the RAM space
     static constexpr int ADDR_END   = 0x4017;
+    /// the number of registers on the chip
+    static constexpr int NUM_REGISTERS = ADDR_END - ADDR_START;
 
-    /// the IO registers on the APU
-    enum Registers {
-        PULSE0_VOL =     0x4000,
-        PULSE0_SWEEP =   0x4001,
-        PULSE0_LO =      0x4002,
-        PULSE0_HI =      0x4003,
-        PULSE1_VOL =     0x4004,
-        PULSE1_SWEEP =   0x4005,
-        PULSE1_LO =      0x4006,
-        PULSE1_HI =      0x4007,
-        TRI_LINEAR =     0x4008,
-        // APU_UNUSED1 =    0x4009,  // may be used for memory clearing loops
-        TRI_LO =         0x400A,
-        TRI_HI =         0x400B,
-        NOISE_VOL =      0x400C,
-        // APU_UNUSED2 =    0x400D,  // may be used for memory clearing loops
-        NOISE_LO =       0x400E,
-        NOISE_HI =       0x400F,
-        // DMC_FREQ =       0x4010,
-        // DMC_RAW =        0x4011,
-        // DMC_START =      0x4012,
-        // DMC_LEN =        0x4013,
-        SND_CHN =        0x4015,
-        // JOY1 =           0x4016,  // unused for APU
-        // STATUS =         0x4017,
+    /// the indexes of the channels on the chip
+    enum Channel {
+        PULSE_0 = 0,
+        PULSE_1,
+        TRIANGLE,
+        NOISE
     };
 
-    /// Initialize a new APU.
+    /// the IO registers on the chip
+    enum Register {
+        /// the duty & 4-bit volume register for pulse waveform generator 0
+        PULSE0_VOL =     0x4000,
+        /// the sweep register for pulse waveform generator 0
+        PULSE0_SWEEP =   0x4001,
+        /// the frequency (low 8-bits) for pulse waveform generator 0
+        PULSE0_LO =      0x4002,
+        /// the frequency (high 3-bits) for pulse waveform generator 0
+        PULSE0_HI =      0x4003,
+        /// the duty & 4-bit volume register for pulse waveform generator 1
+        PULSE1_VOL =     0x4004,
+        /// the sweep register for pulse waveform generator 1
+        PULSE1_SWEEP =   0x4005,
+        /// the frequency (low 8-bits) for pulse waveform generator 1
+        PULSE1_LO =      0x4006,
+        /// the frequency (high 3-bits) for pulse waveform generator 1
+        PULSE1_HI =      0x4007,
+        /// the linear counter for the triangle waveform generator
+        TRI_LINEAR =     0x4008,
+        /// an unnecessary register that may be used for memory clearing loops
+        /// by application code (NES ROMs)
+        // APU_UNUSED1 =    0x4009,
+        /// the frequency (low 8-bits) for triangle waveform generator
+        TRI_LO =         0x400A,
+        /// the frequency (high 3-bits) for triangle waveform generator
+        TRI_HI =         0x400B,
+        /// the volume register for the noise generator
+        NOISE_VOL =      0x400C,
+        /// an unnecessary register that may be used for memory clearing loops
+        /// by application code (NES ROMs)
+        // APU_UNUSED2 =    0x400D,
+        /// period and waveform shape for the noise generator
+        NOISE_LO =       0x400E,
+        /// length counter value for the noise generator
+        NOISE_HI =       0x400F,
+        /// play mode and frequency for DMC samples
+        // DMC_FREQ =       0x4010,
+        /// 7-bit DAC
+        // DMC_RAW =        0x4011,
+        /// start of the DMC waveform
+        // DMC_START =      0x4012,
+        /// length of the DMC waveform
+        // DMC_LEN =        0x4013,
+        /// channel enables and status
+        SND_CHN =        0x4015,
+        // JOY1 =           0x4016,
+        /// the status register
+        STATUS =         0x4017,
+    };
+
+    /// @brief Initialize a new Ricoh 2A03 emulator.
     Ricoh2A03() {
+        // pulse 1 and 2 share the same synthesizer
         pulse1.synth = pulse2.synth = &square_synth;
-        output(NULL);
+        set_output(NULL);
         volume(1.0);
         reset(false);
     }
 
-    /// Reset internal frame counter, registers, and all oscillators.
+    /// @brief Reset internal frame counter, registers, and all oscillators.
     ///
     /// @param pal_timing Use PAL timing if pal_timing is true, otherwise NTSC
     ///
@@ -83,16 +119,16 @@ class Ricoh2A03 {
         last_time = 0;
         osc_enables = 0;
         frame_delay = 1;
-        write_register(0, 0x4017, 0x00);
-        write_register(0, 0x4015, 0x00);
+        write(0x4017, 0x00);
+        write(0x4015, 0x00);
         // initialize sq1, sq2, tri, and noise, not DMC
         for (nes_cpu_addr_t addr = ADDR_START; addr <= 0x4009; addr++)
-            write_register(0, addr, (addr & 3) ? 0x00 : 0x10);
+            write(addr, (addr & 3) ? 0x00 : 0x10);
     }
 
-    /// Set the volume.
+    /// @brief Set overall volume of all oscillators, where 1.0 is full volume
     ///
-    /// @param value the global volume level of the chip
+    /// @param level the value to set the volume to
     ///
     inline void volume(double v = 1.f) {
         square_synth.volume(0.1128 * v);
@@ -100,61 +136,50 @@ class Ricoh2A03 {
         noise.synth.volume(0.0741 * v);
     }
 
-    /// Set treble equalization.
+    /// @brief Set treble equalization for the synthesizers.
     ///
-    /// @param eq the equalizer settings to use
+    /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(const blip_eq_t& eq) {
-        square_synth.treble_eq(eq);
-        triangle.synth.treble_eq(eq);
-        noise.synth.treble_eq(eq);
+    inline void treble_eq(const blip_eq_t& equalizer) {
+        square_synth.treble_eq(equalizer);
+        triangle.synth.treble_eq(equalizer);
+        noise.synth.treble_eq(equalizer);
     }
 
-    /// Set buffer to generate all sound into, or disable sound if NULL.
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
     ///
-    /// @param buf the buffer to write samples from the synthesizer to
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    /// @details
+    /// If buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
     ///
-    inline void output(BLIPBuffer* buf) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel]->output = buffer;
     }
 
-    /// Set the output buffer for an individual synthesizer voice.
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
     ///
-    /// @param i the index of the oscillator to set the output buffer for
-    /// @param buf the buffer to write samples from the synthesizer to
-    /// @note If buffer is NULL, the specified oscillator is muted and
-    ///       emulation accuracy is reduced.
-    /// @note The oscillators are indexed as follows:
-    ///       0) Pulse 1,
-    ///       1) Pulse 2,
-    ///       2) Triangle,
-    ///       3) Noise.
+    /// @param buffer the BLIPBuffer to output the all the voices to
     ///
-    inline void osc_output(int osc, BLIPBuffer* buf) {
-        assert(0 <= osc && osc < OSC_COUNT && "Ricoh2A03::osc_output(): Index out of range");
-        oscs[osc]->output = buf;
+    inline void set_output(BLIPBuffer* buffer) {
+        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
+            set_output(channel, buffer);
     }
 
-    /// Run all oscillators up to specified time, end current time frame, then
-    /// start a new time frame at time 0. Time frames have no effect on
-    /// emulation and each can be whatever length is convenient.
+    /// @brief Write to data to a register.
     ///
-    /// @param time the number of elapsed cycles
-    ///
-    inline void end_frame(nes_cpu_time_t end_time) {
-        if (end_time > last_time) run_until(end_time);
-        // make times relative to new frame
-        last_time -= end_time;
-        assert(last_time >= 0 && "last_time went negative");
-    }
-
-    /// Write to register (0x4000-0x4017, except 0x4014 and 0x4016).
-    ///
-    /// @param time the number of elapsed cycles
-    /// @param address the address of the register to write
+    /// @param address the address of the register to write in [0x4000, 0x4017],
+    /// except 0x4014 and 0x4016. See Register enum for more details.
     /// @param data the data to write to the register
     ///
-    void write_register(nes_cpu_time_t time, nes_cpu_addr_t addr, int data) {
+    void write(nes_cpu_addr_t address, int data) {
+        static const nes_cpu_time_t time = 0;
         /// The length table to lookup length values from registers
         static constexpr unsigned char length_table[0x20] = {
             0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
@@ -162,25 +187,25 @@ class Ricoh2A03 {
             0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
             0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
         };
-        assert(addr > 0x20);  // addr must be actual address (i.e. 0x40xx)
+        assert(address > 0x20);  // addr must be actual address (i.e. 0x40xx)
         assert((unsigned) data <= 0xff);
         // Ignore addresses outside range
-        if (addr < ADDR_START || ADDR_END < addr) return;
+        if (address < ADDR_START || ADDR_END < address) return;
 
         run_until(time);
 
-        if (addr < 0x4010) {  // synthesize registers
+        if (address < 0x4010) {  // synthesize registers
             // Write to channel
-            int osc_index = (addr - ADDR_START) >> 2;
+            int osc_index = (address - ADDR_START) >> 2;
             Oscillator* osc = oscs[osc_index];
 
-            int reg = addr & 3;
+            int reg = address & 3;
             osc->regs[reg] = data;
             osc->reg_written[reg] = true;
 
-            if (osc_index == 4) {
+            /*if (osc_index == 4) {
                 // handle DMC specially
-            } else if (reg == 3) {
+            } else */if (reg == 3) {
                 // load length counter
                 if ((osc_enables >> osc_index) & 1)
                     osc->length_counter = length_table[(data >> 3) & 0x1f];
@@ -189,13 +214,13 @@ class Ricoh2A03 {
                 // if (osc_index < 2)
                 //  ((Nes_Square*) osc)->phase = Nes_Square::phase_range - 1;
             }
-        } else if (addr == 0x4015) {
+        } else if (address == 0x4015) {
             // Channel enables
             for (int i = OSC_COUNT; i--;)
                 if (!((data >> i) & 1))
                     oscs[i]->length_counter = 0;
             osc_enables = data;
-        } else if (addr == 0x4017) {
+        } else if (address == 0x4017) {
             // Frame mode
             frame_mode = data;
 
@@ -209,6 +234,18 @@ class Ricoh2A03 {
                 frame_delay += frame_period;
             }
         }
+    }
+
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    inline void end_frame(nes_cpu_time_t end_time) {
+        if (end_time > last_time) run_until(end_time);
+        // make times relative to new frame
+        last_time -= end_time;
+        assert(last_time >= 0 && "last_time went negative");
     }
 
  private:
@@ -264,7 +301,7 @@ class Ricoh2A03 {
     //     noise.last_amp = 0;
     // }
 
-    /// Run APU until specified time, so that any DMC memory reads can be
+    /// Run PSG until specified time, so that any DMC memory reads can be
     /// accounted for (i.e. inserting CPU wait states).
     ///
     /// @param time the number of elapsed cycles

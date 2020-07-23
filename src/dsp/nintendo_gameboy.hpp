@@ -79,7 +79,7 @@ class NintendoGBS {
     };
 
  private:
-    struct NintendoGBS_Oscillator {
+    struct Oscillator {
         /// TODO:
         enum { trigger = 0x80 };
         /// TODO:
@@ -125,12 +125,12 @@ class NintendoGBS {
         }
     };
 
-    struct NintendoGBS_Envelope : NintendoGBS_Oscillator {
+    struct Envelope : Oscillator {
         int env_delay;
 
         inline void reset() {
             env_delay = 0;
-            NintendoGBS_Oscillator::reset();
+            Oscillator::reset();
         }
 
         void clock_envelope() {
@@ -165,7 +165,7 @@ class NintendoGBS {
         }
     };
 
-    struct NintendoGBS_Pulse : NintendoGBS_Envelope {
+    struct Pulse : Envelope {
         enum { period_mask = 0x70 };
         enum { shift_mask  = 0x07 };
 
@@ -179,7 +179,7 @@ class NintendoGBS {
             phase = 0;
             sweep_freq = 0;
             sweep_delay = 0;
-            NintendoGBS_Envelope::reset();
+            Envelope::reset();
         }
 
         void clock_sweep() {
@@ -252,7 +252,7 @@ class NintendoGBS {
         }
     };
 
-    struct NintendoGBS_Noise : NintendoGBS_Envelope {
+    struct Noise : Envelope {
         typedef BLIPSynth<blip_med_quality, 1> Synth;
         Synth const* synth;
         unsigned bits;
@@ -305,7 +305,7 @@ class NintendoGBS {
         }
     };
 
-    struct NintendoGBS_Wave : NintendoGBS_Oscillator {
+    struct Wave : Oscillator {
         typedef BLIPSynth<blip_med_quality, 1> Synth;
         Synth const* synth;
         int wave_pos;
@@ -390,15 +390,15 @@ class NintendoGBS {
     int frame_count;
 
     /// the pulse waveform generator for channel 1
-    NintendoGBS_Pulse pulse1;
+    Pulse pulse1;
     /// the pulse waveform generator for channel 2
-    NintendoGBS_Pulse pulse2;
+    Pulse pulse2;
     /// the DPCM waveform generator for channel 3
-    NintendoGBS_Wave wave;
+    Wave wave;
     /// the noise generator for channel 4
-    NintendoGBS_Noise noise;
+    Noise noise;
     /// the general set of oscillators on the chip
-    NintendoGBS_Oscillator* const oscs[OSC_COUNT] = {
+    Oscillator* const oscs[OSC_COUNT] = {
         &pulse1,
         &pulse2,
         &wave,
@@ -408,9 +408,9 @@ class NintendoGBS {
     uint8_t regs[REGISTER_COUNT];
 
     /// the synthesizer used by pulse waves
-    NintendoGBS_Pulse::Synth pulse_synth;
+    Pulse::Synth pulse_synth;
     /// the synthesizer used by DPCM wave and noise
-    NintendoGBS_Wave::Synth other_synth;
+    Wave::Synth other_synth;
 
     void update_volume() {
         // TODO: doesn't handle differing left/right global volume (support would
@@ -433,7 +433,7 @@ class NintendoGBS {
 
             // run oscillators
             for (int i = 0; i < OSC_COUNT; ++i) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
+                Oscillator& osc = *oscs[i];
                 if (osc.output) {
                     int playing = false;
                     if (osc.enabled && osc.volume &&
@@ -475,7 +475,7 @@ class NintendoGBS {
 
     void write_osc(int index, int reg, int data) {
         reg -= index * 5;
-        NintendoGBS_Pulse* sq = &pulse2;
+        Pulse* sq = &pulse2;
         switch (index) {
         case 0:
             sq = &pulse1;
@@ -512,7 +512,7 @@ class NintendoGBS {
         noise.synth = &other_synth;
 
         for (int i = 0; i < OSC_COUNT; i++) {
-            NintendoGBS_Oscillator& osc = *oscs[i];
+            Oscillator& osc = *oscs[i];
             osc.regs = &regs[i * 5];
             osc.output = 0;
             osc.outputs[0] = 0;
@@ -560,7 +560,7 @@ class NintendoGBS {
     inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
         assert((unsigned) index < OSC_COUNT);
         assert((center && left && right) || (!center && !left && !right));
-        NintendoGBS_Oscillator& osc = *oscs[index];
+        Oscillator& osc = *oscs[index];
         osc.outputs[1] = right;
         osc.outputs[2] = left;
         osc.outputs[3] = center;
@@ -628,7 +628,7 @@ class NintendoGBS {
         } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
             // return all oscs to 0
             for (int i = 0; i < OSC_COUNT; i++) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
+                Oscillator& osc = *oscs[i];
                 int amp = osc.last_amp;
                 osc.last_amp = 0;
                 if (amp && osc.enabled && osc.output)
@@ -650,7 +650,7 @@ class NintendoGBS {
 
             // left/right assignments
             for (int i = 0; i < OSC_COUNT; i++) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
+                Oscillator& osc = *oscs[i];
                 osc.enabled &= mask;
                 int bits = flags >> i;
                 BLIPBuffer* old_output = osc.output;
@@ -693,7 +693,7 @@ class NintendoGBS {
         if (addr == POWER_CONTROL_STATUS) {
             data = (data & 0x80) | 0x70;
             for (int i = 0; i < OSC_COUNT; i++) {
-                const NintendoGBS_Oscillator& osc = *oscs[i];
+                const Oscillator& osc = *oscs[i];
                 if (osc.enabled && (osc.length || !(osc.regs[4] & osc.len_enabled_mask)))
                     data |= 1 << i;
             }

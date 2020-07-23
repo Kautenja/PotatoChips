@@ -30,17 +30,17 @@ class TexasInstrumentsSN76489 {
     /// the registers on the SN76489
     enum Registers {
         /// the frequency register for pulse generator 0
-        TONE_1_FREQUENCY   = 0b10000000,
+        TONE_0_FREQUENCY   = 0b10000000,
         /// the attenuation register for pulse generator 0
-        TONE_1_ATTENUATION = 0b10010000,
+        TONE_0_ATTENUATION = 0b10010000,
         /// the frequency register for pulse generator 1
-        TONE_2_FREQUENCY   = 0b10100000,
+        TONE_1_FREQUENCY   = 0b10100000,
         /// the attenuation register for pulse generator 1
-        TONE_2_ATTENUATION = 0b10110000,
+        TONE_1_ATTENUATION = 0b10110000,
         /// the frequency register for pulse generator 2
-        TONE_3_FREQUENCY   = 0b11000000,
+        TONE_2_FREQUENCY   = 0b11000000,
         /// the attenuation register for pulse generator 2
-        TONE_3_ATTENUATION = 0b11010000,
+        TONE_2_ATTENUATION = 0b11010000,
         /// the control register for the noise generator
         NOISE_CONTROL      = 0b11100000,
         /// the attenuation register for noise generator

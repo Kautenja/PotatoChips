@@ -381,4 +381,32 @@ class NintendoGBS {
     void write_osc(int index, int reg, int data);
 };
 
+#include "nintendo_gameboy_oscillators.hpp"
+
+void NintendoGBS::write_osc(int index, int reg, int data) {
+    reg -= index * 5;
+    NintendoGBS_Pulse* sq = &square2;
+    switch (index) {
+    case 0:
+        sq = &square1;
+    case 1:
+        if (sq->write_register(reg, data) && index == 0) {
+            square1.sweep_freq = square1.frequency();
+            if ((regs[0] & sq->period_mask) && (regs[0] & sq->shift_mask)) {
+                square1.sweep_delay = 1;  // cause sweep to recalculate now
+                square1.clock_sweep();
+            }
+        }
+        break;
+
+    case 2:
+        wave.write_register(reg, data);
+        break;
+
+    case 3:
+        if (noise.write_register(reg, data))
+            noise.bits = 0x7FFF;
+    }
+}
+
 #endif  // DSP_NINTENDO_GAMEBOY_HPP_

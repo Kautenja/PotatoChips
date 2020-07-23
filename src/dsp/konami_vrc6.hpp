@@ -22,7 +22,11 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
-/// A Konami VRC6 chip emulator.
+/// @brief A Konami VRC6 chip emulator.
+/// @details
+/// the frequency scaling feature is not implemented in the emulation, i.e.,
+/// register 0x9003 is invalid in this emulation
+///
 class KonamiVRC6 {
  public:
     /// the number of oscillators on the VRC6 chip

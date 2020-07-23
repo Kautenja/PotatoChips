@@ -101,15 +101,19 @@ struct Envelope : Oscillator {
 
 /// The square wave oscillator from the NES.
 struct Pulse : Envelope {
+    /// TODO:
     enum { negate_flag = 0x08 };
+    /// TODO:
     enum { shift_mask = 0x07 };
+    /// TODO:
     enum { phase_range = 8 };
+    /// the current phase of the oscillator
     int phase;
+    /// TODO:
     int sweep_delay;
 
-    typedef BLIPSynth<blip_good_quality, 15> Synth;
-    // shared between squares
-    const Synth* synth;
+    /// the BLIP synthesizer for the oscillator (shared between pulse waves)
+    const BLIPSynth<blip_good_quality, 15>* synth;
 
     void clock_sweep(int negative_adjust) {
         int sweep = regs[1];
@@ -180,7 +184,7 @@ struct Pulse : Envelope {
             time += delay;
             if (time < end_time) {
                 BLIPBuffer* const output = this->output;
-                const Synth* synth = this->synth;
+                const auto synth = this->synth;
                 int delta = amp * 2 - volume;
                 int phase = this->phase;
 
@@ -200,6 +204,7 @@ struct Pulse : Envelope {
         delay = time - end_time;
     }
 
+    /// Reset the oscillator to its initial state.
     inline void reset() {
         sweep_delay = 0;
         Envelope::reset();
@@ -211,6 +216,7 @@ struct Triangle : Oscillator {
     enum { phase_range = 16 };
     int phase;
     int linear_counter;
+    /// the BLIP synthesizer for the oscillator
     BLIPSynth<blip_good_quality, 15> synth;
 
     inline int calc_amp() const {
@@ -286,7 +292,9 @@ static constexpr int16_t noise_period_table[16] = {
 
 /// The noise oscillator from the NES.
 struct Noise : Envelope {
+    /// the output value from the noise oscillator
     int noise;
+    /// the BLIP synthesizer for the oscillator
     BLIPSynth<blip_med_quality, 15> synth;
 
     void run(blip_time_t time, blip_time_t end_time) {

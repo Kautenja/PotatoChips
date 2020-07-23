@@ -8,6 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 72,
       "data": {
         "audio": {
           "driver": 5,
@@ -72,8 +73,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -258,7 +259,7 @@
         },
         {
           "id": 5,
-          "value": 0.5
+          "value": 0.894499958
         },
         {
           "id": 6,
@@ -275,6 +276,38 @@
         8,
         0
       ]
+    },
+    {
+      "id": 71,
+      "plugin": "Bogaudio",
+      "version": "1.1.31",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "leftModuleId": 72,
+      "data": {
+        "range": 0.0,
+        "range_db": 80.0,
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        43,
+        0
+      ]
+    },
+    {
+      "id": 72,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "leftModuleId": 1,
+      "rightModuleId": 71,
+      "pos": [
+        38,
+        0
+      ]
     }
   ],
   "cables": [
@@ -287,59 +320,99 @@
       "color": "#0986ad"
     },
     {
-      "id": 75,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 177,
+      "id": 183,
       "outputModuleId": 70,
       "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 178,
-      "outputModuleId": 70,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
+      "inputModuleId": 71,
+      "inputId": 0,
       "color": "#0986ad"
     },
     {
-      "id": 179,
+      "id": 184,
       "outputModuleId": 70,
-      "outputId": 2,
-      "inputModuleId": 2,
-      "inputId": 3,
+      "outputId": 0,
+      "inputModuleId": 72,
+      "inputId": 0,
       "color": "#c9b70e"
     },
     {
-      "id": 180,
+      "id": 185,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 186,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 187,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 188,
       "outputModuleId": 70,
       "outputId": 0,
       "inputModuleId": 7,
       "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 189,
+      "outputModuleId": 70,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 190,
+      "outputModuleId": 70,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 2,
       "color": "#0c8e15"
     },
     {
-      "id": 181,
+      "id": 191,
+      "outputModuleId": 70,
+      "outputId": 2,
+      "inputModuleId": 2,
+      "inputId": 3,
+      "color": "#c91847"
+    },
+    {
+      "id": 192,
       "outputModuleId": 70,
       "outputId": 1,
       "inputModuleId": 68,
       "inputId": 0,
-      "color": "#c91847"
+      "color": "#0c8e15"
     },
     {
-      "id": 182,
+      "id": 193,
       "outputModuleId": 70,
       "outputId": 2,
       "inputModuleId": 69,
       "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 194,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
       "color": "#0986ad"
     }
   ]

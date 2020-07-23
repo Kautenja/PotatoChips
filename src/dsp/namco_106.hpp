@@ -20,6 +20,7 @@
 #define DSP_NAMCO_106_HPP_
 
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
 /// @brief Namco 106 chip emulator.
 class Namco106 {

@@ -20,6 +20,7 @@
 #define DSP_NINTENDO_GAMEBOY_HPP_
 
 #include "nintendo_gameboy_oscillators.hpp"
+#include "exceptions.hpp"
 #include <algorithm>
 #include <cstring>
 

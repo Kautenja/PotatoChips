@@ -20,6 +20,7 @@
 #define DSP_SUNSOFT_FME7_HPP_
 
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
 /// @brief SunSoft FME7 chip emulator.
 class SunSoftFME7 {

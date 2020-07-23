@@ -53,16 +53,8 @@ class SunSoftFME7 {
     /// the range of the amplifier on the chip. It could be any potential
     /// value; 192 gives best error / quality trade-off
     enum { AMP_RANGE = 192 };
-
     /// the table of volume levels for the amplifier
-    const uint8_t AMP_TABLE[16] = {
-        #define ENTRY(n) static_cast<uint8_t>(n * AMP_RANGE + 0.5)
-        ENTRY(0.0000), ENTRY(0.0078), ENTRY(0.0110), ENTRY(0.0156),
-        ENTRY(0.0221), ENTRY(0.0312), ENTRY(0.0441), ENTRY(0.0624),
-        ENTRY(0.0883), ENTRY(0.1249), ENTRY(0.1766), ENTRY(0.2498),
-        ENTRY(0.3534), ENTRY(0.4998), ENTRY(0.7070), ENTRY(1.0000)
-        #undef ENTRY
-    };
+    static const uint8_t AMP_TABLE[16];
 
     /// the registers on the chip
     uint8_t regs[REG_COUNT];
@@ -223,6 +215,16 @@ class SunSoftFME7 {
         }
         last_time = end_time;
     }
+};
+
+// set the table of volume levels for the amplifier
+const uint8_t SunSoftFME7::AMP_TABLE[16] = {
+    #define ENTRY(n) static_cast<uint8_t>(n * AMP_RANGE + 0.5)
+    ENTRY(0.0000), ENTRY(0.0078), ENTRY(0.0110), ENTRY(0.0156),
+    ENTRY(0.0221), ENTRY(0.0312), ENTRY(0.0441), ENTRY(0.0624),
+    ENTRY(0.0883), ENTRY(0.1249), ENTRY(0.1766), ENTRY(0.2498),
+    ENTRY(0.3534), ENTRY(0.4998), ENTRY(0.7070), ENTRY(1.0000)
+    #undef ENTRY
 };
 
 #endif  // DSP_SUNSOFT_FME7_HPP_

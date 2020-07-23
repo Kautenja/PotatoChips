@@ -61,7 +61,7 @@ class AtariPOKEY {
     enum { ADDR_END   = 0xD209 };
 
     /// the registers on the POKEY
-    enum AtariPOKEY_Registers {
+    enum Registers {
         AUDF1  = 0xD200,
         AUDC1  = 0xD201,
         AUDF2  = 0xD202,

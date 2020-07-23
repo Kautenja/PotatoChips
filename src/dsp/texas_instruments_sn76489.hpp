@@ -29,29 +29,42 @@ class TexasInstrumentsSN76489 {
 
     /// the registers on the SN76489
     enum Registers {
+        /// the frequency register for pulse generator 0
         TONE_1_FREQUENCY   = 0b10000000,
+        /// the attenuation register for pulse generator 0
         TONE_1_ATTENUATION = 0b10010000,
+        /// the frequency register for pulse generator 1
         TONE_2_FREQUENCY   = 0b10100000,
+        /// the attenuation register for pulse generator 1
         TONE_2_ATTENUATION = 0b10110000,
+        /// the frequency register for pulse generator 2
         TONE_3_FREQUENCY   = 0b11000000,
+        /// the attenuation register for pulse generator 2
         TONE_3_ATTENUATION = 0b11010000,
+        /// the control register for the noise generator
         NOISE_CONTROL      = 0b11100000,
+        /// the attenuation register for noise generator
         NOISE_ATTENUATION  = 0b11110000
     };
 
     /// the values for the linear feedback shift register to take.
     enum LFSR_Values {
-        N_512    = 0b00,  // N / 512
-        N_1024   = 0b01,  // N / 1024
-        N_2048   = 0b10,  // N / 2048
-        N_TONE_3 = 0b11   // Tone Generator # Output
+        /// N / 512
+        N_512    = 0b00,
+        /// N / 1024
+        N_1024   = 0b01,
+        /// N / 2048
+        N_2048   = 0b10,
+        /// Tone Generator #3 Output
+        N_TONE_3 = 0b11
     };
 
     /// the FB bit in the Noise control register
     static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
 
  private:
-    struct TexasInstrumentsSN76489_Osc {
+    /// an abstract base oscillator class for the chip
+    struct Oscillator {
         /// the output buffer to write samples to
         BLIPBuffer* output = 0;
         /// TODO:
@@ -69,7 +82,8 @@ class TexasInstrumentsSN76489 {
         }
     };
 
-    struct TexasInstrumentsSN76489_Square : TexasInstrumentsSN76489_Osc {
+    /// a pulse oscillator on the chip
+    struct Pulse : Oscillator {
         /// the period of the oscillator
         int period = 0;
         /// the phase of the oscillator
@@ -82,7 +96,7 @@ class TexasInstrumentsSN76489 {
         inline void reset() {
             period = 0;
             phase = 0;
-            TexasInstrumentsSN76489_Osc::reset();
+            Oscillator::reset();
         }
 
         /// Run the oscillator from time until end_time.
@@ -129,7 +143,8 @@ class TexasInstrumentsSN76489 {
         }
     };
 
-    struct TexasInstrumentsSN76489_Noise : TexasInstrumentsSN76489_Osc {
+    /// a noise oscillator on the chip
+    struct Noise : Oscillator {
         /// the possible noise periods
         static const int noise_periods[3];
         /// the period of the oscillator
@@ -147,7 +162,7 @@ class TexasInstrumentsSN76489 {
             period = &noise_periods[0];
             shifter = 0x8000;
             feedback = 0x9000;
-            TexasInstrumentsSN76489_Osc::reset();
+            Oscillator::reset();
         }
 
         /// Run the oscillator from time until end_time.
@@ -194,18 +209,17 @@ class TexasInstrumentsSN76489 {
         }
     };
 
-
     /// the pulse waveform generators
-    TexasInstrumentsSN76489_Square squares[3];
+    Pulse pulses[3];
     /// the synthesizer used by the pulse waveform generators
-    TexasInstrumentsSN76489_Square::Synth square_synth;
+    Pulse::Synth square_synth;
     /// the noise generator
-    TexasInstrumentsSN76489_Noise noise;
+    Noise noise;
     /// The oscillators on the chip
-    TexasInstrumentsSN76489_Osc* oscs[OSC_COUNT] {
-        &squares[0],
-        &squares[1],
-        &squares[2],
+    Oscillator* oscs[OSC_COUNT] {
+        &pulses[0],
+        &pulses[1],
+        &pulses[2],
         &noise
     };
 
@@ -226,9 +240,9 @@ class TexasInstrumentsSN76489 {
         // end_time must not be before previous time
         assert(end_time >= last_time);
         if (end_time > last_time) {  // run oscillators if time is different
-            if (squares[0].output) squares[0].run(last_time, end_time);
-            if (squares[1].output) squares[1].run(last_time, end_time);
-            if (squares[2].output) squares[2].run(last_time, end_time);
+            if (pulses[0].output) pulses[0].run(last_time, end_time);
+            if (pulses[1].output) pulses[1].run(last_time, end_time);
+            if (pulses[2].output) pulses[2].run(last_time, end_time);
             if (noise.output)      noise.run(last_time, end_time);
             last_time = end_time;
         }
@@ -236,6 +250,7 @@ class TexasInstrumentsSN76489 {
 
     /// Disable the copy constructor.
     TexasInstrumentsSN76489(const TexasInstrumentsSN76489&);
+
     /// Disable the assignment operator
     TexasInstrumentsSN76489& operator=(const TexasInstrumentsSN76489&);
 
@@ -246,8 +261,9 @@ class TexasInstrumentsSN76489 {
     ///
     explicit TexasInstrumentsSN76489(double level = 1.0) {
         // set the synthesizer for each pulse waveform generator
-        for (int i = 0; i < 3; i++) squares[i].synth = &square_synth;
-        volume(level);
+        for (int i = 0; i < 3; i++) pulses[i].synth = &square_synth;
+        set_output(NULL);
+        set_volume();
         reset();
     }
 
@@ -258,7 +274,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param level the value to set the volume to
     ///
-    inline void volume(double level) {
+    inline void set_volume(double level = 1.0) {
         level *= 0.85 / (OSC_COUNT * 64 * 2);
         square_synth.volume(level);
         noise.synth.volume(level);
@@ -268,7 +284,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(const blip_eq_t& equalizer) {
+    inline void set_treble_eq(const blip_eq_t& equalizer) {
         square_synth.treble_eq(equalizer);
         noise.synth.treble_eq(equalizer);
     }
@@ -316,9 +332,9 @@ class TexasInstrumentsSN76489 {
             feedback >>= 1;
         }
         // reset the oscillators
-        squares[0].reset();
-        squares[1].reset();
-        squares[2].reset();
+        pulses[0].reset();
+        pulses[1].reset();
+        pulses[2].reset();
         noise.reset();
     }
 
@@ -339,7 +355,7 @@ class TexasInstrumentsSN76489 {
         if (latch & 0x10) {  // volume
             oscs[index]->volume = volumes[data & 15];
         } else if (index < 3) {  // pulse frequency
-            TexasInstrumentsSN76489_Square& sq = squares[index];
+            Pulse& sq = pulses[index];
             if (data & 0x80)
                 sq.period = (sq.period & 0xFF00) | (data << 4 & 0x00FF);
             else
@@ -347,9 +363,9 @@ class TexasInstrumentsSN76489 {
         } else {  // noise
             int select = data & 3;
             if (select < 3)
-                noise.period = &TexasInstrumentsSN76489_Noise::noise_periods[select];
+                noise.period = &Noise::noise_periods[select];
             else
-                noise.period = &squares[2].period;
+                noise.period = &pulses[2].period;
             noise.feedback = (data & 0x04) ? noise_feedback : looped_feedback;
             noise.shifter = 0x8000;
         }
@@ -367,6 +383,6 @@ class TexasInstrumentsSN76489 {
     }
 };
 
-const int TexasInstrumentsSN76489::TexasInstrumentsSN76489_Noise::noise_periods[3] = {0x100, 0x200, 0x400};
+const int TexasInstrumentsSN76489::Noise::noise_periods[3] = {0x100, 0x200, 0x400};
 
 #endif  // DSP_TEXAS_INSTRUMENTS_SN76489_HPP_

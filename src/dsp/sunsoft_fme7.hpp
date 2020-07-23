@@ -1,4 +1,4 @@
-// An oscillator based on the Sunsoft SunSoftFME7 synthesis chip.
+// SunSoft FME7 sound chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -41,191 +41,201 @@ enum SunSoftSunSoftFME7_Registers {
     IO_PORT_B    = 0x0F   // unused
 };
 
-// can be any value; this gives best error/quality tradeoff
-enum { amp_range = 192 };
-
-// static unsigned char const amp_table [16];
-static constexpr unsigned char amp_table[16] =
-{
-	#define ENTRY( n ) (unsigned char) (n * amp_range + 0.5)
-	ENTRY(0.0000), ENTRY(0.0078), ENTRY(0.0110), ENTRY(0.0156),
-	ENTRY(0.0221), ENTRY(0.0312), ENTRY(0.0441), ENTRY(0.0624),
-	ENTRY(0.0883), ENTRY(0.1249), ENTRY(0.1766), ENTRY(0.2498),
-	ENTRY(0.3534), ENTRY(0.4998), ENTRY(0.7070), ENTRY(1.0000)
-	#undef ENTRY
-};
-
+/// SunSoft FME7 sound chip emulator.
 class SunSoftFME7 {
- private:
-	enum { reg_count = 14 };
-	uint8_t regs [reg_count];
-	uint8_t phases [3]; // 0 or 1
-	uint8_t latch;
-	uint16_t delays [3]; // a, b, c
-
  public:
-	// See Nes_Apu.h for reference
-	void reset() {
-		last_time = 0;
-		for (int i = 0; i < OSC_COUNT; i++) oscs[i].last_amp = 0;
-	}
-
-	void volume( double );
-	void treble_eq( blip_eq_t const& );
-	void output( BLIPBuffer* );
-	enum { OSC_COUNT = 3 };
-	void osc_output( int index, BLIPBuffer* );
-	void end_frame( blip_time_t );
-
-	// Mask and addresses of registers
-	enum { addr_mask = 0xE000 };
-	enum { data_addr = 0xE000 };
-	enum { latch_addr = 0xC000 };
-
-	// (addr & addr_mask) == latch_addr
-	void write_latch( int );
-
-	// (addr & addr_mask) == data_addr
-	void write_data( blip_time_t, int data );
-
- public:
-	SunSoftFME7();
+    /// the number of oscillators on the chip
+    enum { OSC_COUNT = 3 };
+    /// the number of registers on the chip
+    enum { REG_COUNT = 14 };
+    /// the range of the amplifier on the chip. It could be any potential
+    /// value; 192 gives best error / quality trade-off
+    enum { AMP_RANGE = 192 };
 
  private:
-	// noncopyable
-	SunSoftFME7( const SunSoftFME7& );
-	SunSoftFME7& operator = ( const SunSoftFME7& );
+    /// the latch register on the chip
+    uint8_t latch;
+    /// the registers on the chip
+    uint8_t regs[REG_COUNT];
+    /// the phases of the oscillators
+    uint8_t phases[3];  // 0 or 1
+    /// delays for the oscillators
+    uint16_t delays[3];
 
-	struct {
-		BLIPBuffer* output;
-		int last_amp;
-	} oscs [OSC_COUNT];
-	blip_time_t last_time;
+    /// the table of volume levels for the amplifier
+    const uint8_t AMP_TABLE[16] = {
+        #define ENTRY(n) static_cast<uint8_t>(n * AMP_RANGE + 0.5)
+        ENTRY(0.0000), ENTRY(0.0078), ENTRY(0.0110), ENTRY(0.0156),
+        ENTRY(0.0221), ENTRY(0.0312), ENTRY(0.0441), ENTRY(0.0624),
+        ENTRY(0.0883), ENTRY(0.1249), ENTRY(0.1766), ENTRY(0.2498),
+        ENTRY(0.3534), ENTRY(0.4998), ENTRY(0.7070), ENTRY(1.0000)
+        #undef ENTRY
+    };
 
-	BLIPSynth<blip_good_quality, 1> synth;
+ public:
+    /// Initialize a new SunSoft FME7 chip emulator.
+    SunSoftFME7() {
+        set_output(NULL);
+        volume(1.0);
+        reset();
+    }
 
-	void run_until(blip_time_t end_time) {
-		// assert( end_time >= last_time );
+    /// Set overall volume of all oscillators, where 1.0 is full volume
+    ///
+    /// @param level the value to set the volume to
+    ///
+    inline void volume(double v) { synth.volume(0.38 / AMP_RANGE * v); }
 
-		for ( int index = 0; index < OSC_COUNT; index++ )
-		{
-			// int mode = regs [7] >> index;
-			int vol_mode = regs [010 + index];
-			int volume = amp_table [vol_mode & 0x0F];
+    /// Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    inline void treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
 
-			BLIPBuffer* const osc_output = oscs [index].output;
-			if ( !osc_output )
-				continue;
+    /// Assign single oscillator output to buffer. If buffer is NULL, silences
+    /// the given oscillator.
+    ///
+    /// @param index the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    ///
+    inline void set_output(int i, BLIPBuffer* buffer) {
+        assert((unsigned) i < OSC_COUNT);
+        oscs[i].output = buffer;
+    }
 
-			// period
-			int const period_factor = 16;
-			unsigned period = (regs [index * 2 + 1] & 0x0F) * 0x100 * period_factor +
-					regs [index * 2] * period_factor;
-			if ( period < 50 ) // around 22 kHz
-			{
-				volume = 0;
-				if ( !period ) // on my AY-3-8910A, period doesn't have extra one added
-					period = period_factor;
-			}
+    /// Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+    }
 
-			// current amplitude
-			int amp = volume;
-			if ( !phases [index] )
-				amp = 0;
-			{
-				int delta = amp - oscs [index].last_amp;
-				if ( delta )
-				{
-					oscs [index].last_amp = amp;
-					synth.offset( last_time, delta, osc_output );
-				}
-			}
+    /// Reset oscillators and internal state.
+    inline void reset() {
+        last_time = 0;
+        for (int i = 0; i < OSC_COUNT; i++)
+            oscs[i].last_amp = 0;
+    }
 
-			blip_time_t time = last_time + delays [index];
-			if ( time < end_time )
-			{
-				int delta = amp * 2 - volume;
-				if ( volume )
-				{
-					do
-					{
-						delta = -delta;
-						synth.offset( time, delta, osc_output );
-						time += period;
-					}
-					while ( time < end_time );
+    /// the mask for addresses
+    enum { ADDR_MASK = 0xE000 };
+    /// the mask for data input
+    enum { DATA_ADDR = 0xE000 };
+    /// the mask for the latch register
+    enum { LATCH_ADDR = 0xC000 };
 
-					oscs [index].last_amp = (delta + volume) >> 1;
-					phases [index] = (delta > 0);
-				}
-				else
-				{
-					// maintain phase when silent
-					int count = (end_time - time + period - 1) / period;
-					phases [index] ^= count & 1;
-					time += (long) count * period;
-				}
-			}
+    /// Write to the latch port.
+    ///
+    /// @param data the byte to write to the latch port
+    /// @details
+    /// (addr & ADDR_MASK) == LATCH_ADDR
+    ///
+    inline void write_latch(int data) { latch = data; }
 
-			delays [index] = time - end_time;
-		}
+    /// Write to the data port.
+    ///
+    /// @param data the byte to write to the data port
+    /// @details
+    /// (addr & ADDR_MASK) == DATA_ADDR
+    ///
+    inline void write_data(int data) {
+        run_until(0);
+        regs[latch] = data;
+    }
 
-		last_time = end_time;
-	}
+    /// Run all oscillators up to specified time, end current frame, then
+    /// start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    inline void end_frame(blip_time_t time) {
+        if (time > last_time) run_until(time);
+        assert(last_time >= time);
+        last_time -= time;
+    }
+
+ private:
+    /// Disable the copy constructor
+    SunSoftFME7(const SunSoftFME7&);
+
+    /// Disable the assignment operator
+    SunSoftFME7& operator=(const SunSoftFME7&);
+
+    /// the oscillators on the chip
+    struct {
+        /// the output buffer to write samples to
+        BLIPBuffer* output;
+        /// the last amplitude value to output from the oscillator
+        int last_amp;
+    } oscs[OSC_COUNT];
+
+    /// the last time the oscillators were updated
+    blip_time_t last_time;
+
+    /// the synthesizer for generating sound from the chip
+    BLIPSynth<blip_good_quality, 1> synth;
+
+    /// Run the oscillators until the given end time.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    void run_until(blip_time_t end_time) {
+        // assert(end_time >= last_time);
+        for (int index = 0; index < OSC_COUNT; index++) {
+            // int mode = regs[7] >> index;
+            int vol_mode = regs[010 + index];
+            int volume = AMP_TABLE[vol_mode & 0x0F];
+
+            BLIPBuffer* const osc_output = oscs[index].output;
+            if (!osc_output) continue;
+
+            // period
+            int const period_factor = 16;
+            unsigned period = (regs[index * 2 + 1] & 0x0F) * 0x100 * period_factor + regs[index * 2] * period_factor;
+            if (period < 50) {  // around 22 kHz
+                volume = 0;
+                if (!period) // on my AY-3-8910A, period doesn't have extra one added
+                    period = period_factor;
+            }
+
+            // current amplitude
+            int amp = volume;
+            if (!phases[index])
+                amp = 0;
+
+            {  // scope for amp change update
+                int delta = amp - oscs[index].last_amp;
+                if (delta) {
+                    oscs[index].last_amp = amp;
+                    synth.offset(last_time, delta, osc_output);
+                }
+            }
+
+            blip_time_t time = last_time + delays[index];
+            if (time < end_time) {
+                int delta = amp * 2 - volume;
+                if (volume) {
+                    do {
+                        delta = -delta;
+                        synth.offset(time, delta, osc_output);
+                        time += period;
+                    } while (time < end_time);
+                    oscs[index].last_amp = (delta + volume) >> 1;
+                    phases[index] = (delta > 0);
+                } else {
+                    // maintain phase when silent
+                    int count = (end_time - time + period - 1) / period;
+                    phases[index] ^= count & 1;
+                    time += (long) count * period;
+                }
+            }
+            delays[index] = time - end_time;
+        }
+        last_time = end_time;
+    }
 };
-
-inline void SunSoftFME7::volume( double v )
-{
-	synth.volume( 0.38 / amp_range * v ); // to do: fine-tune
-}
-
-inline void SunSoftFME7::treble_eq( blip_eq_t const& eq )
-{
-	synth.treble_eq( eq );
-}
-
-inline void SunSoftFME7::osc_output( int i, BLIPBuffer* buf )
-{
-	assert( (unsigned) i < OSC_COUNT );
-	oscs [i].output = buf;
-}
-
-inline void SunSoftFME7::output( BLIPBuffer* buf )
-{
-	for ( int i = 0; i < OSC_COUNT; i++ )
-		osc_output( i, buf );
-}
-
-inline SunSoftFME7::SunSoftFME7()
-{
-	output( NULL );
-	volume( 1.0 );
-	reset();
-}
-
-inline void SunSoftFME7::write_latch( int data ) { latch = data; }
-
-inline void SunSoftFME7::write_data( blip_time_t time, int data )
-{
-	// if ( (unsigned) latch >= reg_count )
-	// {
-	// 	#ifdef dprintf
-	// 		dprintf( "SunSoftFME7 write to %02X (past end of sound registers)\n", (int) latch );
-	// 	#endif
-	// 	return;
-	// }
-
-	run_until( time );
-	regs [latch] = data;
-}
-
-inline void SunSoftFME7::end_frame( blip_time_t time )
-{
-	if ( time > last_time )
-		run_until( time );
-
-	assert( last_time >= time );
-	last_time -= time;
-}
 
 #endif

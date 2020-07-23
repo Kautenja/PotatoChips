@@ -61,7 +61,8 @@ struct ChipFME7 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level",     "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
         onSampleRateChange();
@@ -97,9 +98,9 @@ struct ChipFME7 : Module {
         uint16_t freq12bit = rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
         // write the registers with the frequency data
         apu.write_latch(PULSE_A_LO + 2 * channel);
-        apu.write_data(0, freq12bit & 0b11111111);
+        apu.write_data(freq12bit & 0b11111111);
         apu.write_latch(PULSE_A_HI + 2 * channel);
-        apu.write_data(0, (freq12bit & 0b0000111100000000) >> 8);
+        apu.write_data((freq12bit & 0b0000111100000000) >> 8);
 
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
@@ -109,7 +110,7 @@ struct ChipFME7 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
         apu.write_latch(PULSE_A_ENV + channel);
-        apu.write_data(0, level);
+        apu.write_data(level);
     }
 
     /// Return a 10V signed sample from the FME7.

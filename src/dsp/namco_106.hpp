@@ -21,22 +21,6 @@
 
 #include "blip_buffer.hpp"
 
-/// the number of register per voice on the chip
-static constexpr auto REGS_PER_VOICE = 8;
-
-/// Addresses to the registers for channel 1. To get channel \f$n\f$,
-/// multiply by \f$8n\f$.
-enum Namco106_Registers {
-    FREQ_LOW = 0x40,
-    PHASE_LOW,
-    FREQ_MEDIUM,
-    PHASE_MEDIUM,
-    FREQ_HIGH,
-    PHASE_HIGH,
-    WAVE_ADDRESS,
-    VOLUME
-};
-
 /// An emulation of the Namco 106 synthesis chip.
 class Namco106 {
  public:
@@ -49,7 +33,23 @@ class Namco106 {
     /// the number of registers on the chip
     static constexpr int REG_COUNT = 0x80;
 
-    /// Initialize a new Namco106 chip emulator.
+    /// Addresses to the registers for channel 1. To get channel \f$n\f$,
+    /// multiply by \f$8n\f$.
+    enum Registers {
+        FREQ_LOW = 0x40,
+        PHASE_LOW,
+        FREQ_MEDIUM,
+        PHASE_MEDIUM,
+        FREQ_HIGH,
+        PHASE_HIGH,
+        WAVE_ADDRESS,
+        VOLUME
+    };
+
+    /// the number of register per voice on the chip
+    static constexpr auto REGS_PER_VOICE = 8;
+
+    /// Initialize a new Namco 106 chip emulator.
     Namco106() { output(NULL); volume(1.0); reset(); }
 
     /// Reset internal frame counter, registers, and all oscillators.

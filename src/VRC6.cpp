@@ -67,9 +67,10 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 

@@ -20,6 +20,7 @@
 #define DSP_KONAMI_VRC6_HPP_
 
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
 /// A Konami VRC6 chip emulator.
 class KonamiVRC6 {
@@ -39,98 +40,7 @@ class KonamiVRC6 {
         SAW_PERIOD_HIGH   = 2,
     };
 
-    /// Initialize a new VRC6 chip emulator.
-    KonamiVRC6() { output(NULL); volume(1.0); reset(); }
-
-    /// Reset internal frame counter, registers, and all oscillators.
-    inline void reset() {
-        last_time = 0;
-        for (int i = 0; i < OSC_COUNT; i++) {
-            VRC6_Oscillator& osc = oscs[i];
-            for (int j = 0; j < REG_COUNT; j++) osc.regs[j] = 0;
-            osc.delay = 0;
-            osc.last_amp = 0;
-            osc.phase = 1;
-            osc.amp = 0;
-        }
-    }
-
-    /// Set the volume.
-    ///
-    /// @param value the global volume level of the chip
-    ///
-    inline void volume(double value = 1.f) {
-        value *= 0.0967 * 2;
-        saw_synth.volume(value);
-        square_synth.volume(value * 0.5);
-    }
-
-    /// Set treble equalization.
-    ///
-    /// @param eq the equalizer settings to use
-    ///
-    inline void treble_eq(blip_eq_t const& equalizer) {
-        saw_synth.treble_eq(equalizer);
-        square_synth.treble_eq(equalizer);
-    }
-
-    /// Set buffer to generate all sound into, or disable sound if NULL.
-    ///
-    /// @param buf the buffer to write samples from the synthesizer to
-    ///
-    inline void output(BLIPBuffer* buf) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
-    }
-
-    /// Set the output buffer for an individual synthesizer voice.
-    ///
-    /// @param i the index of the oscillator to set the output buffer for
-    /// @param buf the buffer to write samples from the synthesizer to
-    /// @note If buffer is NULL, the specified oscillator is muted and
-    ///       emulation accuracy is reduced.
-    /// @note The oscillators are indexed as follows:
-    ///       0) Pulse 1,
-    ///       1) Pulse 2,
-    ///       2) Saw.
-    ///
-    inline void osc_output(int i, BLIPBuffer* buf) {
-        assert((unsigned) i < OSC_COUNT);
-        oscs[i].output = buf;
-    }
-
-    /// Run all oscillators up to specified time, end current time frame, then
-    /// start a new time frame at time 0. Time frames have no effect on
-    /// emulation and each can be whatever length is convenient.
-    ///
-    /// @param time the number of elapsed cycles
-    ///
-    inline void end_frame(blip_time_t time) {
-        if (time > last_time) run_until(time);
-        last_time -= time;
-        assert(last_time >= 0);
-    }
-
-    /// Write a value to the given oscillator's register.
-    ///
-    /// @param time the number of elapsed cycles
-    /// @param osc_index the index of the oscillator
-    /// @param reg the index of the synthesizer's register
-    /// @param data the data to write to the register value
-    ///
-    inline void write_osc(blip_time_t time, int osc_index, int reg, int data) {
-        assert((unsigned) osc_index < OSC_COUNT);
-        assert((unsigned) reg < REG_COUNT);
-        run_until(time);
-        oscs[osc_index].regs[reg] = data;
-    }
-
  private:
-    /// Disable the public copy constructor.
-    KonamiVRC6(const KonamiVRC6&);
-
-    /// Disable the public assignment operator.
-    KonamiVRC6& operator = (const KonamiVRC6&);
-
     /// An oscillator on the KonamiVRC6 chip.
     struct VRC6_Oscillator {
         /// the internal registers for the oscillator
@@ -263,6 +173,104 @@ class KonamiVRC6 {
             osc.delay = time - end_time;
         }
         osc.last_amp = last_amp;
+    }
+
+    /// Disable the public copy constructor.
+    KonamiVRC6(const KonamiVRC6&);
+
+    /// Disable the public assignment operator.
+    KonamiVRC6& operator=(const KonamiVRC6&);
+
+ public:
+    /// @brief Initialize a new VRC6 chip emulator.
+    KonamiVRC6() {
+        set_output(NULL);
+        set_volume();
+        reset();
+    }
+
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
+    ///
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    /// @details
+    /// If buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
+    ///
+    inline void set_output(int channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel].output = buffer;
+    }
+
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int channel = 0; channel < OSC_COUNT; channel++)
+            set_output(channel, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
+    ///
+    inline void set_volume(double level = 1.f) {
+        level *= 0.0967 * 2;
+        saw_synth.volume(level);
+        square_synth.volume(level * 0.5);
+    }
+
+    /// @brief Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    inline void set_treble_eq(blip_eq_t const& equalizer) {
+        saw_synth.treble_eq(equalizer);
+        square_synth.treble_eq(equalizer);
+    }
+
+    /// @brief Reset internal frame counter, registers, and all oscillators.
+    inline void reset() {
+        last_time = 0;
+        for (int i = 0; i < OSC_COUNT; i++) {
+            VRC6_Oscillator& osc = oscs[i];
+            for (int j = 0; j < REG_COUNT; j++) osc.regs[j] = 0;
+            osc.delay = 0;
+            osc.last_amp = 0;
+            osc.phase = 1;
+            osc.amp = 0;
+        }
+    }
+
+    /// @brief Write a value to the given oscillator's register.
+    ///
+    /// @param time the number of elapsed cycles
+    /// @param osc_index the index of the oscillator
+    /// @param reg the index of the synthesizer's register
+    /// @param data the data to write to the register value
+    ///
+    inline void write_osc(blip_time_t time, int osc_index, int reg, int data) {
+        assert((unsigned) osc_index < OSC_COUNT);
+        assert((unsigned) reg < REG_COUNT);
+        run_until(time);
+        oscs[osc_index].regs[reg] = data;
+    }
+
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    inline void end_frame(blip_time_t time) {
+        if (time > last_time) run_until(time);
+        last_time -= time;
+        assert(last_time >= 0);
     }
 };
 

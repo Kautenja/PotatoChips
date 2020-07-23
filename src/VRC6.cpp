@@ -106,13 +106,13 @@ struct ChipVRC6 : Module {
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
-        uint8_t lo = freq12bit & 0b11111111;
+        uint8_t lo =  freq12bit & 0b11111111;
         uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, channel, PULSE_PERIOD_LOW, lo);
-        apu.write_osc(0, channel, PULSE_PERIOD_HIGH, hi);
+        apu.write_osc(0, channel, KonamiVRC6::PULSE_PERIOD_LOW, lo);
+        apu.write_osc(0, channel, KonamiVRC6::PULSE_PERIOD_HIGH, hi);
 
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
@@ -127,7 +127,7 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the duty cycle and volume
-        apu.write_osc(0, channel, PULSE_DUTY_VOLUME, (pw << 4) + level);
+        apu.write_osc(0, channel, KonamiVRC6::PULSE_DUTY_VOLUME, (pw << 4) + level);
     }
 
     /// Process saw wave (channel 2).
@@ -165,8 +165,8 @@ struct ChipVRC6 : Module {
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, CHANNEL_INDEX, SAW_PERIOD_LOW, lo);
-        apu.write_osc(0, CHANNEL_INDEX, SAW_PERIOD_HIGH, hi);
+        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_PERIOD_LOW, lo);
+        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_PERIOD_HIGH, hi);
 
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + 2].getValue();
@@ -175,7 +175,7 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the volume
-        apu.write_osc(0, CHANNEL_INDEX, SAW_VOLUME, level);
+        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_VOLUME, level);
     }
 
     /// Return a 10V signed sample from the APU.

@@ -51,18 +51,19 @@ class Exception: public std::exception {
 };
 
 
-/// An exception class.
+/// An exception for trying to set a channel that is out of bounds.
 class ChannelOutOfBoundsException: public std::exception {
  protected:
     /// the error message.
     const std::string message;
 
  public:
-    /// @brief Constructor (C strings).
-    /// @param channel the channel that was requested
+    /// @brief Constructor.
+    ///
+    /// @param channel the channel index that was requested
     /// @param num_channels the number of channels that are available
     ///
-    explicit ChannelOutOfBoundsException(
+    ChannelOutOfBoundsException(
         unsigned channel,
         unsigned num_channels
     ) : message(
@@ -74,10 +75,10 @@ class ChannelOutOfBoundsException: public std::exception {
     ) { }
 
     /// @brief Destroy this exception.
-    ///
     virtual ~ChannelOutOfBoundsException() throw () { }
 
     /// @brief Returns a pointer to the (constant) error description.
+    ///
     /// @returns A pointer to a const char*. The underlying memory is in
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
@@ -85,4 +86,44 @@ class ChannelOutOfBoundsException: public std::exception {
     virtual const char* what() const throw () { return message.c_str(); }
 };
 
+
+/// An exception for trying to set an address that is out of bounds.
+template<typename Address>
+class AddressSpaceException: public std::exception {
+ protected:
+    /// the error message.
+    const std::string message;
+
+ public:
+    /// @brief Constructor.
+    ///
+    /// @param accessed the requested address from the address space
+    /// @param start the first address in the address space
+    /// @param stop the last address in the address space
+    ///
+    AddressSpaceException(
+        Address accessed,
+        Address start,
+        Address stop
+    ) : message(
+        "tried to access address " +
+        std::to_string(accessed) +
+        ", but the chip has address space [" +
+        std::to_string(start) +
+        ", " +
+        std::to_string(stop) +
+        "]"
+    ) { }
+
+    /// @brief Destroy this exception.
+    virtual ~AddressSpaceException() throw () { }
+
+    /// @brief Returns a pointer to the (constant) error description.
+    ///
+    /// @returns A pointer to a const char*. The underlying memory is in
+    /// possession of the Exception object. Callers must not attempt to free
+    /// the memory.
+    ///
+    virtual const char* what() const throw () { return message.c_str(); }
+};
 #endif  // DSP_EXCEPTIONS_HPP_

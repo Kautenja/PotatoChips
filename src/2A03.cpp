@@ -67,7 +67,7 @@ struct Chip2A03 : Module {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -178,14 +178,14 @@ struct Chip2A03 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };

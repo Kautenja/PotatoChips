@@ -8,6 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 68,
       "data": {
         "audio": {
           "driver": 5,
@@ -39,18 +40,17 @@
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 4,
-          "value": 1.0
+          "value": 0.0
         }
       ],
-      "bypass": true,
       "leftModuleId": 59,
       "rightModuleId": 1,
       "pos": [
@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -317,6 +317,38 @@
         39,
         1
       ]
+    },
+    {
+      "id": 68,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "leftModuleId": 1,
+      "rightModuleId": 69,
+      "pos": [
+        38,
+        0
+      ]
+    },
+    {
+      "id": 69,
+      "plugin": "Bogaudio",
+      "version": "1.1.31",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "leftModuleId": 68,
+      "data": {
+        "range": 0.0,
+        "range_db": 80.0,
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        43,
+        0
+      ]
     }
   ],
   "cables": [
@@ -327,14 +359,6 @@
       "inputModuleId": 2,
       "inputId": 1,
       "color": "#c91847"
-    },
-    {
-      "id": 55,
-      "outputModuleId": 59,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#0986ad"
     },
     {
       "id": 56,
@@ -423,6 +447,30 @@
       "inputModuleId": 67,
       "inputId": 0,
       "color": "#c9b70e"
+    },
+    {
+      "id": 55,
+      "outputModuleId": 59,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 172,
+      "outputModuleId": 59,
+      "outputId": 0,
+      "inputModuleId": 68,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 173,
+      "outputModuleId": 59,
+      "outputId": 0,
+      "inputModuleId": 69,
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

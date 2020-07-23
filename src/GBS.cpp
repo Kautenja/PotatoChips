@@ -26,26 +26,26 @@
 /// A Nintendo GBS Chip module.
 struct ChipGBS : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, Gb_Apu::OSC_COUNT),
+        ENUMS(PARAM_FREQ, NintendoGBS::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, Gb_Apu::OSC_COUNT),
+        ENUMS(INPUT_VOCT, NintendoGBS::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
         INPUT_LFSR,
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, Gb_Apu::OSC_COUNT),
+        ENUMS(OUTPUT_CHANNEL, NintendoGBS::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[Gb_Apu::OSC_COUNT];
+    BLIPBuffer buf[NintendoGBS::OSC_COUNT];
     /// The GBS instance to synthesize sound with
-    Gb_Apu apu;
+    NintendoGBS apu;
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -64,7 +64,7 @@ struct ChipGBS : Module {
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < Gb_Apu::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.volume(3.f);
         onSampleRateChange();
@@ -79,9 +79,9 @@ struct ChipGBS : Module {
         static constexpr auto MOD_FACTOR = 10.f;
         // set the pulse width of the pulse wave (high 2 bits)
         auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write_register(0, Gb_Apu::PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
+        apu.write_register(0, NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
         // set the volume of the pulse wave, high 4 bits, envelope add mode on
-        apu.write_register(0, Gb_Apu::PULSE0_START_VOLUME + 5 * channel, 0b11111000);
+        apu.write_register(0, NintendoGBS::PULSE0_START_VOLUME + 5 * channel, 0b11111000);
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -93,8 +93,8 @@ struct ChipGBS : Module {
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        apu.write_register(0, Gb_Apu::PULSE0_FREQ_LO               + 5 * channel, freq11bit & 0xff );
-        apu.write_register(0, Gb_Apu::PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit >> 8) | 0x80 );
+        apu.write_register(0, NintendoGBS::PULSE0_FREQ_LO               + 5 * channel, freq11bit & 0xff );
+        apu.write_register(0, NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit >> 8) | 0x80 );
     }
 
     void channel_wave() {
@@ -105,9 +105,9 @@ struct ChipGBS : Module {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // turn on the DAC for the channel
-        apu.write_register(0, Gb_Apu::WAVE_DAC_POWER, 0b10000000);
+        apu.write_register(0, NintendoGBS::WAVE_DAC_POWER, 0b10000000);
         // set the volume
-        apu.write_register(0, Gb_Apu::WAVE_VOLUME_CODE, 0b00100000);
+        apu.write_register(0, NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + 2].getVoltage();
@@ -120,14 +120,14 @@ struct ChipGBS : Module {
         // write the frequency to the low and high registers
         // - there are 4 registers per pulse channel, multiply channel by 4 to
         //   produce an offset between registers based on channel index
-        apu.write_register(0, Gb_Apu::WAVE_FREQ_LO,  freq11bit & 0xff);
-        apu.write_register(0, Gb_Apu::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, freq11bit >> 8 | 0x80);
+        apu.write_register(0, NintendoGBS::WAVE_FREQ_LO,  freq11bit & 0xff);
+        apu.write_register(0, NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, freq11bit >> 8 | 0x80);
         // write the wave-table for the channel
         for (int i = 0; i < 32 / 2; i++) {
             uint8_t nibbleHi = sine_wave[2 * i];
             uint8_t nibbleLo = sine_wave[2 * i + 1];
             // combine the two nibbles into a byte for the RAM
-            apu.write_register(0, Gb_Apu::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
+            apu.write_register(0, NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
         }
     }
 
@@ -137,7 +137,7 @@ struct ChipGBS : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 7;
         // set the volume for the channel
-        apu.write_register(0, Gb_Apu::NOISE_START_VOLUME, 0b11111000);
+        apu.write_register(0, NintendoGBS::NOISE_START_VOLUME, 0b11111000);
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
@@ -145,9 +145,9 @@ struct ChipGBS : Module {
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         freq += params[PARAM_FREQ + 3].getValue();
         uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write_register(0, Gb_Apu::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | period);
+        apu.write_register(0, NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | period);
         // enable the channel
-        apu.write_register(0, Gb_Apu::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+        apu.write_register(0, NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -168,9 +168,9 @@ struct ChipGBS : Module {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
-            apu.write_register(0, Gb_Apu::POWER_CONTROL_STATUS, 0b10000000);
-            apu.write_register(0, Gb_Apu::STEREO_ENABLES, 0b11111111);
-            apu.write_register(0, Gb_Apu::STEREO_VOLUME, 0b11111111);
+            apu.write_register(0, NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
+            apu.write_register(0, NintendoGBS::STEREO_ENABLES, 0b11111111);
+            apu.write_register(0, NintendoGBS::STEREO_VOLUME, 0b11111111);
             channel_pulse(0);
             channel_pulse(1);
             channel_wave();
@@ -178,14 +178,14 @@ struct ChipGBS : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(4194304 / args.sampleRate);
-        for (int i = 0; i < Gb_Apu::OSC_COUNT; i++)
+        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < Gb_Apu::OSC_COUNT; i++)
+        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), 4194304);
     }
 };

@@ -1,4 +1,4 @@
-// Private oscillators used by Gb_Apu
+// Private oscillators used by NintendoGBS
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -22,15 +22,14 @@
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
 
-struct Gb_Osc
-{
+struct NintendoGBS_Oscillator {
     enum { trigger = 0x80 };
     enum { len_enabled_mask = 0x40 };
 
-    BLIPBuffer* outputs [4]; // NULL, right, left, center
+    BLIPBuffer* outputs[4];  // NULL, right, left, center
     BLIPBuffer* output;
     int output_select;
-    uint8_t* regs; // osc's 5 registers
+    uint8_t* regs;  // osc's 5 registers
 
     int delay;
     int last_amp;
@@ -39,12 +38,15 @@ struct Gb_Osc
     int enabled;
 
     void reset();
+
     void clock_length();
-    int frequency() const { return (regs [4] & 7) * 0x100 + regs [3]; }
+
+    inline int frequency() const {
+        return (regs[4] & 7) * 0x100 + regs[3];
+    }
 };
 
-struct Gb_Env : Gb_Osc
-{
+struct NintendoGBS_Envelope : NintendoGBS_Oscillator {
     int env_delay;
 
     void reset();
@@ -52,8 +54,7 @@ struct Gb_Env : Gb_Osc
     bool write_register(int, int);
 };
 
-struct Gb_Square : Gb_Env
-{
+struct NintendoGBS_Pulse : NintendoGBS_Envelope {
     enum { period_mask = 0x70 };
     enum { shift_mask  = 0x07 };
 
@@ -68,8 +69,7 @@ struct Gb_Square : Gb_Env
     void run(blip_time_t, blip_time_t, int playing);
 };
 
-struct Gb_Noise : Gb_Env
-{
+struct NintendoGBS_Noise : NintendoGBS_Envelope {
     typedef BLIPSynth<blip_med_quality, 1> Synth;
     Synth const* synth;
     unsigned bits;
@@ -77,22 +77,20 @@ struct Gb_Noise : Gb_Env
     void run(blip_time_t, blip_time_t, int playing);
 };
 
-struct Gb_Wave : Gb_Osc
-{
+struct NintendoGBS_Wave : NintendoGBS_Oscillator {
     typedef BLIPSynth<blip_med_quality, 1> Synth;
     Synth const* synth;
     int wave_pos;
     enum { wave_size = 32 };
-    uint8_t wave [wave_size];
+    uint8_t wave[wave_size];
 
     void write_register(int, int);
     void run(blip_time_t, blip_time_t, int playing);
 };
 
-inline void Gb_Env::reset()
-{
+inline void NintendoGBS_Envelope::reset() {
     env_delay = 0;
-    Gb_Osc::reset();
+    NintendoGBS_Oscillator::reset();
 }
 
 #endif  // DSP_NINTENDO_GAMEBOY_OSCILLATORS_HPP_

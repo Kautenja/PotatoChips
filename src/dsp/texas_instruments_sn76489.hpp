@@ -21,34 +21,34 @@
 
 #include "texas_instruments_sn76489_oscillators.hpp"
 
-/// the registers on the SN76489
-enum TexasInstrumentsSN76489_Registers {
-    TONE_1_FREQUENCY   = 0b10000000,
-    TONE_1_ATTENUATION = 0b10010000,
-    TONE_2_FREQUENCY   = 0b10100000,
-    TONE_2_ATTENUATION = 0b10110000,
-    TONE_3_FREQUENCY   = 0b11000000,
-    TONE_3_ATTENUATION = 0b11010000,
-    NOISE_CONTROL      = 0b11100000,
-    NOISE_ATTENUATION  = 0b11110000
-};
-
-/// the values for the linear feedback shift register to take.
-enum TexasInstrumentsSN76489_LFSR_Values {
-    N_512    = 0b00,  // N / 512
-    N_1024   = 0b01,  // N / 1024
-    N_2048   = 0b10,  // N / 2048
-    N_TONE_3 = 0b11   // Tone Generator # Output
-};
-
-/// the FB bit in the Noise control register
-static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
-
 /// Texas Instruments SN76489 programmable sound generator sound chip emulator.
 class TexasInstrumentsSN76489 {
  public:
     /// the number of oscillators on the chip
     static constexpr int OSC_COUNT = 4;
+
+    /// the registers on the SN76489
+    enum Registers {
+        TONE_1_FREQUENCY   = 0b10000000,
+        TONE_1_ATTENUATION = 0b10010000,
+        TONE_2_FREQUENCY   = 0b10100000,
+        TONE_2_ATTENUATION = 0b10110000,
+        TONE_3_FREQUENCY   = 0b11000000,
+        TONE_3_ATTENUATION = 0b11010000,
+        NOISE_CONTROL      = 0b11100000,
+        NOISE_ATTENUATION  = 0b11110000
+    };
+
+    /// the values for the linear feedback shift register to take.
+    enum LFSR_Values {
+        N_512    = 0b00,  // N / 512
+        N_1024   = 0b01,  // N / 1024
+        N_2048   = 0b10,  // N / 2048
+        N_TONE_3 = 0b11   // Tone Generator # Output
+    };
+
+    /// the FB bit in the Noise control register
+    static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
 
  private:
     /// the pulse waveform generators
@@ -178,11 +178,12 @@ class TexasInstrumentsSN76489 {
         noise.reset();
     }
 
+    // TODO: update with address / latch separated from data port
     /// Write to the data port.
     ///
     /// @param data the byte to write to the data port
     ///
-    void write_data(uint8_t data) {
+    void write(uint8_t data) {
         // the possible volume values
         static constexpr unsigned char volumes[16] = {
             64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0

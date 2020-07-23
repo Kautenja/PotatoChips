@@ -127,8 +127,8 @@ struct ChipSN76489 : Module {
         uint8_t hi = 0b00111111 & (freq10bit >> 4);
         // write the data to the chip
         const auto channel_opcode_offset = (2 * channel) << 4;
-        apu.write_data((TONE_1_FREQUENCY + channel_opcode_offset) | lo);
-        apu.write_data(hi);
+        apu.write((TexasInstrumentsSN76489::TONE_1_FREQUENCY + channel_opcode_offset) | lo);
+        apu.write(hi);
 
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
@@ -140,7 +140,7 @@ struct ChipSN76489 : Module {
         }
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write_data((TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
+        apu.write((TexasInstrumentsSN76489::TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
     /// Process noise (channel 3).
@@ -162,7 +162,11 @@ struct ChipSN76489 : Module {
         uint8_t period = FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
         bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
         if (period != noise_period or update_noise_control != state) {
-            apu.write_data(NOISE_CONTROL | (0b00000011 & period) | state * NOISE_FEEDBACK);
+            apu.write(
+                TexasInstrumentsSN76489::NOISE_CONTROL |
+                (0b00000011 & period) |
+                state * TexasInstrumentsSN76489::NOISE_FEEDBACK
+            );
             noise_period = period;
             update_noise_control = state;
         }
@@ -177,7 +181,7 @@ struct ChipSN76489 : Module {
         }
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write_data(NOISE_ATTENUATION | attenuation);
+        apu.write(TexasInstrumentsSN76489::NOISE_ATTENUATION | attenuation);
     }
 
     /// Return a 10V signed sample from the APU.

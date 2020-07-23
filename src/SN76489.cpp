@@ -90,7 +90,7 @@ struct ChipSN76489 : Module {
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 

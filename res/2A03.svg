@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="150px" height="380px" viewBox="0 0 150 380" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="180px" height="380px" viewBox="0 0 180 380" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
     <title>2A03</title>
     <desc>Created with Sketch.</desc>
     <g id="2A03" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="bg">
-            <g id="ChipModule">
+            <g id="ChipModule10HP">
                 <rect id="Background" fill="#404040" fill-rule="nonzero" x="0" y="0" width="150" height="380" rx="1"></rect>
-                <g id="Chip" transform="translate(0.500000, 0.000000)" fill-rule="evenodd">
+                <g id="Chip10HP" transform="translate(0.500000, 0.000000)" fill-rule="evenodd">
                     <g id="leads" stroke-width="1" transform="translate(1.500000, 5.000000)" fill="#E0D9C5">
                         <rect id="Rectangle" x="0" y="0" width="146" height="10" rx="2"></rect>
                         <rect id="Rectangle-Copy" x="0" y="20" width="146" height="10" rx="2"></rect>

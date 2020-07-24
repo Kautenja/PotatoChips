@@ -186,6 +186,11 @@ struct Chip2A03 : Module {
             // pulse channels (2)
             // ---------------------------------------------------------------
             for (int i = 0; i < 2; i++) {
+                // set the pulse width of the pulse wave (high 3 bits) and set
+                // the volume (low 4 bits). the 5th bit controls the envelope,
+                // high sets constant volume.
+                auto volume = getPulseWidth(i) | 0b00010000 | getVolume(i);
+                apu.write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
                 // write the frequency to the low and high registers
                 // - there are 4 registers per pulse channel, multiply channel by 4 to
                 //   produce an offset between registers based on channel index
@@ -194,11 +199,6 @@ struct Chip2A03 : Module {
                 apu.write(Ricoh2A03::PULSE0_LO + 4 * i, lo);
                 auto hi = (freq & 0b0000011100000000) >> 8;
                 apu.write(Ricoh2A03::PULSE0_HI + 4 * i, hi);
-                // set the pulse width of the pulse wave (high 3 bits) and set
-                // the volume (low 4 bits). the 5th bit controls the envelope,
-                // high sets constant volume.
-                auto volume = getPulseWidth(i) | 0b00010000 | getVolume(i);
-                apu.write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
             }
             // ---------------------------------------------------------------
             // triangle channel

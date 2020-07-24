@@ -2119,74 +2119,65 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 }
 #endif /* EMU2413_COMPACTION */
 
-// Ym2413_Emu
+// Emulator
 #include "yamaha_ym2413.hpp"
-
 #include <assert.h>
+
+/// @brief YM2413 chip emulator.
+namespace YM2413 {
 
 static int use_count = 0;
 
-Ym2413_Emu::~Ym2413_Emu()
-{
-    if ( opll )
-    {
+Emulator::Emulator() { opll = 0; }
+
+Emulator::~Emulator() {
+    if (opll) {
         use_count--;
-        OPLL_delete( opll );
+        OPLL_delete(opll);
     }
 }
 
-Ym2413_Emu::Ym2413_Emu()
-{
-    opll = 0;
-}
-
-int Ym2413_Emu::set_rate( double sample_rate, double clock_rate )
-{
-    if ( opll )
-    {
-        OPLL_delete( opll );
+int Emulator::set_rate(double sample_rate, double clock_rate) {
+    if (opll) {
+        OPLL_delete(opll);
         opll = 0;
         use_count--;
     }
 
     // Only one YM2413 may be used at a time (emu2413 uses lots of global data)
-    assert( use_count == 0 );
+    assert(use_count == 0);
     use_count++;
 
-    opll = OPLL_new( clock_rate, sample_rate );
-    if ( !opll )
+    opll = OPLL_new(clock_rate, sample_rate);
+    if (!opll)
         return 1;
 
     reset();
     return 0;
 }
 
-void Ym2413_Emu::reset()
-{
-    OPLL_reset( opll );
-    OPLL_reset_patch( opll, 0 );
-    OPLL_setMask( opll, 0 );
-    OPLL_set_quality( opll, 0 );
+void Emulator::reset() {
+    OPLL_reset(opll);
+    OPLL_reset_patch(opll, 0);
+    OPLL_setMask(opll, 0);
+    OPLL_set_quality(opll, 0);
 }
 
-void Ym2413_Emu::write( int addr, int data )
-{
-    OPLL_writeReg( opll, addr, data );
+void Emulator::mute_voices(int mask) {
+    OPLL_setMask(opll, mask);
 }
 
-void Ym2413_Emu::mute_voices( int mask )
-{
-    OPLL_setMask( opll, mask );
+void Emulator::write(int addr, int data) {
+    OPLL_writeReg(opll, addr, data);
 }
 
-void Ym2413_Emu::run( int pair_count, sample_t* out )
-{
-    while ( pair_count-- )
-    {
-        int s = OPLL_calc( opll );
-        out [0] = s;
-        out [1] = s;
+void Emulator::run(int pair_count, sample_t* out) {
+    while ( pair_count-- ) {
+        int s = OPLL_calc(opll);
+        out[0] = s;
+        out[1] = s;
         out += 2;
     }
 }
 
+}  // namespace YM2413

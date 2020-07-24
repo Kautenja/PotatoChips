@@ -66,14 +66,14 @@ struct Chip2A03 : Module {
     /// Initialize a new 2A03 Chip module.
     Chip2A03() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
-        configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
-        configParam(PARAM_VOLUME + 0,  0.f,  1.f, 0.9f, "Pulse 1 Level", "%", 0.f, 100.f);
-        configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Level", "%", 0.f, 100.f);
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,   "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 3,   0,   15,   7,     "Noise Period", "", 0, 1, -15);
+        configParam(PARAM_PW + 0,     0,    3,   2,     "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1,     0,    3,   2,     "Pulse 2 Duty Cycle");
+        configParam(PARAM_VOLUME + 0,  0.f,  1.f, 0.9f, "Pulse 1 Volume", "%", 0.f, 100.f);
+        configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Volume", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);

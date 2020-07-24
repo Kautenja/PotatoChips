@@ -44,11 +44,9 @@
           "value": 0.899999976
         }
       ],
-      "leftModuleId": 78,
-      "rightModuleId": 81,
       "pos": [
-        29,
-        1
+        0,
+        0
       ]
     },
     {
@@ -90,10 +88,8 @@
           "value": 0.25
         }
       ],
-      "leftModuleId": 77,
-      "rightModuleId": 75,
       "pos": [
-        10,
+        22,
         0
       ]
     },
@@ -128,10 +124,8 @@
           "value": 0.5
         }
       ],
-      "leftModuleId": 75,
-      "rightModuleId": 79,
       "pos": [
-        49,
+        36,
         0
       ]
     },
@@ -222,8 +216,7 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 73,
-      "rightModuleId": 74,
+      "rightModuleId": 77,
       "data": {
         "values0": [
           10,
@@ -397,7 +390,7 @@
         ]
       },
       "pos": [
-        20,
+        50,
         0
       ]
     },
@@ -444,9 +437,10 @@
           "value": 0.5
         }
       ],
-      "leftModuleId": 80,
+      "leftModuleId": 79,
+      "rightModuleId": 80,
       "pos": [
-        77,
+        29,
         1
       ]
     },
@@ -481,9 +475,9 @@
           "value": 2.0
         }
       ],
-      "rightModuleId": 73,
+      "leftModuleId": 75,
       "pos": [
-        0,
+        79,
         0
       ]
     },
@@ -558,9 +552,9 @@
           "value": 0.0
         }
       ],
-      "rightModuleId": 72,
+      "leftModuleId": 81,
       "pos": [
-        0,
+        75,
         1
       ]
     },
@@ -627,10 +621,10 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 74,
+      "rightModuleId": 76,
       "pos": [
-        59,
-        0
+        0,
+        1
       ]
     },
     {
@@ -688,10 +682,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 81,
-      "rightModuleId": 76,
+      "leftModuleId": 76,
+      "rightModuleId": 81,
       "pos": [
-        61,
+        41,
         1
       ]
     },
@@ -782,10 +776,10 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 72,
-      "rightModuleId": 80,
+      "leftModuleId": 80,
+      "rightModuleId": 78,
       "pos": [
-        43,
+        57,
         1
       ]
     }

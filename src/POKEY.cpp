@@ -83,8 +83,8 @@ struct ChipPOKEY : Module {
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
         configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from 3", "");
         configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from 3", "");
-        // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");
-        // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");
+        // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");  // ignore 16-bit
+        // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");  // ignore 16-bit
         configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
         configParam(PARAM_CONTROL + 6, 0, 1, 0, "Ch. 1 Base Frequency", "");
         configParam(PARAM_CONTROL + 7, 0, 1, 0, "LFSR", "");
@@ -176,9 +176,11 @@ struct ChipPOKEY : Module {
     inline uint8_t getControl() {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < 8; bit++) {
+            if (bit == 3 or bit == 4) continue;  // ignore 16-bit
             auto cv = inputs[INPUT_CONTROL + bit].getVoltage();
             controlTriggers[bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
-            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) - !controlTriggers[bit].state;
+            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
+                !controlTriggers[bit].state;
             // the position for the current button's index
             controlByte |= state << bit;
         }
@@ -266,7 +268,7 @@ struct ChipPOKEYWidget : ModuleWidget {
         }
         // global control
         for (int i = 0; i < 8; i++) {
-            if (i == 3 or i == 4) continue;
+            if (i == 3 or i == 4) continue;  // ignore 16-bit
             addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
             addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, ChipPOKEY::INPUT_CONTROL + i));
         }

@@ -15,7 +15,7 @@
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 44100,
+          "sampleRate": 96000,
           "blockSize": 256
         }
       },
@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0136874672
+          "value": 1.0
         },
         {
           "id": 1,
@@ -324,7 +324,7 @@
         },
         {
           "id": 1,
-          "value": -8.10000038
+          "value": 0.0
         },
         {
           "id": 2,
@@ -372,15 +372,15 @@
         },
         {
           "id": 13,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 14,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 15,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 16,
@@ -489,14 +489,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 294,
-      "outputModuleId": 6,
-      "outputId": 3,
-      "inputModuleId": 6,
-      "inputId": 10,
-      "color": "#c9b70e"
-    },
-    {
       "id": 281,
       "outputModuleId": 6,
       "outputId": 3,
@@ -505,27 +497,11 @@
       "color": "#c9b70e"
     },
     {
-      "id": 295,
-      "outputModuleId": 6,
-      "outputId": 2,
-      "inputModuleId": 6,
-      "inputId": 11,
-      "color": "#0c8e15"
-    },
-    {
       "id": 280,
       "outputModuleId": 6,
       "outputId": 2,
       "inputModuleId": 2,
       "inputId": 3,
-      "color": "#c91847"
-    },
-    {
-      "id": 296,
-      "outputModuleId": 6,
-      "outputId": 1,
-      "inputModuleId": 6,
-      "inputId": 9,
       "color": "#c91847"
     },
     {

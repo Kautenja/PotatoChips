@@ -21,32 +21,47 @@
 #ifndef DSP_YM2413_HPP_
 #define DSP_YM2413_HPP_
 
-class Ym2413_Emu  {
+/// @brief YM2413 chip emulator.
+namespace YM2413 {
+
+/// @brief YM2413 chip emulator.
+class Emulator  {
     struct OPLL* opll;
 
  public:
-    Ym2413_Emu();
-    ~Ym2413_Emu();
+    /// the number of channels on the chip
+    enum { channel_count = 14 };
 
-    // Set output sample rate and chip clock rates, in Hz. Returns non-zero
-    // if error.
+    /// the number of output channels on the chip
+    enum { out_chan_count = 2 }; // stereo
+
+    /// a type for 16-bit audio samples.
+    typedef short sample_t;
+
+    /// @brief Initialize a new YM2413 emulator.
+    Emulator();
+
+    /// @brief Destroy an instance of YM2413 emulator.
+    ~Emulator();
+
+    /// @brief Set output sample rate and chip clock rates, in Hz.
+    /// @returns non-zero if error.
     int set_rate(double sample_rate, double clock_rate);
 
-    // Reset to power-up state
+    /// @brief Reset the emulator to power-up state.
     void reset();
 
-    // Mute voice n if bit n (1 << n) of mask is set
-    enum { channel_count = 14 };
+    /// @brief Mute voice n if bit n (1 << n) of mask is set.
     void mute_voices(int mask);
 
-    // Write 'data' to 'addr'
+    /// @brief Write 'data' to 'addr'.
     void write(int addr, int data);
 
-    // Run and write pair_count samples to output
-    typedef short sample_t;
-    enum { out_chan_count = 2 }; // stereo
+    /// @brief Run and write pair_count samples to output.
     void run(int pair_count, sample_t* out);
 };
+
+}  // namespace YM2413
 
 #endif  // DSP_YM2413_HPP_
 

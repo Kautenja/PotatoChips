@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0706874654
+          "value": 0.0136874672
         },
         {
           "id": 1,
@@ -72,107 +72,13 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
       "pos": [
         0,
-        0
-      ]
-    },
-    {
-      "id": 6,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
-      "model": "POKEY",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 7.0
-        },
-        {
-          "id": 5,
-          "value": 7.0
-        },
-        {
-          "id": 6,
-          "value": 7.0
-        },
-        {
-          "id": 7,
-          "value": 7.0
-        },
-        {
-          "id": 8,
-          "value": 0.5
-        },
-        {
-          "id": 9,
-          "value": 0.0
-        },
-        {
-          "id": 10,
-          "value": 0.5
-        },
-        {
-          "id": 11,
-          "value": 0.0
-        },
-        {
-          "id": 12,
-          "value": 0.0
-        },
-        {
-          "id": 13,
-          "value": 0.0
-        },
-        {
-          "id": 14,
-          "value": 0.0
-        },
-        {
-          "id": 15,
-          "value": 0.0
-        },
-        {
-          "id": 16,
-          "value": 0.0
-        },
-        {
-          "id": 17,
-          "value": 0.0
-        },
-        {
-          "id": 18,
-          "value": 0.0
-        },
-        {
-          "id": 19,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 5,
-      "rightModuleId": 11,
-      "pos": [
-        8,
         0
       ]
     },
@@ -405,41 +311,103 @@
         51,
         0
       ]
+    },
+    {
+      "id": 6,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.7.0",
+      "model": "POKEY",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": -8.10000038
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.0
+        },
+        {
+          "id": 5,
+          "value": 7.0
+        },
+        {
+          "id": 6,
+          "value": 7.0
+        },
+        {
+          "id": 7,
+          "value": 7.0
+        },
+        {
+          "id": 8,
+          "value": 0.5
+        },
+        {
+          "id": 9,
+          "value": 0.5
+        },
+        {
+          "id": 10,
+          "value": 0.5
+        },
+        {
+          "id": 11,
+          "value": 0.5
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 0.0
+        },
+        {
+          "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        },
+        {
+          "id": 16,
+          "value": 0.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 0.0
+        },
+        {
+          "id": 19,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 11,
+      "pos": [
+        8,
+        0
+      ]
     }
   ],
   "cables": [
-    {
-      "id": 278,
-      "outputModuleId": 6,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 279,
-      "outputModuleId": 6,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 280,
-      "outputModuleId": 6,
-      "outputId": 2,
-      "inputModuleId": 2,
-      "inputId": 3,
-      "color": "#c91847"
-    },
-    {
-      "id": 281,
-      "outputModuleId": 6,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
     {
       "id": 282,
       "outputModuleId": 2,
@@ -465,14 +433,6 @@
       "color": "#c91847"
     },
     {
-      "id": 285,
-      "outputModuleId": 2,
-      "outputId": 4,
-      "inputModuleId": 10,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
       "id": 286,
       "outputModuleId": 2,
       "outputId": 0,
@@ -489,28 +449,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 288,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
+      "id": 285,
+      "outputModuleId": 2,
+      "outputId": 4,
+      "inputModuleId": 10,
       "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 289,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 290,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 2,
-      "color": "#c91847"
+      "color": "#c9b70e"
     },
     {
       "id": 291,
@@ -521,18 +465,26 @@
       "color": "#c9b70e"
     },
     {
-      "id": 292,
-      "outputModuleId": 6,
+      "id": 290,
+      "outputModuleId": 5,
       "outputId": 0,
-      "inputModuleId": 11,
-      "inputId": 0,
+      "inputModuleId": 6,
+      "inputId": 2,
       "color": "#c91847"
     },
     {
-      "id": 293,
-      "outputModuleId": 6,
+      "id": 289,
+      "outputModuleId": 5,
       "outputId": 0,
-      "inputModuleId": 12,
+      "inputModuleId": 6,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 288,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 6,
       "inputId": 0,
       "color": "#0986ad"
     },
@@ -545,6 +497,14 @@
       "color": "#c9b70e"
     },
     {
+      "id": 281,
+      "outputModuleId": 6,
+      "outputId": 3,
+      "inputModuleId": 2,
+      "inputId": 4,
+      "color": "#c9b70e"
+    },
+    {
       "id": 295,
       "outputModuleId": 6,
       "outputId": 2,
@@ -553,12 +513,52 @@
       "color": "#0c8e15"
     },
     {
+      "id": 280,
+      "outputModuleId": 6,
+      "outputId": 2,
+      "inputModuleId": 2,
+      "inputId": 3,
+      "color": "#c91847"
+    },
+    {
       "id": 296,
       "outputModuleId": 6,
       "outputId": 1,
       "inputModuleId": 6,
       "inputId": 9,
       "color": "#c91847"
+    },
+    {
+      "id": 279,
+      "outputModuleId": 6,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 2,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 293,
+      "outputModuleId": 6,
+      "outputId": 0,
+      "inputModuleId": 12,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 292,
+      "outputModuleId": 6,
+      "outputId": 0,
+      "inputModuleId": 11,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 278,
+      "outputModuleId": 6,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

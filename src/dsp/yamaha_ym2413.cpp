@@ -2119,25 +2119,21 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 }
 #endif /* EMU2413_COMPACTION */
 
-// Emulator
 #include "yamaha_ym2413.hpp"
 #include <assert.h>
 
-/// @brief YM2413 chip emulator.
-namespace YM2413 {
-
 static int use_count = 0;
 
-Emulator::Emulator() { opll = 0; }
-
-Emulator::~Emulator() {
+YM2413::~YM2413() {
     if (opll) {
         use_count--;
         OPLL_delete(opll);
     }
 }
 
-int Emulator::set_rate(double sample_rate, double clock_rate) {
+YM2413::YM2413() { opll = 0; }
+
+int YM2413::set_rate(double sample_rate, double clock_rate) {
     if (opll) {
         OPLL_delete(opll);
         opll = 0;
@@ -2156,22 +2152,22 @@ int Emulator::set_rate(double sample_rate, double clock_rate) {
     return 0;
 }
 
-void Emulator::reset() {
+void YM2413::reset() {
     OPLL_reset(opll);
     OPLL_reset_patch(opll, 0);
     OPLL_setMask(opll, 0);
     OPLL_set_quality(opll, 0);
 }
 
-void Emulator::mute_voices(int mask) {
-    OPLL_setMask(opll, mask);
-}
-
-void Emulator::write(int addr, int data) {
+void YM2413::write(int addr, int data) {
     OPLL_writeReg(opll, addr, data);
 }
 
-void Emulator::run(int pair_count, sample_t* out) {
+void YM2413::mute_voices(int mask) {
+    OPLL_setMask(opll, mask);
+}
+
+void YM2413::run(int pair_count, sample_t* out) {
     while ( pair_count-- ) {
         int s = OPLL_calc(opll);
         out[0] = s;
@@ -2179,5 +2175,3 @@ void Emulator::run(int pair_count, sample_t* out) {
         out += 2;
     }
 }
-
-}  // namespace YM2413

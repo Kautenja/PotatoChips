@@ -118,7 +118,8 @@ struct ChipPOKEY : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
-        for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) apu.set_output(i, &buf[i]);
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
         onSampleRateChange();
@@ -165,7 +166,8 @@ struct ChipPOKEY : Module {
         auto noiseParam = params[PARAM_NOISE + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_NOISE + channel].isConnected()) {
-            auto cv = 1.f - rack::clamp(inputs[INPUT_NOISE + channel].getVoltage() / 10.f, 0.f, 1.f);
+            auto cv = inputs[INPUT_NOISE + channel].getVoltage() / 10.f;
+            cv = 1.f - rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             noiseParam *= 2 * cv;
         }
@@ -186,7 +188,8 @@ struct ChipPOKEY : Module {
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = rack::clamp(inputs[INPUT_LEVEL + channel].getVoltage() / 10.f, 0.f, 1.f);
+            auto cv = inputs[INPUT_LEVEL + channel].getVoltage();
+            cv = rack::clamp(cv / 10.f, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             levelParam *= 2 * cv;
         }
@@ -227,7 +230,7 @@ struct ChipPOKEY : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
                 // there are 2 registers per channel, multiply first channel
                 // by 2 to produce an offset between registers based on channel
                 // index. the 3 noise bit occupy the MSB of the control register
@@ -239,13 +242,13 @@ struct ChipPOKEY : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // set outputs
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // set outputs
             auto channelOutput = getAudioOut(i);
             chMeters[i].process(args.sampleTime, channelOutput / 5.f);
             outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
         }
         if (lightDivider.process()) {  // update the mixer lights
-            for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
                 lights[LIGHTS_LEVEL + i].setBrightness(b);
             }
@@ -255,7 +258,7 @@ struct ChipPOKEY : Module {
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the sample rate for each channel
-        for (std::size_t i = 0; i < AtariPOKEY::OSC_COUNT; i++)
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };
@@ -278,7 +281,7 @@ struct ChipPOKEYWidget : ModuleWidget {
         // the vertical spacing between the same component on different channels
         static constexpr float VERT_SEP = 85.f;
         // channel control
-        for (int i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(19,  73 + i * VERT_SEP), module, ChipPOKEY::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(  Vec(19,  38 + i * VERT_SEP), module, ChipPOKEY::INPUT_FM + i));
             addParam(createParam<Rogan5PSGray>(Vec(46,  39 + i * VERT_SEP), module, ChipPOKEY::PARAM_FREQ + i));

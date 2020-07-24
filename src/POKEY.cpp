@@ -131,11 +131,11 @@ struct ChipPOKEY : Module {
     ///
     inline uint8_t getFrequency(int channel) {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ8BIT_MIN = 0;
+        static constexpr float FREQ8BIT_MIN = 2;
         // the maximal value for the frequency register
         static constexpr float FREQ8BIT_MAX = 0xFF;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
+        static constexpr auto CLOCK_DIVISION = 56;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
@@ -143,10 +143,10 @@ struct ChipPOKEY : Module {
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        // freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // calculate the frequency based on the clock division
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
+        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         return rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
     }
 

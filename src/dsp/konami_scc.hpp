@@ -21,12 +21,13 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 #include <cstring>
 
 // TODO: remove blargg_ulong
 // TODO: c-cast to static_cast
 
-/// Konami SCC sound chip emulator.
+/// @brief Konami SCC sound chip emulator.
 class KonamiSCC {
  public:
     /// the number of oscillators on the chip
@@ -206,9 +207,9 @@ class KonamiSCC {
     /// @param data the byte to write to the register at given address
     ///
     inline void write(int addr, int data) {
+        static constexpr blip_time_t time = 0;
         assert((unsigned) addr < REGISTER_COUNT);
-        // TODO: remove this?
-        run_until(0);
+        run_until(time);
         regs[addr] = data;
     }
 

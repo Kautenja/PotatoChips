@@ -21,6 +21,7 @@
 
 #include "blargg_common.h"
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 #include <cstring>
 
 // TODO: remove blarg_ulong
@@ -50,7 +51,7 @@ inline blargg_ulong run_poly5(blargg_ulong in, int shift) {
 #define POLY_MASK(width, tap1, tap2) \
     ((1UL << (width - 1 - tap1)) | (1UL << (width - 1 - tap2)))
 
-/// Atari POKEY sound chip emulator.
+/// @brief Atari POKEY sound chip emulator.
 class AtariPOKEY {
  public:
     /// the number of oscillators on the chip

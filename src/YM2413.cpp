@@ -33,7 +33,7 @@ struct Chip2413 : Module {
     enum InputIds {
         ENUMS(INPUT_VOCT, YamahaYM2413::channel_count),
         ENUMS(INPUT_FM, YamahaYM2413::channel_count),
-        ENUMS(INPUT_LEVEL, YamahaYM2413::channel_count),
+        ENUMS(INPUT_GATE, YamahaYM2413::channel_count),
         INPUT_COUNT
     };
     enum OutputIds {
@@ -102,8 +102,8 @@ struct Chip2413 : Module {
     //     // get the level from the parameter knob
     //     auto levelParam = params[PARAM_LEVEL + channel].getValue();
     //     // apply the control voltage to the level
-    //     if (inputs[INPUT_LEVEL + channel].isConnected())
-    //         levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+    //     if (inputs[INPUT_GATE + channel].isConnected())
+    //         levelParam *= inputs[INPUT_GATE + channel].getVoltage() / 2.f;
     //     // return the 8-bit level clamped within legal limits
     //     return rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
     // }
@@ -140,35 +140,51 @@ struct Chip2413 : Module {
         // for (int i = 0; i < YamahaYM2413::channel_count; i++)
         //     outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
 
-        apu.write(0x00, 0b00100010);
+        // apu.write(0x00, 0b00100010);
+        // apu.write(0x01, 0b00100010);
 
-        apu.write(0x02, 0b00100010);
+        // apu.write(0x02, 0b00100010);
 
-        apu.write(0x04, 0b00100010);
-        apu.write(0x05, 0b00100010);
+        // apu.write(0x04, 0xff);
+        // apu.write(0x05, 0xff);
 
-        apu.write(0x06, 0b00100110);
-        apu.write(0x07, 0b00100110);
+        // apu.write(0x06, 0xff);
+        // apu.write(0x07, 0xff);
 
-        apu.write(0x10, 0b00101000);
+        // apu.write(0x0e, 0b00101000);
 
-        apu.write(0x20, 0b00110000);
+        // for (int i = 0; i < 8; i++)
+        //     apu.write(0x10 + i, 0b00101000);
 
-        apu.write(0x30, 0b01001000);
+        // auto key_on = 0b00100000 * ((inputs[INPUT_GATE].getVoltage() / 10.f) > 2.f);
+        // auto sustain_on = 0b00000000;
+        // for (int i = 0; i < 8; i++)
+        //     apu.write(0x20 + i, key_on | sustain_on);
 
-        apu.write(random::u32(), random::u32());
+        // for (int i = 0; i < 8; i++)
+        //     apu.write(0x30 + i, 0b01001000);
+
+
+        apu.write(14, random::u32());
+        // apu.write(14, random::u32() % 6);
+
+        apu.write(0x36, random::u32());
+        apu.write(0x37, random::u32());
+        apu.write(0x38, random::u32());
+
 
         int16_t samples[2];
         apu.run(2, samples);
-        outputs[OUTPUT_CHANNEL + 0].setVoltage(10.f * samples[1] / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_CHANNEL + 1].setVoltage(10.f * samples[0] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_CHANNEL + 0].setVoltage(10.f * samples[0] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_CHANNEL + 1].setVoltage(10.f * samples[1] / std::numeric_limits<int16_t>::max());
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         apu.set_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
-};
+
+ };
 
 // ---------------------------------------------------------------------------
 // MARK: Widget
@@ -186,22 +202,22 @@ struct Chip2413Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 99),  module, Chip2413::INPUT_VOCT + 0));
+        // addInput(createInput<PJ301MPort>(Vec(23, 99),  module, Chip2413::INPUT_VOCT + 0));
         // addInput(createInput<PJ301MPort>(Vec(23, 211), module, Chip2413::INPUT_VOCT + 1));
         // addInput(createInput<PJ301MPort>(Vec(23, 320), module, Chip2413::INPUT_VOCT + 2));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 56),  module, Chip2413::INPUT_FM + 0));
+        // addInput(createInput<PJ301MPort>(Vec(23, 56),  module, Chip2413::INPUT_FM + 0));
         // addInput(createInput<PJ301MPort>(Vec(23, 168), module, Chip2413::INPUT_FM + 1));
         // addInput(createInput<PJ301MPort>(Vec(23, 279), module, Chip2413::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, Chip2413::PARAM_FREQ + 0));
+        // addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, Chip2413::PARAM_FREQ + 0));
         // addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, Chip2413::PARAM_FREQ + 1));
         // addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, Chip2413::PARAM_FREQ + 2));
         // levels
-        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, Chip2413::INPUT_LEVEL + 0));
-        // addInput(createInput<PJ301MPort>(Vec(102, 146),  module, Chip2413::INPUT_LEVEL + 1));
-        // addInput(createInput<PJ301MPort>(Vec(102, 255),  module, Chip2413::INPUT_LEVEL + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, Chip2413::PARAM_LEVEL + 0));
+        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, Chip2413::INPUT_GATE + 0));
+        // addInput(createInput<PJ301MPort>(Vec(102, 146),  module, Chip2413::INPUT_GATE + 1));
+        // addInput(createInput<PJ301MPort>(Vec(102, 255),  module, Chip2413::INPUT_GATE + 2));
+        // addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, Chip2413::PARAM_LEVEL + 0));
         // addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, Chip2413::PARAM_LEVEL + 1));
         // addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, Chip2413::PARAM_LEVEL + 2));
         // channel outputs

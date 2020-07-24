@@ -623,10 +623,10 @@ class Ricoh2A03 {
             0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
             0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
         };
-        /// make sure the given address is legal
-        if (address < PULSE0_VOL or address > STATUS)
+        // make sure the given address is legal
+        if (address < ADDR_START or address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        /// run the emulator up to the given time
+        // run the emulator up to the given time
         run_until(time);
         if (address < 0x4010) {  // synthesize registers
             // Write to channel

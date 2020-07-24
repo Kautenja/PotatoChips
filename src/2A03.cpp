@@ -282,7 +282,9 @@ struct Chip2A03Widget : ModuleWidget {
                 addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, Chip2A03::PARAM_VOLUME + i, Chip2A03::LIGHTS_VOLUME + i));
                 addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, Chip2A03::INPUT_VOLUME + i));
             } else {  // noise
-                addParam(createParam<Rogan2PWhite>( Vec(53, 298), module, Chip2A03::PARAM_FREQ + i));
+                auto param = createParam<Rogan2PWhite>( Vec(53, 298), module, Chip2A03::PARAM_FREQ + i);
+                param->snap = true;
+                addParam(param);
             }
         }
         // PW 0

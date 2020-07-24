@@ -110,8 +110,8 @@ struct ChipPOKEY : Module {
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
         configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from 3", "");
         configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from 3", "");
-        configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");
-        configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");
+        // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");
+        // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");
         configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
         configParam(PARAM_CONTROL + 6, 0, 1, 0, "Ch. 1 Base Frequency", "");
         configParam(PARAM_CONTROL + 7, 0, 1, 0, "LFSR", "");
@@ -124,6 +124,7 @@ struct ChipPOKEY : Module {
         onSampleRateChange();
     }
 
+    // fix to return a better value when ch1 or ch3 freq is turned on
     /// Return the frequency for the given channel.
     ///
     /// @param channel the channel to return the frequency for
@@ -281,7 +282,9 @@ struct ChipPOKEYWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(19,  73 + i * VERT_SEP), module, ChipPOKEY::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(  Vec(19,  38 + i * VERT_SEP), module, ChipPOKEY::INPUT_FM + i));
             addParam(createParam<Rogan5PSGray>(Vec(46,  39 + i * VERT_SEP), module, ChipPOKEY::PARAM_FREQ + i));
-            addParam(createParam<Rogan1PRed>(  Vec(109, 30 + i * VERT_SEP), module, ChipPOKEY::PARAM_NOISE + i));
+            auto noise = createParam<Rogan1PRed>(  Vec(109, 30 + i * VERT_SEP), module, ChipPOKEY::PARAM_NOISE + i);
+            noise->snap = true;
+            addParam(noise);
             addInput(createInput<PJ301MPort>(  Vec(116, 71 + i * VERT_SEP), module, ChipPOKEY::INPUT_NOISE + i));
             addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, ChipPOKEY::PARAM_LEVEL + i, ChipPOKEY::LIGHTS_LEVEL + i));
             addInput(createInput<PJ301MPort>(  Vec(172, 28 + i * VERT_SEP), module, ChipPOKEY::INPUT_LEVEL + i));
@@ -289,6 +292,7 @@ struct ChipPOKEYWidget : ModuleWidget {
         }
         // global control
         for (int i = 0; i < 8; i++) {
+            if (i == 3 or i == 4) continue;
             addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
             addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, ChipPOKEY::INPUT_CONTROL + i));
         }

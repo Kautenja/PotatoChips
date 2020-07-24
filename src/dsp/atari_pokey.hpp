@@ -143,6 +143,7 @@ class AtariPOKEY {
             // uint32_t rev = n & 1;
             // for (int i = 1; i < poly5_len; i++)
             //     rev |= (n >> i & 1) << (poly5_len - i);
+            set_volume(1.0);
         }
 
         /// Set the volume of the synthesizer, where 1.0 is full volume.

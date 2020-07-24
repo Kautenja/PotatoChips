@@ -2265,51 +2265,42 @@ int YM2612TimerOver(YM2612* F2612,int c)
 
 // Ym2612_Emu
 
-Ym2612_Emu::~Ym2612_Emu()
-{
-    if ( impl )
-        YM2612Shutdown( impl );
+Ym2612_Emu::~Ym2612_Emu() {
+    if (impl)
+        YM2612Shutdown(impl);
 }
 
-const char* Ym2612_Emu::set_rate( double sample_rate, double clock_rate )
-{
-    if ( impl )
-    {
-        YM2612Shutdown( impl );
+const char* Ym2612_Emu::set_rate(double sample_rate, double clock_rate) {
+    if (impl) {
+        YM2612Shutdown(impl);
         impl = 0;
     }
 
-    impl = YM2612Init( 0, 0, (long) (clock_rate + 0.5), (long) (sample_rate + 0.5), 0, 0 );
-    if ( !impl )
+    impl = YM2612Init(0, 0, (long) (clock_rate + 0.5), (long) (sample_rate + 0.5), 0, 0);
+    if (!impl)
         return "Out of memory";
 
     return 0;
 }
 
-void Ym2612_Emu::reset()
-{
-    YM2612ResetChip( impl );
+void Ym2612_Emu::reset() {
+    YM2612ResetChip(impl);
 }
 
-void Ym2612_Emu::write0( int addr, int data )
-{
-    YM2612Write( impl, 0, addr );
-    YM2612Write( impl, 1, data );
+void Ym2612_Emu::write0(int addr, int data) {
+    YM2612Write(impl, 0, addr);
+    YM2612Write(impl, 1, data);
 }
 
-void Ym2612_Emu::write1( int addr, int data )
-{
-    YM2612Write( impl, 2, addr );
-    YM2612Write( impl, 3, data );
+void Ym2612_Emu::write1(int addr, int data) {
+    YM2612Write(impl, 2, addr);
+    YM2612Write(impl, 3, data);
 }
 
-void Ym2612_Emu::mute_voices( int mask )
-{
-    YM2612Mute( impl, mask );
+void Ym2612_Emu::mute_voices(int mask) {
+    YM2612Mute(impl, mask);
 }
 
-void Ym2612_Emu::run( int pair_count, sample_t* out )
-{
-    YM2612UpdateOne( impl, out, pair_count );
+void Ym2612_Emu::run(int pair_count, sample_t* out) {
+    YM2612UpdateOne(impl, out, pair_count);
 }
-

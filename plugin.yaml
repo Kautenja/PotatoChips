@@ -80,15 +80,17 @@ modules:
     tags:
       - Oscillator
       - Noise
-  # - slug: 2413
-  #   name: 2413
-  #   description: An emulation of the Yamaha YM2413 chip.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf
-  #   tags:
-  #     - Oscillator
-  # - slug: 2612
-  #   name: 2612
+  - slug: '2413'
+    name: '2413'
+    description: An emulation of the Yamaha YM2413 chip.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf
+    tags:
+      - Oscillator
+      - Noise
+  # - slug: '2612'
+  #   name: '2612'
   #   description: An emulation of the Yamaha YM2612 chip.
   #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2612.pdf
   #   tags:
   #     - Oscillator
+  #     - Noise

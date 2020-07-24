@@ -28,11 +28,13 @@ struct Chip2A03 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
+        ENUMS(PARAM_VOLUME, 3),
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
+        ENUMS(INPUT_VOLUME, 3),
         INPUT_LFSR,
         INPUT_COUNT
     };
@@ -40,7 +42,10 @@ struct Chip2A03 : Module {
         ENUMS(OUTPUT_CHANNEL, Ricoh2A03::OSC_COUNT),
         OUTPUT_COUNT
     };
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds {
+        ENUMS(LIGHTS_VOLUME, 3),
+        LIGHT_COUNT
+    };
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[Ricoh2A03::OSC_COUNT];
@@ -62,6 +67,9 @@ struct Chip2A03 : Module {
         configParam(PARAM_FREQ + 3,   0,   15,   7,   "Noise Period", "", 0, 1, -15);
         configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
+        configParam(PARAM_VOLUME + 0,  0.f,  1.f, 0.9f, "Pulse 1 Level", "%", 0.f, 100.f);
+        configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Level", "%", 0.f, 100.f);
+        configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
@@ -71,17 +79,26 @@ struct Chip2A03 : Module {
         onSampleRateChange();
     }
 
-    /// Process pulse wave for given channel.
+    /// Get the frequency for the given channel
     ///
-    /// @param channel the channel to process the pulse wave for
+    /// @param freq_min the minimal value for the frequency register to
+    /// produce sound
+    /// @param freq_max the maximal value for the frequency register
+    /// @param clock_division the clock division of the oscillator relative
+    /// to the CPU
+    /// @returns the 11 bit frequency value from the panel
+    /// @details
+    /// parameters for pulse wave:
+    /// freq_min = 8, freq_max = 1023, clock_division = 16
+    /// parameters for triangle wave:
+    /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
-    void channel_pulse(int channel) {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 1023;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
+    inline uint16_t getFrequency(
+        int channel,
+        float freq_min,
+        float freq_max,
+        float clock_division
+    ) {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
@@ -92,63 +109,60 @@ struct Chip2A03 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        // write the frequency to the low and high registers
-        // - there are 4 registers per pulse channel, multiply channel by 4 to
-        //   produce an offset between registers based on channel index
-        apu.write(Ricoh2A03::PULSE0_LO + 4 * channel,  freq11bit & 0b0000000011111111);
-        apu.write(Ricoh2A03::PULSE0_HI + 4 * channel, (freq11bit & 0b0000011100000000) >> 8);
-        // set the pulse width of the pulse wave (high 2 bits) and set the
-        // volume to a constant level
-        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write(Ricoh2A03::PULSE0_VOL + 4 * channel, pw | 0b00011111);
+        freq = (buf[channel].get_clock_rate() / (clock_division * freq)) - 1;
+        return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Process triangle wave (channel 2).
-    void channel_triangle() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 2;
-        // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 2047;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 2].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 11-bit value
-        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        // write the frequency to the low and high registers
-        apu.write(Ricoh2A03::TRIANGLE_LO,  freq11bit & 0b0000000011111111);
-        apu.write(Ricoh2A03::TRIANGLE_HI, (freq11bit & 0b0000011100000000) >> 8);
-        // write the linear register to enable the oscillator
-        apu.write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+    /// Get the PW for the given channel
+    ///
+    /// @param channel the channel to return the pulse width for
+    /// @returns the pulse width value coded in an 8-bit container
+    ///
+    inline uint8_t getPulseWidth(int channel) {
+        return static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
     }
 
-    /// Process noise (channel 3).
-    void channel_noise() {
+    /// Return the period of the noise oscillator from the panel controls.
+    inline uint8_t getNoisePeriod() {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 0;
+        static constexpr float PERIOD_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 15;
+        static constexpr float PERIOD_MAX = 15;
         // get the pitch / frequency of the oscillator
         auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
         auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
         // convert the pitch to frequency based on standard exponential scale
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
         freq += params[PARAM_FREQ + 3].getValue();
-        uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write(Ricoh2A03::NOISE_LO, lfsr.isHigh() * 0b10000000 | period);
-        apu.write(Ricoh2A03::NOISE_HI, 0);
-        // set the volume to a constant level
-        apu.write(Ricoh2A03::NOISE_VOL, 0b00011111);
+        return PERIOD_MAX - rack::clamp(freq, PERIOD_MIN, PERIOD_MAX);
+    }
+
+    /// Return the volume level from the panel controls.
+    ///
+    /// @param channel the channel to return the volume level of
+    /// @returns the volume level of the given channel
+    /// @details
+    /// channel can be one of 0, 1, or 3. the triangle channel (2) has no
+    /// volume control.
+    ///
+    inline uint8_t getVolume(int channel) {
+        // the minimal value for the volume width register
+        static constexpr float VOLUME_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float VOLUME_MAX = 15;
+        // decrement the noise channel
+        if (channel == 3) channel -= 1;
+        // get the attenuation from the parameter knob
+        auto param = params[PARAM_VOLUME + channel].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_VOLUME + channel].isConnected()) {
+            auto cv = inputs[INPUT_VOLUME + channel].getVoltage() / 10.f;
+            cv = rack::clamp(cv, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            param *= 2 * cv;
+        }
+        // get the 8-bit volume clamped within legal limits
+        return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -168,11 +182,39 @@ struct Chip2A03 : Module {
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-            // process the data on the chip
-            channel_pulse(0);
-            channel_pulse(1);
-            channel_triangle();
-            channel_noise();
+            // ---------------------------------------------------------------
+            // pulse channels (2)
+            // ---------------------------------------------------------------
+            for (int i = 0; i < 2; i++) {
+                // write the frequency to the low and high registers
+                // - there are 4 registers per pulse channel, multiply channel by 4 to
+                //   produce an offset between registers based on channel index
+                uint16_t freq = getFrequency(i, 8, 1023, 16);
+                auto lo =  freq & 0b0000000011111111;
+                apu.write(Ricoh2A03::PULSE0_LO + 4 * i, lo);
+                auto hi = (freq & 0b0000011100000000) >> 8;
+                apu.write(Ricoh2A03::PULSE0_HI + 4 * i, hi);
+                // set the pulse width of the pulse wave (high 3 bits) and set
+                // the volume (low 4 bits). the 5th bit controls the envelope,
+                // high sets constant volume.
+                auto volume = getPulseWidth(i) | 0b00010000 | getVolume(i);
+                apu.write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
+            }
+            // ---------------------------------------------------------------
+            // triangle channel
+            // ---------------------------------------------------------------
+            // write the frequency to the low and high registers
+            uint16_t freq = getFrequency(2, 2, 2047, 32);
+            apu.write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
+            apu.write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+            // write the linear register to enable the oscillator
+            apu.write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+            // ---------------------------------------------------------------
+            // noise channel
+            // ---------------------------------------------------------------
+            apu.write(Ricoh2A03::NOISE_LO, (lfsr.isHigh() << 7) | getNoisePeriod());
+            apu.write(Ricoh2A03::NOISE_HI, 0);
+            apu.write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3));
             // enable all four channels
             apu.write(Ricoh2A03::SND_CHN, 0b00001111);
         }
@@ -219,6 +261,13 @@ struct Chip2A03Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, Chip2A03::PARAM_FREQ + 1));
         addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, Chip2A03::PARAM_FREQ + 2));
         addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, Chip2A03::PARAM_FREQ + 3));
+        // volume control
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 24),  module, Chip2A03::PARAM_VOLUME + 0, Chip2A03::LIGHTS_VOLUME + 0));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 109), module, Chip2A03::PARAM_VOLUME + 1, Chip2A03::LIGHTS_VOLUME + 1));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 279), module, Chip2A03::PARAM_VOLUME + 2, Chip2A03::LIGHTS_VOLUME + 2));
+        addInput(createInput<PJ301MPort>(Vec(150, 74), module, Chip2A03::INPUT_VOLUME + 0));
+        addInput(createInput<PJ301MPort>(Vec(150, 159), module, Chip2A03::INPUT_VOLUME + 1));
+        addInput(createInput<PJ301MPort>(Vec(150, 329), module, Chip2A03::INPUT_VOLUME + 2));
         // PW
         addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, Chip2A03::PARAM_PW + 0));
         addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, Chip2A03::PARAM_PW + 1));

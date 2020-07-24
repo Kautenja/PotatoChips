@@ -23,35 +23,47 @@
 #ifndef DSP_YM2612_HPP_
 #define DSP_YM2612_HPP_
 
+/// @brief Yamaha YM2612 chip emulator engine.
 struct Ym2612_Impl;
 
+/// @brief Yamaha YM2612 chip emulator.
 class Ym2612_Emu  {
+    /// the engine for the emulator
     Ym2612_Impl* impl;
 
  public:
+    /// the number of channels on the chip
+    enum { channel_count = 6 };
+
+    /// the number of output channels on the chip
+    enum { out_chan_count = 2 };
+
+    /// a type for 16-bit audio samples.
+    typedef short sample_t;
+
+    /// @brief Initialize a new YM2612 emulator.
     Ym2612_Emu() { impl = 0; }
+
+    /// @brief Destroy an instance of YM2612 emulator.
     ~Ym2612_Emu();
 
-    // Set output sample rate and chip clock rates, in Hz. Returns non-zero
-    // if error.
+    /// @brief Set output sample rate and chip clock rates, in Hz.
+    /// @returns non-zero if error.
     const char* set_rate(double sample_rate, double clock_rate);
 
-    // Reset to power-up state
+    /// @brief Reset the emulator to power-up state.
     void reset();
 
     // Mute voice n if bit n (1 << n) of mask is set
-    enum { channel_count = 6 };
     void mute_voices(int mask);
 
-    // Write addr to register 0 then data to register 1
+    /// @brief Write addr to register 0 then data to register 1
     void write0(int addr, int data);
 
-    // Write addr to register 2 then data to register 3
+    // @brief Write addr to register 2 then data to register 3
     void write1(int addr, int data);
 
-    // Run and add pair_count samples into current output buffer contents
-    typedef short sample_t;
-    enum { out_chan_count = 2 }; // stereo
+    /// @brief Run and write pair_count samples to output.
     void run(int pair_count, sample_t* out);
 };
 

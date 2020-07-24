@@ -242,7 +242,7 @@ struct Chip2A03 : Module {
             outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
         }
         if (lightDivider.process()) {  // update the mixer lights
-            for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
                 lights[LIGHTS_VOLUME + i].setBrightness(b);
             }

@@ -19,33 +19,6 @@
 #include "components.hpp"
 #include "dsp/atari_pokey.hpp"
 
-// TODO: replace with logic from SN76489 and AY-3-8910 for boolean triggers
-
-/// a trigger for a button with a CV input.
-struct CVButtonTrigger {
-    /// the trigger for the button
-    dsp::SchmittTrigger buttonTrigger;
-    /// the trigger for the CV
-    dsp::SchmittTrigger cvTrigger;
-
-    /// Process the input signals.
-    ///
-    /// @param button the value of the button signal [0, 1]
-    /// @param cv the value of the CV signal [-10, 10]
-    /// @returns true if either signal crossed a rising edge
-    ///
-    inline bool process(float button, float cv) {
-        bool buttonPress = buttonTrigger.process(button);
-        bool cvGate = cvTrigger.process(rescale(cv, 0.1, 2.0f, 0.f, 1.f));
-        return buttonPress or cvGate;
-    }
-
-    /// Return a boolean determining if either the button or CV gate is high.
-    inline bool isHigh() {
-        return buttonTrigger.isHigh() or cvTrigger.isHigh();
-    }
-};
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -81,8 +54,8 @@ struct ChipPOKEY : Module {
     /// The POKEY instance to synthesize sound with
     AtariPOKEY apu;
 
-    /// a Schmitt Trigger for handling player 1 button inputs
-    CVButtonTrigger controlTriggers[8];
+    /// triggers for handling inputs to the control ports
+    dsp::BooleanTrigger controlTriggers[8];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -203,13 +176,11 @@ struct ChipPOKEY : Module {
     inline uint8_t getControl() {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < 8; bit++) {
-            // process the voltage with the Schmitt Trigger
-            controlTriggers[bit].process(
-                params[PARAM_CONTROL + bit].getValue(),
-                inputs[INPUT_CONTROL + bit].getVoltage()
-            );
+            auto cv = inputs[INPUT_CONTROL + bit].getVoltage();
+            controlTriggers[bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) - !controlTriggers[bit].state;
             // the position for the current button's index
-            controlByte |= controlTriggers[bit].isHigh() << bit;
+            controlByte |= state << bit;
         }
         return controlByte;
     }

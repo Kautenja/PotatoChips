@@ -628,7 +628,6 @@
         }
       ],
       "leftModuleId": 74,
-      "rightModuleId": 83,
       "pos": [
         59,
         0
@@ -788,28 +787,6 @@
       "pos": [
         43,
         1
-      ]
-    },
-    {
-      "id": 83,
-      "plugin": "Core",
-      "version": "1.1.6",
-      "model": "AudioInterface",
-      "params": [],
-      "leftModuleId": 79,
-      "data": {
-        "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
-          "offset": 0,
-          "maxChannels": 8,
-          "sampleRate": 44100,
-          "blockSize": 256
-        }
-      },
-      "pos": [
-        88,
-        0
       ]
     }
   ],

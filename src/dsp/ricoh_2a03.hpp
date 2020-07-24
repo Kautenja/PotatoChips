@@ -644,7 +644,7 @@ class Ricoh2A03 {
                 // reset square phase
                 // DISABLED TO HACK SQUARE OSCILLATOR for VCV Rack
                 // if (osc_index < 2)
-                //  ((Nes_Square*) osc)->phase = Nes_Square::phase_range - 1;
+                //     ((Pulse*) osc)->phase = Pulse::phase_range - 1;
             }
         } else if (address == 0x4015) {
             // Channel enables

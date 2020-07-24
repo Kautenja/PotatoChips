@@ -359,11 +359,6 @@ class Ricoh2A03 {
         }
     };
 
-    static constexpr int16_t noise_period_table[16] = {
-        0x004, 0x008, 0x010, 0x020, 0x040, 0x060, 0x080, 0x0A0,
-        0x0CA, 0x0FE, 0x17C, 0x1FC, 0x2FA, 0x3F8, 0x7F2, 0xFE4
-    };
-
     /// The noise oscillator from the NES.
     struct Noise : Envelope {
         /// the output value from the noise oscillator
@@ -372,6 +367,10 @@ class Ricoh2A03 {
         BLIPSynth<blip_med_quality, 15> synth;
 
         void run(blip_time_t time, blip_time_t end_time) {
+            static const int16_t noise_period_table[16] = {
+                0x004, 0x008, 0x010, 0x020, 0x040, 0x060, 0x080, 0x0A0,
+                0x0CA, 0x0FE, 0x17C, 0x1FC, 0x2FA, 0x3F8, 0x7F2, 0xFE4
+            };
             if (!output) return;
             const int volume = this->volume();
             int amp = (noise & 1) ? volume : 0;

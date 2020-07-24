@@ -2124,16 +2124,16 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 
 static int use_count = 0;
 
-YM2413::~YM2413() {
+YamahaYM2413::~YamahaYM2413() {
     if (opll) {
         use_count--;
         OPLL_delete(opll);
     }
 }
 
-YM2413::YM2413() { opll = 0; }
+YamahaYM2413::YamahaYM2413() { opll = 0; }
 
-int YM2413::set_rate(double sample_rate, double clock_rate) {
+int YamahaYM2413::set_rate(double sample_rate, double clock_rate) {
     if (opll) {
         OPLL_delete(opll);
         opll = 0;
@@ -2152,22 +2152,22 @@ int YM2413::set_rate(double sample_rate, double clock_rate) {
     return 0;
 }
 
-void YM2413::reset() {
+void YamahaYM2413::reset() {
     OPLL_reset(opll);
     OPLL_reset_patch(opll, 0);
     OPLL_setMask(opll, 0);
     OPLL_set_quality(opll, 0);
 }
 
-void YM2413::write(int addr, int data) {
+void YamahaYM2413::write(int addr, int data) {
     OPLL_writeReg(opll, addr, data);
 }
 
-void YM2413::mute_voices(int mask) {
+void YamahaYM2413::mute_voices(int mask) {
     OPLL_setMask(opll, mask);
 }
 
-void YM2413::run(int pair_count, sample_t* out) {
+void YamahaYM2413::run(int pair_count, sample_t* out) {
     while ( pair_count-- ) {
         int s = OPLL_calc(opll);
         out[0] = s;

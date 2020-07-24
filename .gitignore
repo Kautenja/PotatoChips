@@ -6,6 +6,7 @@
 /plugin.dylib
 /plugin.dll
 /plugin.so
+/docs
 .DS_Store
 
 # MARK: Python gitignore

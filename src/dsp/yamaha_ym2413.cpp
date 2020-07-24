@@ -2119,74 +2119,59 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 }
 #endif /* EMU2413_COMPACTION */
 
-// Ym2413_Emu
 #include "yamaha_ym2413.hpp"
-
 #include <assert.h>
 
 static int use_count = 0;
 
-Ym2413_Emu::~Ym2413_Emu()
-{
-    if ( opll )
-    {
+YM2413::~YM2413() {
+    if (opll) {
         use_count--;
-        OPLL_delete( opll );
+        OPLL_delete(opll);
     }
 }
 
-Ym2413_Emu::Ym2413_Emu()
-{
-    opll = 0;
-}
+YM2413::YM2413() { opll = 0; }
 
-int Ym2413_Emu::set_rate( double sample_rate, double clock_rate )
-{
-    if ( opll )
-    {
-        OPLL_delete( opll );
+int YM2413::set_rate(double sample_rate, double clock_rate) {
+    if (opll) {
+        OPLL_delete(opll);
         opll = 0;
         use_count--;
     }
 
     // Only one YM2413 may be used at a time (emu2413 uses lots of global data)
-    assert( use_count == 0 );
+    assert(use_count == 0);
     use_count++;
 
-    opll = OPLL_new( clock_rate, sample_rate );
-    if ( !opll )
+    opll = OPLL_new(clock_rate, sample_rate);
+    if (!opll)
         return 1;
 
     reset();
     return 0;
 }
 
-void Ym2413_Emu::reset()
-{
-    OPLL_reset( opll );
-    OPLL_reset_patch( opll, 0 );
-    OPLL_setMask( opll, 0 );
-    OPLL_set_quality( opll, 0 );
+void YM2413::reset() {
+    OPLL_reset(opll);
+    OPLL_reset_patch(opll, 0);
+    OPLL_setMask(opll, 0);
+    OPLL_set_quality(opll, 0);
 }
 
-void Ym2413_Emu::write( int addr, int data )
-{
-    OPLL_writeReg( opll, addr, data );
+void YM2413::write(int addr, int data) {
+    OPLL_writeReg(opll, addr, data);
 }
 
-void Ym2413_Emu::mute_voices( int mask )
-{
-    OPLL_setMask( opll, mask );
+void YM2413::mute_voices(int mask) {
+    OPLL_setMask(opll, mask);
 }
 
-void Ym2413_Emu::run( int pair_count, sample_t* out )
-{
-    while ( pair_count-- )
-    {
-        int s = OPLL_calc( opll );
-        out [0] = s;
-        out [1] = s;
+void YM2413::run(int pair_count, sample_t* out) {
+    while ( pair_count-- ) {
+        int s = OPLL_calc(opll);
+        out[0] = s;
+        out[1] = s;
         out += 2;
     }
 }
-

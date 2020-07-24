@@ -1,4 +1,4 @@
-// An emulation of the Namco 106 synthesis chip.
+// Namco 106 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -20,15 +20,16 @@
 #define DSP_NAMCO_106_HPP_
 
 #include "blip_buffer.hpp"
+#include "exceptions.hpp"
 
-/// An emulation of the Namco 106 synthesis chip.
+/// @brief Namco 106 chip emulator.
 class Namco106 {
  public:
     /// CPU clock cycle count
     typedef int32_t cpu_time_t;
     /// 16-bit memory address
     typedef int16_t cpu_addr_t;
-    /// the number of oscillators on the Namco 106 chip
+    /// the number of oscillators on the chip
     static constexpr int OSC_COUNT = 8;
     /// the number of registers on the chip
     static constexpr int REG_COUNT = 0x80;
@@ -58,7 +59,7 @@ class Namco106 {
         addr_reg = 0;
         memset(reg, 0, REG_COUNT);
         for (int i = 0; i < OSC_COUNT; i++) {
-            Namco106_Oscillator& osc = oscs[i];
+            Oscillator& osc = oscs[i];
             osc.delay = 0;
             osc.last_amp = 0;
             osc.wave_pos = 0;
@@ -135,7 +136,7 @@ class Namco106 {
     Namco106& operator=(const Namco106&);
 
     /// An oscillator on the Namco106 chip.
-    struct Namco106_Oscillator {
+    struct Oscillator {
         /// TODO: document
         int32_t delay;
         /// the output buffer to write samples to
@@ -147,7 +148,7 @@ class Namco106 {
     };
 
     /// the oscillators on the chip
-    Namco106_Oscillator oscs[OSC_COUNT];
+    Oscillator oscs[OSC_COUNT];
 
     /// the time after the last run_until call
     cpu_time_t last_time = 0;
@@ -173,7 +174,7 @@ class Namco106 {
     void run_until(cpu_time_t nes_end_time) {
         unsigned int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
-            Namco106_Oscillator& osc = oscs[i];
+            Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
             if (!output) continue;
 

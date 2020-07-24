@@ -90,7 +90,7 @@ struct ChipSN76489 : Module {
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -127,7 +127,7 @@ struct ChipSN76489 : Module {
         uint8_t hi = 0b00111111 & (freq10bit >> 4);
         // write the data to the chip
         const auto channel_opcode_offset = (2 * channel) << 4;
-        apu.write((TexasInstrumentsSN76489::TONE_1_FREQUENCY + channel_opcode_offset) | lo);
+        apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + channel_opcode_offset) | lo);
         apu.write(hi);
 
         // get the attenuation from the parameter knob
@@ -140,7 +140,7 @@ struct ChipSN76489 : Module {
         }
         // get the 8-bit attenuation clamped within legal limits
         uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write((TexasInstrumentsSN76489::TONE_1_ATTENUATION + channel_opcode_offset) | attenuation);
+        apu.write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + channel_opcode_offset) | attenuation);
     }
 
     /// Process noise (channel 3).

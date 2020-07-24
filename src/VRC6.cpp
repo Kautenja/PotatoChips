@@ -67,9 +67,10 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // global volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -111,8 +112,8 @@ struct ChipVRC6 : Module {
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, channel, KonamiVRC6::PULSE_PERIOD_LOW, lo);
-        apu.write_osc(0, channel, KonamiVRC6::PULSE_PERIOD_HIGH, hi);
+        apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
+        apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
 
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
@@ -127,7 +128,7 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the duty cycle and volume
-        apu.write_osc(0, channel, KonamiVRC6::PULSE_DUTY_VOLUME, (pw << 4) + level);
+        apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, (pw << 4) + level);
     }
 
     /// Process saw wave (channel 2).
@@ -146,8 +147,6 @@ struct ChipVRC6 : Module {
         // the actual max for volume is 42, but some distortion effects are
         // available on the chip from 42 to 63 (as a result of overflow)
         static constexpr float LEVEL_MAX = 63;
-        // the index of the channel
-        static constexpr int CHANNEL_INDEX = 2;
 
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
@@ -165,8 +164,8 @@ struct ChipVRC6 : Module {
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
-        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_PERIOD_LOW, lo);
-        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_PERIOD_HIGH, hi);
+        apu.write(KonamiVRC6::SAW_PERIOD_LOW, lo);
+        apu.write(KonamiVRC6::SAW_PERIOD_HIGH, hi);
 
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + 2].getValue();
@@ -175,7 +174,7 @@ struct ChipVRC6 : Module {
         // get the 8-bit level clamped within legal limits
         uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
         // write the register for the volume
-        apu.write_osc(0, CHANNEL_INDEX, KonamiVRC6::SAW_VOLUME, level);
+        apu.write(KonamiVRC6::SAW_VOLUME, level);
     }
 
     /// Return a 10V signed sample from the APU.
@@ -200,14 +199,14 @@ struct ChipVRC6 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };

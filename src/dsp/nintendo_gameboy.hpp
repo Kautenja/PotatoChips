@@ -1,4 +1,4 @@
-// Nintendo Game Boy PAPU sound chip emulator
+// The Nintendo GameBoy Sound System (GBS) chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -19,7 +19,8 @@
 #ifndef DSP_NINTENDO_GAMEBOY_HPP_
 #define DSP_NINTENDO_GAMEBOY_HPP_
 
-#include "nintendo_gameboy_oscillators.hpp"
+#include "blip_buffer.hpp"
+#include "exceptions.hpp"
 #include <algorithm>
 #include <cstring>
 
@@ -31,9 +32,18 @@ const uint8_t sine_wave[32] = {
     0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
 };
 
-/// The Nintendo GameBoy Sound System (GBS) Audio Processing Unit (APU).
+/// @brief The Nintendo GameBoy Sound System (GBS) chip emulator.
 class NintendoGBS {
  public:
+    /// the number of oscillators on the chip
+    enum { OSC_COUNT = 4 };
+    /// the first address of the APU in memory space
+    enum { ADDR_START = 0xFF10 };
+    /// the last address of the APU in memory space
+    enum { ADDR_END   = 0xFF3F };
+    /// the total number of registers available on the chip
+    enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
+
     /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
     enum Registers {
         // Pulse 0
@@ -68,19 +78,441 @@ class NintendoGBS {
         WAVE_TABLE_VALUES                 = 0xFF30
     };
 
+ private:
+    struct Oscillator {
+        /// TODO:
+        enum { trigger = 0x80 };
+        /// TODO:
+        enum { len_enabled_mask = 0x40 };
+        /// TODO:
+        BLIPBuffer* outputs[4];  // NULL, right, left, center
+        /// TODO:
+        BLIPBuffer* output;
+        /// TODO:
+        int output_select;
+        /// the 5 registers for the oscillator
+        uint8_t* regs;  // osc's 5 registers
+
+        /// TODO:
+        int delay;
+        /// TODO:
+        int last_amp;
+        /// TODO:
+        int volume;
+        /// TODO:
+        int length;
+        /// TODO:
+        int enabled;
+
+        /// Reset the oscillator to its default state.
+        inline void reset() {
+            delay = 0;
+            last_amp = 0;
+            length = 0;
+            output_select = 3;
+            output = outputs[output_select];
+        }
+
+        /// TODO:
+        inline void clock_length() {
+            if ((regs[4] & len_enabled_mask) && length)
+                length--;
+        }
+
+        /// Return the 11-bit frequency of the oscillator.
+        inline int frequency() const {
+            return (regs[4] & 7) * 0x100 + regs[3];
+        }
+    };
+
+    struct Envelope : Oscillator {
+        int env_delay;
+
+        inline void reset() {
+            env_delay = 0;
+            Oscillator::reset();
+        }
+
+        void clock_envelope() {
+            if (env_delay && !--env_delay) {
+                env_delay = regs[2] & 7;
+                int v = volume - 1 + (regs[2] >> 2 & 2);
+                if ((unsigned) v < 15)
+                    volume = v;
+            }
+        }
+
+        bool write_register(int reg, int data) {
+            switch (reg) {
+            case 1:
+                length = 64 - (regs[1] & 0x3F);
+                break;
+            case 2:
+                if (!(data >> 4))
+                    enabled = false;
+                break;
+            case 4:
+                if (data & trigger) {
+                    env_delay = regs[2] & 7;
+                    volume = regs[2] >> 4;
+                    enabled = true;
+                    if (length == 0)
+                        length = 64;
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    struct Pulse : Envelope {
+        enum { period_mask = 0x70 };
+        enum { shift_mask  = 0x07 };
+
+        typedef BLIPSynth<blip_good_quality, 1> Synth;
+        Synth const* synth;
+        int sweep_delay;
+        int sweep_freq;
+        int phase;
+
+        inline void reset() {
+            phase = 0;
+            sweep_freq = 0;
+            sweep_delay = 0;
+            Envelope::reset();
+        }
+
+        void clock_sweep() {
+            int sweep_period = (regs[0] & period_mask) >> 4;
+            if (sweep_period && sweep_delay && !--sweep_delay) {
+                sweep_delay = sweep_period;
+                regs[3] = sweep_freq & 0xFF;
+                regs[4] = (regs[4] & ~0x07) | (sweep_freq >> 8 & 0x07);
+
+                int offset = sweep_freq >> (regs[0] & shift_mask);
+                if (regs[0] & 0x08)
+                    offset = -offset;
+                sweep_freq += offset;
+
+                if (sweep_freq < 0) {
+                    sweep_freq = 0;
+                } else if (sweep_freq >= 2048) {
+                    sweep_delay = 0;  // don't modify channel frequency any further
+                    sweep_freq = 2048;  // silence sound immediately
+                }
+            }
+        }
+
+        void run(blip_time_t time, blip_time_t end_time, int playing) {
+            if (sweep_freq == 2048)
+                playing = false;
+
+            static unsigned char const table[4] = { 1, 2, 4, 6 };
+            int const duty = table[regs[1] >> 6];
+            int amp = volume & playing;
+            if (phase >= duty)
+                amp = -amp;
+
+            int frequency = this->frequency();
+            if (unsigned (frequency - 1) > 2040) {  // frequency < 1 || frequency > 2041
+                // really high frequency results in DC at half volume
+                amp = volume >> 1;
+                playing = false;
+            }
+
+            {
+                int delta = amp - last_amp;
+                if (delta) {
+                    last_amp = amp;
+                    synth->offset(time, delta, output);
+                }
+            }
+
+            time += delay;
+            if (!playing)
+                time = end_time;
+
+            if (time < end_time) {
+                int const period = (2048 - frequency) * 4;
+                BLIPBuffer* const output = this->output;
+                int phase = this->phase;
+                int delta = amp * 2;
+                do {
+                    phase = (phase + 1) & 7;
+                    if (phase == 0 || phase == duty) {
+                        delta = -delta;
+                        synth->offset(time, delta, output);
+                    }
+                    time += period;
+                } while (time < end_time);
+                this->phase = phase;
+                last_amp = delta >> 1;
+            }
+            delay = time - end_time;
+        }
+    };
+
+    struct Noise : Envelope {
+        typedef BLIPSynth<blip_med_quality, 1> Synth;
+        Synth const* synth;
+        unsigned bits;
+
+        void run(blip_time_t time, blip_time_t end_time, int playing) {
+            int amp = volume & playing;
+            int tap = 13 - (regs[3] & 8);
+            if (bits >> tap & 2)
+                amp = -amp;
+
+            {
+                int delta = amp - last_amp;
+                if (delta) {
+                    last_amp = amp;
+                    synth->offset(time, delta, output);
+                }
+            }
+
+            time += delay;
+            if (!playing)
+                time = end_time;
+
+            if (time < end_time) {
+                static unsigned char const table[8] = { 8, 16, 32, 48, 64, 80, 96, 112 };
+                int period = table[regs[3] & 7] << (regs[3] >> 4);
+
+                // keep parallel resampled time to eliminate time conversion in the loop
+                BLIPBuffer* const output = this->output;
+                const auto resampled_period = output->resampled_duration(period);
+                auto resampled_time = output->resampled_time(time);
+                unsigned bits = this->bits;
+                int delta = amp * 2;
+
+                do {
+                    unsigned changed = (bits >> tap) + 1;
+                    time += period;
+                    bits <<= 1;
+                    if (changed & 2) {
+                        delta = -delta;
+                        bits |= 1;
+                        synth->offset_resampled(resampled_time, delta, output);
+                    }
+                    resampled_time += resampled_period;
+                } while (time < end_time);
+
+                this->bits = bits;
+                last_amp = delta >> 1;
+            }
+            delay = time - end_time;
+        }
+    };
+
+    struct Wave : Oscillator {
+        typedef BLIPSynth<blip_med_quality, 1> Synth;
+        Synth const* synth;
+        int wave_pos;
+        enum { wave_size = 32 };
+        uint8_t wave[wave_size];
+
+        inline void write_register(int reg, int data) {
+            switch (reg) {
+            case 0:
+                if (!(data & 0x80))
+                    enabled = false;
+                break;
+            case 1:
+                length = 256 - regs[1];
+                break;
+            case 2:
+                volume = data >> 5 & 3;
+                break;
+            case 4:
+                if (data & trigger & regs[0]) {
+                    wave_pos = 0;
+                    enabled = true;
+                    if (length == 0)
+                        length = 256;
+                }
+            }
+        }
+
+        void run(blip_time_t time, blip_time_t end_time, int playing) {
+            int volume_shift = (volume - 1) & 7;  // volume = 0 causes shift = 7
+            int frequency;
+            {
+                int amp = (wave[wave_pos] >> volume_shift & playing) * 2;
+                frequency = this->frequency();
+                if (unsigned (frequency - 1) > 2044) {  // frequency < 1 || frequency > 2045
+                    amp = 30 >> volume_shift & playing;
+                    playing = false;
+                }
+
+                int delta = amp - last_amp;
+                if (delta) {
+                    last_amp = amp;
+                    synth->offset(time, delta, output);
+                }
+            }
+
+            time += delay;
+            if (!playing)
+                time = end_time;
+
+            if (time < end_time) {
+                BLIPBuffer* const output = this->output;
+                int const period = (2048 - frequency) * 2;
+                int wave_pos = (this->wave_pos + 1) & (wave_size - 1);
+
+                do {
+                    int amp = (wave[wave_pos] >> volume_shift) * 2;
+                    wave_pos = (wave_pos + 1) & (wave_size - 1);
+                    int delta = amp - last_amp;
+                    if (delta) {
+                        last_amp = amp;
+                        synth->offset(time, delta, output);
+                    }
+                    time += period;
+                } while (time < end_time);
+
+                this->wave_pos = (wave_pos - 1) & (wave_size - 1);
+            }
+            delay = time - end_time;
+        }
+    };
+
+    /// TODO:
+    blip_time_t next_frame_time;
+    /// TODO:
+    blip_time_t last_time;
+    /// TODO:
+    blip_time_t frame_period;
+    /// TODO:
+    double volume_unit;
+    /// TODO:
+    int frame_count;
+
+    /// the pulse waveform generator for channel 1
+    Pulse pulse1;
+    /// the pulse waveform generator for channel 2
+    Pulse pulse2;
+    /// the DPCM waveform generator for channel 3
+    Wave wave;
+    /// the noise generator for channel 4
+    Noise noise;
+    /// the general set of oscillators on the chip
+    Oscillator* const oscs[OSC_COUNT] = {
+        &pulse1,
+        &pulse2,
+        &wave,
+        &noise
+    };
+    /// the registers on the chip
+    uint8_t regs[REGISTER_COUNT];
+
+    /// the synthesizer used by pulse waves
+    Pulse::Synth pulse_synth;
+    /// the synthesizer used by DPCM wave and noise
+    Wave::Synth other_synth;
+
+    void update_volume() {
+        // TODO: doesn't handle differing left/right global volume (support would
+        // require modification to all oscillator code)
+        int data = regs[STEREO_VOLUME - ADDR_START];
+        double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
+        pulse_synth.volume(vol);
+        other_synth.volume(vol);
+    }
+
+    void run_until(blip_time_t end_time) {
+        assert(end_time >= last_time); // end_time must not be before previous time
+        if (end_time == last_time)
+            return;
+
+        while (true) {
+            blip_time_t time = next_frame_time;
+            if (time > end_time)
+                time = end_time;
+
+            // run oscillators
+            for (int i = 0; i < OSC_COUNT; ++i) {
+                Oscillator& osc = *oscs[i];
+                if (osc.output) {
+                    int playing = false;
+                    if (osc.enabled && osc.volume &&
+                            (!(osc.regs[4] & osc.len_enabled_mask) || osc.length))
+                        playing = -1;
+                    switch (i) {
+                    case 0: pulse1.run(last_time, time, playing); break;
+                    case 1: pulse2.run(last_time, time, playing); break;
+                    case 2: wave.run(  last_time, time, playing); break;
+                    case 3: noise.run( last_time, time, playing); break;
+                    }
+                }
+            }
+            last_time = time;
+
+            if (time == end_time)
+                break;
+
+            next_frame_time += frame_period;
+
+            // 256 Hz actions
+            pulse1.clock_length();
+            pulse2.clock_length();
+            wave.clock_length();
+            noise.clock_length();
+
+            frame_count = (frame_count + 1) & 3;
+            if (frame_count == 0) {
+                // 64 Hz actions
+                pulse1.clock_envelope();
+                pulse2.clock_envelope();
+                noise.clock_envelope();
+            }
+
+            if (frame_count & 1)
+                pulse1.clock_sweep(); // 128 Hz action
+        }
+    }
+
+    void write_osc(int index, int reg, int data) {
+        reg -= index * 5;
+        Pulse* sq = &pulse2;
+        switch (index) {
+        case 0:
+            sq = &pulse1;
+        case 1:
+            if (sq->write_register(reg, data) && index == 0) {
+                pulse1.sweep_freq = pulse1.frequency();
+                if ((regs[0] & sq->period_mask) && (regs[0] & sq->shift_mask)) {
+                    pulse1.sweep_delay = 1;  // cause sweep to recalculate now
+                    pulse1.clock_sweep();
+                }
+            }
+            break;
+        case 2:
+            wave.write_register(reg, data);
+            break;
+        case 3:
+            if (noise.write_register(reg, data))
+                noise.bits = 0x7FFF;
+        }
+    }
+
+    /// Disable the copy constructor
+    NintendoGBS(const NintendoGBS&);
+
+    /// Disable the assignment operator
+    NintendoGBS& operator=(const NintendoGBS&);
+
+ public:
+    /// Initialize a new Nintendo GBS chip emulator.
     NintendoGBS() {
-        square1.synth = &square_synth;
-        square2.synth = &square_synth;
+        pulse1.synth = &pulse_synth;
+        pulse2.synth = &pulse_synth;
         wave.synth  = &other_synth;
         noise.synth = &other_synth;
 
-        oscs[0] = &square1;
-        oscs[1] = &square2;
-        oscs[2] = &wave;
-        oscs[3] = &noise;
-
         for (int i = 0; i < OSC_COUNT; i++) {
-            NintendoGBS_Oscillator& osc = *oscs[i];
+            Oscillator& osc = *oscs[i];
             osc.regs = &regs[i * 5];
             osc.output = 0;
             osc.outputs[0] = 0;
@@ -105,7 +537,7 @@ class NintendoGBS {
 
     // Set treble equalization
     void treble_eq(const blip_eq_t& eq) {
-        square_synth.treble_eq(eq);
+        pulse_synth.treble_eq(eq);
         other_synth.treble_eq(eq);
     }
 
@@ -125,11 +557,10 @@ class NintendoGBS {
     // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
     // which refer to Square 1, Square 2, Wave, and Noise. If buffer is NULL,
     // silences oscillator.
-    enum { OSC_COUNT = 4 };
     inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
         assert((unsigned) index < OSC_COUNT);
         assert((center && left && right) || (!center && !left && !right));
-        NintendoGBS_Oscillator& osc = *oscs[index];
+        Oscillator& osc = *oscs[index];
         osc.outputs[1] = right;
         osc.outputs[2] = left;
         osc.outputs[3] = center;
@@ -146,8 +577,8 @@ class NintendoGBS {
         last_time       = 0;
         frame_count     = 0;
 
-        square1.reset();
-        square2.reset();
+        pulse1.reset();
+        pulse2.reset();
         wave.reset();
         noise.reset();
         noise.bits = 1;
@@ -166,11 +597,6 @@ class NintendoGBS {
         };
         memcpy(wave.wave, initial_wave, sizeof wave.wave);
     }
-
-    // Reads and writes at addr must satisfy ADDR_START <= addr <= ADDR_END
-    enum { ADDR_START = 0xFF10 };
-    enum { ADDR_END   = 0xFF3F };
-    enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
 
     // Write 'data' to address at specified time
     void write(unsigned addr, int data) {
@@ -202,7 +628,7 @@ class NintendoGBS {
         } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
             // return all oscs to 0
             for (int i = 0; i < OSC_COUNT; i++) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
+                Oscillator& osc = *oscs[i];
                 int amp = osc.last_amp;
                 osc.last_amp = 0;
                 if (amp && osc.enabled && osc.output)
@@ -224,7 +650,7 @@ class NintendoGBS {
 
             // left/right assignments
             for (int i = 0; i < OSC_COUNT; i++) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
+                Oscillator& osc = *oscs[i];
                 osc.enabled &= mask;
                 int bits = flags >> i;
                 BLIPBuffer* old_output = osc.output;
@@ -267,7 +693,7 @@ class NintendoGBS {
         if (addr == POWER_CONTROL_STATUS) {
             data = (data & 0x80) | 0x70;
             for (int i = 0; i < OSC_COUNT; i++) {
-                const NintendoGBS_Oscillator& osc = *oscs[i];
+                const Oscillator& osc = *oscs[i];
                 if (osc.enabled && (osc.length || !(osc.regs[4] & osc.len_enabled_mask)))
                     data |= 1 << i;
             }
@@ -294,91 +720,6 @@ class NintendoGBS {
         if (tempo_division != 1.0)
             frame_period = blip_time_t (frame_period / tempo_division);
     }
-
- private:
-    // noncopyable
-    NintendoGBS(const NintendoGBS&);
-    NintendoGBS& operator = (const NintendoGBS&);
-
-    NintendoGBS_Oscillator* oscs[OSC_COUNT];
-    blip_time_t next_frame_time;
-    blip_time_t last_time;
-    blip_time_t frame_period;
-    double volume_unit;
-    int frame_count;
-
-    NintendoGBS_Pulse square1;
-    NintendoGBS_Pulse square2;
-    NintendoGBS_Wave wave;
-    NintendoGBS_Noise noise;
-    uint8_t regs[REGISTER_COUNT];
-    // used by squares
-    NintendoGBS_Pulse::Synth square_synth;
-    // used by wave and noise
-    NintendoGBS_Wave::Synth other_synth;
-
-    void update_volume() {
-        // TODO: doesn't handle differing left/right global volume (support would
-        // require modification to all oscillator code)
-        int data = regs[STEREO_VOLUME - ADDR_START];
-        double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
-        square_synth.volume(vol);
-        other_synth.volume(vol);
-    }
-
-    void run_until(blip_time_t end_time) {
-        assert(end_time >= last_time); // end_time must not be before previous time
-        if (end_time == last_time)
-            return;
-
-        while (true) {
-            blip_time_t time = next_frame_time;
-            if (time > end_time)
-                time = end_time;
-
-            // run oscillators
-            for (int i = 0; i < OSC_COUNT; ++i) {
-                NintendoGBS_Oscillator& osc = *oscs[i];
-                if (osc.output) {
-                    int playing = false;
-                    if (osc.enabled && osc.volume &&
-                            (!(osc.regs[4] & osc.len_enabled_mask) || osc.length))
-                        playing = -1;
-                    switch (i) {
-                    case 0: square1.run(last_time, time, playing); break;
-                    case 1: square2.run(last_time, time, playing); break;
-                    case 2: wave   .run(last_time, time, playing); break;
-                    case 3: noise  .run(last_time, time, playing); break;
-                    }
-                }
-            }
-            last_time = time;
-
-            if (time == end_time)
-                break;
-
-            next_frame_time += frame_period;
-
-            // 256 Hz actions
-            square1.clock_length();
-            square2.clock_length();
-            wave.clock_length();
-            noise.clock_length();
-
-            frame_count = (frame_count + 1) & 3;
-            if (frame_count == 0) {
-                // 64 Hz actions
-                square1.clock_envelope();
-                square2.clock_envelope();
-                noise.clock_envelope();
-            }
-
-            if (frame_count & 1)
-                square1.clock_sweep(); // 128 Hz action
-        }
-    }
-
-    void write_osc(int index, int reg, int data);
 };
 
 #endif  // DSP_NINTENDO_GAMEBOY_HPP_

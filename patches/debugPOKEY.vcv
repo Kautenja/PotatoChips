@@ -8,6 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 12,
       "data": {
         "audio": {
           "driver": 5,
@@ -31,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.101999998
+          "value": 0.0706874654
         },
         {
           "id": 1,
@@ -50,7 +51,6 @@
           "value": 1.0
         }
       ],
-      "bypass": true,
       "leftModuleId": 11,
       "rightModuleId": 1,
       "pos": [
@@ -126,7 +126,7 @@
         },
         {
           "id": 9,
-          "value": 0.5
+          "value": 0.0
         },
         {
           "id": 10,
@@ -134,7 +134,7 @@
         },
         {
           "id": 11,
-          "value": 0.5
+          "value": 0.0
         },
         {
           "id": 12,
@@ -386,6 +386,25 @@
         26,
         0
       ]
+    },
+    {
+      "id": 12,
+      "plugin": "Bogaudio",
+      "version": "1.1.31",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "leftModuleId": 1,
+      "data": {
+        "range": 0.0,
+        "range_db": 80.0,
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        51,
+        0
+      ]
     }
   ],
   "cables": [
@@ -510,12 +529,36 @@
       "color": "#c91847"
     },
     {
-      "id": 301,
-      "outputModuleId": 5,
+      "id": 293,
+      "outputModuleId": 6,
+      "outputId": 0,
+      "inputModuleId": 12,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 294,
+      "outputModuleId": 6,
+      "outputId": 3,
+      "inputModuleId": 6,
+      "inputId": 10,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 295,
+      "outputModuleId": 6,
+      "outputId": 2,
+      "inputModuleId": 6,
+      "inputId": 11,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 296,
+      "outputModuleId": 6,
       "outputId": 1,
       "inputModuleId": 6,
       "inputId": 9,
-      "color": "#0c8e15"
+      "color": "#c91847"
     }
   ]
 }

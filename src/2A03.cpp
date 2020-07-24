@@ -125,7 +125,17 @@ struct Chip2A03 : Module {
     /// @returns the pulse width value coded in an 8-bit container
     ///
     inline uint8_t getPulseWidth(int channel) {
-        return static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
+        // the minimal value for the pulse width register
+        static constexpr float PW_MIN = 0;
+        // the maximal value for the pulse width register
+        static constexpr float PW_MAX = 3;
+        // get the pulse width from the parameter knob
+        auto pwParam = params[PARAM_PW + channel].getValue();
+        // get the control voltage to the pulse width with 1V/step
+        auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 3.f;
+        // get the 8-bit pulse width clamped within legal limits
+        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        return pw << 6;
     }
 
     /// Return the period of the noise oscillator from the panel controls.

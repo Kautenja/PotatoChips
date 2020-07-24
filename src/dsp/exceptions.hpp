@@ -23,7 +23,7 @@
 class Exception: public std::exception {
  protected:
     /// the error message.
-    std::string message;
+    const std::string message;
 
  public:
     /// @brief Constructor (C strings).
@@ -40,14 +40,14 @@ class Exception: public std::exception {
 
     /// @brief Destroy this exception.
     ///
-    virtual ~Exception() throw () { }
+    ~Exception() throw () { }
 
     /// @brief Returns a pointer to the (constant) error description.
     /// @returns A pointer to a const char*. The underlying memory is in
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    virtual const char* what() const throw () { return message.c_str(); }
+    const char* what() const throw () { return message.c_str(); }
 };
 
 
@@ -75,7 +75,7 @@ class ChannelOutOfBoundsException: public std::exception {
     ) { }
 
     /// @brief Destroy this exception.
-    virtual ~ChannelOutOfBoundsException() throw () { }
+    ~ChannelOutOfBoundsException() throw () { }
 
     /// @brief Returns a pointer to the (constant) error description.
     ///
@@ -83,7 +83,7 @@ class ChannelOutOfBoundsException: public std::exception {
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    virtual const char* what() const throw () { return message.c_str(); }
+    const char* what() const throw () { return message.c_str(); }
 };
 
 
@@ -116,7 +116,7 @@ class AddressSpaceException: public std::exception {
     ) { }
 
     /// @brief Destroy this exception.
-    virtual ~AddressSpaceException() throw () { }
+    ~AddressSpaceException() throw () { }
 
     /// @brief Returns a pointer to the (constant) error description.
     ///
@@ -124,6 +124,7 @@ class AddressSpaceException: public std::exception {
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    virtual const char* what() const throw () { return message.c_str(); }
+    const char* what() const throw () { return message.c_str(); }
 };
+
 #endif  // DSP_EXCEPTIONS_HPP_

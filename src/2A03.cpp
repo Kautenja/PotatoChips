@@ -35,6 +35,7 @@ struct Chip2A03 : Module {
         ENUMS(INPUT_VOCT, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
         ENUMS(INPUT_VOLUME, 3),
+        ENUMS(INPUT_PW, 2),
         INPUT_LFSR,
         INPUT_COUNT
     };
@@ -52,11 +53,15 @@ struct Chip2A03 : Module {
     /// The 2A03 instance to synthesize sound with
     Ricoh2A03 apu;
 
-    // a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr;
+
+    // a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+    /// a VU meter for keeping track of the channel levels
+    dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
 
     /// Initialize a new 2A03 Chip module.
     Chip2A03() {
@@ -71,6 +76,7 @@ struct Chip2A03 : Module {
         configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Level", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
         cvDivider.setDivision(16);
+        lightDivider.setDivision(512);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
@@ -220,8 +226,17 @@ struct Chip2A03 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+            auto channelOutput = getAudioOut(i);
+            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
+            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        }
+        if (lightDivider.process()) {  // update the mixer lights
+            for (int i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+                float b = chMeters[i].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_VOLUME + i].setBrightness(b);
+            }
+        }
     }
 
     /// Respond to the change of sample rate in the engine.
@@ -248,36 +263,42 @@ struct Chip2A03Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, Chip2A03::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, Chip2A03::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, Chip2A03::INPUT_VOCT + 2));
-        addInput(createInput<PJ301MPort>(Vec(20, 329), module, Chip2A03::INPUT_VOCT + 3));
+        // addInput(createInput<PJ301MPort>(Vec(19, 160), module, Chip2A03::INPUT_VOCT + 1));
+        // addInput(createInput<PJ301MPort>(Vec(19, 245), module, Chip2A03::INPUT_VOCT + 2));
+        // addInput(createInput<PJ301MPort>(Vec(22, 329), module, Chip2A03::INPUT_VOCT + 3));
         // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, Chip2A03::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, Chip2A03::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, Chip2A03::INPUT_FM + 2));
+        addInput(createInput<PJ301MPort>(Vec(19, 26),  module, Chip2A03::INPUT_FM + 0));
+        addInput(createInput<PJ301MPort>(Vec(19, 111), module, Chip2A03::INPUT_FM + 1));
+        addInput(createInput<PJ301MPort>(Vec(19, 196), module, Chip2A03::INPUT_FM + 2));
         // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, Chip2A03::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, Chip2A03::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, Chip2A03::PARAM_FREQ + 2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, Chip2A03::PARAM_FREQ + 3));
+        addParam(createParam<BefacoBigKnob>(Vec(52, 25),  module, Chip2A03::PARAM_FREQ + 0));
+        addParam(createParam<BefacoBigKnob>(Vec(52, 110), module, Chip2A03::PARAM_FREQ + 1));
+        addParam(createParam<BefacoBigKnob>(Vec(52, 195), module, Chip2A03::PARAM_FREQ + 2));
+        addParam(createParam<Rogan2PWhite>( Vec(53, 298), module, Chip2A03::PARAM_FREQ + 3));
         // volume control
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 24),  module, Chip2A03::PARAM_VOLUME + 0, Chip2A03::LIGHTS_VOLUME + 0));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 109), module, Chip2A03::PARAM_VOLUME + 1, Chip2A03::LIGHTS_VOLUME + 1));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(150, 279), module, Chip2A03::PARAM_VOLUME + 2, Chip2A03::LIGHTS_VOLUME + 2));
-        addInput(createInput<PJ301MPort>(Vec(150, 74), module, Chip2A03::INPUT_VOLUME + 0));
-        addInput(createInput<PJ301MPort>(Vec(150, 159), module, Chip2A03::INPUT_VOLUME + 1));
-        addInput(createInput<PJ301MPort>(Vec(150, 329), module, Chip2A03::INPUT_VOLUME + 2));
-        // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, Chip2A03::PARAM_PW + 0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, Chip2A03::PARAM_PW + 1));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23),  module, Chip2A03::PARAM_VOLUME + 0, Chip2A03::LIGHTS_VOLUME + 0));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 108), module, Chip2A03::PARAM_VOLUME + 1, Chip2A03::LIGHTS_VOLUME + 1));
+        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 278), module, Chip2A03::PARAM_VOLUME + 2, Chip2A03::LIGHTS_VOLUME + 2));
+        addInput(createInput<PJ301MPort>(Vec(166, 26),  module, Chip2A03::INPUT_VOLUME + 0));
+        addInput(createInput<PJ301MPort>(Vec(166, 111), module, Chip2A03::INPUT_VOLUME + 1));
+        addInput(createInput<PJ301MPort>(Vec(166, 281), module, Chip2A03::INPUT_VOLUME + 2));
+        // PW 0
+        auto pw0 = createParam<RoundSmallBlackKnob>(Vec(167, 205), module, Chip2A03::PARAM_PW + 0);
+        pw0->snap = true;
+        addParam(pw0);
+        addInput(createInput<PJ301MPort>(Vec(134, 206),  module, Chip2A03::INPUT_PW + 0));
+        // PW 1
+        auto pw1 = createParam<RoundSmallBlackKnob>(Vec(107, 293), module, Chip2A03::PARAM_PW + 1);
+        pw1->snap = true;
+        addParam(pw1);
+        addInput(createInput<PJ301MPort>(Vec(106, 328),  module, Chip2A03::INPUT_PW + 1));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, Chip2A03::INPUT_LFSR));
         // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, Chip2A03::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, Chip2A03::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, Chip2A03::OUTPUT_CHANNEL + 2));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, Chip2A03::OUTPUT_CHANNEL + 3));
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
+            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_CHANNEL + i));
+        }
     }
 };
 

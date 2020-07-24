@@ -207,9 +207,9 @@ class KonamiSCC {
     /// @param data the byte to write to the register at given address
     ///
     inline void write(int addr, int data) {
+        static constexpr blip_time_t time = 0;
         assert((unsigned) addr < REGISTER_COUNT);
-        // TODO: remove this?
-        run_until(0);
+        run_until(time);
         regs[addr] = data;
     }
 

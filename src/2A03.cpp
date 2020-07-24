@@ -272,26 +272,19 @@ struct Chip2A03Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        // addInput(createInput<PJ301MPort>(Vec(19, 160), module, Chip2A03::INPUT_VOCT + 1));
-        // addInput(createInput<PJ301MPort>(Vec(19, 245), module, Chip2A03::INPUT_VOCT + 2));
-        // addInput(createInput<PJ301MPort>(Vec(22, 329), module, Chip2A03::INPUT_VOCT + 3));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(19, 26),  module, Chip2A03::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(19, 111), module, Chip2A03::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(19, 196), module, Chip2A03::INPUT_FM + 2));
-        // Frequency parameters
-        addParam(createParam<BefacoBigKnob>(Vec(52, 25),  module, Chip2A03::PARAM_FREQ + 0));
-        addParam(createParam<BefacoBigKnob>(Vec(52, 110), module, Chip2A03::PARAM_FREQ + 1));
-        addParam(createParam<BefacoBigKnob>(Vec(52, 195), module, Chip2A03::PARAM_FREQ + 2));
-        addParam(createParam<Rogan2PWhite>( Vec(53, 298), module, Chip2A03::PARAM_FREQ + 3));
-        // volume control
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23),  module, Chip2A03::PARAM_VOLUME + 0, Chip2A03::LIGHTS_VOLUME + 0));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 108), module, Chip2A03::PARAM_VOLUME + 1, Chip2A03::LIGHTS_VOLUME + 1));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 278), module, Chip2A03::PARAM_VOLUME + 2, Chip2A03::LIGHTS_VOLUME + 2));
-        addInput(createInput<PJ301MPort>(Vec(166, 26),  module, Chip2A03::INPUT_VOLUME + 0));
-        addInput(createInput<PJ301MPort>(Vec(166, 111), module, Chip2A03::INPUT_VOLUME + 1));
-        addInput(createInput<PJ301MPort>(Vec(166, 281), module, Chip2A03::INPUT_VOLUME + 2));
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
+            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_CHANNEL + i));
+            if (i < 3) {  // pulse0, pulse1, triangle
+                addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, Chip2A03::INPUT_FM + i));
+                addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, Chip2A03::PARAM_FREQ + i));
+                auto y = i == 2 ? 3 : i;
+                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, Chip2A03::PARAM_VOLUME + i, Chip2A03::LIGHTS_VOLUME + i));
+                addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, Chip2A03::INPUT_VOLUME + i));
+            } else {  // noise
+                addParam(createParam<Rogan2PWhite>( Vec(53, 298), module, Chip2A03::PARAM_FREQ + i));
+            }
+        }
         // PW 0
         auto pw0 = createParam<RoundSmallBlackKnob>(Vec(167, 205), module, Chip2A03::PARAM_PW + 0);
         pw0->snap = true;
@@ -304,11 +297,6 @@ struct Chip2A03Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(106, 328),  module, Chip2A03::INPUT_PW + 1));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, Chip2A03::INPUT_LFSR));
-        // channel outputs
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
-            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_CHANNEL + i));
-        }
     }
 };
 

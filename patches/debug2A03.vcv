@@ -51,6 +51,7 @@
           "value": 0.0
         }
       ],
+      "bypass": true,
       "leftModuleId": 59,
       "rightModuleId": 1,
       "pos": [
@@ -73,7 +74,6 @@
         "lastMod": 0,
         "midi": {
           "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },

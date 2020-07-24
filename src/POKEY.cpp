@@ -144,7 +144,7 @@ struct ChipPOKEY : Module {
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // calculate the frequency based on the clock division
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;

@@ -383,9 +383,13 @@ class AtariPOKEY {
 
  public:
     /// Initialize a new Atari POKEY chip emulator.
-    AtariPOKEY() {
+    ///
+    /// @param engine_ the engine to initialize the POKEY with. if nullptr, a
+    /// new engine is created for this POKEY instance
+    ///
+    explicit AtariPOKEY(Engine* engine_ = nullptr) {
         set_output(NULL);
-        reset(new Engine);
+        reset(engine_ == nullptr ? new Engine : engine_);
     }
 
     /// @brief Assign single oscillator output to buffer. If buffer is NULL,

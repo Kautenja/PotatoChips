@@ -204,22 +204,22 @@ struct Chip106 : Module {
         // FREQUENCY LOW
         uint8_t low = (freq & 0b000000000000000011111111) >> 0;
         apu.write_addr(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0, low);
+        apu.write_data(low);
         // FREQUENCY MEDIUM
         uint8_t med = (freq & 0b000000001111111100000000) >> 8;
         apu.write_addr(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0, med);
+        apu.write_data(med);
         // WAVEFORM LENGTH + FREQUENCY HIGH
         uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
         apu.write_addr(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0, hig);
+        apu.write_data(hig);
         // WAVE ADDRESS
         apu.write_addr(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0, 0);
+        apu.write_data(0);
         // VOLUME (and channel selection on channel 8, this has no effect on
         // other channels, so the check logic is skipped)
         apu.write_addr(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0, ((channels - 1) << 4) | getVolume(channel));
+        apu.write_data(((channels - 1) << 4) | getVolume(channel));
     }
 
     /// Return a 10V signed sample from the chip.
@@ -258,7 +258,7 @@ struct Chip106 : Module {
                 uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
                 uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
                 // combine the two nibbles into a byte for the RAM
-                apu.write_data(0, (nibbleHi << 4) | nibbleLo);
+                apu.write_data((nibbleHi << 4) | nibbleLo);
             }
             // get the number of active channels from the panel
             num_channels = getActiveChannels();

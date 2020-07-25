@@ -224,7 +224,8 @@ class Namco106 {
     /// Write data to the register pointed to by the address register.
     /// Read/write data register is at 0x4800
     // enum { data_reg_addr = 0x4800 };
-    inline void write_data(cpu_time_t time, int data) {
+    inline void write_data(int data) {
+        static constexpr blip_time_t time = 0;
         run_until(time);
         access() = data;
     }

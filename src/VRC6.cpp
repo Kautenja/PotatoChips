@@ -142,37 +142,6 @@ struct ChipVRC6 : Module {
         return rack::clamp(max_level * (levelParam + levelCV), 0.f, max_level);
     }
 
-    /// Process square wave for given channel.
-    ///
-    /// @param channel the pulse channel to process data for
-    ///
-    void channel_pulse(int channel) {
-        // frequency
-        uint16_t freq = getFrequency(channel, 4, 4095, 16);
-        uint8_t lo =  freq & 0b0000000011111111;
-        uint8_t hi = (freq & 0b0000111100000000) >> 8;
-        // enable the channel
-        hi |= 0b10000000;
-        apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
-        apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
-        // level
-        apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, getPW(channel) | getLevel(channel, 15));
-    }
-
-    /// Process saw wave (channel 2).
-    void channel_saw() {
-        // frequency
-        uint16_t freq = getFrequency(2, 3, 4095, 14);
-        uint8_t lo =  freq & 0b0000000011111111;
-        uint8_t hi = (freq & 0b0000111100000000) >> 8;
-        // enable the channel
-        hi |= 0b10000000;
-        apu.write(KonamiVRC6::SAW_PERIOD_LOW, lo);
-        apu.write(KonamiVRC6::SAW_PERIOD_HIGH, hi);
-        // level
-        apu.write(KonamiVRC6::SAW_VOLUME, getLevel(2, 63));
-    }
-
     /// Return a 10V signed sample from the APU.
     ///
     /// @param channel the channel to get the audio sample for
@@ -189,9 +158,27 @@ struct ChipVRC6 : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            channel_pulse(0);
-            channel_pulse(1);
-            channel_saw();
+            for (unsigned channel = 0; channel < 2; channel++) {  // pulses
+                // frequency
+                uint16_t freq = getFrequency(channel, 4, 4095, 16);
+                uint8_t lo =  freq & 0b0000000011111111;
+                uint8_t hi = (freq & 0b0000111100000000) >> 8;
+                hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the channel
+                apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
+                apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
+                // level
+                apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, getPW(channel) | getLevel(channel, 15));
+            }
+            // saw
+            // frequency
+            uint16_t freq = getFrequency(2, 3, 4095, 14);
+            uint8_t lo =  freq & 0b0000000011111111;
+            uint8_t hi = (freq & 0b0000111100000000) >> 8;
+            hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the channel
+            apu.write(KonamiVRC6::SAW_PERIOD_LOW, lo);
+            apu.write(KonamiVRC6::SAW_PERIOD_HIGH, hi);
+            // level
+            apu.write(KonamiVRC6::SAW_VOLUME, getLevel(2, 63));
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

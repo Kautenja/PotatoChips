@@ -59,6 +59,9 @@ class KonamiVRC6 {
     /// the number of registers per oscillator voice
     static constexpr uint16_t REGS_PER_OSC = 0x1000;
 
+    /// a flag to enable a voice using the period high register
+    static constexpr uint8_t PERIOD_HIGH_ENABLED = 0b10000000;
+
  private:
     /// An oscillator on the KonamiVRC6 chip.
     struct Oscillator {

@@ -53,16 +53,15 @@ struct ChipFME7 : Module {
     /// Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -56.f, 56.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -56.f, 56.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -56.f, 56.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level", "%", 0.f, 100.f);
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level", "%", 0.f, 100.f);
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level", "%", 0.f, 100.f);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
+            // get the channel name starting with ACII code 65 (A)
+            auto channel_name = std::string(1, static_cast<char>(65 + i));
+            configParam(PARAM_FREQ  + i, -56.f, 56.f, 0.f,  "Pulse " + channel_name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + i,   0.f,  1.f, 0.5f, "Pulse " + channel_name + " Level",     "%",   0.f,                100.f       );
             apu.set_output(i, &buf[i]);
+        }
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
         onSampleRateChange();
@@ -132,12 +131,13 @@ struct ChipFME7 : Module {
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
-                // frequency
+                // frequency. there are two frequency registers per voice.
+                // shift the index left 1 instead of multiplying by 2
                 auto freq = getFrequency(i);
                 uint8_t lo =  freq & 0b11111111;
-                apu.write(SunSoftFME7::PULSE_A_LO + 2 * i, lo);
+                apu.write(SunSoftFME7::PULSE_A_LO + (i << 1), lo);
                 uint8_t hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(SunSoftFME7::PULSE_A_HI + 2 * i, hi);
+                apu.write(SunSoftFME7::PULSE_A_HI + (i << 1), hi);
                 // level
                 apu.write(SunSoftFME7::PULSE_A_ENV + i, getVolume(i));
             }
@@ -171,29 +171,14 @@ struct ChipFME7Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 99),  module, ChipFME7::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(23, 211), module, ChipFME7::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(23, 320), module, ChipFME7::INPUT_VOCT + 2));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(23, 56),  module, ChipFME7::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(23, 168), module, ChipFME7::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(23, 279), module, ChipFME7::INPUT_FM + 2));
-        // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42),  module, ChipFME7::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipFME7::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipFME7::PARAM_FREQ + 2));
-        // levels
-        addInput(createInput<PJ301MPort>(Vec(102, 36),   module, ChipFME7::INPUT_LEVEL + 0));
-        addInput(createInput<PJ301MPort>(Vec(102, 146),  module, ChipFME7::INPUT_LEVEL + 1));
-        addInput(createInput<PJ301MPort>(Vec(102, 255),  module, ChipFME7::INPUT_LEVEL + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 64),  module, ChipFME7::PARAM_LEVEL + 0));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipFME7::PARAM_LEVEL + 1));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipFME7::PARAM_LEVEL + 2));
-        // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipFME7::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipFME7::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 324), module, ChipFME7::OUTPUT_CHANNEL + 2));
+        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(  Vec(23,  99  + 112 * i), module, ChipFME7::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(  Vec(23,  56  + 112 * i), module, ChipFME7::INPUT_FM       + i));
+            addParam(createParam<Rogan3PSNES>( Vec(54,  42  + 112 * i), module, ChipFME7::PARAM_FREQ     + i));
+            addInput(createInput<PJ301MPort>(  Vec(102, 36  + 112 * i), module, ChipFME7::INPUT_LEVEL    + i));
+            addParam(createParam<Rogan0PSNES>( Vec(103, 64  + 112 * i), module, ChipFME7::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(Vec(107, 104 + 112 * i), module, ChipFME7::OUTPUT_CHANNEL + i));
+        }
     }
 };
 

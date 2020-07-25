@@ -4,7 +4,10 @@
 #ifndef BLARGG_ENDIAN_H_
 #define BLARGG_ENDIAN_H_
 
-#include "blargg_common.h"
+// Uncomment to enable platform-specific optimizations
+// #define BLARGG_NONPORTABLE 1
+// Uncomment if automatic byte-order determination doesn't work
+// #define BLARGG_BIG_ENDIAN 1
 
 // BLARGG_CPU_CISC: Defined if CPU has very few general-purpose registers (< 16)
 #if defined (_M_IX86) || defined (_M_IA64) || defined (__i486__) || \
@@ -72,13 +75,13 @@ inline unsigned get_be16( void const* p ) {
     return  ((unsigned char const*) p) [0] * 0x100u +
             ((unsigned char const*) p) [1];
 }
-inline blargg_ulong get_le32( void const* p ) {
+inline uint32_t get_le32( void const* p ) {
     return  ((unsigned char const*) p) [3] * 0x01000000u +
             ((unsigned char const*) p) [2] * 0x00010000u +
             ((unsigned char const*) p) [1] * 0x00000100u +
             ((unsigned char const*) p) [0];
 }
-inline blargg_ulong get_be32( void const* p ) {
+inline uint32_t get_be32( void const* p ) {
     return  ((unsigned char const*) p) [0] * 0x01000000u +
             ((unsigned char const*) p) [1] * 0x00010000u +
             ((unsigned char const*) p) [2] * 0x00000100u +
@@ -92,13 +95,13 @@ inline void set_be16( void* p, unsigned n ) {
     ((unsigned char*) p) [0] = (unsigned char) (n >> 8);
     ((unsigned char*) p) [1] = (unsigned char) n;
 }
-inline void set_le32( void* p, blargg_ulong n ) {
+inline void set_le32( void* p, uint32_t n ) {
     ((unsigned char*) p) [3] = (unsigned char) (n >> 24);
     ((unsigned char*) p) [2] = (unsigned char) (n >> 16);
     ((unsigned char*) p) [1] = (unsigned char) (n >> 8);
     ((unsigned char*) p) [0] = (unsigned char) n;
 }
-inline void set_be32( void* p, blargg_ulong n ) {
+inline void set_be32( void* p, uint32_t n ) {
     ((unsigned char*) p) [0] = (unsigned char) (n >> 24);
     ((unsigned char*) p) [1] = (unsigned char) (n >> 16);
     ((unsigned char*) p) [2] = (unsigned char) (n >> 8);
@@ -146,13 +149,13 @@ inline void set_be32( void* p, blargg_ulong n ) {
 
 // auto-selecting versions
 
-inline void set_le( uint16_t* p, unsigned     n ) { SET_LE16( p, n ); }
-inline void set_le( uint32_t* p, blargg_ulong n ) { SET_LE32( p, n ); }
-inline void set_be( uint16_t* p, unsigned     n ) { SET_BE16( p, n ); }
-inline void set_be( uint32_t* p, blargg_ulong n ) { SET_BE32( p, n ); }
-inline unsigned     get_le( uint16_t* p ) { return GET_LE16( p ); }
-inline blargg_ulong get_le( uint32_t* p ) { return GET_LE32( p ); }
-inline unsigned     get_be( uint16_t* p ) { return GET_BE16( p ); }
-inline blargg_ulong get_be( uint32_t* p ) { return GET_BE32( p ); }
+inline void set_le( uint16_t* p, unsigned n ) { SET_LE16( p, n ); }
+inline void set_le( uint32_t* p, uint32_t n ) { SET_LE32( p, n ); }
+inline void set_be( uint16_t* p, unsigned n ) { SET_BE16( p, n ); }
+inline void set_be( uint32_t* p, uint32_t n ) { SET_BE32( p, n ); }
+inline unsigned get_le( uint16_t* p ) { return GET_LE16( p ); }
+inline uint32_t get_le( uint32_t* p ) { return GET_LE32( p ); }
+inline unsigned get_be( uint16_t* p ) { return GET_BE16( p ); }
+inline uint32_t get_be( uint32_t* p ) { return GET_BE32( p ); }
 
 #endif  // BLARGG_ENDIAN_H_

@@ -179,7 +179,7 @@ struct ChipSCC : Module {
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    float getAudioOut(uint8_t channel) {
+    inline float getAudioOut(uint8_t channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume

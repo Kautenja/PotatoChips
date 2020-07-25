@@ -154,7 +154,7 @@ struct ChipGBS : Module {
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    float getAudioOut(int channel) {
+    inline float getAudioOut(int channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume

@@ -78,10 +78,9 @@ struct ChipSN76489 : Module {
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
                 configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            else
-                configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
             configParam(PARAM_LEVEL + i, 0, 1, 0.5, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
         }
+        configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
@@ -147,7 +146,8 @@ struct ChipSN76489 : Module {
         auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
+            auto cv = inputs[INPUT_LEVEL + channel].getVoltage();
+            cv = rack::clamp(cv / 10.f, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             attenuationParam *= 2 * cv;
         }
@@ -238,38 +238,21 @@ struct ChipSN76489Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(19, 73),  module, ChipSN76489::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(19, 158), module, ChipSN76489::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(19, 243), module, ChipSN76489::INPUT_VOCT + 2));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(19, 38),  module, ChipSN76489::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(19, 123), module, ChipSN76489::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(19, 208), module, ChipSN76489::INPUT_FM + 2));
-        // Frequency parameters
-        addParam(createParam<Rogan5PSGray>(Vec(46, 39),  module, ChipSN76489::PARAM_FREQ + 0));
-        addParam(createParam<Rogan5PSGray>(Vec(46, 124), module, ChipSN76489::PARAM_FREQ + 1));
-        addParam(createParam<Rogan5PSGray>(Vec(46, 209), module, ChipSN76489::PARAM_FREQ + 2));
-        // noise period
+        // components
+        for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
+            if (i < TexasInstrumentsSN76489::NOISE) {
+                addInput(createInput<PJ301MPort>(  Vec(19, 73 + i * 85),  module, ChipSN76489::INPUT_VOCT     + i));
+                addInput(createInput<PJ301MPort>(  Vec(19, 38 + i * 85),  module, ChipSN76489::INPUT_FM       + i));
+                addParam(createParam<Rogan5PSGray>(Vec(46, 39 + i * 85),  module, ChipSN76489::PARAM_FREQ     + i));
+            }
+            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 24 + i * 85),  module, ChipSN76489::PARAM_LEVEL + i, ChipSN76489::LIGHTS_LEVEL + i));
+            addInput(createInput<PJ301MPort>(      Vec(135, 28 + i * 85), module, ChipSN76489::INPUT_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(    Vec(137, 74 + i * 85), module, ChipSN76489::OUTPUT_CHANNEL + i));
+        }
         addParam(createParam<Rogan1PWhite>(Vec(64, 296), module, ChipSN76489::PARAM_NOISE_PERIOD));
-        addInput(createInput<PJ301MPort>(Vec(76, 332),   module, ChipSN76489::INPUT_NOISE_PERIOD));
-        // LFSR switch
-        addParam(createParam<CKSS>(Vec(22, 288),       module, ChipSN76489::PARAM_LFSR));
-        addInput(createInput<PJ301MPort>(Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
-        // Level
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 24),  module, ChipSN76489::PARAM_LEVEL + 0, ChipSN76489::LIGHTS_LEVEL + 0));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 109), module, ChipSN76489::PARAM_LEVEL + 1, ChipSN76489::LIGHTS_LEVEL + 1));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 194), module, ChipSN76489::PARAM_LEVEL + 2, ChipSN76489::LIGHTS_LEVEL + 2));
-        addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 279), module, ChipSN76489::PARAM_LEVEL + 3, ChipSN76489::LIGHTS_LEVEL + 3));
-        addInput(createInput<PJ301MPort>(Vec(135, 28),   module, ChipSN76489::INPUT_LEVEL + 0));
-        addInput(createInput<PJ301MPort>(Vec(135, 113),  module, ChipSN76489::INPUT_LEVEL + 1));
-        addInput(createInput<PJ301MPort>(Vec(135, 198),  module, ChipSN76489::INPUT_LEVEL + 2));
-        addInput(createInput<PJ301MPort>(Vec(135, 283),  module, ChipSN76489::INPUT_LEVEL + 3));
-        // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(137, 74),  module, ChipSN76489::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(137, 159), module, ChipSN76489::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(137, 244), module, ChipSN76489::OUTPUT_CHANNEL + 2));
-        addOutput(createOutput<PJ301MPort>(Vec(137, 329), module, ChipSN76489::OUTPUT_CHANNEL + 3));
+        addInput(createInput<PJ301MPort>(  Vec(76, 332), module, ChipSN76489::INPUT_NOISE_PERIOD));
+        addParam(createParam<CKSS>(        Vec(22, 288), module, ChipSN76489::PARAM_LFSR));
+        addInput(createInput<PJ301MPort>(  Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
     }
 };
 

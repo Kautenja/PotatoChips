@@ -19,7 +19,7 @@
 //
 
 #include "sony_spc700.hpp"
-#include "sony_spc700_endian.h"
+#include "sony_spc700_endian.hpp"
 #include <cstring>
 
 #ifdef BLARGG_ENABLE_OPTIMIZER

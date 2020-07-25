@@ -78,7 +78,9 @@ class Namco106 {
     ///
     /// @param eq the equalizer settings to use
     ///
-    inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
+    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+        synth.treble_eq(equalizer);
+    }
 
     /// Set buffer to generate all sound into, or disable sound if NULL.
     ///

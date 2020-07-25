@@ -536,9 +536,9 @@ class NintendoGBS {
     }
 
     // Set treble equalization
-    void treble_eq(const blip_eq_t& eq) {
-        pulse_synth.treble_eq(eq);
-        other_synth.treble_eq(eq);
+    void treble_eq(const BLIPEqualizer& equalizer) {
+        pulse_synth.treble_eq(equalizer);
+        other_synth.treble_eq(equalizer);
     }
 
     // Outputs can be assigned to a single buffer for mono output, or to three

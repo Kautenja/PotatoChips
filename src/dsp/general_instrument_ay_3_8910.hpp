@@ -498,8 +498,8 @@ class GeneralInstrumentAy_3_8910 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(blip_eq_t const& eq) {
-        synth.treble_eq(eq);
+    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+        synth.treble_eq(equalizer);
     }
 
     /// @brief Reset internal state, registers, and all oscillators.

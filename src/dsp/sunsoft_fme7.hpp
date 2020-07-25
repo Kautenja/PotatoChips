@@ -161,7 +161,9 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
+    inline void treble_eq(BLIPEqualizer const& equalizer) {
+        synth.treble_eq(equalizer);
+    }
 
     /// Assign single oscillator output to buffer. If buffer is NULL, silences
     /// the given oscillator.

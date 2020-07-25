@@ -174,7 +174,7 @@ class KonamiSCC {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(blip_eq_t const& equalizer) {
+    inline void treble_eq(BLIPEqualizer const& equalizer) {
         synth.treble_eq(equalizer);
     }
 

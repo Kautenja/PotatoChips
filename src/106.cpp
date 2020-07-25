@@ -62,7 +62,7 @@ struct Chip106 : Module {
     /// The 106 instance to synthesize sound with
     Namco106 apu;
     /// the number of active channels
-    int num_channels = 1;
+    unsigned num_channels = 1;
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -105,18 +105,18 @@ struct Chip106 : Module {
         cvDivider.setDivision(16);
         lightsDivider.setDivision(128);
         // set the output buffer for each individual voice
-        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
             configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
-            apu.osc_output(i, &buf[i]);
+            apu.set_output(i, &buf[i]);
         }
         // set the wave-forms to the default values
-        for (int i = 0; i < num_wavetables; i++)
+        for (unsigned i = 0; i < num_wavetables; i++)
             memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -266,16 +266,16 @@ struct Chip106 : Module {
             // get the number of active channels from the panel
             num_channels = getActiveChannels();
             // set the frequency for all channels on the chip
-            for (int i = 0; i < Namco106::OSC_COUNT; i++)
+            for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
                 setFrequency(i, num_channels);
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < Namco106::OSC_COUNT; i++)
+        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
         // set the channel lights if the light divider is high
         if (lightsDivider.process()) {
-            for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
                 auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
                 lights[light].setSmoothBrightness(i < num_channels, args.sampleTime * lightsDivider.getDivision());
             }
@@ -284,20 +284,20 @@ struct Chip106 : Module {
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        for (int i = 0; i < Namco106::OSC_COUNT; i++)
+        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
-        for (int i = 0; i < num_wavetables; i++)
+        for (unsigned i = 0; i < num_wavetables; i++)
             memcpy(values[i], default_values, num_samples);
     }
 
     /// Respond to the user randomizing the module with the "Randomize" action.
     void onRandomize() override {
-        for (int table = 0; table < num_wavetables; table++) {
-            for (int sample = 0; sample < num_samples; sample++) {
+        for (unsigned table = 0; table < num_wavetables; table++) {
+            for (unsigned sample = 0; sample < num_samples; sample++) {
                 values[table][sample] = random::u32() % bit_depth;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
@@ -391,7 +391,7 @@ struct Chip106Widget : ModuleWidget {
         addParam(createParam<Rogan1PSNES>(Vec(161, 233), module, Chip106::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(164, 271), module, Chip106::INPUT_WAVETABLE));
         // individual channel controls
-        for (int i = 0; i < Namco106::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, Chip106::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, Chip106::INPUT_FM + i      ));
             addParam(createParam<Rogan2PSNES>( Vec(275, 35 + i * 41), module, Chip106::PARAM_FREQ + i    ));

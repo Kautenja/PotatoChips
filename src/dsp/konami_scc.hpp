@@ -92,7 +92,7 @@ class KonamiSCC {
     /// the registers on the chip
     unsigned char regs[REGISTER_COUNT];
     /// the synthesizer for the oscillators on the chip
-    BLIPSynth<blip_med_quality, 1> synth;
+    BLIPSynthesizer<blip_med_quality, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///

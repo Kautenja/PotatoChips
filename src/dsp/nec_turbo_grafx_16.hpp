@@ -74,7 +74,7 @@ class NECTurboGrafx16 {
         /// TODO:
         enum { AMP_RANGE = 0x8000 };
         /// TODO:
-        typedef BLIPSynth<blip_med_quality,1> synth_t;
+        typedef BLIPSynthesizer<blip_med_quality,1> synth_t;
 
         /// TODO:
         void run_until(synth_t& synth_, blip_time_t end_time) {

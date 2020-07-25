@@ -198,7 +198,7 @@ struct Chip106 : Module {
     /// @param channel the channel to set the frequency for
     /// @param channels the number of enabled channels in [1, 8]
     ///
-    void setFrequency(uint8_t channel, uint8_t channels = 1) {
+    inline void setFrequency(uint8_t channel, uint8_t channels = 1) {
         // extract the low, medium, and high frequency register values
         auto freq = getFrequency(channel);
         // FREQUENCY LOW

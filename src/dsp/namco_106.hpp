@@ -77,7 +77,9 @@ class Namco106 {
     BLIPSynthesizer<blip_good_quality, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
-    uint8_t& access() {
+    /// @details
+    /// increments the addr_reg by 1 after accessing
+    inline uint8_t& access() {
         int addr = addr_reg & 0x7f;
         if (addr_reg & 0x80) addr_reg = (addr + 1) | 0x80;
         return reg[addr];

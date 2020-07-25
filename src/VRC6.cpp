@@ -27,14 +27,14 @@
 struct ChipVRC6 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
-        ENUMS(PARAM_PW, 2),
+        ENUMS(PARAM_PW, KonamiVRC6::OSC_COUNT - 1),  // pulse wave only
         ENUMS(PARAM_LEVEL, KonamiVRC6::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
         ENUMS(INPUT_VOCT, KonamiVRC6::OSC_COUNT),
         ENUMS(INPUT_FM, KonamiVRC6::OSC_COUNT),
-        ENUMS(INPUT_PW, 2),
+        ENUMS(INPUT_PW, KonamiVRC6::OSC_COUNT - 1),  // pulse wave only
         ENUMS(INPUT_LEVEL, KonamiVRC6::OSC_COUNT),
         INPUT_COUNT
     };
@@ -89,7 +89,7 @@ struct ChipVRC6 : Module {
     /// freq_min = 3, freq_max = 4095, clock_division = 14
     ///
     inline uint16_t getFrequency(
-        int channel,
+        unsigned channel,
         float freq_min,
         float freq_max,
         float clock_division
@@ -114,12 +114,12 @@ struct ChipVRC6 : Module {
     /// @returns the pulse width value in an 8-bit container in the high 4 bits.
     /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
-    inline uint8_t getPW(int channel) {
+    inline uint8_t getPW(unsigned channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (before shift)
         static constexpr float PW_MAX = 0b00000111;
-        if (channel == 2) return 0;  // fail grace-fully for saw request
+        if (channel == KonamiVRC6::SAW) return 0;  // no PW for saw wave
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
         // get the control voltage to the pulse width with 1V/step
@@ -135,7 +135,7 @@ struct ChipVRC6 : Module {
     /// @param channel the channel to return the pulse width value for
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    inline uint8_t getLevel(int channel, float max_level) {
+    inline uint8_t getLevel(unsigned channel, float max_level) {
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
@@ -148,7 +148,7 @@ struct ChipVRC6 : Module {
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    float getAudioOut(int channel) {
+    float getAudioOut(unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
@@ -164,7 +164,7 @@ struct ChipVRC6 : Module {
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
-                // frequency
+                // frequency (max frequency is same for pulses and saw, 4095)
                 uint16_t freq = getFrequency(i, freq_low[i], 4095, clock_division[i]);
                 uint8_t lo =  freq & 0b0000000011111111;
                 uint8_t hi = (freq & 0b0000111100000000) >> 8;
@@ -209,7 +209,7 @@ struct ChipVRC6Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(20,  78  + i * 110), module, ChipVRC6::INPUT_VOCT     + i));
             addInput(createInput<PJ301MPort>(  Vec(26,  37  + i * 110), module, ChipVRC6::INPUT_FM       + i));
             addParam(createParam<Rogan3PSNES>( Vec(54,  42  + i * 110), module, ChipVRC6::PARAM_FREQ     + i));
-            if (i < 2) {  // pulse width
+            if (i != KonamiVRC6::SAW) {  // pulse width
                 auto pwParam = createParam<Rogan0PSNES>(Vec(30, 107 + i * 110), module, ChipVRC6::PARAM_PW + i);
                 pwParam->snap = true;
                 addParam(pwParam);

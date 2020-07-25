@@ -52,11 +52,7 @@ class Exception: public std::exception {
 
 
 /// An exception for trying to set a channel that is out of bounds.
-class ChannelOutOfBoundsException: public std::exception {
- protected:
-    /// the error message.
-    const std::string message;
-
+class ChannelOutOfBoundsException: public Exception {
  public:
     /// @brief Constructor.
     ///
@@ -66,34 +62,19 @@ class ChannelOutOfBoundsException: public std::exception {
     ChannelOutOfBoundsException(
         unsigned channel,
         unsigned num_channels
-    ) : message(
+    ) : Exception(
         "tried to set output for channel index " +
         std::to_string(channel) +
         ", but the chip has " +
         std::to_string(num_channels) +
         " channels"
     ) { }
-
-    /// @brief Destroy this exception.
-    ~ChannelOutOfBoundsException() throw () { }
-
-    /// @brief Returns a pointer to the (constant) error description.
-    ///
-    /// @returns A pointer to a const char*. The underlying memory is in
-    /// possession of the Exception object. Callers must not attempt to free
-    /// the memory.
-    ///
-    const char* what() const noexcept override { return message.c_str(); }
 };
 
 
 /// An exception for trying to set an address that is out of bounds.
 template<typename Address>
-class AddressSpaceException: public std::exception {
- protected:
-    /// the error message.
-    const std::string message;
-
+class AddressSpaceException: public Exception {
  public:
     /// @brief Constructor.
     ///
@@ -105,7 +86,7 @@ class AddressSpaceException: public std::exception {
         Address accessed,
         Address start,
         Address stop
-    ) : message(
+    ) : Exception(
         "tried to access address " +
         std::to_string(accessed) +
         ", but the chip has address space [" +
@@ -114,17 +95,6 @@ class AddressSpaceException: public std::exception {
         std::to_string(stop) +
         "]"
     ) { }
-
-    /// @brief Destroy this exception.
-    ~AddressSpaceException() throw () { }
-
-    /// @brief Returns a pointer to the (constant) error description.
-    ///
-    /// @returns A pointer to a const char*. The underlying memory is in
-    /// possession of the Exception object. Callers must not attempt to free
-    /// the memory.
-    ///
-    const char* what() const noexcept override { return message.c_str(); }
 };
 
 #endif  // DSP_EXCEPTIONS_HPP_

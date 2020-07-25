@@ -19,7 +19,6 @@
 #ifndef DSP_SONY_SPC700_HPP_
 #define DSP_SONY_SPC700_HPP_
 
-#include "blargg_common.h"
 #include "exceptions.hpp"
 
 /// @brief Sony SPC700 chip emulator.

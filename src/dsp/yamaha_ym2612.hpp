@@ -24,12 +24,12 @@
 #define DSP_YM2612_HPP_
 
 /// @brief Yamaha YM2612 chip emulator engine.
-struct Ym2612_Impl;
+struct YamahaYM2612Engine;
 
 /// @brief Yamaha YM2612 chip emulator.
-class Ym2612_Emu  {
+class YamahaYM2612  {
     /// the engine for the emulator
-    Ym2612_Impl* impl;
+    YamahaYM2612Engine* impl;
 
  public:
     /// the number of channels on the chip
@@ -42,10 +42,10 @@ class Ym2612_Emu  {
     typedef short sample_t;
 
     /// @brief Initialize a new YM2612 emulator.
-    Ym2612_Emu() { impl = 0; }
+    YamahaYM2612() { impl = 0; }
 
     /// @brief Destroy an instance of YM2612 emulator.
-    ~Ym2612_Emu();
+    ~YamahaYM2612();
 
     /// @brief Set output sample rate and chip clock rates, in Hz.
     /// @returns non-zero if error.

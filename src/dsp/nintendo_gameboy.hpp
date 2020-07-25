@@ -102,6 +102,9 @@ class NintendoGBS {
         WAVE_TABLE_VALUES                 = 0xFF30
     };
 
+    /// the number of registers per voice on the chip
+    static constexpr int REGS_PER_VOICE = 5;
+
  private:
     struct Oscillator {
         /// TODO:

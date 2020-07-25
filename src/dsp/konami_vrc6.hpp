@@ -116,6 +116,8 @@ class KonamiVRC6 {
     void run_until(blip_time_t time) {
         if (time < last_time)
             throw Exception("end_time must be >= last_time");
+        else if (time == last_time)
+            return;
         run_square(oscs[0], time);
         run_square(oscs[1], time);
         run_saw(time);

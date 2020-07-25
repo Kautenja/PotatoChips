@@ -44,37 +44,61 @@ class NintendoGBS {
     /// the total number of registers available on the chip
     static constexpr auto REGISTER_COUNT = ADDR_END - ADDR_START;
 
+    /// the indexes of the channels on the chip
+    enum Channel {
+        PULSE0,
+        PULSE1,
+        WAVETABLE,
+        NOISE
+    };
+
     /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
     enum Registers {
-        // Pulse 0
+        /// sweep period register for channel 0 (only channel 0 has sweep)
         PULSE0_SWEEP_PERIOD               = 0xFF10,
+        /// duty cycle / length load register for channel 0
         PULSE0_DUTY_LENGTH_LOAD           = 0xFF11,
+        /// start volume register for channel 0
         PULSE0_START_VOLUME               = 0xFF12,
+        /// the frequency register (low 8-bits) for channel 0
         PULSE0_FREQ_LO                    = 0xFF13,
+        /// the frequency register (hi 3-bits) / length / enable for channel 0
         PULSE0_TRIG_LENGTH_ENABLE_HI      = 0xFF14,
-        // Pulse 1
         // PULSE1_UNUSED                     = 0xFF15,
+        /// duty cycle / length load register for channel 1
         PULSE1_DUTY_LENGTH_LOAD           = 0xFF16,
+        /// start volume register for channel 1
         PULSE1_START_VOLUME               = 0xFF17,
+        /// the frequency register (low 8-bits) for channel 1
         PULSE1_FREQ_LO                    = 0xFF18,
+        /// the frequency register (hi 3-bits) / length / enable for channel 1
         PULSE1_TRIG_LENGTH_ENABLE_FREQ_HI = 0xFF19,
-        // Wave
+        /// the DAC power register for channel 2
         WAVE_DAC_POWER                    = 0xFF1A,
+        /// the length load register for channel 2
         WAVE_LENGTH_LOAD                  = 0xFF1B,
+        /// the volume code register for channel 2
         WAVE_VOLUME_CODE                  = 0xFF1C,
+        /// the frequency register (low 8-bits) for channel 2
         WAVE_FREQ_LO                      = 0xFF1D,
+        /// the frequency register (hi 3-bits) / length / enable for channel 2
         WAVE_TRIG_LENGTH_ENABLE_FREQ_HI   = 0xFF1E,
-        // Noise
         // NOISE_UNUSED                      = 0xFF1F,
+        /// the length load register for channel 3
         NOISE_LENGTH_LOAD                 = 0xFF20,
+        /// start volume register for channel 3
         NOISE_START_VOLUME                = 0xFF21,
+        /// the clock shift register for channel 3
         NOISE_CLOCK_SHIFT                 = 0xFF22,
+        /// the trigger / length / enable register for channel 3
         NOISE_TRIG_LENGTH_ENABLE          = 0xFF23,
-        // Control / Status
+        /// the global stereo volume register
         STEREO_VOLUME                     = 0xFF24,
+        /// the stereo enables register
         STEREO_ENABLES                    = 0xFF25,
+        /// the global power control statue register
         POWER_CONTROL_STATUS              = 0xFF26,
-        // wave-table for wave channel
+        /// the wave-table register for channel 2
         WAVE_TABLE_VALUES                 = 0xFF30
     };
 

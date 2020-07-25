@@ -28,6 +28,14 @@ class TexasInstrumentsSN76489 {
     /// the number of oscillators on the chip
     static constexpr int OSC_COUNT = 4;
 
+    /// the indexes of the channels on the chip
+    enum Channel {
+        PULSE0,
+        PULSE1,
+        PULSE2,
+        NOISE
+    };
+
     /// the registers on the SN76489
     enum Register : uint8_t {
         /// the frequency register for pulse generator 0

@@ -75,15 +75,14 @@ struct ChipSN76489 : Module {
     /// Initialize a new SN76489 Chip module.
     ChipSN76489() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Tone 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Tone 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Tone 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
+        for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
+            if (i < TexasInstrumentsSN76489::NOISE)
+                configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            else
+                configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
+            configParam(PARAM_LEVEL + i, 0, 1, 0.5, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
+        }
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
-        configParam(PARAM_LEVEL + 0, 0, 1, 0.5, "Tone 1 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Tone 2 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Tone 3 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Noise Level",  "%", 0, 100);
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
@@ -94,11 +93,12 @@ struct ChipSN76489 : Module {
         onSampleRateChange();
     }
 
-    /// Process pulse wave for given channel.
+    /// Get the 10-bit frequency parameter for the given pulse channel.
     ///
-    /// @param channel the channel to process the pulse wave for
+    /// @param channel the channel to return the frequency for
+    /// @returns the 10 bit frequency value from the panel
     ///
-    void channel_pulse(int channel) {
+    inline uint16_t getFrequency(int channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ10BIT_MIN = 0;
         // the maximal value for the frequency register
@@ -107,11 +107,6 @@ struct ChipSN76489 : Module {
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // the minimal value for the volume width register
-        static constexpr float ATT_MIN = 0;
-        // the maximal value for the volume width register
-        static constexpr float ATT_MAX = 15;
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -121,15 +116,33 @@ struct ChipSN76489 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
-        uint16_t freq10bit = rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
-        // calculate the high and low bytes from the 10-bit frequency
-        uint8_t lo = 0b00001111 & freq10bit;
-        uint8_t hi = 0b00111111 & (freq10bit >> 4);
-        // write the data to the chip
-        const auto channel_opcode_offset = (2 * channel) << 4;
-        apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + channel_opcode_offset) | lo);
-        apu.write(hi);
+        return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
+    }
 
+    /// Return the period of the noise oscillator from the panel controls.
+    inline uint8_t getNoisePeriod() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ_MIN = 0;
+        // the maximal value for the frequency register
+        static constexpr float FREQ_MAX = 3;
+        // get the attenuation from the parameter knob
+        float freq = params[PARAM_NOISE_PERIOD].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_NOISE_PERIOD].isConnected())
+            freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
+        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+    }
+
+    /// Return the volume level from the panel controls.
+    ///
+    /// @param channel the channel to return the volume level of
+    /// @returns the volume level of the given channel
+    ///
+    inline uint8_t getVolume(int channel) {
+        // the minimal value for the volume width register
+        static constexpr float ATT_MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float ATT_MAX = 15;
         // get the attenuation from the parameter knob
         auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the attenuation
@@ -139,56 +152,14 @@ struct ChipSN76489 : Module {
             attenuationParam *= 2 * cv;
         }
         // get the 8-bit attenuation clamped within legal limits
-        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + channel_opcode_offset) | attenuation);
-    }
-
-    /// Process noise (channel 3).
-    void channel_noise() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 0;
-        // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 3;
-        // the minimal value for the volume width register
-        static constexpr float ATT_MIN = 0;
-        // the maximal value for the volume width register
-        static constexpr float ATT_MAX = 15;
-
-        // get the attenuation from the parameter knob
-        float freq = params[PARAM_NOISE_PERIOD].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_NOISE_PERIOD].isConnected())
-            freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
-        uint8_t period = FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
-        bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
-        if (period != noise_period or update_noise_control != state) {
-            apu.write(
-                TexasInstrumentsSN76489::NOISE_CONTROL |
-                (0b00000011 & period) |
-                state * TexasInstrumentsSN76489::NOISE_FEEDBACK
-            );
-            noise_period = period;
-            update_noise_control = state;
-        }
-
-        // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_LEVEL + 3].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + 3].isConnected()) {
-            auto cv = rack::clamp(inputs[INPUT_LEVEL + 3].getVoltage() / 10.f, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            attenuationParam *= 2 * cv;
-        }
-        // get the 8-bit attenuation clamped within legal limits
-        uint8_t attenuation = ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
-        apu.write(TexasInstrumentsSN76489::NOISE_ATTENUATION | attenuation);
+        return ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
     }
 
     /// Return a 10V signed sample from the APU.
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    float getAudioOut(int channel) {
+    inline float getAudioOut(int channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
@@ -202,10 +173,31 @@ struct ChipSN76489 : Module {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
-            channel_pulse(0);
-            channel_pulse(1);
-            channel_pulse(2);
-            channel_noise();
+            for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT - 1; i++) {
+                // 10-bit frequency
+                auto freq = getFrequency(i);
+                uint8_t lo = 0b00001111 & freq;
+                uint8_t hi = 0b00111111 & (freq >> 4);
+                const auto channel_opcode_offset = (2 * i) << 4;
+                apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + channel_opcode_offset) | lo);
+                apu.write(hi);
+                // 4-bit attenuation
+                apu.write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + channel_opcode_offset) | getVolume(i));
+            }
+            // 2-bit noise period
+            auto period = getNoisePeriod();
+            bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
+            if (period != noise_period or update_noise_control != state) {
+                apu.write(
+                    TexasInstrumentsSN76489::NOISE_CONTROL |
+                    (0b00000011 & period) |
+                    state * TexasInstrumentsSN76489::NOISE_FEEDBACK
+                );
+                noise_period = period;
+                update_noise_control = state;
+            }
+            // 4-bit attenuation
+            apu.write(TexasInstrumentsSN76489::NOISE_ATTENUATION | getVolume(TexasInstrumentsSN76489::NOISE));
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

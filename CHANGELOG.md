@@ -60,20 +60,9 @@
 
 -   Texas Instruments SN76489 from Sega Master System
 
-### 1.4.1 (2020-07-20)
+### 1.4.1 (2020-07-25)
 
--   fix issue where CV controlled SN76489 VCA wouldn't return to 0
+-   fix issue where CV modulated SN76489 VCA wouldn't return to 0
+-   fix issue where SN76489 at high-frequency would produce no output
 -   fix issue where amplifier for FME7 wasn't allowed full gain
 -   4-bit volume control with CV, 2-bit PW control CV, and new panel for 2A03
-
-### 1.5.0 (2020-07-21)
-
--   Atari POKEY module (alpha)
-
-### 1.6.0 (2020-07-21)
-
--   General Instrument AY-3-8910 module (alpha)
-
-### 1.7.0 (2020-07-21)
-
--   Konami SCC module (alpha)

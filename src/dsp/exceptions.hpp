@@ -47,7 +47,7 @@ class Exception: public std::exception {
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    const char* what() const throw () { return message.c_str(); }
+    const char* what() const noexcept override { return message.c_str(); }
 };
 
 
@@ -83,7 +83,7 @@ class ChannelOutOfBoundsException: public std::exception {
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    const char* what() const throw () { return message.c_str(); }
+    const char* what() const noexcept override { return message.c_str(); }
 };
 
 
@@ -124,7 +124,7 @@ class AddressSpaceException: public std::exception {
     /// possession of the Exception object. Callers must not attempt to free
     /// the memory.
     ///
-    const char* what() const throw () { return message.c_str(); }
+    const char* what() const noexcept override { return message.c_str(); }
 };
 
 #endif  // DSP_EXCEPTIONS_HPP_

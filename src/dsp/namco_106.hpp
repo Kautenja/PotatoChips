@@ -169,11 +169,15 @@ class Namco106 {
         return reg[addr];
     }
 
-    /// Run Namco106 until specified time.
+    /// Run the emulator until specified time.
     ///
     /// @param time the number of elapsed cycles
     ///
     void run_until(cpu_time_t nes_end_time) {
+        if (nes_end_time < last_time)
+            throw Exception("end_time must be >= last_time");
+        else if (nes_end_time == last_time)
+            return;
         unsigned int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
         for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Oscillator& osc = oscs[i];

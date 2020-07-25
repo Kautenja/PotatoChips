@@ -630,7 +630,7 @@ class NintendoGBS {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    void treble_eq(const BLIPEqualizer& equalizer) {
+    void set_treble_eq(const BLIPEqualizer& equalizer) {
         pulse_synth.treble_eq(equalizer);
         other_synth.treble_eq(equalizer);
     }
@@ -762,18 +762,18 @@ class NintendoGBS {
     /// @param address the address of the register to read from
     /// @returns data the data in the register at given address
     ///
-    uint8_t read_register(uint16_t addr) {
+    uint8_t read(uint16_t address) {
         static constexpr int time = 0;
         run_until(time);
         // make sure the given address is legal
-        if (addr < ADDR_START or addr > ADDR_END)
-            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
+        if (address < ADDR_START or address > ADDR_END)
+            throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         // get the register index from the address
-        auto index = addr - ADDR_START;
+        auto index = address - ADDR_START;
         // read the data from the register
         uint8_t data = regs[index];
         // handle a read from the power control status register
-        if (addr == POWER_CONTROL_STATUS) {
+        if (address == POWER_CONTROL_STATUS) {
             data = (data & 0x80) | 0x70;
             for (unsigned i = 0; i < OSC_COUNT; i++) {
                 const Oscillator& osc = *oscs[i];

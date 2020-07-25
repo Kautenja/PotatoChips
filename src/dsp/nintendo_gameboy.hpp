@@ -36,13 +36,14 @@ const uint8_t sine_wave[32] = {
 class NintendoGBS {
  public:
     /// the number of oscillators on the chip
-    enum { OSC_COUNT = 4 };
+    static constexpr unsigned OSC_COUNT = 4;
     /// the first address of the APU in memory space
-    enum { ADDR_START = 0xFF10 };
+    static constexpr uint16_t ADDR_START = 0xFF10;
     /// the last address of the APU in memory space
-    enum { ADDR_END   = 0xFF3F };
+    static constexpr uint16_t ADDR_END   = 0xFF3F;
+    // TODO: remove + 1?
     /// the total number of registers available on the chip
-    enum { REGISTER_COUNT = ADDR_END - ADDR_START + 1 };
+    static constexpr auto REGISTER_COUNT = ADDR_END - ADDR_START + 1;
 
     /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
     enum Registers {
@@ -421,9 +422,15 @@ class NintendoGBS {
         other_synth.volume(vol);
     }
 
+    /// @brief Run emulator until specified time, so that any DMC memory reads
+    /// can be accounted for (i.e. inserting CPU wait states).
+    ///
+    /// @param time the number of elapsed cycles
+    ///
     void run_until(blip_time_t end_time) {
-        assert(end_time >= last_time); // end_time must not be before previous time
-        if (end_time == last_time)
+        if (end_time < last_time)
+            throw Exception("end_time must be >= last_time");
+        else if (end_time == last_time)
             return;
 
         while (true) {
@@ -432,12 +439,11 @@ class NintendoGBS {
                 time = end_time;
 
             // run oscillators
-            for (int i = 0; i < OSC_COUNT; ++i) {
+            for (unsigned i = 0; i < OSC_COUNT; ++i) {
                 Oscillator& osc = *oscs[i];
                 if (osc.output) {
                     int playing = false;
-                    if (osc.enabled && osc.volume &&
-                            (!(osc.regs[4] & osc.len_enabled_mask) || osc.length))
+                    if (osc.enabled && osc.volume && (!(osc.regs[4] & osc.len_enabled_mask) || osc.length))
                         playing = -1;
                     switch (i) {
                     case 0: pulse1.run(last_time, time, playing); break;
@@ -510,8 +516,7 @@ class NintendoGBS {
         pulse2.synth = &pulse_synth;
         wave.synth  = &other_synth;
         noise.synth = &other_synth;
-
-        for (int i = 0; i < OSC_COUNT; i++) {
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
             Oscillator& osc = *oscs[i];
             osc.regs = &regs[i * 5];
             osc.output = 0;
@@ -520,58 +525,94 @@ class NintendoGBS {
             osc.outputs[2] = 0;
             osc.outputs[3] = 0;
         }
-
-        set_tempo(1.0);
-        volume(1.0);
+        set_tempo();
+        set_volume();
         reset();
     }
 
-    // Set overall volume of all oscillators, where 1.0 is full volume
-    void volume(double vol) {
-        // 15: steps
-        // 2: ?
-        // 8: master volume range
-        volume_unit = 0.60 / OSC_COUNT / 15 / 2 / 8 * vol;
-        update_volume();
-    }
-
-    // Set treble equalization
-    void treble_eq(const BLIPEqualizer& equalizer) {
-        pulse_synth.treble_eq(equalizer);
-        other_synth.treble_eq(equalizer);
-    }
-
-    // Outputs can be assigned to a single buffer for mono output, or to three
-    // buffers for stereo output (using Stereo_Buffer to do the mixing).
-
-    // Assign all oscillator outputs to specified buffer(s). If buffer
-    // is NULL, silences all oscillators.
-    inline void output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, center, left, right);
-    }
-
-    inline void output(BLIPBuffer* mono) {
-        output(mono, mono, mono);
-    }
-
-    // Assign single oscillator output to buffer(s). Valid indicies are 0 to 3,
-    // which refer to Square 1, Square 2, Wave, and Noise. If buffer is NULL,
-    // silences oscillator.
-    inline void osc_output(int index, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
-        assert((unsigned) index < OSC_COUNT);
-        assert((center && left && right) || (!center && !left && !right));
-        Oscillator& osc = *oscs[index];
+    /// @brief Assign single oscillator output to buffer (surround). If buffer
+    /// is NULL, silences the given oscillator.
+    ///
+    /// @param channel the index of the oscillator to set the output for
+    /// @param center the BLIPBuffer to output the center channel of the given voice to
+    /// @param left the BLIPBuffer to output the left channel of the given voice to
+    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    /// @details
+    /// If a buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced. all buffers must be NULL if one is NULL, i.e.,
+    /// NULL = center = left = right
+    ///
+    inline void set_output(unsigned channel, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        if (!((center && left && right) or (!center && !left && !right)))
+            throw Exception("center, left, and right must be specified or NULL");
+        Oscillator& osc = *oscs[channel];
         osc.outputs[1] = right;
         osc.outputs[2] = left;
         osc.outputs[3] = center;
         osc.output = osc.outputs[osc.output_select];
     }
 
-    inline void osc_output(int index, BLIPBuffer* mono) {
-        osc_output(index, mono, mono, mono);
+    /// @brief Assign single oscillator output to buffer (mono). If buffer is
+    /// NULL, silences the given oscillator.
+    ///
+    /// @param channel the index of the oscillator to set the output for
+    /// @param center the BLIPBuffer to output the center channel of the given voice to
+    /// @param left the BLIPBuffer to output the left channel of the given voice to
+    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    /// @details
+    /// If a buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
+    ///
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        set_output(channel, buffer, buffer, buffer);
     }
 
-    // Reset oscillators and internal state
+    /// @brief Assign all oscillator outputs to buffers (surround). If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param center the BLIPBuffer to output the center channel of the given voice to
+    /// @param left the BLIPBuffer to output the left channel of the given voice to
+    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    ///
+    inline void set_output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        for (unsigned i = 0; i < OSC_COUNT; i++)
+            set_output(i, center, left, right);
+    }
+
+    /// @brief Assign all oscillator outputs to specified buffer (mono). If
+    /// buffer is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        set_output(buffer, buffer, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
+    ///
+    void set_volume(double level = 1.0) {
+        // 15: steps
+        // 2: ?
+        // 8: master volume range
+        volume_unit = 0.60 / OSC_COUNT / 15 / 2 / 8 * level;
+        update_volume();
+    }
+
+    /// @brief Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    void treble_eq(const BLIPEqualizer& equalizer) {
+        pulse_synth.treble_eq(equalizer);
+        other_synth.treble_eq(equalizer);
+    }
+
+    /// @brief Reset internal frame counter, registers, and all oscillators.
     void reset() {
         next_frame_time = 0;
         last_time       = 0;
@@ -592,15 +633,29 @@ class NintendoGBS {
         write(POWER_CONTROL_STATUS, 0x00);
 
         static constexpr uint8_t initial_wave[] = {
-            0x84,0x40,0x43,0xAA,0x2D,0x78,0x92,0x3C, // wave table
-            0x60,0x59,0x59,0xB0,0x34,0xB8,0x2E,0xDA
+            0x84, 0x40, 0x43, 0xAA, 0x2D, 0x78, 0x92, 0x3C,
+            0x60, 0x59, 0x59, 0xB0, 0x34, 0xB8, 0x2E, 0xDA
         };
         memcpy(wave.wave, initial_wave, sizeof wave.wave);
     }
 
-    // Write 'data' to address at specified time
-    void write(unsigned addr, int data) {
-        static constexpr int time = 0;
+    /// @brief Set the tempo division of the clock.
+    ///
+    /// @param tempo_division the tempo division to set the clock to
+    ///
+    void set_tempo(double tempo_division = 1.0) {
+        frame_period = 4194304 / 256;  // 256 Hz
+        if (tempo_division != 1.0)
+            frame_period = frame_period / tempo_division;
+    }
+
+    /// @brief Write data to a register.
+    ///
+    /// @param address the address of the register to write
+    /// @param data the data to write to the register
+    ///
+    void write(uint16_t addr, uint8_t data) {
+        static constexpr blip_time_t time = 0;
         static constexpr unsigned char powerup_regs[0x20] = {
             0x80,0x3F,0x00,0xFF,0xBF,                     // square 1
             0xFF,0x3F,0x00,0xFF,0xBF,                     // square 2
@@ -611,23 +666,22 @@ class NintendoGBS {
             0x80,                                         // power
             0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // wave-table
         };
-
-        assert((unsigned) data < 0x100);
-
-        int reg = addr - ADDR_START;
-        if ((unsigned) reg >= REGISTER_COUNT)
-            return;
-
+        // make sure the given address is legal
+        if (addr < ADDR_START or addr > ADDR_END)
+            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
+        // run the emulator up to the given time
         run_until(time);
-
-        int old_reg = regs[reg];
+        // calculate the register index from the address
+        auto reg = addr - ADDR_START;
+        // store the old value from the register
+        auto old_reg = regs[reg];
+        // update the register with the new value
         regs[reg] = data;
-
-        if (addr < STEREO_VOLUME) {
+        if (addr < STEREO_VOLUME) {  // stereo volume
             write_osc(reg / 5, reg, data);
         } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
             // return all oscs to 0
-            for (int i = 0; i < OSC_COUNT; i++) {
+            for (unsigned i = 0; i < OSC_COUNT; i++) {
                 Oscillator& osc = *oscs[i];
                 int amp = osc.last_amp;
                 osc.last_amp = 0;
@@ -647,9 +701,8 @@ class NintendoGBS {
         } else if (addr == 0xFF25 || addr == POWER_CONTROL_STATUS) {
             int mask = (regs[POWER_CONTROL_STATUS - ADDR_START] & 0x80) ? ~0 : 0;
             int flags = regs[0xFF25 - ADDR_START] & mask;
-
-            // left/right assignments
-            for (int i = 0; i < OSC_COUNT; i++) {
+            // left / right assignments
+            for (unsigned i = 0; i < OSC_COUNT; i++) {
                 Oscillator& osc = *oscs[i];
                 osc.enabled &= mask;
                 int bits = flags >> i;
@@ -670,29 +723,36 @@ class NintendoGBS {
                         if (i != POWER_CONTROL_STATUS - ADDR_START)
                             write(i + ADDR_START, powerup_regs[i]);
                     }
+                } else {
+                    // std::cout << "APU powered on\n" << std::endl;
                 }
-                // else {
-                //     std::cout << "APU powered on\n" << std::endl;
-                // }
             }
-        } else if (addr >= 0xFF30) {
+        } else if (addr >= 0xFF30) {  // update wave-table
             int index = (addr & 0x0F) * 2;
             wave.wave[index] = data >> 4;
             wave.wave[index + 1] = data & 0x0F;
         }
     }
 
-    // Read from address at specified time
-    int read_register(blip_time_t time, unsigned addr) {
+    /// @brief Read data from a register.
+    ///
+    /// @param address the address of the register to read from
+    /// @returns data the data in the register at given address
+    ///
+    uint8_t read_register(uint16_t addr) {
+        static constexpr int time = 0;
         run_until(time);
-
-        int index = addr - ADDR_START;
-        assert((unsigned) index < REGISTER_COUNT);
-        int data = regs[index];
-
+        // make sure the given address is legal
+        if (addr < ADDR_START or addr > ADDR_END)
+            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
+        // get the register index from the address
+        auto index = addr - ADDR_START;
+        // read the data from the register
+        uint8_t data = regs[index];
+        // handle a read from the power control status register
         if (addr == POWER_CONTROL_STATUS) {
             data = (data & 0x80) | 0x70;
-            for (int i = 0; i < OSC_COUNT; i++) {
+            for (unsigned i = 0; i < OSC_COUNT; i++) {
                 const Oscillator& osc = *oscs[i];
                 if (osc.enabled && (osc.length || !(osc.regs[4] & osc.len_enabled_mask)))
                     data |= 1 << i;
@@ -702,23 +762,15 @@ class NintendoGBS {
         return data;
     }
 
-    // Run all oscillators up to specified time, end current time frame, then
-    // start a new frame at time 0.
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
     void end_frame(blip_time_t end_time) {
-        if (end_time > last_time)
-            run_until(end_time);
-
-        assert(next_frame_time >= end_time);
+        run_until(end_time);
         next_frame_time -= end_time;
-
-        assert(last_time >= end_time);
         last_time -= end_time;
-    }
-
-    void set_tempo(double tempo_division) {
-        frame_period = 4194304 / 256; // 256 Hz
-        if (tempo_division != 1.0)
-            frame_period = blip_time_t (frame_period / tempo_division);
     }
 };
 

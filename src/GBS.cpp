@@ -64,9 +64,10 @@ struct ChipGBS : Module {
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++) apu.osc_output(i, &buf[i]);
+        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
+            apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -178,14 +179,14 @@ struct ChipGBS : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(4194304 / args.sampleRate);
-        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++)
+        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < NintendoGBS::OSC_COUNT; i++)
+        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), 4194304);
     }
 };

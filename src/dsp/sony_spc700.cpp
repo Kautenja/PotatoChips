@@ -314,7 +314,7 @@ void SPC700::run(long count, short* out_buf) {
 
         // What is the expected behavior when pitch modulation is enabled on
         // voice 0? Jurassic Park 2 does this. Assume 0 for now.
-        blargg_long prev_outx = 0;
+        int prev_outx = 0;
 
         int echol = 0;
         int echor = 0;

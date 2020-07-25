@@ -20,7 +20,7 @@
 
 #include "plugin.hpp"
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 0P.
+/// A knob in the style of the NES turbo knob, but the shape of Rogan 0PS.
 struct Rogan0PSNES : rack::Rogan {
     Rogan0PSNES() {
         const auto path = "res/ComponentLibrary/Rogan0PSNES.svg";
@@ -28,7 +28,7 @@ struct Rogan0PSNES : rack::Rogan {
     }
 };
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 1P.
+/// A knob in the style of the NES turbo knob, but the shape of Rogan 1PS.
 struct Rogan1PSNES : rack::Rogan {
     Rogan1PSNES() {
         const auto path = "res/ComponentLibrary/Rogan1PSNES.svg";
@@ -36,7 +36,7 @@ struct Rogan1PSNES : rack::Rogan {
     }
 };
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 2P.
+/// A knob in the style of the NES turbo knob, but the shape of Rogan 2PS.
 struct Rogan2PSNES : rack::Rogan {
     Rogan2PSNES() {
         const auto path = "res/ComponentLibrary/Rogan2PSNES.svg";
@@ -44,7 +44,7 @@ struct Rogan2PSNES : rack::Rogan {
     }
 };
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 3P.
+/// A knob in the style of the NES turbo knob, but the shape of Rogan 3PS.
 struct Rogan3PSNES : rack::Rogan {
     Rogan3PSNES() {
         const auto path = "res/ComponentLibrary/Rogan3PSNES.svg";

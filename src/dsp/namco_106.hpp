@@ -30,9 +30,9 @@ class Namco106 {
     /// 16-bit memory address
     typedef int16_t cpu_addr_t;
     /// the number of oscillators on the chip
-    static constexpr int OSC_COUNT = 8;
+    static constexpr unsigned OSC_COUNT = 8;
     /// the number of registers on the chip
-    static constexpr int REG_COUNT = 0x80;
+    static constexpr unsigned REG_COUNT = 0x80;
 
     /// Addresses to the registers for channel 1. To get channel \f$n\f$,
     /// multiply by \f$8n\f$.
@@ -50,93 +50,7 @@ class Namco106 {
     /// the number of register per voice on the chip
     static constexpr auto REGS_PER_VOICE = 8;
 
-    /// Initialize a new Namco 106 chip emulator.
-    Namco106() { output(NULL); volume(1.0); reset(); }
-
-    /// Reset internal frame counter, registers, and all oscillators.
-    inline void reset() {
-        last_time = 0;
-        addr_reg = 0;
-        memset(reg, 0, REG_COUNT);
-        for (int i = 0; i < OSC_COUNT; i++) {
-            Oscillator& osc = oscs[i];
-            osc.delay = 0;
-            osc.last_amp = 0;
-            osc.wave_pos = 0;
-        }
-    }
-
-    /// Set the volume.
-    ///
-    /// @param value the global volume level of the chip
-    ///
-    inline void volume(double value = 1.f) {
-        synth.volume(0.10 / OSC_COUNT * value);
-    }
-
-    /// Set treble equalization.
-    ///
-    /// @param eq the equalizer settings to use
-    ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        synth.treble_eq(equalizer);
-    }
-
-    /// Set buffer to generate all sound into, or disable sound if NULL.
-    ///
-    /// @param buf the buffer to write samples from the synthesizer to
-    ///
-    inline void output(BLIPBuffer* buf) {
-        for (int i = 0; i < OSC_COUNT; i++) osc_output(i, buf);
-    }
-
-    /// Set the output buffer for an individual synthesizer voice.
-    ///
-    /// @param i the index of the oscillator to set the output buffer for
-    /// @param buf the buffer to write samples from the synthesizer to
-    /// @note If buffer is NULL, the specified oscillator is muted and
-    ///       emulation accuracy is reduced.
-    ///
-    inline void osc_output(int i, BLIPBuffer* buf) {
-        assert((unsigned) i < OSC_COUNT);
-        oscs[i].output = buf;
-    }
-
-    /// Run all oscillators up to specified time, end current time frame, then
-    /// start a new time frame at time 0. Time frames have no effect on
-    /// emulation and each can be whatever length is convenient.
-    ///
-    /// @param time the number of elapsed cycles
-    ///
-    inline void end_frame(cpu_time_t time) {
-        if (time > last_time) run_until(time);
-        assert(last_time >= time);
-        last_time -= time;
-    }
-
-    /// Write data to the register pointed to by the address register.
-    /// Read/write data register is at 0x4800
-    // enum { data_reg_addr = 0x4800 };
-    inline void write_data(cpu_time_t time, int data) {
-        run_until(time);
-        access() = data;
-    }
-
-    /// Return the data pointed to by the value in the address register.
-    inline int read_data() { return access(); }
-
-    /// Set the address register to a new value.
-    /// Write-only address register is at 0xF800
-    // enum { addr_reg_addr = 0xF800 };
-    inline void write_addr(int value) { addr_reg = value; }
-
  private:
-    /// Disable the public copy constructor.
-    Namco106(const Namco106&);
-
-    /// Disable the public assignment operator.
-    Namco106& operator=(const Namco106&);
-
     /// An oscillator on the Namco106 chip.
     struct Oscillator {
         /// TODO: document
@@ -178,8 +92,9 @@ class Namco106 {
             throw Exception("end_time must be >= last_time");
         else if (nes_end_time == last_time)
             return;
+        // get the number of active oscillators
         unsigned int active_oscs = ((reg[0x7f] >> 4) & 7) + 1;
-        for (int i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
+        for (unsigned i = OSC_COUNT - active_oscs; i < OSC_COUNT; i++) {
             Oscillator& osc = oscs[i];
             BLIPBuffer* output = osc.output;
             if (!output) continue;
@@ -232,6 +147,99 @@ class Namco106 {
             osc.delay = time - end_time;
         }
         last_time = nes_end_time;
+    }
+
+    /// Disable the public copy constructor.
+    Namco106(const Namco106&);
+
+    /// Disable the public assignment operator.
+    Namco106& operator=(const Namco106&);
+
+ public:
+    /// Initialize a new Namco 106 chip emulator.
+    Namco106() {
+        set_output(NULL);
+        set_volume();
+        reset();
+    }
+
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
+    ///
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    ///
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel].output = buffer;
+    }
+
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
+            set_output(channel, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
+    ///
+    inline void set_volume(double level = 1.f) {
+        synth.volume(0.10 / OSC_COUNT * level);
+    }
+
+    /// @brief Set treble equalization for the synthesizers.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizers
+    ///
+    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+        synth.treble_eq(equalizer);
+    }
+
+    /// @brief Reset internal frame counter, registers, and all oscillators.
+    inline void reset() {
+        last_time = 0;
+        addr_reg = 0;
+        memset(reg, 0, REG_COUNT);
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
+            Oscillator& osc = oscs[i];
+            osc.delay = 0;
+            osc.last_amp = 0;
+            osc.wave_pos = 0;
+        }
+    }
+
+    /// Set the address register to a new value.
+    /// Write-only address register is at 0xF800
+    // enum { addr_reg_addr = 0xF800 };
+    inline void write_addr(int value) { addr_reg = value; }
+
+    /// Write data to the register pointed to by the address register.
+    /// Read/write data register is at 0x4800
+    // enum { data_reg_addr = 0x4800 };
+    inline void write_data(cpu_time_t time, int data) {
+        run_until(time);
+        access() = data;
+    }
+
+    /// Return the data pointed to by the value in the address register.
+    inline int read_data() { return access(); }
+
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
+    ///
+    /// @param end_time the time to run the oscillators until
+    ///
+    inline void end_frame(cpu_time_t time) {
+        run_until(time);
+        last_time -= time;
     }
 };
 

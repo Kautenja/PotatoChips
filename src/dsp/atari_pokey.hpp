@@ -79,7 +79,7 @@ class AtariPOKEY {
     };
 
     /// the registers on the POKEY
-    enum Registers {
+    enum Register {
         /// the frequency of oscillator 1
         AUDF1  = 0xD200,
         /// the volume and distortion of oscillator 1

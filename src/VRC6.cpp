@@ -108,72 +108,69 @@ struct ChipVRC6 : Module {
         return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Process square wave for given channel.
+    /// Return the pulse width parameter for the given channel.
     ///
-    /// @param channel the pulse channel to process data for
+    /// @param channel the channel to return the pulse width value for
+    /// @returns the pulse width value in an 8-bit container in the high 4 bits
     ///
-    void channel_pulse(int channel) {
+    inline uint8_t getPW(int channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
-        // the maximal value for the pulse width register (0b00000111)
-        static constexpr float PW_MAX = 7;
-        // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
-        // the maximal value for the volume width register (0b00001111)
-        static constexpr float LEVEL_MAX = 15;
-
-        uint16_t freq = getFrequency(channel, 4, 4095, 16);
-        uint8_t lo =  freq & 0b0000000011111111;
-        uint8_t hi = (freq & 0b0000111100000000) >> 8;
-        // enable the channel
-        hi |= 0b10000000;
-        // write the register for the frequency
-        apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
-        apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
-
+        // the maximal value for the pulse width register (before shift)
+        static constexpr float PW_MAX = 0b00000111;
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
         // get the control voltage to the pulse width with 1V/step
         auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 2.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        // shift the pulse width over into the high 4 bits
+        return pw << 4;
+    }
+
+    /// Return the level parameter for the given channel.
+    ///
+    /// @param channel the channel to return the pulse width value for
+    /// @returns the level value in an 8-bit container in the low 4 bits
+    ///
+    inline uint8_t getLevel(int channel, float max_level) {
         // get the level from the parameter knob
         auto levelParam = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         auto levelCV = inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
         // get the 8-bit level clamped within legal limits
-        uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
-        // write the register for the duty cycle and volume
-        apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, (pw << 4) + level);
+        return rack::clamp(max_level * (levelParam + levelCV), 0.f, max_level);
     }
 
-    /// Process saw wave (channel 2).
-    void channel_saw() {
-        // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
-        // the maximal value for the volume width register (0b00111111)
-        // the actual max for volume is 42, but some distortion effects are
-        // available on the chip from 42 to 63 (as a result of overflow)
-        static constexpr float LEVEL_MAX = 63;
-
-        uint16_t freq = getFrequency(2, 3, 4095, 14);
-        // convert the frequency to a 12-bit value spanning two 8-bit registers
+    /// Process square wave for given channel.
+    ///
+    /// @param channel the pulse channel to process data for
+    ///
+    void channel_pulse(int channel) {
+        // frequency
+        uint16_t freq = getFrequency(channel, 4, 4095, 16);
         uint8_t lo =  freq & 0b0000000011111111;
         uint8_t hi = (freq & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
-        // write the register for the frequency
+        apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
+        apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
+        // level
+        apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, getPW(channel) | getLevel(channel, 15));
+    }
+
+    /// Process saw wave (channel 2).
+    void channel_saw() {
+        // frequency
+        uint16_t freq = getFrequency(2, 3, 4095, 14);
+        uint8_t lo =  freq & 0b0000000011111111;
+        uint8_t hi = (freq & 0b0000111100000000) >> 8;
+        // enable the channel
+        hi |= 0b10000000;
         apu.write(KonamiVRC6::SAW_PERIOD_LOW, lo);
         apu.write(KonamiVRC6::SAW_PERIOD_HIGH, hi);
-
-        // get the level from the parameter knob
-        auto levelParam = params[PARAM_LEVEL + 2].getValue();
-        // apply the control voltage to the level
-        auto levelCV = inputs[INPUT_LEVEL + 2].getVoltage() / 2.f;
-        // get the 8-bit level clamped within legal limits
-        uint8_t level = rack::clamp(LEVEL_MAX * (levelParam + levelCV), LEVEL_MIN, LEVEL_MAX);
-        // write the register for the volume
-        apu.write(KonamiVRC6::SAW_VOLUME, level);
+        // level
+        apu.write(KonamiVRC6::SAW_VOLUME, getLevel(2, 63));
     }
 
     /// Return a 10V signed sample from the APU.

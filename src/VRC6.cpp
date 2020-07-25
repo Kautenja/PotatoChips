@@ -205,38 +205,20 @@ struct ChipVRC6Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 78), module, ChipVRC6::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 188), module, ChipVRC6::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 298), module, ChipVRC6::INPUT_VOCT + 2));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(26, 37), module, ChipVRC6::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipVRC6::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipVRC6::INPUT_FM + 2));
-        // PW inputs
-        { auto param = createParam<Rogan0PSNES>(Vec(30, 107), module, ChipVRC6::PARAM_PW + 0);
-        param->snap = true;
-        addParam(param); }
-        { auto param = createParam<Rogan0PSNES>(Vec(30, 218), module, ChipVRC6::PARAM_PW + 1);
-        param->snap = true;
-        addParam(param); }
-        addInput(createInput<PJ301MPort>(Vec(58, 104), module, ChipVRC6::INPUT_PW + 0));
-        addInput(createInput<PJ301MPort>(Vec(58, 215), module, ChipVRC6::INPUT_PW + 1));
-        // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipVRC6::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 151), module, ChipVRC6::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 266), module, ChipVRC6::PARAM_FREQ + 2));
-        // Levels
-        addInput(createInput<PJ301MPort>(Vec(102, 36), module, ChipVRC6::INPUT_LEVEL + 0));
-        addInput(createInput<PJ301MPort>(Vec(102, 146), module, ChipVRC6::INPUT_LEVEL + 1));
-        addInput(createInput<PJ301MPort>(Vec(102, 255), module, ChipVRC6::INPUT_LEVEL + 2));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 64), module, ChipVRC6::PARAM_LEVEL + 0));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 174), module, ChipVRC6::PARAM_LEVEL + 1));
-        addParam(createParam<Rogan0PSNES>(Vec(103, 283), module, ChipVRC6::PARAM_LEVEL + 2));
-        // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(107, 104), module, ChipVRC6::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 214), module, ChipVRC6::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(107, 324), module, ChipVRC6::OUTPUT_CHANNEL + 2));
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(  Vec(20,  78  + i * 110), module, ChipVRC6::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(  Vec(26,  37  + i * 110), module, ChipVRC6::INPUT_FM       + i));
+            addParam(createParam<Rogan3PSNES>( Vec(54,  42  + i * 110), module, ChipVRC6::PARAM_FREQ     + i));
+            if (i < 2) {  // pulse width
+                auto pwParam = createParam<Rogan0PSNES>(Vec(30, 107 + i * 110), module, ChipVRC6::PARAM_PW + i);
+                pwParam->snap = true;
+                addParam(pwParam);
+                addInput(createInput<PJ301MPort>(Vec(58, 104 + i * 110), module, ChipVRC6::INPUT_PW + i));
+            }
+            addInput(createInput<PJ301MPort>(  Vec(102, 36  + i * 110), module, ChipVRC6::INPUT_LEVEL    + i));
+            addParam(createParam<Rogan0PSNES>( Vec(103, 64  + i * 110), module, ChipVRC6::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(Vec(107, 104 + i * 110), module, ChipVRC6::OUTPUT_CHANNEL + i));
+        }
     }
 };
 

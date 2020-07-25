@@ -111,13 +111,15 @@ struct ChipVRC6 : Module {
     /// Return the pulse width parameter for the given channel.
     ///
     /// @param channel the channel to return the pulse width value for
-    /// @returns the pulse width value in an 8-bit container in the high 4 bits
+    /// @returns the pulse width value in an 8-bit container in the high 4 bits.
+    /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
     inline uint8_t getPW(int channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (before shift)
         static constexpr float PW_MAX = 0b00000111;
+        if (channel == 2) return 0;  // fail grace-fully for saw request
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
         // get the control voltage to the pulse width with 1V/step
@@ -157,28 +159,22 @@ struct ChipVRC6 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
+        static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
+        static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
+        static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned channel = 0; channel < 2; channel++) {  // pulses
+            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
                 // frequency
-                uint16_t freq = getFrequency(channel, 4, 4095, 16);
+                uint16_t freq = getFrequency(i, freq_low[i], 4095, clock_division[i]);
                 uint8_t lo =  freq & 0b0000000011111111;
                 uint8_t hi = (freq & 0b0000111100000000) >> 8;
                 hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the channel
-                apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * channel, lo);
-                apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * channel, hi);
+                apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * i, lo);
+                apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * i, hi);
                 // level
-                apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * channel, getPW(channel) | getLevel(channel, 15));
+                uint8_t level = getPW(i) | getLevel(i, max_level[i]);
+                apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * i, level);
             }
-            // saw
-            // frequency
-            uint16_t freq = getFrequency(2, 3, 4095, 14);
-            uint8_t lo =  freq & 0b0000000011111111;
-            uint8_t hi = (freq & 0b0000111100000000) >> 8;
-            hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the channel
-            apu.write(KonamiVRC6::SAW_PERIOD_LOW, lo);
-            apu.write(KonamiVRC6::SAW_PERIOD_HIGH, hi);
-            // level
-            apu.write(KonamiVRC6::SAW_VOLUME, getLevel(2, 63));
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

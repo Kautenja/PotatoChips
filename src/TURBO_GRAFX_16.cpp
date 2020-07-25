@@ -35,7 +35,6 @@ struct ChipTurboGrafx16 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, NECTurboGrafx16::OSC_COUNT),
         ENUMS(PARAM_VOLUME, NECTurboGrafx16::OSC_COUNT),
-        PARAM_NUM_CHANNELS, PARAM_NUM_CHANNELS_ATT,
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
@@ -43,7 +42,6 @@ struct ChipTurboGrafx16 : Module {
         ENUMS(INPUT_VOCT, NECTurboGrafx16::OSC_COUNT),
         ENUMS(INPUT_FM, NECTurboGrafx16::OSC_COUNT),
         ENUMS(INPUT_VOLUME, NECTurboGrafx16::OSC_COUNT),
-        INPUT_NUM_CHANNELS,
         INPUT_WAVETABLE,
         INPUT_COUNT
     };
@@ -95,8 +93,6 @@ struct ChipTurboGrafx16 : Module {
     /// Initialize a new NEC Turbo-Grafx-16 Chip module.
     ChipTurboGrafx16() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels");
-        configParam(PARAM_NUM_CHANNELS_ATT, -1, 1, 0, "Active Channels Attenuverter");
         configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
         cvDivider.setDivision(16);
@@ -357,10 +353,6 @@ struct ChipTurboGrafx16Widget : ModuleWidget {
             // add the table editor to the module
             addChild(table_editor);
         }
-        // channel select
-        addParam(createParam<Rogan3PSNES>(Vec(155, 38), module, ChipTurboGrafx16::PARAM_NUM_CHANNELS));
-        addParam(createParam<Rogan1PSNES>(Vec(161, 88), module, ChipTurboGrafx16::PARAM_NUM_CHANNELS_ATT));
-        addInput(createInput<PJ301MPort>(Vec(164, 126), module, ChipTurboGrafx16::INPUT_NUM_CHANNELS));
         // wave-table morph
         addParam(createParam<Rogan3PSNES>(Vec(155, 183), module, ChipTurboGrafx16::PARAM_WAVETABLE));
         addParam(createParam<Rogan1PSNES>(Vec(161, 233), module, ChipTurboGrafx16::PARAM_WAVETABLE_ATT));

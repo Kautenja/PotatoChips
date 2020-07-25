@@ -61,10 +61,10 @@ struct ChipFME7 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level", "%", 0.f, 100.f);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -131,7 +131,7 @@ struct ChipFME7 : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
                 // frequency
                 auto freq = getFrequency(i);
                 uint8_t lo =  freq & 0b11111111;
@@ -144,14 +144,14 @@ struct ChipFME7 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < SunSoftFME7::OSC_COUNT; i++)
+        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };

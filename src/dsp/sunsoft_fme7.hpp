@@ -26,25 +26,52 @@
 class SunSoftFME7 {
  public:
     /// the number of oscillators on the chip
-    enum { OSC_COUNT = 3 };
+    static constexpr unsigned OSC_COUNT = 3;
     /// the number of registers on the chip
-    enum { REG_COUNT = 14 };
+    /// the first address of the RAM space
+    static constexpr uint16_t ADDR_START = 0;
+    /// the last address of the RAM space
+    static constexpr uint16_t ADDR_END   = 14;
+    /// the number of registers on the chip
+    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
+
+
+    /// the indexes of the channels on the chip
+    enum Channel {
+        PULSEA,
+        PULSEB,
+        PULSEC,
+    };
 
     /// the IO registers on the chip.
-    enum Registers {
+    enum Register {
+        /// the low 8 bits of the 12 bit frequency for pulse channel A
         PULSE_A_LO   = 0x00,
+        /// the high 4 bits of the 12 bit frequency for pulse channel A
         PULSE_A_HI   = 0x01,
+        /// the low 8 bits of the 12 bit frequency for pulse channel B
         PULSE_B_LO   = 0x02,
+        /// the high 4 bits of the 12 bit frequency for pulse channel B
         PULSE_B_HI   = 0x03,
+        /// the low 8 bits of the 12 bit frequency for pulse channel C
         PULSE_C_LO   = 0x04,
+        /// the high 4 bits of the 12 bit frequency for pulse channel C
         PULSE_C_HI   = 0x05,
+        /// the period of the noise generator
         NOISE_PERIOD = 0x06,
+        /// the noise of the noise generator
         NOISE_TONE   = 0x07,
+        /// the envelope register for pulse channel A
         PULSE_A_ENV  = 0x08,
+        /// the envelope register for pulse channel B
         PULSE_B_ENV  = 0x09,
+        /// the envelope register for pulse channel C
         PULSE_C_ENV  = 0x0A,
+        /// the low 8 bits of the envelope frequency register
         ENV_LO       = 0x0B,
+        /// the high 4 bits of the envelope frequency register
         ENV_HI       = 0x0C,
+        /// the envelope reset register
         ENV_RESET    = 0x0D,
         // IO_PORT_A    = 0x0E,  // unused
         // IO_PORT_B    = 0x0F   // unused
@@ -58,7 +85,7 @@ class SunSoftFME7 {
     static const uint8_t AMP_TABLE[16];
 
     /// the registers on the chip
-    uint8_t regs[REG_COUNT];
+    uint8_t regs[NUM_REGISTERS];
 
     /// the oscillators on the chip
     struct {
@@ -83,8 +110,12 @@ class SunSoftFME7 {
     /// @param end_time the time to run the oscillators until
     ///
     void run_until(blip_time_t end_time) {
-        // assert(end_time >= last_time);
-        for (int index = 0; index < OSC_COUNT; index++) {
+        if (end_time < last_time)
+            throw Exception("end_time must be >= last_time");
+        else if (end_time == last_time)
+            return;
+
+        for (unsigned index = 0; index < OSC_COUNT; index++) {
             // int mode = regs[7] >> index;
             int vol_mode = regs[010 + index];
             int volume = AMP_TABLE[vol_mode & 0x0F];
@@ -147,17 +178,42 @@ class SunSoftFME7 {
     /// Initialize a new SunSoft FME7 chip emulator.
     SunSoftFME7() {
         set_output(NULL);
-        volume(1.0);
+        set_volume();
         reset();
     }
 
-    /// Set overall volume of all oscillators, where 1.0 is full volume
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
     ///
-    /// @param level the value to set the volume to
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
     ///
-    inline void volume(double v) { synth.volume(0.38 / AMP_RANGE * v); }
+    inline void set_output(int channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel].output = buffer;
+    }
 
-    /// Set treble equalization for the synthesizers.
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
+    ///
+    inline void set_volume(double level = 1.0) {
+        synth.volume(0.38 / AMP_RANGE * level);
+    }
+
+    /// @brief Set treble equalization for the synthesizers.
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
@@ -165,28 +221,7 @@ class SunSoftFME7 {
         synth.treble_eq(equalizer);
     }
 
-    /// Assign single oscillator output to buffer. If buffer is NULL, silences
-    /// the given oscillator.
-    ///
-    /// @param index the index of the oscillator to set the output for
-    /// @param buffer the BLIPBuffer to output the given voice to
-    /// @returns 0 if the output was set successfully, 1 if the index is invalid
-    ///
-    inline void set_output(int i, BLIPBuffer* buffer) {
-        assert((unsigned) i < OSC_COUNT);
-        oscs[i].output = buffer;
-    }
-
-    /// Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
-    ///
-    /// @param buffer the BLIPBuffer to output the all the voices to
-    ///
-    inline void set_output(BLIPBuffer* buffer) {
-        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
-    }
-
-    /// Reset oscillators and internal state.
+    /// @brief Reset internal state, registers, and all oscillators.
     inline void reset() {
         memset(regs, 0, sizeof regs);
         last_time = 0;
@@ -194,27 +229,31 @@ class SunSoftFME7 {
             oscs[i].last_amp = 0;
     }
 
-    /// Write data to the chip port.
+    /// @brief Write data to the chip port.
     ///
-    /// @param latch the byte to write to the latch port
+    /// @param address the byte to write to the latch port
     /// @param data the byte to write to the data port
     ///
     /// @details
-    /// Sets the latch, then write the data to the appropriate address
+    /// Sets the latch to address, then write the data using the latch
     ///
-    inline void write(uint8_t latch, uint8_t data) {
-        run_until(0);
-        regs[latch] = data;
+    inline void write(uint8_t address, uint8_t data) {
+        static constexpr blip_time_t time = 0;
+        // make sure the given address is legal. the minimal address is zero,
+        // so just check the maximal address
+        if (/*address < ADDR_START or*/ address > ADDR_END)
+            throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
+        run_until(time);
+        regs[address] = data;
     }
 
-    /// Run all oscillators up to specified time, end current frame, then
-    /// start a new frame at time 0.
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
     ///
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t time) {
-        if (time > last_time) run_until(time);
-        assert(last_time >= time);
+        run_until(time);
         last_time -= time;
     }
 };

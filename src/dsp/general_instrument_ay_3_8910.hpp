@@ -81,8 +81,8 @@ class GeneralInstrumentAy_3_8910 {
         // IO_PORT_B   // unused
     };
 
-    /// the flag bit for turning on the envelope for a channel's VOLUME_CH_#
-    /// register
+    /// @brief the flag bit for turning on the envelope for a channel's
+    /// VOLUME_CH_# register
     static constexpr int PERIOD_CH_ENVELOPE_ON = 0b00010000;
 
     /// symbolic flags for enabling channels using the mixer register

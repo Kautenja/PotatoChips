@@ -29,7 +29,7 @@ class TexasInstrumentsSN76489 {
     static constexpr int OSC_COUNT = 4;
 
     /// the registers on the SN76489
-    enum Registers {
+    enum Register : uint8_t {
         /// the frequency register for pulse generator 0
         TONE_0_FREQUENCY   = 0b10000000,
         /// the attenuation register for pulse generator 0

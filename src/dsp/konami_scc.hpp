@@ -37,7 +37,7 @@ class KonamiSCC {
     int static constexpr WAVE_SIZE = 32;
 
     /// the registers on the Konami SCC
-    enum Registers {
+    enum Register : uint16_t {
         WAVEFORM_CH_1,
         WAVEFORM_CH_2     = 1 * WAVE_SIZE,
         WAVEFORM_CH_3     = 2 * WAVE_SIZE,

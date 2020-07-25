@@ -1,6 +1,6 @@
 {
   "slug": "KautenjaDSP-PotatoChips",
-  "version": "1.7.0",
+  "version": "1.4.1",
   "license": "GPL-3.0-or-later",
   "name": "KautenjaDSP Potato Chips",
   "brand": "KautenjaDSP",
@@ -109,7 +109,8 @@
       "description": "An emulation of the Yamaha YM2413 chip.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf",
       "tags": [
-        "Oscillator"
+        "Oscillator",
+        "Noise"
       ]
     }
   ]

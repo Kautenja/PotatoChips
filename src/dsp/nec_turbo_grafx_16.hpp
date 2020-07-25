@@ -41,8 +41,8 @@ class NECTurboGrafx16 {
 
     /// @brief Turbo Grafx 16 sound chip emulator.
     struct Oscillator {
-        /// TODO:
-        unsigned char wave[32];
+        /// the waveform to generate (i.e., the wavetable)
+        uint8_t wave[32];
         /// TODO:
         short volume[2];
         /// TODO:
@@ -52,32 +52,32 @@ class NECTurboGrafx16 {
         /// TODO:
         int period;
         /// TODO:
-        unsigned char noise;
+        uint8_t noise;
         /// TODO:
-        unsigned char phase;
+        uint8_t phase;
         /// TODO:
-        unsigned char balance;
+        uint8_t balance;
         /// TODO:
-        unsigned char dac;
-        /// TODO:
+        uint8_t dac;
+        /// the last time that the oscillator was updated
         blip_time_t last_time;
 
-        /// TODO:
+        /// the left, center, and right channel output buffers for the oscillator
         BLIPBuffer* outputs[2];
-        /// TODO:
+        /// the left, center, right, and active channel output buffers for the oscillator
         BLIPBuffer* chans[3];
         /// TODO:
         unsigned noise_lfsr;
-        /// TODO:
-        unsigned char control;
+        /// the control register for the oscillator
+        uint8_t control;
 
-        /// TODO:
+        /// the range of the amplifier on the oscillator
         enum { AMP_RANGE = 0x8000 };
-        /// TODO:
-        typedef BLIPSynthesizer<blip_med_quality,1> synth_t;
+        /// the synthesizer type that the oscillator uses
+        typedef BLIPSynthesizer<blip_med_quality,1> Synthesizer;
 
         /// TODO:
-        void run_until(synth_t& synth_, blip_time_t end_time) {
+        void run_until(Synthesizer& synth_, blip_time_t end_time) {
             if (end_time < last_time)
                 throw Exception("end_time must be >= last_time");
             else if (end_time == last_time)
@@ -172,14 +172,14 @@ class NECTurboGrafx16 {
         }
     };
 
-    /// TODO:
+    /// the oscillators on the chip
     Oscillator oscs[OSC_COUNT];
-    /// TODO:
+    /// the latch address to read/write from/to
     int latch;
-    /// TODO:
+    /// the balance between left and right channels
     int balance;
-    /// TODO:
-    Oscillator::synth_t synth;
+    /// the synthesizer for producing samples from the chip
+    Oscillator::Synthesizer synth;
 
     /// TODO:
     void balance_changed(Oscillator& osc) {

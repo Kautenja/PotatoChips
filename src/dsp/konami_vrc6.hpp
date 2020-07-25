@@ -34,6 +34,9 @@ class KonamiVRC6 {
     /// the number of registers per oscillator
     static constexpr unsigned REG_COUNT = 3;
 
+    /// the indexes of the channels on the chip
+    enum Channel { PULSE0, PULSE1, SAW };
+
     /// the IO registers on the VRC6 chip.
     enum Register : uint16_t {
         /// the volume register for pulse waveform generator 0

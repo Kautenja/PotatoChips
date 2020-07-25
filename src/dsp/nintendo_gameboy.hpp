@@ -41,9 +41,8 @@ class NintendoGBS {
     static constexpr uint16_t ADDR_START = 0xFF10;
     /// the last address of the APU in memory space
     static constexpr uint16_t ADDR_END   = 0xFF3F;
-    // TODO: remove + 1?
     /// the total number of registers available on the chip
-    static constexpr auto REGISTER_COUNT = ADDR_END - ADDR_START + 1;
+    static constexpr auto REGISTER_COUNT = ADDR_END - ADDR_START;
 
     /// Registers for the Nintendo GameBoy Sound System (GBS) APU.
     enum Registers {

@@ -15,8 +15,8 @@
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 44100,
-          "blockSize": 256
+          "sampleRate": 48000,
+          "blockSize": 2048
         }
       },
       "pos": [
@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.101999998
+          "value": 0.00999999978
         },
         {
           "id": 1,
@@ -312,7 +312,7 @@
         },
         {
           "id": 3,
-          "value": 3.12599969
+          "value": 0.0
         },
         {
           "id": 4,
@@ -320,7 +320,7 @@
         },
         {
           "id": 5,
-          "value": 1.0
+          "value": 0.5
         },
         {
           "id": 6,

@@ -21,7 +21,7 @@
 //
 
 #include "yamaha_ym2612.hpp"
-typedef Ym2612_Impl YM2612;
+typedef YamahaYM2612Engine YM2612;
 
 typedef void (*FM_TIMERHANDLER)( void* user_data, int c, int cnt, double stepTime );
 typedef void (*FM_IRQHANDLER)( void* user_data, int irq );
@@ -1874,7 +1874,7 @@ static void OPNWriteReg(FM_HELPER *CRAP, FM_OPN *OPN, int r, int v)
 /*      YM2612 local section                                                   */
 /*******************************************************************************/
 /* here's the virtual YM2612 */
-struct Ym2612_Impl
+struct YamahaYM2612Engine
 {
 #ifdef _STATE_H
     UINT8       REGS[512];          /* registers            */
@@ -2263,14 +2263,14 @@ int YM2612TimerOver(YM2612* F2612,int c)
 
 #endif /* BUILD_YM2612 */
 
-// Ym2612_Emu
+// YamahaYM2612
 
-Ym2612_Emu::~Ym2612_Emu() {
+YamahaYM2612::~YamahaYM2612() {
     if (impl)
         YM2612Shutdown(impl);
 }
 
-const char* Ym2612_Emu::set_rate(double sample_rate, double clock_rate) {
+const char* YamahaYM2612::set_rate(double sample_rate, double clock_rate) {
     if (impl) {
         YM2612Shutdown(impl);
         impl = 0;
@@ -2283,24 +2283,24 @@ const char* Ym2612_Emu::set_rate(double sample_rate, double clock_rate) {
     return 0;
 }
 
-void Ym2612_Emu::reset() {
+void YamahaYM2612::reset() {
     YM2612ResetChip(impl);
 }
 
-void Ym2612_Emu::write0(int addr, int data) {
+void YamahaYM2612::write0(int addr, int data) {
     YM2612Write(impl, 0, addr);
     YM2612Write(impl, 1, data);
 }
 
-void Ym2612_Emu::write1(int addr, int data) {
+void YamahaYM2612::write1(int addr, int data) {
     YM2612Write(impl, 2, addr);
     YM2612Write(impl, 3, data);
 }
 
-void Ym2612_Emu::mute_voices(int mask) {
+void YamahaYM2612::mute_voices(int mask) {
     YM2612Mute(impl, mask);
 }
 
-void Ym2612_Emu::run(int pair_count, sample_t* out) {
+void YamahaYM2612::run(int pair_count, sample_t* out) {
     YM2612UpdateOne(impl, out, pair_count);
 }

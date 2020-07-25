@@ -114,7 +114,7 @@ class AtariPOKEY {
     /// TODO:
     static constexpr int poly17_len = (1L << 17) - 1;
 
-    /// Common tables and BLIPSynth that can be shared among AtariPOKEY objects.
+    /// Common tables and BLIPSynthesizer that can be shared among AtariPOKEY objects.
     class Engine {
      private:
         /// TODO:
@@ -125,7 +125,7 @@ class AtariPOKEY {
         uint8_t poly17[poly17_len / 8 + 1];
 
         /// the synthesizer for the Atari POKEY engine
-        BLIPSynth<blip_good_quality, 1> synth;
+        BLIPSynthesizer<blip_good_quality, 1> synth;
 
         // friend the container class to access member data
         friend class AtariPOKEY;

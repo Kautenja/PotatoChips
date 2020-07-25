@@ -186,7 +186,7 @@ class Ricoh2A03 {
         int sweep_delay;
 
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
-        typedef BLIPSynth<blip_good_quality, 15> Synth;
+        typedef BLIPSynthesizer<blip_good_quality, 15> Synth;
         const Synth* synth;
 
         void clock_sweep(int negative_adjust) {
@@ -291,7 +291,7 @@ class Ricoh2A03 {
         int phase;
         int linear_counter;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynth<blip_good_quality, 15> synth;
+        BLIPSynthesizer<blip_good_quality, 15> synth;
 
         inline int calc_amp() const {
             int amp = phase_range - phase;
@@ -364,7 +364,7 @@ class Ricoh2A03 {
         /// the output value from the noise oscillator
         int noise;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynth<blip_med_quality, 15> synth;
+        BLIPSynthesizer<blip_med_quality, 15> synth;
 
         void run(blip_time_t time, blip_time_t end_time) {
             static const int16_t noise_period_table[16] = {

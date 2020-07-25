@@ -45,7 +45,7 @@ static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
 
 /// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
 /// in noticeable broadband noise when synthesizing high frequency square
-/// waves. Affects size of BLIPSynth objects since they store the waveform
+/// waves. Affects size of BLIPSynthesizer objects since they store the waveform
 /// directly.
 static constexpr uint8_t BLIP_PHASE_BITS = 6;
 
@@ -329,7 +329,7 @@ class BLIPEqualizer {
     /// @param out the output buffer to equalize
     /// @param count the number of samples to generate
     /// @details
-    /// for usage within instances of BLIPSynth_
+    /// for usage within instances of BLIPSynthesizer_
     ///
     inline void _generate(float* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
@@ -362,7 +362,7 @@ enum BLIPQuality {
 /// expected amplitudes (max - min).
 ///
 template<BLIPQuality quality, int range>
-class BLIPSynth {
+class BLIPSynthesizer {
  private:
     /// TODO:
     double volume_unit;
@@ -400,7 +400,7 @@ class BLIPSynth {
     int delta_factor;
 
     /// Initialize a new BLIP synthesizer.
-    BLIPSynth() :
+    BLIPSynthesizer() :
         volume_unit(0.0),
         kernel_unit(0),
         buf(0),
@@ -508,7 +508,7 @@ class BLIPSynth {
     }
 
     /// Update amplitude of waveform at given time. Using this requires a
-    /// separate BLIPSynth for each waveform.
+    /// separate BLIPSynthesizer for each waveform.
     ///
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer

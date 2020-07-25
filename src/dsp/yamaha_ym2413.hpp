@@ -22,7 +22,7 @@
 #define DSP_YM2413_HPP_
 
 /// @brief Yamaha YM2413 chip emulator.
-class YM2413  {
+class YamahaYM2413  {
     struct OPLL* opll;
 
  public:
@@ -36,10 +36,10 @@ class YM2413  {
     typedef short sample_t;
 
     /// @brief Initialize a new YM2413 emulator.
-    YM2413();
+    YamahaYM2413();
 
     /// @brief Destroy an instance of YM2413 emulator.
-    ~YM2413();
+    ~YamahaYM2413();
 
     /// @brief Set output sample rate and chip clock rates, in Hz.
     /// @returns non-zero if error.

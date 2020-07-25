@@ -24,134 +24,6 @@
 #include "exceptions.hpp"
 #include <cstring>
 
-/// @brief Turbo Grafx 16 sound chip emulator.
-struct NECTurboGrafx16_Oscillator {
-    /// TODO:
-    unsigned char wave[32];
-    /// TODO:
-    short volume[2];
-    /// TODO:
-    int last_amp[2];
-    /// TODO:
-    int delay;
-    /// TODO:
-    int period;
-    /// TODO:
-    unsigned char noise;
-    /// TODO:
-    unsigned char phase;
-    /// TODO:
-    unsigned char balance;
-    /// TODO:
-    unsigned char dac;
-    /// TODO:
-    blip_time_t last_time;
-
-    /// TODO:
-    BLIPBuffer* outputs[2];
-    /// TODO:
-    BLIPBuffer* chans[3];
-    /// TODO:
-    unsigned noise_lfsr;
-    /// TODO:
-    unsigned char control;
-
-    /// TODO:
-    enum { AMP_RANGE = 0x8000 };
-    /// TODO:
-    typedef BLIPSynth<blip_med_quality,1> synth_t;
-
-    /// TODO:
-    void run_until(synth_t& synth_, blip_time_t end_time) {
-        BLIPBuffer* const osc_outputs_0 = outputs[0]; // cache often-used values
-        if (osc_outputs_0 && control & 0x80) {
-            int dac = this->dac;
-
-            int const volume_0 = volume[0];
-            {
-                int delta = dac * volume_0 - last_amp[0];
-                if (delta) synth_.offset(last_time, delta, osc_outputs_0);
-            }
-
-            BLIPBuffer* const osc_outputs_1 = outputs[1];
-            int const volume_1 = volume[1];
-            if (osc_outputs_1) {
-                int delta = dac * volume_1 - last_amp[1];
-                if (delta) synth_.offset(last_time, delta, osc_outputs_1);
-            }
-
-            blip_time_t time = last_time + delay;
-            if (time < end_time) {
-                if (noise & 0x80) {
-                    if (volume_0 | volume_1) {
-                        // noise
-                        int const period = (32 - (noise & 0x1F)) * 64; // TODO: correct?
-                        unsigned noise_lfsr = this->noise_lfsr;
-                        do {
-                            int new_dac = 0x1F & -(noise_lfsr >> 1 & 1);
-                            // Implemented using "Galios configuration"
-                            // TODO: find correct LFSR algorithm
-                            noise_lfsr = (noise_lfsr >> 1) ^ (0xE008 & -(noise_lfsr & 1));
-                            //noise_lfsr = (noise_lfsr >> 1) ^ (0x6000 & -(noise_lfsr & 1));
-                            int delta = new_dac - dac;
-                            if (delta) {
-                                dac = new_dac;
-                                synth_.offset(time, delta * volume_0, osc_outputs_0);
-                                if (osc_outputs_1)
-                                    synth_.offset(time, delta * volume_1, osc_outputs_1);
-                            }
-                            time += period;
-                        } while (time < end_time);
-
-                        this->noise_lfsr = noise_lfsr;
-                        assert(noise_lfsr);
-                    }
-                }
-                else if (!(control & 0x40)) {
-                    // wave
-                    int phase = (this->phase + 1) & 0x1F; // pre-advance for optimal inner loop
-                    int period = this->period * 2;
-                    if (period >= 14 && (volume_0 | volume_1)) {
-                        do {
-                            int new_dac = wave[phase];
-                            phase = (phase + 1) & 0x1F;
-                            int delta = new_dac - dac;
-                            if (delta) {
-                                dac = new_dac;
-                                synth_.offset(time, delta * volume_0, osc_outputs_0);
-                                if (osc_outputs_1)
-                                    synth_.offset(time, delta * volume_1, osc_outputs_1);
-                            }
-                            time += period;
-                        } while (time < end_time);
-                    } else {
-                        if (!period) {
-                            // TODO: Gekisha Boy assumes that period = 0 silences wave
-                            //period = 0x1000 * 2;
-                            period = 1;
-                            //if (!(volume_0 | volume_1))
-                            //  dprintf("Used period 0\n");
-                        }
-                        // maintain phase when silent
-                        blargg_long count = (end_time - time + period - 1) / period;
-                        phase += count; // phase will be masked below
-                        time += count * period;
-                    }
-                    this->phase = (phase - 1) & 0x1F; // undo pre-advance
-                }
-            }
-            time -= end_time;
-            if (time < 0) time = 0;
-            delay = time;
-
-            this->dac = dac;
-            last_amp[0] = dac * volume_0;
-            last_amp[1] = dac * volume_1;
-        }
-        last_time = end_time;
-    }
-};
-
 /// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 class NECTurboGrafx16 {
  public:
@@ -166,19 +38,147 @@ class NECTurboGrafx16 {
     /// reduces asymmetry and clamping when starting notes
     static constexpr bool CENTER_WAVES = true;
 
+    /// @brief Turbo Grafx 16 sound chip emulator.
+    struct Oscillator {
+        /// TODO:
+        unsigned char wave[32];
+        /// TODO:
+        short volume[2];
+        /// TODO:
+        int last_amp[2];
+        /// TODO:
+        int delay;
+        /// TODO:
+        int period;
+        /// TODO:
+        unsigned char noise;
+        /// TODO:
+        unsigned char phase;
+        /// TODO:
+        unsigned char balance;
+        /// TODO:
+        unsigned char dac;
+        /// TODO:
+        blip_time_t last_time;
+
+        /// TODO:
+        BLIPBuffer* outputs[2];
+        /// TODO:
+        BLIPBuffer* chans[3];
+        /// TODO:
+        unsigned noise_lfsr;
+        /// TODO:
+        unsigned char control;
+
+        /// TODO:
+        enum { AMP_RANGE = 0x8000 };
+        /// TODO:
+        typedef BLIPSynth<blip_med_quality,1> synth_t;
+
+        /// TODO:
+        void run_until(synth_t& synth_, blip_time_t end_time) {
+            BLIPBuffer* const osc_outputs_0 = outputs[0]; // cache often-used values
+            if (osc_outputs_0 && control & 0x80) {
+                int dac = this->dac;
+
+                int const volume_0 = volume[0];
+                {
+                    int delta = dac * volume_0 - last_amp[0];
+                    if (delta) synth_.offset(last_time, delta, osc_outputs_0);
+                }
+
+                BLIPBuffer* const osc_outputs_1 = outputs[1];
+                int const volume_1 = volume[1];
+                if (osc_outputs_1) {
+                    int delta = dac * volume_1 - last_amp[1];
+                    if (delta) synth_.offset(last_time, delta, osc_outputs_1);
+                }
+
+                blip_time_t time = last_time + delay;
+                if (time < end_time) {
+                    if (noise & 0x80) {
+                        if (volume_0 | volume_1) {
+                            // noise
+                            int const period = (32 - (noise & 0x1F)) * 64; // TODO: correct?
+                            unsigned noise_lfsr = this->noise_lfsr;
+                            do {
+                                int new_dac = 0x1F & -(noise_lfsr >> 1 & 1);
+                                // Implemented using "Galios configuration"
+                                // TODO: find correct LFSR algorithm
+                                noise_lfsr = (noise_lfsr >> 1) ^ (0xE008 & -(noise_lfsr & 1));
+                                //noise_lfsr = (noise_lfsr >> 1) ^ (0x6000 & -(noise_lfsr & 1));
+                                int delta = new_dac - dac;
+                                if (delta) {
+                                    dac = new_dac;
+                                    synth_.offset(time, delta * volume_0, osc_outputs_0);
+                                    if (osc_outputs_1)
+                                        synth_.offset(time, delta * volume_1, osc_outputs_1);
+                                }
+                                time += period;
+                            } while (time < end_time);
+
+                            this->noise_lfsr = noise_lfsr;
+                            assert(noise_lfsr);
+                        }
+                    }
+                    else if (!(control & 0x40)) {
+                        // wave
+                        int phase = (this->phase + 1) & 0x1F; // pre-advance for optimal inner loop
+                        int period = this->period * 2;
+                        if (period >= 14 && (volume_0 | volume_1)) {
+                            do {
+                                int new_dac = wave[phase];
+                                phase = (phase + 1) & 0x1F;
+                                int delta = new_dac - dac;
+                                if (delta) {
+                                    dac = new_dac;
+                                    synth_.offset(time, delta * volume_0, osc_outputs_0);
+                                    if (osc_outputs_1)
+                                        synth_.offset(time, delta * volume_1, osc_outputs_1);
+                                }
+                                time += period;
+                            } while (time < end_time);
+                        } else {
+                            if (!period) {
+                                // TODO: Gekisha Boy assumes that period = 0 silences wave
+                                //period = 0x1000 * 2;
+                                period = 1;
+                                //if (!(volume_0 | volume_1))
+                                //  dprintf("Used period 0\n");
+                            }
+                            // maintain phase when silent
+                            blargg_long count = (end_time - time + period - 1) / period;
+                            phase += count; // phase will be masked below
+                            time += count * period;
+                        }
+                        this->phase = (phase - 1) & 0x1F; // undo pre-advance
+                    }
+                }
+                time -= end_time;
+                if (time < 0) time = 0;
+                delay = time;
+
+                this->dac = dac;
+                last_amp[0] = dac * volume_0;
+                last_amp[1] = dac * volume_1;
+            }
+            last_time = end_time;
+        }
+    };
+
     /// TODO:
-    NECTurboGrafx16_Oscillator oscs[OSC_COUNT];
+    Oscillator oscs[OSC_COUNT];
     /// TODO:
     int latch;
     /// TODO:
     int balance;
     /// TODO:
-    NECTurboGrafx16_Oscillator::synth_t synth;
+    Oscillator::synth_t synth;
 
     /// TODO:
-    void balance_changed(NECTurboGrafx16_Oscillator& osc) {
+    void balance_changed(Oscillator& osc) {
         static const short log_table[32] = {  // ~1.5 db per step
-            #define ENTRY(factor) short (factor * NECTurboGrafx16_Oscillator::AMP_RANGE / 31.0 + 0.5)
+            #define ENTRY(factor) short (factor * Oscillator::AMP_RANGE / 31.0 + 0.5)
             ENTRY(0.000000), ENTRY(0.005524), ENTRY(0.006570), ENTRY(0.007813),
             ENTRY(0.009291), ENTRY(0.011049), ENTRY(0.013139), ENTRY(0.015625),
             ENTRY(0.018581), ENTRY(0.022097), ENTRY(0.026278), ENTRY(0.031250),
@@ -222,7 +222,7 @@ class NECTurboGrafx16 {
  public:
     /// Initialize a new Turbo Grafx 16 chip.
     NECTurboGrafx16() {
-        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        Oscillator* osc = &oscs[OSC_COUNT];
         do {
             osc--;
             osc->outputs[0] = 0;
@@ -239,7 +239,7 @@ class NECTurboGrafx16 {
     /// @param level the value to set the volume to
     ///
     inline void set_volume(double level) {
-        synth.volume(1.8 / OSC_COUNT / NECTurboGrafx16_Oscillator::AMP_RANGE * level);
+        synth.volume(1.8 / OSC_COUNT / Oscillator::AMP_RANGE * level);
     }
 
     /// Set treble equalization for the synthesizers.
@@ -262,7 +262,7 @@ class NECTurboGrafx16 {
         oscs[index].chans[0] = center;
         oscs[index].chans[1] = left;
         oscs[index].chans[2] = right;
-        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        Oscillator* osc = &oscs[OSC_COUNT];
         do {
             osc--;
             balance_changed(*osc);
@@ -283,10 +283,10 @@ class NECTurboGrafx16 {
         latch = 0;
         balance = 0xFF;
 
-        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        Oscillator* osc = &oscs[OSC_COUNT];
         do {
             osc--;
-            memset(osc, 0, offsetof(NECTurboGrafx16_Oscillator, outputs));
+            memset(osc, 0, offsetof(Oscillator, outputs));
             osc->noise_lfsr = 1;
             osc->control = 0x40;
             osc->balance = 0xFF;
@@ -305,7 +305,7 @@ class NECTurboGrafx16 {
         } else if (addr == 0x801) {
             if (balance != data) {
                 balance = data;
-                NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+                Oscillator* osc = &oscs[OSC_COUNT];
                 do {
                     osc--;
                     osc->run_until(synth, time);
@@ -313,7 +313,7 @@ class NECTurboGrafx16 {
                 } while (osc != oscs);
             }
         } else if (latch < OSC_COUNT) {
-            NECTurboGrafx16_Oscillator& osc = oscs[latch];
+            Oscillator& osc = oscs[latch];
             osc.run_until(synth, time);
             switch (addr) {
             case 0x802:
@@ -355,7 +355,7 @@ class NECTurboGrafx16 {
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t end_time) {
-        NECTurboGrafx16_Oscillator* osc = &oscs[OSC_COUNT];
+        Oscillator* osc = &oscs[OSC_COUNT];
         do {
             osc--;
             if (end_time > osc->last_time) osc->run_until(synth, end_time);

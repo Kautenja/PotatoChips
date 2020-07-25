@@ -71,18 +71,28 @@ struct ChipGBS : Module {
         onSampleRateChange();
     }
 
-    void channel_pulse(int channel) {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 2035;
+    /// Get the frequency for the given channel
+    ///
+    /// @param freq_min the minimal value for the frequency register to
+    /// produce sound
+    /// @param freq_max the maximal value for the frequency register
+    /// @param clock_division the clock division of the oscillator relative
+    /// to the CPU
+    /// @returns the 11 bit frequency value from the panel
+    /// @details
+    /// parameters for pulse wave:
+    /// freq_min = 8, freq_max = 1023, clock_division = 16
+    /// parameters for triangle wave:
+    /// freq_min = 2, freq_max = 2047, clock_division = 32
+    ///
+    inline uint16_t getFrequency(
+        int channel,
+        float freq_min,
+        float freq_max,
+        float clock_division
+    ) {
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
-        // set the pulse width of the pulse wave (high 2 bits)
-        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + 5 * channel, pw);
-        // set the volume of the pulse wave, high 4 bits, envelope add mode on
-        apu.write(NintendoGBS::PULSE0_START_VOLUME + 5 * channel, 0b11111000);
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
@@ -90,12 +100,23 @@ struct ChipGBS : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        // write the frequency to the low and high registers
-        // - there are 4 registers per pulse channel, multiply channel by 4 to
-        //   produce an offset between registers based on channel index
-        apu.write(NintendoGBS::PULSE0_FREQ_LO               + 5 * channel, freq11bit & 0xff );
-        apu.write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + 5 * channel, (freq11bit >> 8) | 0x80 );
+        // convert the frequency to an 11-bit value
+        freq = (buf[channel].get_clock_rate() / (clock_division * freq));
+        return rack::clamp(freq, freq_min, freq_max);
+    }
+
+    void channel_pulse(int channel) {
+        // pulse width of the pulse wave (high 2 bits)
+        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
+        apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * channel, pw);
+        // volume of the pulse wave, envelope add mode on
+        apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, 0b11111000);
+        // frequency
+        auto freq = getFrequency(channel, 8, 2035, 16);
+        auto lo =           freq & 0b0000000011111111;
+        apu.write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * channel, lo);
+        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+        apu.write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * channel, hi);
     }
 
     void channel_wave() {

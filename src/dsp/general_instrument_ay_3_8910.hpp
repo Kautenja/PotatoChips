@@ -19,7 +19,6 @@
 #ifndef DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
 #define DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
 
-#include "blargg_common.h"
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
@@ -133,7 +132,7 @@ class GeneralInstrumentAy_3_8910 {
         /// TODO:
         blip_time_t delay;
         /// TODO:
-        blargg_ulong lfsr;
+        uint32_t lfsr;
     } noise;
 
     /// TODO:
@@ -200,7 +199,7 @@ class GeneralInstrumentAy_3_8910 {
         if (!noise_period)
             noise_period = noise_period_factor;
         blip_time_t const old_noise_delay = noise.delay;
-        blargg_ulong const old_noise_lfsr = noise.lfsr;
+        uint32_t const old_noise_lfsr = noise.lfsr;
 
         // envelope period
         blip_time_t const env_period_factor = PERIOD_FACTOR * 2; // verified
@@ -222,7 +221,7 @@ class GeneralInstrumentAy_3_8910 {
 
             // period
             int half_vol = 0;
-            blip_time_t inaudible_period = (blargg_ulong) (osc_output->get_clock_rate() +
+            blip_time_t inaudible_period = (uint32_t) (osc_output->get_clock_rate() +
                     INAUDIBLE_FREQ) / (INAUDIBLE_FREQ * 2);
             if (osc->period <= inaudible_period && !(osc_mode & TONE_OFF)) {
                 half_vol = 1; // Actually around 60%, but 50% is close enough
@@ -253,14 +252,14 @@ class GeneralInstrumentAy_3_8910 {
             blip_time_t const period = osc->period;
             blip_time_t time = start_time + osc->delay;
             if (osc_mode & TONE_OFF) {  // maintain tone's phase when off
-                blargg_long count = (final_end_time - time + period - 1) / period;
+                blip_time_t count = (final_end_time - time + period - 1) / period;
                 time += count * period;
                 osc->phase ^= count & 1;
             }
 
             // noise time
             blip_time_t ntime = final_end_time;
-            blargg_ulong noise_lfsr = 1;
+            uint32_t noise_lfsr = 1;
             if (!(osc_mode & NOISE_OFF)) {
                 ntime = start_time + old_noise_delay;
                 noise_lfsr = old_noise_lfsr;
@@ -315,8 +314,8 @@ class GeneralInstrumentAy_3_8910 {
                             }
                         } else {
                             // 20 or more noise periods on average for some music
-                            blargg_long remain = end - ntime;
-                            blargg_long count = remain / noise_period;
+                            blip_time_t remain = end - ntime;
+                            blip_time_t count = remain / noise_period;
                             if (remain >= 0)
                                 ntime += noise_period + count * noise_period;
                         }
@@ -375,7 +374,7 @@ class GeneralInstrumentAy_3_8910 {
         // maintain envelope phase
         blip_time_t remain = final_end_time - last_time - env.delay;
         if (remain >= 0) {
-            blargg_long count = (remain + env_period) / env_period;
+            blip_time_t count = (remain + env_period) / env_period;
             env.pos += count;
             if (env.pos >= 0)
                 env.pos = (env.pos & 31) - 32;

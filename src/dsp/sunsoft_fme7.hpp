@@ -29,11 +29,11 @@ class SunSoftFME7 {
     static constexpr unsigned OSC_COUNT = 3;
     /// the number of registers on the chip
     /// the first address of the RAM space
-    static constexpr uint16_t ADDR_START = 0;
+    static constexpr uint8_t ADDR_START = 0;
     /// the last address of the RAM space
-    static constexpr uint16_t ADDR_END   = 14;
+    static constexpr uint8_t ADDR_END   = 14;
     /// the number of registers on the chip
-    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
+    static constexpr uint8_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
     /// the indexes of the channels on the chip
     enum Channel {
@@ -43,7 +43,7 @@ class SunSoftFME7 {
     };
 
     /// the IO registers on the chip.
-    enum Register {
+    enum Register : uint8_t {
         /// the low 8 bits of the 12 bit frequency for pulse channel A
         PULSE_A_LO   = 0x00,
         /// the high 4 bits of the 12 bit frequency for pulse channel A

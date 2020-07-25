@@ -68,18 +68,12 @@ struct ChipPOKEY : Module {
     /// Initialize a new POKEY Chip module.
     ChipPOKEY() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Channel 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Channel 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Channel 3 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3, -30.f, 30.f, 0.f, "Channel 4 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE + 0, 0, 7, 7, "Channel 1 Noise");
-        configParam(PARAM_NOISE + 1, 0, 7, 7, "Channel 2 Noise");
-        configParam(PARAM_NOISE + 2, 0, 7, 7, "Channel 3 Noise");
-        configParam(PARAM_NOISE + 3, 0, 7, 7, "Channel 4 Noise");
-        configParam(PARAM_LEVEL + 0, 0, 1, 0.5, "Channel 1 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 1, 0, 1, 0.5, "Channel 2 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 2, 0, 1, 0.5, "Channel 3 Level", "%", 0, 100);
-        configParam(PARAM_LEVEL + 3, 0, 1, 0.5, "Channel 4 Level", "%", 0, 100);
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
+            configParam(PARAM_FREQ  + i, -30.f, 30.f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_NOISE + i,   0,    7,   7,   "Channel " + std::to_string(i + 1) + " Noise"                                             );
+            configParam(PARAM_LEVEL + i,   0,    1,   0.5, "Channel " + std::to_string(i + 1) + " Level",     "%",   0,                  100         );
+        }
+        // control register controls
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
         configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from 3", "");
         configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from 3", "");

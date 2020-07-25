@@ -21,6 +21,7 @@
 #include "sony_spc700.hpp"
 #include "sony_spc700_endian.hpp"
 #include <cstring>
+#include <cstddef>
 
 SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     set_gain(1.0);

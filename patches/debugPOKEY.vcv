@@ -15,8 +15,8 @@
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 96000,
-          "blockSize": 256
+          "sampleRate": 48000,
+          "blockSize": 2048
         }
       },
       "pos": [
@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.00999999978
         },
         {
           "id": 1,
@@ -73,7 +73,6 @@
         "lastMod": 0,
         "midi": {
           "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -372,11 +371,11 @@
         },
         {
           "id": 13,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 14,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 15,

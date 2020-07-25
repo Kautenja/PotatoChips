@@ -28,27 +28,9 @@ struct Rogan0PSNES : rack::Rogan {
     }
 };
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 0P.
-struct Rogan0PSNES_Snap : rack::Rogan {
-    Rogan0PSNES_Snap() {
-        snap = true;
-        const auto path = "res/ComponentLibrary/Rogan0PSNES.svg";
-        setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
-    }
-};
-
 /// A knob in the style of the NES turbo knob, but the shape of Rogan 1P.
 struct Rogan1PSNES : rack::Rogan {
     Rogan1PSNES() {
-        const auto path = "res/ComponentLibrary/Rogan1PSNES.svg";
-        setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
-    }
-};
-
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 1P.
-struct Rogan1PSNES_Snap : rack::Rogan {
-    Rogan1PSNES_Snap() {
-        snap = true;
         const auto path = "res/ComponentLibrary/Rogan1PSNES.svg";
         setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
     }
@@ -62,27 +44,9 @@ struct Rogan2PSNES : rack::Rogan {
     }
 };
 
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 2P.
-struct Rogan2PSNES_Snap : rack::Rogan {
-    Rogan2PSNES_Snap() {
-        snap = true;
-        const auto path = "res/ComponentLibrary/Rogan2PSNES.svg";
-        setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
-    }
-};
-
 /// A knob in the style of the NES turbo knob, but the shape of Rogan 3P.
 struct Rogan3PSNES : rack::Rogan {
     Rogan3PSNES() {
-        const auto path = "res/ComponentLibrary/Rogan3PSNES.svg";
-        setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
-    }
-};
-
-/// A knob in the style of the NES turbo knob, but the shape of Rogan 3P.
-struct Rogan3PSNES_Snap : rack::Rogan {
-    Rogan3PSNES_Snap() {
-        snap = true;
         const auto path = "res/ComponentLibrary/Rogan3PSNES.svg";
         setSvg(APP->window->loadSvg(rack::asset::plugin(plugin_instance, path)));
     }

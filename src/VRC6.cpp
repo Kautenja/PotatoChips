@@ -235,8 +235,12 @@ struct ChipVRC6Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(26, 149), module, ChipVRC6::INPUT_FM + 1));
         addInput(createInput<PJ301MPort>(Vec(26, 258), module, ChipVRC6::INPUT_FM + 2));
         // PW inputs
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(30, 107), module, ChipVRC6::PARAM_PW + 0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(30, 218), module, ChipVRC6::PARAM_PW + 1));
+        { auto param = createParam<Rogan0PSNES>(Vec(30, 107), module, ChipVRC6::PARAM_PW + 0);
+        param->snap = true;
+        addParam(param); }
+        { auto param = createParam<Rogan0PSNES>(Vec(30, 218), module, ChipVRC6::PARAM_PW + 1);
+        param->snap = true;
+        addParam(param); }
         addInput(createInput<PJ301MPort>(Vec(58, 104), module, ChipVRC6::INPUT_PW + 0));
         addInput(createInput<PJ301MPort>(Vec(58, 215), module, ChipVRC6::INPUT_PW + 1));
         // Frequency parameters

@@ -73,6 +73,7 @@
         "lastMod": 123,
         "midi": {
           "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },

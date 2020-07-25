@@ -74,19 +74,45 @@ struct ChipVRC6 : Module {
         onSampleRateChange();
     }
 
+    /// Get the frequency for the given channel
+    ///
+    /// @param freq_min the minimal value for the frequency register to
+    /// produce sound
+    /// @param freq_max the maximal value for the frequency register
+    /// @param clock_division the clock division of the oscillator relative
+    /// to the CPU
+    /// @returns the 12 bit frequency value from the panel
+    /// @details
+    /// parameters for pulse wave:
+    /// freq_min = 4, freq_max = 4095, clock_division = 16
+    /// parameters for triangle wave:
+    /// freq_min = 3, freq_max = 4095, clock_division = 14
+    ///
+    inline uint16_t getFrequency(
+        int channel,
+        float freq_min,
+        float freq_max,
+        float clock_division
+    ) {
+        // the constant modulation factor
+        static constexpr auto MOD_FACTOR = 10.f;
+        // get the pitch from the parameter and control voltage
+        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        // convert the pitch to frequency based on standard exponential scale
+        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to an 11-bit value
+        freq = (buf[channel].get_clock_rate() / (clock_division * freq)) - 1;
+        return rack::clamp(freq, freq_min, freq_max);
+    }
+
     /// Process square wave for given channel.
     ///
     /// @param channel the pulse channel to process data for
     ///
     void channel_pulse(int channel) {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 4;
-        // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 4095;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 16;
-        // the constant modulation factor
-        static constexpr float MOD_FACTOR = 10;
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (0b00000111)
@@ -96,19 +122,9 @@ struct ChipVRC6 : Module {
         // the maximal value for the volume width register (0b00001111)
         static constexpr float LEVEL_MAX = 15;
 
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to 12-bit
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        // convert the frequency to a 12-bit value spanning two 8-bit registers
-        uint8_t lo =  freq12bit & 0b11111111;
-        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        uint16_t freq = getFrequency(channel, 4, 4095, 16);
+        uint8_t lo =  freq & 0b0000000011111111;
+        uint8_t hi = (freq & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency
@@ -133,14 +149,6 @@ struct ChipVRC6 : Module {
 
     /// Process saw wave (channel 2).
     void channel_saw() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 3;
-        // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 4095;
-        // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 14;
-        // the constant modulation factor
-        static constexpr float MOD_FACTOR = 10;
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register (0b00111111)
@@ -148,19 +156,10 @@ struct ChipVRC6 : Module {
         // available on the chip from 42 to 63 (as a result of overflow)
         static constexpr float LEVEL_MAX = 63;
 
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 2].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to 12-bit
-        freq = (buf[2].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        uint16_t freq12bit = rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        uint16_t freq = getFrequency(2, 3, 4095, 14);
         // convert the frequency to a 12-bit value spanning two 8-bit registers
-        uint8_t lo = freq12bit & 0b11111111;
-        uint8_t hi = (freq12bit & 0b0000111100000000) >> 8;
+        uint8_t lo =  freq & 0b0000000011111111;
+        uint8_t hi = (freq & 0b0000111100000000) >> 8;
         // enable the channel
         hi |= 0b10000000;
         // write the register for the frequency

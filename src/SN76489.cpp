@@ -99,7 +99,7 @@ struct ChipSN76489 : Module {
     ///
     inline uint16_t getFrequency(int channel) {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ10BIT_MIN = 0;
+        static constexpr float FREQ10BIT_MIN = 9;
         // the maximal value for the frequency register
         static constexpr float FREQ10BIT_MAX = 1023;
         // the clock division of the oscillator relative to the CPU

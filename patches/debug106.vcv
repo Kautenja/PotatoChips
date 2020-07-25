@@ -15,7 +15,7 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 4096
+          "blockSize": 512
         }
       },
       "pos": [
@@ -38,8 +38,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -169,7 +169,7 @@
         },
         {
           "id": 16,
-          "value": 8.0
+          "value": 4.0
         },
         {
           "id": 17,
@@ -1059,6 +1059,14 @@
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#0986ad"
+    },
+    {
+      "id": 196,
+      "outputModuleId": 11,
+      "outputId": 7,
+      "inputModuleId": 11,
+      "inputId": 25,
+      "color": "#c9b70e"
     }
   ]
 }

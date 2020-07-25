@@ -23,47 +23,69 @@
 #include "exceptions.hpp"
 #include <cstring>
 
-// TODO: c-cast to static_cast
-
 /// @brief Konami SCC sound chip emulator.
 class KonamiSCC {
  public:
     /// the number of oscillators on the chip
-    enum { OSC_COUNT = 5 };
+    static constexpr unsigned OSC_COUNT = 5;
+    /// the first address of the RAM space
+    static constexpr uint16_t ADDR_START = 0x0000;
+    /// the last address of the RAM space
+    static constexpr uint16_t ADDR_END   = 0x0090;
     /// the number of registers on the chip
-    enum { REGISTER_COUNT = 0x90 };
+    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
     /// the size of the wave-tables on the chip in bytes
-    int static constexpr WAVE_SIZE = 32;
+    static constexpr uint16_t WAVE_SIZE = 32;
 
     /// the registers on the Konami SCC
     enum Register : uint16_t {
+        /// the register for the waveform for channel 1
         WAVEFORM_CH_1,
+        /// the register for the waveform for channel 2
         WAVEFORM_CH_2     = 1 * WAVE_SIZE,
+        /// the register for the waveform for channel 3
         WAVEFORM_CH_3     = 2 * WAVE_SIZE,
+        /// the register for the waveform for channel 4
         WAVEFORM_CH_4     = 3 * WAVE_SIZE,
+        /// the register for the low 8 bits of the frequency for channel 1
         FREQUENCY_CH_1_LO = 4 * WAVE_SIZE,
+        /// the register for the high 4 bits of the frequency for channel 1
         FREQUENCY_CH_1_HI,
+        /// the register for the low 8 bits of the frequency for channel 2
         FREQUENCY_CH_2_LO,
+        /// the register for the high 4 bits of the frequency for channel 2
         FREQUENCY_CH_2_HI,
+        /// the register for the low 8 bits of the frequency for channel 3
         FREQUENCY_CH_3_LO,
+        /// the register for the high 4 bits of the frequency for channel 3
         FREQUENCY_CH_3_HI,
+        /// the register for the low 8 bits of the frequency for channel 4
         FREQUENCY_CH_4_LO,
+        /// the register for the high 4 bits of the frequency for channel 4
         FREQUENCY_CH_4_HI,
+        /// the register for the low 8 bits of the frequency for channel 5
         FREQUENCY_CH_5_LO,
+        /// the register for the high 4 bits of the frequency for channel 5
         FREQUENCY_CH_5_HI,
+        /// the volume level for channel 1
         VOLUME_CH_1,
+        /// the volume level for channel 2
         VOLUME_CH_2,
+        /// the volume level for channel 3
         VOLUME_CH_3,
+        /// the volume level for channel 4
         VOLUME_CH_4,
+        /// the volume level for channel 5
         VOLUME_CH_5,
-        POWER,
+        /// the global power control register
+        POWER
     };
 
-    /// a flag to indicate that the volume is on
+    /// a flag that denotes that the volume is on for a VOLUME_CH_# register
     static constexpr uint8_t VOLUME_ON    = 0b00010000;
 
-    /// a flag for the power register to indicate that all 5 channels are on
+    /// a flag for the power register that denotes that all 5 channels are on
     static constexpr uint8_t POWER_ALL_ON = 0b00011111;
 
  private:
@@ -71,26 +93,26 @@ class KonamiSCC {
     enum { AMP_RANGE = 0x8000 };
     /// Tones above this frequency are treated as disabled tone at half volume.
     /// Power of two is more efficient (avoids division).
-    unsigned static constexpr INAUDIBLE_FREQ = AMP_RANGE / 2;
+    static constexpr unsigned INAUDIBLE_FREQ = AMP_RANGE / 2;
 
     /// An oscillators on the chip.
-    struct osc_t {
+    struct Oscillator {
         /// TODO:
         int delay = 0;
-        /// TODO:
+        /// the current phase of the oscillator
         int phase = 0;
-        /// TODO:
+        /// the last amplitude value to output from the oscillator
         int last_amp = 0;
-        /// TODO:
+        /// the output buffer to write samples from the oscillator to
         BLIPBuffer* output = NULL;
     };
 
     /// the oscillators on the chip
-    osc_t oscs[OSC_COUNT];
+    Oscillator oscs[OSC_COUNT];
     /// the last time the oscillators were updated
     blip_time_t last_time = 0;
     /// the registers on the chip
-    unsigned char regs[REGISTER_COUNT];
+    uint8_t regs[NUM_REGISTERS];
     /// the synthesizer for the oscillators on the chip
     BLIPSynthesizer<blip_med_quality, 1> synth;
 
@@ -99,8 +121,12 @@ class KonamiSCC {
     /// @param end_time the time to run the oscillators until
     ///
     void run_until(blip_time_t end_time) {
-        for (int index = 0; index < OSC_COUNT; index++) {
-            osc_t& osc = oscs[index];
+        if (end_time < last_time)
+            throw Exception("end_time must be >= last_time");
+        else if (end_time == last_time)
+            return;
+        for (unsigned index = 0; index < OSC_COUNT; index++) {
+            Oscillator& osc = oscs[index];
             // get the output buffer for this oscillator, continue if it's null
             BLIPBuffer* const output = osc.output;
             if (!output) continue;
@@ -159,18 +185,47 @@ class KonamiSCC {
  public:
     /// Initialize a new Konami SCC.
     KonamiSCC() {
-        memset(regs, 0, sizeof regs);
+        set_output(NULL);
+        set_volume();
+        reset();
     }
 
-    /// Set overall volume of all oscillators, where 1.0 is full volume
+    /// @brief Assign single oscillator output to buffer. If buffer is NULL,
+    /// silences the given oscillator.
     ///
-    /// @param level the value to set the volume to
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the given voice to
+    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    /// @details
+    /// If buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
     ///
-    inline void set_volume(double v) {
-        synth.volume(0.43 / OSC_COUNT / AMP_RANGE * v);
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
+            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
+        oscs[channel].output = buffer;
     }
 
-    /// Set treble equalization for the synthesizers.
+    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// is NULL, silences all oscillators.
+    ///
+    /// @param buffer the single buffer to output the all the voices to
+    ///
+    inline void set_output(BLIPBuffer* buffer) {
+        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
+            set_output(channel, buffer);
+    }
+
+    /// @brief Set the volume level of all oscillators.
+    ///
+    /// @param level the value to set the volume level to, where \f$1.0\f$ is
+    /// full volume. Can be overdriven past \f$1.0\f$.
+    ///
+    inline void set_volume(double level = 1.0) {
+        synth.volume(0.43 / OSC_COUNT / AMP_RANGE * level);
+    }
+
+    /// @brief Set treble equalization for the synthesizers.
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
@@ -178,49 +233,38 @@ class KonamiSCC {
         synth.treble_eq(equalizer);
     }
 
-    /// Set sound output of specific oscillator to buffer, where index is
-    /// 0 to 4. If buffer is NULL, the specified oscillator is muted.
-    inline void set_output(int index, BLIPBuffer* buffer) {
-        assert((unsigned) index < OSC_COUNT);
-        oscs[index].output = buffer;
-    }
-
-    /// Set buffer to generate all sound into, or disable sound if NULL
-    inline void set_output(BLIPBuffer* buffer) {
-        for (int i = 0; i < OSC_COUNT; i++)
-            set_output(i, buffer);
-    }
-
-    /// Reset oscillators and internal state.
+    /// @brief Reset oscillators and internal state.
     inline void reset() {
         last_time = 0;
-        for (int i = 0; i < OSC_COUNT; i++)
-            memset(&oscs[i], 0, offsetof(osc_t, output));
+        for (unsigned i = 0; i < OSC_COUNT; i++)  // clear the oscillators
+            memset(&oscs[i], 0, offsetof(Oscillator, output));
+        // clear the registers
         memset(regs, 0, sizeof regs);
     }
 
-    /// Write to the data port.
+    /// @brief Write to the data port.
     ///
     /// @param addr the register to write the data to
     /// @param data the byte to write to the register at given address
     ///
-    inline void write(int addr, int data) {
+    inline void write(uint16_t address, uint8_t data) {
         static constexpr blip_time_t time = 0;
-        assert((unsigned) addr < REGISTER_COUNT);
+        // make sure the given address is legal. the starting address is 0,
+        // and address is unsigned, so just check the upper bound
+        if (/*address < ADDR_START or*/ address > ADDR_END)
+            throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         run_until(time);
-        regs[addr] = data;
+        regs[address] = data;
     }
 
-    /// Run all oscillators up to specified time, end current frame, then
-    /// start a new frame at time 0.
+    /// @brief Run all oscillators up to specified time, end current frame,
+    /// then start a new frame at time 0.
     ///
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t end_time) {
-        if (end_time > last_time)
-            run_until(end_time);
+        run_until(end_time);
         last_time -= end_time;
-        assert(last_time >= 0);
     }
 };
 

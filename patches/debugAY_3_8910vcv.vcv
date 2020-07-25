@@ -8,7 +8,6 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
-      "rightModuleId": 14,
       "data": {
         "audio": {
           "driver": 5,
@@ -16,11 +15,11 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 256
+          "blockSize": 2048
         }
       },
       "pos": [
-        41,
+        39,
         0
       ]
     },
@@ -32,7 +31,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.00999999978
         },
         {
           "id": 1,
@@ -40,11 +39,11 @@
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 4,
@@ -54,7 +53,7 @@
       "leftModuleId": 11,
       "rightModuleId": 1,
       "pos": [
-        31,
+        29,
         0
       ]
     },
@@ -236,123 +235,11 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
+      "leftModuleId": 16,
       "rightModuleId": 2,
       "pos": [
-        26,
+        24,
         0
-      ]
-    },
-    {
-      "id": 14,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "Maths",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 0.0
-        },
-        {
-          "id": 10,
-          "value": 0.0
-        },
-        {
-          "id": 11,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 1,
-      "data": {
-        "slew1.isCycling": 0,
-        "slew4.isCycling": 0
-      },
-      "pos": [
-        51,
-        0
-      ]
-    },
-    {
-      "id": 15,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Scope",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 14.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        }
-      ],
-      "data": {
-        "lissajous": 0,
-        "external": 0
-      },
-      "pos": [
-        55,
-        1
       ]
     },
     {
@@ -379,11 +266,11 @@
         },
         {
           "id": 4,
-          "value": 0.899999976
+          "value": 0.0
         },
         {
           "id": 5,
-          "value": 0.899999976
+          "value": 0.0
         },
         {
           "id": 6,
@@ -411,6 +298,7 @@
         }
       ],
       "leftModuleId": 5,
+      "rightModuleId": 11,
       "pos": [
         8,
         0
@@ -457,22 +345,6 @@
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#0986ad"
-    },
-    {
-      "id": 300,
-      "outputModuleId": 14,
-      "outputId": 6,
-      "inputModuleId": 15,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 299,
-      "outputModuleId": 14,
-      "outputId": 5,
-      "inputModuleId": 15,
-      "inputId": 0,
-      "color": "#c9b70e"
     },
     {
       "id": 305,

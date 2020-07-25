@@ -234,6 +234,11 @@ class AtariPOKEY {
     /// @param end_time the number of elapsed cycles
     ///
     void run_until(blip_time_t end_time) {
+        if (end_time < last_time)  // invalid end time
+            throw Exception("final_end_time must be >= last_time");
+        else if (end_time == last_time)  // no change in time
+            return;
+
         calc_periods();
 
         // 17/9-bit poly selection
@@ -481,7 +486,7 @@ class AtariPOKEY {
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t end_time) {
-        if (end_time > last_time) run_until(end_time);
+        run_until(end_time);
         last_time -= end_time;
     }
 };

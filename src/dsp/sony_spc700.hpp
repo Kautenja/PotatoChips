@@ -20,6 +20,7 @@
 #define DSP_SONY_SPC700_HPP_
 
 #include "exceptions.hpp"
+#include <cassert>
 
 /// @brief Sony SonySPC700 chip emulator.
 class SonySPC700 {

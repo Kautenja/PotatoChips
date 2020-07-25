@@ -169,7 +169,7 @@ class NintendoGBS {
         enum { period_mask = 0x70 };
         enum { shift_mask  = 0x07 };
 
-        typedef BLIPSynth<blip_good_quality, 1> Synth;
+        typedef BLIPSynthesizer<blip_good_quality, 1> Synth;
         Synth const* synth;
         int sweep_delay;
         int sweep_freq;
@@ -253,7 +253,7 @@ class NintendoGBS {
     };
 
     struct Noise : Envelope {
-        typedef BLIPSynth<blip_med_quality, 1> Synth;
+        typedef BLIPSynthesizer<blip_med_quality, 1> Synth;
         Synth const* synth;
         unsigned bits;
 
@@ -306,7 +306,7 @@ class NintendoGBS {
     };
 
     struct Wave : Oscillator {
-        typedef BLIPSynth<blip_med_quality, 1> Synth;
+        typedef BLIPSynthesizer<blip_med_quality, 1> Synth;
         Synth const* synth;
         int wave_pos;
         enum { wave_size = 32 };
@@ -536,9 +536,9 @@ class NintendoGBS {
     }
 
     // Set treble equalization
-    void treble_eq(const blip_eq_t& eq) {
-        pulse_synth.treble_eq(eq);
-        other_synth.treble_eq(eq);
+    void treble_eq(const BLIPEqualizer& equalizer) {
+        pulse_synth.treble_eq(equalizer);
+        other_synth.treble_eq(equalizer);
     }
 
     // Outputs can be assigned to a single buffer for mono output, or to three

@@ -19,11 +19,10 @@
 #ifndef DSP_SONY_SPC700_HPP_
 #define DSP_SONY_SPC700_HPP_
 
-#include "blargg_common.h"
 #include "exceptions.hpp"
 
-/// @brief Sony SPC700 chip emulator.
-class SPC700 {
+/// @brief Sony SonySPC700 chip emulator.
+class SonySPC700 {
  public:
     enum { VOICE_COUNT = 8 };
     enum { REGISTER_COUNT = 128 };
@@ -134,7 +133,7 @@ class SPC700 {
 
  public:
     // Keeps pointer to 64K ram
-    SPC700(uint8_t* ram);
+    SonySPC700(uint8_t* ram);
 
     // Mute voice n if bit n (1 << n) of mask is clear.
     void mute_voices(int mask);

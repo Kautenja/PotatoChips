@@ -76,7 +76,7 @@ class SunSoftFME7 {
     blip_time_t last_time;
 
     /// the synthesizer for generating sound from the chip
-    BLIPSynth<blip_good_quality, 1> synth;
+    BLIPSynthesizer<blip_good_quality, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
@@ -161,7 +161,9 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(blip_eq_t const& eq) { synth.treble_eq(eq); }
+    inline void treble_eq(BLIPEqualizer const& equalizer) {
+        synth.treble_eq(equalizer);
+    }
 
     /// Assign single oscillator output to buffer. If buffer is NULL, silences
     /// the given oscillator.

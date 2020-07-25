@@ -36,7 +36,7 @@ typedef blip_long blip_time_t;
 /// An output sample type for 16-bit signed samples[-32768, 32767]
 typedef int16_t blip_sample_t;
 
-/// TODO:
+/// A re-sampled time unit
 typedef blip_ulong blip_resampled_time_t;
 
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
@@ -45,7 +45,7 @@ static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
 
 /// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
 /// in noticeable broadband noise when synthesizing high frequency square
-/// waves. Affects size of BLIPSynth objects since they store the waveform
+/// waves. Affects size of BLIPSynthesizer objects since they store the waveform
 /// directly.
 static constexpr uint8_t BLIP_PHASE_BITS = 6;
 
@@ -249,7 +249,7 @@ class BLIPBuffer {
 };
 
 /// Low-pass equalization parameters and logic.
-class blip_eq_t {
+class BLIPEqualizer {
  private:
     /// the constant value for Pi
     static constexpr double pi = 3.1415926535897932384626433832795029;
@@ -304,7 +304,7 @@ class blip_eq_t {
     }
 
  public:
-    /// Initialize a new blip_eq_t.
+    /// Initialize a new BLIPEqualizer.
     ///
     /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
@@ -313,7 +313,7 @@ class blip_eq_t {
     /// @param sample_rate the sample rate the engine is running at
     /// @param cutoff_freq TODO:
     ///
-    explicit blip_eq_t(
+    explicit BLIPEqualizer(
         double treble,
         uint32_t rolloff_freq = 0,
         uint32_t sample_rate = 44100,
@@ -329,7 +329,7 @@ class blip_eq_t {
     /// @param out the output buffer to equalize
     /// @param count the number of samples to generate
     /// @details
-    /// for usage within instances of BLIPSynth_
+    /// for usage within instances of BLIPSynthesizer_
     ///
     inline void _generate(float* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
@@ -362,7 +362,7 @@ enum BLIPQuality {
 /// expected amplitudes (max - min).
 ///
 template<BLIPQuality quality, int range>
-class BLIPSynth {
+class BLIPSynthesizer {
  private:
     /// TODO:
     double volume_unit;
@@ -400,7 +400,7 @@ class BLIPSynth {
     int delta_factor;
 
     /// Initialize a new BLIP synthesizer.
-    BLIPSynth() :
+    BLIPSynthesizer() :
         volume_unit(0.0),
         kernel_unit(0),
         buf(0),
@@ -415,7 +415,7 @@ class BLIPSynth {
         if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
-                treble_eq(blip_eq_t(-8.0));
+                treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
@@ -446,7 +446,7 @@ class BLIPSynth {
     }
 
     /// TODO:
-    void treble_eq(blip_eq_t const& eq) {
+    void treble_eq(BLIPEqualizer const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
@@ -508,7 +508,7 @@ class BLIPSynth {
     }
 
     /// Update amplitude of waveform at given time. Using this requires a
-    /// separate BLIPSynth for each waveform.
+    /// separate BLIPSynthesizer for each waveform.
     ///
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer

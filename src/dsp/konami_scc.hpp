@@ -19,12 +19,10 @@
 #ifndef DSP_KONAMI_SCC_HPP_
 #define DSP_KONAMI_SCC_HPP_
 
-#include "blargg_common.h"
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 #include <cstring>
 
-// TODO: remove blargg_ulong
 // TODO: c-cast to static_cast
 
 /// @brief Konami SCC sound chip emulator.
@@ -94,7 +92,7 @@ class KonamiSCC {
     /// the registers on the chip
     unsigned char regs[REGISTER_COUNT];
     /// the synthesizer for the oscillators on the chip
-    BLIPSynth<blip_med_quality, 1> synth;
+    BLIPSynthesizer<blip_med_quality, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
@@ -110,7 +108,7 @@ class KonamiSCC {
             blip_time_t period = (regs[0x80 + index * 2 + 1] & 0x0F) * 0x100 + regs[0x80 + index * 2] + 1;
             int volume = 0;
             if (regs[0x8F] & (1 << index)) {
-                blip_time_t inaudible_period = (blargg_ulong) (output->get_clock_rate() + INAUDIBLE_FREQ * 32) / (INAUDIBLE_FREQ * 16);
+                blip_time_t inaudible_period = (output->get_clock_rate() + INAUDIBLE_FREQ * 32) / (INAUDIBLE_FREQ * 16);
                 if (period > inaudible_period)
                     volume = (regs[0x8A + index] & 0x0F) * (AMP_RANGE / 256 / 15);
             }
@@ -130,7 +128,7 @@ class KonamiSCC {
             blip_time_t time = last_time + osc.delay;
             if (time < end_time) {
                 if (!volume) {  // maintain phase
-                    blargg_long count = (end_time - time + period - 1) / period;
+                    blip_time_t count = (end_time - time + period - 1) / period;
                     osc.phase = (osc.phase + count) & (WAVE_SIZE - 1);
                     time += count * period;
                 } else {
@@ -176,7 +174,7 @@ class KonamiSCC {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(blip_eq_t const& equalizer) {
+    inline void treble_eq(BLIPEqualizer const& equalizer) {
         synth.treble_eq(equalizer);
     }
 

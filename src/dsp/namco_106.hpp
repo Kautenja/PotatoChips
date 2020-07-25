@@ -78,7 +78,9 @@ class Namco106 {
     ///
     /// @param eq the equalizer settings to use
     ///
-    inline void treble_eq(const blip_eq_t& eq) { synth.treble_eq(eq); }
+    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+        synth.treble_eq(equalizer);
+    }
 
     /// Set buffer to generate all sound into, or disable sound if NULL.
     ///
@@ -158,7 +160,7 @@ class Namco106 {
     /// the RAM on the chip
     uint8_t reg[REG_COUNT];
     /// the synthesizer for producing sound from the chip
-    BLIPSynth<blip_good_quality, 15> synth;
+    BLIPSynthesizer<blip_good_quality, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
     uint8_t& access() {

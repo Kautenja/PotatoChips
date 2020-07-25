@@ -60,24 +60,18 @@ struct ChipAY_3_8910 : Module {
     /// Initialize a new FME7 Chip module.
     ChipAY_3_8910() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -48.f, 48.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -48.f, 48.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -48.f, 48.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.9f, "Pulse A Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.9f, "Pulse B Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.9f, "Pulse C Level",     "%",   0.f,                100.f       );
-        configParam(PARAM_TONE + 0, 0, 1, 0, "Pulse A Tone Enabled", "");
-        configParam(PARAM_TONE + 1, 0, 1, 0, "Pulse B Tone Enabled", "");
-        configParam(PARAM_TONE + 2, 0, 1, 0, "Pulse C Tone Enabled", "");
-        configParam(PARAM_NOISE + 0, 0, 1, 1, "Pulse A Noise Enabled", "");
-        configParam(PARAM_NOISE + 1, 0, 1, 1, "Pulse B Noise Enabled", "");
-        configParam(PARAM_NOISE + 2, 0, 1, 1, "Pulse C Noise Enabled", "");
         cvDivider.setDivision(16);
-        // set the output buffer for each individual voice
-        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
+        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+            // get the channel name starting with ACII code 65 (A)
+            auto channel_name = std::string(1, static_cast<char>(65 + i));
+            configParam(PARAM_FREQ  + i, -60.f, 60.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + i,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
+            configParam(PARAM_TONE  + i,  0,     1,   0,    "Pulse " + channel_name + " Tone Enabled",  "");
+            configParam(PARAM_NOISE + i,  0,     1,   1,    "Pulse " + channel_name + " Noise Enabled", "");
             apu.set_output(i, &buf[i]);
+        }
         // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.volume(3.f);
+        apu.set_volume(3.f);
         onSampleRateChange();
     }
 
@@ -87,11 +81,10 @@ struct ChipAY_3_8910 : Module {
     /// @returns the 12-bit frequency in a 16-bit container
     ///
     inline uint16_t getFrequency(int channel) {
-        // TODO update min max for Freq and Level
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ12BIT_MIN = 4;
+        static constexpr float FREQ12BIT_MIN = 2;
         // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8191;
+        static constexpr float FREQ12BIT_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
@@ -142,7 +135,7 @@ struct ChipAY_3_8910 : Module {
     ///
     inline uint8_t getMixer() {
         uint8_t mixerByte = 0;
-        for (std::size_t i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // process the tone trigger
             mixerTriggers[2 * i].process(rescale(inputs[INPUT_TONE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             bool toneState = (1 - params[PARAM_TONE + i].getValue()) - !mixerTriggers[2 * i].state;
@@ -171,13 +164,16 @@ struct ChipAY_3_8910 : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            // frequency
-            for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+                // 2 frequency registers per voice, shift over by 1 instead of
+                // multiplying
+                auto offset = i << 1;
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + 2 * i, lo);
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + offset, lo);
                 auto hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + 2 * i, hi);
+                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + offset, hi);
+                // volume
                 auto level = getLevel(i);
                 apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
             }
@@ -185,10 +181,10 @@ struct ChipAY_3_8910 : Module {
             apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise());
             // set the 6-channel boolean mixer (tone and noise for each channel)
             apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer());
-            // envelope period (TODO: fix envelop in engine)
+            // envelope period (TODO: fix envelope in engine)
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
             // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
-            // envelope shape bits (TODO: fix envelop in engine)
+            // envelope shape bits (TODO: fix envelope in engine)
             // apu.write(
             //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
             //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_NONE
@@ -196,14 +192,14 @@ struct ChipAY_3_8910 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
+        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
+        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };
@@ -223,7 +219,7 @@ struct ChipAY_3_8910Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        for (int i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111),  module, ChipAY_3_8910::INPUT_FM       + i));
             addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT      + i));
             addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111),  module, ChipAY_3_8910::PARAM_FREQ     + i));

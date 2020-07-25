@@ -64,6 +64,7 @@
 
 -   fix issue where CV controlled SN76489 VCA wouldn't return to 0
 -   fix issue where amplifier for FME7 wasn't allowed full gain
+-   4-bit volume control with CV, 2-bit PW control CV, and new panel for 2A03
 
 ### 1.5.0 (2020-07-21)
 

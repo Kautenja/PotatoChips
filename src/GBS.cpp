@@ -218,10 +218,16 @@ struct ChipGBSWidget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipGBS::PARAM_FREQ + 0));
         addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipGBS::PARAM_FREQ + 1));
         addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipGBS::PARAM_FREQ + 2));
-        addParam(createParam<Rogan3PSNES_Snap>(Vec(54, 297), module, ChipGBS::PARAM_FREQ + 3));
+        { auto param = createParam<Rogan3PSNES>(Vec(54, 297), module, ChipGBS::PARAM_FREQ + 3);
+        param->snap = true;
+        addParam(param); }
         // PW
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 30), module, ChipGBS::PARAM_PW + 0));
-        addParam(createParam<Rogan0PSNES_Snap>(Vec(102, 115), module, ChipGBS::PARAM_PW + 1));
+        { auto param = createParam<Rogan0PSNES>(Vec(102, 30), module, ChipGBS::PARAM_PW + 0);
+        param->snap = true;
+        addParam(param); }
+        { auto param = createParam<Rogan0PSNES>(Vec(102, 115), module, ChipGBS::PARAM_PW + 1);
+        param->snap = true;
+        addParam(param); }
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipGBS::INPUT_LFSR));
         // channel outputs

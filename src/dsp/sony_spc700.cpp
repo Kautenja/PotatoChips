@@ -19,14 +19,10 @@
 //
 
 #include "sony_spc700.hpp"
-#include "sony_spc700_endian.h"
+#include "sony_spc700_endian.hpp"
 #include <cstring>
 
-#ifdef BLARGG_ENABLE_OPTIMIZER
-    #include BLARGG_ENABLE_OPTIMIZER
-#endif
-
-SPC700::SPC700(uint8_t* ram_) : ram(ram_) {
+SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     set_gain(1.0);
     mute_voices(0);
     disable_surround(false);
@@ -36,12 +32,12 @@ SPC700::SPC700(uint8_t* ram_) : ram(ram_) {
     blargg_verify_byte_order();
 }
 
-void SPC700::mute_voices(int mask) {
+void SonySPC700::mute_voices(int mask) {
     for (int i = 0; i < VOICE_COUNT; i++)
         voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
-void SPC700::reset() {
+void SonySPC700::reset() {
     keys = 0;
     echo_ptr = 0;
     noise_count = 0;
@@ -62,7 +58,7 @@ void SPC700::reset() {
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void SPC700::write(int i, int data) {
+void SonySPC700::write(int i, int data) {
     assert((unsigned) i < REGISTER_COUNT);
 
     reg[i] = data;
@@ -106,7 +102,7 @@ static const short env_rates[0x20] = {
 
 const int env_range = 0x800;
 
-inline int SPC700::clock_envelope(int v) {
+inline int SonySPC700::clock_envelope(int v) {
     raw_voice_t& raw_voice = this->voice[v];
     voice_t& voice = voice_state[v];
 
@@ -269,7 +265,7 @@ inline int clamp_16(int n) {
     return n;
 }
 
-void SPC700::run(long count, short* out_buf) {
+void SonySPC700::run(long count, short* out_buf) {
     // to do: make clock_envelope() inline so that this becomes a leaf function?
 
     // Should we just fill the buffer with silence? Flags won't be cleared
@@ -314,7 +310,7 @@ void SPC700::run(long count, short* out_buf) {
 
         // What is the expected behavior when pitch modulation is enabled on
         // voice 0? Jurassic Park 2 does this. Assume 0 for now.
-        blargg_long prev_outx = 0;
+        int prev_outx = 0;
 
         int echol = 0;
         int echor = 0;
@@ -565,7 +561,7 @@ void SPC700::run(long count, short* out_buf) {
 
 // Interleved gauss table (to improve cache coherency).
 // gauss[i * 2 + j] = normal_gauss[(1 - j) * 256 + i]
-const int16_t SPC700::gauss[512] = {
+const int16_t SonySPC700::gauss[512] = {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,
  311,1298, 307,1297, 304,1297, 300,1296, 297,1295, 293,1294, 290,1293, 286,1292,

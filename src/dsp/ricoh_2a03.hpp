@@ -186,7 +186,7 @@ class Ricoh2A03 {
         int sweep_delay;
 
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
-        typedef BLIPSynth<blip_good_quality, 15> Synth;
+        typedef BLIPSynthesizer<blip_good_quality, 15> Synth;
         const Synth* synth;
 
         void clock_sweep(int negative_adjust) {
@@ -291,7 +291,7 @@ class Ricoh2A03 {
         int phase;
         int linear_counter;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynth<blip_good_quality, 15> synth;
+        BLIPSynthesizer<blip_good_quality, 15> synth;
 
         inline int calc_amp() const {
             int amp = phase_range - phase;
@@ -364,7 +364,7 @@ class Ricoh2A03 {
         /// the output value from the noise oscillator
         int noise;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynth<blip_med_quality, 15> synth;
+        BLIPSynthesizer<blip_med_quality, 15> synth;
 
         void run(blip_time_t time, blip_time_t end_time) {
             static const int16_t noise_period_table[16] = {
@@ -577,7 +577,7 @@ class Ricoh2A03 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const blip_eq_t& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
         square_synth.treble_eq(equalizer);
         triangle.synth.treble_eq(equalizer);
         noise.synth.treble_eq(equalizer);
@@ -623,10 +623,10 @@ class Ricoh2A03 {
             0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
             0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
         };
-        /// make sure the given address is legal
-        if (address < PULSE0_VOL or address > STATUS)
+        // make sure the given address is legal
+        if (address < ADDR_START or address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        /// run the emulator up to the given time
+        // run the emulator up to the given time
         run_until(time);
         if (address < 0x4010) {  // synthesize registers
             // Write to channel
@@ -644,7 +644,7 @@ class Ricoh2A03 {
                 // reset square phase
                 // DISABLED TO HACK SQUARE OSCILLATOR for VCV Rack
                 // if (osc_index < 2)
-                //  ((Nes_Square*) osc)->phase = Nes_Square::phase_range - 1;
+                //     ((Pulse*) osc)->phase = Pulse::phase_range - 1;
             }
         } else if (address == 0x4015) {
             // Channel enables

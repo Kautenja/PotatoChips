@@ -35,7 +35,6 @@ struct ChipSCC : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiSCC::OSC_COUNT),
         ENUMS(PARAM_VOLUME, KonamiSCC::OSC_COUNT),
-        PARAM_NUM_CHANNELS, PARAM_NUM_CHANNELS_ATT,
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
@@ -43,7 +42,6 @@ struct ChipSCC : Module {
         ENUMS(INPUT_VOCT, KonamiSCC::OSC_COUNT),
         ENUMS(INPUT_FM, KonamiSCC::OSC_COUNT),
         ENUMS(INPUT_VOLUME, KonamiSCC::OSC_COUNT),
-        INPUT_NUM_CHANNELS,
         INPUT_WAVETABLE,
         INPUT_COUNT
     };
@@ -96,14 +94,12 @@ struct ChipSCC : Module {
     /// Initialize a new Konami SCC Chip module.
     ChipSCC() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels");
-        configParam(PARAM_NUM_CHANNELS_ATT, -1, 1, 0, "Active Channels Attenuverter");
         configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
         cvDivider.setDivision(16);
         lightsDivider.setDivision(128);
         // set the output buffer for each individual voice
-        for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
             auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
             configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
@@ -217,7 +213,7 @@ struct ChipSCC : Module {
                 apu.write(KonamiSCC::WAVEFORM_CH_4 + i, sample);
             }
             // frequency
-            for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
+            for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
                 apu.write(KonamiSCC::FREQUENCY_CH_1_LO + 2 * i, lo);
@@ -230,14 +226,14 @@ struct ChipSCC : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < KonamiSCC::OSC_COUNT; i++)
+        for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each channel
-        for (int i = 0; i < KonamiSCC::OSC_COUNT; i++)
+        for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
@@ -334,16 +330,12 @@ struct ChipSCCWidget : ModuleWidget {
             // add the table editor to the module
             addChild(table_editor);
         }
-        // channel select
-        addParam(createParam<Rogan3PSNES>(Vec(155, 38), module, ChipSCC::PARAM_NUM_CHANNELS));
-        addParam(createParam<Rogan1PSNES>(Vec(161, 88), module, ChipSCC::PARAM_NUM_CHANNELS_ATT));
-        addInput(createInput<PJ301MPort>(Vec(164, 126), module, ChipSCC::INPUT_NUM_CHANNELS));
         // wave-table morph
         addParam(createParam<Rogan3PSNES>(Vec(155, 183), module, ChipSCC::PARAM_WAVETABLE));
         addParam(createParam<Rogan1PSNES>(Vec(161, 233), module, ChipSCC::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(164, 271), module, ChipSCC::INPUT_WAVETABLE));
         // individual channel controls
-        for (int i = 0; i < KonamiSCC::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, ChipSCC::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, ChipSCC::INPUT_FM + i      ));
             addParam(createParam<Rogan2PSNES>( Vec(275, 35 + i * 41), module, ChipSCC::PARAM_FREQ + i    ));

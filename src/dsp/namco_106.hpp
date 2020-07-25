@@ -36,7 +36,7 @@ class Namco106 {
 
     /// Addresses to the registers for channel 1. To get channel \f$n\f$,
     /// multiply by \f$8n\f$.
-    enum Registers {
+    enum Register : uint16_t {
         FREQ_LOW = 0x40,
         PHASE_LOW,
         FREQ_MEDIUM,

@@ -48,7 +48,7 @@ class GeneralInstrumentAy_3_8910 {
     };
 
     /// the registers on the chip
-    enum Register {
+    enum Register : uint16_t {
         /// the low 8 bits of the 12 bit frequency for channel A
         PERIOD_CH_A_LO,
         /// the high 4 bits of the 12 bit frequency for channel A

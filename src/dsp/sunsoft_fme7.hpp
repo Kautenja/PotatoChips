@@ -35,7 +35,6 @@ class SunSoftFME7 {
     /// the number of registers on the chip
     static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
-
     /// the indexes of the channels on the chip
     enum Channel {
         PULSEA,
@@ -189,7 +188,7 @@ class SunSoftFME7 {
     /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     ///
-    inline void set_output(int channel, BLIPBuffer* buffer) {
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
         if (channel >= OSC_COUNT)  // make sure the channel is within bounds
             throw ChannelOutOfBoundsException(channel, OSC_COUNT);
         oscs[channel].output = buffer;
@@ -201,7 +200,7 @@ class SunSoftFME7 {
     /// @param buffer the single buffer to output the all the voices to
     ///
     inline void set_output(BLIPBuffer* buffer) {
-        for (int i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
+        for (unsigned i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
     }
 
     /// @brief Set the volume level of all oscillators.
@@ -225,7 +224,7 @@ class SunSoftFME7 {
     inline void reset() {
         memset(regs, 0, sizeof regs);
         last_time = 0;
-        for (int i = 0; i < OSC_COUNT; i++)
+        for (unsigned i = 0; i < OSC_COUNT; i++)
             oscs[i].last_amp = 0;
     }
 

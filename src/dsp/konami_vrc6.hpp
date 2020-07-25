@@ -262,7 +262,7 @@ class KonamiVRC6 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(blip_eq_t const& equalizer) {
+    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
         saw_synth.treble_eq(equalizer);
         square_synth.treble_eq(equalizer);
     }

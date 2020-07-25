@@ -249,7 +249,7 @@ class BLIPBuffer {
 };
 
 /// Low-pass equalization parameters and logic.
-class blip_eq_t {
+class BLIPEqualizer {
  private:
     /// the constant value for Pi
     static constexpr double pi = 3.1415926535897932384626433832795029;
@@ -304,7 +304,7 @@ class blip_eq_t {
     }
 
  public:
-    /// Initialize a new blip_eq_t.
+    /// Initialize a new BLIPEqualizer.
     ///
     /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
@@ -313,7 +313,7 @@ class blip_eq_t {
     /// @param sample_rate the sample rate the engine is running at
     /// @param cutoff_freq TODO:
     ///
-    explicit blip_eq_t(
+    explicit BLIPEqualizer(
         double treble,
         uint32_t rolloff_freq = 0,
         uint32_t sample_rate = 44100,
@@ -415,7 +415,7 @@ class BLIPSynth {
         if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
-                treble_eq(blip_eq_t(-8.0));
+                treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
@@ -446,7 +446,7 @@ class BLIPSynth {
     }
 
     /// TODO:
-    void treble_eq(blip_eq_t const& eq) {
+    void treble_eq(BLIPEqualizer const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);

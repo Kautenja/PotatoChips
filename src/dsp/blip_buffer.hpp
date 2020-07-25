@@ -36,7 +36,7 @@ typedef blip_long blip_time_t;
 /// An output sample type for 16-bit signed samples[-32768, 32767]
 typedef int16_t blip_sample_t;
 
-/// TODO:
+/// A re-sampled time unit
 typedef blip_ulong blip_resampled_time_t;
 
 /// The number of bits in re-sampled ratio fraction. Higher values give a more

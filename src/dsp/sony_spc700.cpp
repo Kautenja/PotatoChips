@@ -22,10 +22,6 @@
 #include "sony_spc700_endian.hpp"
 #include <cstring>
 
-#ifdef BLARGG_ENABLE_OPTIMIZER
-    #include BLARGG_ENABLE_OPTIMIZER
-#endif
-
 SPC700::SPC700(uint8_t* ram_) : ram(ram_) {
     set_gain(1.0);
     mute_voices(0);

@@ -539,7 +539,7 @@ class GeneralInstrumentAy_3_8910 {
     /// @param end_time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t time) {
-        if (time > last_time) run_until(time);
+        run_until(time);
         last_time -= time;
     }
 };

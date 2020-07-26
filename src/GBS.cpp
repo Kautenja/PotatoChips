@@ -106,7 +106,7 @@ struct ChipGBS : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buf[channel].get_clock_rate() / freq) >> 5);
-        return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        return rack::clamp(freq, FREQ_MIN, FREQ_MAX) - 1;
     }
 
     /// Get the PW for the given channel
@@ -213,7 +213,7 @@ struct ChipGBS : Module {
                 apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
         }
         // process audio samples on the chip engine
-        apu.end_frame(4194304 / args.sampleRate);
+        apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
     }
@@ -222,7 +222,7 @@ struct ChipGBS : Module {
     inline void onSampleRateChange() override {
         // update the buffer for each channel
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), 4194304);
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };
 

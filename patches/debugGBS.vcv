@@ -15,8 +15,8 @@
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 44100,
-          "blockSize": 256
+          "sampleRate": 48000,
+          "blockSize": 2048
         }
       },
       "pos": [
@@ -48,7 +48,7 @@
         },
         {
           "id": 4,
-          "value": 4.97069771e-34
+          "value": 1.0
         }
       ],
       "leftModuleId": 48,
@@ -468,14 +468,6 @@
       "color": "#c91847"
     },
     {
-      "id": 755,
-      "outputModuleId": 48,
-      "outputId": 2,
-      "inputModuleId": 54,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 756,
       "outputModuleId": 48,
       "outputId": 3,
@@ -506,6 +498,14 @@
       "inputModuleId": 48,
       "inputId": 2,
       "color": "#c9b70e"
+    },
+    {
+      "id": 755,
+      "outputModuleId": 48,
+      "outputId": 2,
+      "inputModuleId": 54,
+      "inputId": 0,
+      "color": "#0986ad"
     }
   ]
 }

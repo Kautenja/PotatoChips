@@ -120,30 +120,16 @@ struct ChipGBS : Module {
     }
 
     void channel_wave() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ11BIT_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ11BIT_MAX = 2035;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
         // turn on the DAC for the channel
         apu.write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
         // set the volume
         apu.write(NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
-        // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + 2].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + 2].getVoltage();
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + 2].getVoltage();
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // convert the frequency to an 11-bit value
-        uint16_t freq11bit = rack::clamp(freq, FREQ11BIT_MIN, FREQ11BIT_MAX);
-        // write the frequency to the low and high registers
-        // - there are 4 registers per pulse channel, multiply channel by 4 to
-        //   produce an offset between registers based on channel index
-        apu.write(NintendoGBS::WAVE_FREQ_LO,  freq11bit & 0xff);
-        apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, freq11bit >> 8 | 0x80);
+        // frequency
+        auto freq = getFrequency(2, 8, 2035, 16);
+        auto lo =           freq & 0b0000000011111111;
+        apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
+        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+        apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
         // write the wave-table for the channel
         for (int i = 0; i < 32 / 2; i++) {
             uint8_t nibbleHi = sine_wave[2 * i];

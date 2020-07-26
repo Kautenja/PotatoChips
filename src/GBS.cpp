@@ -85,12 +85,11 @@ struct ChipGBS : Module {
     /// parameters for triangle wave:
     /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
-    inline uint16_t getFrequency(
-        int channel,
-        float freq_min,
-        float freq_max,
-        float clock_division
-    ) {
+    inline uint16_t getFrequency(int channel) {
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ_MIN = 8;
+        // the maximal value for the frequency register
+        static constexpr float FREQ_MAX = 2035;
         // the constant modulation factor
         static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
@@ -98,11 +97,16 @@ struct ChipGBS : Module {
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        // TODO: why is the wavetable clocked at half rate? this is not
+        // documented anywhere that I can find; however, it makes sense that
+        // the wave channel would be an octave lower since the original
+        // triangle channel was intended for bass
+        if (channel == NintendoGBS::WAVETABLE) freq *= 2;
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (clock_division * freq));
-        return rack::clamp(freq, freq_min, freq_max);
+        freq = 2048.f - (static_cast<uint32_t>(buf[channel].get_clock_rate() / freq) >> 5);
+        return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
     /// Get the PW for the given channel
@@ -139,10 +143,6 @@ struct ChipGBS : Module {
         return FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
-    void channel_pulse(int channel) {
-
-    }
-
     /// Return a 10V signed sample from the APU.
     ///
     /// @param channel the channel to get the audio sample for
@@ -174,7 +174,7 @@ struct ChipGBS : Module {
                 // volume of the pulse wave, envelope add mode on
                 apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, 0b11111000);
                 // frequency
-                auto freq = getFrequency(channel, 8, 2035, 16);
+                auto freq = getFrequency(channel);
                 auto lo =           freq & 0b0000000011111111;
                 apu.write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * channel, lo);
                 auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
@@ -188,7 +188,7 @@ struct ChipGBS : Module {
             // set the volume
             apu.write(NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
             // frequency
-            auto freq = getFrequency(2, 8, 2035, 16);
+            auto freq = getFrequency(2);
             auto lo =           freq & 0b0000000011111111;
             apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
             auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);

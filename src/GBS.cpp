@@ -105,6 +105,25 @@ struct ChipGBS : Module {
         return rack::clamp(freq, freq_min, freq_max);
     }
 
+    /// Get the PW for the given channel
+    ///
+    /// @param channel the channel to return the pulse width for
+    /// @returns the pulse width value coded in an 8-bit container
+    ///
+    inline uint8_t getPulseWidth(int channel) {
+        // the minimal value for the pulse width register
+        static constexpr float PW_MIN = 0;
+        // the maximal value for the pulse width register
+        static constexpr float PW_MAX = 3;
+        // get the pulse width from the parameter knob
+        auto pwParam = params[PARAM_PW + channel].getValue();
+        // get the control voltage to the pulse width with 1V/step
+        auto pwCV = 0;  // TODO: inputs[INPUT_PW + channel].getVoltage() / 3.f;
+        // get the 8-bit pulse width clamped within legal limits
+        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        return pw << 6;
+    }
+
     /// Return the period of the noise oscillator from the panel controls.
     inline uint8_t getNoisePeriod() {
         // the minimal value for the frequency register to produce sound
@@ -121,37 +140,7 @@ struct ChipGBS : Module {
     }
 
     void channel_pulse(int channel) {
-        // pulse width of the pulse wave (high 2 bits)
-        auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
-        apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * channel, pw);
-        // volume of the pulse wave, envelope add mode on
-        apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, 0b11111000);
-        // frequency
-        auto freq = getFrequency(channel, 8, 2035, 16);
-        auto lo =           freq & 0b0000000011111111;
-        apu.write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * channel, lo);
-        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-        apu.write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * channel, hi);
-    }
 
-    void channel_wave() {
-        // turn on the DAC for the channel
-        apu.write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
-        // set the volume
-        apu.write(NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
-        // frequency
-        auto freq = getFrequency(2, 8, 2035, 16);
-        auto lo =           freq & 0b0000000011111111;
-        apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
-        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-        apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
-        // write the wave-table for the channel
-        for (int i = 0; i < 32 / 2; i++) {
-            uint8_t nibbleHi = sine_wave[2 * i];
-            uint8_t nibbleLo = sine_wave[2 * i + 1];
-            // combine the two nibbles into a byte for the RAM
-            apu.write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
-        }
     }
 
     /// Return a 10V signed sample from the APU.
@@ -176,18 +165,44 @@ struct ChipGBS : Module {
             // set the global volume
             apu.write(NintendoGBS::STEREO_ENABLES, 0b11111111);
             apu.write(NintendoGBS::STEREO_VOLUME, 0b11111111);
-            // -----
+            // ---------------------------------------------------------------
             // pulse
-            // -----
-            channel_pulse(0);
-            channel_pulse(1);
-            // -----
+            // ---------------------------------------------------------------
+            for (unsigned channel = 0; channel < 2; channel++) {
+                // pulse width of the pulse wave (high 2 bits)
+                apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * channel, getPulseWidth(channel));
+                // volume of the pulse wave, envelope add mode on
+                apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, 0b11111000);
+                // frequency
+                auto freq = getFrequency(channel, 8, 2035, 16);
+                auto lo =           freq & 0b0000000011111111;
+                apu.write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * channel, lo);
+                auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+                apu.write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * channel, hi);
+            }
+            // ---------------------------------------------------------------
             // wave
-            // -----
-            channel_wave();
-            // -----
+            // ---------------------------------------------------------------
+            // turn on the DAC for the channel
+            apu.write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
+            // set the volume
+            apu.write(NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
+            // frequency
+            auto freq = getFrequency(2, 8, 2035, 16);
+            auto lo =           freq & 0b0000000011111111;
+            apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
+            auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+            apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
+            // write the wave-table for the channel
+            for (int i = 0; i < 32 / 2; i++) {
+                uint8_t nibbleHi = sine_wave[2 * i];
+                uint8_t nibbleLo = sine_wave[2 * i + 1];
+                // combine the two nibbles into a byte for the RAM
+                apu.write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
+            }
+            // ---------------------------------------------------------------
             // noise
-            // -----
+            // ---------------------------------------------------------------
             // set the period and LFSR
             apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | getNoisePeriod());
             // set the volume for the channel

@@ -105,6 +105,21 @@ struct ChipGBS : Module {
         return rack::clamp(freq, freq_min, freq_max);
     }
 
+    /// Return the period of the noise oscillator from the panel controls.
+    inline uint8_t getNoisePeriod() {
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ_MIN = 0;
+        // the maximal value for the frequency register
+        static constexpr float FREQ_MAX = 7;
+        // get the pitch / frequency of the oscillator
+        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
+        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
+        // convert the pitch to frequency based on standard exponential scale
+        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
+        freq += params[PARAM_FREQ + 3].getValue();
+        return FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+    }
+
     void channel_pulse(int channel) {
         // pulse width of the pulse wave (high 2 bits)
         auto pw = static_cast<uint8_t>(params[PARAM_PW + channel].getValue()) << 6;
@@ -139,25 +154,6 @@ struct ChipGBS : Module {
         }
     }
 
-    void channel_noise() {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 0;
-        // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 7;
-        // set the volume for the channel
-        apu.write(NintendoGBS::NOISE_START_VOLUME, 0b11111000);
-        // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
-        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
-        // convert the pitch to frequency based on standard exponential scale
-        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_FREQ + 3].getValue();
-        uint8_t period = FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-        apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | period);
-        // enable the channel
-        apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
-    }
-
     /// Return a 10V signed sample from the APU.
     ///
     /// @param channel the channel to get the audio sample for
@@ -175,14 +171,31 @@ struct ChipGBS : Module {
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
             lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-            // process the data on the chip
+            // turn on the power
             apu.write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
+            // set the global volume
             apu.write(NintendoGBS::STEREO_ENABLES, 0b11111111);
             apu.write(NintendoGBS::STEREO_VOLUME, 0b11111111);
+            // -----
+            // pulse
+            // -----
             channel_pulse(0);
             channel_pulse(1);
+            // -----
+            // wave
+            // -----
             channel_wave();
-            channel_noise();
+            // -----
+            // noise
+            // -----
+            // set the period and LFSR
+            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | getNoisePeriod());
+            // set the volume for the channel
+            apu.write(NintendoGBS::NOISE_START_VOLUME, 0b11111000);
+            // enable the channel. setting trigger resets the phase of the noise,
+            // so check if it's set first
+            if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80)
+                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
         }
         // process audio samples on the chip engine
         apu.end_frame(4194304 / args.sampleRate);

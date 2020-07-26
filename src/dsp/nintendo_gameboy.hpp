@@ -353,7 +353,9 @@ class NintendoGBS {
                 break;
             case 4:
                 if (data & trigger & regs[0]) {
-                    wave_pos = 0;
+                    // NOTE: HACKED FOR VCV RACK TO PREVENT RESETTING ON
+                    // CERTAIN FREQUENCIES
+                    // wave_pos = 0;
                     enabled = true;
                     if (length == 0)
                         length = 256;

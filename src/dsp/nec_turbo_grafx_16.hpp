@@ -38,6 +38,43 @@ class NECTurboGrafx16 {
     /// the number of registers on the chip
     static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
+    /// the indexes of the channels on the chip
+    enum Channel {
+        WAVE0,
+        WAVE1,
+        WAVE2,
+        WAVE3,
+        WAVE4,
+        WAVE5,
+    };
+
+    /// the IO registers on the chip
+    enum Register : uint16_t {
+        /// The register for selecting the active channel
+        CHANNEL_SELECT  = 0x0800,
+        /// The register for setting the main volume output from the chip
+        MAIN_VOLUME     = 0x0801,
+        /// The register with the low 8 bits of the 12-bit frequency value for
+        /// the active channel
+        CHANNEL_FREQ_LO = 0x0802,
+        /// The register with the high 4 bits of the 12-bit frequency value for
+        /// the active channel
+        CHANNEL_FREQ_HI = 0x0803,
+        /// The register for setting the volume / enabling the active channel.
+        /// This register must be cleared before writing wave data for the
+        /// active channel.
+        CHANNEL_VOLUME  = 0x0804,
+        /// The register with the stereo balance for the active channel
+        CHANNEL_BALANCE = 0x0805,
+        /// The register to write wave-table data to for the active channel
+        CHANNEL_WAVE    = 0x0806,
+        /// The register to write noise control data to for the active channel
+        CHANNEL_NOISE   = 0x0807,
+    };
+
+    /// a flag for the CHANNEL_VOLUME register to enable the active channel
+    static constexpr uint8_t CHANNEL_VOLUME_ENABLE = 0b10000000;
+
  private:
     /// reduces asymmetry and clamping when starting notes
     static constexpr bool CENTER_WAVES = true;

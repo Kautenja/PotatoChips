@@ -24,6 +24,9 @@
 #include <cstring>
 
 /// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
+/// @details
+/// The current LFSR algorithm is not accurate to the Turbo Grafx 16
+///
 class NECTurboGrafx16 {
  public:
     /// the number of oscillators on the chip
@@ -43,19 +46,19 @@ class NECTurboGrafx16 {
     struct Oscillator {
         /// the waveform to generate (i.e., the wavetable)
         uint8_t wave[32];
-        /// TODO:
+        /// the stereo volume for the oscillator
         short volume[2];
-        /// TODO:
+        /// the last amplitude value to emit from the oscillator
         int last_amp[2];
         /// TODO:
         int delay;
-        /// TODO:
+        /// the period of the oscillator
         int period;
         /// TODO:
         uint8_t noise;
-        /// TODO:
+        /// the phase of the oscillator
         uint8_t phase;
-        /// TODO:
+        /// the balance of the oscillator between left and right channels
         uint8_t balance;
         /// TODO:
         uint8_t dac;
@@ -66,7 +69,7 @@ class NECTurboGrafx16 {
         BLIPBuffer* outputs[2];
         /// the left, center, right, and active channel output buffers for the oscillator
         BLIPBuffer* chans[3];
-        /// TODO:
+        /// the linear feedback shift register for noise
         unsigned noise_lfsr;
         /// the control register for the oscillator
         uint8_t control;
@@ -82,8 +85,8 @@ class NECTurboGrafx16 {
                 throw Exception("end_time must be >= last_time");
             else if (end_time == last_time)
                 return;
-
-            BLIPBuffer* const osc_outputs_0 = outputs[0]; // cache often-used values
+            // cache often-used values
+            BLIPBuffer* const osc_outputs_0 = outputs[0];
             if (osc_outputs_0 && control & 0x80) {
                 int dac = this->dac;
 
@@ -105,14 +108,14 @@ class NECTurboGrafx16 {
                     if (noise & 0x80) {
                         if (volume_0 | volume_1) {
                             // noise
-                            int const period = (32 - (noise & 0x1F)) * 64; // TODO: correct?
-                            unsigned noise_lfsr = this->noise_lfsr;
+                            // TODO: correct?
+                            int const noise_period = (32 - (noise & 0x1F)) * 64;
                             do {
                                 int new_dac = 0x1F & -(noise_lfsr >> 1 & 1);
                                 // Implemented using "Galios configuration"
                                 // TODO: find correct LFSR algorithm
-                                noise_lfsr = (noise_lfsr >> 1) ^ (0xE008 & -(noise_lfsr & 1));
-                                //noise_lfsr = (noise_lfsr >> 1) ^ (0x6000 & -(noise_lfsr & 1));
+                                noise_lfsr = (noise_lfsr >> 1) ^ (0xE008 & - (noise_lfsr & 1));
+                                // noise_lfsr = (noise_lfsr >> 1) ^ (0x6000 & - (noise_lfsr & 1));
                                 int delta = new_dac - dac;
                                 if (delta) {
                                     dac = new_dac;
@@ -120,16 +123,13 @@ class NECTurboGrafx16 {
                                     if (osc_outputs_1)
                                         synth_.offset(time, delta * volume_1, osc_outputs_1);
                                 }
-                                time += period;
+                                time += noise_period;
                             } while (time < end_time);
-
-                            this->noise_lfsr = noise_lfsr;
-                            assert(noise_lfsr);
+                            // assert(noise_lfsr);
                         }
-                    }
-                    else if (!(control & 0x40)) {
-                        // wave
-                        int phase = (this->phase + 1) & 0x1F; // pre-advance for optimal inner loop
+                    } else if (!(control & 0x40)) {  // wave
+                        // pre-advance for optimal inner loop
+                        int phase = (this->phase + 1) & 0x1F;
                         int period = this->period * 2;
                         if (period >= 14 && (volume_0 | volume_1)) {
                             do {
@@ -147,17 +147,18 @@ class NECTurboGrafx16 {
                         } else {
                             if (!period) {
                                 // TODO: Gekisha Boy assumes that period = 0 silences wave
-                                //period = 0x1000 * 2;
+                                // period = 0x1000 * 2;
                                 period = 1;
-                                //if (!(volume_0 | volume_1))
-                                //  dprintf("Used period 0\n");
+                                // if (!(volume_0 | volume_1))
+                                //     dprintf("Used period 0\n");
                             }
                             // maintain phase when silent
                             blip_time_t count = (end_time - time + period - 1) / period;
                             phase += count; // phase will be masked below
                             time += count * period;
                         }
-                        this->phase = (phase - 1) & 0x1F; // undo pre-advance
+                        // undo pre-advance
+                        this->phase = (phase - 1) & 0x1F;
                     }
                 }
                 time -= end_time;
@@ -312,12 +313,10 @@ class NECTurboGrafx16 {
         } else if (addr == 0x801) {
             if (balance != data) {
                 balance = data;
-                Oscillator* osc = &oscs[OSC_COUNT];
-                do {
-                    osc--;
-                    osc->run_until(synth, time);
+                for (unsigned i = 0; i < OSC_COUNT; i++) {
+                    oscs[i].run_until(synth, time);
                     balance_changed(*oscs);
-                } while (osc != oscs);
+                }
             }
         } else if (latch < OSC_COUNT) {
             Oscillator& osc = oscs[latch];

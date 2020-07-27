@@ -117,21 +117,6 @@ class BLIPBuffer {
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer_); }
 
-    /// The result from setting the sample rate to a new value
-    enum class SampleRateStatus {
-        Success = 0,               // setting the sample rate succeeded
-        BufferLengthExceedsLimit,  // requested length exceeds limit
-        OutOfMemory                // ran out of resources for buffer
-    };
-    // ^ and remove this enum class
-    // TODO: throw exception instead of return error code model, these
-    // exceptions should never happen in runtime, and don't need to be fast
-    // when they do. it's more important to guarantee that the client code
-    // crashes in these cases than it is to provide the client the opportunity
-    // to do fast error handling. I.e., setting sample rate / clock rate should
-    // be well-defined for production code and not cause exceptions to begin
-    // with.
-    //
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
@@ -141,26 +126,27 @@ class BLIPBuffer {
     /// @returns NULL on success, otherwise if there isn't enough memory,
     /// returns error without affecting current buffer setup.
     ///
-    SampleRateStatus set_sample_rate(
+    void set_sample_rate(
         uint32_t samples_per_sec,
         uint32_t clock_cycles_per_sec,
         uint32_t buffer_length = 1000 / 4
     ) {
-        // check the size parameter
+        // TODO: is this size check necessary? what is happening here? the
+        // check and error fails for sample rates greater than 300, but ignoring
+        // the condition doesn't cause any audible issues upstream?
         uint32_t new_size = MAX_RESAMPLED_TIME;
-        if (buffer_length != blip_max_length) {
-            uint32_t size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
-            if (size >= new_size)  // fails if requested length exceeds limit
-                return SampleRateStatus::BufferLengthExceedsLimit;
-            new_size = size;
+        if (buffer_length != blip_max_length) {  // check the size parameter
+            // uint32_t size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
+            // if (size >= new_size) throw Exception("buffer size exceeds limit");
+            // new_size = size;
+            new_size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
         }
-        // resize the buffer
-        if (buffer_size_ != new_size) {
-            void* p = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
+        if (buffer_size_ != new_size) {  // resize the buffer
+            void* new_buffer = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
             // if the reallocation failed, return an out of memory flag
-            if (!p) return SampleRateStatus::OutOfMemory;
+            if (!new_buffer) throw Exception("out of memory for buffer size");
             // update the buffer and buffer size
-            buffer_ = (buf_t_*) p;
+            buffer_ = static_cast<buf_t_*>(new_buffer);
             buffer_size_ = new_size;
         }
         // update instance variables based on the new sample rate
@@ -175,8 +161,6 @@ class BLIPBuffer {
         factor_ = clock_rate_factor(clock_rate_);
         // clear the buffer
         reader_accum_ = 0;
-        // return success flag
-        return SampleRateStatus::Success;
     }
 
     /// @brief Return the current output sample rate.

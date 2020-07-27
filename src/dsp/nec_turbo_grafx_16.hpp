@@ -331,15 +331,13 @@ class NECTurboGrafx16 {
     inline void reset() {
         latch = 0;
         balance = 0xFF;
-
-        Oscillator* osc = &oscs[OSC_COUNT];
-        do {
-            osc--;
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
+            Oscillator* osc = &oscs[i];
             memset(osc, 0, offsetof(Oscillator, outputs));
             osc->noise_lfsr = 1;
             osc->control = 0x40;
             osc->balance = 0xFF;
-        } while (osc != oscs);
+        }
     }
 
     /// @brief Write to the data port.

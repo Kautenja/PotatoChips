@@ -123,7 +123,15 @@ class BLIPBuffer {
         BufferLengthExceedsLimit,  // requested length exceeds limit
         OutOfMemory                // ran out of resources for buffer
     };
-
+    // ^ and remove this enum class
+    // TODO: throw exception instead of return error code model, these
+    // exceptions should never happen in runtime, and don't need to be fast
+    // when they do. it's more important to guarantee that the client code
+    // crashes in these cases than it is to provide the client the opportunity
+    // to do fast error handling. I.e., setting sample rate / clock rate should
+    // be well-defined for production code and not cause exceptions to begin
+    // with.
+    //
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
@@ -228,14 +236,26 @@ class BLIPBuffer {
         bass_shift_ = shift;
     }
 
-// ---------------------------------------------------------------------------
-// TODO: not documented yet
-// ---------------------------------------------------------------------------
-
+    // TODO: remove and use resampled_time
+    /// @brief Return the time value re-sampled according to the clock rate
+    /// factor.
+    ///
+    /// @param time the time to re-sample
+    /// @returns the re-sampled time according to the clock rate factor, i.e.,
+    /// \f$time * \frac{sample_rate}{clock_rate}\f$
+    ///
+    __attribute__((deprecated("use reampled_time instead")))
     inline blip_resampled_time_t resampled_duration(int time) const {
         return time * factor_;
     }
 
+    /// @brief Return the time value re-sampled according to the clock rate
+    /// factor.
+    ///
+    /// @param time the time to re-sample
+    /// @returns the re-sampled time according to the clock rate factor, i.e.,
+    /// \f$time * \frac{sample_rate}{clock_rate}\f$
+    ///
     inline blip_resampled_time_t resampled_time(blip_time_t time) const {
         return time * factor_;
     }

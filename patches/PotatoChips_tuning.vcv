@@ -86,7 +86,7 @@
         },
         {
           "id": 7,
-          "value": 0.25
+          "value": 0.5
         }
       ],
       "leftModuleId": 87,
@@ -426,19 +426,19 @@
         },
         {
           "id": 5,
-          "value": 0.5
+          "value": 0.800000012
         },
         {
           "id": 6,
-          "value": 0.5
+          "value": 0.800000012
         },
         {
           "id": 7,
-          "value": 0.5
+          "value": 0.800000012
         },
         {
           "id": 8,
-          "value": 0.5
+          "value": 0.800000012
         }
       ],
       "rightModuleId": 91,

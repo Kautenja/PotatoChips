@@ -21,7 +21,6 @@
 
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
-#include <cstring>
 
 /// @brief Konami SCC sound chip emulator.
 class KonamiSCC {

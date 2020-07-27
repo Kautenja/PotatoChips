@@ -22,7 +22,6 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 #include <algorithm>
-#include <cstring>
 
 /// @brief The Nintendo GameBoy Sound System (GBS) chip emulator.
 class NintendoGBS {

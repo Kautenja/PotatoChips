@@ -66,8 +66,8 @@ struct ChipAY_3_8910 : Module {
             auto channel_name = std::string(1, static_cast<char>(65 + i));
             configParam(PARAM_FREQ  + i, -60.f, 60.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_LEVEL + i,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
-            configParam(PARAM_TONE  + i,  0,     1,   0,    "Pulse " + channel_name + " Tone Enabled",  "");
-            configParam(PARAM_NOISE + i,  0,     1,   1,    "Pulse " + channel_name + " Noise Enabled", "");
+            configParam(PARAM_TONE  + i,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
+            configParam(PARAM_NOISE + i,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
             apu.set_output(i, &buf[i]);
         }
         // volume of 3 produces a roughly 5Vpp signal from all voices
@@ -125,9 +125,28 @@ struct ChipAY_3_8910 : Module {
     ///
     /// @returns the period for the noise oscillator
     /// @details
-    /// Returns a frequency based on the knob for channel 3
+    /// Returns a frequency based on the knob for channel 3 (index 2)
     ///
-    inline uint8_t getNoise() { return getFrequency(2) >> 3; }
+    inline uint8_t getNoise() {
+        // use the frequency control knob from channel index 2
+        static constexpr unsigned channel = 2;
+        // the minimal value for the noise frequency register to produce sound
+        static constexpr float FREQ_MIN = 0;
+        // the maximal value for the noise frequency register
+        static constexpr float FREQ_MAX = 31;
+        // get the parameter value from the UI knob. the knob represents
+        // frequency, so translate to a simple [0, 1] scale.
+        auto param = (0.5f + params[PARAM_FREQ + channel].getValue() / 120.f);
+        // 5V scale for V/OCT input
+        param += inputs[INPUT_VOCT + channel].getVoltage() / 5.f;
+        // 10V scale for mod input
+        param += inputs[INPUT_FM + channel].getVoltage() / 10.f;
+        // clamp the parameter within its legal limits
+        param = rack::clamp(param, 0.f, 1.f);
+        // get the 5-bit noise period clamped within legal limits. invert the
+        // value about the maximal to match directionality of channel frequency
+        return FREQ_MAX - rack::clamp(FREQ_MAX * param, FREQ_MIN, FREQ_MAX);
+    }
 
     /// Return the mixer byte.
     ///
@@ -139,11 +158,11 @@ struct ChipAY_3_8910 : Module {
             // process the tone trigger
             mixerTriggers[2 * i].process(rescale(inputs[INPUT_TONE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             bool toneState = (1 - params[PARAM_TONE + i].getValue()) - !mixerTriggers[2 * i].state;
-            mixerByte |= toneState << i;
+            mixerByte |= !toneState << i;
             // process the noise trigger
             mixerTriggers[2 * i + 1].process(rescale(inputs[INPUT_NOISE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             bool noiseState = (1 - params[PARAM_NOISE + i].getValue()) - !mixerTriggers[2 * i + 1].state;
-            mixerByte |= noiseState << (i + 3);
+            mixerByte |= !noiseState << (i + 3);
         }
         return mixerByte;
     }

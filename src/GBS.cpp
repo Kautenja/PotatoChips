@@ -114,7 +114,7 @@ struct ChipGBS : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buf[channel].get_clock_rate() / freq) >> 5);
-        return rack::clamp(freq, FREQ_MIN, FREQ_MAX) - 1;
+        return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
     /// Get the PW for the given channel

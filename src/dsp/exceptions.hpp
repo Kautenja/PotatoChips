@@ -40,7 +40,7 @@ class Exception: public std::exception {
 
     /// @brief Destroy this exception.
     ///
-    ~Exception() throw () { }
+    ~Exception() noexcept { }
 
     /// @brief Returns a pointer to the (constant) error description.
     /// @returns A pointer to a const char*. The underlying memory is in

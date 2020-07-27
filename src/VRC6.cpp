@@ -205,20 +205,25 @@ struct ChipVRC6Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(  Vec(20,  78  + i * 110), module, ChipVRC6::INPUT_VOCT     + i));
-            addInput(createInput<PJ301MPort>(  Vec(26,  37  + i * 110), module, ChipVRC6::INPUT_FM       + i));
-            addParam(createParam<Rogan3PSNES>( Vec(54,  42  + i * 110), module, ChipVRC6::PARAM_FREQ     + i));
-            if (i != KonamiVRC6::SAW) {  // pulse width
-                auto pwParam = createParam<Rogan0PSNES>(Vec(30, 107 + i * 110), module, ChipVRC6::PARAM_PW + i);
-                pwParam->snap = true;
-                addParam(pwParam);
-                addInput(createInput<PJ301MPort>(Vec(58, 104 + i * 110), module, ChipVRC6::INPUT_PW + i));
-            }
-            addInput(createInput<PJ301MPort>(  Vec(102, 36  + i * 110), module, ChipVRC6::INPUT_LEVEL    + i));
-            addParam(createParam<Rogan0PSNES>( Vec(103, 64  + i * 110), module, ChipVRC6::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(Vec(107, 104 + i * 110), module, ChipVRC6::OUTPUT_CHANNEL + i));
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
+            addInput(createInput<PJ301MPort>(    Vec(18,  69  + i * 110), module, ChipVRC6::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  34  + i * 110), module, ChipVRC6::INPUT_FM       + i));
+            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 110), module, ChipVRC6::PARAM_FREQ     + i));
+            auto pw = createParam<RoundSmallBlackKnob>(Vec(146, 35 + i * 110), module, ChipVRC6::PARAM_PW + i);
+            pw->snap = true;
+            addParam(pw);
+            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 110), module, ChipVRC6::INPUT_PW + i));
+            addInput(createInput<PJ301MPort>(    Vec(18, 104  + i * 110), module, ChipVRC6::INPUT_LEVEL    + i));
+            addParam(createParam<BefacoSlidePot>(Vec(180, 24  + i * 110), module, ChipVRC6::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 110), module, ChipVRC6::OUTPUT_CHANNEL + i));
         }
+        int i = 2;
+        addInput(createInput<PJ301MPort>(    Vec(18,  322), module, ChipVRC6::INPUT_VOCT     + i));
+        addInput(createInput<PJ301MPort>(    Vec(18,  249), module, ChipVRC6::INPUT_FM       + i));
+        addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 110), module, ChipVRC6::PARAM_FREQ     + i));
+        addInput(createInput<PJ301MPort>(    Vec(152, 257), module, ChipVRC6::INPUT_LEVEL    + i));
+        addParam(createParam<BefacoSlidePot>(Vec(180, 24  + i * 110), module, ChipVRC6::PARAM_LEVEL    + i));
+        addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 110), module, ChipVRC6::OUTPUT_CHANNEL + i));
     }
 };
 

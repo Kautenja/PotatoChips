@@ -98,10 +98,8 @@ struct ChipTurboGrafx16 : Module {
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
-            auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
-            configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
-            configParam(PARAM_VOLUME + i, 0, 31, 31, descVol,  "%", 0, 100.f / 31.f);
+            configParam(PARAM_FREQ   + i, -42.f, 42.f,  0.f, "Channel " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_VOLUME + i,   0,   31,   31,   "Channel " + std::to_string(i + 1) + " Volume",     "%",   0,                  100.f / 31.f);
             apu.set_output(i, &buf[i], &buf[i], &buf[i]);
         }
         // set the wave-forms to the default values
@@ -111,17 +109,15 @@ struct ChipTurboGrafx16 : Module {
         apu.set_volume(3.f);
         onSampleRateChange();
 
-
-
         // TODO: move
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
             // select channel 0
-            apu.write(0x0800, i);
-            // clear to write wave data
-            apu.write(0x0804, 0b00000000);
+            apu.write(NECTurboGrafx16::CHANNEL_SELECT, i);
+            // disable the channel to write wave data
+            apu.write(NECTurboGrafx16::CHANNEL_VOLUME, 0b00000000);
             // write the wave-table
             for (int sample = 0; sample < num_samples; sample++)
-                apu.write(0x0806, values[0][sample]);
+                apu.write(NECTurboGrafx16::CHANNEL_WAVE, values[0][sample]);
         }
     }
 
@@ -144,11 +140,10 @@ struct ChipTurboGrafx16 : Module {
     /// @returns the 12-bit frequency in a 16-bit container
     ///
     inline uint16_t getFrequency(int channel) {
-        // TODO update min max for Freq and Level
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ12BIT_MIN = 4;
+        static constexpr float FREQ12BIT_MIN = 7;
         // the maximal value for the frequency register
-        static constexpr float FREQ12BIT_MAX = 8191;
+        static constexpr float FREQ12BIT_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // the constant modulation factor
@@ -203,24 +198,23 @@ struct ChipTurboGrafx16 : Module {
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {
             // set the main amplifier level
-            apu.write(0x0801, 0b11111111);
+            apu.write(NECTurboGrafx16::MAIN_VOLUME, 0b11111111);
             // set the channel values
             for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
                 // select the i'th channel
-                apu.write(0x0800, i);
+                apu.write(NECTurboGrafx16::CHANNEL_SELECT, i);
                 // frequency
                 auto freq = getFrequency(i);
                 auto lo =  freq & 0b0000000011111111;
-                apu.write(0x0802, lo);
+                apu.write(NECTurboGrafx16::CHANNEL_FREQ_LO, lo);
                 auto hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(0x0803, hi);
+                apu.write(NECTurboGrafx16::CHANNEL_FREQ_HI, hi);
                 // volume
-                auto volume = getVolume(i);
-                apu.write(0x0804, 0b10000000 | volume);
+                apu.write(NECTurboGrafx16::CHANNEL_VOLUME, NECTurboGrafx16::CHANNEL_VOLUME_ENABLE | getVolume(i));
                 // balance
-                apu.write(0x0805, 0b11111111);
+                apu.write(NECTurboGrafx16::CHANNEL_BALANCE, 0b11111111);
                 // noise
-                // apu.write(0x0807, 0b11111111);
+                // apu.write(NECTurboGrafx16::CHANNEL_NOISE, 0b11111111);
             }
 
             // // write the waveform data to the chip's RAM

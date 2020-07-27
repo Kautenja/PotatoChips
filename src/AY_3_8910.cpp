@@ -245,16 +245,16 @@ struct ChipAY_3_8910Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111),  module, ChipAY_3_8910::INPUT_FM       + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT      + i));
-            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111),  module, ChipAY_3_8910::PARAM_FREQ     + i));
-            addParam(createParam<CKSS>(          Vec(144,  29  + i * 111),  module, ChipAY_3_8910::PARAM_TONE    + i));
-            addInput(createInput<PJ301MPort>(    Vec(147,  53 + i * 111), module, ChipAY_3_8910::INPUT_TONE      + i));
-            addParam(createParam<CKSS>(          Vec(138,  105  + i * 111),  module, ChipAY_3_8910::PARAM_NOISE  + i));
-            addInput(createInput<PJ301MPort>(    Vec(175,  65 + i * 111), module, ChipAY_3_8910::INPUT_NOISE     + i));
-            addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111),  module, ChipAY_3_8910::INPUT_LEVEL    + i));
-            addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111),  module, ChipAY_3_8910::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_CHANNEL  + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111), module, ChipAY_3_8910::INPUT_FM       + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT     + i));
+            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, ChipAY_3_8910::PARAM_FREQ     + i));
+            addParam(createParam<CKSS>(          Vec(144, 29  + i * 111), module, ChipAY_3_8910::PARAM_TONE     + i));
+            addInput(createInput<PJ301MPort>(    Vec(147, 53  + i * 111), module, ChipAY_3_8910::INPUT_TONE     + i));
+            addParam(createParam<CKSS>(          Vec(138, 105 + i * 111), module, ChipAY_3_8910::PARAM_NOISE    + i));
+            addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, ChipAY_3_8910::INPUT_NOISE    + i));
+            addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111), module, ChipAY_3_8910::INPUT_LEVEL    + i));
+            addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111), module, ChipAY_3_8910::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_CHANNEL + i));
         }
     }
 };

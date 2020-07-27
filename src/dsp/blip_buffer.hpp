@@ -23,6 +23,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include "exceptions.hpp"
 
 /// A 32-bit signed value
 typedef int32_t blip_long;
@@ -239,12 +240,21 @@ class BLIPBuffer {
         return time * factor_;
     }
 
+    /// @brief Return the clock rate factor based on given clock rate and the
+    /// current sample rate.
+    ///
+    /// @param clock_rate the clock rate to calculate the clock rate factor of
+    /// @returns the number of clock cycles per sample
+    /// @details
+    /// throws an exception if the factor is too large or the sample rate is
+    /// not set
+    ///
     inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
-        double ratio = (double) sample_rate_ / clock_rate;
-        blip_long factor = (blip_long) floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-        // fails if clock/output ratio is too large
-        assert(factor > 0 || !sample_rate_);
-        return (blip_resampled_time_t) factor;
+        double ratio = static_cast<double>(sample_rate_) / clock_rate;
+        blip_long factor = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        if (!(factor > 0 || !sample_rate_))  // fails if ratio is too large
+            throw Exception("sample_rate : clock_rate ratio is too large");
+        return factor;
     }
 };
 

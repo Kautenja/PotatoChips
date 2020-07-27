@@ -25,7 +25,8 @@
 
 /// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 /// @details
-/// The current LFSR algorithm is not accurate to the Turbo Grafx 16
+/// - The LFO is not implemented
+/// - The current LFSR algorithm is not accurate to the Turbo Grafx 16
 ///
 class NECTurboGrafx16 {
  public:
@@ -34,7 +35,8 @@ class NECTurboGrafx16 {
     /// the first address of the RAM space
     static constexpr int ADDR_START = 0x0800;
     /// the last address of the RAM space
-    static constexpr int ADDR_END   = 0x0809;
+    static constexpr int ADDR_END   = 0x0807;
+    // static constexpr int ADDR_END   = 0x0809;
     /// the number of registers on the chip
     static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
@@ -72,6 +74,10 @@ class NECTurboGrafx16 {
         /// The high bit enables noise and the low 5 bits set the period. Noise
         /// is only available for channels 5 & 6.
         CHANNEL_NOISE   = 0x0807,
+        /// the register for setting the frequency of the LFO
+        // LFO_FREQ   = 0x0808,
+        /// the control register for the LFO
+        // LFO_CONTROL   = 0x0809,
     };
 
     /// a flag for the CHANNEL_VOLUME register to enable the active channel

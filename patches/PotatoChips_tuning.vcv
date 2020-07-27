@@ -90,6 +90,7 @@
         }
       ],
       "leftModuleId": 87,
+      "rightModuleId": 89,
       "pos": [
         58,
         1
@@ -856,7 +857,7 @@
       "params": [],
       "leftModuleId": 90,
       "pos": [
-        83,
+        82,
         1
       ]
     },
@@ -866,9 +867,10 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
+      "leftModuleId": 73,
       "rightModuleId": 90,
       "pos": [
-        73,
+        72,
         1
       ]
     },
@@ -881,7 +883,7 @@
       "leftModuleId": 89,
       "rightModuleId": 88,
       "pos": [
-        78,
+        77,
         1
       ]
     },

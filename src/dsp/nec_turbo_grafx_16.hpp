@@ -132,21 +132,20 @@ class NECTurboGrafx16 {
             // cache often-used values
             BLIPBuffer* const osc_outputs_0 = outputs[0];
             if (osc_outputs_0 && control & 0x80) {
-                int dac = this->dac;
-
+                // left volume
                 int const volume_0 = volume[0];
                 {
                     int delta = dac * volume_0 - last_amp[0];
                     if (delta) synth.offset(last_time, delta, osc_outputs_0);
                 }
-
+                // right volume
                 BLIPBuffer* const osc_outputs_1 = outputs[1];
                 int const volume_1 = volume[1];
                 if (osc_outputs_1) {
                     int delta = dac * volume_1 - last_amp[1];
                     if (delta) synth.offset(last_time, delta, osc_outputs_1);
                 }
-
+                // update time
                 blip_time_t time = last_time + delay;
                 if (time < end_time) {
                     if (noise & 0x80) {
@@ -208,7 +207,6 @@ class NECTurboGrafx16 {
                 if (time < 0) time = 0;
                 delay = time;
 
-                this->dac = dac;
                 last_amp[0] = dac * volume_0;
                 last_amp[1] = dac * volume_1;
             }

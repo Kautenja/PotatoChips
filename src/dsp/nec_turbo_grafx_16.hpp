@@ -162,7 +162,6 @@ class NECTurboGrafx16 {
                                 }
                                 time += noise_period;
                             } while (time < end_time);
-                            // assert(noise_lfsr);
                         }
                     } else if (!(control & 0x40)) {  // wave
                         // pre-advance for optimal inner loop

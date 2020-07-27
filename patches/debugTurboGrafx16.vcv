@@ -567,7 +567,7 @@
     {
       "id": 28,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "TURBO_GRAFX_16",
       "params": [
         {

@@ -19,7 +19,6 @@
 #ifndef DSP_ATARI_POKEY_HPP_
 #define DSP_ATARI_POKEY_HPP_
 
-#include <cstring>
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 

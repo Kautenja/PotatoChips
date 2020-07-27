@@ -21,7 +21,6 @@
 
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
-#include <cstring>
 
 /// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 /// @details

@@ -85,7 +85,7 @@
     {
       "id": 59,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "2A03",
       "params": [
         {
@@ -366,7 +366,7 @@
     {
       "id": 70,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "AY_3_8910",
       "params": [
         {
@@ -428,7 +428,7 @@
     {
       "id": 71,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "SN76489",
       "params": [
         {

@@ -78,7 +78,7 @@ struct ChipSN76489 : Module {
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
                 configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + i, 0, 1, 0.5, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
+            configParam(PARAM_LEVEL + i, 0, 1, 0.8, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
         }
         configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");

@@ -62,9 +62,9 @@ struct ChipVRC6 : Module {
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,   "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_PW + 0,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
         configParam(PARAM_PW + 1,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f,  "Pulse 1 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.25f, "Saw Level / Quantization", "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.8f,  "Pulse 1 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.8f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)

@@ -59,7 +59,7 @@ struct ChipFME7 : Module {
             // get the channel name starting with ACII code 65 (A)
             auto channel_name = std::string(1, static_cast<char>(65 + i));
             configParam(PARAM_FREQ  + i, -56.f, 56.f, 0.f,  "Pulse " + channel_name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + i,   0.f,  1.f, 0.5f, "Pulse " + channel_name + " Level",     "%",   0.f,                100.f       );
+            configParam(PARAM_LEVEL + i,   0.f,  1.f, 0.8f, "Pulse " + channel_name + " Level",     "%",   0.f,                100.f       );
             apu.set_output(i, &buf[i]);
         }
         // volume of 3 produces a roughly 5Vpp signal from all voices
@@ -172,12 +172,12 @@ struct ChipFME7Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(  Vec(23,  99  + 112 * i), module, ChipFME7::INPUT_VOCT     + i));
-            addInput(createInput<PJ301MPort>(  Vec(23,  56  + 112 * i), module, ChipFME7::INPUT_FM       + i));
-            addParam(createParam<Rogan3PSNES>( Vec(54,  42  + 112 * i), module, ChipFME7::PARAM_FREQ     + i));
-            addInput(createInput<PJ301MPort>(  Vec(102, 36  + 112 * i), module, ChipFME7::INPUT_LEVEL    + i));
-            addParam(createParam<Rogan0PSNES>( Vec(103, 64  + 112 * i), module, ChipFME7::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(Vec(107, 104 + 112 * i), module, ChipFME7::OUTPUT_CHANNEL + i));
+            addInput(createInput<PJ301MPort>(   Vec(18,  100 + 112 * i), module, ChipFME7::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(   Vec(18,  27  + 112 * i), module, ChipFME7::INPUT_FM       + i));
+            addParam(createParam<Rogan6PSWhite>(Vec(47,  29  + 112 * i), module, ChipFME7::PARAM_FREQ     + i));
+            addInput(createInput<PJ301MPort>(   Vec(152, 35  + 112 * i), module, ChipFME7::INPUT_LEVEL    + i));
+            addParam(createParam<BefacoSlidePot>(  Vec(179, 24  + 112 * i), module, ChipFME7::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>( Vec(150, 100 + 112 * i), module, ChipFME7::OUTPUT_CHANNEL + i));
         }
     }
 };

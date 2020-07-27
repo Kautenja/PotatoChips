@@ -118,10 +118,10 @@ class NECTurboGrafx16 {
 
         /// @brief Run the oscillator until specified time.
         ///
-        /// @param synth_ the synthesizer to use for generating samples
+        /// @param synth the synthesizer to use for generating samples
         /// @param time the number of elapsed cycles
         ///
-        void run_until(Synthesizer& synth_, blip_time_t end_time) {
+        void run_until(const Synthesizer& synth, blip_time_t end_time) {
             if (end_time < last_time)
                 throw Exception("end_time must be >= last_time");
             else if (end_time == last_time)
@@ -134,14 +134,14 @@ class NECTurboGrafx16 {
                 int const volume_0 = volume[0];
                 {
                     int delta = dac * volume_0 - last_amp[0];
-                    if (delta) synth_.offset(last_time, delta, osc_outputs_0);
+                    if (delta) synth.offset(last_time, delta, osc_outputs_0);
                 }
 
                 BLIPBuffer* const osc_outputs_1 = outputs[1];
                 int const volume_1 = volume[1];
                 if (osc_outputs_1) {
                     int delta = dac * volume_1 - last_amp[1];
-                    if (delta) synth_.offset(last_time, delta, osc_outputs_1);
+                    if (delta) synth.offset(last_time, delta, osc_outputs_1);
                 }
 
                 blip_time_t time = last_time + delay;
@@ -160,9 +160,9 @@ class NECTurboGrafx16 {
                                 int delta = new_dac - dac;
                                 if (delta) {
                                     dac = new_dac;
-                                    synth_.offset(time, delta * volume_0, osc_outputs_0);
+                                    synth.offset(time, delta * volume_0, osc_outputs_0);
                                     if (osc_outputs_1)
-                                        synth_.offset(time, delta * volume_1, osc_outputs_1);
+                                        synth.offset(time, delta * volume_1, osc_outputs_1);
                                 }
                                 time += noise_period;
                             } while (time < end_time);
@@ -178,9 +178,9 @@ class NECTurboGrafx16 {
                                 int delta = new_dac - dac;
                                 if (delta) {
                                     dac = new_dac;
-                                    synth_.offset(time, delta * volume_0, osc_outputs_0);
+                                    synth.offset(time, delta * volume_0, osc_outputs_0);
                                     if (osc_outputs_1)
-                                        synth_.offset(time, delta * volume_1, osc_outputs_1);
+                                        synth.offset(time, delta * volume_1, osc_outputs_1);
                                 }
                                 time += period;
                             } while (time < end_time);

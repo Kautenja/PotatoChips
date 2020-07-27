@@ -99,11 +99,10 @@ class BLIPBuffer {
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
-    typedef blip_time_t buf_t_;
-    /// TODO:
+    /// the clock rate factor, i.e., the number of CPU samples per audio sample
     blip_ulong factor_ = 1;
-    /// TODO:
-    buf_t_* buffer_ = 0;
+    /// the buffer of samples in the BLIP buffer
+    blip_time_t* buffer_ = 0;
     /// TODO:
     uint32_t buffer_size_ = 0;
     /// TODO:
@@ -146,7 +145,7 @@ class BLIPBuffer {
             // if the reallocation failed, return an out of memory flag
             if (!new_buffer) throw Exception("out of memory for buffer size");
             // update the buffer and buffer size
-            buffer_ = static_cast<buf_t_*>(new_buffer);
+            buffer_ = static_cast<blip_time_t*>(new_buffer);
             buffer_size_ = new_size;
         }
         // update instance variables based on the new sample rate
@@ -175,14 +174,14 @@ class BLIPBuffer {
     ///
     inline uint32_t get_clock_rate() const { return clock_rate_; }
 
-    /// @brief Read out of this buffer into `dest` and remove them from the buffer.
+    /// @brief Return the output sample from the buffer.
     ///
     /// @param output the output array to push samples from the buffer into
     /// @returns the sample
     ///
     blip_sample_t read_sample() {
         // create a temporary pointer to the buffer that can be mutated
-        const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
+        const blip_time_t* BLIP_RESTRICT buffer_temp = buffer_;
         // get the current accumulator
         blip_long read_accum_temp = reader_accum_;
         // get the sample from the accumulator

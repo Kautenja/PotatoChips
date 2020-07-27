@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        28,
+        32,
         0
       ]
     },
@@ -54,7 +54,7 @@
       "leftModuleId": 70,
       "rightModuleId": 1,
       "pos": [
-        18,
+        22,
         0
       ]
     },
@@ -73,7 +73,6 @@
         "lastMod": 0,
         "midi": {
           "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -221,6 +220,7 @@
         }
       ],
       "leftModuleId": 68,
+      "rightModuleId": 71,
       "data": {
         "lissajous": 0,
         "external": 0
@@ -233,7 +233,7 @@
     {
       "id": 70,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "VRC6",
       "params": [
         {
@@ -258,15 +258,15 @@
         },
         {
           "id": 5,
-          "value": 0.5
+          "value": 0.800000012
         },
         {
           "id": 6,
-          "value": 0.5
+          "value": 0.800000012
         },
         {
           "id": 7,
-          "value": 0.25
+          "value": 0.5
         }
       ],
       "leftModuleId": 5,
@@ -282,7 +282,7 @@
       "version": "1.1.31",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
-      "leftModuleId": 72,
+      "leftModuleId": 69,
       "data": {
         "range": 0.0,
         "range_db": 80.0,
@@ -291,8 +291,8 @@
         "window": "kaiser"
       },
       "pos": [
-        43,
-        0
+        39,
+        1
       ]
     },
     {
@@ -302,9 +302,34 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 1,
-      "rightModuleId": 71,
+      "rightModuleId": 130,
       "pos": [
-        38,
+        42,
+        0
+      ]
+    },
+    {
+      "id": 130,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "leftModuleId": 72,
+      "rightModuleId": 131,
+      "pos": [
+        47,
+        0
+      ]
+    },
+    {
+      "id": 131,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "leftModuleId": 130,
+      "pos": [
+        52,
         0
       ]
     }
@@ -325,14 +350,6 @@
       "inputModuleId": 71,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 184,
-      "outputModuleId": 70,
-      "outputId": 0,
-      "inputModuleId": 72,
-      "inputId": 0,
-      "color": "#c9b70e"
     },
     {
       "id": 185,
@@ -413,6 +430,46 @@
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#0986ad"
+    },
+    {
+      "id": 223,
+      "outputModuleId": 70,
+      "outputId": 1,
+      "inputModuleId": 130,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 224,
+      "outputModuleId": 70,
+      "outputId": 2,
+      "inputModuleId": 131,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 225,
+      "outputModuleId": 70,
+      "outputId": 0,
+      "inputModuleId": 72,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 226,
+      "outputModuleId": 70,
+      "outputId": 1,
+      "inputModuleId": 71,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 227,
+      "outputModuleId": 70,
+      "outputId": 2,
+      "inputModuleId": 71,
+      "inputId": 2,
+      "color": "#c91847"
     }
   ]
 }

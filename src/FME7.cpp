@@ -172,12 +172,12 @@ struct ChipFME7Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(   Vec(18,  100 + 112 * i), module, ChipFME7::INPUT_VOCT     + i));
-            addInput(createInput<PJ301MPort>(   Vec(18,  27  + 112 * i), module, ChipFME7::INPUT_FM       + i));
-            addParam(createParam<Rogan6PSWhite>(Vec(47,  29  + 112 * i), module, ChipFME7::PARAM_FREQ     + i));
-            addInput(createInput<PJ301MPort>(   Vec(152, 35  + 112 * i), module, ChipFME7::INPUT_LEVEL    + i));
-            addParam(createParam<BefacoSlidePot>(  Vec(179, 24  + 112 * i), module, ChipFME7::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>( Vec(150, 100 + 112 * i), module, ChipFME7::OUTPUT_CHANNEL + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  100 + 112 * i), module, ChipFME7::INPUT_VOCT     + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  27  + 112 * i), module, ChipFME7::INPUT_FM       + i));
+            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + 112 * i), module, ChipFME7::PARAM_FREQ     + i));
+            addInput(createInput<PJ301MPort>(    Vec(152, 35  + 112 * i), module, ChipFME7::INPUT_LEVEL    + i));
+            addParam(createParam<BefacoSlidePot>(Vec(179, 24  + 112 * i), module, ChipFME7::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + 112 * i), module, ChipFME7::OUTPUT_CHANNEL + i));
         }
     }
 };

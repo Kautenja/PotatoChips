@@ -145,7 +145,7 @@ class GeneralInstrumentAy_3_8910 {
     static constexpr int TONE_OFF     = 0x01;
 
     /// the oscillators on the chip (three pulse waveform generators)
-    struct osc_t {
+    struct Oscillator {
         /// the period of the oscillator
         blip_time_t period;
         /// TODO:
@@ -161,14 +161,14 @@ class GeneralInstrumentAy_3_8910 {
     BLIPSynthesizer<blip_good_quality, 1> synth;
     /// the last time the oscillators were updated
     blip_time_t last_time;
-    /// the registers on teh chip
+    /// the registers on the chip
     uint8_t regs[NUM_REGISTERS];
 
     /// the noise generator on the chip
     struct {
         /// TODO:
         blip_time_t delay;
-        /// TODO:
+        /// the linear feedback shift register for generating noise values
         uint32_t lfsr;
     } noise;
 
@@ -218,7 +218,7 @@ class GeneralInstrumentAy_3_8910 {
             // if the period is zero, set to the minimal value of PERIOD_FACTOR
             if (!period) period = PERIOD_FACTOR;
             // adjust time of next timer expiration based on change in period
-            osc_t& osc = oscs[i];
+            Oscillator& osc = oscs[i];
             if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
             osc.period = period;
         }
@@ -254,7 +254,7 @@ class GeneralInstrumentAy_3_8910 {
 
         // run each osc separately
         for (unsigned index = 0; index < OSC_COUNT; index++) {
-            osc_t* const osc = &oscs[index];
+            Oscillator* const osc = &oscs[index];
             int osc_mode = regs[CHANNEL_ENABLES] >> index;
 
             // output
@@ -373,7 +373,7 @@ class GeneralInstrumentAy_3_8910 {
                                 time += period;
                                 //phase ^= 1;
                             }
-                            //assert(phase == (delta > 0));
+                            // assert(phase == (delta > 0));
                             phase = unsigned (-delta) >> (CHAR_BIT * sizeof (unsigned) - 1);
                             // (delta > 0)
                         } else {
@@ -507,17 +507,14 @@ class GeneralInstrumentAy_3_8910 {
         last_time   = 0;
         noise.delay = 0;
         noise.lfsr  = 1;
-
-        osc_t* osc = &oscs[OSC_COUNT];
-        do {
-            osc--;
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
+            Oscillator* osc = &oscs[i];
             osc->period   = PERIOD_FACTOR;
             osc->delay    = 0;
             osc->last_amp = 0;
             osc->phase    = 0;
-        } while (osc != oscs);
-
-        for (int i = sizeof regs; --i >= 0;) regs[i] = 0;
+        }
+        memset(regs, 0, sizeof regs);
         regs[CHANNEL_ENABLES] = 0xFF;
         _write(13, 0);
     }

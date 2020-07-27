@@ -2120,7 +2120,6 @@ OPLL_calc_stereo (OPLL * opll, e_int32 out[2])
 #endif /* EMU2413_COMPACTION */
 
 #include "yamaha_ym2413.hpp"
-#include <assert.h>
 
 static int use_count = 0;
 
@@ -2140,8 +2139,8 @@ int YamahaYM2413::set_rate(double sample_rate, double clock_rate) {
         use_count--;
     }
 
-    // Only one YM2413 may be used at a time (emu2413 uses lots of global data)
-    assert(use_count == 0);
+    if (use_count != 0)
+        throw "Only one YM2413 may be used at a time (emu2413 uses lots of global data)";
     use_count++;
 
     opll = OPLL_new(clock_rate, sample_rate);

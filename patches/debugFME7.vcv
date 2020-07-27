@@ -51,6 +51,7 @@
           "value": 1.0
         }
       ],
+      "bypass": true,
       "leftModuleId": 64,
       "rightModuleId": 1,
       "pos": [
@@ -299,14 +300,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 72,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 64,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
       "id": 171,
       "outputModuleId": 5,
       "outputId": 0,
@@ -377,6 +370,14 @@
       "inputModuleId": 70,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 178,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 64,
+      "inputId": 0,
+      "color": "#c9b70e"
     }
   ]
 }

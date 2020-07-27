@@ -56,17 +56,14 @@ class ChannelOutOfBoundsException: public Exception {
  public:
     /// @brief Constructor.
     ///
-    /// @param channel the channel index that was requested
-    /// @param num_channels the number of channels that are available
+    /// @param index the channel index that was requested
+    /// @param count the number of channels that are available
     ///
-    ChannelOutOfBoundsException(
-        unsigned channel,
-        unsigned num_channels
-    ) : Exception(
+    ChannelOutOfBoundsException(unsigned index, unsigned count) : Exception(
         "tried to set output for channel index " +
-        std::to_string(channel) +
+        std::to_string(index) +
         ", but the chip has " +
-        std::to_string(num_channels) +
+        std::to_string(count) +
         " channels"
     ) { }
 };
@@ -78,17 +75,13 @@ class AddressSpaceException: public Exception {
  public:
     /// @brief Constructor.
     ///
-    /// @param accessed the requested address from the address space
+    /// @param at the requested address from the address space
     /// @param start the first address in the address space
     /// @param stop the last address in the address space
     ///
-    AddressSpaceException(
-        Address accessed,
-        Address start,
-        Address stop
-    ) : Exception(
+    AddressSpaceException(Address at, Address start, Address stop) : Exception(
         "tried to access address " +
-        std::to_string(accessed) +
+        std::to_string(at) +
         ", but the chip has address space [" +
         std::to_string(start) +
         ", " +

@@ -340,19 +340,19 @@ class NECTurboGrafx16 {
         }
     }
 
-    /// @brief Write to the data port.
+    /// @brief Write data to a register.
     ///
-    /// @param addr the address to write the data to
-    /// @param data the byte to write to the data port
+    /// @param addr the address of the register to write the data to
+    /// @param data the byte to write to the register at given address
     ///
     void write(uint16_t addr, uint8_t data) {
+        static constexpr auto time = 0;
         // make sure the given address is legal
         if (addr < ADDR_START or addr > ADDR_END)
             throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
-        static constexpr auto time = 0;
-        if (addr == 0x800) {
+        if (addr == CHANNEL_SELECT) {  // select the active channel
             latch = data & 7;
-        } else if (addr == 0x801) {
+        } else if (addr == MAIN_VOLUME) {  // update the global volume control
             if (balance != data) {
                 balance = data;
                 for (unsigned i = 0; i < OSC_COUNT; i++) {
@@ -360,37 +360,37 @@ class NECTurboGrafx16 {
                     balance_changed(*oscs);
                 }
             }
-        } else if (latch < OSC_COUNT) {
+        } else if (latch < OSC_COUNT) {  // individual channel control
             Oscillator& osc = oscs[latch];
             osc.run_until(synth, time);
-            switch (addr) {
-            case 0x802:
+            switch (addr) {  // update the channel's register
+            case CHANNEL_FREQ_LO:  // low 8 bits of 12-bit frequency
                 osc.period = (osc.period & 0xF00) | data;
                 break;
-            case 0x803:
+            case CHANNEL_FREQ_HI:  // high 4 bits of 12-bit frequency
                 osc.period = (osc.period & 0x0FF) | ((data & 0x0F) << 8);
                 break;
-            case 0x804:
-                if (osc.control & 0x40 & ~data)
+            case CHANNEL_VOLUME:  // 5-bit volume control
+                if (osc.control & 0x40 & ~data)  // reset phase
                     osc.phase = 0;
                 osc.control = data;
                 balance_changed(osc);
                 break;
-            case 0x805:
+            case CHANNEL_BALANCE:  // L+R balance fader
                 osc.balance = data;
                 balance_changed(osc);
                 break;
-            case 0x806:
+            case CHANNEL_WAVE:  // wave-table data / DAC control
                 data &= 0x1F;
-                if (!(osc.control & 0x40)) {
+                if (!(osc.control & 0x40)) {  // update wave & increment phase
                     osc.wave[osc.phase] = data;
                     osc.phase = (osc.phase + 1) & 0x1F;
-                } else if (osc.control & 0x80) {
+                } else if (osc.control & 0x80) {  // set DAC
                     osc.dac = data;
                 }
                 break;
-             case 0x807:
-                if (&osc >= &oscs[4])
+             case CHANNEL_NOISE:  // noise control / period
+                if (&osc >= &oscs[WAVE4])  // only apply noise for index 4 + 5
                     osc.noise = data;
                 break;
             }

@@ -68,7 +68,9 @@ class NECTurboGrafx16 {
         CHANNEL_BALANCE = 0x0805,
         /// The register to write wave-table data to for the active channel
         CHANNEL_WAVE    = 0x0806,
-        /// The register to write noise control data to for the active channel
+        /// The register to write noise control data to for the active channel.
+        /// The high bit enables noise and the low 5 bits set the period. Noise
+        /// is only available for channels 5 & 6.
         CHANNEL_NOISE   = 0x0807,
     };
 
@@ -91,7 +93,8 @@ class NECTurboGrafx16 {
         int delay;
         /// the period of the oscillator
         int period;
-        /// TODO:
+        /// the noise register for the oscillator. the high bit enables noise
+        /// and the low 5 bits set the period
         uint8_t noise;
         /// the phase of the oscillator
         uint8_t phase;

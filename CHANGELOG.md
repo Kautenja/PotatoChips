@@ -65,5 +65,5 @@
 -   fix issue where CV modulated SN76489 VCA wouldn't return to 0
 -   fix issue where SN76489 at high-frequency would produce no output
 -   fix issue where amplifier for FME7 wasn't allowed full gain
--   4-bit volume control with CV, 2-bit PW control CV, and new panel for 2A03
--   updated panel for FME7
+-   4-bit volume control with CV & 2-bit PW control CV for 2A03
+-   updated panel for 2A03, FME7, VRC6

@@ -154,14 +154,27 @@ struct ChipAY_3_8910 : Module {
     ///
     inline uint8_t getMixer() {
         uint8_t mixerByte = 0;
+        // iterate over the oscillators to set the mixer tone and noise flags
         for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-            // process the tone trigger
-            mixerTriggers[2 * i].process(rescale(inputs[INPUT_TONE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-            bool toneState = (1 - params[PARAM_TONE + i].getValue()) - !mixerTriggers[2 * i].state;
+            // tone trigger
+            // clamp the input within [0, 10]. this allows bipolar signals to
+            // be interpreted as unipolar signals for the trigger input
+            auto tone = math::clamp(inputs[INPUT_TONE + i].getVoltage(), 0.f, 10.f);
+            // there are 2 triggers per channel, process the tone trigger
+            auto toneTrigger = mixerTriggers[i << 1];
+            toneTrigger.process(rescale(tone, 0.f, 2.f, 0.f, 1.f));
+            // get the state of the tone based on the parameter and trig input
+            bool toneState = params[PARAM_TONE + i].getValue() - toneTrigger.state;
             mixerByte |= !toneState << i;
-            // process the noise trigger
-            mixerTriggers[2 * i + 1].process(rescale(inputs[INPUT_NOISE + i].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-            bool noiseState = (1 - params[PARAM_NOISE + i].getValue()) - !mixerTriggers[2 * i + 1].state;
+            // noise trigger
+            // clamp the input within [0, 10]. this allows bipolar signals to
+            // be interpreted as unipolar signals for the trigger input
+            auto noise = math::clamp(inputs[INPUT_NOISE + i].getVoltage(), 0.f, 10.f);
+            // there are 2 triggers per channel, process the noise trigger
+            auto noiseTrigger = mixerTriggers[(i << 1) + 1];
+            noiseTrigger.process(rescale(noise, 0.f, 2.f, 0.f, 1.f));
+            // get the state of the noise based on the parameter and trig input
+            bool noiseState = params[PARAM_NOISE + i].getValue() - noiseTrigger.state;
             mixerByte |= !noiseState << (i + 3);
         }
         return mixerByte;

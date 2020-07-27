@@ -116,7 +116,11 @@ class NECTurboGrafx16 {
         /// the synthesizer type that the oscillator uses
         typedef BLIPSynthesizer<blip_med_quality,1> Synthesizer;
 
-        /// TODO:
+        /// @brief Run the oscillator until specified time.
+        ///
+        /// @param synth_ the synthesizer to use for generating samples
+        /// @param time the number of elapsed cycles
+        ///
         void run_until(Synthesizer& synth_, blip_time_t end_time) {
             if (end_time < last_time)
                 throw Exception("end_time must be >= last_time");
@@ -218,7 +222,10 @@ class NECTurboGrafx16 {
     /// the synthesizer for producing samples from the chip
     Oscillator::Synthesizer synth;
 
-    /// TODO:
+    /// Update the volume levels for an oscillator after changing the balance.
+    ///
+    /// @param osc the oscillator to update the volume levels of
+    ///
     void balance_changed(Oscillator& osc) {
         static const short log_table[32] = {  // ~1.5 db per step
             #define ENTRY(factor) short (factor * Oscillator::AMP_RANGE / 31.0 + 0.5)

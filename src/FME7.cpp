@@ -90,7 +90,7 @@ struct ChipFME7 : Module {
         freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
+        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq) + 1;
         return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 

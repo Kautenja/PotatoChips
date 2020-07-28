@@ -32,15 +32,15 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0771886557
+          "value": 0.251188636
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 3,
@@ -48,7 +48,7 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "leftModuleId": 59,
@@ -633,7 +633,7 @@
     {
       "id": 173,
       "outputModuleId": 59,
-      "outputId": 2,
+      "outputId": 0,
       "inputModuleId": 69,
       "inputId": 0,
       "color": "#c91847"

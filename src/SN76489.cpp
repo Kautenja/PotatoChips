@@ -171,7 +171,8 @@ struct ChipSN76489 : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            auto lfsrV = math::clamp(inputs[INPUT_LFSR].getVoltage(), 0.f, 10.f);
+            lfsr.process(rescale(lfsrV, 0.f, 2.f, 0.f, 1.f));
             // process the data on the chip
             for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT - 1; i++) {
                 // 10-bit frequency

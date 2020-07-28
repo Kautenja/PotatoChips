@@ -67,3 +67,4 @@
 -   fix issue where amplifier for FME7 wasn't allowed full gain
 -   4-bit volume control with CV & 2-bit PW control CV for 2A03
 -   updated panel for 2A03, FME7, VRC6
+-   fix issue where SN76489 trigger input wasn't responding to bipolar inputs

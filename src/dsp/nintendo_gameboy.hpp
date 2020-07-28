@@ -437,8 +437,8 @@ class NintendoGBS {
         // require modification to all oscillator code)
         int data = regs[STEREO_VOLUME - ADDR_START];
         double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
-        pulse_synth.volume(vol);
-        other_synth.volume(vol);
+        pulse_synth.set_volume(vol);
+        other_synth.set_volume(vol);
     }
 
     /// @brief Run emulator until specified time, so that any DMC memory reads

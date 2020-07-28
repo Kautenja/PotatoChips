@@ -262,8 +262,8 @@ class KonamiVRC6 {
     ///
     inline void set_volume(double level = 1.f) {
         level *= 0.0967 * 2;
-        saw_synth.volume(level);
-        square_synth.volume(level * 0.5);
+        saw_synth.set_volume(level);
+        square_synth.set_volume(level * 0.5);
     }
 
     /// @brief Set treble equalization for the synthesizers.

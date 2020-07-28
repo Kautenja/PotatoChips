@@ -384,7 +384,7 @@ class BLIPSynthesizer {
     BLIPBuffer* buf;
     /// the last amplitude value (DPCM sample) to output from the synthesizer
     int last_amp;
-    /// TODO:
+    /// the influence of amplitude deltas based on the volume unit
     int delta_factor;
 
     /// Initialize a new BLIP synthesizer.
@@ -397,8 +397,11 @@ class BLIPSynthesizer {
         memset(impulses, 0, sizeof impulses);
     }
 
-    /// TODO:
-    void volume(double new_unit) {
+    /// Set the volume to a new value.
+    ///
+    /// @param new_unit the new volume level to use
+    ///
+    void set_volume(double new_unit) {
         new_unit = new_unit * (1.0 / (range < 0 ? -range : range));
         if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
@@ -477,7 +480,7 @@ class BLIPSynthesizer {
         double vol = volume_unit;
         if (vol) {
             volume_unit = 0.0;
-            volume(vol);
+            set_volume(vol);
         }
     }
 

@@ -321,7 +321,7 @@ class NECTurboGrafx16 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(1.8 / OSC_COUNT / Oscillator::AMP_RANGE * level);
+        synth.set_volume(1.8 / OSC_COUNT / Oscillator::AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.

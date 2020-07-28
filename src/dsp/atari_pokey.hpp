@@ -150,7 +150,7 @@ class AtariPOKEY {
         /// @param level the value to set the volume to
         ///
         inline void set_volume(double level = 1.0) {
-            synth.volume(1.0 / OSC_COUNT / 30 * level);
+            synth.set_volume(1.0 / OSC_COUNT / 30 * level);
         }
 
         /// @brief Set treble equalization for the synthesizers.

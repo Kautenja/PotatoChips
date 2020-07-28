@@ -194,7 +194,7 @@ class Namco106 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.f) {
-        synth.volume(0.10 / OSC_COUNT * level);
+        synth.set_volume(0.10 / OSC_COUNT * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.

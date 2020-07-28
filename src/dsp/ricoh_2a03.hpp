@@ -568,9 +568,9 @@ class Ricoh2A03 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        square_synth.volume(0.1128 * level);
-        triangle.synth.volume(0.12765 * level);
-        noise.synth.volume(0.0741 * level);
+        square_synth.set_volume(0.1128 * level);
+        triangle.synth.set_volume(0.12765 * level);
+        noise.synth.set_volume(0.0741 * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.

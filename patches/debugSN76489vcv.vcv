@@ -455,14 +455,6 @@
       "inputModuleId": 10,
       "inputId": 0,
       "color": "#c9b70e"
-    },
-    {
-      "id": 754,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 76,
-      "inputId": 4,
-      "color": "#c91847"
     }
   ]
 }

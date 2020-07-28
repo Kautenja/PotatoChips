@@ -299,7 +299,7 @@ class NintendoGBS {
 
                 // keep parallel resampled time to eliminate time conversion in the loop
                 BLIPBuffer* const output = this->output;
-                const auto resampled_period = output->resampled_duration(period);
+                const auto resampled_period = output->resampled_time(period);
                 auto resampled_time = output->resampled_time(time);
                 unsigned bits = this->bits;
                 int delta = amp * 2;

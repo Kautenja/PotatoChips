@@ -398,7 +398,7 @@ class Ricoh2A03 {
                     BLIPBuffer* const output = this->output;
 
                     // using re-sampled time avoids conversion in synth.offset()
-                    auto rperiod = output->resampled_duration(period);
+                    auto rperiod = output->resampled_time(period);
                     auto rtime = output->resampled_time(time);
 
                     int noise = this->noise;

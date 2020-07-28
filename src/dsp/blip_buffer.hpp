@@ -111,35 +111,23 @@ class BLIPBuffer {
     blip_time_t* buffer = 0;
 
     /// Initialize a new BLIP Buffer.
-    BLIPBuffer() { }
+    BLIPBuffer() {
+        static constexpr int size = 1;
+        void* buffer_ = realloc(buffer, (size + blip_buffer_extra_) * sizeof *buffer);
+        if (!buffer_) throw Exception("out of memory for buffer size");
+        buffer = static_cast<blip_time_t*>(buffer_);
+        buffer_size = size;
+    }
 
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer); }
 
-    /// @brief Set the output sample rate and buffer length in milliseconds.
+    /// @brief Set the output sample rate and clock rate.
     ///
     /// @param sample_rate_ the number of samples per second
     /// @param clock_rate_ the number of source clock cycles per second
-    /// @param buffer_length length of the buffer in milliseconds (1/1000 sec).
-    /// defaults to 250, i.e., 1/4 sec.
-    /// @returns NULL on success, otherwise if there isn't enough memory,
-    /// returns error without affecting current buffer setup.
     ///
-    void set_sample_rate(
-        uint32_t sample_rate_,
-        uint32_t clock_rate_,
-        uint32_t buffer_length = 1000 / 4
-    ) {
-        uint32_t new_size = MAX_RESAMPLED_TIME;
-        if (buffer_length != blip_max_length) {  // check the size parameter
-            // TODO: is this size check necessary? what is happening here? the
-            // check and error fails for sample rates greater than 300, but ignoring
-            // the condition doesn't cause any audible issues upstream?
-            // uint32_t size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
-            // if (size >= new_size) throw Exception("buffer size exceeds limit");
-            // new_size = size;
-            new_size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
-        }
+    void set_sample_rate(uint32_t sample_rate_, uint32_t clock_rate_) {
         // calculate the number of cycles per sample (round by truncation) and
         // re-calculate the clock rate with rounding error accounted for
         clock_rate_ = static_cast<uint32_t>(clock_rate_ / sample_rate_) * sample_rate_;
@@ -148,13 +136,6 @@ class BLIPBuffer {
         blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
         if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
             throw Exception("sample_rate : clock_rate ratio is too large");
-        if (buffer_size != new_size) {  // resize the buffer
-            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
-            if (!new_buffer) throw Exception("out of memory for buffer size");
-            // update the instance variables atomically
-            buffer = static_cast<blip_time_t*>(new_buffer);
-            buffer_size = new_size;
-        }
         // update the instance variables atomically
         sample_rate = sample_rate_;
         clock_rate = clock_rate_;

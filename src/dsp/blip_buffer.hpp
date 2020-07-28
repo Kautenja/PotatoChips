@@ -56,17 +56,7 @@ static constexpr int blip_widest_impulse_ = 16;
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
-static constexpr uint32_t blip_max_length = 0;
-
-/// TODO:
-static constexpr uint32_t blip_default_length = 250;
-
-/// TODO:
 static constexpr uint8_t blip_sample_bits = 30;
-
-/// Constant value to use instead of BLIP_READER_BASS(), for slightly more
-/// optimal code at the cost of having no bass control
-static constexpr uint32_t blip_reader_default_bass = 9;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
     #define BLIP_RESTRICT __restrict

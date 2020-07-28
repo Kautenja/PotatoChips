@@ -249,16 +249,16 @@ struct ChipPOKEYWidget : ModuleWidget {
         static constexpr float VERT_SEP = 85.f;
         // channel control
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(  Vec(19,  73 + i * VERT_SEP), module, ChipPOKEY::INPUT_VOCT + i));
-            addInput(createInput<PJ301MPort>(  Vec(19,  38 + i * VERT_SEP), module, ChipPOKEY::INPUT_FM + i));
-            addParam(createParam<Rogan5PSGray>(Vec(46,  39 + i * VERT_SEP), module, ChipPOKEY::PARAM_FREQ + i));
-            auto noise = createParam<Rogan1PRed>(  Vec(109, 30 + i * VERT_SEP), module, ChipPOKEY::PARAM_NOISE + i);
+            addInput(createInput<PJ301MPort>(    Vec(19,  73 + i * VERT_SEP), module, ChipPOKEY::INPUT_VOCT + i));
+            addInput(createInput<PJ301MPort>(    Vec(19,  38 + i * VERT_SEP), module, ChipPOKEY::INPUT_FM + i));
+            addParam(createParam<Rogan5PSGray>(  Vec(46,  39 + i * VERT_SEP), module, ChipPOKEY::PARAM_FREQ + i));
+            auto noise = createParam<Rogan1PRed>(Vec(109, 25 + i * VERT_SEP), module, ChipPOKEY::PARAM_NOISE + i);
             noise->snap = true;
             addParam(noise);
-            addInput(createInput<PJ301MPort>(  Vec(116, 71 + i * VERT_SEP), module, ChipPOKEY::INPUT_NOISE + i));
+            addInput(createInput<PJ301MPort>(    Vec(116, 73 + i * VERT_SEP), module, ChipPOKEY::INPUT_NOISE + i));
             addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, ChipPOKEY::PARAM_LEVEL + i, ChipPOKEY::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(  Vec(172, 28 + i * VERT_SEP), module, ChipPOKEY::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_CHANNEL + i));
+            addInput(createInput<PJ301MPort>(    Vec(172, 28 + i * VERT_SEP), module, ChipPOKEY::INPUT_LEVEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_CHANNEL + i));
         }
         // global control
         for (int i = 0; i < 8; i++) {

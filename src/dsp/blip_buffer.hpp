@@ -336,11 +336,11 @@ class BLIPEqualizer {
     }
 };
 
-/// the synthesis quality level. Start with blip_good_quality.
+/// the synthesis quality level. Start with BLIP_QUALITY_GOOD.
 enum BLIPQuality {
-    blip_med_quality  = 8,
-    blip_good_quality = 12,
-    blip_high_quality = 16
+    BLIP_QUALITY_MEDIUM  = 8,
+    BLIP_QUALITY_GOOD = 12,
+    BLIP_QUALITY_HIGH = 16
 };
 
 /// @brief A digital synthesizer for arbitrary waveforms based on BLIP.

@@ -199,6 +199,17 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
 
+    /// @brief Return the time value re-sampled according to the clock rate
+    /// factor.
+    ///
+    /// @param time the time to re-sample
+    /// @returns the re-sampled time according to the clock rate factor, i.e.,
+    /// \f$time * \frac{sample_rate}{clock_rate}\f$
+    ///
+    inline blip_resampled_time_t resampled_time(blip_time_t time) const {
+        return time * factor;
+    }
+
     /// @brief Return the output sample from the buffer.
     ///
     /// @param output the output array to push samples from the buffer into
@@ -216,17 +227,6 @@ class BLIPBuffer {
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;
-    }
-
-    /// @brief Return the time value re-sampled according to the clock rate
-    /// factor.
-    ///
-    /// @param time the time to re-sample
-    /// @returns the re-sampled time according to the clock rate factor, i.e.,
-    /// \f$time * \frac{sample_rate}{clock_rate}\f$
-    ///
-    inline blip_resampled_time_t resampled_time(blip_time_t time) const {
-        return time * factor;
     }
 };
 

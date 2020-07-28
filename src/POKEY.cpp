@@ -75,8 +75,8 @@ struct ChipPOKEY : Module {
         }
         // control register controls
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
-        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from 3", "");
-        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from 3", "");
+        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from Channel 4", "");
+        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from Channel 3", "");
         // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");  // ignore 16-bit
         // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");  // ignore 16-bit
         configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
@@ -171,7 +171,7 @@ struct ChipPOKEY : Module {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < 8; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
-            auto cv = inputs[INPUT_CONTROL + bit].getVoltage();
+            auto cv = math::clamp(inputs[INPUT_CONTROL + bit].getVoltage(), 0.f, 10.f);
             controlTriggers[bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
                 !controlTriggers[bit].state;

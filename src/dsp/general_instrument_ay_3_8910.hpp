@@ -158,7 +158,7 @@ class GeneralInstrumentAy_3_8910 {
         BLIPBuffer* output;
     } oscs[OSC_COUNT];
     /// the synthesizer shared by the 5 oscillator channels
-    BLIPSynthesizer<blip_good_quality, 1> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
     /// the last time the oscillators were updated
     blip_time_t last_time;
     /// the registers on the chip

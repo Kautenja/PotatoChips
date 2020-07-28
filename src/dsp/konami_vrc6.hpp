@@ -105,9 +105,9 @@ class KonamiVRC6 {
     blip_time_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
-    BLIPSynthesizer<blip_med_quality, 31> saw_synth;
+    BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 31> saw_synth;
     /// a BLIP synthesizer for the square waveform
-    BLIPSynthesizer<blip_good_quality, 15> square_synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> square_synth;
 
     /// @brief Run VRC6 until specified time.
     ///

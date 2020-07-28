@@ -74,7 +74,7 @@ class Namco106 {
     /// the RAM on the chip
     uint8_t reg[REG_COUNT];
     /// the synthesizer for producing sound from the chip
-    BLIPSynthesizer<blip_good_quality, 15> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
     /// @details

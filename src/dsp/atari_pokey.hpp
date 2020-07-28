@@ -124,7 +124,7 @@ class AtariPOKEY {
         uint8_t poly17[poly17_len / 8 + 1];
 
         /// the synthesizer for the Atari POKEY engine
-        BLIPSynthesizer<blip_good_quality, 1> synth;
+        BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
 
         // friend the container class to access member data
         friend class AtariPOKEY;

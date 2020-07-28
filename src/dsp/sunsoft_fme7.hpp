@@ -102,7 +102,7 @@ class SunSoftFME7 {
     blip_time_t last_time;
 
     /// the synthesizer for generating sound from the chip
-    BLIPSynthesizer<blip_good_quality, 1> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///

@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.251188636
         },
         {
           "id": 1,
@@ -295,7 +295,7 @@
     {
       "id": 76,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "SN76489",
       "params": [
         {

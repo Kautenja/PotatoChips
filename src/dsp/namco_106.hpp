@@ -74,7 +74,7 @@ class Namco106 {
     /// the RAM on the chip
     uint8_t reg[REG_COUNT];
     /// the synthesizer for producing sound from the chip
-    BLIPSynthesizer<blip_good_quality, 15> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
     /// @details
@@ -122,7 +122,7 @@ class Namco106 {
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
                 // calculate the period of the waveform
-                auto period = output->resampled_duration(((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) / wave_size;
+                auto period = output->resampled_time(((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) / wave_size;
                 // backup the amplitude and position
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;
@@ -194,7 +194,7 @@ class Namco106 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.f) {
-        synth.volume(0.10 / OSC_COUNT * level);
+        synth.set_volume(0.10 / OSC_COUNT * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
@@ -202,7 +202,7 @@ class Namco106 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        synth.treble_eq(equalizer);
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal frame counter, registers, and all oscillators.

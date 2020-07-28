@@ -158,7 +158,7 @@ class GeneralInstrumentAy_3_8910 {
         BLIPBuffer* output;
     } oscs[OSC_COUNT];
     /// the synthesizer shared by the 5 oscillator channels
-    BLIPSynthesizer<blip_good_quality, 1> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
     /// the last time the oscillators were updated
     blip_time_t last_time;
     /// the registers on the chip
@@ -491,7 +491,7 @@ class GeneralInstrumentAy_3_8910 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(0.7 / OSC_COUNT / AMP_RANGE * level);
+        synth.set_volume(0.7 / OSC_COUNT / AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
@@ -499,7 +499,7 @@ class GeneralInstrumentAy_3_8910 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(BLIPEqualizer const& equalizer) {
-        synth.treble_eq(equalizer);
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal state, registers, and all oscillators.

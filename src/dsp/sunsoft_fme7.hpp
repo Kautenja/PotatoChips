@@ -102,7 +102,7 @@ class SunSoftFME7 {
     blip_time_t last_time;
 
     /// the synthesizer for generating sound from the chip
-    BLIPSynthesizer<blip_good_quality, 1> synth;
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
@@ -209,15 +209,15 @@ class SunSoftFME7 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(0.38 / AMP_RANGE * level);
+        synth.set_volume(0.38 / AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(BLIPEqualizer const& equalizer) {
-        synth.treble_eq(equalizer);
+    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal state, registers, and all oscillators.

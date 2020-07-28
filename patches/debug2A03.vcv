@@ -16,7 +16,7 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
-          "blockSize": 2048
+          "blockSize": 4096
         }
       },
       "pos": [
@@ -32,15 +32,15 @@
       "params": [
         {
           "id": 0,
-          "value": 0.190000013
+          "value": 0.0771886557
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 3,
@@ -48,7 +48,7 @@
         },
         {
           "id": 4,
-          "value": 1.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 59,
@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -85,7 +85,7 @@
     {
       "id": 59,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "2A03",
       "params": [
         {
@@ -366,7 +366,7 @@
     {
       "id": 70,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "AY_3_8910",
       "params": [
         {
@@ -428,7 +428,7 @@
     {
       "id": 71,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.0",
+      "version": "1.4.1",
       "model": "SN76489",
       "params": [
         {
@@ -469,8 +469,50 @@
         }
       ],
       "leftModuleId": 70,
+      "rightModuleId": 72,
       "pos": [
         68,
+        1
+      ]
+    },
+    {
+      "id": 72,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "LFO",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.5
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 71,
+      "pos": [
+        80,
         1
       ]
     }
@@ -581,28 +623,20 @@
       "color": "#0986ad"
     },
     {
-      "id": 173,
-      "outputModuleId": 59,
-      "outputId": 0,
-      "inputModuleId": 69,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 174,
-      "outputModuleId": 34,
-      "outputId": 1,
-      "inputModuleId": 59,
-      "inputId": 12,
-      "color": "#0986ad"
-    },
-    {
       "id": 189,
       "outputModuleId": 34,
       "outputId": 0,
       "inputModuleId": 59,
       "inputId": 2,
       "color": "#c9b70e"
+    },
+    {
+      "id": 173,
+      "outputModuleId": 59,
+      "outputId": 2,
+      "inputModuleId": 69,
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

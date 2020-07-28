@@ -98,7 +98,7 @@ class TexasInstrumentsSN76489 {
         /// the phase of the oscillator
         int phase = 0;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<blip_good_quality, 1> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
         const Synth* synth;
 
         /// Reset the oscillator to its initial state.
@@ -163,7 +163,7 @@ class TexasInstrumentsSN76489 {
         /// the linear feedback shift registers
         unsigned feedback = 0x9000;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<blip_med_quality, 1> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
 
         /// Reset the oscillator to its initial state.
@@ -306,8 +306,8 @@ class TexasInstrumentsSN76489 {
     ///
     inline void set_volume(double level = 1.0) {
         level *= 0.85 / (OSC_COUNT * 64 * 2);
-        square_synth.volume(level);
-        noise.synth.volume(level);
+        square_synth.set_volume(level);
+        noise.synth.set_volume(level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
@@ -315,8 +315,8 @@ class TexasInstrumentsSN76489 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        square_synth.treble_eq(equalizer);
-        noise.synth.treble_eq(equalizer);
+        square_synth.set_treble_eq(equalizer);
+        noise.synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset oscillators and internal state.

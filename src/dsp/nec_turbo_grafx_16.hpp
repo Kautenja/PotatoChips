@@ -122,7 +122,7 @@ class NECTurboGrafx16 {
         /// the range of the amplifier on the oscillator
         enum { AMP_RANGE = 0x8000 };
         /// the synthesizer type that the oscillator uses
-        typedef BLIPSynthesizer<blip_med_quality,1> Synthesizer;
+        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM,1> Synthesizer;
 
         /// @brief Run the oscillator until specified time.
         ///
@@ -321,7 +321,7 @@ class NECTurboGrafx16 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(1.8 / OSC_COUNT / Oscillator::AMP_RANGE * level);
+        synth.set_volume(1.8 / OSC_COUNT / Oscillator::AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
@@ -329,7 +329,7 @@ class NECTurboGrafx16 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(BLIPEqualizer const& equalizer) {
-        synth.treble_eq(equalizer);
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal state, registers, and all oscillators.

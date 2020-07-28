@@ -186,7 +186,7 @@ class Ricoh2A03 {
         int sweep_delay;
 
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
-        typedef BLIPSynthesizer<blip_good_quality, 15> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> Synth;
         const Synth* synth;
 
         void clock_sweep(int negative_adjust) {
@@ -291,7 +291,7 @@ class Ricoh2A03 {
         int phase;
         int linear_counter;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynthesizer<blip_good_quality, 15> synth;
+        BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
 
         inline int calc_amp() const {
             int amp = phase_range - phase;
@@ -364,7 +364,7 @@ class Ricoh2A03 {
         /// the output value from the noise oscillator
         int noise;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynthesizer<blip_med_quality, 15> synth;
+        BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 15> synth;
 
         void run(blip_time_t time, blip_time_t end_time) {
             static const int16_t noise_period_table[16] = {
@@ -398,7 +398,7 @@ class Ricoh2A03 {
                     BLIPBuffer* const output = this->output;
 
                     // using re-sampled time avoids conversion in synth.offset()
-                    auto rperiod = output->resampled_duration(period);
+                    auto rperiod = output->resampled_time(period);
                     auto rtime = output->resampled_time(time);
 
                     int noise = this->noise;
@@ -568,9 +568,9 @@ class Ricoh2A03 {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        square_synth.volume(0.1128 * level);
-        triangle.synth.volume(0.12765 * level);
-        noise.synth.volume(0.0741 * level);
+        square_synth.set_volume(0.1128 * level);
+        triangle.synth.set_volume(0.12765 * level);
+        noise.synth.set_volume(0.0741 * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
@@ -578,9 +578,9 @@ class Ricoh2A03 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        square_synth.treble_eq(equalizer);
-        triangle.synth.treble_eq(equalizer);
-        noise.synth.treble_eq(equalizer);
+        square_synth.set_treble_eq(equalizer);
+        triangle.synth.set_treble_eq(equalizer);
+        noise.synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal frame counter, registers, and all oscillators.

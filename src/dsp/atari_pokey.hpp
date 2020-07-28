@@ -124,7 +124,7 @@ class AtariPOKEY {
         uint8_t poly17[poly17_len / 8 + 1];
 
         /// the synthesizer for the Atari POKEY engine
-        BLIPSynthesizer<blip_good_quality, 1> synth;
+        BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
 
         // friend the container class to access member data
         friend class AtariPOKEY;
@@ -150,7 +150,7 @@ class AtariPOKEY {
         /// @param level the value to set the volume to
         ///
         inline void set_volume(double level = 1.0) {
-            synth.volume(1.0 / OSC_COUNT / 30 * level);
+            synth.set_volume(1.0 / OSC_COUNT / 30 * level);
         }
 
         /// @brief Set treble equalization for the synthesizers.
@@ -158,7 +158,7 @@ class AtariPOKEY {
         /// @param equalizer the equalization parameter for the synthesizers
         ///
         inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-            synth.treble_eq(equalizer);
+            synth.set_treble_eq(equalizer);
         }
     };
 

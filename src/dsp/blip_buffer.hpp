@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
 #include <cmath>
 #include <limits>
 #include "exceptions.hpp"
@@ -85,12 +84,21 @@ static constexpr uint32_t MAX_RESAMPLED_TIME =
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  private:
+    /// the size of the buffer
+    uint32_t buffer_size = 0;
     /// The sample rate to generate samples from the buffer at
-    uint32_t sample_rate_ = 0;
+    uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
-    uint32_t clock_rate_ = 0;
-    /// the frequency of the high-pass filter (TODO: in Hz?)
-    int bass_freq_ = 16;
+    uint32_t clock_rate = 0;
+    /// the clock rate factor, i.e., the number of CPU samples per audio sample
+    blip_ulong factor = 1;
+    /// the cut-off frequency of the high-pass filter in Hz
+    int bass_freq = 16;
+    /// the number of shifts to adjust samples to filter out bass according to
+    /// the cut-off frequency of the hi-pass filter (`bass_freq`)
+    int bass_shift = 0;
+    /// the accumulator for integrating samples into
+    blip_long sample_accumulator = 0;
 
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);
@@ -99,155 +107,103 @@ class BLIPBuffer {
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
-    typedef blip_time_t buf_t_;
-    /// TODO:
-    blip_ulong factor_ = 1;
-    /// TODO:
-    buf_t_* buffer_ = 0;
-    /// TODO:
-    uint32_t buffer_size_ = 0;
-    /// TODO:
-    blip_long reader_accum_ = 0;
-    /// TODO:
-    int bass_shift_ = 0;
+    /// the buffer of samples in the BLIP buffer
+    blip_time_t* buffer = 0;
 
     /// Initialize a new BLIP Buffer.
     BLIPBuffer() { }
 
     /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer() { free(buffer_); }
+    ~BLIPBuffer() { free(buffer); }
 
-    /// The result from setting the sample rate to a new value
-    enum class SampleRateStatus {
-        Success = 0,               // setting the sample rate succeeded
-        BufferLengthExceedsLimit,  // requested length exceeds limit
-        OutOfMemory                // ran out of resources for buffer
-    };
-    // ^ and remove this enum class
-    // TODO: throw exception instead of return error code model, these
-    // exceptions should never happen in runtime, and don't need to be fast
-    // when they do. it's more important to guarantee that the client code
-    // crashes in these cases than it is to provide the client the opportunity
-    // to do fast error handling. I.e., setting sample rate / clock rate should
-    // be well-defined for production code and not cause exceptions to begin
-    // with.
-    //
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
-    /// @param samples_per_sec the number of samples per second
-    /// @param clock_cycles_per_sec the number of source clock cycles per second
+    /// @param sample_rate_ the number of samples per second
+    /// @param clock_rate_ the number of source clock cycles per second
     /// @param buffer_length length of the buffer in milliseconds (1/1000 sec).
     /// defaults to 250, i.e., 1/4 sec.
     /// @returns NULL on success, otherwise if there isn't enough memory,
     /// returns error without affecting current buffer setup.
     ///
-    SampleRateStatus set_sample_rate(
-        uint32_t samples_per_sec,
-        uint32_t clock_cycles_per_sec,
+    void set_sample_rate(
+        uint32_t sample_rate_,
+        uint32_t clock_rate_,
         uint32_t buffer_length = 1000 / 4
     ) {
-        // check the size parameter
         uint32_t new_size = MAX_RESAMPLED_TIME;
-        if (buffer_length != blip_max_length) {
-            uint32_t size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
-            if (size >= new_size)  // fails if requested length exceeds limit
-                return SampleRateStatus::BufferLengthExceedsLimit;
-            new_size = size;
+        if (buffer_length != blip_max_length) {  // check the size parameter
+            // TODO: is this size check necessary? what is happening here? the
+            // check and error fails for sample rates greater than 300, but ignoring
+            // the condition doesn't cause any audible issues upstream?
+            // uint32_t size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
+            // if (size >= new_size) throw Exception("buffer size exceeds limit");
+            // new_size = size;
+            new_size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
         }
-        // resize the buffer
-        if (buffer_size_ != new_size) {
-            void* p = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
-            // if the reallocation failed, return an out of memory flag
-            if (!p) return SampleRateStatus::OutOfMemory;
-            // update the buffer and buffer size
-            buffer_ = (buf_t_*) p;
-            buffer_size_ = new_size;
-        }
-        // update instance variables based on the new sample rate
-        sample_rate_ = samples_per_sec;
-        // update the high-pass filter
-        bass_freq(bass_freq_);
-        // calculate the number of cycles per sample (round by truncation)
-        uint32_t cycles_per_sample = clock_cycles_per_sec / samples_per_sec;
+        // calculate the number of cycles per sample (round by truncation) and
         // re-calculate the clock rate with rounding error accounted for
-        clock_rate_ = cycles_per_sample * samples_per_sec;
+        clock_rate_ = static_cast<uint32_t>(clock_rate_ / sample_rate_) * sample_rate_;
         // calculate the time factor based on the clock_rate and sample_rate
-        factor_ = clock_rate_factor(clock_rate_);
-        // clear the buffer
-        reader_accum_ = 0;
-        // return success flag
-        return SampleRateStatus::Success;
+        double ratio = static_cast<double>(sample_rate_) / clock_rate_;
+        blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
+            throw Exception("sample_rate : clock_rate ratio is too large");
+        if (buffer_size != new_size) {  // resize the buffer
+            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
+            if (!new_buffer) throw Exception("out of memory for buffer size");
+            // update the instance variables atomically
+            buffer = static_cast<blip_time_t*>(new_buffer);
+            buffer_size = new_size;
+        }
+        // update the instance variables atomically
+        sample_rate = sample_rate_;
+        clock_rate = clock_rate_;
+        factor = factor_;
+        sample_accumulator = 0;
+        // reset the bass frequency (because sample_rate has changed)
+        set_bass_freq(bass_freq);
     }
 
     /// @brief Return the current output sample rate.
     ///
     /// @returns the audio sample rate
     ///
-    inline uint32_t get_sample_rate() const { return sample_rate_; }
+    inline uint32_t get_sample_rate() const { return sample_rate; }
 
     /// @brief Return the number of source time units per second.
     ///
     /// @returns the number of source time units per second
     ///
-    inline uint32_t get_clock_rate() const { return clock_rate_; }
+    inline uint32_t get_clock_rate() const { return clock_rate; }
 
-    /// @brief Read out of this buffer into `dest` and remove them from the buffer.
-    ///
-    /// @param output the output array to push samples from the buffer into
-    /// @returns the sample
-    ///
-    blip_sample_t read_sample() {
-        // create a temporary pointer to the buffer that can be mutated
-        const buf_t_* BLIP_RESTRICT buffer_temp = buffer_;
-        // get the current accumulator
-        blip_long read_accum_temp = reader_accum_;
-        // get the sample from the accumulator
-        blip_long sample = read_accum_temp >> (blip_sample_bits - 16);
-        if (static_cast<blip_sample_t>(sample) != sample)
-            sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
-        read_accum_temp += *buffer_temp - (read_accum_temp >> (bass_shift_));
-        // update the accumulator
-        reader_accum_ = read_accum_temp;
-        // -------------------------------------------------------------------
-        // TODO: remove
-        // -------------------------------------------------------------------
-        // copy remaining samples to beginning and clear old samples
-        static constexpr auto count = 1;
-        long remain = count + blip_buffer_extra_;
-        memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
-        memset(buffer_ + remain, 0, count * sizeof *buffer_);
-        // -------------------------------------------------------------------
-        return sample;
-    }
-
-    /// @brief Set frequency high-pass filter frequency, where higher values
+    /// @brief Set the frequency of the high-pass filter, where higher values
     /// reduce the bass more.
     ///
-    /// @param frequency TODO:
+    /// @param frequency the cut-off frequency of the high-pass filter
     ///
-    inline void bass_freq(int frequency) {
-        bass_freq_ = frequency;
+    inline void set_bass_freq(int frequency) {
         int shift = 31;
         if (frequency > 0) {
             shift = 13;
-            long f = (frequency << 16) / sample_rate_;
+            blip_long f = (frequency << 16) / sample_rate;
             while ((f >>= 1) && --shift) { }
         }
-        bass_shift_ = shift;
+        bass_shift = shift;
+        bass_freq = frequency;
     }
 
-    // TODO: remove and use resampled_time
-    /// @brief Return the time value re-sampled according to the clock rate
-    /// factor.
+    /// @brief Return the frequency of the  high-pass filter.
     ///
-    /// @param time the time to re-sample
-    /// @returns the re-sampled time according to the clock rate factor, i.e.,
-    /// \f$time * \frac{sample_rate}{clock_rate}\f$
+    /// @returns the cut-off frequency of the high-pass filter, where higher
+    /// values reduce the bass more.
     ///
-    __attribute__((deprecated("use reampled_time instead")))
-    inline blip_resampled_time_t resampled_duration(int time) const {
-        return time * factor_;
-    }
+    inline uint32_t get_bass_freq() const { return bass_freq; }
+
+    /// @brief Return the size of the buffer.
+    ///
+    /// @returns the size of the buffer (TODO: units?)
+    ///
+    inline uint32_t get_size() const { return buffer_size; }
 
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
@@ -257,24 +213,26 @@ class BLIPBuffer {
     /// \f$time * \frac{sample_rate}{clock_rate}\f$
     ///
     inline blip_resampled_time_t resampled_time(blip_time_t time) const {
-        return time * factor_;
+        return time * factor;
     }
 
-    /// @brief Return the clock rate factor based on given clock rate and the
-    /// current sample rate.
+    /// @brief Return the output sample from the buffer.
     ///
-    /// @param clock_rate the clock rate to calculate the clock rate factor of
-    /// @returns the number of clock cycles per sample
-    /// @details
-    /// throws an exception if the factor is too large or the sample rate is
-    /// not set
+    /// @param output the output array to push samples from the buffer into
+    /// @returns the sample
     ///
-    inline blip_resampled_time_t clock_rate_factor(uint32_t clock_rate) const {
-        double ratio = static_cast<double>(sample_rate_) / clock_rate;
-        blip_long factor = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-        if (!(factor > 0 || !sample_rate_))  // fails if ratio is too large
-            throw Exception("sample_rate : clock_rate ratio is too large");
-        return factor;
+    blip_sample_t read_sample() {
+        // get the sample from the accumulator
+        blip_long sample = sample_accumulator >> (blip_sample_bits - 16);
+        if (static_cast<blip_sample_t>(sample) != sample)
+            sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
+        sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
+        // copy remaining samples to beginning and clear old samples
+        static constexpr auto count = 1;
+        auto remain = count + blip_buffer_extra_;
+        memmove(buffer, buffer + count, remain * sizeof *buffer);
+        memset(buffer + remain, 0, count * sizeof *buffer);
+        return sample;
     }
 };
 
@@ -378,11 +336,11 @@ class BLIPEqualizer {
     }
 };
 
-/// the synthesis quality level. Start with blip_good_quality.
+/// the synthesis quality level. Start with BLIP_QUALITY_GOOD.
 enum BLIPQuality {
-    blip_med_quality  = 8,
-    blip_good_quality = 12,
-    blip_high_quality = 16
+    BLIP_QUALITY_MEDIUM  = 8,
+    BLIP_QUALITY_GOOD = 12,
+    BLIP_QUALITY_HIGH = 16
 };
 
 /// @brief A digital synthesizer for arbitrary waveforms based on BLIP.
@@ -395,11 +353,17 @@ template<BLIPQuality quality, int range>
 class BLIPSynthesizer {
  private:
     /// TODO:
-    double volume_unit;
+    double volume_unit = 0;
     /// TODO:
     blip_sample_t impulses[blip_res * (quality / 2) + 1];
     /// TODO:
-    blip_long kernel_unit;
+    blip_long kernel_unit = 0;
+    /// the output buffer that the synthesizer writes samples to
+    BLIPBuffer* buffer = 0;
+    /// the last amplitude value (DPCM sample) to output from the synthesizer
+    int last_amp = 0;
+    /// the influence of amplitude deltas based on the volume unit
+    int delta_factor = 0;
 
     /// TODO:
     inline int impulses_size() const { return blip_res / 2 * quality + 1; }
@@ -422,30 +386,19 @@ class BLIPSynthesizer {
     }
 
  public:
-    /// the output buffer that the synthesizer writes samples to
-    BLIPBuffer* buf;
-    /// the last amplitude value (DPCM sample) to output from the synthesizer
-    int last_amp;
-    /// TODO:
-    int delta_factor;
-
     /// Initialize a new BLIP synthesizer.
-    BLIPSynthesizer() :
-        volume_unit(0.0),
-        kernel_unit(0),
-        buf(0),
-        last_amp(0),
-        delta_factor(0) {
-        memset(impulses, 0, sizeof impulses);
-    }
+    BLIPSynthesizer() { memset(impulses, 0, sizeof impulses); }
 
-    /// TODO:
-    void volume(double new_unit) {
+    /// Set the volume to a new value.
+    ///
+    /// @param new_unit the new volume level to use
+    ///
+    void set_volume(double new_unit) {
         new_unit = new_unit * (1.0 / (range < 0 ? -range : range));
         if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
-                treble_eq(BLIPEqualizer(-8.0));
+                set_treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
@@ -461,7 +414,8 @@ class BLIPSynthesizer {
 
                 if (shift) {
                     kernel_unit >>= shift;
-                    assert(kernel_unit > 0); // fails if volume unit is too low
+                    if (kernel_unit <= 0)
+                        throw Exception("volume level is too low");
                     // keep values positive to avoid round-towards-zero of sign-preserving
                     // right shift for negative values
                     long offset = 0x8000 + (1 << (shift - 1));
@@ -475,8 +429,11 @@ class BLIPSynthesizer {
         }
     }
 
-    /// TODO:
-    void treble_eq(BLIPEqualizer const& eq) {
+    /// @brief Set treble equalization for the synthesizer.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizer
+    ///
+    void set_treble_eq(BLIPEqualizer const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
@@ -518,24 +475,24 @@ class BLIPSynthesizer {
         double vol = volume_unit;
         if (vol) {
             volume_unit = 0.0;
-            volume(vol);
+            set_volume(vol);
         }
+    }
+
+    /// Set the buffer used for output.
+    ///
+    /// @param buffer_ the buffer that this synthesizer will write samples to
+    ///
+    inline void set_output(BLIPBuffer* buffer_) {
+        buffer = buffer_;
+        last_amp = 0;
     }
 
     /// Get the buffer used for output.
     ///
     /// @returns the buffer that this synthesizer is writing samples to
     ///
-    inline BLIPBuffer* output() const { return buf; }
-
-    /// Set the buffer used for output.
-    ///
-    /// @param buffer the buffer that this synthesizer will write samples to
-    ///
-    inline void output(BLIPBuffer* buffer) {
-        buf = buffer;
-        last_amp = 0;
-    }
+    inline BLIPBuffer* get_output() const { return buffer; }
 
     /// Update amplitude of waveform at given time. Using this requires a
     /// separate BLIPSynthesizer for each waveform.
@@ -543,37 +500,54 @@ class BLIPSynthesizer {
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer
     ///
-    inline void update(blip_time_t time, int amplitude) {
+    inline void update(blip_time_t time, int amplitude) const {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
-        offset_resampled(time * buf->factor_, delta, buf);
+        offset_resampled(buffer->resampled_time(time), delta, buffer);
     }
 
-// ---------------------------------------------------------------------------
-// MARK: Low-level interface
-// TODO: document
-// ---------------------------------------------------------------------------
-
-    /// Add an amplitude transition of specified delta, optionally into
-    /// specified buffer rather than the one set with output(). Delta can be
-    /// positive or negative. The actual change in amplitude is
-    /// delta * (volume / range)
-    inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
-        offset_resampled(time * buf->factor_, delta, buf);
+    /// @brief Add an amplitude transition of specified delta into specified
+    /// buffer rather than the instance buffer.
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buffer the buffer to write the data into
+    ///
+    inline void offset(blip_time_t time, int delta, BLIPBuffer* buffer) const {
+        offset_resampled(buffer->resampled_time(time), delta, buffer);
     }
 
+    /// @brief Add an amplitude transition of specified delta.
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buf the buffer to write the data into
+    ///
     inline void offset(blip_time_t time, int delta) const {
-        offset(time, delta, buf);
+        offset(time, delta, buffer);
     }
 
-    /// Works directly in terms of fractional output samples. Contact Shay Green
-    /// for more info.
-    void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
-        // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code
-        // or the need for a longer buffer as set by set_sample_rate().
-        assert((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
+    /// @brief TODO:
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param blip_buf the buffer to write the data into
+    /// @details
+    /// Works directly in terms of fractional output samples.
+    /// Contact Shay Green for more info.
+    ///
+    void offset_resampled(
+        blip_resampled_time_t time,
+        int delta,
+        BLIPBuffer* blip_buffer
+    ) const {
+        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buffer->get_size()))
+            throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
-        blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
+        blip_long* BLIP_RESTRICT buffer = blip_buffer->buffer + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
         int const fwd = (blip_widest_impulse_ - quality) / 2;
@@ -592,7 +566,7 @@ class BLIPSynthesizer {
         // straight forward implementation resulted in better code on GCC for x86
 
         #define ADD_IMP(out, in) \
-            buf[out] += (blip_long) imp[blip_res * (in)] * delta
+            buffer[out] += (blip_long) imp[blip_res * (in)] * delta
 
         #define BLIP_FWD(i) {\
             ADD_IMP(fwd     + i, i    );\
@@ -622,39 +596,39 @@ class BLIPSynthesizer {
         // for RISC processors, help compiler by reading ahead of writes
 
         #define BLIP_FWD(i) {\
-            blip_long t0 =                       i0 * delta + buf[fwd     + i];\
-            blip_long t1 = imp[blip_res * (i + 1)] * delta + buf[fwd + 1 + i];\
+            blip_long t0 =                       i0 * delta + buffer[fwd     + i];\
+            blip_long t1 = imp[blip_res * (i + 1)] * delta + buffer[fwd + 1 + i];\
             i0 =           imp[blip_res * (i + 2)];\
-            buf[fwd     + i] = t0;\
-            buf[fwd + 1 + i] = t1;\
+            buffer[fwd     + i] = t0;\
+            buffer[fwd + 1 + i] = t1;\
         }
         #define BLIP_REV(r) {\
-            blip_long t0 =                 i0 * delta + buf[rev     - r];\
-            blip_long t1 = imp[blip_res * r] * delta + buf[rev + 1 - r];\
+            blip_long t0 =                 i0 * delta + buffer[rev     - r];\
+            blip_long t1 = imp[blip_res * r] * delta + buffer[rev + 1 - r];\
             i0 =           imp[blip_res * (r - 1)];\
-            buf[rev     - r] = t0;\
-            buf[rev + 1 - r] = t1;\
+            buffer[rev     - r] = t0;\
+            buffer[rev + 1 - r] = t1;\
         }
 
             blip_long i0 = *imp;
             BLIP_FWD(0)
             if (quality > 8 ) BLIP_FWD(2)
             if (quality > 12) BLIP_FWD(4) {
-                blip_long t0 =                   i0 * delta + buf[fwd + mid - 1];
-                blip_long t1 = imp[blip_res * mid] * delta + buf[fwd + mid    ];
+                blip_long t0 =                   i0 * delta + buffer[fwd + mid - 1];
+                blip_long t1 = imp[blip_res * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
                 i0 = imp[blip_res * mid];
-                buf[fwd + mid - 1] = t0;
-                buf[fwd + mid    ] = t1;
+                buffer[fwd + mid - 1] = t0;
+                buffer[fwd + mid    ] = t1;
             }
             if (quality > 12) BLIP_REV(6)
             if (quality > 8 ) BLIP_REV(4)
             BLIP_REV(2)
 
-            blip_long t0 =   i0 * delta + buf[rev    ];
-            blip_long t1 = *imp * delta + buf[rev + 1];
-            buf[rev    ] = t0;
-            buf[rev + 1] = t1;
+            blip_long t0 =   i0 * delta + buffer[rev    ];
+            blip_long t1 = *imp * delta + buffer[rev + 1];
+            buffer[rev    ] = t0;
+            buffer[rev + 1] = t1;
         #endif  // CISC
 
         #undef BLIP_FWD

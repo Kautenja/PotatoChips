@@ -187,7 +187,7 @@ class NintendoGBS {
         enum { period_mask = 0x70 };
         enum { shift_mask  = 0x07 };
 
-        typedef BLIPSynthesizer<blip_good_quality, 1> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
         Synth const* synth;
         int sweep_delay;
         int sweep_freq;
@@ -271,7 +271,7 @@ class NintendoGBS {
     };
 
     struct Noise : Envelope {
-        typedef BLIPSynthesizer<blip_med_quality, 1> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth const* synth;
         unsigned bits;
 
@@ -299,7 +299,7 @@ class NintendoGBS {
 
                 // keep parallel resampled time to eliminate time conversion in the loop
                 BLIPBuffer* const output = this->output;
-                const auto resampled_period = output->resampled_duration(period);
+                const auto resampled_period = output->resampled_time(period);
                 auto resampled_time = output->resampled_time(time);
                 unsigned bits = this->bits;
                 int delta = amp * 2;
@@ -324,7 +324,7 @@ class NintendoGBS {
     };
 
     struct Wave : Oscillator {
-        typedef BLIPSynthesizer<blip_med_quality, 1> Synth;
+        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth const* synth;
         int wave_pos;
         enum { wave_size = 32 };
@@ -437,8 +437,8 @@ class NintendoGBS {
         // require modification to all oscillator code)
         int data = regs[STEREO_VOLUME - ADDR_START];
         double vol = (std::max(data & 7, data >> 4 & 7) + 1) * volume_unit;
-        pulse_synth.volume(vol);
-        other_synth.volume(vol);
+        pulse_synth.set_volume(vol);
+        other_synth.set_volume(vol);
     }
 
     /// @brief Run emulator until specified time, so that any DMC memory reads
@@ -627,8 +627,8 @@ class NintendoGBS {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     void set_treble_eq(const BLIPEqualizer& equalizer) {
-        pulse_synth.treble_eq(equalizer);
-        other_synth.treble_eq(equalizer);
+        pulse_synth.set_treble_eq(equalizer);
+        other_synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal frame counter, registers, and all oscillators.

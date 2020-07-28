@@ -113,7 +113,7 @@ class KonamiSCC {
     /// the registers on the chip
     uint8_t regs[NUM_REGISTERS];
     /// the synthesizer for the oscillators on the chip
-    BLIPSynthesizer<blip_med_quality, 1> synth;
+    BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
@@ -221,15 +221,15 @@ class KonamiSCC {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(0.43 / OSC_COUNT / AMP_RANGE * level);
+        synth.set_volume(0.43 / OSC_COUNT / AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(BLIPEqualizer const& equalizer) {
-        synth.treble_eq(equalizer);
+    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset oscillators and internal state.

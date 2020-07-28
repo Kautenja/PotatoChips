@@ -193,35 +193,6 @@ struct Chip106 : Module {
         return rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// Set the frequency for a given channel.
-    ///
-    /// @param channel the channel to set the frequency for
-    /// @param channels the number of enabled channels in [1, 8]
-    ///
-    inline void setFrequency(uint8_t channel, uint8_t channels = 1) {
-        // extract the low, medium, and high frequency register values
-        auto freq = getFrequency(channel);
-        // FREQUENCY LOW
-        uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-        apu.write_addr(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(low);
-        // FREQUENCY MEDIUM
-        uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-        apu.write_addr(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(med);
-        // WAVEFORM LENGTH + FREQUENCY HIGH
-        uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-        apu.write_addr(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(hig);
-        // WAVE ADDRESS
-        apu.write_addr(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(0);
-        // VOLUME (and channel selection on channel 8, this has no effect on
-        // other channels, so the check logic is skipped)
-        apu.write_addr(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel);
-        apu.write_data(((channels - 1) << 4) | getVolume(channel));
-    }
-
     /// Return a 10V signed sample from the chip.
     ///
     /// @param channel the channel to get the audio sample for
@@ -263,8 +234,29 @@ struct Chip106 : Module {
             // get the number of active channels from the panel
             num_channels = getActiveChannels();
             // set the frequency for all channels on the chip
-            for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
-                setFrequency(i, num_channels);
+            for (unsigned channel = 0; channel < Namco106::OSC_COUNT; channel++) {
+                // extract the low, medium, and high frequency register values
+                auto freq = getFrequency(channel);
+                // FREQUENCY LOW
+                uint8_t low = (freq & 0b000000000000000011111111) >> 0;
+                apu.write_addr(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel);
+                apu.write_data(low);
+                // FREQUENCY MEDIUM
+                uint8_t med = (freq & 0b000000001111111100000000) >> 8;
+                apu.write_addr(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel);
+                apu.write_data(med);
+                // WAVEFORM LENGTH + FREQUENCY HIGH
+                uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
+                apu.write_addr(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel);
+                apu.write_data(hig);
+                // WAVE ADDRESS
+                apu.write_addr(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel);
+                apu.write_data(0);
+                // VOLUME (and channel selection on channel 8, this has no effect on
+                // other channels, so the check logic is skipped)
+                apu.write_addr(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel);
+                apu.write_data(((num_channels - 1) << 4) | getVolume(channel));
+            }
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

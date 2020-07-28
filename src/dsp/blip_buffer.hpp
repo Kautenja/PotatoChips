@@ -50,30 +50,13 @@ static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
 static constexpr uint8_t BLIP_PHASE_BITS = 6;
 
 /// TODO:
-static constexpr int blip_widest_impulse_ = 16;
-
-/// TODO:
-static constexpr int blip_buffer_extra_ = blip_widest_impulse_ + 2;
+static constexpr int BLIP_WIDEST_IMPULSE = 16;
 
 /// TODO:
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
-static constexpr uint32_t blip_max_length = 0;
-
-/// TODO:
-static constexpr uint32_t blip_default_length = 250;
-
-/// TODO:
-static constexpr uint8_t blip_sample_bits = 30;
-
-/// Constant value to use instead of BLIP_READER_BASS(), for slightly more
-/// optimal code at the cost of having no bass control
-static constexpr uint32_t blip_reader_default_bass = 9;
-
-/// maximal length that re-sampled time can represent
-static constexpr uint32_t MAX_RESAMPLED_TIME =
-    (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
+static constexpr uint8_t BLIP_SAMPLE_BITS = 30;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
     #define BLIP_RESTRICT __restrict
@@ -111,35 +94,23 @@ class BLIPBuffer {
     blip_time_t* buffer = 0;
 
     /// Initialize a new BLIP Buffer.
-    BLIPBuffer() { }
+    BLIPBuffer() {
+        static constexpr int size = 1;
+        void* buffer_ = realloc(buffer, (size + BLIP_WIDEST_IMPULSE) * sizeof *buffer);
+        if (!buffer_) throw Exception("out of memory for buffer size");
+        buffer = static_cast<blip_time_t*>(buffer_);
+        buffer_size = size;
+    }
 
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer); }
 
-    /// @brief Set the output sample rate and buffer length in milliseconds.
+    /// @brief Set the output sample rate and clock rate.
     ///
     /// @param sample_rate_ the number of samples per second
     /// @param clock_rate_ the number of source clock cycles per second
-    /// @param buffer_length length of the buffer in milliseconds (1/1000 sec).
-    /// defaults to 250, i.e., 1/4 sec.
-    /// @returns NULL on success, otherwise if there isn't enough memory,
-    /// returns error without affecting current buffer setup.
     ///
-    void set_sample_rate(
-        uint32_t sample_rate_,
-        uint32_t clock_rate_,
-        uint32_t buffer_length = 1000 / 4
-    ) {
-        uint32_t new_size = MAX_RESAMPLED_TIME;
-        if (buffer_length != blip_max_length) {  // check the size parameter
-            // TODO: is this size check necessary? what is happening here? the
-            // check and error fails for sample rates greater than 300, but ignoring
-            // the condition doesn't cause any audible issues upstream?
-            // uint32_t size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
-            // if (size >= new_size) throw Exception("buffer size exceeds limit");
-            // new_size = size;
-            new_size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
-        }
+    void set_sample_rate(uint32_t sample_rate_, uint32_t clock_rate_) {
         // calculate the number of cycles per sample (round by truncation) and
         // re-calculate the clock rate with rounding error accounted for
         clock_rate_ = static_cast<uint32_t>(clock_rate_ / sample_rate_) * sample_rate_;
@@ -148,13 +119,6 @@ class BLIPBuffer {
         blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
         if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
             throw Exception("sample_rate : clock_rate ratio is too large");
-        if (buffer_size != new_size) {  // resize the buffer
-            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
-            if (!new_buffer) throw Exception("out of memory for buffer size");
-            // update the instance variables atomically
-            buffer = static_cast<blip_time_t*>(new_buffer);
-            buffer_size = new_size;
-        }
         // update the instance variables atomically
         sample_rate = sample_rate_;
         clock_rate = clock_rate_;
@@ -223,13 +187,13 @@ class BLIPBuffer {
     ///
     blip_sample_t read_sample() {
         // get the sample from the accumulator
-        blip_long sample = sample_accumulator >> (blip_sample_bits - 16);
+        blip_long sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
         sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
-        auto remain = count + blip_buffer_extra_;
+        auto remain = count + BLIP_WIDEST_IMPULSE;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;
@@ -401,7 +365,7 @@ class BLIPSynthesizer {
                 set_treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
-            double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
+            double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
 
             if (factor > 0.0) {
                 int shift = 0;
@@ -434,7 +398,7 @@ class BLIPSynthesizer {
     /// @param equalizer the equalization parameter for the synthesizer
     ///
     void set_treble_eq(BLIPEqualizer const& eq) {
-        float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
+        float fimpulse[blip_res / 2 * (BLIP_WIDEST_IMPULSE - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
         eq._generate(&fimpulse[blip_res], half_size);
@@ -550,7 +514,7 @@ class BLIPSynthesizer {
         blip_long* BLIP_RESTRICT buffer = blip_buffer->buffer + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
-        int const fwd = (blip_widest_impulse_ - quality) / 2;
+        int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;
         int const rev = fwd + quality - 2;
         int const mid = quality / 2 - 1;
 

@@ -22,9 +22,6 @@ They're just so addicting!
 <!-- MARK: 106 -->
 <!-- ------------------------------------------------------------ -->
 
-<details>
-<summary>106</summary>
-
 ## 106
 
 106 is an emulation of the Namco 106 audio processing unit from the
@@ -54,7 +51,6 @@ See the [Manual][106] for more information about the features of this module.
 
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
-</details>
 
 
 
@@ -64,9 +60,6 @@ See the [Manual][106] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: 2A03 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>2A03</summary>
 
 ## 2A03
 
@@ -94,7 +87,6 @@ See the [Manual][2A03] for more information about the features of this module.
 
 [2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
 
-</details>
 
 
 
@@ -103,9 +95,6 @@ See the [Manual][2A03] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: AY-3-8910 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>AY-3-8910</summary>
 
 ## AY-3-8910 _(Coming Soon!)_
 
@@ -122,7 +111,6 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 
 [AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
 
-</details>
 
 
 
@@ -132,9 +120,6 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: FME7 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>FME7</summary>
 
 ## FME7
 
@@ -156,7 +141,6 @@ See the [Manual][FME7] for more information about the features of this module.
 
 [FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 
-</details>
 
 
 
@@ -166,9 +150,6 @@ See the [Manual][FME7] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: GBS -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>GBS</summary>
 
 ## GBS _(Coming Soon!)_
 
@@ -185,7 +166,6 @@ See the [Manual][GBS] for more information about the features of this module.
 
 [GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
 
-</details>
 
 
 
@@ -195,9 +175,6 @@ See the [Manual][GBS] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: POKEY -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>POKEY</summary>
 
 ## POKEY _(Coming Soon!)_
 
@@ -213,7 +190,6 @@ See the [Manual][POKEY] for more information about the features of this module.
 
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 
-</details>
 
 
 
@@ -223,9 +199,6 @@ See the [Manual][POKEY] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>SCC</summary>
 
 ## SCC _(Coming Soon!)_
 
@@ -241,7 +214,6 @@ See the [Manual][SCC] for more information about the features of this module.
 
 [SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
 
-</details>
 
 
 
@@ -251,9 +223,6 @@ See the [Manual][SCC] for more information about the features of this module.
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SN76489 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>SN76489</summary>
 
 ## SN76489
 
@@ -282,7 +251,6 @@ See the [Manual][SN76489] for more information about the features of this module
 [TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
 [SN76489]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SN76489.pdf
 
-</details>
 
 
 
@@ -292,9 +260,6 @@ See the [Manual][SN76489] for more information about the features of this module
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: TurboGrafx16 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>TurboGrafx16</summary>
 
 ## TurboGrafx16 _(Coming Soon!)_
 
@@ -310,7 +275,6 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 
 [TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
 
-</details>
 
 
 
@@ -319,9 +283,6 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: VRC6 -->
 <!-- ------------------------------------------------------------ -->
-
-<details>
-<summary>VRC6</summary>
 
 ## VRC6
 
@@ -347,4 +308,3 @@ See the [Manual][VRC6] for more information about the features of this module.
 
 [VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 
-</details>

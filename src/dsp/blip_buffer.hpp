@@ -53,9 +53,6 @@ static constexpr uint8_t BLIP_PHASE_BITS = 6;
 static constexpr int blip_widest_impulse_ = 16;
 
 /// TODO:
-static constexpr int blip_buffer_extra_ = blip_widest_impulse_ + 2;
-
-/// TODO:
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
@@ -70,10 +67,6 @@ static constexpr uint8_t blip_sample_bits = 30;
 /// Constant value to use instead of BLIP_READER_BASS(), for slightly more
 /// optimal code at the cost of having no bass control
 static constexpr uint32_t blip_reader_default_bass = 9;
-
-/// maximal length that re-sampled time can represent
-static constexpr uint32_t MAX_RESAMPLED_TIME =
-    (std::numeric_limits<uint32_t>::max() >> BLIP_BUFFER_ACCURACY) - blip_buffer_extra_ - 64;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
     #define BLIP_RESTRICT __restrict
@@ -113,7 +106,7 @@ class BLIPBuffer {
     /// Initialize a new BLIP Buffer.
     BLIPBuffer() {
         static constexpr int size = 1;
-        void* buffer_ = realloc(buffer, (size + blip_buffer_extra_) * sizeof *buffer);
+        void* buffer_ = realloc(buffer, (size + blip_widest_impulse_) * sizeof *buffer);
         if (!buffer_) throw Exception("out of memory for buffer size");
         buffer = static_cast<blip_time_t*>(buffer_);
         buffer_size = size;
@@ -210,7 +203,7 @@ class BLIPBuffer {
         sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
-        auto remain = count + blip_buffer_extra_;
+        auto remain = count + blip_widest_impulse_;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;

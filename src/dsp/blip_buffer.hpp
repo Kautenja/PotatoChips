@@ -116,29 +116,6 @@ class BLIPBuffer {
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer); }
 
-    /// @brief Set the frequency of the high-pass filter, where higher values
-    /// reduce the bass more.
-    ///
-    /// @param frequency the cut-off frequency of the high-pass filter
-    ///
-    inline void set_bass_freq(int frequency) {
-        int shift = 31;
-        if (frequency > 0) {
-            shift = 13;
-            blip_long f = (frequency << 16) / sample_rate;
-            while ((f >>= 1) && --shift) { }
-        }
-        bass_shift = shift;
-        bass_freq = frequency;
-    }
-
-    /// @brief Return the frequency of the  high-pass filter.
-    ///
-    /// @returns the cut-off frequency of the high-pass filter, where higher
-    /// values reduce the bass more.
-    ///
-    inline uint32_t get_bass_freq() const { return bass_freq; }
-
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param sample_rate_ the number of samples per second
@@ -198,6 +175,29 @@ class BLIPBuffer {
     /// @returns the number of source time units per second
     ///
     inline uint32_t get_clock_rate() const { return clock_rate; }
+
+    /// @brief Set the frequency of the high-pass filter, where higher values
+    /// reduce the bass more.
+    ///
+    /// @param frequency the cut-off frequency of the high-pass filter
+    ///
+    inline void set_bass_freq(int frequency) {
+        int shift = 31;
+        if (frequency > 0) {
+            shift = 13;
+            blip_long f = (frequency << 16) / sample_rate;
+            while ((f >>= 1) && --shift) { }
+        }
+        bass_shift = shift;
+        bass_freq = frequency;
+    }
+
+    /// @brief Return the frequency of the  high-pass filter.
+    ///
+    /// @returns the cut-off frequency of the high-pass filter, where higher
+    /// values reduce the bass more.
+    ///
+    inline uint32_t get_bass_freq() const { return bass_freq; }
 
     /// @brief Return the output sample from the buffer.
     ///

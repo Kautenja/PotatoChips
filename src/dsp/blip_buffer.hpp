@@ -358,6 +358,12 @@ class BLIPSynthesizer {
     blip_sample_t impulses[blip_res * (quality / 2) + 1];
     /// TODO:
     blip_long kernel_unit;
+    /// the output buffer that the synthesizer writes samples to
+    BLIPBuffer* buf;
+    /// the last amplitude value (DPCM sample) to output from the synthesizer
+    int last_amp;
+    /// the influence of amplitude deltas based on the volume unit
+    int delta_factor;
 
     /// TODO:
     inline int impulses_size() const { return blip_res / 2 * quality + 1; }
@@ -380,13 +386,6 @@ class BLIPSynthesizer {
     }
 
  public:
-    /// the output buffer that the synthesizer writes samples to
-    BLIPBuffer* buf;
-    /// the last amplitude value (DPCM sample) to output from the synthesizer
-    int last_amp;
-    /// the influence of amplitude deltas based on the volume unit
-    int delta_factor;
-
     /// Initialize a new BLIP synthesizer.
     BLIPSynthesizer() :
         volume_unit(0.0),
@@ -437,7 +436,10 @@ class BLIPSynthesizer {
         }
     }
 
-    /// TODO:
+    /// @brief Set treble equalization for the synthesizer.
+    ///
+    /// @param equalizer the equalization parameter for the synthesizer
+    ///
     void set_treble_eq(BLIPEqualizer const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 

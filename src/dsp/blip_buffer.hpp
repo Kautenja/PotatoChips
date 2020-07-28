@@ -50,13 +50,13 @@ static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
 static constexpr uint8_t BLIP_PHASE_BITS = 6;
 
 /// TODO:
-static constexpr int blip_widest_impulse_ = 16;
+static constexpr int BLIP_WIDEST_IMPULSE = 16;
 
 /// TODO:
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
-static constexpr uint8_t blip_sample_bits = 30;
+static constexpr uint8_t BLIP_SAMPLE_BITS = 30;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
     #define BLIP_RESTRICT __restrict
@@ -96,7 +96,7 @@ class BLIPBuffer {
     /// Initialize a new BLIP Buffer.
     BLIPBuffer() {
         static constexpr int size = 1;
-        void* buffer_ = realloc(buffer, (size + blip_widest_impulse_) * sizeof *buffer);
+        void* buffer_ = realloc(buffer, (size + BLIP_WIDEST_IMPULSE) * sizeof *buffer);
         if (!buffer_) throw Exception("out of memory for buffer size");
         buffer = static_cast<blip_time_t*>(buffer_);
         buffer_size = size;
@@ -187,13 +187,13 @@ class BLIPBuffer {
     ///
     blip_sample_t read_sample() {
         // get the sample from the accumulator
-        blip_long sample = sample_accumulator >> (blip_sample_bits - 16);
+        blip_long sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
         sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
-        auto remain = count + blip_widest_impulse_;
+        auto remain = count + BLIP_WIDEST_IMPULSE;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;
@@ -365,7 +365,7 @@ class BLIPSynthesizer {
                 set_treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
-            double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
+            double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
 
             if (factor > 0.0) {
                 int shift = 0;
@@ -398,7 +398,7 @@ class BLIPSynthesizer {
     /// @param equalizer the equalization parameter for the synthesizer
     ///
     void set_treble_eq(BLIPEqualizer const& eq) {
-        float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
+        float fimpulse[blip_res / 2 * (BLIP_WIDEST_IMPULSE - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
         eq._generate(&fimpulse[blip_res], half_size);
@@ -514,7 +514,7 @@ class BLIPSynthesizer {
         blip_long* BLIP_RESTRICT buffer = blip_buffer->buffer + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
-        int const fwd = (blip_widest_impulse_ - quality) / 2;
+        int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;
         int const rev = fwd + quality - 2;
         int const mid = quality / 2 - 1;
 

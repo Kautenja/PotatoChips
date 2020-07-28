@@ -122,7 +122,6 @@ class BLIPBuffer {
     /// @param frequency the cut-off frequency of the high-pass filter
     ///
     inline void set_bass_freq(int frequency) {
-        bass_freq = frequency;
         int shift = 31;
         if (frequency > 0) {
             shift = 13;
@@ -130,6 +129,7 @@ class BLIPBuffer {
             while ((f >>= 1) && --shift) { }
         }
         bass_shift = shift;
+        bass_freq = frequency;
     }
 
     /// @brief Return the frequency of the  high-pass filter.

@@ -167,7 +167,8 @@ struct ChipGBS : Module {
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            auto lfsrV = math::clamp(inputs[INPUT_LFSR].getVoltage(), 0.f, 10.f);
+            lfsr.process(rescale(lfsrV, 0.f, 2.f, 0.f, 1.f));
             // turn on the power
             apu.write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
             // set the global volume

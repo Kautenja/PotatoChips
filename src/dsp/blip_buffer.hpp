@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
 #include <cmath>
 #include <limits>
 #include "exceptions.hpp"
@@ -182,15 +181,11 @@ class BLIPBuffer {
     blip_sample_t read_sample() {
         // create a temporary pointer to the buffer that can be mutated
         const blip_time_t* BLIP_RESTRICT buffer_temp = buffer_;
-        // get the current accumulator
-        blip_long read_accum_temp = reader_accum_;
         // get the sample from the accumulator
-        blip_long sample = read_accum_temp >> (blip_sample_bits - 16);
+        blip_long sample = reader_accum_ >> (blip_sample_bits - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
-        read_accum_temp += *buffer_temp - (read_accum_temp >> (bass_shift_));
-        // update the accumulator
-        reader_accum_ = read_accum_temp;
+        reader_accum_ += *buffer_temp - (reader_accum_ >> (bass_shift_));
         // -------------------------------------------------------------------
         // TODO: remove
         // -------------------------------------------------------------------
@@ -444,7 +439,8 @@ class BLIPSynthesizer {
 
                 if (shift) {
                     kernel_unit >>= shift;
-                    assert(kernel_unit > 0); // fails if volume unit is too low
+                    if (kernel_unit <= 0)
+                        throw Exception("volume level is too low");
                     // keep values positive to avoid round-towards-zero of sign-preserving
                     // right shift for negative values
                     long offset = 0x8000 + (1 << (shift - 1));
@@ -552,9 +548,8 @@ class BLIPSynthesizer {
     /// Works directly in terms of fractional output samples. Contact Shay Green
     /// for more info.
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
-        // Fails if time is beyond end of BLIPBuffer, due to a bug in caller code
-        // or the need for a longer buffer as set by set_sample_rate().
-        assert((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_);
+        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_))
+            throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
         blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));

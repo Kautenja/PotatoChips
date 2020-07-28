@@ -81,27 +81,6 @@ static constexpr uint32_t MAX_RESAMPLED_TIME =
     #define BLIP_RESTRICT
 #endif
 
-/// @brief Return the clock rate factor based on given clock rate and the
-/// current sample rate.
-///
-/// @param sample_rate the sample rate to calculate the clock rate factor for
-/// @param clock_rate the clock rate to calculate the clock rate factor for
-/// @returns the clock rate factor for given sample rate and clock rate
-/// @details
-/// throws an exception if the factor is too large or the sample rate is
-/// not set
-///
-static inline blip_resampled_time_t clock_rate_factor(
-    uint32_t sample_rate,
-    uint32_t clock_rate
-) {
-    double ratio = static_cast<double>(sample_rate) / clock_rate;
-    blip_long factor = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-    if (!(factor > 0 || !sample_rate))  // fails if ratio is too large
-        throw Exception("sample_rate : clock_rate ratio is too large");
-    return factor;
-}
-
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  private:
@@ -109,8 +88,8 @@ class BLIPBuffer {
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
-    /// the frequency of the high-pass filter (TODO: in Hz?)
-    int bass_freq_ = 16;
+    /// the cut-off frequency of the high-pass filter in Hz
+    int bass_freq = 16;
 
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);
@@ -120,13 +99,13 @@ class BLIPBuffer {
 
  public:
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    blip_ulong factor_ = 1;
+    blip_ulong factor = 1;
     /// the buffer of samples in the BLIP buffer
     blip_time_t* buffer_ = 0;
     /// TODO:
-    uint32_t buffer_size_ = 0;
+    uint32_t buffer_size = 0;
     /// TODO:
-    blip_long reader_accum_ = 0;
+    blip_long sample_accumulator = 0;
     /// TODO:
     int bass_shift_ = 0;
 
@@ -136,6 +115,8 @@ class BLIPBuffer {
     /// Destroy an existing BLIP Buffer.
     ~BLIPBuffer() { free(buffer_); }
 
+    // TODO: update to only set instance variables after all exception handling
+    // has occurred. This will ensure that the operation is atomic.
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param samples_per_sec the number of samples per second
@@ -160,26 +141,30 @@ class BLIPBuffer {
             // new_size = size;
             new_size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
         }
-        if (buffer_size_ != new_size) {  // resize the buffer
+        if (buffer_size != new_size) {  // resize the buffer
             void* new_buffer = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
             // if the reallocation failed, return an out of memory flag
             if (!new_buffer) throw Exception("out of memory for buffer size");
             // update the buffer and buffer size
             buffer_ = static_cast<blip_time_t*>(new_buffer);
-            buffer_size_ = new_size;
+            buffer_size = new_size;
         }
         // update instance variables based on the new sample rate
         sample_rate = samples_per_sec;
         // update the high-pass filter
-        bass_freq(bass_freq_);
+        set_bass_freq(bass_freq);
         // calculate the number of cycles per sample (round by truncation)
         uint32_t cycles_per_sample = clock_cycles_per_sec / samples_per_sec;
         // re-calculate the clock rate with rounding error accounted for
         clock_rate = cycles_per_sample * samples_per_sec;
         // calculate the time factor based on the clock_rate and sample_rate
-        factor_ = clock_rate_factor(sample_rate, clock_rate);
+        double ratio = static_cast<double>(sample_rate) / clock_rate;
+        blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
+        if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
+            throw Exception("sample_rate : clock_rate ratio is too large");
+        factor = factor_;
         // clear the buffer
-        reader_accum_ = 0;
+        sample_accumulator = 0;
     }
 
     /// @brief Return the current output sample rate.
@@ -201,29 +186,25 @@ class BLIPBuffer {
     ///
     blip_sample_t read_sample() {
         // get the sample from the accumulator
-        blip_long sample = reader_accum_ >> (blip_sample_bits - 16);
+        blip_long sample = sample_accumulator >> (blip_sample_bits - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
-        reader_accum_ += *buffer_ - (reader_accum_ >> (bass_shift_));
-        // -------------------------------------------------------------------
-        // TODO: remove
-        // -------------------------------------------------------------------
+        sample_accumulator += *buffer_ - (sample_accumulator >> (bass_shift_));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
         auto remain = count + blip_buffer_extra_;
         memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
         memset(buffer_ + remain, 0, count * sizeof *buffer_);
-        // -------------------------------------------------------------------
         return sample;
     }
 
     /// @brief Set frequency high-pass filter frequency, where higher values
     /// reduce the bass more.
     ///
-    /// @param frequency TODO:
+    /// @param frequency the cut-off frequency of the high-pass filter
     ///
-    inline void bass_freq(int frequency) {
-        bass_freq_ = frequency;
+    inline void set_bass_freq(int frequency) {
+        bass_freq = frequency;
         int shift = 31;
         if (frequency > 0) {
             shift = 13;
@@ -242,7 +223,7 @@ class BLIPBuffer {
     ///
     __attribute__((deprecated("use reampled_time instead")))
     inline blip_resampled_time_t resampled_duration(int time) const {
-        return time * factor_;
+        return time * factor;
     }
 
     /// @brief Return the time value re-sampled according to the clock rate
@@ -253,7 +234,7 @@ class BLIPBuffer {
     /// \f$time * \frac{sample_rate}{clock_rate}\f$
     ///
     inline blip_resampled_time_t resampled_time(blip_time_t time) const {
-        return time * factor_;
+        return time * factor;
     }
 };
 
@@ -526,7 +507,7 @@ class BLIPSynthesizer {
     inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
-        offset_resampled(time * buf->factor_, delta, buf);
+        offset_resampled(time * buf->factor, delta, buf);
     }
 
 // ---------------------------------------------------------------------------
@@ -539,7 +520,7 @@ class BLIPSynthesizer {
     /// positive or negative. The actual change in amplitude is
     /// delta * (volume / range)
     inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
-        offset_resampled(time * buf->factor_, delta, buf);
+        offset_resampled(time * buf->factor, delta, buf);
     }
 
     inline void offset(blip_time_t time, int delta) const {
@@ -549,7 +530,7 @@ class BLIPSynthesizer {
     /// Works directly in terms of fractional output samples. Contact Shay Green
     /// for more info.
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
-        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size_))
+        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
         blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);

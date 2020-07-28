@@ -301,7 +301,7 @@ See the [Manual][SN76489] for more information about the features of this module
 TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
 
 <p align="center">
-<img alt="TurboGrafx16" src="manual/TurboGrafx16/img/TurboGrafx16-Module.svg">
+<img alt="TurboGrafx16" src="manual/TurboGrafx16/img/TURBO_GRAFX_16-Module.svg">
 </p>
 
 ### Features

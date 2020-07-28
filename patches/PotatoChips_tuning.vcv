@@ -9,7 +9,7 @@
       "params": [
         {
           "id": 0,
-          "value": -30.0
+          "value": 0.0
         },
         {
           "id": 1,
@@ -647,27 +647,27 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 9,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 10,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 11,
-          "value": 1.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 97,

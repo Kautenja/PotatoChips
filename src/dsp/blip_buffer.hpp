@@ -101,19 +101,20 @@ class BLIPBuffer {
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
     blip_ulong factor = 1;
     /// the buffer of samples in the BLIP buffer
-    blip_time_t* buffer_ = 0;
+    blip_time_t* buffer = 0;
     /// TODO:
     uint32_t buffer_size = 0;
     /// TODO:
     blip_long sample_accumulator = 0;
-    /// TODO:
-    int bass_shift_ = 0;
+    /// the number of shifts to adjust samples to filter out bass according to
+    /// the cut-off frequency of the hi-pass filter (`bass_freq`)
+    int bass_shift = 0;
 
     /// Initialize a new BLIP Buffer.
     BLIPBuffer() { }
 
     /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer() { free(buffer_); }
+    ~BLIPBuffer() { free(buffer); }
 
     // TODO: update to only set instance variables after all exception handling
     // has occurred. This will ensure that the operation is atomic.
@@ -142,11 +143,11 @@ class BLIPBuffer {
             new_size = (samples_per_sec * (buffer_length + 1) + 999) / 1000;
         }
         if (buffer_size != new_size) {  // resize the buffer
-            void* new_buffer = realloc(buffer_, (new_size + blip_buffer_extra_) * sizeof *buffer_);
+            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
             // if the reallocation failed, return an out of memory flag
             if (!new_buffer) throw Exception("out of memory for buffer size");
             // update the buffer and buffer size
-            buffer_ = static_cast<blip_time_t*>(new_buffer);
+            buffer = static_cast<blip_time_t*>(new_buffer);
             buffer_size = new_size;
         }
         // update instance variables based on the new sample rate
@@ -189,12 +190,12 @@ class BLIPBuffer {
         blip_long sample = sample_accumulator >> (blip_sample_bits - 16);
         if (static_cast<blip_sample_t>(sample) != sample)
             sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
-        sample_accumulator += *buffer_ - (sample_accumulator >> (bass_shift_));
+        sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
         auto remain = count + blip_buffer_extra_;
-        memmove(buffer_, buffer_ + count, remain * sizeof *buffer_);
-        memset(buffer_ + remain, 0, count * sizeof *buffer_);
+        memmove(buffer, buffer + count, remain * sizeof *buffer);
+        memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;
     }
 
@@ -211,7 +212,7 @@ class BLIPBuffer {
             blip_long f = (frequency << 16) / sample_rate;
             while ((f >>= 1) && --shift) { }
         }
-        bass_shift_ = shift;
+        bass_shift = shift;
     }
 
     /// @brief Return the time value re-sampled according to the clock rate
@@ -533,7 +534,7 @@ class BLIPSynthesizer {
         if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
-        blip_long* BLIP_RESTRICT buf = blip_buf->buffer_ + (time >> BLIP_BUFFER_ACCURACY);
+        blip_long* BLIP_RESTRICT buf = blip_buf->buffer + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
         int const fwd = (blip_widest_impulse_ - quality) / 2;

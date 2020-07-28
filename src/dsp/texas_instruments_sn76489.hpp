@@ -315,8 +315,8 @@ class TexasInstrumentsSN76489 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        square_synth.treble_eq(equalizer);
-        noise.synth.treble_eq(equalizer);
+        square_synth.set_treble_eq(equalizer);
+        noise.synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset oscillators and internal state.

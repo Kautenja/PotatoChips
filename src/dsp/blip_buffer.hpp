@@ -97,7 +97,6 @@ class BLIPBuffer {
     /// the number of shifts to adjust samples to filter out bass according to
     /// the cut-off frequency of the hi-pass filter (`bass_freq`)
     int bass_shift = 0;
-
     /// the accumulator for integrating samples into
     blip_long sample_accumulator = 0;
 
@@ -404,7 +403,7 @@ class BLIPSynthesizer {
         if (new_unit != volume_unit) {
             // use default eq if it hasn't been set yet
             if (!kernel_unit)
-                treble_eq(BLIPEqualizer(-8.0));
+                set_treble_eq(BLIPEqualizer(-8.0));
 
             volume_unit = new_unit;
             double factor = new_unit * (1L << blip_sample_bits) / kernel_unit;
@@ -436,7 +435,7 @@ class BLIPSynthesizer {
     }
 
     /// TODO:
-    void treble_eq(BLIPEqualizer const& eq) {
+    void set_treble_eq(BLIPEqualizer const& eq) {
         float fimpulse[blip_res / 2 * (blip_widest_impulse_ - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
@@ -482,20 +481,20 @@ class BLIPSynthesizer {
         }
     }
 
-    /// Get the buffer used for output.
-    ///
-    /// @returns the buffer that this synthesizer is writing samples to
-    ///
-    inline BLIPBuffer* output() const { return buf; }
-
     /// Set the buffer used for output.
     ///
     /// @param buffer the buffer that this synthesizer will write samples to
     ///
-    inline void output(BLIPBuffer* buffer) {
+    inline void set_output(BLIPBuffer* buffer) {
         buf = buffer;
         last_amp = 0;
     }
+
+    /// Get the buffer used for output.
+    ///
+    /// @returns the buffer that this synthesizer is writing samples to
+    ///
+    inline BLIPBuffer* get_output() const { return buf; }
 
     /// Update amplitude of waveform at given time. Using this requires a
     /// separate BLIPSynthesizer for each waveform.
@@ -503,31 +502,45 @@ class BLIPSynthesizer {
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer
     ///
-    inline void update(blip_time_t time, int amplitude) {
+    inline void update(blip_time_t time, int amplitude) const {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
         offset_resampled(buf->resampled_time(time), delta, buf);
     }
 
-// ---------------------------------------------------------------------------
-// MARK: Low-level interface
-// TODO: document
-// ---------------------------------------------------------------------------
-
-    /// Add an amplitude transition of specified delta, optionally into
-    /// specified buffer rather than the one set with output(). Delta can be
-    /// positive or negative. The actual change in amplitude is
-    /// delta * (volume / range)
+    /// @brief Add an amplitude transition of specified delta into specified
+    /// buffer rather than the instance buffer.
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buf the buffer to write the data into
+    ///
     inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
         offset_resampled(buf->resampled_time(time), delta, buf);
     }
 
+    /// @brief Add an amplitude transition of specified delta.
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buf the buffer to write the data into
+    ///
     inline void offset(blip_time_t time, int delta) const {
         offset(time, delta, buf);
     }
 
-    /// Works directly in terms of fractional output samples. Contact Shay Green
-    /// for more info.
+    /// @brief TODO:
+    ///
+    /// @param time TODO:
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buf the buffer to write the data into
+    /// @details
+    /// Works directly in terms of fractional output samples.
+    /// Contact Shay Green for more info.
+    ///
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
         if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->get_size()))
             throw Exception("time goes beyond end of buffer");

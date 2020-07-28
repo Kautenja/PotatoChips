@@ -202,7 +202,7 @@ class Namco106 {
     /// @param equalizer the equalization parameter for the synthesizers
     ///
     inline void set_treble_eq(const BLIPEqualizer& equalizer) {
-        synth.treble_eq(equalizer);
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal frame counter, registers, and all oscillators.

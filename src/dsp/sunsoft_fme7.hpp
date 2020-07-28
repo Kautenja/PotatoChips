@@ -216,8 +216,8 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void treble_eq(BLIPEqualizer const& equalizer) {
-        synth.treble_eq(equalizer);
+    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+        synth.set_treble_eq(equalizer);
     }
 
     /// @brief Reset internal state, registers, and all oscillators.

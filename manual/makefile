@@ -6,7 +6,7 @@ manual:
 	make -C 106
 	cp 106/build/manual.pdf build/106.pdf
 	make -C AY-3-8910
-	cp AY_3_8910/build/manual.pdf build/AY-3-8910.pdf
+	cp AY-3-8910/build/manual.pdf build/AY-3-8910.pdf
 	make -C FME7
 	cp FME7/build/manual.pdf build/FME7.pdf
 	make -C GBS

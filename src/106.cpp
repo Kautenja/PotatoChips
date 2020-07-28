@@ -218,7 +218,6 @@ struct Chip106 : Module {
             // calculate floating point offset between the base and next table
             float interpolate = wavetable - wavetable0;
             for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
-                apu.write_addr(i);
                 // get the first waveform data
                 auto nibbleHi0 = values[wavetable0][2 * i];
                 auto nibbleLo0 = values[wavetable0][2 * i + 1];
@@ -229,7 +228,7 @@ struct Chip106 : Module {
                 uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
                 uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
                 // combine the two nibbles into a byte for the RAM
-                apu.write_data((nibbleHi << 4) | nibbleLo);
+                apu.write(i, (nibbleHi << 4) | nibbleLo);
             }
             // get the number of active channels from the panel
             num_channels = getActiveChannels();
@@ -239,23 +238,18 @@ struct Chip106 : Module {
                 auto freq = getFrequency(channel);
                 // FREQUENCY LOW
                 uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-                apu.write_addr(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel);
-                apu.write_data(low);
+                apu.write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel, low);
                 // FREQUENCY MEDIUM
                 uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-                apu.write_addr(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel);
-                apu.write_data(med);
+                apu.write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel, med);
                 // WAVEFORM LENGTH + FREQUENCY HIGH
                 uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-                apu.write_addr(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel);
-                apu.write_data(hig);
+                apu.write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel, hig);
                 // WAVE ADDRESS
-                apu.write_addr(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel);
-                apu.write_data(0);
+                apu.write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel, 0);
                 // VOLUME (and channel selection on channel 8, this has no effect on
                 // other channels, so the check logic is skipped)
-                apu.write_addr(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel);
-                apu.write_data(((num_channels - 1) << 4) | getVolume(channel));
+                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel, ((num_channels - 1) << 4) | getVolume(channel));
             }
         }
         // process audio samples on the chip engine

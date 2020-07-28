@@ -218,22 +218,17 @@ class Namco106 {
         }
     }
 
-    /// Set the address register to a new value.
-    /// Write-only address register is at 0xF800
-    // enum { addr_reg_addr = 0xF800 };
-    inline void write_addr(int value) { addr_reg = value; }
-
-    /// Write data to the register pointed to by the address register.
-    /// Read/write data register is at 0x4800
-    // enum { data_reg_addr = 0x4800 };
-    inline void write_data(int data) {
+    /// @brief Write data to register with given address.
+    ///
+    /// @param address the address to write the data to
+    /// @param data the data to write to the given address
+    ///
+    inline void write(uint16_t address, uint8_t data) {
         static constexpr blip_time_t time = 0;
         run_until(time);
+        addr_reg = address;
         access() = data;
     }
-
-    /// Return the data pointed to by the value in the address register.
-    inline int read_data() { return access(); }
 
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.

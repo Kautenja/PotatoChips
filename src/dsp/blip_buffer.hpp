@@ -139,8 +139,6 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
 
-    // TODO: update to only set instance variables after all exception handling
-    // has occurred. This will ensure that the operation is atomic.
     /// @brief Set the output sample rate and buffer length in milliseconds.
     ///
     /// @param sample_rate_ the number of samples per second
@@ -155,40 +153,38 @@ class BLIPBuffer {
         uint32_t clock_rate_,
         uint32_t buffer_length = 1000 / 4
     ) {
-        // TODO: is this size check necessary? what is happening here? the
-        // check and error fails for sample rates greater than 300, but ignoring
-        // the condition doesn't cause any audible issues upstream?
         uint32_t new_size = MAX_RESAMPLED_TIME;
         if (buffer_length != blip_max_length) {  // check the size parameter
+            // TODO: is this size check necessary? what is happening here? the
+            // check and error fails for sample rates greater than 300, but ignoring
+            // the condition doesn't cause any audible issues upstream?
             // uint32_t size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
             // if (size >= new_size) throw Exception("buffer size exceeds limit");
             // new_size = size;
             new_size = (sample_rate_ * (buffer_length + 1) + 999) / 1000;
         }
-        if (buffer_size != new_size) {  // resize the buffer
-            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
-            // if the reallocation failed, return an out of memory flag
-            if (!new_buffer) throw Exception("out of memory for buffer size");
-            // update the buffer and buffer size
-            buffer = static_cast<blip_time_t*>(new_buffer);
-            buffer_size = new_size;
-        }
-        // update instance variables based on the new sample rate
-        sample_rate = sample_rate_;
-        // update the high-pass filter
-        set_bass_freq(bass_freq);
-        // calculate the number of cycles per sample (round by truncation)
-        uint32_t cycles_per_sample = clock_rate_ / sample_rate_;
+        // calculate the number of cycles per sample (round by truncation) and
         // re-calculate the clock rate with rounding error accounted for
-        clock_rate = cycles_per_sample * sample_rate_;
+        clock_rate_ = static_cast<uint32_t>(clock_rate_ / sample_rate_) * sample_rate_;
         // calculate the time factor based on the clock_rate and sample_rate
-        double ratio = static_cast<double>(sample_rate) / clock_rate;
+        double ratio = static_cast<double>(sample_rate_) / clock_rate_;
         blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
         if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
             throw Exception("sample_rate : clock_rate ratio is too large");
+        if (buffer_size != new_size) {  // resize the buffer
+            void* new_buffer = realloc(buffer, (new_size + blip_buffer_extra_) * sizeof *buffer);
+            if (!new_buffer) throw Exception("out of memory for buffer size");
+            // update the instance variables atomically
+            buffer = static_cast<blip_time_t*>(new_buffer);
+            buffer_size = new_size;
+        }
+        // update the instance variables atomically
+        sample_rate = sample_rate_;
+        clock_rate = clock_rate_;
         factor = factor_;
-        // clear the buffer
         sample_accumulator = 0;
+        // reset the bass frequency (because sample_rate has changed)
+        set_bass_freq(bass_freq);
     }
 
     /// @brief Return the current output sample rate.

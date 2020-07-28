@@ -84,12 +84,22 @@ static constexpr uint32_t MAX_RESAMPLED_TIME =
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  private:
+    /// the size of the buffer
+    uint32_t buffer_size = 0;
     /// The sample rate to generate samples from the buffer at
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
+    /// the clock rate factor, i.e., the number of CPU samples per audio sample
+    blip_ulong factor = 1;
     /// the cut-off frequency of the high-pass filter in Hz
     int bass_freq = 16;
+    /// the number of shifts to adjust samples to filter out bass according to
+    /// the cut-off frequency of the hi-pass filter (`bass_freq`)
+    int bass_shift = 0;
+
+    /// the accumulator for integrating samples into
+    blip_long sample_accumulator = 0;
 
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);
@@ -98,17 +108,8 @@ class BLIPBuffer {
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
-    /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    blip_ulong factor = 1;
     /// the buffer of samples in the BLIP buffer
     blip_time_t* buffer = 0;
-    /// the size of the buffer
-    uint32_t buffer_size = 0;
-    /// the accumulator for integrating samples into
-    blip_long sample_accumulator = 0;
-    /// the number of shifts to adjust samples to filter out bass according to
-    /// the cut-off frequency of the hi-pass filter (`bass_freq`)
-    int bass_shift = 0;
 
     /// Initialize a new BLIP Buffer.
     BLIPBuffer() { }
@@ -198,6 +199,12 @@ class BLIPBuffer {
     /// values reduce the bass more.
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
+
+    /// @brief Return the size of the buffer.
+    ///
+    /// @returns the size of the buffer (TODO: units?)
+    ///
+    inline uint32_t get_size() const { return buffer_size; }
 
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
@@ -499,7 +506,7 @@ class BLIPSynthesizer {
     inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
-        offset_resampled(time * buf->factor, delta, buf);
+        offset_resampled(buf->resampled_time(time), delta, buf);
     }
 
 // ---------------------------------------------------------------------------
@@ -512,7 +519,7 @@ class BLIPSynthesizer {
     /// positive or negative. The actual change in amplitude is
     /// delta * (volume / range)
     inline void offset(blip_time_t time, int delta, BLIPBuffer* buf) const {
-        offset_resampled(time * buf->factor, delta, buf);
+        offset_resampled(buf->resampled_time(time), delta, buf);
     }
 
     inline void offset(blip_time_t time, int delta) const {
@@ -522,7 +529,7 @@ class BLIPSynthesizer {
     /// Works directly in terms of fractional output samples. Contact Shay Green
     /// for more info.
     void offset_resampled(blip_resampled_time_t time, int delta, BLIPBuffer* blip_buf) const {
-        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->buffer_size))
+        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buf->get_size()))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
         blip_long* BLIP_RESTRICT buf = blip_buf->buffer + (time >> BLIP_BUFFER_ACCURACY);

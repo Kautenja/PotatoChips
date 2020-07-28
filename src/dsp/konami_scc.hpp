@@ -221,7 +221,7 @@ class KonamiSCC {
     /// full volume. Can be overdriven past \f$1.0\f$.
     ///
     inline void set_volume(double level = 1.0) {
-        synth.volume(0.43 / OSC_COUNT / AMP_RANGE * level);
+        synth.set_volume(0.43 / OSC_COUNT / AMP_RANGE * level);
     }
 
     /// @brief Set treble equalization for the synthesizers.

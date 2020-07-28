@@ -306,8 +306,8 @@ class TexasInstrumentsSN76489 {
     ///
     inline void set_volume(double level = 1.0) {
         level *= 0.85 / (OSC_COUNT * 64 * 2);
-        square_synth.volume(level);
-        noise.synth.volume(level);
+        square_synth.set_volume(level);
+        noise.synth.set_volume(level);
     }
 
     /// @brief Set treble equalization for the synthesizers.

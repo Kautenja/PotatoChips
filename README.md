@@ -113,7 +113,7 @@ AY-3-8910 is an emulation of the General Instrument AY-3-8910 audio processing
 unit.
 
 <p align="center">
-<img alt="AY-3-8910" src="manual/AY_3_8910/img/AY_3_8910-Module.svg">
+<img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
 </p>
 
 ### Features

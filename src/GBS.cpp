@@ -88,10 +88,10 @@ struct ChipGBS : Module {
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
         configParam(PARAM_WAVETABLE, 0, 5, 0, "Wavetable morph");
         configParam(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
-        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 0.5f, "Pulse 1 Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 0.5f, "Pulse 2 Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 0.5f, "Wave Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 0.5f, "Noise Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 1.0f, "Pulse 1 Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
@@ -204,7 +204,8 @@ struct ChipGBS : Module {
             levelParam *= FM_SCALE * inputs[INPUT_LEVEL + channel].getVoltage();
         // get the 8-bit volume clamped within legal limits
         uint8_t volume = rack::clamp(max_ * levelParam, VOLUME_MIN, max_);
-        if (channel == NintendoGBS::WAVETABLE) return volume << 5;
+        if (channel == NintendoGBS::WAVETABLE)
+            return volume == 3 ? 1 << 5 : (static_cast<uint8_t>(4 - volume) << 5);
         return volume << 4;
     }
 
@@ -252,7 +253,8 @@ struct ChipGBS : Module {
             // turn on the DAC for the channel
             apu.write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
             // set the volume
-            apu.write(NintendoGBS::WAVE_VOLUME_CODE, 0b00100000);
+            auto waveVolume = getVolume(NintendoGBS::WAVETABLE, 3);
+            apu.write(NintendoGBS::WAVE_VOLUME_CODE, waveVolume);
             // frequency
             auto freq = getFrequency(2);
             auto lo =           freq & 0b0000000011111111;
@@ -272,7 +274,7 @@ struct ChipGBS : Module {
             // set the period and LFSR
             apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | getNoisePeriod());
             // set the volume for the channel
-            auto noiseVolume = getVolume(3, 15);
+            auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
             if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {
                 apu.write(NintendoGBS::NOISE_START_VOLUME, noiseVolume);
                 apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);

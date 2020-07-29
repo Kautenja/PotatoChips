@@ -66,7 +66,7 @@ struct ChipGBS : Module {
     static constexpr auto SAMPLES_PER_WAVETABLE = 32;
 
     // the number of editors on the module
-    static constexpr int num_wavetables = 5;
+    static constexpr int NUM_WAVETABLES = 5;
 
     /// the samples in the wave-table (1)
     uint8_t values0[SAMPLES_PER_WAVETABLE];
@@ -80,7 +80,7 @@ struct ChipGBS : Module {
     uint8_t values4[SAMPLES_PER_WAVETABLE];
 
     /// the wave-tables to morph between
-    uint8_t* values[num_wavetables] = {
+    uint8_t* values[NUM_WAVETABLES] = {
         values0,
         values1,
         values2,
@@ -89,7 +89,7 @@ struct ChipGBS : Module {
     };
 
     /// the default wave-table for each page of the wave-table editor
-    static constexpr uint8_t* wavetables[num_wavetables] = {
+    static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
         SINE,
         PW5,
         RAMP_UP,
@@ -375,13 +375,13 @@ struct ChipGBS : Module {
 
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
-        for (unsigned i = 0; i < num_wavetables; i++)
+        for (unsigned i = 0; i < NUM_WAVETABLES; i++)
             memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
     }
 
     /// Respond to the user randomizing the module with the "Randomize" action.
     void onRandomize() override {
-        for (unsigned table = 0; table < num_wavetables; table++) {
+        for (unsigned table = 0; table < NUM_WAVETABLES; table++) {
             for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
                 values[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
@@ -397,7 +397,7 @@ struct ChipGBS : Module {
     /// Convert the module's state to a JSON object.
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
-        for (int table = 0; table < num_wavetables; table++) {
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
             json_t* array = json_array();
             for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
                 json_array_append_new(array, json_integer(values[table][sample]));
@@ -410,7 +410,7 @@ struct ChipGBS : Module {
 
     /// Load the module's state from a JSON object.
     void dataFromJson(json_t* rootJ) override {
-        for (int table = 0; table < num_wavetables; table++) {
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
             auto key = "values" + std::to_string(table);
             json_t* data = json_object_get(rootJ, key.c_str());
             if (data) {
@@ -440,7 +440,7 @@ struct ChipGBSWidget : ModuleWidget {
         // module will be null and a dummy waveform is displayed
         auto module_ = reinterpret_cast<ChipGBS*>(this->module);
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[ChipGBS::num_wavetables] = {
+        static constexpr NVGcolor colors[ChipGBS::NUM_WAVETABLES] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -448,9 +448,9 @@ struct ChipGBSWidget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         // add wave-table editors
-        for (int i = 0; i < ChipGBS::num_wavetables; i++) {
+        for (int i = 0; i < ChipGBS::NUM_WAVETABLES; i++) {
             // get the wave-table buffer for this editor
-            auto wavetable =
+            uint8_t* wavetable =
                 module ? &module_->values[i][0] : &ChipGBS::wavetables[i][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(

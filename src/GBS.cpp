@@ -17,12 +17,13 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
+#include "widget/wavetable_editor.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 
 // TODO: remove (use global wavetable header)
 
 /// the default values for the wave-table
-const uint8_t sine_wave[32] = {
+const uint8_t default_values[32] = {
     0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
     0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
 };
@@ -66,6 +67,32 @@ struct ChipGBS : Module {
     /// The GBS instance to synthesize sound with
     NintendoGBS apu;
 
+    /// the bit-depth of the wave-table
+    static constexpr auto bit_depth = 15;
+    /// the number of samples in the wave-table
+    static constexpr auto num_samples = 32;
+    /// the samples in the wave-table (1)
+    uint8_t values0[num_samples];
+    /// the samples in the wave-table (2)
+    uint8_t values1[num_samples];
+    /// the samples in the wave-table (3)
+    uint8_t values2[num_samples];
+    /// the samples in the wave-table (4)
+    uint8_t values3[num_samples];
+    /// the samples in the wave-table (5)
+    uint8_t values4[num_samples];
+
+    // the number of editors on the module
+    static constexpr int num_wavetables = 5;
+    /// the wave-tables to morph between
+    uint8_t* values[num_wavetables] = {
+        values0,
+        values1,
+        values2,
+        values3,
+        values4
+    };
+
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr;
 
@@ -94,6 +121,9 @@ struct ChipGBS : Module {
         configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
         cvDivider.setDivision(16);
         lightDivider.setDivision(128);
+        // set the wave-forms to the default values
+        for (unsigned i = 0; i < num_wavetables; i++)
+            memcpy(values[i], default_values, num_samples);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
@@ -262,10 +292,24 @@ struct ChipGBS : Module {
             apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
             auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
             apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
-            // write the wave-table for the channel
-            for (int i = 0; i < 32 / 2; i++) {
-                uint8_t nibbleHi = sine_wave[2 * i];
-                uint8_t nibbleLo = sine_wave[2 * i + 1];
+            // write the waveform data to the chip's RAM
+            auto wavetable = getWavetable();
+            // calculate the address of the base waveform in the table
+            int wavetable0 = floor(wavetable);
+            // calculate the address of the next waveform in the table
+            int wavetable1 = ceil(wavetable);
+            // calculate floating point offset between the base and next table
+            float interpolate = wavetable - wavetable0;
+            for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
+                // get the first waveform data
+                auto nibbleHi0 = values[wavetable0][2 * i];
+                auto nibbleLo0 = values[wavetable0][2 * i + 1];
+                // get the second waveform data
+                auto nibbleHi1 = values[wavetable1][2 * i];
+                auto nibbleLo1 = values[wavetable1][2 * i + 1];
+                // floating point interpolation
+                uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+                uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
                 // combine the two nibbles into a byte for the RAM
                 apu.write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
             }
@@ -306,6 +350,53 @@ struct ChipGBS : Module {
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
+
+    /// Respond to the user resetting the module with the "Initialize" action.
+    void onReset() override {
+        for (unsigned i = 0; i < num_wavetables; i++)
+            memcpy(values[i], default_values, num_samples);
+    }
+
+    /// Respond to the user randomizing the module with the "Randomize" action.
+    void onRandomize() override {
+        for (unsigned table = 0; table < num_wavetables; table++) {
+            for (unsigned sample = 0; sample < num_samples; sample++) {
+                values[table][sample] = random::u32() % bit_depth;
+                // interpolate between random samples to smooth slightly
+                if (sample > 0) {
+                    auto last = values[table][sample - 1];
+                    auto next = values[table][sample];
+                    values[table][sample] = (last + next) / 2;
+                }
+            }
+        }
+    }
+
+    /// Convert the module's state to a JSON object.
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        for (int table = 0; table < num_wavetables; table++) {
+            json_t* array = json_array();
+            for (int sample = 0; sample < num_samples; sample++)
+                json_array_append_new(array, json_integer(values[table][sample]));
+            auto key = "values" + std::to_string(table);
+            json_object_set_new(rootJ, key.c_str(), array);
+        }
+
+        return rootJ;
+    }
+
+    /// Load the module's state from a JSON object.
+    void dataFromJson(json_t* rootJ) override {
+        for (int table = 0; table < num_wavetables; table++) {
+            auto key = "values" + std::to_string(table);
+            json_t* data = json_object_get(rootJ, key.c_str());
+            if (data) {
+                for (int sample = 0; sample < num_samples; sample++)
+                    values[table][sample] = json_integer_value(json_array_get(data, sample));
+            }
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -323,6 +414,39 @@ struct ChipGBSWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+        // if the module is displaying in/being rendered for the library, the
+        // module will be null and a dummy waveform is displayed
+        static uint8_t library_values[ChipGBS::num_samples] = {
+            0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
+            0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
+        };
+        auto module_ = reinterpret_cast<ChipGBS*>(this->module);
+        // the fill colors for the wave-table editor lines
+        static constexpr NVGcolor colors[ChipGBS::num_wavetables] = {
+            {{{1.f, 0.f, 0.f, 1.f}}},  // red
+            {{{0.f, 1.f, 0.f, 1.f}}},  // green
+            {{{0.f, 0.f, 1.f, 1.f}}},  // blue
+            {{{1.f, 1.f, 0.f, 1.f}}},  // yellow
+            {{{1.f, 1.f, 1.f, 1.f}}}   // white
+        };
+        // add wave-table editors
+        for (int i = 0; i < ChipGBS::num_wavetables; i++) {
+            // get the wave-table buffer for this editor
+            uint8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
+            // setup a table editor for the buffer
+            auto table_editor = new WaveTableEditor<uint8_t>(
+                wavetable,             // wave-table buffer
+                ChipGBS::num_samples,  // wave-table length
+                ChipGBS::bit_depth,    // waveform bit depth
+                Vec(18, 26 + 67 * i),  // position
+                Vec(135, 60),          // size
+                colors[i]              // line fill color
+            );
+            // add the table editor to the module
+            addChild(table_editor);
+        }
+
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
             if (i < NintendoGBS::NOISE) {
                 addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, ChipGBS::INPUT_VOCT     + i));

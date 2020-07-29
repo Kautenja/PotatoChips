@@ -90,6 +90,7 @@
         }
       ],
       "leftModuleId": 74,
+      "rightModuleId": 75,
       "pos": [
         28,
         0
@@ -220,6 +221,7 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 73,
       "rightModuleId": 77,
       "data": {
         "values0": [
@@ -394,7 +396,7 @@
         ]
       },
       "pos": [
-        50,
+        42,
         0
       ]
     },
@@ -477,11 +479,35 @@
         {
           "id": 5,
           "value": 2.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
         }
       ],
       "leftModuleId": 75,
       "pos": [
-        79,
+        71,
         0
       ]
     },

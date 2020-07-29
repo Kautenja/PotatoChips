@@ -66,21 +66,32 @@ struct ChipGBS : Module {
     /// The GBS instance to synthesize sound with
     NintendoGBS apu;
 
+    /// a Schmitt Trigger for handling inputs to the LFSR port
+    dsp::SchmittTrigger lfsr;
+
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr;
+    /// a VU meter for keeping track of the channel levels
+    dsp::VuMeter2 chMeters[NintendoGBS::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
 
     /// Initialize a new GBS Chip module.
     ChipGBS() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD,   0,    7,   4,   "Noise Period", "", 0, 1, -7);
-        configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Wave Frequency",    " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_NOISE_PERIOD, 0, 7, 4, "Noise Period", "", 0, 1, -7);
+        configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
+        configParam(PARAM_WAVETABLE, 0, 5, 0, "Wavetable morph");
+        configParam(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
+        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 0.5f, "Pulse 1 Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 0.5f, "Pulse 2 Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 0.5f, "Wave Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 0.5f, "Noise Volume", "%", 0, 100);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
@@ -281,7 +292,7 @@ struct ChipGBSWidget : ModuleWidget {
         addParam(param);
         addInput(createInput<PJ301MPort>(Vec(169, 329), module, ChipGBS::INPUT_NOISE_PERIOD));
         // LFSR switch
-        addParam(createParam<CKSS>(Vec(280, 291), module, ChipGBS::PARAM_LFSR));
+        addParam(createParam<CKSS>(Vec(280, 281), module, ChipGBS::PARAM_LFSR));
         addInput(createInput<PJ301MPort>(Vec(258, 329), module, ChipGBS::INPUT_LFSR));
     }
 };

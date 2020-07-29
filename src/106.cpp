@@ -91,15 +91,6 @@ struct Chip106 : Module {
         values4
     };
 
-    /// the default wave-table for each page of the wave-table editor
-    static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
-        SINE,
-        PW5,
-        RAMP_UP,
-        TRIANGLE_DIST,
-        RAMP_DOWN
-    };
-
     /// Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -278,6 +269,14 @@ struct Chip106 : Module {
 
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
+        /// the default wave-table for each page of the wave-table editor
+        static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
+            SINE,
+            PW5,
+            RAMP_UP,
+            TRIANGLE_DIST,
+            RAMP_DOWN
+        };
         for (unsigned i = 0; i < NUM_WAVETABLES; i++)
             memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
     }

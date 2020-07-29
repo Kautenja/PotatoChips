@@ -178,7 +178,7 @@ struct ChipGBS : Module {
         // get the pulse width from the parameter knob
         auto pwParam = params[PARAM_PW + channel].getValue();
         // get the control voltage to the pulse width with 1V/step
-        auto pwCV = 0;  // TODO: inputs[INPUT_PW + channel].getVoltage() / 3.f;
+        auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 3.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
         return pw << 6;

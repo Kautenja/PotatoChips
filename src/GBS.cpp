@@ -235,8 +235,16 @@ struct ChipGBS : Module {
             levelParam *= FM_SCALE * inputs[INPUT_LEVEL + channel].getVoltage();
         // get the 8-bit volume clamped within legal limits
         uint8_t volume = rack::clamp(max_ * levelParam, VOLUME_MIN, max_);
+        // wave volume is 2-bit:
+        // 00 - 0%
+        // 01 - 100%
+        // 10 - 50%
+        // 11 - 25%
+        // invert to go in sequence from parameter as [0, 25, 50, 100]%
+        // the 2 bits occupy the high bits 6 & 7, shift left 5 to place
         if (channel == NintendoGBS::WAVETABLE)
             return volume == 3 ? 1 << 5 : (static_cast<uint8_t>(4 - volume) << 5);
+        // the volume level occupies the high 4 bits, shift left 4 to place
         return volume << 4;
     }
 
@@ -317,18 +325,19 @@ struct ChipGBS : Module {
             // noise
             // ---------------------------------------------------------------
             // set the period and LFSR
-            bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
-            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, state * 0b00001000 | getNoisePeriod());
+            bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
+            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, is_lfsr * 0b00001000 | getNoisePeriod());
             // set the volume for the channel
             auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
             if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {
                 apu.write(NintendoGBS::NOISE_START_VOLUME, noiseVolume);
+                // trigger the channel when the volume changes
+                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+            } else if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80) {
+                // enable the channel. setting trigger resets the phase of the
+                // noise, so check if it's set first
                 apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
             }
-            // enable the channel. setting trigger resets the phase of the noise,
-            // so check if it's set first
-            else if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80)
-                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);

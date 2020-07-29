@@ -447,11 +447,19 @@ struct ChipGBSWidget : ModuleWidget {
             {{{1.f, 1.f, 0.f, 1.f}}},  // yellow
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
+        /// the default wave-table for each page of the wave-table editor
+        static constexpr uint8_t* wavetables[ChipGBS::NUM_WAVETABLES] = {
+            SINE,
+            PW5,
+            RAMP_UP,
+            TRIANGLE_DIST,
+            RAMP_DOWN
+        };
         // add wave-table editors
         for (int i = 0; i < ChipGBS::NUM_WAVETABLES; i++) {
             // get the wave-table buffer for this editor
             uint8_t* wavetable =
-                module ? &module_->values[i][0] : &ChipGBS::wavetables[i][0];
+                module ? &module_->values[i][0] : &wavetables[i][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer

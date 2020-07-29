@@ -158,6 +158,19 @@ struct ChipGBS : Module {
         return pw << 6;
     }
 
+    /// Return the wave-table parameter.
+    ///
+    /// @returns the floating index of the wave-table table in [0, 4]
+    ///
+    inline float getWavetable() {
+        auto param = params[PARAM_WAVETABLE].getValue();
+        // auto att = params[PARAM_WAVETABLE_ATT].getValue();
+        // get the CV as 1V per wave-table
+        auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
+        // wave-tables are indexed maths style on panel, subtract 1 for CS style
+        return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
+    }
+
     /// Return the period of the noise oscillator from the panel controls.
     inline uint8_t getNoisePeriod() {
         // the minimal value for the frequency register to produce sound
@@ -278,7 +291,7 @@ struct ChipGBSWidget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(             Vec(169, 26 + 85 * i), module, ChipGBS::INPUT_FM       + i));
                 addParam(createParam<BefacoBigKnob>(          Vec(202, 25 + 85 * i), module, ChipGBS::PARAM_FREQ     + i));
                 auto param = createParam<RoundSmallBlackKnob>(Vec(289, 38 + 85 * i), module, ChipGBS::PARAM_PW       + i);
-                param->snap = true;
+                if (i < NintendoGBS::WAVETABLE) param->snap = true;
                 addParam(param);
                 addInput(createInput<PJ301MPort>(             Vec(288, 73 + 85 * i), module, ChipGBS::INPUT_PW       + i));
             }

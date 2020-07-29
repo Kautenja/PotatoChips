@@ -186,6 +186,28 @@ struct ChipGBS : Module {
         return FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
+    /// Return the volume parameter for the given channel.
+    ///
+    /// @param channel the channel to get the volume parameter for
+    /// @param max_ the maximal value for the volume width register
+    /// @returns the volume parameter for the given channel. This includes
+    /// the value of the knob and any CV modulation.
+    ///
+    inline uint8_t getVolume(uint8_t channel, float max_) {
+        // the minimal value for the volume width register
+        static constexpr float VOLUME_MIN = 0;
+        // get the volume from the parameter knob
+        auto levelParam = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the volume
+        static constexpr float FM_SCALE = 0.5f;
+        if (inputs[INPUT_LEVEL + channel].isConnected())
+            levelParam *= FM_SCALE * inputs[INPUT_LEVEL + channel].getVoltage();
+        // get the 8-bit volume clamped within legal limits
+        uint8_t volume = rack::clamp(max_ * levelParam, VOLUME_MIN, max_);
+        if (channel == NintendoGBS::WAVETABLE) return volume << 5;
+        return volume << 4;
+    }
+
     /// Return a 10V signed sample from the APU.
     ///
     /// @param channel the channel to get the audio sample for
@@ -216,7 +238,7 @@ struct ChipGBS : Module {
                 // pulse width of the pulse wave (high 2 bits)
                 apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * channel, getPulseWidth(channel));
                 // volume of the pulse wave, envelope add mode on
-                apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, 0b11111000);
+                apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, getVolume(channel, 15));
                 // frequency
                 auto freq = getFrequency(channel);
                 auto lo =           freq & 0b0000000011111111;
@@ -250,10 +272,14 @@ struct ChipGBS : Module {
             // set the period and LFSR
             apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | getNoisePeriod());
             // set the volume for the channel
-            apu.write(NintendoGBS::NOISE_START_VOLUME, 0b11111000);
+            auto noiseVolume = getVolume(3, 15);
+            if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {
+                apu.write(NintendoGBS::NOISE_START_VOLUME, noiseVolume);
+                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+            }
             // enable the channel. setting trigger resets the phase of the noise,
             // so check if it's set first
-            if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80)
+            else if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80)
                 apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
         }
         // process audio samples on the chip engine

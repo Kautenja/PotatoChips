@@ -16,11 +16,11 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
-          "blockSize": 2048
+          "blockSize": 256
         }
       },
       "pos": [
-        41,
+        63,
         0
       ]
     },
@@ -32,29 +32,29 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0316227749
+          "value": 1.0
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 4,
-          "value": 1.0
+          "value": 0.707945764
         }
       ],
       "leftModuleId": 11,
       "rightModuleId": 1,
       "pos": [
-        31,
+        53,
         0
       ]
     },
@@ -64,7 +64,6 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 6,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -127,7 +126,7 @@
         "external": 0
       },
       "pos": [
-        0,
+        22,
         1
       ]
     },
@@ -177,7 +176,7 @@
         "external": 0
       },
       "pos": [
-        13,
+        35,
         1
       ]
     },
@@ -227,7 +226,7 @@
         "external": 0
       },
       "pos": [
-        26,
+        48,
         1
       ]
     },
@@ -276,7 +275,7 @@
         "external": 0
       },
       "pos": [
-        39,
+        61,
         1
       ]
     },
@@ -289,7 +288,7 @@
       "leftModuleId": 6,
       "rightModuleId": 2,
       "pos": [
-        26,
+        48,
         0
       ]
     },
@@ -308,7 +307,7 @@
         "window": "kaiser"
       },
       "pos": [
-        51,
+        73,
         0
       ]
     },
@@ -320,15 +319,15 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": -12.1078959
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": -0.107905492
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 11.8920851
         },
         {
           "id": 3,
@@ -399,10 +398,75 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 13,
       "rightModuleId": 11,
       "pos": [
-        8,
+        30,
+        0
+      ]
+    },
+    {
+      "id": 13,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Maths",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 5.45003271
+        },
+        {
+          "id": 3,
+          "value": 3.92056561
+        },
+        {
+          "id": 4,
+          "value": 6.39517689
+        },
+        {
+          "id": 5,
+          "value": 4.12928295
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 6,
+      "data": {
+        "slew1.isCycling": 0,
+        "slew4.isCycling": 0
+      },
+      "pos": [
+        10,
         0
       ]
     }
@@ -457,38 +521,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 291,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 3,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 290,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 2,
-      "color": "#c91847"
-    },
-    {
-      "id": 289,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 288,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 6,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 281,
       "outputModuleId": 6,
       "outputId": 3,
@@ -535,6 +567,118 @@
       "inputModuleId": 2,
       "inputId": 1,
       "color": "#0986ad"
+    },
+    {
+      "id": 300,
+      "outputModuleId": 13,
+      "outputId": 2,
+      "inputModuleId": 6,
+      "inputId": 13,
+      "color": "#0986ad"
+    },
+    {
+      "id": 301,
+      "outputModuleId": 13,
+      "outputId": 2,
+      "inputModuleId": 6,
+      "inputId": 14,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 302,
+      "outputModuleId": 13,
+      "outputId": 2,
+      "inputModuleId": 6,
+      "inputId": 15,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 303,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 13,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 307,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 6,
+      "inputId": 4,
+      "color": "#c91847"
+    },
+    {
+      "id": 308,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 6,
+      "inputId": 5,
+      "color": "#0986ad"
+    },
+    {
+      "id": 309,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 6,
+      "inputId": 6,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 310,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 6,
+      "inputId": 7,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 299,
+      "outputModuleId": 13,
+      "outputId": 2,
+      "inputModuleId": 6,
+      "inputId": 12,
+      "color": "#c91847"
+    },
+    {
+      "id": 288,
+      "outputModuleId": 13,
+      "outputId": 3,
+      "inputModuleId": 6,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 289,
+      "outputModuleId": 13,
+      "outputId": 3,
+      "inputModuleId": 6,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 290,
+      "outputModuleId": 13,
+      "outputId": 3,
+      "inputModuleId": 6,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 291,
+      "outputModuleId": 13,
+      "outputId": 3,
+      "inputModuleId": 6,
+      "inputId": 3,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 315,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 13,
+      "inputId": 3,
+      "color": "#c91847"
     }
   ]
 }

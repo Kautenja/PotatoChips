@@ -19,13 +19,7 @@
 #include "components.hpp"
 #include "widget/wavetable_editor.hpp"
 #include "dsp/namco_106.hpp"
-#include <cstring>
-
-/// the default values for the wave-table
-const uint8_t default_values[32] = {
-    0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-    0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-};
+#include "wavetable4bit.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -70,29 +64,40 @@ struct Chip106 : Module {
     dsp::ClockDivider lightsDivider;
 
     /// the bit-depth of the wave-table
-    static constexpr auto bit_depth = 15;
+    static constexpr auto BIT_DEPTH = 15;
     /// the number of samples in the wave-table
-    static constexpr auto num_samples = 32;
-    /// the samples in the wave-table (1)
-    uint8_t values0[num_samples];
-    /// the samples in the wave-table (2)
-    uint8_t values1[num_samples];
-    /// the samples in the wave-table (3)
-    uint8_t values2[num_samples];
-    /// the samples in the wave-table (4)
-    uint8_t values3[num_samples];
-    /// the samples in the wave-table (5)
-    uint8_t values4[num_samples];
+    static constexpr auto SAMPLES_PER_WAVETABLE = 32;
 
     // the number of editors on the module
-    static constexpr int num_wavetables = 5;
+    static constexpr int NUM_WAVETABLES = 5;
+
+    /// the samples in the wave-table (1)
+    uint8_t values0[SAMPLES_PER_WAVETABLE];
+    /// the samples in the wave-table (2)
+    uint8_t values1[SAMPLES_PER_WAVETABLE];
+    /// the samples in the wave-table (3)
+    uint8_t values2[SAMPLES_PER_WAVETABLE];
+    /// the samples in the wave-table (4)
+    uint8_t values3[SAMPLES_PER_WAVETABLE];
+    /// the samples in the wave-table (5)
+    uint8_t values4[SAMPLES_PER_WAVETABLE];
+
     /// the wave-tables to morph between
-    uint8_t* values[num_wavetables] = {
+    uint8_t* values[NUM_WAVETABLES] = {
         values0,
         values1,
         values2,
         values3,
         values4
+    };
+
+    /// the default wave-table for each page of the wave-table editor
+    static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
+        SINE,
+        PW5,
+        RAMP_UP,
+        TRIANGLE_DIST,
+        RAMP_DOWN
     };
 
     /// Initialize a new 106 Chip module.
@@ -112,12 +117,12 @@ struct Chip106 : Module {
             configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
             apu.set_output(i, &buf[i]);
         }
-        // set the wave-forms to the default values
-        for (unsigned i = 0; i < num_wavetables; i++)
-            memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
+        // update the sample rate on the engine
         onSampleRateChange();
+        // reset the wave-tables to default values
+        onReset();
     }
 
     /// Return the active channels parameter.
@@ -161,7 +166,7 @@ struct Chip106 : Module {
         freq += FM_SCALE * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
-        static constexpr uint32_t wave_length = 64 - (num_samples / 4);
+        static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
         // ignoring num_channels in the calculation allows the standard 103
         // function where additional channels reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buf[0].get_clock_rate();
@@ -217,7 +222,7 @@ struct Chip106 : Module {
             int wavetable1 = ceil(wavetable);
             // calculate floating point offset between the base and next table
             float interpolate = wavetable - wavetable0;
-            for (int i = 0; i < num_samples / 2; i++) {  // iterate over nibbles
+            for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
                 // get the first waveform data
                 auto nibbleHi0 = values[wavetable0][2 * i];
                 auto nibbleLo0 = values[wavetable0][2 * i + 1];
@@ -273,15 +278,15 @@ struct Chip106 : Module {
 
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
-        for (unsigned i = 0; i < num_wavetables; i++)
-            memcpy(values[i], default_values, num_samples);
+        for (unsigned i = 0; i < NUM_WAVETABLES; i++)
+            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
     }
 
     /// Respond to the user randomizing the module with the "Randomize" action.
     void onRandomize() override {
-        for (unsigned table = 0; table < num_wavetables; table++) {
-            for (unsigned sample = 0; sample < num_samples; sample++) {
-                values[table][sample] = random::u32() % bit_depth;
+        for (unsigned table = 0; table < NUM_WAVETABLES; table++) {
+            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
+                values[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
                     auto last = values[table][sample - 1];
@@ -295,9 +300,9 @@ struct Chip106 : Module {
     /// Convert the module's state to a JSON object.
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
-        for (int table = 0; table < num_wavetables; table++) {
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
             json_t* array = json_array();
-            for (int sample = 0; sample < num_samples; sample++)
+            for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
                 json_array_append_new(array, json_integer(values[table][sample]));
             auto key = "values" + std::to_string(table);
             json_object_set_new(rootJ, key.c_str(), array);
@@ -308,11 +313,11 @@ struct Chip106 : Module {
 
     /// Load the module's state from a JSON object.
     void dataFromJson(json_t* rootJ) override {
-        for (int table = 0; table < num_wavetables; table++) {
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
             auto key = "values" + std::to_string(table);
             json_t* data = json_object_get(rootJ, key.c_str());
             if (data) {
-                for (int sample = 0; sample < num_samples; sample++)
+                for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
                     values[table][sample] = json_integer_value(json_array_get(data, sample));
             }
         }
@@ -336,13 +341,9 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // if the module is displaying in/being rendered for the library, the
         // module will be null and a dummy waveform is displayed
-        static uint8_t library_values[Chip106::num_samples] = {
-            0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-            0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-        };
         auto module_ = reinterpret_cast<Chip106*>(this->module);
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[Chip106::num_wavetables] = {
+        static constexpr NVGcolor colors[Chip106::NUM_WAVETABLES] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -350,17 +351,18 @@ struct Chip106Widget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         // add wave-table editors
-        for (int i = 0; i < Chip106::num_wavetables; i++) {
+        for (int i = 0; i < Chip106::NUM_WAVETABLES; i++) {
             // get the wave-table buffer for this editor
-            uint8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
+            uint8_t* wavetable =
+                module ? &module_->values[i][0] : &Chip106::wavetables[i][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,             // wave-table buffer
-                Chip106::num_samples,  // wave-table length
-                Chip106::bit_depth,    // waveform bit depth
-                Vec(10, 26 + 67 * i),  // position
-                Vec(135, 60),          // size
-                colors[i]              // line fill color
+                wavetable,                       // wave-table buffer
+                Chip106::SAMPLES_PER_WAVETABLE,  // wave-table length
+                Chip106::BIT_DEPTH,              // waveform bit depth
+                Vec(10, 26 + 67 * i),            // position
+                Vec(135, 60),                    // size
+                colors[i]                        // line fill color
             );
             // add the table editor to the module
             addChild(table_editor);

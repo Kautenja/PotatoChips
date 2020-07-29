@@ -93,6 +93,7 @@ struct ChipGBS : Module {
         configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
         cvDivider.setDivision(16);
+        lightDivider.setDivision(128);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
@@ -286,8 +287,17 @@ struct ChipGBS : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
+            auto channelOutput = getAudioOut(i);
+            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
+            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        }
+        if (lightDivider.process()) {  // update the mixer lights
+            for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
+                float b = chMeters[i].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_LEVEL + i].setBrightness(b);
+            }
+        }
     }
 
     /// Respond to the change of sample rate in the engine.

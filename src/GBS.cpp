@@ -34,21 +34,32 @@ const uint8_t sine_wave[32] = {
 /// A Nintendo GBS Chip module.
 struct ChipGBS : Module {
     enum ParamIds {
-        ENUMS(PARAM_FREQ, NintendoGBS::OSC_COUNT),
+        ENUMS(PARAM_FREQ, 3),
+        PARAM_NOISE_PERIOD,
         ENUMS(PARAM_PW, 2),
+        PARAM_WAVETABLE,
+        PARAM_LFSR,
+        ENUMS(PARAM_LEVEL, NintendoGBS::OSC_COUNT),
         PARAM_COUNT
     };
     enum InputIds {
-        ENUMS(INPUT_VOCT, NintendoGBS::OSC_COUNT),
+        ENUMS(INPUT_VOCT, 3),
+        INPUT_NOISE_PERIOD,
         ENUMS(INPUT_FM, 3),
+        ENUMS(INPUT_PW, 2),
+        INPUT_WAVETABLE,
         INPUT_LFSR,
+        ENUMS(INPUT_LEVEL, NintendoGBS::OSC_COUNT),
         INPUT_COUNT
     };
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, NintendoGBS::OSC_COUNT),
         OUTPUT_COUNT
     };
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds {
+        ENUMS(LIGHTS_LEVEL, NintendoGBS::OSC_COUNT),
+        LIGHT_COUNT
+    };
 
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buf[NintendoGBS::OSC_COUNT];
@@ -67,7 +78,7 @@ struct ChipGBS : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,   0,    7,   4,   "Noise Period", "", 0, 1, -7);
+        configParam(PARAM_NOISE_PERIOD,   0,    7,   4,   "Noise Period", "", 0, 1, -7);
         configParam(PARAM_PW + 0,     0,    3,   2,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1,     0,    3,   2,   "Pulse 2 Duty Cycle");
         cvDivider.setDivision(16);
@@ -143,11 +154,11 @@ struct ChipGBS : Module {
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 7;
         // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
-        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
+        auto sign = sgn(inputs[INPUT_NOISE_PERIOD].getVoltage());
+        auto pitch = abs(inputs[INPUT_NOISE_PERIOD].getVoltage() / 100.f);
         // convert the pitch to frequency based on standard exponential scale
         auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_FREQ + 3].getValue();
+        freq += params[PARAM_NOISE_PERIOD].getValue();
         return FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
@@ -250,36 +261,28 @@ struct ChipGBSWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // V/OCT inputs
-        addInput(createInput<PJ301MPort>(Vec(20, 74), module, ChipGBS::INPUT_VOCT + 0));
-        addInput(createInput<PJ301MPort>(Vec(20, 159), module, ChipGBS::INPUT_VOCT + 1));
-        addInput(createInput<PJ301MPort>(Vec(20, 244), module, ChipGBS::INPUT_VOCT + 2));
-        addInput(createInput<PJ301MPort>(Vec(20, 329), module, ChipGBS::INPUT_VOCT + 3));
-        // FM inputs
-        addInput(createInput<PJ301MPort>(Vec(25, 32), module, ChipGBS::INPUT_FM + 0));
-        addInput(createInput<PJ301MPort>(Vec(25, 118), module, ChipGBS::INPUT_FM + 1));
-        addInput(createInput<PJ301MPort>(Vec(25, 203), module, ChipGBS::INPUT_FM + 2));
-        // Frequency parameters
-        addParam(createParam<Rogan3PSNES>(Vec(54, 42), module, ChipGBS::PARAM_FREQ + 0));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 126), module, ChipGBS::PARAM_FREQ + 1));
-        addParam(createParam<Rogan3PSNES>(Vec(54, 211), module, ChipGBS::PARAM_FREQ + 2));
-        { auto param = createParam<Rogan3PSNES>(Vec(54, 297), module, ChipGBS::PARAM_FREQ + 3);
+        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
+            if (i < NintendoGBS::NOISE) {
+                addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, ChipGBS::INPUT_VOCT     + i));
+                addInput(createInput<PJ301MPort>(             Vec(169, 26 + 85 * i), module, ChipGBS::INPUT_FM       + i));
+                addParam(createParam<BefacoBigKnob>(          Vec(202, 25 + 85 * i), module, ChipGBS::PARAM_FREQ     + i));
+                auto param = createParam<RoundSmallBlackKnob>(Vec(289, 38 + 85 * i), module, ChipGBS::PARAM_PW       + i);
+                param->snap = true;
+                addParam(param);
+                addInput(createInput<PJ301MPort>(             Vec(288, 73 + 85 * i), module, ChipGBS::INPUT_PW       + i));
+            }
+            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(316, 24 + 85 * i),  module, ChipGBS::PARAM_LEVEL + i, ChipGBS::LIGHTS_LEVEL + i));
+            addInput(createInput<PJ301MPort>(                 Vec(346, 26 + 85 * i), module, ChipGBS::INPUT_LEVEL + i));
+            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, ChipGBS::OUTPUT_CHANNEL + i));
+        }
+        // noise period
+        auto param = createParam<Rogan3PWhite>(Vec(202, 298), module, ChipGBS::PARAM_NOISE_PERIOD);
         param->snap = true;
-        addParam(param); }
-        // PW
-        { auto param = createParam<Rogan0PSNES>(Vec(102, 30), module, ChipGBS::PARAM_PW + 0);
-        param->snap = true;
-        addParam(param); }
-        { auto param = createParam<Rogan0PSNES>(Vec(102, 115), module, ChipGBS::PARAM_PW + 1);
-        param->snap = true;
-        addParam(param); }
+        addParam(param);
+        addInput(createInput<PJ301MPort>(Vec(169, 329), module, ChipGBS::INPUT_NOISE_PERIOD));
         // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(24, 284), module, ChipGBS::INPUT_LFSR));
-        // channel outputs
-        addOutput(createOutput<PJ301MPort>(Vec(106, 74),  module, ChipGBS::OUTPUT_CHANNEL + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 159), module, ChipGBS::OUTPUT_CHANNEL + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 244), module, ChipGBS::OUTPUT_CHANNEL + 2));
-        addOutput(createOutput<PJ301MPort>(Vec(106, 329), module, ChipGBS::OUTPUT_CHANNEL + 3));
+        addParam(createParam<CKSS>(Vec(280, 291), module, ChipGBS::PARAM_LFSR));
+        addInput(createInput<PJ301MPort>(Vec(258, 329), module, ChipGBS::INPUT_LFSR));
     }
 };
 

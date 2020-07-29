@@ -125,15 +125,15 @@ struct ChipGBS : Module {
         configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
         cvDivider.setDivision(16);
         lightDivider.setDivision(128);
-        // set the wave-forms to the default values
-        for (unsigned i = 0; i < num_wavetables; i++)
-            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
+        // update the sample rate on the engine
         onSampleRateChange();
+        // reset the wave-tables
+        onReset();
     }
 
     /// Get the frequency for the given channel

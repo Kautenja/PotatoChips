@@ -19,14 +19,7 @@
 #include "components.hpp"
 #include "widget/wavetable_editor.hpp"
 #include "dsp/nintendo_gameboy.hpp"
-
-// TODO: remove (use global wavetable header)
-
-/// the default values for the wave-table
-const uint8_t default_values[32] = {
-    0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-    0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-};
+#include "wavetable4bit.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -71,6 +64,10 @@ struct ChipGBS : Module {
     static constexpr auto BIT_DEPTH = 15;
     /// the number of samples in the wave-table
     static constexpr auto SAMPLES_PER_WAVETABLE = 32;
+
+    // the number of editors on the module
+    static constexpr int num_wavetables = 5;
+
     /// the samples in the wave-table (1)
     uint8_t values0[SAMPLES_PER_WAVETABLE];
     /// the samples in the wave-table (2)
@@ -82,8 +79,6 @@ struct ChipGBS : Module {
     /// the samples in the wave-table (5)
     uint8_t values4[SAMPLES_PER_WAVETABLE];
 
-    // the number of editors on the module
-    static constexpr int num_wavetables = 5;
     /// the wave-tables to morph between
     uint8_t* values[num_wavetables] = {
         values0,
@@ -91,6 +86,15 @@ struct ChipGBS : Module {
         values2,
         values3,
         values4
+    };
+
+    /// the default wave-table for each page of the wave-table editor
+    static constexpr uint8_t* wavetables[num_wavetables] = {
+        SINE,
+        PW5,
+        RAMP_UP,
+        TRIANGLE_DIST,
+        RAMP_DOWN
     };
 
     /// a Trigger for handling inputs to the LFSR port
@@ -123,7 +127,7 @@ struct ChipGBS : Module {
         lightDivider.setDivision(128);
         // set the wave-forms to the default values
         for (unsigned i = 0; i < num_wavetables; i++)
-            memcpy(values[i], default_values, SAMPLES_PER_WAVETABLE);
+            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
             apu.set_output(i, &buf[i]);
@@ -372,7 +376,7 @@ struct ChipGBS : Module {
     /// Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
         for (unsigned i = 0; i < num_wavetables; i++)
-            memcpy(values[i], default_values, SAMPLES_PER_WAVETABLE);
+            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
     }
 
     /// Respond to the user randomizing the module with the "Randomize" action.
@@ -432,13 +436,8 @@ struct ChipGBSWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
         // if the module is displaying in/being rendered for the library, the
         // module will be null and a dummy waveform is displayed
-        static uint8_t library_values[ChipGBS::SAMPLES_PER_WAVETABLE] = {
-            0xA,0x8,0xD,0xC,0xE,0xE,0xF,0xF,0xF,0xF,0xE,0xF,0xD,0xE,0xA,0xC,
-            0x5,0x8,0x2,0x3,0x1,0x1,0x0,0x0,0x0,0x0,0x1,0x0,0x2,0x1,0x5,0x3
-        };
         auto module_ = reinterpret_cast<ChipGBS*>(this->module);
         // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[ChipGBS::num_wavetables] = {
@@ -451,20 +450,21 @@ struct ChipGBSWidget : ModuleWidget {
         // add wave-table editors
         for (int i = 0; i < ChipGBS::num_wavetables; i++) {
             // get the wave-table buffer for this editor
-            uint8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
+            auto wavetable =
+                module ? &module_->values[i][0] : &ChipGBS::wavetables[i][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,             // wave-table buffer
+                wavetable,                       // wave-table buffer
                 ChipGBS::SAMPLES_PER_WAVETABLE,  // wave-table length
-                ChipGBS::BIT_DEPTH,    // waveform bit depth
-                Vec(18, 26 + 67 * i),  // position
-                Vec(135, 60),          // size
-                colors[i]              // line fill color
+                ChipGBS::BIT_DEPTH,              // waveform bit depth
+                Vec(18, 26 + 67 * i),            // position
+                Vec(135, 60),                    // size
+                colors[i]                        // line fill color
             );
             // add the table editor to the module
             addChild(table_editor);
         }
-
+        // channel components
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
             if (i < NintendoGBS::NOISE) {
                 addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, ChipGBS::INPUT_VOCT     + i));

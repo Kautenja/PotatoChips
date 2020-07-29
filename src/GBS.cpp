@@ -300,7 +300,7 @@ struct ChipGBS : Module {
             apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
             auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
             apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
-            // write the waveform data to the chip's RAM
+            // get the index of the wavetable from the panel
             auto wavetable = getWavetable();
             // calculate the address of the base waveform in the table
             int wavetable0 = floor(wavetable);
@@ -308,18 +308,25 @@ struct ChipGBS : Module {
             int wavetable1 = ceil(wavetable);
             // calculate floating point offset between the base and next table
             float interpolate = wavetable - wavetable0;
-            // iterate over nibbles
-            for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {
+            // iterate over samples. APU samples are packed with two samples
+            // per byte, but samples at this layer are not packed for
+            // simplicity. As such, iterate over APU samples and consider
+            // samples at this layer two at a time. Use shift instead of
+            // multiplication / division for better performance
+            for (int i = 0; i < (SAMPLES_PER_WAVETABLE >> 1); i++) {
+                // shift the APU sample over 1 to iterate over internal samples
+                // in pairs (e.g., two at a time)
+                auto sample = i << 1;
                 // get the first waveform data
-                auto nibbleHi0 = values[wavetable0][2 * i];
-                auto nibbleLo0 = values[wavetable0][2 * i + 1];
+                auto nibbleHi0 = values[wavetable0][sample];
+                auto nibbleLo0 = values[wavetable0][sample + 1];
                 // get the second waveform data
-                auto nibbleHi1 = values[wavetable1][2 * i];
-                auto nibbleLo1 = values[wavetable1][2 * i + 1];
-                // floating point interpolation
+                auto nibbleHi1 = values[wavetable1][sample];
+                auto nibbleLo1 = values[wavetable1][sample + 1];
+                // floating point interpolation between both samples
                 uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
                 uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-                // combine the two nibbles into a byte for the RAM
+                // combine the two samples into a single byte for the RAM
                 apu.write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
             }
             // ---------------------------------------------------------------

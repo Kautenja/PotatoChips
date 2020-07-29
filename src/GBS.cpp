@@ -93,8 +93,8 @@ struct ChipGBS : Module {
         values4
     };
 
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr;
+    /// a Trigger for handling inputs to the LFSR port
+    dsp::BooleanTrigger lfsr;
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -317,7 +317,8 @@ struct ChipGBS : Module {
             // noise
             // ---------------------------------------------------------------
             // set the period and LFSR
-            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, lfsr.isHigh() * 0b00001000 | getNoisePeriod());
+            bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
+            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, state * 0b00001000 | getNoisePeriod());
             // set the volume for the channel
             auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
             if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {

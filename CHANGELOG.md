@@ -68,3 +68,4 @@
 -   4-bit volume control with CV & 2-bit PW control CV for 2A03
 -   updated panel for 2A03, FME7, VRC6
 -   fix issue where SN76489 trigger input wasn't responding to bipolar inputs
+-   updated default wave-tables for 106, sine, ramps, pulse, triangle

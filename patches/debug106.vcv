@@ -36,9 +36,10 @@
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
-        "lastMod": 0,
+        "lastMod": 30,
         "midi": {
           "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -168,7 +169,7 @@
         },
         {
           "id": 16,
-          "value": 4.0
+          "value": 1.0
         },
         {
           "id": 17,
@@ -1068,6 +1069,70 @@
       "inputModuleId": 82,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 775,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 8,
+      "color": "#c91847"
+    },
+    {
+      "id": 776,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 9,
+      "color": "#0986ad"
+    },
+    {
+      "id": 777,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 10,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 778,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 11,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 779,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 12,
+      "color": "#c91847"
+    },
+    {
+      "id": 780,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 13,
+      "color": "#0986ad"
+    },
+    {
+      "id": 781,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 14,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 782,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 11,
+      "inputId": 15,
+      "color": "#0c8e15"
     }
   ]
 }

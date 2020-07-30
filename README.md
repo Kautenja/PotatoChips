@@ -96,16 +96,22 @@ See the [Manual][2A03] for more information about the features of this module.
 <!-- MARK: AY-3-8910 -->
 <!-- ------------------------------------------------------------ -->
 
-## AY-3-8910 _(Coming Soon!)_
+## AY-3-8910
 
 AY-3-8910 is an emulation of the General Instrument AY-3-8910 audio processing
-unit.
+unit. The AY-3-8910 features three pulse waveform generators and a noise
+generator that is shared between the channels.
 
 <p align="center">
 <img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
 </p>
 
 ### Features
+
+-   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
+-   **Amplitude modulation:** Manual and CV control over the individual voice levels
+-   **White noise:** Generate noise using the frequency knob for channel 3
+-   **Tone/Noise control:** CV and switch to control tone and noise for each channel
 
 See the [Manual][AY_3_8910] for more information about the features of this module.
 
@@ -151,16 +157,26 @@ See the [Manual][FME7] for more information about the features of this module.
 <!-- MARK: GBS -->
 <!-- ------------------------------------------------------------ -->
 
-## GBS _(Coming Soon!)_
+## GBS
 
 GBS is an emulation of the Nintendo GameBoy Sound System (GBS) audio processing
-unit.
+unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
+generator with a wave-table synthesizer.
 
 <p align="center">
 <img alt="GBS" src="manual/GBS/img/GBS-Module.svg">
 </p>
 
 ### Features
+
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with four duty
+    cycles: _12.5%_, _25%_, _50%_, and _75%_
+-   **Wave-table synthesis channel:** wave-table synthesis with bit depth
+    of 4 bits and table size of 32 samples. 5 pages of wave-tables can be
+    interpolated between using CV
+-   **Noise generator:** generate pseudo-random numbers at 7 different
+    frequencies
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
 See the [Manual][GBS] for more information about the features of this module.
 
@@ -178,13 +194,29 @@ See the [Manual][GBS] for more information about the features of this module.
 
 ## POKEY _(Coming Soon!)_
 
-POKEY is an emulation of the Atari POKEY audio processing unit.
+POKEY is an emulation of the Atari POKEY audio processing unit. The POKEY
+produces four pulse waveforms, but contains a variety of bonus controls,
+including extended frequency ranges, high-pass filters, and noise generators /
+distortion effects.
 
 <p align="center">
 <img alt="POKEY" src="manual/POKEY/img/POKEY-Module.svg">
 </p>
 
 ### Features
+
+-   **Quad pulse wave generator:** Four pulse waves with 8-bit frequency value
+    and _50%_ pulse width
+-   **Low-frequency mode:** Change base clock of the chip from
+    _64 KHz_ to _15 KHz_
+-   **High-frequency mode:** Change base clock of channels 1 and 3 from
+    _64 KHz_ to _1.79 MHz_
+-   **High-pass filter:** High-pass filter channel 1 using channel 3 as a clock
+    or high-pass channel 2 using channel 4 as a clock
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
+-   **Noise/Distortion generator:** generate per-channel pseudo-random numbers
+    at 15 different frequencies as a distortion source
+-   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
 
 See the [Manual][POKEY] for more information about the features of this module.
 

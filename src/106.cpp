@@ -152,9 +152,8 @@ struct Chip106 : Module {
         // get the frequency of the oscillator from the parameter and CVs
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        pitch += inputs[INPUT_FM + channel].getVoltage() / 10.f;
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        static constexpr float FM_SCALE = 5.f;
-        freq += FM_SCALE * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);

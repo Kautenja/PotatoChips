@@ -192,7 +192,7 @@ See the [Manual][GBS] for more information about the features of this module.
 <!-- MARK: POKEY -->
 <!-- ------------------------------------------------------------ -->
 
-## POKEY _(Coming Soon!)_
+## POKEY
 
 POKEY is an emulation of the Atari POKEY audio processing unit. The POKEY
 produces four pulse waveforms, but contains a variety of bonus controls,

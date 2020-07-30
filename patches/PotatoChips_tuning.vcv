@@ -47,7 +47,7 @@
       "rightModuleId": 82,
       "pos": [
         0,
-        1
+        0
       ]
     },
     {
@@ -93,7 +93,7 @@
       "rightModuleId": 89,
       "pos": [
         58,
-        1
+        0
       ]
     },
     {
@@ -131,7 +131,7 @@
       "rightModuleId": 85,
       "pos": [
         29,
-        1
+        0
       ]
     },
     {
@@ -221,6 +221,7 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 104,
       "rightModuleId": 105,
       "data": {
         "values0": [
@@ -395,8 +396,8 @@
         ]
       },
       "pos": [
-        37,
-        3
+        41,
+        2
       ]
     },
     {
@@ -445,7 +446,7 @@
       "rightModuleId": 91,
       "pos": [
         0,
-        2
+        1
       ]
     },
     {
@@ -477,12 +478,208 @@
         {
           "id": 5,
           "value": 2.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        },
+        {
+          "id": 9,
+          "value": 1.0
+        },
+        {
+          "id": 10,
+          "value": 1.0
+        },
+        {
+          "id": 11,
+          "value": 1.0
         }
       ],
       "rightModuleId": 102,
+      "data": {
+        "values0": [
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          14,
+          15,
+          15,
+          15,
+          14,
+          14,
+          13,
+          12,
+          10,
+          9,
+          8,
+          6,
+          5,
+          3,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "values1": [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "values2": [
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
+          7,
+          7,
+          8,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          12,
+          12,
+          13,
+          13,
+          14,
+          14,
+          15
+        ],
+        "values3": [
+          5,
+          4,
+          7,
+          7,
+          10,
+          9,
+          12,
+          12,
+          15,
+          12,
+          12,
+          9,
+          10,
+          7,
+          7,
+          4,
+          5,
+          2,
+          3,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          3,
+          2
+        ],
+        "values4": [
+          15,
+          15,
+          14,
+          14,
+          13,
+          13,
+          12,
+          12,
+          11,
+          11,
+          10,
+          10,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
       "pos": [
         0,
-        3
+        2
       ]
     },
     {
@@ -548,10 +745,11 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 113,
       "rightModuleId": 114,
       "pos": [
-        0,
-        5
+        54,
+        3
       ]
     },
     {
@@ -612,7 +810,7 @@
       "rightModuleId": 109,
       "pos": [
         0,
-        4
+        3
       ]
     },
     {
@@ -674,7 +872,7 @@
       "rightModuleId": 98,
       "pos": [
         65,
-        2
+        1
       ]
     },
     {
@@ -768,7 +966,7 @@
       "rightModuleId": 94,
       "pos": [
         27,
-        2
+        1
       ]
     },
     {
@@ -781,7 +979,7 @@
       "rightModuleId": 83,
       "pos": [
         14,
-        1
+        0
       ]
     },
     {
@@ -794,7 +992,7 @@
       "rightModuleId": 84,
       "pos": [
         19,
-        1
+        0
       ]
     },
     {
@@ -807,7 +1005,7 @@
       "rightModuleId": 74,
       "pos": [
         24,
-        1
+        0
       ]
     },
     {
@@ -820,7 +1018,7 @@
       "rightModuleId": 86,
       "pos": [
         43,
-        1
+        0
       ]
     },
     {
@@ -833,7 +1031,7 @@
       "rightModuleId": 87,
       "pos": [
         48,
-        1
+        0
       ]
     },
     {
@@ -846,7 +1044,7 @@
       "rightModuleId": 73,
       "pos": [
         53,
-        1
+        0
       ]
     },
     {
@@ -856,9 +1054,10 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 90,
+      "rightModuleId": 128,
       "pos": [
         82,
-        1
+        0
       ]
     },
     {
@@ -871,7 +1070,7 @@
       "rightModuleId": 90,
       "pos": [
         72,
-        1
+        0
       ]
     },
     {
@@ -884,7 +1083,7 @@
       "rightModuleId": 88,
       "pos": [
         77,
-        1
+        0
       ]
     },
     {
@@ -897,7 +1096,7 @@
       "rightModuleId": 92,
       "pos": [
         12,
-        2
+        1
       ]
     },
     {
@@ -910,7 +1109,7 @@
       "rightModuleId": 93,
       "pos": [
         17,
-        2
+        1
       ]
     },
     {
@@ -923,7 +1122,7 @@
       "rightModuleId": 81,
       "pos": [
         22,
-        2
+        1
       ]
     },
     {
@@ -936,7 +1135,7 @@
       "rightModuleId": 95,
       "pos": [
         45,
-        2
+        1
       ]
     },
     {
@@ -949,7 +1148,7 @@
       "rightModuleId": 96,
       "pos": [
         50,
-        2
+        1
       ]
     },
     {
@@ -962,7 +1161,7 @@
       "rightModuleId": 97,
       "pos": [
         55,
-        2
+        1
       ]
     },
     {
@@ -975,7 +1174,7 @@
       "rightModuleId": 80,
       "pos": [
         60,
-        2
+        1
       ]
     },
     {
@@ -988,7 +1187,7 @@
       "rightModuleId": 99,
       "pos": [
         81,
-        2
+        1
       ]
     },
     {
@@ -1001,7 +1200,7 @@
       "rightModuleId": 100,
       "pos": [
         86,
-        2
+        1
       ]
     },
     {
@@ -1011,9 +1210,10 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 99,
+      "rightModuleId": 124,
       "pos": [
         91,
-        2
+        1
       ]
     },
     {
@@ -1025,8 +1225,8 @@
       "leftModuleId": 77,
       "rightModuleId": 103,
       "pos": [
-        10,
-        3
+        26,
+        2
       ]
     },
     {
@@ -1038,8 +1238,8 @@
       "leftModuleId": 102,
       "rightModuleId": 104,
       "pos": [
-        15,
-        3
+        31,
+        2
       ]
     },
     {
@@ -1049,9 +1249,10 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 103,
+      "rightModuleId": 75,
       "pos": [
-        20,
-        3
+        36,
+        2
       ]
     },
     {
@@ -1063,8 +1264,8 @@
       "leftModuleId": 75,
       "rightModuleId": 106,
       "pos": [
-        66,
-        3
+        70,
+        2
       ]
     },
     {
@@ -1076,8 +1277,8 @@
       "leftModuleId": 105,
       "rightModuleId": 107,
       "pos": [
-        71,
-        3
+        75,
+        2
       ]
     },
     {
@@ -1089,8 +1290,8 @@
       "leftModuleId": 106,
       "rightModuleId": 108,
       "pos": [
-        76,
-        3
+        80,
+        2
       ]
     },
     {
@@ -1102,8 +1303,8 @@
       "leftModuleId": 107,
       "rightModuleId": 120,
       "pos": [
-        81,
-        3
+        85,
+        2
       ]
     },
     {
@@ -1116,7 +1317,7 @@
       "rightModuleId": 110,
       "pos": [
         29,
-        4
+        3
       ]
     },
     {
@@ -1129,7 +1330,7 @@
       "rightModuleId": 111,
       "pos": [
         34,
-        4
+        3
       ]
     },
     {
@@ -1142,7 +1343,7 @@
       "rightModuleId": 112,
       "pos": [
         39,
-        4
+        3
       ]
     },
     {
@@ -1155,7 +1356,7 @@
       "rightModuleId": 113,
       "pos": [
         44,
-        4
+        3
       ]
     },
     {
@@ -1165,9 +1366,10 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 112,
+      "rightModuleId": 78,
       "pos": [
         49,
-        4
+        3
       ]
     },
     {
@@ -1179,8 +1381,8 @@
       "leftModuleId": 78,
       "rightModuleId": 115,
       "pos": [
-        29,
-        5
+        83,
+        3
       ]
     },
     {
@@ -1192,8 +1394,8 @@
       "leftModuleId": 114,
       "rightModuleId": 116,
       "pos": [
-        34,
-        5
+        88,
+        3
       ]
     },
     {
@@ -1205,8 +1407,8 @@
       "leftModuleId": 115,
       "rightModuleId": 117,
       "pos": [
-        39,
-        5
+        93,
+        3
       ]
     },
     {
@@ -1218,8 +1420,8 @@
       "leftModuleId": 116,
       "rightModuleId": 118,
       "pos": [
-        44,
-        5
+        98,
+        3
       ]
     },
     {
@@ -1231,8 +1433,8 @@
       "leftModuleId": 117,
       "rightModuleId": 119,
       "pos": [
-        49,
-        5
+        103,
+        3
       ]
     },
     {
@@ -1243,8 +1445,8 @@
       "params": [],
       "leftModuleId": 118,
       "pos": [
-        54,
-        5
+        108,
+        3
       ]
     },
     {
@@ -1256,8 +1458,8 @@
       "leftModuleId": 108,
       "rightModuleId": 121,
       "pos": [
-        86,
-        3
+        90,
+        2
       ]
     },
     {
@@ -1269,8 +1471,8 @@
       "leftModuleId": 120,
       "rightModuleId": 122,
       "pos": [
-        91,
-        3
+        95,
+        2
       ]
     },
     {
@@ -1282,8 +1484,8 @@
       "leftModuleId": 121,
       "rightModuleId": 123,
       "pos": [
-        96,
-        3
+        100,
+        2
       ]
     },
     {
@@ -1294,8 +1496,8 @@
       "params": [],
       "leftModuleId": 122,
       "pos": [
-        101,
-        3
+        105,
+        2
       ]
     },
     {
@@ -1349,14 +1551,15 @@
           "value": 0.5
         }
       ],
+      "leftModuleId": 100,
       "rightModuleId": 125,
       "data": {
         "lowCpu": false,
         "model": 0
       },
       "pos": [
-        4,
-        0
+        96,
+        1
       ]
     },
     {
@@ -1367,8 +1570,8 @@
       "params": [],
       "leftModuleId": 124,
       "pos": [
-        16,
-        0
+        108,
+        1
       ]
     },
     {
@@ -1406,12 +1609,13 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 129,
       "rightModuleId": 127,
       "data": {
         "poly_input": 0
       },
       "pos": [
-        29,
+        102,
         0
       ]
     },
@@ -1423,7 +1627,7 @@
       "params": [],
       "leftModuleId": 126,
       "pos": [
-        39,
+        112,
         0
       ]
     },
@@ -1439,11 +1643,11 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 2,
-          "value": -54.0
+          "value": 0.0
         },
         {
           "id": 3,
@@ -1462,9 +1666,10 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 88,
       "rightModuleId": 129,
       "pos": [
-        51,
+        87,
         0
       ]
     },
@@ -1475,8 +1680,9 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 128,
+      "rightModuleId": 126,
       "pos": [
-        61,
+        97,
         0
       ]
     }

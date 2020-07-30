@@ -329,7 +329,11 @@ struct ChipGBS : Module {
             // ---------------------------------------------------------------
             // set the period and LFSR
             bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
-            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, is_lfsr * 0b00001000 | getNoisePeriod());
+            auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod();
+            if (apu.read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
+                apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);
+                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+            }
             // set the volume for the channel
             auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
             if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {

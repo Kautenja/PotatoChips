@@ -128,15 +128,15 @@
 
 \section{Overview}
 
-% GBS is an emulation of the GBS sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The GBS chip contains two pulse wave generators, a quantized triangle wave generator, and a noise generator. The original chip featured a DMC loader for playing samples that has been omitted in this emulation.
+GBS is an emulation of the Nintendo GameBoy Sound System (GBS) audio processing unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform generator with a wave-table synthesizer.
 
-% GBS provides the key features of the GBS chip, namely,
-% \begin{itemize}
-%   \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$;
-%   \item \textbf{Quantized triangle wave generator:} Generate NES style triangle wave with 16 steps of quantization;
-%   \item \textbf{Noise generator:} generate pseudo-random numbers at 16 different frequencies; and
-%   \item \textbf{Linear Feedback Shift Register (LFSR):} for that old-school 8-bit randomness!
-% \end{itemize}
+GBS provides the key features of the GameBoy Sound System chip, namely,
+\begin{itemize}
+  \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$
+  \item \textbf{Wave-table synthesis channel:} wave-table synthesis with bit depth of 4 bits and table size of 32 samples. 5 pages of wave-tables can be interpolated between using CV
+  \item \textbf{Noise generator:} generate pseudo-random numbers at 7 different frequencies
+  \item \textbf{Linear Feedback Shift Register (LFSR):} old-school 8-bit randomness!
+\end{itemize}
 
 % -------------------
 % MARK: Panel Layout

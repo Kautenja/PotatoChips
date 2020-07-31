@@ -128,15 +128,20 @@
 
 \section{Overview}
 
-% POKEY is an emulation of the POKEY sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The POKEY chip contains two pulse wave generators, a quantized triangle wave generator, and a noise generator. The original chip featured a DMC loader for playing samples that has been omitted in this emulation.
+POKEY is an emulation of the Atari POKEY sound chip from the
 
-% POKEY provides the key features of the POKEY chip, namely,
-% \begin{itemize}
-%   \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$;
-%   \item \textbf{Quantized triangle wave generator:} Generate NES style triangle wave with 16 steps of quantization;
-%   \item \textbf{Noise generator:} generate pseudo-random numbers at 16 different frequencies; and
-%   \item \textbf{Linear Feedback Shift Register (LFSR):} for that old-school 8-bit randomness!
-% \end{itemize}
+Nintendo Entertainment System (NES) for VCV Rack. The POKEY chip contains two pulse wave generators, a quantized triangle wave generator, and a noise generator. The original chip featured a DMC loader for playing samples that has been omitted in this emulation.
+
+POKEY provides the key features of the POKEY chip, namely,
+\begin{itemize}
+  \item \textbf{Quad pulse wave generator:} Four pulse waves with 8-bit frequency value and $50\%$ pulse width
+  \item \textbf{Low-frequency mode:} Change base clock of the chip from $64 KHz$ to $15 KHz$
+  \item \textbf{High-frequency mode:} Change base clock of channels 1 and 3 from $64 KHz$ to $1.79 MHz$
+  \item \textbf{High-pass filter:} High-pass filter channel 1 using channel 3 as a clock or high-pass channel 2 using channel 4 as a clock
+  \item \textbf{Linear Feedback Shift Register (LFSR):} old-school 8-bit randomness!
+  \item \textbf{Noise/Distortion generator:} generate per-channel pseudo-random numbers at 15 different frequencies as a distortion source
+  \item \textbf{Amplitude modulation:} 4-bit amplifier with linear amplitude modulation
+\end{itemize}
 
 % -------------------
 % MARK: Panel Layout

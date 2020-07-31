@@ -128,15 +128,18 @@
 
 \section{Overview}
 
-% AY_3_8910 is an emulation of the AY_3_8910 sound chip from the Nintendo Entertainment System (NES) for VCV Rack. The AY_3_8910 chip contains two pulse wave generators, a quantized triangle wave generator, and a noise generator. The original chip featured a DMC loader for playing samples that has been omitted in this emulation.
+AY-3-8910 is an emulation of the General Instrument AY-3-8910 sound chip from
+many Arcade games. The AY features three tone generators, each with an optional
+noise effect.
 
-% AY_3_8910 provides the key features of the AY_3_8910 chip, namely,
-% \begin{itemize}
-%   \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$;
-%   \item \textbf{Quantized triangle wave generator:} Generate NES style triangle wave with 16 steps of quantization;
-%   \item \textbf{Noise generator:} generate pseudo-random numbers at 16 different frequencies; and
-%   \item \textbf{Linear Feedback Shift Register (LFSR):} for that old-school 8-bit randomness!
-% \end{itemize}
+AY-3-8910 provides the key features of the General Instrument AY-3-8910 chip,
+namely,
+\begin{itemize}
+  \item \textbf{Triple pulse wave generator:} Triple 12-bit pulse waves with duty cycle of $50\%$
+  \item \textbf{Amplitude modulation:} Manual and CV control over the individual voice levels
+  \item \textbf{White noise:} Generate noise using the frequency knob for channel 3
+  \item \textbf{Tone/Noise control:} CV and switch to control tone and noise for each channel
+\end{itemize}
 
 % -------------------
 % MARK: Panel Layout

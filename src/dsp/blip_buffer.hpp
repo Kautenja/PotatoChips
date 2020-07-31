@@ -464,7 +464,7 @@ class BLIPSynthesizer {
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer
     ///
-    inline void update(blip_time_t time, int amplitude) const {
+    inline void update(blip_time_t time, int amplitude) {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
         offset_resampled(buffer->resampled_time(time), delta, buffer);

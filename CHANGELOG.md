@@ -69,3 +69,7 @@
 -   updated panel for 2A03, FME7, VRC6
 -   fix issue where SN76489 trigger input wasn't responding to bipolar inputs
 -   updated default wave-tables for 106, sine, ramps, pulse, triangle
+
+### 1.4.2 (2020-07-31)
+
+-   fix build break for MacOS platform

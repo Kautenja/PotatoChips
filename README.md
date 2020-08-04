@@ -13,11 +13,6 @@ They're just so addicting!
 
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: 106 -->
 <!-- ------------------------------------------------------------ -->
@@ -51,12 +46,6 @@ See the [Manual][106] for more information about the features of this module.
 
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
-
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: 2A03 -->
 <!-- ------------------------------------------------------------ -->
@@ -87,11 +76,6 @@ See the [Manual][2A03] for more information about the features of this module.
 
 [2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
 
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: AY-3-8910 -->
 <!-- ------------------------------------------------------------ -->
@@ -117,12 +101,6 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 
 [AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
 
-
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: FME7 -->
 <!-- ------------------------------------------------------------ -->
@@ -146,12 +124,6 @@ pulse wave generators are implemented currently.
 See the [Manual][FME7] for more information about the features of this module.
 
 [FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
-
-
-
-
-
-
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: GBS -->
@@ -181,12 +153,6 @@ generator with a wave-table synthesizer.
 See the [Manual][GBS] for more information about the features of this module.
 
 [GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
-
-
-
-
-
-
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: POKEY -->
@@ -222,12 +188,6 @@ See the [Manual][POKEY] for more information about the features of this module.
 
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 
-
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->
 <!-- ------------------------------------------------------------ -->
@@ -245,12 +205,6 @@ SCC is an emulation of the Konami SCC audio processing unit.
 See the [Manual][SCC] for more information about the features of this module.
 
 [SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
-
-
-
-
-
-
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SN76489 -->
@@ -283,12 +237,6 @@ See the [Manual][SN76489] for more information about the features of this module
 [TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
 [SN76489]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SN76489.pdf
 
-
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: TurboGrafx16 -->
 <!-- ------------------------------------------------------------ -->
@@ -306,11 +254,6 @@ TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
 See the [Manual][TurboGrafx16] for more information about the features of this module.
 
 [TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
-
-
-
-
-
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: VRC6 -->
@@ -339,4 +282,3 @@ pulse wave generators, and a quantized saw wave generator.
 See the [Manual][VRC6] for more information about the features of this module.
 
 [VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
-

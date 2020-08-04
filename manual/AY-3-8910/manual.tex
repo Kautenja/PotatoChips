@@ -136,8 +136,8 @@ AY-3-8910 provides the key features of the General Instrument AY-3-8910 chip,
 namely,
 \begin{itemize}
   \item \textbf{Triple pulse wave generator:} Triple 12-bit pulse waves with duty cycle of $50\%$
+  \item \textbf{Noise generator:} Generate noise on each channel using the frequency knob for channel 3
   \item \textbf{Amplitude modulation:} Manual and CV control over the individual voice levels
-  \item \textbf{White noise:} Generate noise using the frequency knob for channel 3
   \item \textbf{Tone/Noise control:} CV and switch to control tone and noise for each channel
 \end{itemize}
 
@@ -145,21 +145,22 @@ namely,
 % MARK: Panel Layout
 % -------------------
 
+\clearpage
 \section{Panel Layout}
-
-\begin{center}
+\begin{figure}[!htp]
+\centering
 \includegraphics{AY_3_8910-Manual}
-\end{center}
+\end{figure}
 
-% \begin{enumerate}
-%   \item Coarse frequency control over the four channels.
-%   \item $V$/Octave inputs for pulse1, pulse2, and triangle waveform generators.
-%   \item linear CV frequency modulation for pulse1, pulse2, and triangle waveform generators.
-%   \item Pulse width selector. Chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$.
-%   \item CV LFSR gate, high at $2V$. Holds the LFSR generator as long as the input voltage is $>2V$.
-%   \item Period of randomness $\in [0, 15]$ for the noise generator. See \url{https://wiki.nesdev.com/w/index.php/APU_Noise} for approximate frequency and pitch mappings.
-%   \item Channel outputs, ${\approx}10V_{pp}$.
-% \end{enumerate}
+\clearpage
+\begin{enumerate}
+  \item Coarse frequency control over the four channels. The frequency of channel 3 also controls the period of the noise generator.
+  \item $V$/Octave inputs for tone1, tone2, and tone3 waveform generators.
+  \item linear CV frequency modulation for tone1, tone2, and tone3 waveform generators.
+  \item On/off control over pulse generator (top) and noise generator (bottom) for each channel. The CV gate input goes high at $2V$. The toggle switch both acts as a basic switch and inverts the effect of the CV gate input.
+  \item Coarse amplitude control over the channels using the 4-bit amplifier.
+  \item Channel outputs, ${\approx}10V_{pp}$.
+\end{enumerate}
 
 % -------------------
 % MARK: References

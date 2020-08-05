@@ -4,7 +4,7 @@
     {
       "id": 72,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "2A03",
       "params": [
         {
@@ -54,7 +54,7 @@
     {
       "id": 73,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "VRC6",
       "params": [
         {
@@ -100,7 +100,7 @@
     {
       "id": 74,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "FME7",
       "params": [
         {
@@ -138,7 +138,7 @@
     {
       "id": 75,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "106",
       "params": [
         {
@@ -404,7 +404,7 @@
     {
       "id": 76,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "SN76489",
       "params": [
         {
@@ -454,7 +454,7 @@
     {
       "id": 77,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "GBS",
       "params": [
         {
@@ -688,7 +688,7 @@
     {
       "id": 80,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "AY_3_8910",
       "params": [
         {
@@ -750,7 +750,7 @@
     {
       "id": 81,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "model": "POKEY",
       "params": [
         {

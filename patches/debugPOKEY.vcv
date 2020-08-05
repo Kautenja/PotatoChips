@@ -69,7 +69,7 @@
         "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
-        "lastPitch": 2176,
+        "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
           "driver": 1,
@@ -315,7 +315,7 @@
     {
       "id": 6,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "POKEY",
       "params": [
         {

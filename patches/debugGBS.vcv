@@ -68,7 +68,7 @@
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
-        "lastMod": 92,
+        "lastMod": 0,
         "midi": {
           "driver": 1,
           "deviceName": "Arturia KeyStep 32",
@@ -132,7 +132,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "GBS",
       "params": [
         {
@@ -149,7 +149,7 @@
         },
         {
           "id": 3,
-          "value": 4.0
+          "value": 0.0
         },
         {
           "id": 4,
@@ -702,14 +702,6 @@
       "inputModuleId": 54,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 773,
-      "outputModuleId": 5,
-      "outputId": 5,
-      "inputModuleId": 48,
-      "inputId": 9,
-      "color": "#c9b70e"
     },
     {
       "id": 774,

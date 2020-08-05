@@ -10,18 +10,18 @@ authorUrl: https://kautenja.github.io/
 sourceUrl: https://github.com/Kautenja/PotatoChips
 changelogUrl: https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md
 modules:
-  # - slug: AY_3_8910
-  #   name: AY-3-8910
-  #   description: An emulation of the General Instrument AY-3-8910 audio processing unit.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
-  #   tags:
-  #     - Oscillator
-  # - slug: POKEY
-  #   name: POKEY
-  #   description: An emulation of the Atari POKEY audio processing unit.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
-  #   tags:
-  #     - Oscillator
+  - slug: AY_3_8910
+    name: AY-3-8910
+    description: An emulation of the General Instrument AY-3-8910 audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
+    tags:
+      - Oscillator
+  - slug: POKEY
+    name: POKEY
+    description: An emulation of the Atari POKEY audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+    tags:
+      - Oscillator
   # - slug: SCC
   #   name: SCC
   #   description: An emulation of the Konami SCC chip.
@@ -46,13 +46,13 @@ modules:
   #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf
   #   tags:
   #     - Oscillator
-  # - slug: GBS
-  #   name: GBS
-  #   description: An emulation of the Nintendo Gameboy Sound System audio processing unit.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
-  #   tags:
-  #     - Oscillator
-  #     - Noise
+  - slug: GBS
+    name: GBS
+    description: An emulation of the Nintendo Gameboy Sound System audio processing unit.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
+    tags:
+      - Oscillator
+      - Noise
   # - slug: S_SMP
   #   name: S-SMP
   #   description: An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System.

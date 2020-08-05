@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -470,6 +470,30 @@
       "outputId": 0,
       "inputModuleId": 70,
       "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 810,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 70,
+      "inputId": 3,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 811,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 70,
+      "inputId": 4,
+      "color": "#c91847"
+    },
+    {
+      "id": 812,
+      "outputModuleId": 5,
+      "outputId": 4,
+      "inputModuleId": 70,
+      "inputId": 5,
       "color": "#0986ad"
     }
   ]

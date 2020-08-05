@@ -146,19 +146,17 @@ struct ChipGBS : Module {
         static constexpr float FREQ_MIN = 8;
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 2035;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        pitch += inputs[INPUT_FM + channel].getVoltage() / 10.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // TODO: why is the wavetable clocked at half rate? this is not
+        // TODO: why is the wave-table clocked at half rate? this is not
         // documented anywhere that I can find; however, it makes sense that
         // the wave channel would be an octave lower since the original
         // triangle channel was intended for bass
         if (channel == NintendoGBS::WAVETABLE) freq *= 2;
-        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buf[channel].get_clock_rate() / freq) >> 5);
@@ -329,7 +327,11 @@ struct ChipGBS : Module {
             // ---------------------------------------------------------------
             // set the period and LFSR
             bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
-            apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, is_lfsr * 0b00001000 | getNoisePeriod());
+            auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod();
+            if (apu.read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
+                apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);
+                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+            }
             // set the volume for the channel
             auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
             if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {

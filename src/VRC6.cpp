@@ -94,14 +94,12 @@ struct ChipVRC6 : Module {
         float freq_max,
         float clock_division
     ) {
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
+        pitch += inputs[INPUT_FM + channel].getVoltage() / 10.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq += MOD_FACTOR * inputs[INPUT_FM + channel].getVoltage();
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buf[channel].get_clock_rate() / (clock_division * freq)) - 1;

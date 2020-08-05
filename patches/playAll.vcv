@@ -397,7 +397,7 @@
         ]
       },
       "pos": [
-        75,
+        72,
         0
       ]
     },
@@ -447,7 +447,7 @@
       "bypass": true,
       "rightModuleId": 87,
       "pos": [
-        43,
+        41,
         1
       ]
     },
@@ -681,7 +681,7 @@
         ]
       },
       "pos": [
-        75,
+        66,
         1
       ]
     },
@@ -743,7 +743,7 @@
       "bypass": true,
       "rightModuleId": 89,
       "pos": [
-        42,
+        41,
         2
       ]
     },
@@ -852,7 +852,7 @@
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
-        "lastMod": 27,
+        "lastMod": 0,
         "midi": {
           "driver": 1,
           "deviceName": "Arturia KeyStep 32",
@@ -1018,7 +1018,7 @@
       "bypass": true,
       "leftModuleId": 76,
       "pos": [
-        55,
+        53,
         1
       ]
     },
@@ -1086,7 +1086,7 @@
       "bypass": true,
       "leftModuleId": 80,
       "pos": [
-        58,
+        57,
         2
       ]
     },
@@ -1117,9 +1117,10 @@
           "value": 1.0
         }
       ],
+      "bypass": true,
       "leftModuleId": 77,
       "pos": [
-        101,
+        92,
         1
       ]
     },
@@ -1360,7 +1361,7 @@
         "poly_channel_offset": -1
       },
       "pos": [
-        104,
+        101,
         0
       ]
     }
@@ -2205,6 +2206,14 @@
       "inputModuleId": 77,
       "inputId": 3,
       "color": "#c91847"
+    },
+    {
+      "id": 897,
+      "outputModuleId": 82,
+      "outputId": 5,
+      "inputModuleId": 72,
+      "inputId": 3,
+      "color": "#0c8e15"
     }
   ]
 }

@@ -73,3 +73,11 @@
 ### 1.4.2 (2020-07-31)
 
 -   fix build break for MacOS platform
+
+### 1.5.0 (2020-08-04)
+
+-   strong FM for all modules by a factor of 2
+-   new modules!
+    -   AY-3-8910
+    -   POKEY
+    -   GBS

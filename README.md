@@ -192,6 +192,7 @@ See the [Manual][POKEY] for more information about the features of this module.
 <!-- MARK: SCC -->
 <!-- ------------------------------------------------------------ -->
 
+<!--
 ## SCC _(Coming Soon!)_
 
 SCC is an emulation of the Konami SCC audio processing unit.
@@ -205,11 +206,11 @@ SCC is an emulation of the Konami SCC audio processing unit.
 See the [Manual][SCC] for more information about the features of this module.
 
 [SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
+-->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SN76489 -->
 <!-- ------------------------------------------------------------ -->
-
 ## SN76489
 
 SN76489 is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
@@ -241,6 +242,7 @@ See the [Manual][SN76489] for more information about the features of this module
 <!-- MARK: TurboGrafx16 -->
 <!-- ------------------------------------------------------------ -->
 
+<!--
 ## TurboGrafx16 _(Coming Soon!)_
 
 TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
@@ -254,6 +256,7 @@ TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
 See the [Manual][TurboGrafx16] for more information about the features of this module.
 
 [TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
+-->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: VRC6 -->

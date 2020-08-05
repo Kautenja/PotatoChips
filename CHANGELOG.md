@@ -84,4 +84,4 @@
 
 ### 1.5.1 (2020-08-04)
 
--   improve the CV input for noise period on GBS
+-   improve the CV input for noise period on 2A03 & GBS

@@ -139,16 +139,15 @@ struct Chip2A03 : Module {
     /// Return the period of the noise oscillator from the panel controls.
     inline uint8_t getNoisePeriod() {
         // the minimal value for the frequency register to produce sound
-        static constexpr float PERIOD_MIN = 0;
+        static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
-        static constexpr float PERIOD_MAX = 15;
-        // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_VOCT + 3].getVoltage());
-        auto pitch = abs(inputs[INPUT_VOCT + 3].getVoltage() / 100.f);
-        // convert the pitch to frequency based on standard exponential scale
-        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_FREQ + 3].getValue();
-        return PERIOD_MAX - rack::clamp(freq, PERIOD_MIN, PERIOD_MAX);
+        static constexpr float FREQ_MAX = 15;
+        // get the attenuation from the parameter knob
+        float freq = params[PARAM_FREQ + 3].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_VOCT + 3].isConnected())
+            freq += inputs[INPUT_VOCT + 3].getVoltage() / 2.f;
+        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// Return the volume level from the panel controls.

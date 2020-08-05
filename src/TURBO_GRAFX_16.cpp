@@ -146,8 +146,6 @@ struct ChipTurboGrafx16 : Module {
         static constexpr float FREQ12BIT_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
-        // the constant modulation factor
-        static constexpr auto MOD_FACTOR = 10.f;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();

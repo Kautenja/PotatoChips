@@ -188,18 +188,18 @@ Mode & Description                   \\
 \begin{table}[!htp]
 \caption{Descriptions of each of the bits in the Audio Control register.}
 \label{tab:audio-control}
-\begin{tabular}{|l||l|l|l|}
+\begin{tabular}{|l|l||l|l|l|}
 \hline
- Bit & Description                                                     & 0       & 1         \\
+ Bit & Name              & Description                                            & 0       & 1         \\
 \hline\hline
- 1   & Choice of global frequency divider rate                         & $64kHz$ & $15kHz$   \\
- 2   & High-pass filter for channel 2 rated by frequency of channel 4  & Off     & On        \\
- 3   & High-pass filter for channel 1 rated by frequency of channel 3  & Off     & On        \\
- 4   & Connection of channels 4 \& 3 to achieve 16-bit frequency       & Off     & On        \\
- 5   & Connection of channels 2 \& 1 to achieve 16-bit frequency       & Off     & On        \\
- 6   & Channel 3 divider frequency                                     & $64kHz$ & $1.79MHz$ \\
- 7   & Channel 1 divider frequency                                     & $64kHz$ & $1.79MHz$ \\
- 8   & Noise / distortion shift register                               & 17-bit  & 9-bit     \\
+ 1   & \texttt{LOW FREQ} & Choice of frequency divider rate for all channels      & $64kHz$ & $15kHz$   \\
+ 2   & \texttt{HP 4>2}   & High-pass filter for Ch. 2 rated by frequency of Ch. 4 & Off     & On        \\
+ 3   & \texttt{HP 3>1}   & High-pass filter for Ch. 1 rated by frequency of Ch. 3 & Off     & On        \\
+ 4   & \texttt{16=4+3}   & Combine Ch. 4 \& Ch. 3 to achieve 16-bit frequency     & Off     & On        \\
+ 5   & \texttt{16=2+1}   & Combine Ch. 2 \& Ch. 1 to achieve 16-bit frequency     & Off     & On        \\
+ 6   & \texttt{AUD3HI}   & Channel 3 clock divider frequency                      & $64kHz$ & $1.79MHz$ \\
+ 7   & \texttt{AUD1HI}   & Channel 1 clock divider frequency                      & $64kHz$ & $1.79MHz$ \\
+ 8   & \texttt{LFSR}     & Noise / distortion shift register                      & 17-bit  & 9-bit     \\
 \hline
 \end{tabular}
 \end{table}

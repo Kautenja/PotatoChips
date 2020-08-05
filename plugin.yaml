@@ -22,12 +22,12 @@ modules:
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
     tags:
       - Oscillator
-  - slug: SCC
-    name: SCC
-    description: An emulation of the Konami SCC chip.
-    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
-    tags:
-      - Oscillator
+  # - slug: SCC
+  #   name: SCC
+  #   description: An emulation of the Konami SCC chip.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
+  #   tags:
+  #     - Oscillator
   - slug: VRC6
     name: VRC6
     description: An emulation of the Konami VRC6 chip.
@@ -40,12 +40,12 @@ modules:
     manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
     tags:
       - Oscillator
-  - slug: TURBO_GRAFX_16
-    name: Turbo Grafx 16
-    description: An emulation of the NEC Turbo Grafx 16 audio processing unit.
-    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf
-    tags:
-      - Oscillator
+  # - slug: TURBO_GRAFX_16
+  #   name: Turbo Grafx 16
+  #   description: An emulation of the NEC Turbo Grafx 16 audio processing unit.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf
+  #   tags:
+  #     - Oscillator
   - slug: GBS
     name: GBS
     description: An emulation of the Nintendo Gameboy Sound System audio processing unit.
@@ -80,13 +80,13 @@ modules:
     tags:
       - Oscillator
       - Noise
-  - slug: '2413'
-    name: '2413'
-    description: An emulation of the Yamaha YM2413 chip.
-    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf
-    tags:
-      - Oscillator
-      - Noise
+  # - slug: '2413'
+  #   name: '2413'
+  #   description: An emulation of the Yamaha YM2413 chip.
+  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf
+  #   tags:
+  #     - Oscillator
+  #     - Noise
   # - slug: '2612'
   #   name: '2612'
   #   description: An emulation of the Yamaha YM2612 chip.

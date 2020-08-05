@@ -82,7 +82,7 @@ struct ChipFME7 : Module {
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 10.f;
+        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);

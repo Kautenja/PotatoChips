@@ -105,7 +105,7 @@ struct ChipGBS : Module {
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Wave Frequency",    " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD, 0, 7, 4, "Noise Period", "", 0, 1, -7);
+        configParam(PARAM_NOISE_PERIOD, 0, 7, 0, "Noise Period", "", 0, 1, -7);
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
         configParam(PARAM_WAVETABLE, 0, 5, 0, "Wavetable morph");
@@ -201,13 +201,12 @@ struct ChipGBS : Module {
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 7;
-        // get the pitch / frequency of the oscillator
-        auto sign = sgn(inputs[INPUT_NOISE_PERIOD].getVoltage());
-        auto pitch = abs(inputs[INPUT_NOISE_PERIOD].getVoltage() / 100.f);
-        // convert the pitch to frequency based on standard exponential scale
-        auto freq = rack::dsp::FREQ_C4 * sign * (powf(2.0, pitch) - 1.f);
-        freq += params[PARAM_NOISE_PERIOD].getValue();
-        return FREQ_MAX - rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        // get the attenuation from the parameter knob
+        float freq = params[PARAM_NOISE_PERIOD].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_NOISE_PERIOD].isConnected())
+            freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
+        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// Return the volume parameter for the given channel.

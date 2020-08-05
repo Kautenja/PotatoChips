@@ -81,3 +81,7 @@
     -   AY-3-8910
     -   POKEY
     -   GBS
+
+### 1.5.1 (2020-08-04)
+
+-   improve the CV input for noise period on GBS

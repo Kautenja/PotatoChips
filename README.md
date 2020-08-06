@@ -19,12 +19,14 @@ They're just so addicting!
 
 ## 106
 
-106 is an emulation of the Namco 106 audio processing unit from the
-Nintendo Entertainment System (NES) for VCV Rack. The Namco 106 chip contains
-eight channels of wave-table synthesis and 128 bytes of operational RAM. The
-wave-tables are 4-bit and can be as long as 63 samples. This module uses a
-bank of five 32-sample wave-tables to act as the waveform for all eight
-channels.
+106 is an emulation of the 
+[Namco 106](https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no) 
+audio processing unit from the
+[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) 
+for VCV Rack. The Namco 106 chip contains eight channels of wave-table 
+synthesis and 128 bytes of operational RAM. The wave-tables are 4-bit 
+and can be as long as 63 samples. This module uses a bank of five 
+32-sample wave-tables to act as the waveform for all eight channels.
 
 <p align="center">
 <img alt="106" src="manual/106/img/106-Module.svg">
@@ -52,8 +54,11 @@ See the [Manual][106] for more information about the features of this module.
 
 ## 2A03
 
-2A03 is an emulation of the Ricoh 2A03 audio processing unit from the Nintendo
-Entertainment System (NES) for VCV Rack. The 2A03 chip contains two pulse wave
+2A03 is an emulation of the 
+[Ricoh 2A03](https://wiki.nesdev.com/w/index.php/2A03) 
+audio processing unit from the 
+[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) 
+for VCV Rack. The 2A03 chip contains two pulse wave
 generators, a quantized triangle wave generator, and a noise generator. The
 original chip featured a DMC loader for playing samples that has been omitted
 in this emulation.
@@ -82,7 +87,9 @@ See the [Manual][2A03] for more information about the features of this module.
 
 ## AY-3-8910
 
-AY-3-8910 is an emulation of the General Instrument AY-3-8910 audio processing
+AY-3-8910 is an emulation of the 
+[General Instrument AY-3-8910](http://map.grauw.nl/resources/sound/generalinstrument_ay-3-8910.pdf) 
+audio processing
 unit. The AY-3-8910 features three pulse waveform generators and a noise
 generator that is shared between the channels.
 
@@ -107,8 +114,11 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 
 ## FME7
 
-FME7 is an emulation of the Sunsoft FME7 audio processing unit from the
-Nintendo Entertainment System (NES) for VCV Rack. The FME7 chip contains three
+FME7 is an emulation of the 
+[Sunsoft FME7](https://wiki.nesdev.com/w/index.php/Sunsoft_FME-7) 
+audio processing unit from the
+[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)  
+for VCV Rack. The FME7 chip contains three
 pulse wave generators, a noise generator, and an envelope generator. Only the
 pulse wave generators are implemented currently.
 
@@ -131,7 +141,9 @@ See the [Manual][FME7] for more information about the features of this module.
 
 ## GBS
 
-GBS is an emulation of the Nintendo GameBoy Sound System (GBS) audio processing
+GBS is an emulation of the 
+[Nintendo GameBoy Sound System (GBS)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
+audio processing
 unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
 generator with a wave-table synthesizer.
 
@@ -160,7 +172,9 @@ See the [Manual][GBS] for more information about the features of this module.
 
 ## POKEY
 
-POKEY is an emulation of the Atari POKEY audio processing unit. The POKEY
+POKEY is an emulation of the 
+[Atari POKEY](https://en.wikipedia.org/wiki/POKEY) 
+audio processing unit. The POKEY
 produces four pulse waveforms, but contains a variety of bonus controls,
 including extended frequency ranges, high-pass filters, and noise generators /
 distortion effects.
@@ -264,8 +278,11 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 
 ## VRC6
 
-VRC6 is an emulation of the Konami VRC6 audio processing unit from the
-Nintendo Entertainment System (NES) for VCV Rack. The VRC6 chip contains two
+VRC6 is an emulation of the 
+[Konami VRC6](https://wiki.nesdev.com/w/index.php/VRC6_audio) 
+audio processing unit from the
+[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System) 
+for VCV Rack. The VRC6 chip contains two
 pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">

@@ -99,6 +99,8 @@ struct Chip2A03 : Module {
 
     /// Get the frequency for the given oscillator and polyphony channel
     ///
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @param freq_min the minimal value for the frequency register to
     /// produce sound
     /// @param freq_max the maximal value for the frequency register
@@ -209,11 +211,12 @@ struct Chip2A03 : Module {
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
+        // determine the number of channels based on the inputs
         unsigned channels = 1;
         for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
             channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
-
-        if (cvDivider.process()) {  // process the CV inputs to the chip
+        // process the CV inputs to the chip
+        if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
                 lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
                 // ---------------------------------------------------------------
@@ -256,22 +259,27 @@ struct Chip2A03 : Module {
         // set output polyphony channels
         for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
             outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine
+        // process audio samples on the chip engine. keep a sum of the output
+        // of each channel for the VU meters
+        float sum[Ricoh2A03::OSC_COUNT] = {0, 0, 0, 0};
         for (unsigned channel = 0; channel < channels; channel++) {
+            // end the frame on the engine
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            float lastOscOutput = 0;
-            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-                auto oscillatorOutput = getAudioOut(i, channel);
-                // only update VU meter on first polyphony channel or a higher-amplitude subsequent polyphony channel
-                chMeters[i].process(args.sampleTime, std::max(oscillatorOutput / 5.f, lastOscOutput / 5));
-                outputs[OUTPUT_OSCILLATOR + i].setVoltage(oscillatorOutput, channel);
-                lastOscOutput = oscillatorOutput;
+            // get the output from each oscillator and accumulate into the sum
+            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
+                auto output = getAudioOut(oscillator, channel);
+                sum[oscillator] += output;
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(output, channel);
             }
         }
-        if (lightDivider.process()) {  // update the mixer lights
-            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-                float b = chMeters[i].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_VOLUME + i].setBrightness(b);
+        // process the VU meter for each oscillator based on the summed outputs
+        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
+            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
+        // update the VU meter lights
+        if (lightDivider.process()) {
+            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
+                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_VOLUME + oscillator].setBrightness(brightness);
             }
         }
     }

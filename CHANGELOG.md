@@ -85,3 +85,7 @@
 ### 1.5.1 (2020-08-04)
 
 -   improve the CV input for noise period on 2A03 & GBS
+
+### 1.5.2 (2020-08-08)
+
+-   fix CV volume control for VRC6, FME7, AY-3-8910, 106

@@ -135,11 +135,16 @@ struct ChipVRC6 : Module {
     ///
     inline uint8_t getLevel(unsigned channel, float max_level) {
         // get the level from the parameter knob
-        auto levelParam = params[PARAM_LEVEL + channel].getValue();
+        auto param = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
-        auto levelCV = inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+            cv = rack::clamp(cv, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            param *= 2 * cv;
+        }
         // get the 8-bit level clamped within legal limits
-        return rack::clamp(max_level * (levelParam + levelCV), 0.f, max_level);
+        return rack::clamp(max_level * param, 0.f, max_level);
     }
 
     /// Return a 10V signed sample from the APU.

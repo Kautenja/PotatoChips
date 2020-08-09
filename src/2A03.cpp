@@ -60,7 +60,7 @@ struct Chip2A03 : Module {
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
     /// a VU meter for keeping track of the oscillator levels
     dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
@@ -309,6 +309,10 @@ struct Chip2A03 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip2A03Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     Chip2A03Widget(Chip2A03 *module) {
         setModule(module);
         static constexpr auto panel = "res/2A03.svg";

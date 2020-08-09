@@ -69,7 +69,7 @@ struct ChipGBS : Module {
     /// the number of samples in the wave-table
     static constexpr auto SAMPLES_PER_WAVETABLE = 32;
 
-    // the number of editors on the module
+    /// the number of editors on the module
     static constexpr int NUM_WAVETABLES = 5;
 
     /// the samples in the wave-table (1)
@@ -95,7 +95,7 @@ struct ChipGBS : Module {
     /// a Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// a VU meter for keeping track of the oscillator levels
@@ -473,6 +473,10 @@ struct ChipGBS : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipGBSWidget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipGBSWidget(ChipGBS *module) {
         setModule(module);
         static constexpr auto panel = "res/GBS.svg";

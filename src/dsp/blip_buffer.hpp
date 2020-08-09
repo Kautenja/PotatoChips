@@ -397,11 +397,11 @@ class BLIPSynthesizer {
     ///
     /// @param equalizer the equalization parameter for the synthesizer
     ///
-    void set_treble_eq(BLIPEqualizer const& eq) {
+    void set_treble_eq(BLIPEqualizer const& equalizer) {
         float fimpulse[blip_res / 2 * (BLIP_WIDEST_IMPULSE - 1) + blip_res * 2];
 
         int const half_size = blip_res / 2 * (quality - 1);
-        eq._generate(&fimpulse[blip_res], half_size);
+        equalizer._generate(&fimpulse[blip_res], half_size);
 
         int i;
 
@@ -487,7 +487,6 @@ class BLIPSynthesizer {
     /// @param time TODO:
     /// @param delta the change in amplitude. can be positive or negative.
     /// The actual change in amplitude is delta * (volume / range)
-    /// @param buf the buffer to write the data into
     ///
     inline void offset(blip_time_t time, int delta) const {
         offset(time, delta, buffer);
@@ -498,7 +497,7 @@ class BLIPSynthesizer {
     /// @param time TODO:
     /// @param delta the change in amplitude. can be positive or negative.
     /// The actual change in amplitude is delta * (volume / range)
-    /// @param blip_buf the buffer to write the data into
+    /// @param blip_buffer the buffer to write the data into
     /// @details
     /// Works directly in terms of fractional output samples.
     /// Contact Shay Green for more info.

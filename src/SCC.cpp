@@ -61,12 +61,10 @@ struct ChipSCC : Module {
     BLIPBuffer buf[KonamiSCC::OSC_COUNT];
     /// The Konami SCC instance to synthesize sound with
     KonamiSCC apu;
-    /// the number of active channels
-    int num_channels = 1;
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
-    // a clock divider for running LED updates slower than audio rate
+    /// a clock divider for running LED updates slower than audio rate
     dsp::ClockDivider lightsDivider;
 
     /// the bit-depth of the wave-table
@@ -84,10 +82,10 @@ struct ChipSCC : Module {
     /// the samples in the wave-table (5)
     int8_t values4[num_samples];
 
-    // the number of editors on the module
-    static constexpr int num_wavetables = 5;
+    /// the number of editors on the module
+    static constexpr int NUM_WAVETABLES = 5;
     /// the wave-tables to morph between
-    int8_t* values[num_wavetables] = {
+    int8_t* values[NUM_WAVETABLES] = {
         values0,
         values1,
         values2,
@@ -111,7 +109,7 @@ struct ChipSCC : Module {
             apu.set_output(i, &buf[i]);
         }
         // set the wave-forms to the default values
-        for (int i = 0; i < num_wavetables; i++)
+        for (int i = 0; i < NUM_WAVETABLES; i++)
             memcpy(values[i], default_values, num_samples);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
@@ -244,13 +242,13 @@ struct ChipSCC : Module {
 
     // /// Respond to the user resetting the module with the "Initialize" action.
     // void onReset() override {
-    //     for (int i = 0; i < num_wavetables; i++)
+    //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.
     // void onRandomize() override {
-    //     for (int table = 0; table < num_wavetables; table++) {
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         for (int sample = 0; sample < num_samples; sample++) {
     //             values[table][sample] = random::u32() % bit_depth;
     //             // interpolate between random samples to smooth slightly
@@ -266,7 +264,7 @@ struct ChipSCC : Module {
     // /// Convert the module's state to a JSON object.
     // json_t* dataToJson() override {
     //     json_t* rootJ = json_object();
-    //     for (int table = 0; table < num_wavetables; table++) {
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         json_t* array = json_array();
     //         for (int sample = 0; sample < num_samples; sample++)
     //             json_array_append_new(array, json_integer(values[table][sample]));
@@ -279,7 +277,7 @@ struct ChipSCC : Module {
 
     // /// Load the module's state from a JSON object.
     // void dataFromJson(json_t* rootJ) override {
-    //     for (int table = 0; table < num_wavetables; table++) {
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         auto key = "values" + std::to_string(table);
     //         json_t* data = json_object_get(rootJ, key.c_str());
     //         if (data) {
@@ -296,6 +294,10 @@ struct ChipSCC : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipSCCWidget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipSCCWidget(ChipSCC *module) {
         setModule(module);
         static constexpr auto panel = "res/SCC.svg";
@@ -312,7 +314,7 @@ struct ChipSCCWidget : ModuleWidget {
         };
         auto module_ = reinterpret_cast<ChipSCC*>(this->module);
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[ChipSCC::num_wavetables] = {
+        static constexpr NVGcolor colors[ChipSCC::NUM_WAVETABLES] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -320,7 +322,7 @@ struct ChipSCCWidget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         // add wave-table editors
-        for (int i = 0; i < ChipSCC::num_wavetables; i++) {
+        for (int i = 0; i < ChipSCC::NUM_WAVETABLES; i++) {
             // get the wave-table buffer for this editor
             int8_t* wavetable = module ? &module_->values[i][0] : &library_values[0];
             // setup a table editor for the buffer

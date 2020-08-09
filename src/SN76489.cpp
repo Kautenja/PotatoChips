@@ -39,7 +39,7 @@ struct ChipSN76489 : Module {
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr;
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// a VU meter for keeping track of the channel levels
@@ -232,6 +232,10 @@ struct ChipSN76489 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipSN76489Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipSN76489Widget(ChipSN76489 *module) {
         setModule(module);
         static constexpr auto panel = "res/SN76489.svg";

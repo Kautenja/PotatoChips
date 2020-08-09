@@ -51,7 +51,7 @@ struct ChipFME7 : Module {
     /// The FME7 instance to synthesize sound with
     SunSoftFME7 apu;
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// Initialize a new FME7 Chip module.
@@ -168,6 +168,10 @@ struct ChipFME7 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipFME7Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipFME7Widget(ChipFME7 *module) {
         setModule(module);
         static constexpr auto panel = "res/FME7.svg";

@@ -61,7 +61,7 @@ struct ChipPOKEY : Module {
     /// triggers for handling inputs to the control ports
     dsp::BooleanTrigger controlTriggers[8];
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// a VU meter for keeping track of the channel levels
@@ -238,6 +238,10 @@ struct ChipPOKEY : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipPOKEYWidget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipPOKEYWidget(ChipPOKEY *module) {
         setModule(module);
         static constexpr auto panel = "res/POKEY.svg";

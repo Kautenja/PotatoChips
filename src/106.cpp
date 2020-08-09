@@ -59,12 +59,12 @@ struct Chip106 : Module {
     BLIPBuffer buf[Namco106::OSC_COUNT];
     /// The 106 instance to synthesize sound with
     Namco106 apu;
-    /// the number of active channels
-    unsigned num_channels = 1;
+    /// the number of active oscillators on the chip
+    unsigned num_oscillators = 1;
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
-    // a clock divider for running LED updates slower than audio rate
+    /// a clock divider for running LED updates slower than audio rate
     dsp::ClockDivider lightsDivider;
 
     /// the bit-depth of the wave-table
@@ -72,7 +72,7 @@ struct Chip106 : Module {
     /// the number of samples in the wave-table
     static constexpr auto SAMPLES_PER_WAVETABLE = 32;
 
-    // the number of editors on the module
+    /// the number of editors on the module
     static constexpr int NUM_WAVETABLES = 5;
 
     /// the samples in the wave-table (1)
@@ -161,7 +161,7 @@ struct Chip106 : Module {
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
-        // ignoring num_channels in the calculation allows the standard 103
+        // ignoring num_oscillators in the calculation allows the standard 103
         // function where additional channels reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buf[0].get_clock_rate();
         // clamp within the legal bounds for the frequency value
@@ -233,7 +233,7 @@ struct Chip106 : Module {
                 apu.write(i, (nibbleHi << 4) | nibbleLo);
             }
             // get the number of active channels from the panel
-            num_channels = getActiveChannels();
+            num_oscillators = getActiveChannels();
             // set the frequency for all channels on the chip
             for (unsigned channel = 0; channel < Namco106::OSC_COUNT; channel++) {
                 // extract the low, medium, and high frequency register values
@@ -251,7 +251,7 @@ struct Chip106 : Module {
                 apu.write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel, 0);
                 // VOLUME (and channel selection on channel 8, this has no effect on
                 // other channels, so the check logic is skipped)
-                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel, ((num_channels - 1) << 4) | getVolume(channel));
+                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel, ((num_oscillators - 1) << 4) | getVolume(channel));
             }
         }
         // process audio samples on the chip engine
@@ -262,7 +262,7 @@ struct Chip106 : Module {
         if (lightsDivider.process()) {
             for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
                 auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
-                lights[light].setSmoothBrightness(i < num_channels, args.sampleTime * lightsDivider.getDivision());
+                lights[light].setSmoothBrightness(i < num_oscillators, args.sampleTime * lightsDivider.getDivision());
             }
         }
     }
@@ -335,6 +335,10 @@ struct Chip106 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip106Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     Chip106Widget(Chip106 *module) {
         setModule(module);
         static constexpr auto panel = "res/106.svg";

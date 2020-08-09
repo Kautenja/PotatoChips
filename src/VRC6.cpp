@@ -55,19 +55,19 @@ struct ChipVRC6 : Module {
     /// The VRC6 instance to synthesize sound with
     KonamiVRC6 apu[POLYPHONY_CHANNELS];
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
-    /// Initialize a new VRC6 Chip module.
+    /// @brief Initialize a new VRC6 Chip module.
     ChipVRC6() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,   "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW + 0,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_PW + 1,     0,    7,   4,     "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.8f,  "Pulse 1 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.8f,  "Pulse 2 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,  "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,  "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,  "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_PW + 0,     0,    7,   4,    "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_PW + 1,     0,    7,   4,    "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.8f, "Pulse 1 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.8f, "Pulse 2 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
@@ -80,7 +80,17 @@ struct ChipVRC6 : Module {
         onSampleRateChange();
     }
 
-    /// Get the frequency for the given oscillator and polyphony channel
+    /// @brief Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each oscillator and polyphony channel
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
+                buf[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
+    }
+
+    /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -115,7 +125,8 @@ struct ChipVRC6 : Module {
         return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Return the pulse width parameter for the given oscillator and polyphony channel.
+    /// @brief Return the pulse width parameter for the given oscillator and
+    /// polyphony channel.
     ///
     /// @param oscillator the oscillator to return the pulse width for
     /// @param channel the polyphony channel of the given oscillator
@@ -138,10 +149,12 @@ struct ChipVRC6 : Module {
         return pw << 4;
     }
 
-    /// Return the level parameter for the given oscillator and polyphony channel.
+    /// @brief Return the level parameter for the given oscillator and
+    /// polyphony channel.
     ///
     /// @param oscillator the oscillator to return the pulse width value for
     /// @param channel the polyphony channel of the given oscillator
+    /// @param max_level the maximal level for the input oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel, float max_level) {
@@ -158,7 +171,7 @@ struct ChipVRC6 : Module {
         return rack::clamp(max_level * param, 0.f, max_level);
     }
 
-    /// Return a 10V signed sample from the APU.
+    /// @brief Return a 10V signed sample from the APU.
     ///
     /// @param oscillator the oscillator to get the audio sample for
     /// @param channel the polyphony channel of the given oscillator
@@ -172,7 +185,7 @@ struct ChipVRC6 : Module {
         return Vpp * buf[channel][oscillator].read_sample() / divisor;
     }
 
-    /// Process the CV inputs for the given channel.
+    /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
@@ -194,7 +207,7 @@ struct ChipVRC6 : Module {
         }
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
@@ -216,15 +229,6 @@ struct ChipVRC6 : Module {
                 outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
         }
     }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
-                buf[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-        }
-    }
 };
 
 // ---------------------------------------------------------------------------
@@ -233,6 +237,10 @@ struct ChipVRC6 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipVRC6Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipVRC6Widget(ChipVRC6 *module) {
         setModule(module);
         static constexpr auto panel = "res/VRC6.svg";

@@ -55,7 +55,7 @@ struct ChipAY_3_8910 : Module {
     /// The General Instrument AY-3-8910 instance to synthesize sound with
     GeneralInstrumentAy_3_8910 apu[POLYPHONY_CHANNELS];
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// triggers for handling inputs to the tone and noise enable switches
@@ -275,6 +275,10 @@ struct ChipAY_3_8910 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct ChipAY_3_8910Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     ChipAY_3_8910Widget(ChipAY_3_8910 *module) {
         setModule(module);
         static constexpr auto panel = "res/AY_3_8910.svg";

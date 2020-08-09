@@ -25,24 +25,28 @@
 
 /// A Yamaha YM2413 chip emulator module.
 struct Chip2413 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, YamahaYM2413::channel_count),
         ENUMS(PARAM_LEVEL, YamahaYM2413::channel_count),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, YamahaYM2413::channel_count),
         ENUMS(INPUT_FM, YamahaYM2413::channel_count),
         ENUMS(INPUT_GATE, YamahaYM2413::channel_count),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, YamahaYM2413::channel_count),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds { LIGHT_COUNT };
 
-    // a clock divider for running CV acquisition slower than audio rate
+    /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
     /// The YM2413 instance to synthesize sound with
@@ -192,6 +196,10 @@ struct Chip2413 : Module {
 
 /// The widget structure that lays out the panel of the module and the UI menus.
 struct Chip2413Widget : ModuleWidget {
+    /// @brief Initialize a new widget.
+    ///
+    /// @param module the back-end module to interact with
+    ///
     Chip2413Widget(Chip2413 *module) {
         setModule(module);
         static constexpr auto panel = "res/2413.svg";

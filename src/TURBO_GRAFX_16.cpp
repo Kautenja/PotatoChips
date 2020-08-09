@@ -197,7 +197,10 @@ struct ChipTurboGrafx16 : Module {
         return Vpp * buf[channel].read_sample() / divisor;
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {
             // set the main amplifier level

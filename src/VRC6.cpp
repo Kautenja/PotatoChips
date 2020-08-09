@@ -208,6 +208,9 @@ struct ChipVRC6 : Module {
     }
 
     /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;

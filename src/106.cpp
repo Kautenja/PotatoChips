@@ -254,6 +254,9 @@ struct Chip106 : Module {
     }
 
     /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {
             // write waveform data to the chip's RAM based on the position in

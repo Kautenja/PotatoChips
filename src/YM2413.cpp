@@ -125,7 +125,10 @@ struct Chip2413 : Module {
     //     return Vpp * buf[channel].read_sample() / divisor;
     // }
 
-    /// Process a sample.
+    /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         // if (cvDivider.process()) {  // process the CV inputs to the chip
         //     for (int i = 0; i < YamahaYM2413::channel_count; i++) {

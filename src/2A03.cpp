@@ -40,7 +40,7 @@ struct Chip2A03 : Module {
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, Ricoh2A03::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, Ricoh2A03::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -49,16 +49,16 @@ struct Chip2A03 : Module {
     };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[Ricoh2A03::OSC_COUNT];
+    BLIPBuffer buf[16][Ricoh2A03::OSC_COUNT];
     /// The 2A03 instance to synthesize sound with
-    Ricoh2A03 apu;
+    Ricoh2A03 apu[16];
 
     /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr;
+    dsp::SchmittTrigger lfsr[16];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
-    /// a VU meter for keeping track of the channel levels
+    /// a VU meter for keeping track of the oscillator levels
     dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
     /// a clock divider for updating the mixer LEDs
     dsp::ClockDivider lightDivider;
@@ -78,14 +78,16 @@ struct Chip2A03 : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-            apu.set_output(i, &buf[i]);
-        // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        for (int i = 0; i < 16; i++) {
+            for (unsigned j = 0; j < Ricoh2A03::OSC_COUNT; j++)
+                apu[i].set_output(j, &buf[i][j]);
+            // volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[i].set_volume(3.f);
+        }
         onSampleRateChange();
     }
 
-    /// Get the frequency for the given channel
+    /// Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param freq_min the minimal value for the frequency register to
     /// produce sound
@@ -100,44 +102,46 @@ struct Chip2A03 : Module {
     /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
     inline uint16_t getFrequency(
+        int oscillator,
         int channel,
         float freq_min,
         float freq_max,
         float clock_division
     ) {
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (clock_division * freq)) - 1;
+        freq = (buf[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
         return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Get the PW for the given channel
+    /// Get the PW for the given oscillator and polyphony channel
     ///
-    /// @param channel the channel to return the pulse width for
+    /// @param oscillator the oscillator to return the pulse width for
+    /// @param channel the polyphony channel of the given oscillator
     /// @returns the pulse width value coded in an 8-bit container
     ///
-    inline uint8_t getPulseWidth(int channel) {
+    inline uint8_t getPulseWidth(int oscillator, int channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register
         static constexpr float PW_MAX = 3;
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + channel].getValue();
+        auto pwParam = params[PARAM_PW + oscillator].getValue();
         // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 3.f;
+        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 3.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
         return pw << 6;
     }
 
     /// Return the period of the noise oscillator from the panel controls.
-    inline uint8_t getNoisePeriod() {
+    inline uint8_t getNoisePeriod(int channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
@@ -146,30 +150,31 @@ struct Chip2A03 : Module {
         float freq = params[PARAM_FREQ + 3].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_VOCT + 3].isConnected())
-            freq += inputs[INPUT_VOCT + 3].getVoltage() / 2.f;
+            freq += inputs[INPUT_VOCT + 3].getPolyVoltage(channel) / 2.f;
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the volume level from the panel controls.
+    /// Return the volume level from the panel controls for a given oscillator and polyphony channel.
     ///
-    /// @param channel the channel to return the volume level of
-    /// @returns the volume level of the given channel
+    /// @param oscillator the oscillator to return the volume level of
+    /// @param channel the polyphony channel of the given oscillator
+    /// @returns the volume level of the given oscillator
     /// @details
-    /// channel can be one of 0, 1, or 3. the triangle channel (2) has no
+    /// oscillator can be one of 0, 1, or 3. the triangle oscillator (2) has no
     /// volume control.
     ///
-    inline uint8_t getVolume(int channel) {
+    inline uint8_t getVolume(int oscillator, int channel) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float VOLUME_MAX = 15;
-        // decrement the noise channel
-        if (channel == 3) channel -= 1;
+        // decrement the noise oscillator
+        if (oscillator == 3) oscillator -= 1;
         // get the attenuation from the parameter knob
-        auto param = params[PARAM_VOLUME + channel].getValue();
+        auto param = params[PARAM_VOLUME + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOLUME + channel].isConnected()) {
-            auto cv = inputs[INPUT_VOLUME + channel].getVoltage() / 10.f;
+        if (inputs[INPUT_VOLUME + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_VOLUME + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -180,63 +185,78 @@ struct Chip2A03 : Module {
 
     /// Return a 10V signed sample from the APU.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
+    /// @param channel the polyphony channel of the given oscillator
     ///
-    inline float getAudioOut(int channel) {
+    inline float getAudioOut(int oscillator, int channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buf[channel][oscillator].read_sample() / divisor;
     }
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
+        int channels = 1;
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+            channels = std::max(inputs[INPUT_VOCT + i].getChannels(), channels);
+
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            lfsr.process(rescale(inputs[INPUT_LFSR].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-            // ---------------------------------------------------------------
-            // pulse channels (2)
-            // ---------------------------------------------------------------
-            for (int i = 0; i < 2; i++) {
-                // set the pulse width of the pulse wave (high 3 bits) and set
-                // the volume (low 4 bits). the 5th bit controls the envelope,
-                // high sets constant volume.
-                auto volume = getPulseWidth(i) | 0b00010000 | getVolume(i);
-                apu.write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
+            for (int c = 0; c < channels; c++) {
+                lfsr[c].process(rescale(inputs[INPUT_LFSR].getVoltage(c), 0.f, 2.f, 0.f, 1.f));
+                // ---------------------------------------------------------------
+                // pulse oscillator (2)
+                // ---------------------------------------------------------------
+                for (int i = 0; i < 2; i++) {
+                    // set the pulse width of the pulse wave (high 3 bits) and set
+                    // the volume (low 4 bits). the 5th bit controls the envelope,
+                    // high sets constant volume.
+                    auto volume = getPulseWidth(i, c) | 0b00010000 | getVolume(i, c);
+                    apu[c].write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
+                    // write the frequency to the low and high registers
+                    // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
+                    //   produce an offset between registers based on oscillator index
+                    uint16_t freq = getFrequency(i, c, 8, 1023, 16);
+                    auto lo =  freq & 0b0000000011111111;
+                    apu[c].write(Ricoh2A03::PULSE0_LO + 4 * i, lo);
+                    auto hi = (freq & 0b0000011100000000) >> 8;
+                    apu[c].write(Ricoh2A03::PULSE0_HI + 4 * i, hi);
+                }
+                // ---------------------------------------------------------------
+                // triangle oscillator
+                // ---------------------------------------------------------------
                 // write the frequency to the low and high registers
-                // - there are 4 registers per pulse channel, multiply channel by 4 to
-                //   produce an offset between registers based on channel index
-                uint16_t freq = getFrequency(i, 8, 1023, 16);
-                auto lo =  freq & 0b0000000011111111;
-                apu.write(Ricoh2A03::PULSE0_LO + 4 * i, lo);
-                auto hi = (freq & 0b0000011100000000) >> 8;
-                apu.write(Ricoh2A03::PULSE0_HI + 4 * i, hi);
+                uint16_t freq = getFrequency(2, c, 2, 2047, 32);
+                apu[c].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
+                apu[c].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+                // write the linear register to enable the oscillator
+                apu[c].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+                // ---------------------------------------------------------------
+                // noise oscillator
+                // ---------------------------------------------------------------
+                apu[c].write(Ricoh2A03::NOISE_LO, (lfsr[c].isHigh() << 7) | getNoisePeriod(c));
+                apu[c].write(Ricoh2A03::NOISE_HI, 0);
+                apu[c].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, c));
+                // enable all four oscillators
+                apu[c].write(Ricoh2A03::SND_CHN, 0b00001111);
             }
-            // ---------------------------------------------------------------
-            // triangle channel
-            // ---------------------------------------------------------------
-            // write the frequency to the low and high registers
-            uint16_t freq = getFrequency(2, 2, 2047, 32);
-            apu.write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
-            apu.write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
-            // write the linear register to enable the oscillator
-            apu.write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
-            // ---------------------------------------------------------------
-            // noise channel
-            // ---------------------------------------------------------------
-            apu.write(Ricoh2A03::NOISE_LO, (lfsr.isHigh() << 7) | getNoisePeriod());
-            apu.write(Ricoh2A03::NOISE_HI, 0);
-            apu.write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3));
-            // enable all four channels
-            apu.write(Ricoh2A03::SND_CHN, 0b00001111);
         }
+        // set output polyphony channels
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+            outputs[OUTPUT_OSCILLATOR + i].setChannels(channels);
         // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-            auto channelOutput = getAudioOut(i);
-            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
-            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        for (int c = 0; c < channels; c++) {
+            apu[c].end_frame(CLOCK_RATE / args.sampleRate);
+            float lastOscOutput = 0;
+            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+                auto oscillatorOutput = getAudioOut(i, c);
+                // only update VU meter on first polyphony channel or a higher-amplitude subsequent polyphony channel
+                chMeters[i].process(args.sampleTime, std::max(oscillatorOutput / 5.f, lastOscOutput / 5));
+                outputs[OUTPUT_OSCILLATOR + i].setVoltage(oscillatorOutput, c);
+                lastOscOutput = oscillatorOutput;
+            }
         }
         if (lightDivider.process()) {  // update the mixer lights
             for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
@@ -248,9 +268,11 @@ struct Chip2A03 : Module {
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator and polyphony channel
+        for (int c = 0; c < 16; c++) {
+            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+                buf[c][i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        }
     }
 };
 
@@ -271,7 +293,7 @@ struct Chip2A03Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
-            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_OSCILLATOR + i));
             if (i < 3) {  // pulse0, pulse1, triangle
                 addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, Chip2A03::INPUT_FM + i));
                 addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, Chip2A03::PARAM_FREQ + i));

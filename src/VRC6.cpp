@@ -39,7 +39,7 @@ struct ChipVRC6 : Module {
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, KonamiVRC6::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, KonamiVRC6::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -47,9 +47,9 @@ struct ChipVRC6 : Module {
     };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[KonamiVRC6::OSC_COUNT];
+    BLIPBuffer buf[16][KonamiVRC6::OSC_COUNT];
     /// The VRC6 instance to synthesize sound with
-    KonamiVRC6 apu;
+    KonamiVRC6 apu[16];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -67,14 +67,16 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-            apu.set_output(i, &buf[i]);
-        // global volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        for (int c = 0; c < 16; c++) {
+            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+                apu[c].set_output(i, &buf[c][i]);
+            // global volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[c].set_volume(3.f);
+        }
         onSampleRateChange();
     }
 
-    /// Get the frequency for the given channel
+    /// Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param freq_min the minimal value for the frequency register to
     /// produce sound
@@ -89,56 +91,59 @@ struct ChipVRC6 : Module {
     /// freq_min = 3, freq_max = 4095, clock_division = 14
     ///
     inline uint16_t getFrequency(
-        unsigned channel,
+        unsigned oscillator,
+        int channel,
         float freq_min,
         float freq_max,
         float clock_division
     ) {
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (clock_division * freq)) - 1;
+        freq = (buf[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
         return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Return the pulse width parameter for the given channel.
+    /// Return the pulse width parameter for the given oscillator and polyphony channel.
     ///
-    /// @param channel the channel to return the pulse width value for
+    /// @param oscillator the oscillator to return the pulse width for
+    /// @param channel the polyphony channel of the given oscillator
     /// @returns the pulse width value in an 8-bit container in the high 4 bits.
     /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
-    inline uint8_t getPW(unsigned channel) {
+    inline uint8_t getPW(unsigned oscillator, int channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (before shift)
         static constexpr float PW_MAX = 0b00000111;
-        if (channel == KonamiVRC6::SAW) return 0;  // no PW for saw wave
+        if (oscillator == KonamiVRC6::SAW) return 0;  // no PW for saw wave
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + channel].getValue();
+        auto pwParam = params[PARAM_PW + oscillator].getValue();
         // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 2.f;
+        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 2.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
         // shift the pulse width over into the high 4 bits
         return pw << 4;
     }
 
-    /// Return the level parameter for the given channel.
+    /// Return the level parameter for the given oscillator and polyphony channel.
     ///
-    /// @param channel the channel to return the pulse width value for
+    /// @param oscillator the oscillator to return the pulse width value for
+    /// @param channel the polyphony channel of the given oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    inline uint8_t getLevel(unsigned channel, float max_level) {
+    inline uint8_t getLevel(unsigned oscillator, int channel, float max_level) {
         // get the level from the parameter knob
         auto param = params[PARAM_LEVEL + channel].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+            auto cv = inputs[INPUT_LEVEL + channel].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -149,15 +154,16 @@ struct ChipVRC6 : Module {
 
     /// Return a 10V signed sample from the APU.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
+    /// @param channel the polyphony channel of the given oscillator
     ///
-    inline float getAudioOut(unsigned channel) {
+    inline float getAudioOut(unsigned oscillator, int channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buf[channel][oscillator].read_sample() / divisor;
     }
 
     /// Process a sample.
@@ -165,31 +171,43 @@ struct ChipVRC6 : Module {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
+        int channels = 1;
+        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+            channels = std::max(inputs[INPUT_VOCT + i].getChannels(), channels);
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
-                // frequency (max frequency is same for pulses and saw, 4095)
-                uint16_t freq = getFrequency(i, freq_low[i], 4095, clock_division[i]);
-                uint8_t lo =  freq & 0b0000000011111111;
-                uint8_t hi = (freq & 0b0000111100000000) >> 8;
-                hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the channel
-                apu.write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * i, lo);
-                apu.write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * i, hi);
-                // level
-                uint8_t level = getPW(i) | getLevel(i, max_level[i]);
-                apu.write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * i, level);
+            for (int c = 0; c < channels; c++) {
+                for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
+                    // frequency (max frequency is same for pulses and saw, 4095)
+                    uint16_t freq = getFrequency(i, c, freq_low[i], 4095, clock_division[i]);
+                    uint8_t lo =  freq & 0b0000000011111111;
+                    uint8_t hi = (freq & 0b0000111100000000) >> 8;
+                    hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
+                    apu[c].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * i, lo);
+                    apu[c].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * i, hi);
+                    // level
+                    uint8_t level = getPW(i, c) | getLevel(i, c, max_level[i]);
+                    apu[c].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * i, level);
+                }
             }
         }
-        // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
+        // set output polyphony channels
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
+            outputs[OUTPUT_OSCILLATOR + i].setChannels(channels);
+        // process audio samples on the chip engine
+        for (int c = 0; c < channels; c++) {
+            apu[c].end_frame(CLOCK_RATE / args.sampleRate);
+            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+                outputs[OUTPUT_OSCILLATOR + i].setVoltage(getAudioOut(i, c), c);
+        }
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator and polyphony channel
+        for (int c = 0; c < 16; c++) {
+            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
+                buf[c][i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        }
     }
 };
 
@@ -218,7 +236,7 @@ struct ChipVRC6Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, ChipVRC6::INPUT_PW + i));
             addInput(createInput<PJ301MPort>(    Vec(18, 104  + i * 111), module, ChipVRC6::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(180, 21  + i * 111), module, ChipVRC6::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
         }
         int i = 2;
         addInput(createInput<PJ301MPort>(    Vec(18,  322), module, ChipVRC6::INPUT_VOCT     + i));
@@ -226,7 +244,7 @@ struct ChipVRC6Widget : ModuleWidget {
         addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, ChipVRC6::PARAM_FREQ     + i));
         addInput(createInput<PJ301MPort>(    Vec(152, 257), module, ChipVRC6::INPUT_LEVEL    + i));
         addParam(createParam<BefacoSlidePot>(Vec(180, 21  + i * 111), module, ChipVRC6::PARAM_LEVEL    + i));
-        addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_CHANNEL + i));
+        addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
     }
 };
 

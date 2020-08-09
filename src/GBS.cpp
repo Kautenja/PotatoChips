@@ -220,13 +220,16 @@ struct ChipGBS : Module {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // get the volume from the parameter knob
-        auto levelParam = params[PARAM_LEVEL + channel].getValue();
-        // apply the control voltage to the volume
-        static constexpr float FM_SCALE = 0.5f;
-        if (inputs[INPUT_LEVEL + channel].isConnected())
-            levelParam *= FM_SCALE * inputs[INPUT_LEVEL + channel].getVoltage();
+        auto param = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+            cv = rack::clamp(cv, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            param *= 2 * cv;
+        }
         // get the 8-bit volume clamped within legal limits
-        uint8_t volume = rack::clamp(max_ * levelParam, VOLUME_MIN, max_);
+        uint8_t volume = rack::clamp(max_ * param, VOLUME_MIN, max_);
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%

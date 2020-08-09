@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        65,
+        73,
         0
       ]
     },
@@ -30,7 +30,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 11,
+      "rightModuleId": 136,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -100,7 +100,7 @@
     {
       "id": 11,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "106",
       "params": [
         {
@@ -184,7 +184,7 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 136,
       "rightModuleId": 19,
       "data": {
         "values0": [
@@ -359,7 +359,7 @@
         ]
       },
       "pos": [
-        9,
+        17,
         0
       ]
     },
@@ -829,7 +829,7 @@
         "poly_channel_offset": -1
       },
       "pos": [
-        38,
+        46,
         0
       ]
     },
@@ -848,7 +848,37 @@
         "window": "kaiser"
       },
       "pos": [
-        75,
+        83,
+        0
+      ]
+    },
+    {
+      "id": 136,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.698000014
+        },
+        {
+          "id": 1,
+          "value": 0.618499935
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 11,
+      "pos": [
+        9,
         0
       ]
     }
@@ -1133,6 +1163,22 @@
       "inputModuleId": 11,
       "inputId": 15,
       "color": "#0c8e15"
+    },
+    {
+      "id": 831,
+      "outputModuleId": 136,
+      "outputId": 0,
+      "inputModuleId": 11,
+      "inputId": 23,
+      "color": "#c91847"
+    },
+    {
+      "id": 832,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 136,
+      "inputId": 4,
+      "color": "#0986ad"
     }
   ]
 }

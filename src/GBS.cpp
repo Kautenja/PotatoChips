@@ -17,9 +17,9 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "widget/wavetable_editor.hpp"
 #include "dsp/nintendo_gameboy.hpp"
-#include "wavetable4bit.hpp"
+#include "dsp/wavetable4bit.hpp"
+#include "widget/wavetable_editor.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

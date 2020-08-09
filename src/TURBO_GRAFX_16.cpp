@@ -17,8 +17,9 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "widget/wavetable_editor.hpp"
 #include "dsp/nec_turbo_grafx_16.hpp"
+#include "dsp/wavetable4bit.hpp"
+#include "widget/wavetable_editor.hpp"
 
 /// the default values for the wave-table
 const uint8_t default_values[32] = {

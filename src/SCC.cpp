@@ -17,9 +17,9 @@
 
 #include "plugin.hpp"
 #include "components.hpp"
-#include "widget/wavetable_editor.hpp"
 #include "dsp/konami_scc.hpp"
-#include <cstring>
+#include "dsp/wavetable4bit.hpp"
+#include "widget/wavetable_editor.hpp"
 
 /// the default values for the wave-table
 const int8_t default_values[32] = {

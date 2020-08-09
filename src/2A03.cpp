@@ -209,6 +209,49 @@ struct Chip2A03 : Module {
         return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
+    /// Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(unsigned channel) {
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        // ---------------------------------------------------------------
+        // pulse oscillator (2)
+        // ---------------------------------------------------------------
+        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
+            // set the pulse width of the pulse wave (high 3 bits) and set
+            // the volume (low 4 bits). the 5th bit controls the envelope,
+            // high sets constant volume.
+            auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
+            apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
+            // write the frequency to the low and high registers
+            // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
+            //   produce an offset between registers based on oscillator index
+            uint16_t freq = getFrequency(oscillator, channel, 8, 1023, 16);
+            auto lo =  freq & 0b0000000011111111;
+            apu[channel].write(Ricoh2A03::PULSE0_LO + 4 * oscillator, lo);
+            auto hi = (freq & 0b0000011100000000) >> 8;
+            apu[channel].write(Ricoh2A03::PULSE0_HI + 4 * oscillator, hi);
+        }
+        // ---------------------------------------------------------------
+        // triangle oscillator
+        // ---------------------------------------------------------------
+        // write the frequency to the low and high registers
+        uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
+        apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
+        apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+        // write the linear register to enable the oscillator
+        apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+        // ---------------------------------------------------------------
+        // noise oscillator
+        // ---------------------------------------------------------------
+        apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
+        apu[channel].write(Ricoh2A03::NOISE_HI, 0);
+        apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
+        // enable all four oscillators
+        apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
+    }
+
     /// Process a sample.
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
@@ -218,42 +261,7 @@ struct Chip2A03 : Module {
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-                // ---------------------------------------------------------------
-                // pulse oscillator (2)
-                // ---------------------------------------------------------------
-                for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-                    // set the pulse width of the pulse wave (high 3 bits) and set
-                    // the volume (low 4 bits). the 5th bit controls the envelope,
-                    // high sets constant volume.
-                    auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
-                    apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
-                    // write the frequency to the low and high registers
-                    // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
-                    //   produce an offset between registers based on oscillator index
-                    uint16_t freq = getFrequency(oscillator, channel, 8, 1023, 16);
-                    auto lo =  freq & 0b0000000011111111;
-                    apu[channel].write(Ricoh2A03::PULSE0_LO + 4 * oscillator, lo);
-                    auto hi = (freq & 0b0000011100000000) >> 8;
-                    apu[channel].write(Ricoh2A03::PULSE0_HI + 4 * oscillator, hi);
-                }
-                // ---------------------------------------------------------------
-                // triangle oscillator
-                // ---------------------------------------------------------------
-                // write the frequency to the low and high registers
-                uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
-                apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
-                apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
-                // write the linear register to enable the oscillator
-                apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
-                // ---------------------------------------------------------------
-                // noise oscillator
-                // ---------------------------------------------------------------
-                apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
-                apu[channel].write(Ricoh2A03::NOISE_HI, 0);
-                apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
-                // enable all four oscillators
-                apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
+                processCV(channel);
             }
         }
         // set output polyphony channels

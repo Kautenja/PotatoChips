@@ -95,7 +95,7 @@ struct Chip106 : Module {
         values4
     };
 
-    /// Initialize a new 106 Chip module.
+    /// @brief Initialize a new 106 Chip module.
     Chip106() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_NUM_CHANNELS, 1, 8, 4, "Active Channels");
@@ -120,20 +120,81 @@ struct Chip106 : Module {
         onReset();
     }
 
-    /// Return the active channels parameter.
+    /// @brief Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    /// @brief Respond to the user resetting the module with the "Initialize" action.
+    void onReset() override {
+        /// the default wave-table for each page of the wave-table editor
+        static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
+            SINE,
+            PW5,
+            RAMP_UP,
+            TRIANGLE_DIST,
+            RAMP_DOWN
+        };
+        for (unsigned i = 0; i < NUM_WAVETABLES; i++)
+            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
+    }
+
+    /// @brief Respond to the user randomizing the module with the "Randomize" action.
+    void onRandomize() override {
+        for (unsigned table = 0; table < NUM_WAVETABLES; table++) {
+            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
+                values[table][sample] = random::u32() % BIT_DEPTH;
+                // interpolate between random samples to smooth slightly
+                if (sample > 0) {
+                    auto last = values[table][sample - 1];
+                    auto next = values[table][sample];
+                    values[table][sample] = (last + next) / 2;
+                }
+            }
+        }
+    }
+
+    /// @brief Convert the module's state to a JSON object.
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
+            json_t* array = json_array();
+            for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
+                json_array_append_new(array, json_integer(values[table][sample]));
+            auto key = "values" + std::to_string(table);
+            json_object_set_new(rootJ, key.c_str(), array);
+        }
+
+        return rootJ;
+    }
+
+    /// @brief Load the module's state from a JSON object.
+    void dataFromJson(json_t* rootJ) override {
+        for (int table = 0; table < NUM_WAVETABLES; table++) {
+            auto key = "values" + std::to_string(table);
+            json_t* data = json_object_get(rootJ, key.c_str());
+            if (data) {
+                for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
+                    values[table][sample] = json_integer_value(json_array_get(data, sample));
+            }
+        }
+    }
+
+    /// @brief Return the active oscillators parameter.
     ///
-    /// @returns the active channel count in [1, 8]
+    /// @returns the active oscillator count in [1, 8]
     ///
-    inline uint8_t getActiveChannels() {
+    inline uint8_t getActiveOscillators() {
         auto param = params[PARAM_NUM_CHANNELS].getValue();
         auto att = params[PARAM_NUM_CHANNELS_ATT].getValue();
-        // get the CV as 1V per channel
+        // get the CV as 1V per oscillator
         auto cv = 8.f * inputs[INPUT_NUM_CHANNELS].getVoltage() / 10.f;
-        // channels are indexed maths style on the chip, not CS style
+        // oscillators are indexed maths style on the chip, not CS style
         return rack::math::clamp(param + att * cv, 1.f, 8.f);
     }
 
-    /// Return the wave-table parameter.
+    /// @brief Return the wave-table parameter.
     ///
     /// @returns the floating index of the wave-table table in [0, 4]
     ///
@@ -146,23 +207,23 @@ struct Chip106 : Module {
         return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
     }
 
-    /// Return the frequency parameter for the given channel.
+    /// @brief Return the frequency parameter for the given oscillator.
     ///
-    /// @param channel the channel to get the frequency parameter for
-    /// @returns the frequency parameter for the given channel. This includes
+    /// @param oscillator the oscillator to get the frequency parameter for
+    /// @returns the frequency parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint32_t getFrequency(uint8_t channel) {
+    inline uint32_t getFrequency(unsigned oscillator) {
         // get the frequency of the oscillator from the parameter and CVs
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getVoltage();
+        pitch += inputs[INPUT_FM + oscillator].getVoltage() / 5.f;
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
         // ignoring num_oscillators in the calculation allows the standard 103
-        // function where additional channels reduce the frequency of all
+        // function where additional oscillators reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buf[0].get_clock_rate();
         // clamp within the legal bounds for the frequency value
         freq = rack::clamp(freq, 4.f, 262143.f);
@@ -171,22 +232,22 @@ struct Chip106 : Module {
         return static_cast<uint32_t>(freq) | (wave_length << 18);
     }
 
-    /// Return the volume parameter for the given channel.
+    /// @brief Return the volume parameter for the given oscillator.
     ///
-    /// @param channel the channel to get the volume parameter for
-    /// @returns the volume parameter for the given channel. This includes
+    /// @param oscillator the oscillator to get the volume parameter for
+    /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(uint8_t channel) {
+    inline uint8_t getVolume(unsigned oscillator) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float VOLUME_MAX = 15;
         // get the volume from the parameter knob
-        auto param = params[PARAM_VOLUME + channel].getValue();
+        auto param = params[PARAM_VOLUME + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOLUME + channel].isConnected()) {
-            auto cv = inputs[INPUT_VOLUME + channel].getVoltage() / 10.f;
+        if (inputs[INPUT_VOLUME + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_VOLUME + oscillator].getVoltage() / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -195,20 +256,20 @@ struct Chip106 : Module {
         return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// Return a 10V signed sample from the chip.
+    /// @brief Return a 10V signed sample from the chip.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
     ///
-    inline float getAudioOut(uint8_t channel) {
+    inline float getAudioOut(unsigned oscillator) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buf[oscillator].read_sample() / divisor;
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {
             // write the waveform data to the chip's RAM
@@ -232,98 +293,37 @@ struct Chip106 : Module {
                 // combine the two nibbles into a byte for the RAM
                 apu.write(i, (nibbleHi << 4) | nibbleLo);
             }
-            // get the number of active channels from the panel
-            num_oscillators = getActiveChannels();
-            // set the frequency for all channels on the chip
-            for (unsigned channel = 0; channel < Namco106::OSC_COUNT; channel++) {
+            // get the number of active oscillators from the panel
+            num_oscillators = getActiveOscillators();
+            // set the frequency for all oscillators on the chip
+            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
                 // extract the low, medium, and high frequency register values
-                auto freq = getFrequency(channel);
+                auto freq = getFrequency(oscillator);
                 // FREQUENCY LOW
                 uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-                apu.write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * channel, low);
+                apu.write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * oscillator, low);
                 // FREQUENCY MEDIUM
                 uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-                apu.write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * channel, med);
+                apu.write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * oscillator, med);
                 // WAVEFORM LENGTH + FREQUENCY HIGH
                 uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-                apu.write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * channel, hig);
+                apu.write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * oscillator, hig);
                 // WAVE ADDRESS
-                apu.write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * channel, 0);
-                // VOLUME (and channel selection on channel 8, this has no effect on
-                // other channels, so the check logic is skipped)
-                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * channel, ((num_oscillators - 1) << 4) | getVolume(channel));
+                apu.write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * oscillator, 0);
+                // VOLUME (and oscillator selection on oscillator 8, this has
+                // no effect on other oscillators -> check logic is skipped)
+                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * oscillator, ((num_oscillators - 1) << 4) | getVolume(oscillator));
             }
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
-        // set the channel lights if the light divider is high
+        // set the VU meter lights if the light divider is high
         if (lightsDivider.process()) {
             for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
                 auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - i - 1;
                 lights[light].setSmoothBrightness(i < num_oscillators, args.sampleTime * lightsDivider.getDivision());
-            }
-        }
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-    }
-
-    /// Respond to the user resetting the module with the "Initialize" action.
-    void onReset() override {
-        /// the default wave-table for each page of the wave-table editor
-        static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
-            SINE,
-            PW5,
-            RAMP_UP,
-            TRIANGLE_DIST,
-            RAMP_DOWN
-        };
-        for (unsigned i = 0; i < NUM_WAVETABLES; i++)
-            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
-    }
-
-    /// Respond to the user randomizing the module with the "Randomize" action.
-    void onRandomize() override {
-        for (unsigned table = 0; table < NUM_WAVETABLES; table++) {
-            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
-                values[table][sample] = random::u32() % BIT_DEPTH;
-                // interpolate between random samples to smooth slightly
-                if (sample > 0) {
-                    auto last = values[table][sample - 1];
-                    auto next = values[table][sample];
-                    values[table][sample] = (last + next) / 2;
-                }
-            }
-        }
-    }
-
-    /// Convert the module's state to a JSON object.
-    json_t* dataToJson() override {
-        json_t* rootJ = json_object();
-        for (int table = 0; table < NUM_WAVETABLES; table++) {
-            json_t* array = json_array();
-            for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
-                json_array_append_new(array, json_integer(values[table][sample]));
-            auto key = "values" + std::to_string(table);
-            json_object_set_new(rootJ, key.c_str(), array);
-        }
-
-        return rootJ;
-    }
-
-    /// Load the module's state from a JSON object.
-    void dataFromJson(json_t* rootJ) override {
-        for (int table = 0; table < NUM_WAVETABLES; table++) {
-            auto key = "values" + std::to_string(table);
-            json_t* data = json_object_get(rootJ, key.c_str());
-            if (data) {
-                for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
-                    values[table][sample] = json_integer_value(json_array_get(data, sample));
             }
         }
     }
@@ -384,7 +384,7 @@ struct Chip106Widget : ModuleWidget {
             // add the table editor to the module
             addChild(table_editor);
         }
-        // channel select
+        // oscillator select
         addParam(createParam<Rogan3PSNES>(Vec(155, 38), module, Chip106::PARAM_NUM_CHANNELS));
         addParam(createParam<Rogan1PSNES>(Vec(161, 88), module, Chip106::PARAM_NUM_CHANNELS_ATT));
         addInput(createInput<PJ301MPort>(Vec(164, 126), module, Chip106::INPUT_NUM_CHANNELS));
@@ -392,7 +392,7 @@ struct Chip106Widget : ModuleWidget {
         addParam(createParam<Rogan3PSNES>(Vec(155, 183), module, Chip106::PARAM_WAVETABLE));
         addParam(createParam<Rogan1PSNES>(Vec(161, 233), module, Chip106::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(164, 271), module, Chip106::INPUT_WAVETABLE));
-        // individual channel controls
+        // individual oscillator controls
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, Chip106::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, Chip106::INPUT_FM + i      ));

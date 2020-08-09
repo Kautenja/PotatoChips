@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        32,
+        40,
         0
       ]
     },
@@ -51,10 +51,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 70,
+      "leftModuleId": 132,
       "rightModuleId": 1,
       "pos": [
-        22,
+        30,
         0
       ]
     },
@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
           "channel": -1
         }
       },
@@ -234,7 +234,7 @@
     {
       "id": 70,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "VRC6",
       "params": [
         {
@@ -271,7 +271,7 @@
         }
       ],
       "leftModuleId": 5,
-      "rightModuleId": 2,
+      "rightModuleId": 132,
       "pos": [
         8,
         0
@@ -305,7 +305,7 @@
       "leftModuleId": 1,
       "rightModuleId": 130,
       "pos": [
-        42,
+        50,
         0
       ]
     },
@@ -318,7 +318,7 @@
       "leftModuleId": 72,
       "rightModuleId": 131,
       "pos": [
-        47,
+        55,
         0
       ]
     },
@@ -330,7 +330,37 @@
       "params": [],
       "leftModuleId": 130,
       "pos": [
-        52,
+        60,
+        0
+      ]
+    },
+    {
+      "id": 132,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.676999986
+        },
+        {
+          "id": 1,
+          "value": 0.758000016
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 70,
+      "rightModuleId": 2,
+      "pos": [
+        22,
         0
       ]
     }
@@ -495,6 +525,38 @@
       "inputModuleId": 70,
       "inputId": 5,
       "color": "#0986ad"
+    },
+    {
+      "id": 813,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 132,
+      "inputId": 4,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 814,
+      "outputModuleId": 132,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 8,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 815,
+      "outputModuleId": 132,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 9,
+      "color": "#c91847"
+    },
+    {
+      "id": 816,
+      "outputModuleId": 132,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 10,
+      "color": "#c9b70e"
     }
   ]
 }

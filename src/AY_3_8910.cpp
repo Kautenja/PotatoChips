@@ -25,6 +25,19 @@
 
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
+ private:
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
+    /// The General Instrument AY-3-8910 instance to synthesize sound with
+    GeneralInstrumentAy_3_8910 apu[POLYPHONY_CHANNELS];
+
+    /// a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
+    /// triggers for handling inputs to the tone and noise enable switches
+    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+
+ public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
@@ -49,17 +62,6 @@ struct ChipAY_3_8910 : Module {
     };
     /// the indexes of lights on the module
     enum LightIds { LIGHT_COUNT };
-
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
-    /// The General Instrument AY-3-8910 instance to synthesize sound with
-    GeneralInstrumentAy_3_8910 apu[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
-    /// triggers for handling inputs to the tone and noise enable switches
-    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// @brief Initialize a new FME7 Chip module.
     ChipAY_3_8910() {

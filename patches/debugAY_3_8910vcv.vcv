@@ -66,14 +66,14 @@
       "params": [],
       "rightModuleId": 16,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
           "channel": -1
         }
       },

@@ -49,12 +49,12 @@ struct Chip2A03 : Module {
     };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[16][Ricoh2A03::OSC_COUNT];
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][Ricoh2A03::OSC_COUNT];
     /// The 2A03 instance to synthesize sound with
-    Ricoh2A03 apu[16];
+    Ricoh2A03 apu[POLYPHONY_CHANNELS];
 
     /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr[16];
+    dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -78,13 +78,23 @@ struct Chip2A03 : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
-        for (int i = 0; i < 16; i++) {
-            for (unsigned j = 0; j < Ricoh2A03::OSC_COUNT; j++)
-                apu[i].set_output(j, &buf[i][j]);
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
             // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[i].set_volume(3.f);
+            apu[channel].set_volume(3.f);
         }
         onSampleRateChange();
+    }
+
+    /// Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each oscillator and polyphony channel
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
     }
 
     /// Get the frequency for the given oscillator and polyphony channel
@@ -116,7 +126,7 @@ struct Chip2A03 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
+        freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
         return rack::clamp(freq, freq_min, freq_max);
     }
 
@@ -194,67 +204,67 @@ struct Chip2A03 : Module {
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel][oscillator].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        int channels = 1;
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-            channels = std::max(inputs[INPUT_VOCT + i].getChannels(), channels);
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
 
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int c = 0; c < channels; c++) {
-                lfsr[c].process(rescale(inputs[INPUT_LFSR].getVoltage(c), 0.f, 2.f, 0.f, 1.f));
+            for (unsigned channel = 0; channel < channels; channel++) {
+                lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
                 // ---------------------------------------------------------------
                 // pulse oscillator (2)
                 // ---------------------------------------------------------------
-                for (int i = 0; i < 2; i++) {
+                for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
                     // set the pulse width of the pulse wave (high 3 bits) and set
                     // the volume (low 4 bits). the 5th bit controls the envelope,
                     // high sets constant volume.
-                    auto volume = getPulseWidth(i, c) | 0b00010000 | getVolume(i, c);
-                    apu[c].write(Ricoh2A03::PULSE0_VOL + 4 * i, volume);
+                    auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
+                    apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
                     // write the frequency to the low and high registers
                     // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
                     //   produce an offset between registers based on oscillator index
-                    uint16_t freq = getFrequency(i, c, 8, 1023, 16);
+                    uint16_t freq = getFrequency(oscillator, channel, 8, 1023, 16);
                     auto lo =  freq & 0b0000000011111111;
-                    apu[c].write(Ricoh2A03::PULSE0_LO + 4 * i, lo);
+                    apu[channel].write(Ricoh2A03::PULSE0_LO + 4 * oscillator, lo);
                     auto hi = (freq & 0b0000011100000000) >> 8;
-                    apu[c].write(Ricoh2A03::PULSE0_HI + 4 * i, hi);
+                    apu[channel].write(Ricoh2A03::PULSE0_HI + 4 * oscillator, hi);
                 }
                 // ---------------------------------------------------------------
                 // triangle oscillator
                 // ---------------------------------------------------------------
                 // write the frequency to the low and high registers
-                uint16_t freq = getFrequency(2, c, 2, 2047, 32);
-                apu[c].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
-                apu[c].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+                uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
+                apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
+                apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
                 // write the linear register to enable the oscillator
-                apu[c].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+                apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
                 // ---------------------------------------------------------------
                 // noise oscillator
                 // ---------------------------------------------------------------
-                apu[c].write(Ricoh2A03::NOISE_LO, (lfsr[c].isHigh() << 7) | getNoisePeriod(c));
-                apu[c].write(Ricoh2A03::NOISE_HI, 0);
-                apu[c].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, c));
+                apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
+                apu[channel].write(Ricoh2A03::NOISE_HI, 0);
+                apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
                 // enable all four oscillators
-                apu[c].write(Ricoh2A03::SND_CHN, 0b00001111);
+                apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
             }
         }
         // set output polyphony channels
-        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-            outputs[OUTPUT_OSCILLATOR + i].setChannels(channels);
+        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
         // process audio samples on the chip engine
-        for (int c = 0; c < channels; c++) {
-            apu[c].end_frame(CLOCK_RATE / args.sampleRate);
+        for (unsigned channel = 0; channel < channels; channel++) {
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             float lastOscOutput = 0;
             for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-                auto oscillatorOutput = getAudioOut(i, c);
+                auto oscillatorOutput = getAudioOut(i, channel);
                 // only update VU meter on first polyphony channel or a higher-amplitude subsequent polyphony channel
                 chMeters[i].process(args.sampleTime, std::max(oscillatorOutput / 5.f, lastOscOutput / 5));
-                outputs[OUTPUT_OSCILLATOR + i].setVoltage(oscillatorOutput, c);
+                outputs[OUTPUT_OSCILLATOR + i].setVoltage(oscillatorOutput, channel);
                 lastOscOutput = oscillatorOutput;
             }
         }
@@ -263,15 +273,6 @@ struct Chip2A03 : Module {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);
                 lights[LIGHTS_VOLUME + i].setBrightness(b);
             }
-        }
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (int c = 0; c < 16; c++) {
-            for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
-                buf[c][i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
         }
     }
 };

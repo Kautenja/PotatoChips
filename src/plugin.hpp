@@ -25,6 +25,9 @@ using namespace rack;
 /// the base clock rate of the VCV Rack environment
 static constexpr uint32_t CLOCK_RATE = 768000;
 
+/// the number of potential polyphonic channels
+static constexpr unsigned POLYPHONY_CHANNELS = 16;
+
 /// the global instance of the plug-in
 extern rack::Plugin* plugin_instance;
 // the global instance of each the 2A03 module

@@ -104,12 +104,16 @@ struct ChipFME7 : Module {
         // the maximal value for the volume width register
         static constexpr float LEVEL_MAX = 15;
         // get the level from the parameter knob
-        auto levelParam = params[PARAM_LEVEL + channel].getValue();
-        // apply the control voltage to the level
-        if (inputs[INPUT_LEVEL + channel].isConnected())
-            levelParam *= inputs[INPUT_LEVEL + channel].getVoltage() / 2.f;
+        auto param = params[PARAM_LEVEL + channel].getValue();
+        // apply the control voltage to the attenuation
+        if (inputs[INPUT_LEVEL + channel].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+            cv = rack::clamp(cv, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            param *= 2 * cv;
+        }
         // return the 8-bit level clamped within legal limits
-        return rack::clamp(LEVEL_MAX * levelParam, LEVEL_MIN, LEVEL_MAX);
+        return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
     }
 
     /// Return a 10V signed sample from the FME7.

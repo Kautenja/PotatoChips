@@ -47,7 +47,7 @@ struct ChipGBS : Module {
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, NintendoGBS::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, NintendoGBS::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds {
@@ -56,9 +56,9 @@ struct ChipGBS : Module {
     };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[NintendoGBS::OSC_COUNT];
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][NintendoGBS::OSC_COUNT];
     /// The GBS instance to synthesize sound with
-    NintendoGBS apu;
+    NintendoGBS apu[POLYPHONY_CHANNELS];
 
     /// the bit-depth of the wave-table
     static constexpr auto BIT_DEPTH = 15;
@@ -89,12 +89,12 @@ struct ChipGBS : Module {
     };
 
     /// a Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr;
+    dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
-    /// a VU meter for keeping track of the channel levels
+    /// a VU meter for keeping track of the oscillator levels
     dsp::VuMeter2 chMeters[NintendoGBS::OSC_COUNT];
     /// a clock divider for updating the mixer LEDs
     dsp::ClockDivider lightDivider;
@@ -117,10 +117,12 @@ struct ChipGBS : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(128);
         // set the output buffer for each individual voice
-        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
-            apu.set_output(i, &buf[i]);
-        // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
+            // volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[channel].set_volume(3.f);
+        }
         // update the sample rate on the engine
         onSampleRateChange();
         // reset the wave-tables
@@ -129,9 +131,12 @@ struct ChipGBS : Module {
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
     }
 
     /// Respond to the user resetting the module with the "Initialize" action.
@@ -189,13 +194,10 @@ struct ChipGBS : Module {
         }
     }
 
-    /// Get the frequency for the given channel
+    /// Get the frequency for the given oscillator
     ///
-    /// @param freq_min the minimal value for the frequency register to
-    /// produce sound
-    /// @param freq_max the maximal value for the frequency register
-    /// @param clock_division the clock division of the oscillator relative
-    /// to the CPU
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 11 bit frequency value from the panel
     /// @details
     /// parameters for pulse wave:
@@ -203,42 +205,43 @@ struct ChipGBS : Module {
     /// parameters for triangle wave:
     /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
-    inline uint16_t getFrequency(int channel) {
+    inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 8;
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 2035;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         // TODO: why is the wave-table clocked at half rate? this is not
         // documented anywhere that I can find; however, it makes sense that
-        // the wave channel would be an octave lower since the original
-        // triangle channel was intended for bass
-        if (channel == NintendoGBS::WAVETABLE) freq *= 2;
+        // the wave oscillator would be an octave lower since the original
+        // triangle oscillator was intended for bass
+        if (oscillator == NintendoGBS::WAVETABLE) freq *= 2;
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = 2048.f - (static_cast<uint32_t>(buf[channel].get_clock_rate() / freq) >> 5);
+        freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
         return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
-    /// Get the PW for the given channel
+    /// Get the PW for the given oscillator
     ///
-    /// @param channel the channel to return the pulse width for
+    /// @param oscillator the oscillator to return the pulse width for
+    /// @param channel the polyphonic channel to return the pulse width for
     /// @returns the pulse width value coded in an 8-bit container
     ///
-    inline uint8_t getPulseWidth(int channel) {
+    inline uint8_t getPulseWidth(unsigned oscillator, unsigned channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register
         static constexpr float PW_MAX = 3;
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + channel].getValue();
+        auto pwParam = params[PARAM_PW + oscillator].getValue();
         // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + channel].getVoltage() / 3.f;
+        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 3.f;
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
         return pw << 6;
@@ -246,19 +249,24 @@ struct ChipGBS : Module {
 
     /// Return the wave-table parameter.
     ///
+    /// @param channel the polyphonic channel to return the wave-table for
     /// @returns the floating index of the wave-table table in [0, 4]
     ///
-    inline float getWavetable() {
+    inline float getWavetable(unsigned channel) {
         auto param = params[PARAM_WAVETABLE].getValue();
         // auto att = params[PARAM_WAVETABLE_ATT].getValue();
         // get the CV as 1V per wave-table
-        auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
+        auto cv = inputs[INPUT_WAVETABLE].getPolyVoltage(channel) / 2.f;
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
         return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
     }
 
     /// Return the period of the noise oscillator from the panel controls.
-    inline uint8_t getNoisePeriod() {
+    ///
+    /// @param channel the polyphonic channel to return the period for
+    /// @returns the period of the noise waveform generator
+    ///
+    inline uint8_t getNoisePeriod(unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
@@ -267,25 +275,26 @@ struct ChipGBS : Module {
         float freq = params[PARAM_NOISE_PERIOD].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
-            freq += inputs[INPUT_NOISE_PERIOD].getVoltage() / 2.f;
+            freq += inputs[INPUT_NOISE_PERIOD].getPolyVoltage(channel) / 2.f;
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the volume parameter for the given channel.
+    /// Return the volume parameter for the given oscillator.
     ///
-    /// @param channel the channel to get the volume parameter for
+    /// @param oscillator the oscillator to get the volume parameter for
+    /// @param channel the polyphonic channel to return the volume for
     /// @param max_ the maximal value for the volume width register
-    /// @returns the volume parameter for the given channel. This includes
+    /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(uint8_t channel, float max_) {
+    inline uint8_t getVolume(unsigned oscillator, unsigned channel, float max_) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // get the volume from the parameter knob
-        auto param = params[PARAM_LEVEL + channel].getValue();
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -299,7 +308,7 @@ struct ChipGBS : Module {
         // 11 - 25%
         // invert to go in sequence from parameter as [0, 25, 50, 100]%
         // the 2 bits occupy the high bits 6 & 7, shift left 5 to place
-        if (channel == NintendoGBS::WAVETABLE)
+        if (oscillator == NintendoGBS::WAVETABLE)
             return volume == 3 ? 1 << 5 : (static_cast<uint8_t>(4 - volume) << 5);
         // the volume level occupies the high 4 bits, shift left 4 to place
         return volume << 4;
@@ -307,118 +316,143 @@ struct ChipGBS : Module {
 
     /// Return a 10V signed sample from the APU.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
+    /// @param channel the polyphonic channel to return the volume for
     ///
-    inline float getAudioOut(int channel) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
+    }
+
+    inline void processCV(unsigned channel) {
+        lfsr[channel].process(rescale(
+            math::clamp(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 10.f),
+            0.f, 2.f, 0.f, 1.f
+        ));
+        // turn on the power
+        apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
+        // set the global volume
+        apu[channel].write(NintendoGBS::STEREO_ENABLES, 0b11111111);
+        apu[channel].write(NintendoGBS::STEREO_VOLUME, 0b11111111);
+        // ---------------------------------------------------------------
+        // pulse
+        // ---------------------------------------------------------------
+        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
+            // pulse width of the pulse wave (high 2 bits)
+            apu[channel].write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * oscillator, getPulseWidth(oscillator, channel));
+            // volume of the pulse wave, envelope add mode on
+            apu[channel].write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * oscillator, getVolume(oscillator, channel, 15));
+            // frequency
+            auto freq = getFrequency(oscillator, channel);
+            auto lo =           freq & 0b0000000011111111;
+            apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator, lo);
+            auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+            apu[channel].write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * oscillator, hi);
+        }
+        // ---------------------------------------------------------------
+        // wave
+        // ---------------------------------------------------------------
+        // turn on the DAC for the oscillator
+        apu[channel].write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
+        // set the volume
+        auto waveVolume = getVolume(NintendoGBS::WAVETABLE, channel, 3);
+        apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, waveVolume);
+        // frequency
+        auto freq = getFrequency(2, channel);
+        auto lo =           freq & 0b0000000011111111;
+        apu[channel].write(NintendoGBS::WAVE_FREQ_LO, lo);
+        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
+        apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
+        // get the index of the wave-table from the panel
+        auto wavetable = getWavetable(channel);
+        // calculate the address of the base waveform in the table
+        int wavetable0 = floor(wavetable);
+        // calculate the address of the next waveform in the table
+        int wavetable1 = ceil(wavetable);
+        // calculate floating point offset between the base and next table
+        float interpolate = wavetable - wavetable0;
+        // iterate over samples. APU samples are packed with two samples
+        // per byte, but samples at this layer are not packed for
+        // simplicity. As such, iterate over APU samples and consider
+        // samples at this layer two at a time. Use shift instead of
+        // multiplication / division for better performance
+        for (int i = 0; i < (SAMPLES_PER_WAVETABLE >> 1); i++) {
+            // shift the APU sample over 1 to iterate over internal samples
+            // in pairs (e.g., two at a time)
+            auto sample = i << 1;
+            // get the first waveform data
+            auto nibbleHi0 = values[wavetable0][sample];
+            auto nibbleLo0 = values[wavetable0][sample + 1];
+            // get the second waveform data
+            auto nibbleHi1 = values[wavetable1][sample];
+            auto nibbleLo1 = values[wavetable1][sample + 1];
+            // floating point interpolation between both samples
+            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+            // combine the two samples into a single byte for the RAM
+            apu[channel].write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
+        }
+        // ---------------------------------------------------------------
+        // noise
+        // ---------------------------------------------------------------
+        // set the period and LFSR
+        bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].state;
+        auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod(channel);
+        if (apu[channel].read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
+            apu[channel].write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);
+            apu[channel].write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+        }
+        // set the volume for the oscillator
+        auto noiseVolume = getVolume(NintendoGBS::NOISE, channel, 15);
+        if (apu[channel].read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {
+            apu[channel].write(NintendoGBS::NOISE_START_VOLUME, noiseVolume);
+            // trigger the oscillator when the volume changes
+            apu[channel].write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+        } else if (apu[channel].read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80) {
+            // enable the oscillator. setting trigger resets the phase of the
+            // noise, so check if it's set first
+            apu[channel].write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+        }
     }
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        if (cvDivider.process()) {  // process the CV inputs to the chip
-            auto lfsrV = math::clamp(inputs[INPUT_LFSR].getVoltage(), 0.f, 10.f);
-            lfsr.process(rescale(lfsrV, 0.f, 2.f, 0.f, 1.f));
-            // turn on the power
-            apu.write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
-            // set the global volume
-            apu.write(NintendoGBS::STEREO_ENABLES, 0b11111111);
-            apu.write(NintendoGBS::STEREO_VOLUME, 0b11111111);
-            // ---------------------------------------------------------------
-            // pulse
-            // ---------------------------------------------------------------
-            for (unsigned channel = 0; channel < 2; channel++) {
-                // pulse width of the pulse wave (high 2 bits)
-                apu.write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * channel, getPulseWidth(channel));
-                // volume of the pulse wave, envelope add mode on
-                apu.write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * channel, getVolume(channel, 15));
-                // frequency
-                auto freq = getFrequency(channel);
-                auto lo =           freq & 0b0000000011111111;
-                apu.write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * channel, lo);
-                auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-                apu.write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * channel, hi);
-            }
-            // ---------------------------------------------------------------
-            // wave
-            // ---------------------------------------------------------------
-            // turn on the DAC for the channel
-            apu.write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
-            // set the volume
-            auto waveVolume = getVolume(NintendoGBS::WAVETABLE, 3);
-            apu.write(NintendoGBS::WAVE_VOLUME_CODE, waveVolume);
-            // frequency
-            auto freq = getFrequency(2);
-            auto lo =           freq & 0b0000000011111111;
-            apu.write(NintendoGBS::WAVE_FREQ_LO, lo);
-            auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-            apu.write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
-            // get the index of the wavetable from the panel
-            auto wavetable = getWavetable();
-            // calculate the address of the base waveform in the table
-            int wavetable0 = floor(wavetable);
-            // calculate the address of the next waveform in the table
-            int wavetable1 = ceil(wavetable);
-            // calculate floating point offset between the base and next table
-            float interpolate = wavetable - wavetable0;
-            // iterate over samples. APU samples are packed with two samples
-            // per byte, but samples at this layer are not packed for
-            // simplicity. As such, iterate over APU samples and consider
-            // samples at this layer two at a time. Use shift instead of
-            // multiplication / division for better performance
-            for (int i = 0; i < (SAMPLES_PER_WAVETABLE >> 1); i++) {
-                // shift the APU sample over 1 to iterate over internal samples
-                // in pairs (e.g., two at a time)
-                auto sample = i << 1;
-                // get the first waveform data
-                auto nibbleHi0 = values[wavetable0][sample];
-                auto nibbleLo0 = values[wavetable0][sample + 1];
-                // get the second waveform data
-                auto nibbleHi1 = values[wavetable1][sample];
-                auto nibbleLo1 = values[wavetable1][sample + 1];
-                // floating point interpolation between both samples
-                uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-                uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-                // combine the two samples into a single byte for the RAM
-                apu.write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
-            }
-            // ---------------------------------------------------------------
-            // noise
-            // ---------------------------------------------------------------
-            // set the period and LFSR
-            bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
-            auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod();
-            if (apu.read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
-                apu.write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);
-                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
-            }
-            // set the volume for the channel
-            auto noiseVolume = getVolume(NintendoGBS::NOISE, 15);
-            if (apu.read(NintendoGBS::NOISE_START_VOLUME) != noiseVolume) {
-                apu.write(NintendoGBS::NOISE_START_VOLUME, noiseVolume);
-                // trigger the channel when the volume changes
-                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
-            } else if (apu.read(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE) != 0x80) {
-                // enable the channel. setting trigger resets the phase of the
-                // noise, so check if it's set first
-                apu.write(NintendoGBS::NOISE_TRIG_LENGTH_ENABLE, 0x80);
+        // determine the number of channels based on the inputs
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        // process the CV inputs to the chip
+        if (cvDivider.process()) {
+            for (unsigned channel = 0; channel < channels; channel++) {
+                processCV(channel);
             }
         }
-        // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
-            auto channelOutput = getAudioOut(i);
-            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
-            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        // set output polyphony channels
+        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
+        // process audio samples on the chip engine. keep a sum of the output
+        // of each channel for the VU meters
+        float sum[NintendoGBS::OSC_COUNT] = {0, 0, 0, 0};
+        for (unsigned channel = 0; channel < channels; channel++) {
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
+                auto output = getAudioOut(oscillator, channel);
+                sum[oscillator] += output;
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(output, channel);
+            }
         }
-        if (lightDivider.process()) {  // update the mixer lights
-            for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
-                float b = chMeters[i].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_LEVEL + i].setBrightness(b);
+        // process the VU meter for each oscillator based on the summed outputs
+        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
+            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
+        // update the VU meter lights
+        if (lightDivider.process()) {
+            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
+                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_LEVEL + oscillator].setBrightness(brightness);
             }
         }
     }
@@ -475,7 +509,7 @@ struct ChipGBSWidget : ModuleWidget {
             // add the table editor to the module
             addChild(table_editor);
         }
-        // channel components
+        // oscillator components
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
             if (i < NintendoGBS::NOISE) {
                 addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, ChipGBS::INPUT_VOCT     + i));
@@ -488,7 +522,7 @@ struct ChipGBSWidget : ModuleWidget {
             }
             addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(316, 24 + 85 * i),  module, ChipGBS::PARAM_LEVEL + i, ChipGBS::LIGHTS_LEVEL + i));
             addInput(createInput<PJ301MPort>(                 Vec(346, 26 + 85 * i), module, ChipGBS::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, ChipGBS::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, ChipGBS::OUTPUT_OSCILLATOR + i));
         }
         // noise period
         auto param = createParam<Rogan3PWhite>(Vec(202, 298), module, ChipGBS::PARAM_NOISE_PERIOD);

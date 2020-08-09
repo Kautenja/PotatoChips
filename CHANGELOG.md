@@ -92,4 +92,4 @@
 
 ### 1.6.0 (2020-08-08)
 
--   polyphonic 2A03, VRC6
+-   polyphonic 2A03, VRC6, GBS

@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef RACKNES_COMPONENTS_HPP
-#define RACKNES_COMPONENTS_HPP
+#ifndef COMPONENTS_HPP
+#define COMPONENTS_HPP
 
 #include "plugin.hpp"
 
@@ -52,4 +52,4 @@ struct Rogan3PSNES : rack::Rogan {
     }
 };
 
-#endif  // RACKNES_COMPONENTS_HPP
+#endif  // COMPONENTS_HPP

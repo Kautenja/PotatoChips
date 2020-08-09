@@ -17,8 +17,8 @@
 
 #include "rack.hpp"
 
-#ifndef PLUGIN_HPP_
-#define PLUGIN_HPP_
+#ifndef PLUGIN_HPP
+#define PLUGIN_HPP
 
 using namespace rack;
 
@@ -53,4 +53,4 @@ extern rack::Model *modelChipPOKEY;
 // the global instance of each the 2413 module
 extern rack::Model *modelChip2413;
 
-#endif  // PLUGIN_HPP_
+#endif  // PLUGIN_HPP

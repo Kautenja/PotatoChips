@@ -67,17 +67,19 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (int c = 0; c < 16; c++) {
-            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-                apu[c].set_output(i, &buf[c][i]);
+        for (unsigned channel = 0; channel < 16; channel++) {
+            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buf[channel][oscillator]);
             // global volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[c].set_volume(3.f);
+            apu[channel].set_volume(3.f);
         }
         onSampleRateChange();
     }
 
     /// Get the frequency for the given oscillator and polyphony channel
     ///
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @param freq_min the minimal value for the frequency register to
     /// produce sound
     /// @param freq_max the maximal value for the frequency register
@@ -92,7 +94,7 @@ struct ChipVRC6 : Module {
     ///
     inline uint16_t getFrequency(
         unsigned oscillator,
-        int channel,
+        unsigned channel,
         float freq_min,
         float freq_max,
         float clock_division
@@ -116,7 +118,7 @@ struct ChipVRC6 : Module {
     /// @returns the pulse width value in an 8-bit container in the high 4 bits.
     /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
-    inline uint8_t getPW(unsigned oscillator, int channel) {
+    inline uint8_t getPW(unsigned oscillator, unsigned channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register (before shift)
@@ -138,7 +140,7 @@ struct ChipVRC6 : Module {
     /// @param channel the polyphony channel of the given oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    inline uint8_t getLevel(unsigned oscillator, int channel, float max_level) {
+    inline uint8_t getLevel(unsigned oscillator, unsigned channel, float max_level) {
         // get the level from the parameter knob
         auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the level
@@ -157,7 +159,7 @@ struct ChipVRC6 : Module {
     /// @param oscillator the oscillator to get the audio sample for
     /// @param channel the polyphony channel of the given oscillator
     ///
-    inline float getAudioOut(unsigned oscillator, int channel) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
@@ -166,47 +168,55 @@ struct ChipVRC6 : Module {
         return Vpp * buf[channel][oscillator].read_sample() / divisor;
     }
 
-    /// Process a sample.
-    void process(const ProcessArgs &args) override {
+    /// Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(unsigned channel) {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
-        int channels = 1;
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-            channels = std::max(inputs[INPUT_VOCT + i].getChannels(), channels);
+        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
+            // frequency (max frequency is same for pulses and saw, 4095)
+            uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], 4095, clock_division[oscillator]);
+            uint8_t lo =  freq & 0b0000000011111111;
+            uint8_t hi = (freq & 0b0000111100000000) >> 8;
+            hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
+            apu[channel].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * oscillator, lo);
+            apu[channel].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * oscillator, hi);
+            // level
+            uint8_t level = getPW(oscillator, channel) | getLevel(oscillator, channel, max_level[oscillator]);
+            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * oscillator, level);
+        }
+    }
+
+    /// Process a sample.
+    void process(const ProcessArgs &args) override {
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (int c = 0; c < channels; c++) {
-                for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
-                    // frequency (max frequency is same for pulses and saw, 4095)
-                    uint16_t freq = getFrequency(i, c, freq_low[i], 4095, clock_division[i]);
-                    uint8_t lo =  freq & 0b0000000011111111;
-                    uint8_t hi = (freq & 0b0000111100000000) >> 8;
-                    hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
-                    apu[c].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * i, lo);
-                    apu[c].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * i, hi);
-                    // level
-                    uint8_t level = getPW(i, c) | getLevel(i, c, max_level[i]);
-                    apu[c].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * i, level);
-                }
+            for (unsigned channel = 0; channel < channels; channel++) {
+                processCV(channel);
             }
         }
         // set output polyphony channels
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-            outputs[OUTPUT_OSCILLATOR + i].setChannels(channels);
+        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
         // process audio samples on the chip engine
-        for (int c = 0; c < channels; c++) {
-            apu[c].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-                outputs[OUTPUT_OSCILLATOR + i].setVoltage(getAudioOut(i, c), c);
+        for (unsigned channel = 0; channel < channels; channel++) {
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
         }
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each oscillator and polyphony channel
-        for (int c = 0; c < 16; c++) {
-            for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++)
-                buf[c][i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        for (unsigned channel = 0; channel < 16; channel++) {
+            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
+                buf[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
         }
     }
 };

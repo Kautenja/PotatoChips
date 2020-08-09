@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 51,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "hw:Sanskrit 6th,0",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
@@ -64,14 +64,14 @@
       "params": [],
       "rightModuleId": 137,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": 2,
+          "deviceName": "Launchpad Pro MK3:Launchpad Pro MK3 MIDI 1 28:0",
           "channel": -1
         }
       },
@@ -169,11 +169,11 @@
         },
         {
           "id": 8,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 10,
@@ -208,7 +208,7 @@
           6,
           5,
           3,
-          2,
+          0,
           1,
           1,
           0,
@@ -594,6 +594,34 @@
         8,
         0
       ]
+    },
+    {
+      "id": 138,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.907999754
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "pos": [
+        28,
+        2
+      ]
     }
   ],
   "cables": [
@@ -780,6 +808,22 @@
       "inputModuleId": 137,
       "inputId": 4,
       "color": "#0986ad"
+    },
+    {
+      "id": 839,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 138,
+      "inputId": 4,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 840,
+      "outputModuleId": 138,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 9,
+      "color": "#0c8e15"
     }
   ]
 }

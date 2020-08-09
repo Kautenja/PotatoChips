@@ -42,7 +42,7 @@ struct ChipSN76489 : Module {
     /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
 
-    /// a VU meter for keeping track of the channel levels
+    /// a VU meter for keeping track of the oscillator levels
     dsp::VuMeter2 chMeters[TexasInstrumentsSN76489::OSC_COUNT];
     /// a clock divider for updating the mixer LEDs
     dsp::ClockDivider lightDivider;
@@ -96,12 +96,12 @@ struct ChipSN76489 : Module {
         onSampleRateChange();
     }
 
-    /// Get the 10-bit frequency parameter for the given pulse channel.
+    /// Get the 10-bit frequency parameter for the given pulse oscillator.
     ///
-    /// @param channel the channel to return the frequency for
+    /// @param oscillator the oscillator to return the frequency for
     /// @returns the 10 bit frequency value from the panel
     ///
-    inline uint16_t getFrequency(int channel) {
+    inline uint16_t getFrequency(unsigned oscillator) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ10BIT_MIN = 9;
         // the maximal value for the frequency register
@@ -109,14 +109,14 @@ struct ChipSN76489 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getVoltage();
+        pitch += inputs[INPUT_FM + oscillator].getVoltage() / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq));
+        freq = (buf[oscillator].get_clock_rate() / (CLOCK_DIVISION * freq));
         return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
@@ -136,19 +136,19 @@ struct ChipSN76489 : Module {
 
     /// Return the volume level from the panel controls.
     ///
-    /// @param channel the channel to return the volume level of
-    /// @returns the volume level of the given channel
+    /// @param oscillator the oscillator to return the volume level of
+    /// @returns the volume level of the given oscillator
     ///
-    inline uint8_t getVolume(int channel) {
+    inline uint8_t getVolume(unsigned oscillator) {
         // the minimal value for the volume width register
         static constexpr float ATT_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float ATT_MAX = 15;
         // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_LEVEL + channel].getValue();
+        auto attenuationParam = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getVoltage();
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getVoltage();
             cv = rack::clamp(cv / 10.f, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             attenuationParam *= 2 * cv;
@@ -159,15 +159,15 @@ struct ChipSN76489 : Module {
 
     /// Return a 10V signed sample from the APU.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
     ///
-    inline float getAudioOut(int channel) {
+    inline float getAudioOut(unsigned oscillator) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buf[oscillator].read_sample() / divisor;
     }
 
     /// @brief Process a sample.
@@ -184,11 +184,11 @@ struct ChipSN76489 : Module {
                 auto freq = getFrequency(i);
                 uint8_t lo = 0b00001111 & freq;
                 uint8_t hi = 0b00111111 & (freq >> 4);
-                const auto channel_opcode_offset = (2 * i) << 4;
-                apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + channel_opcode_offset) | lo);
+                const auto offset = (2 * i) << 4;
+                apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + offset) | lo);
                 apu.write(hi);
                 // 4-bit attenuation
-                apu.write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + channel_opcode_offset) | getVolume(i));
+                apu.write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + offset) | getVolume(i));
             }
             // 2-bit noise period
             auto period = getNoisePeriod();
@@ -208,24 +208,24 @@ struct ChipSN76489 : Module {
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
         // set the output voltages (and process the levels in VU)
-        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
-            auto channelOutput = getAudioOut(i);
-            chMeters[i].process(args.sampleTime, channelOutput / 5.f);
-            outputs[OUTPUT_CHANNEL + i].setVoltage(channelOutput);
+        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++) {
+            auto output = getAudioOut(oscillator);
+            chMeters[oscillator].process(args.sampleTime, output / 5.f);
+            outputs[OUTPUT_CHANNEL + oscillator].setVoltage(output);
         }
         if (lightDivider.process()) {  // update the mixer lights
-            for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
-                float b = chMeters[i].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_LEVEL + i].setBrightness(b);
+            for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++) {
+                float b = chMeters[oscillator].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_LEVEL + oscillator].setBrightness(b);
             }
         }
     }
 
     /// Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator
+        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
+            buf[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };
 

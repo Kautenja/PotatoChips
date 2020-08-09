@@ -1,4 +1,4 @@
-// The RackNES VCVRack plugin.
+// The Potato Chips VCVRack plugin.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -17,12 +17,12 @@
 
 #include "plugin.hpp"
 
-/// the global instance of the RackNES plug-in
+/// the global instance of the plugin
 Plugin* plugin_instance;
 
-/// Initialize an instance of the RackNES plug-in.
+/// Initialize an instance of the plug-in.
 ///
-/// @param instance a fresh instance of the RackNES plug-in to initialize
+/// @param instance a fresh instance of the plug-in to initialize
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;

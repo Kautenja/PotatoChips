@@ -89,3 +89,7 @@
 ### 1.5.2 (2020-08-08)
 
 -   fix CV volume control for VRC6, FME7, AY-3-8910, 106
+
+### 1.6.0 (2020-08-08)
+
+-   polyphonic 2A03, VRC6

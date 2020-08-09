@@ -25,6 +25,16 @@
 
 /// A SunSoft FME7 chip emulator module.
 struct ChipFME7 : Module {
+ private:
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buffers[SunSoftFME7::OSC_COUNT];
+    /// The FME7 instance to synthesize sound with
+    SunSoftFME7 apu;
+
+    /// a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
+ public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, SunSoftFME7::OSC_COUNT),
@@ -46,37 +56,36 @@ struct ChipFME7 : Module {
     /// the indexes of lights on the module
     enum LightIds { LIGHT_COUNT };
 
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[SunSoftFME7::OSC_COUNT];
-    /// The FME7 instance to synthesize sound with
-    SunSoftFME7 apu;
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
-    /// Initialize a new FME7 Chip module.
+    /// @brief Initialize a new FME7 Chip module.
     ChipFME7() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
-        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
-            // get the channel name starting with ACII code 65 (A)
-            auto channel_name = std::string(1, static_cast<char>(65 + i));
-            configParam(PARAM_FREQ  + i, -56.f, 56.f, 0.f,  "Pulse " + channel_name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + i,   0.f,  1.f, 0.8f, "Pulse " + channel_name + " Level",     "%",   0.f,                100.f       );
-            apu.set_output(i, &buf[i]);
+        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
+            // get the oscillator name starting with ACII code 65 (A)
+            auto name = std::string(1, static_cast<char>(65 + oscillator));
+            configParam(PARAM_FREQ  + oscillator, -56.f, 56.f, 0.f,  "Pulse " + name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f, 0.8f, "Pulse " + name + " Level",     "%",   0.f,                100.f       );
+            apu.set_output(oscillator, &buffers[oscillator]);
         }
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
         onSampleRateChange();
     }
 
-    /// Return the frequency for the given channel.
+    /// @brief Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each oscillator
+        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
+            buffers[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    /// @brief Return the frequency for the given oscillator.
     ///
-    /// @param channel the index of the channel to get the frequency of
+    /// @param oscillator the index of the oscillator to get the frequency of
     /// @returns the 12-bit frequency in a 16-bit container
     ///
-    inline uint16_t getFrequency(int channel) {
+    inline uint16_t getFrequency(unsigned oscillator) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ12BIT_MIN = 4;
         // the maximal value for the frequency register
@@ -84,34 +93,34 @@ struct ChipFME7 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getVoltage();
+        pitch += inputs[INPUT_FM + oscillator].getVoltage() / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
+        freq = buffers[oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
         return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
-    /// Return the volume parameter for the given channel.
+    /// @brief Return the volume parameter for the given oscillator.
     ///
-    /// @param channel the channel to get the volume parameter for
-    /// @returns the volume parameter for the given channel. This includes
+    /// @param oscillator the oscillator to get the volume parameter for
+    /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(uint8_t channel) {
+    inline uint8_t getVolume(unsigned oscillator) {
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float LEVEL_MAX = 15;
         // get the level from the parameter knob
-        auto param = params[PARAM_LEVEL + channel].getValue();
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getVoltage() / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -120,17 +129,17 @@ struct ChipFME7 : Module {
         return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
     }
 
-    /// Return a 10V signed sample from the FME7.
+    /// @brief Return a 10V signed sample from the FME7.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to get the audio sample for
     ///
-    inline float getAudioOut(int channel) {
+    inline float getAudioOut(unsigned oscillator) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buffers[oscillator].read_sample() / divisor;
     }
 
     /// @brief Process a sample.
@@ -139,29 +148,22 @@ struct ChipFME7 : Module {
     ///
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
+            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
                 // frequency. there are two frequency registers per voice.
                 // shift the index left 1 instead of multiplying by 2
-                auto freq = getFrequency(i);
+                auto freq = getFrequency(oscillator);
                 uint8_t lo =  freq & 0b11111111;
-                apu.write(SunSoftFME7::PULSE_A_LO + (i << 1), lo);
+                apu.write(SunSoftFME7::PULSE_A_LO + (oscillator << 1), lo);
                 uint8_t hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(SunSoftFME7::PULSE_A_HI + (i << 1), hi);
+                apu.write(SunSoftFME7::PULSE_A_HI + (oscillator << 1), hi);
                 // level
-                apu.write(SunSoftFME7::PULSE_A_ENV + i, getVolume(i));
+                apu.write(SunSoftFME7::PULSE_A_ENV + oscillator, getVolume(oscillator));
             }
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_CHANNEL + oscillator].setVoltage(getAudioOut(oscillator));
     }
 };
 

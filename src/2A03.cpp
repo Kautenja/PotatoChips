@@ -25,6 +25,23 @@
 
 /// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
+ private:
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][Ricoh2A03::OSC_COUNT];
+    /// The 2A03 instance to synthesize sound with
+    Ricoh2A03 apu[POLYPHONY_CHANNELS];
+
+    /// a Schmitt Trigger for handling inputs to the LFSR port
+    dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
+
+    /// a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+    /// a VU meter for keeping track of the oscillator levels
+    dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
+
+ public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
@@ -51,21 +68,6 @@ struct Chip2A03 : Module {
         ENUMS(LIGHTS_VOLUME, 3),
         LIGHT_COUNT
     };
-
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][Ricoh2A03::OSC_COUNT];
-    /// The 2A03 instance to synthesize sound with
-    Ricoh2A03 apu[POLYPHONY_CHANNELS];
-
-    /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-    /// a VU meter for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
 
     /// @brief Initialize a new 2A03 Chip module.
     Chip2A03() {

@@ -352,25 +352,26 @@ struct ChipGBS : Module {
             apu[channel].write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * oscillator, getVolume(oscillator, channel, 15));
             // frequency
             auto freq = getFrequency(oscillator, channel);
-            auto lo =           freq & 0b0000000011111111;
-            apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator, lo);
-            auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-            apu[channel].write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * oscillator, hi);
+            apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator,
+                         freq & 0b0000000011111111
+            );
+            apu[channel].write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * oscillator,
+                0x80 | ((freq & 0b0000011100000000) >> 8)
+            );
         }
         // ---------------------------------------------------------------
         // wave
         // ---------------------------------------------------------------
-        // turn on the DAC for the oscillator
         apu[channel].write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
-        // set the volume
-        auto waveVolume = getVolume(NintendoGBS::WAVETABLE, channel, 3);
-        apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, waveVolume);
+        apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, getVolume(NintendoGBS::WAVETABLE, channel, 3));
         // frequency
         auto freq = getFrequency(2, channel);
-        auto lo =           freq & 0b0000000011111111;
-        apu[channel].write(NintendoGBS::WAVE_FREQ_LO, lo);
-        auto hi =  0x80 | ((freq & 0b0000011100000000) >> 8);
-        apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI, hi);
+        apu[channel].write(NintendoGBS::WAVE_FREQ_LO,
+                     freq & 0b0000000011111111
+        );
+        apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
+            0x80 | ((freq & 0b0000011100000000) >> 8)
+        );
         // get the index of the wave-table from the panel
         auto wavetable = getWavetable(channel);
         // calculate the address of the base waveform in the table

@@ -22,7 +22,7 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
-/// Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
+/// @brief Turbo Grafx 16 (PC Engine) PSG sound chip emulator.
 /// @details
 /// - The LFO is not implemented
 /// - The current LFSR algorithm is not accurate to the Turbo Grafx 16

@@ -25,6 +25,16 @@
 
 /// A Konami VRC6 Chip module.
 struct ChipVRC6 : Module {
+ private:
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][KonamiVRC6::OSC_COUNT];
+    /// The VRC6 instance to synthesize sound with
+    KonamiVRC6 apu[POLYPHONY_CHANNELS];
+
+    /// a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+
+ public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
@@ -50,14 +60,6 @@ struct ChipVRC6 : Module {
         LIGHT_COUNT
     };
 
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[POLYPHONY_CHANNELS][KonamiVRC6::OSC_COUNT];
-    /// The VRC6 instance to synthesize sound with
-    KonamiVRC6 apu[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
     /// @brief Initialize a new VRC6 Chip module.
     ChipVRC6() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
@@ -73,7 +75,7 @@ struct ChipVRC6 : Module {
         // set the output buffer for each individual voice
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buf[channel][oscillator]);
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
             // global volume of 3 produces a roughly 5Vpp signal from all voices
             apu[channel].set_volume(3.f);
         }
@@ -85,7 +87,7 @@ struct ChipVRC6 : Module {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-                buf[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
             }
         }
     }
@@ -121,7 +123,7 @@ struct ChipVRC6 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
+        freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
         return rack::clamp(freq, freq_min, freq_max);
     }
 
@@ -182,7 +184,7 @@ struct ChipVRC6 : Module {
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel][oscillator].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
     /// @brief Process the CV inputs for the given channel.

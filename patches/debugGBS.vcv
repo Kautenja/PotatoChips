@@ -35,11 +35,11 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 3,
@@ -52,7 +52,7 @@
       ],
       "leftModuleId": 55,
       "pos": [
-        54,
+        62,
         0
       ]
     },
@@ -62,7 +62,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 48,
+      "rightModuleId": 137,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -184,7 +184,7 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 137,
       "rightModuleId": 52,
       "data": {
         "values0": [
@@ -359,7 +359,7 @@
         ]
       },
       "pos": [
-        8,
+        16,
         0
       ]
     },
@@ -522,7 +522,7 @@
       "leftModuleId": 48,
       "rightModuleId": 53,
       "pos": [
-        34,
+        42,
         0
       ]
     },
@@ -535,7 +535,7 @@
       "leftModuleId": 52,
       "rightModuleId": 54,
       "pos": [
-        39,
+        47,
         0
       ]
     },
@@ -548,7 +548,7 @@
       "leftModuleId": 53,
       "rightModuleId": 55,
       "pos": [
-        44,
+        52,
         0
       ]
     },
@@ -561,7 +561,37 @@
       "leftModuleId": 54,
       "rightModuleId": 2,
       "pos": [
-        49,
+        57,
+        0
+      ]
+    },
+    {
+      "id": 137,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.782000005
+        },
+        {
+          "id": 1,
+          "value": 0.665000021
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 48,
+      "pos": [
+        8,
         0
       ]
     }
@@ -710,6 +740,46 @@
       "inputModuleId": 48,
       "inputId": 6,
       "color": "#0c8e15"
+    },
+    {
+      "id": 833,
+      "outputModuleId": 137,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 14,
+      "color": "#0986ad"
+    },
+    {
+      "id": 834,
+      "outputModuleId": 137,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 13,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 835,
+      "outputModuleId": 137,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 12,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 836,
+      "outputModuleId": 137,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 11,
+      "color": "#c91847"
+    },
+    {
+      "id": 837,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 137,
+      "inputId": 4,
+      "color": "#0986ad"
     }
   ]
 }

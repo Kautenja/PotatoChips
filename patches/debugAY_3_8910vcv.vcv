@@ -8,6 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 11,
       "data": {
         "audio": {
           "driver": 5,
@@ -19,7 +20,7 @@
         }
       },
       "pos": [
-        39,
+        42,
         0
       ]
     },
@@ -50,10 +51,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 11,
+      "leftModuleId": 135,
       "rightModuleId": 1,
       "pos": [
-        29,
+        32,
         0
       ]
     },
@@ -235,17 +236,16 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
-      "leftModuleId": 16,
-      "rightModuleId": 2,
+      "leftModuleId": 1,
       "pos": [
-        24,
+        52,
         0
       ]
     },
     {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "AY_3_8910",
       "params": [
         {
@@ -298,9 +298,39 @@
         }
       ],
       "leftModuleId": 5,
-      "rightModuleId": 11,
+      "rightModuleId": 135,
       "pos": [
         8,
+        0
+      ]
+    },
+    {
+      "id": 135,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.680000007
+        },
+        {
+          "id": 1,
+          "value": 0.725000024
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 16,
+      "rightModuleId": 2,
+      "pos": [
+        24,
         0
       ]
     }
@@ -425,6 +455,38 @@
       "inputModuleId": 16,
       "inputId": 2,
       "color": "#0986ad"
+    },
+    {
+      "id": 827,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 16,
+      "inputId": 6,
+      "color": "#c91847"
+    },
+    {
+      "id": 828,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 16,
+      "inputId": 7,
+      "color": "#0986ad"
+    },
+    {
+      "id": 829,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 16,
+      "inputId": 8,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 830,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 135,
+      "inputId": 4,
+      "color": "#0c8e15"
     }
   ]
 }

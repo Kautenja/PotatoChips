@@ -170,13 +170,16 @@ struct ChipTurboGrafx16 : Module {
         // the maximal value for the volume width register
         static constexpr float VOLUME_MAX = 31;
         // get the volume from the parameter knob
-        auto levelParam = params[PARAM_VOLUME + channel].getValue();
+        auto param = params[PARAM_VOLUME + channel].getValue();
         // apply the control voltage to the volume
-        static constexpr float FM_SCALE = 0.5f;
-        if (inputs[INPUT_VOLUME + channel].isConnected())
-            levelParam *= FM_SCALE * inputs[INPUT_VOLUME + channel].getVoltage();
+        if (inputs[INPUT_VOLUME + channel].isConnected()) {
+            auto cv = inputs[INPUT_VOLUME + channel].getVoltage() / 10.f;
+            cv = rack::clamp(cv, 0.f, 1.f);
+            cv = roundf(100.f * cv) / 100.f;
+            param *= 2 * cv;
+        }
         // get the 8-bit volume clamped within legal limits
-        return rack::clamp(levelParam, VOLUME_MIN, VOLUME_MAX);
+        return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
     /// Return a 10V signed sample from the chip.

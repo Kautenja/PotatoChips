@@ -27,6 +27,22 @@
 
 /// A Nintendo GBS Chip module.
 struct ChipGBS : Module {
+ private:
+    /// The BLIP buffer to render audio samples from
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][NintendoGBS::OSC_COUNT];
+    /// The GBS instance to synthesize sound with
+    NintendoGBS apu[POLYPHONY_CHANNELS];
+
+    /// a Trigger for handling inputs to the LFSR port
+    dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
+    /// a clock divider for running CV acquisition slower than audio rate
+    dsp::ClockDivider cvDivider;
+    /// a VU meter for keeping track of the oscillator levels
+    dsp::VuMeter2 chMeters[NintendoGBS::OSC_COUNT];
+    /// a clock divider for updating the mixer LEDs
+    dsp::ClockDivider lightDivider;
+
+ public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, 3),
@@ -59,51 +75,17 @@ struct ChipGBS : Module {
         LIGHT_COUNT
     };
 
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][NintendoGBS::OSC_COUNT];
-    /// The GBS instance to synthesize sound with
-    NintendoGBS apu[POLYPHONY_CHANNELS];
-
     /// the bit-depth of the wave-table
     static constexpr auto BIT_DEPTH = 15;
     /// the number of samples in the wave-table
     static constexpr auto SAMPLES_PER_WAVETABLE = 32;
-
     /// the number of editors on the module
-    static constexpr int NUM_WAVETABLES = 5;
-
-    /// the samples in the wave-table (1)
-    uint8_t values0[SAMPLES_PER_WAVETABLE];
-    /// the samples in the wave-table (2)
-    uint8_t values1[SAMPLES_PER_WAVETABLE];
-    /// the samples in the wave-table (3)
-    uint8_t values2[SAMPLES_PER_WAVETABLE];
-    /// the samples in the wave-table (4)
-    uint8_t values3[SAMPLES_PER_WAVETABLE];
-    /// the samples in the wave-table (5)
-    uint8_t values4[SAMPLES_PER_WAVETABLE];
+    static constexpr int NUM_WAVEFORMS = 5;
 
     /// the wave-tables to morph between
-    uint8_t* values[NUM_WAVETABLES] = {
-        values0,
-        values1,
-        values2,
-        values3,
-        values4
-    };
+    uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
-    /// a Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
-    /// a VU meter for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[NintendoGBS::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
-
-    /// Initialize a new GBS Chip module.
+    /// @brief Initialize a new GBS Chip module.
     ChipGBS() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -112,7 +94,7 @@ struct ChipGBS : Module {
         configParam(PARAM_NOISE_PERIOD, 0, 7, 0, "Noise Period", "", 0, 1, -7);
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
-        configParam(PARAM_WAVETABLE, 0, 5, 0, "Wavetable morph");
+        configParam(PARAM_WAVETABLE, 0, NUM_WAVEFORMS, 0, "Waveform morph");
         configParam(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
         configParam(PARAM_LEVEL + 0, 0.f, 1.f, 1.0f, "Pulse 1 Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume", "%", 0, 100);
@@ -133,7 +115,7 @@ struct ChipGBS : Module {
         onReset();
     }
 
-    /// Respond to the change of sample rate in the engine.
+    /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each oscillator
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
@@ -143,71 +125,72 @@ struct ChipGBS : Module {
         }
     }
 
-    /// Respond to the user resetting the module with the "Initialize" action.
+    /// @brief Respond to the user resetting the module with the "Initialize" action.
     void onReset() override {
         /// the default wave-table for each page of the wave-table editor
-        static constexpr uint8_t* wavetables[NUM_WAVETABLES] = {
+        static constexpr uint8_t* wavetables[NUM_WAVEFORMS] = {
             SINE,
             PW5,
             RAMP_UP,
             TRIANGLE_DIST,
             RAMP_DOWN
         };
-        for (unsigned i = 0; i < NUM_WAVETABLES; i++)
-            memcpy(values[i], wavetables[i], SAMPLES_PER_WAVETABLE);
+        for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
+            memcpy(wavetable[i], wavetables[i], SAMPLES_PER_WAVETABLE);
     }
 
-    /// Respond to the user randomizing the module with the "Randomize" action.
+    /// @brief Respond to the user randomizing the module with the "Randomize" action.
     void onRandomize() override {
-        for (unsigned table = 0; table < NUM_WAVETABLES; table++) {
+        for (unsigned table = 0; table < NUM_WAVEFORMS; table++) {
             for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
-                values[table][sample] = random::u32() % BIT_DEPTH;
+                wavetable[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
-                    auto last = values[table][sample - 1];
-                    auto next = values[table][sample];
-                    values[table][sample] = (last + next) / 2;
+                    auto last = wavetable[table][sample - 1];
+                    auto next = wavetable[table][sample];
+                    wavetable[table][sample] = (last + next) / 2;
                 }
             }
         }
     }
 
-    /// Convert the module's state to a JSON object.
+    /// @brief Convert the module's state to a JSON object.
+    ///
+    /// @returns a new JSON object with this module's state stored into it
+    ///
     json_t* dataToJson() override {
         json_t* rootJ = json_object();
-        for (int table = 0; table < NUM_WAVETABLES; table++) {
+        for (int table = 0; table < NUM_WAVEFORMS; table++) {
             json_t* array = json_array();
             for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
-                json_array_append_new(array, json_integer(values[table][sample]));
-            auto key = "values" + std::to_string(table);
+                json_array_append_new(array, json_integer(wavetable[table][sample]));
+            auto key = "wavetable" + std::to_string(table);
             json_object_set_new(rootJ, key.c_str(), array);
         }
 
         return rootJ;
     }
 
-    /// Load the module's state from a JSON object.
+    /// @brief Load the module's state from a JSON object.
+    ///
+    /// @param rootJ a JSON object with state data to load into this module
+    ///
     void dataFromJson(json_t* rootJ) override {
-        for (int table = 0; table < NUM_WAVETABLES; table++) {
-            auto key = "values" + std::to_string(table);
+        for (int table = 0; table < NUM_WAVEFORMS; table++) {
+            auto key = "wavetable" + std::to_string(table);
             json_t* data = json_object_get(rootJ, key.c_str());
             if (data) {
                 for (int sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++)
-                    values[table][sample] = json_integer_value(json_array_get(data, sample));
+                    wavetable[table][sample] = json_integer_value(json_array_get(data, sample));
             }
         }
     }
 
-    /// Get the frequency for the given oscillator
+    /// @brief Get the frequency for the given oscillator
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 11 bit frequency value from the panel
-    /// @details
-    /// parameters for pulse wave:
-    /// freq_min = 8, freq_max = 1023, clock_division = 16
-    /// parameters for triangle wave:
-    /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
     inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
         // the minimal value for the frequency register to produce sound
@@ -231,7 +214,7 @@ struct ChipGBS : Module {
         return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
     }
 
-    /// Get the PW for the given oscillator
+    /// @brief Get the PW for the given oscillator
     ///
     /// @param oscillator the oscillator to return the pulse width for
     /// @param channel the polyphonic channel to return the pulse width for
@@ -251,12 +234,12 @@ struct ChipGBS : Module {
         return pw << 6;
     }
 
-    /// Return the wave-table parameter.
+    /// @brief Return the wave-table parameter.
     ///
     /// @param channel the polyphonic channel to return the wave-table for
     /// @returns the floating index of the wave-table table in [0, 4]
     ///
-    inline float getWavetable(unsigned channel) {
+    inline float getWavetablePosition(unsigned channel) {
         auto param = params[PARAM_WAVETABLE].getValue();
         // auto att = params[PARAM_WAVETABLE_ATT].getValue();
         // get the CV as 1V per wave-table
@@ -265,7 +248,7 @@ struct ChipGBS : Module {
         return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
     }
 
-    /// Return the period of the noise oscillator from the panel controls.
+    /// @brief Return the period of the noise oscillator from the panel controls.
     ///
     /// @param channel the polyphonic channel to return the period for
     /// @returns the period of the noise waveform generator
@@ -283,7 +266,7 @@ struct ChipGBS : Module {
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the volume parameter for the given oscillator.
+    /// @brief Return the volume parameter for the given oscillator.
     ///
     /// @param oscillator the oscillator to get the volume parameter for
     /// @param channel the polyphonic channel to return the volume for
@@ -318,7 +301,7 @@ struct ChipGBS : Module {
         return volume << 4;
     }
 
-    /// Return a 10V signed sample from the APU.
+    /// @brief Return a 10V signed sample from the APU.
     ///
     /// @param oscillator the oscillator to get the audio sample for
     /// @param channel the polyphonic channel to return the output for
@@ -332,7 +315,7 @@ struct ChipGBS : Module {
         return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
-    /// Process the CV inputs for the given channel.
+    /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
@@ -377,13 +360,13 @@ struct ChipGBS : Module {
             0x80 | ((freq & 0b0000011100000000) >> 8)
         );
         // get the index of the wave-table from the panel
-        auto wavetable = getWavetable(channel);
+        auto position = getWavetablePosition(channel);
         // calculate the address of the base waveform in the table
-        int wavetable0 = floor(wavetable);
+        int wavetable0 = floor(position);
         // calculate the address of the next waveform in the table
-        int wavetable1 = ceil(wavetable);
+        int wavetable1 = ceil(position);
         // calculate floating point offset between the base and next table
-        float interpolate = wavetable - wavetable0;
+        float interpolate = position - wavetable0;
         // iterate over samples. APU samples are packed with two samples
         // per byte, but samples at this layer are not packed for
         // simplicity. As such, iterate over APU samples and consider
@@ -394,11 +377,11 @@ struct ChipGBS : Module {
             // in pairs (e.g., two at a time)
             auto sample = i << 1;
             // get the first waveform data
-            auto nibbleHi0 = values[wavetable0][sample];
-            auto nibbleLo0 = values[wavetable0][sample + 1];
+            auto nibbleHi0 = wavetable[wavetable0][sample];
+            auto nibbleLo0 = wavetable[wavetable0][sample + 1];
             // get the second waveform data
-            auto nibbleHi1 = values[wavetable1][sample];
-            auto nibbleLo1 = values[wavetable1][sample + 1];
+            auto nibbleHi1 = wavetable[wavetable1][sample];
+            auto nibbleLo1 = wavetable[wavetable1][sample + 1];
             // floating point interpolation between both samples
             uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
             uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
@@ -428,7 +411,7 @@ struct ChipGBS : Module {
         }
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
@@ -486,11 +469,8 @@ struct ChipGBSWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // if the module is displaying in/being rendered for the library, the
-        // module will be null and a dummy waveform is displayed
-        auto module_ = reinterpret_cast<ChipGBS*>(this->module);
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[ChipGBS::NUM_WAVETABLES] = {
+        static constexpr NVGcolor colors[ChipGBS::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -498,7 +478,7 @@ struct ChipGBSWidget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         /// the default wave-table for each page of the wave-table editor
-        static constexpr uint8_t* wavetables[ChipGBS::NUM_WAVETABLES] = {
+        static constexpr uint8_t* wavetables[ChipGBS::NUM_WAVEFORMS] = {
             SINE,
             PW5,
             RAMP_UP,
@@ -506,18 +486,21 @@ struct ChipGBSWidget : ModuleWidget {
             RAMP_DOWN
         };
         // add wave-table editors
-        for (int i = 0; i < ChipGBS::NUM_WAVETABLES; i++) {
-            // get the wave-table buffer for this editor
-            uint8_t* wavetable =
-                module ? &module_->values[i][0] : &wavetables[i][0];
+        for (int wave = 0; wave < ChipGBS::NUM_WAVEFORMS; wave++) {
+            // get the wave-table buffer for this editor. if the module is
+            // displaying in/being rendered for the library, the module will
+            // be null and a dummy waveform is displayed
+            uint8_t* wavetable = module ?
+                &reinterpret_cast<ChipGBS*>(this->module)->wavetable[wave][0] :
+                &wavetables[wave][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer
                 ChipGBS::SAMPLES_PER_WAVETABLE,  // wave-table length
                 ChipGBS::BIT_DEPTH,              // waveform bit depth
-                Vec(18, 26 + 67 * i),            // position
+                Vec(18, 26 + 67 * wave),         // position
                 Vec(135, 60),                    // size
-                colors[i]                        // line fill color
+                colors[wave]                     // line fill color
             );
             // add the table editor to the module
             addChild(table_editor);

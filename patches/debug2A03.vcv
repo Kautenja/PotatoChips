@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 22,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },

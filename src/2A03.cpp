@@ -114,8 +114,8 @@ struct Chip2A03 : Module {
     /// freq_min = 2, freq_max = 2047, clock_division = 32
     ///
     inline uint16_t getFrequency(
-        int oscillator,
-        int channel,
+        unsigned oscillator,
+        unsigned channel,
         float freq_min,
         float freq_max,
         float clock_division
@@ -138,7 +138,7 @@ struct Chip2A03 : Module {
     /// @param channel the polyphony channel of the given oscillator
     /// @returns the pulse width value coded in an 8-bit container
     ///
-    inline uint8_t getPulseWidth(int oscillator, int channel) {
+    inline uint8_t getPulseWidth(unsigned oscillator, unsigned channel) {
         // the minimal value for the pulse width register
         static constexpr float PW_MIN = 0;
         // the maximal value for the pulse width register
@@ -153,7 +153,7 @@ struct Chip2A03 : Module {
     }
 
     /// Return the period of the noise oscillator from the panel controls.
-    inline uint8_t getNoisePeriod(int channel) {
+    inline uint8_t getNoisePeriod(unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the frequency register
@@ -175,7 +175,7 @@ struct Chip2A03 : Module {
     /// oscillator can be one of 0, 1, or 3. the triangle oscillator (2) has no
     /// volume control.
     ///
-    inline uint8_t getVolume(int oscillator, int channel) {
+    inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
@@ -200,7 +200,7 @@ struct Chip2A03 : Module {
     /// @param oscillator the oscillator to get the audio sample for
     /// @param channel the polyphony channel of the given oscillator
     ///
-    inline float getAudioOut(int oscillator, int channel) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume

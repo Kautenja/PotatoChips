@@ -95,7 +95,7 @@ class KonamiVRC6 {
         inline uint16_t period() const {
             // turn the low and high period registers into the 12-bit period
             // value
-            return ((regs[PERIOD_HIGH] & 0x0f) << 8) | regs[PERIOD_LOW] + 1;
+            return (((regs[PERIOD_HIGH] & 0x0f) << 8) | regs[PERIOD_LOW]) + 1;
         }
     };
 

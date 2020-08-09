@@ -317,7 +317,7 @@ struct ChipGBS : Module {
     /// Return a 10V signed sample from the APU.
     ///
     /// @param oscillator the oscillator to get the audio sample for
-    /// @param channel the polyphonic channel to return the volume for
+    /// @param channel the polyphonic channel to return the output for
     ///
     inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
@@ -328,6 +328,10 @@ struct ChipGBS : Module {
         return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
+    /// Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
     inline void processCV(unsigned channel) {
         lfsr[channel].process(rescale(
             math::clamp(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 10.f),

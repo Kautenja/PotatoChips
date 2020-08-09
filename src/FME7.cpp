@@ -25,21 +25,25 @@
 
 /// A SunSoft FME7 chip emulator module.
 struct ChipFME7 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, SunSoftFME7::OSC_COUNT),
         ENUMS(PARAM_LEVEL, SunSoftFME7::OSC_COUNT),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, SunSoftFME7::OSC_COUNT),
         ENUMS(INPUT_FM, SunSoftFME7::OSC_COUNT),
         ENUMS(INPUT_LEVEL, SunSoftFME7::OSC_COUNT),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, SunSoftFME7::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds { LIGHT_COUNT };
 
     /// The BLIP buffer to render audio samples from

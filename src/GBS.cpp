@@ -27,6 +27,7 @@
 
 /// A Nintendo GBS Chip module.
 struct ChipGBS : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, 3),
         PARAM_NOISE_PERIOD,
@@ -36,6 +37,7 @@ struct ChipGBS : Module {
         ENUMS(PARAM_LEVEL, NintendoGBS::OSC_COUNT),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, 3),
         INPUT_NOISE_PERIOD,
@@ -46,10 +48,12 @@ struct ChipGBS : Module {
         ENUMS(INPUT_LEVEL, NintendoGBS::OSC_COUNT),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, NintendoGBS::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, NintendoGBS::OSC_COUNT),
         LIGHT_COUNT

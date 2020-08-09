@@ -32,12 +32,14 @@ const uint8_t default_values[32] = {
 
 /// A NEC Turbo-Grafx-16 Chip module.
 struct ChipTurboGrafx16 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, NECTurboGrafx16::OSC_COUNT),
         ENUMS(PARAM_VOLUME, NECTurboGrafx16::OSC_COUNT),
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, NECTurboGrafx16::OSC_COUNT),
         ENUMS(INPUT_FM, NECTurboGrafx16::OSC_COUNT),
@@ -45,10 +47,12 @@ struct ChipTurboGrafx16 : Module {
         INPUT_WAVETABLE,
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, NECTurboGrafx16::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHT_CHANNEL, NECTurboGrafx16::OSC_COUNT),
         LIGHT_COUNT

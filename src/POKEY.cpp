@@ -25,6 +25,7 @@
 
 /// A Atari POKEY Chip module.
 struct ChipPOKEY : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
@@ -32,6 +33,7 @@ struct ChipPOKEY : Module {
         ENUMS(PARAM_CONTROL, 8),  // 1 button per bit (control flag)
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_FM, AtariPOKEY::OSC_COUNT),
@@ -40,10 +42,12 @@ struct ChipPOKEY : Module {
         ENUMS(INPUT_CONTROL, 8),  // 1 input per bit (control flag)
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, AtariPOKEY::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, AtariPOKEY::OSC_COUNT),
         LIGHT_COUNT

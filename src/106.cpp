@@ -27,6 +27,7 @@
 
 /// A Namco 106 Chip module.
 struct Chip106 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
         ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
@@ -34,6 +35,7 @@ struct Chip106 : Module {
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
         ENUMS(INPUT_FM, Namco106::OSC_COUNT),
@@ -42,10 +44,12 @@ struct Chip106 : Module {
         INPUT_WAVETABLE,
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, Namco106::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHT_CHANNEL, Namco106::OSC_COUNT),
         LIGHT_COUNT

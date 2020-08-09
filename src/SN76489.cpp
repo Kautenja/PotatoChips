@@ -48,6 +48,7 @@ struct ChipSN76489 : Module {
     dsp::ClockDivider lightDivider;
 
  public:
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT - 1),
         PARAM_NOISE_PERIOD,
@@ -55,6 +56,7 @@ struct ChipSN76489 : Module {
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT - 1),
         INPUT_NOISE_PERIOD,
@@ -63,10 +65,12 @@ struct ChipSN76489 : Module {
         ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, TexasInstrumentsSN76489::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         LIGHT_COUNT

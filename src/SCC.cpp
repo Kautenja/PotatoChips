@@ -32,12 +32,14 @@ const int8_t default_values[32] = {
 
 /// A Konami SCC Chip module.
 struct ChipSCC : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiSCC::OSC_COUNT),
         ENUMS(PARAM_VOLUME, KonamiSCC::OSC_COUNT),
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, KonamiSCC::OSC_COUNT),
         ENUMS(INPUT_FM, KonamiSCC::OSC_COUNT),
@@ -45,10 +47,12 @@ struct ChipSCC : Module {
         INPUT_WAVETABLE,
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, KonamiSCC::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         LIGHT_COUNT
     };

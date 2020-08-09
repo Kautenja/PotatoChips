@@ -25,12 +25,14 @@
 
 /// A Ricoh 2A03 Chip module.
 struct Chip2A03 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
         ENUMS(PARAM_VOLUME, 3),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_FM, 3),
@@ -39,10 +41,12 @@ struct Chip2A03 : Module {
         INPUT_LFSR,
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, Ricoh2A03::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_VOLUME, 3),
         LIGHT_COUNT
@@ -63,7 +67,7 @@ struct Chip2A03 : Module {
     /// a clock divider for updating the mixer LEDs
     dsp::ClockDivider lightDivider;
 
-    /// Initialize a new 2A03 Chip module.
+    /// @brief Initialize a new 2A03 Chip module.
     Chip2A03() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -87,7 +91,7 @@ struct Chip2A03 : Module {
         onSampleRateChange();
     }
 
-    /// Respond to the change of sample rate in the engine.
+    /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
@@ -97,7 +101,7 @@ struct Chip2A03 : Module {
         }
     }
 
-    /// Get the frequency for the given oscillator and polyphony channel
+    /// @brief Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -132,7 +136,7 @@ struct Chip2A03 : Module {
         return rack::clamp(freq, freq_min, freq_max);
     }
 
-    /// Get the PW for the given oscillator and polyphony channel
+    /// @brief Get the PW for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the pulse width for
     /// @param channel the polyphony channel of the given oscillator
@@ -152,7 +156,10 @@ struct Chip2A03 : Module {
         return pw << 6;
     }
 
-    /// Return the period of the noise oscillator from the panel controls.
+    /// @brief Return the period of the noise oscillator from the panel controls.
+    ///
+    /// @param channel the polyphony channel of the given oscillator
+    ///
     inline uint8_t getNoisePeriod(unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
@@ -166,7 +173,7 @@ struct Chip2A03 : Module {
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the volume level from the panel controls for a given oscillator and polyphony channel.
+    /// @brief Return the volume level from the panel controls for a given oscillator and polyphony channel.
     ///
     /// @param oscillator the oscillator to return the volume level of
     /// @param channel the polyphony channel of the given oscillator
@@ -195,7 +202,7 @@ struct Chip2A03 : Module {
         return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// Return a 10V signed sample from the APU.
+    /// @brief Return a 10V signed sample from the APU.
     ///
     /// @param oscillator the oscillator to get the audio sample for
     /// @param channel the polyphony channel of the given oscillator
@@ -209,7 +216,7 @@ struct Chip2A03 : Module {
         return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
-    /// Process the CV inputs for the given channel.
+    /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
@@ -252,7 +259,10 @@ struct Chip2A03 : Module {
         apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;

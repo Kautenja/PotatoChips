@@ -25,12 +25,14 @@
 
 /// A Konami VRC6 Chip module.
 struct ChipVRC6 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
         ENUMS(PARAM_PW, KonamiVRC6::OSC_COUNT - 1),  // pulse wave only
         ENUMS(PARAM_LEVEL, KonamiVRC6::OSC_COUNT),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, KonamiVRC6::OSC_COUNT),
         ENUMS(INPUT_FM, KonamiVRC6::OSC_COUNT),
@@ -38,10 +40,12 @@ struct ChipVRC6 : Module {
         ENUMS(INPUT_LEVEL, KonamiVRC6::OSC_COUNT),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, KonamiVRC6::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds {
         LIGHT_COUNT
     };

@@ -25,6 +25,7 @@
 
 /// A General Instrument AY-3-8910 Chip module.
 struct ChipAY_3_8910 : Module {
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
@@ -32,6 +33,7 @@ struct ChipAY_3_8910 : Module {
         ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_COUNT
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
@@ -40,10 +42,12 @@ struct ChipAY_3_8910 : Module {
         ENUMS(INPUT_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_COUNT
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, GeneralInstrumentAy_3_8910::OSC_COUNT),
         OUTPUT_COUNT
     };
+    /// the indexes of lights on the module
     enum LightIds { LIGHT_COUNT };
 
     /// The BLIP buffer to render audio samples from
@@ -57,7 +61,7 @@ struct ChipAY_3_8910 : Module {
     /// triggers for handling inputs to the tone and noise enable switches
     dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
-    /// Initialize a new FME7 Chip module.
+    /// @brief Initialize a new FME7 Chip module.
     ChipAY_3_8910() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         cvDivider.setDivision(16);
@@ -79,7 +83,7 @@ struct ChipAY_3_8910 : Module {
         onSampleRateChange();
     }
 
-    /// Respond to the change of sample rate in the engine.
+    /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
@@ -89,7 +93,7 @@ struct ChipAY_3_8910 : Module {
         }
     }
 
-    /// Return the frequency for the given channel.
+    /// @brief Return the frequency for the given channel.
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -114,7 +118,7 @@ struct ChipAY_3_8910 : Module {
         return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
-    /// Return the level for the given channel.
+    /// @brief Return the level for the given channel.
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -138,7 +142,7 @@ struct ChipAY_3_8910 : Module {
         return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
     }
 
-    /// Return the noise period.
+    /// @brief Return the noise period.
     ///
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the period for the noise oscillator
@@ -166,7 +170,7 @@ struct ChipAY_3_8910 : Module {
         return FREQ_MAX - rack::clamp(FREQ_MAX * param, FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the mixer byte.
+    /// @brief Return the mixer byte.
     ///
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 8-bit mixer byte from parameters and CV inputs
@@ -192,7 +196,7 @@ struct ChipAY_3_8910 : Module {
         return mixerByte;
     }
 
-    /// Return a 10V signed sample from the FME7.
+    /// @brief Return a 10V signed sample from the FME7.
     ///
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -206,7 +210,7 @@ struct ChipAY_3_8910 : Module {
         return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
-    /// Process the CV inputs for the given channel.
+    /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
@@ -238,7 +242,10 @@ struct ChipAY_3_8910 : Module {
         // );
     }
 
-    /// Process a sample.
+    /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;

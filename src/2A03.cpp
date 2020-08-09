@@ -247,17 +247,17 @@ struct Chip2A03 : Module {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
             outputs[OUTPUT_OSCILLATOR + i].setChannels(channels);
         // process audio samples on the chip engine
+        float sum[Ricoh2A03::OSC_COUNT] = {0, 0, 0, 0};
         for (int c = 0; c < channels; c++) {
             apu[c].end_frame(CLOCK_RATE / args.sampleRate);
-            float lastOscOutput = 0;
             for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-                auto oscillatorOutput = getAudioOut(i, c);
-                // only update VU meter on first polyphony channel or a higher-amplitude subsequent polyphony channel
-                chMeters[i].process(args.sampleTime, std::max(oscillatorOutput / 5.f, lastOscOutput / 5));
-                outputs[OUTPUT_OSCILLATOR + i].setVoltage(oscillatorOutput, c);
-                lastOscOutput = oscillatorOutput;
+                auto output = getAudioOut(i, c);
+                sum[i] += output;
+                outputs[OUTPUT_OSCILLATOR + i].setVoltage(output, c);
             }
         }
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++)
+            chMeters[i].process(args.sampleTime, sum[i] / 5.f);
         if (lightDivider.process()) {  // update the mixer lights
             for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
                 float b = chMeters[i].getBrightness(-24.f, 0.f);

@@ -41,15 +41,15 @@ struct ChipAY_3_8910 : Module {
         INPUT_COUNT
     };
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, GeneralInstrumentAy_3_8910::OSC_COUNT),
         OUTPUT_COUNT
     };
     enum LightIds { LIGHT_COUNT };
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[GeneralInstrumentAy_3_8910::OSC_COUNT];
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
     /// The General Instrument AY-3-8910 instance to synthesize sound with
-    GeneralInstrumentAy_3_8910 apu;
+    GeneralInstrumentAy_3_8910 apu[POLYPHONY_CHANNELS];
 
     // a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -61,26 +61,41 @@ struct ChipAY_3_8910 : Module {
     ChipAY_3_8910() {
         config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
         cvDivider.setDivision(16);
-        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
+        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
-            auto channel_name = std::string(1, static_cast<char>(65 + i));
-            configParam(PARAM_FREQ  + i, -60.f, 60.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + i,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
-            configParam(PARAM_TONE  + i,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
-            configParam(PARAM_NOISE + i,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
-            apu.set_output(i, &buf[i]);
+            auto channel_name = std::string(1, static_cast<char>(65 + oscillator));
+            configParam(PARAM_FREQ  + oscillator, -60.f, 60.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + oscillator,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
+            configParam(PARAM_TONE  + oscillator,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
+            configParam(PARAM_NOISE + oscillator,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
         }
-        // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        // set the output buffer for each individual voice
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
+            // volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[channel].set_volume(3.f);
+        }
         onSampleRateChange();
+    }
+
+    /// Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each oscillator and polyphony channel
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
     }
 
     /// Return the frequency for the given channel.
     ///
-    /// @param channel the index of the channel to get the frequency of
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 12-bit frequency in a 16-bit container
     ///
-    inline uint16_t getFrequency(int channel) {
+    inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ12BIT_MIN = 2;
         // the maximal value for the frequency register
@@ -88,32 +103,33 @@ struct ChipAY_3_8910 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + channel].getVoltage();
-        pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
-        freq = buf[channel].get_clock_rate() / (CLOCK_DIVISION * freq);
+        freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
         return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
     /// Return the level for the given channel.
     ///
-    /// @param channel the index of the channel to get the level of
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 4-bit level value in an 8-bit container
     ///
-    inline uint8_t getLevel(int channel) {
+    inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume width register
         static constexpr float LEVEL_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float LEVEL_MAX = 15;
         // get the level from the parameter knob
-        auto param = params[PARAM_LEVEL + channel].getValue();
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getVoltage() / 10.f;
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -124,36 +140,38 @@ struct ChipAY_3_8910 : Module {
 
     /// Return the noise period.
     ///
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the period for the noise oscillator
     /// @details
-    /// Returns a frequency based on the knob for channel 3 (index 2)
+    /// Returns a frequency based on the knob for oscillator 3 (index 2)
     ///
-    inline uint8_t getNoise() {
-        // use the frequency control knob from channel index 2
-        static constexpr unsigned channel = 2;
+    inline uint8_t getNoise(unsigned channel) {
+        // use the frequency control knob from oscillator index 2
+        static constexpr unsigned oscillator = 2;
         // the minimal value for the noise frequency register to produce sound
         static constexpr float FREQ_MIN = 0;
         // the maximal value for the noise frequency register
         static constexpr float FREQ_MAX = 31;
         // get the parameter value from the UI knob. the knob represents
         // frequency, so translate to a simple [0, 1] scale.
-        auto param = (0.5f + params[PARAM_FREQ + channel].getValue() / 120.f);
+        auto param = (0.5f + params[PARAM_FREQ + oscillator].getValue() / 120.f);
         // 5V scale for V/OCT input
-        param += inputs[INPUT_VOCT + channel].getVoltage() / 5.f;
+        param += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel) / 5.f;
         // 10V scale for mod input
-        param += inputs[INPUT_FM + channel].getVoltage() / 10.f;
+        param += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 10.f;
         // clamp the parameter within its legal limits
         param = rack::clamp(param, 0.f, 1.f);
         // get the 5-bit noise period clamped within legal limits. invert the
-        // value about the maximal to match directionality of channel frequency
+        // value about the maximal to match directionality of oscillator frequency
         return FREQ_MAX - rack::clamp(FREQ_MAX * param, FREQ_MIN, FREQ_MAX);
     }
 
     /// Return the mixer byte.
     ///
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 8-bit mixer byte from parameters and CV inputs
     ///
-    inline uint8_t getMixer() {
+    inline uint8_t getMixer(unsigned channel) {
         uint8_t mixerByte = 0;
         // iterate over the oscillators to set the mixer tone and noise flags.
         // there is a set of 3 flags for both tone and noise. start with
@@ -164,7 +182,7 @@ struct ChipAY_3_8910 : Module {
         for (unsigned i = 0; i < 2 * GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // clamp the input within [0, 10]. this allows bipolar signals to
             // be interpreted as unipolar signals for the trigger input
-            auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(), 0.f, 10.f);
+            auto cv = math::clamp(inputs[INPUT_TONE + i].getPolyVoltage(channel), 0.f, 10.f);
             mixerTriggers[i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
             bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[i].state;
@@ -176,57 +194,71 @@ struct ChipAY_3_8910 : Module {
 
     /// Return a 10V signed sample from the FME7.
     ///
-    /// @param channel the channel to get the audio sample for
+    /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     ///
-    inline float getAudioOut(int channel) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
+    }
+
+    /// Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(unsigned channel) {
+        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
+            // 2 frequency registers per voice, shift over by 1 instead of
+            // multiplying
+            auto offset = oscillator << 1;
+            auto freq = getFrequency(oscillator, channel);
+            auto lo =  freq & 0b0000000011111111;
+            apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + offset, lo);
+            auto hi = (freq & 0b0000111100000000) >> 8;
+            apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + offset, hi);
+            // volume
+            auto level = getLevel(oscillator, channel);
+            apu[channel].write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + oscillator, level);
+        }
+        // set the 5-bit noise value based on the channel 3 parameter
+        apu[channel].write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise(channel));
+        // set the 6-channel boolean mixer (tone and noise for each channel)
+        apu[channel].write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer(channel));
+        // envelope period (TODO: fix envelope in engine)
+        // apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
+        // apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
+        // envelope shape bits (TODO: fix envelope in engine)
+        // apu[channel].write(
+        //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
+        //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_NONE
+        // );
     }
 
     /// Process a sample.
     void process(const ProcessArgs &args) override {
-        if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-                // 2 frequency registers per voice, shift over by 1 instead of
-                // multiplying
-                auto offset = i << 1;
-                auto freq = getFrequency(i);
-                auto lo =  freq & 0b0000000011111111;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + offset, lo);
-                auto hi = (freq & 0b0000111100000000) >> 8;
-                apu.write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + offset, hi);
-                // volume
-                auto level = getLevel(i);
-                apu.write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + i, level);
+        // determine the number of channels based on the inputs
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        // process the CV inputs to the chip
+        if (cvDivider.process()) {
+            for (unsigned channel = 0; channel < channels; channel++) {
+                processCV(channel);
             }
-            // set the 5-bit noise value based on the channel 3 parameter
-            apu.write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise());
-            // set the 6-channel boolean mixer (tone and noise for each channel)
-            apu.write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer());
-            // envelope period (TODO: fix envelope in engine)
-            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
-            // apu.write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
-            // envelope shape bits (TODO: fix envelope in engine)
-            // apu.write(
-            //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
-            //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_NONE
-            // );
         }
+        // set output polyphony channels
+        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
         // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
-            outputs[OUTPUT_CHANNEL + i].setVoltage(getAudioOut(i));
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        for (unsigned channel = 0; channel < channels; channel++) {
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
+        }
     }
 };
 
@@ -255,7 +287,7 @@ struct ChipAY_3_8910Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, ChipAY_3_8910::INPUT_NOISE    + i));
             addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111), module, ChipAY_3_8910::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111), module, ChipAY_3_8910::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_OSCILLATOR + i));
         }
     }
 };

@@ -140,10 +140,10 @@ struct ChipVRC6 : Module {
     ///
     inline uint8_t getLevel(unsigned oscillator, int channel, float max_level) {
         // get the level from the parameter knob
-        auto param = params[PARAM_LEVEL + channel].getValue();
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the level
-        if (inputs[INPUT_LEVEL + channel].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + channel].getPolyVoltage(channel) / 10.f;
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;

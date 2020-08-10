@@ -96,7 +96,7 @@
     -   AY-3-8910
     -   106
 
-### 1.6.0 (2020-08-08)
+### 1.6.0 (2020-08-10)
 
 -   polyphonic support for:
     -   2A03
@@ -107,3 +107,7 @@
     -   FME7
     -   SN76489
     -   106
+
+### 1.6.0 (2020-08-10)
+
+-   fix to check all input ports for polyphonic cables

@@ -295,7 +295,7 @@
     {
       "id": 76,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.1",
+      "version": "1.6.0",
       "model": "SN76489",
       "params": [
         {

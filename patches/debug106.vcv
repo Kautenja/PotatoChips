@@ -32,14 +32,14 @@
       "params": [],
       "rightModuleId": 136,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
-        "lastMod": 30,
+        "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -100,7 +100,7 @@
     {
       "id": 11,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.1",
+      "version": "1.6.0",
       "model": "106",
       "params": [
         {
@@ -173,11 +173,11 @@
         },
         {
           "id": 17,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 18,
-          "value": 5.0
+          "value": 1.0
         },
         {
           "id": 19,
@@ -1235,6 +1235,22 @@
       "inputModuleId": 11,
       "inputId": 16,
       "color": "#0986ad"
+    },
+    {
+      "id": 840,
+      "outputModuleId": 136,
+      "outputId": 0,
+      "inputModuleId": 11,
+      "inputId": 25,
+      "color": "#0986ad"
+    },
+    {
+      "id": 841,
+      "outputModuleId": 136,
+      "outputId": 0,
+      "inputModuleId": 11,
+      "inputId": 24,
+      "color": "#0c8e15"
     }
   ]
 }

@@ -67,7 +67,7 @@ struct Chip106 : Module {
     };
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHT_CHANNEL, Namco106::OSC_COUNT),
+        ENUMS(LIGHT_CHANNEL, 3 * Namco106::OSC_COUNT),
         LIGHT_COUNT
     };
 
@@ -340,32 +340,33 @@ struct Chip106 : Module {
                 outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
             }
         }
-
         // set the VU meter lights if the light divider is high
         if (lightsDivider.process()) {
             float brightness[Namco106::OSC_COUNT] = {};
+            // accumulate brightness for all the channels
             for (unsigned channel = 0; channel < channels; channel++) {
                 for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
                     brightness[oscillator] = brightness[oscillator] + (oscillator < num_oscillators[channel]);
                 }
             }
+            // set the lights based on the accumulated brightness
             for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
-                lights[light].setSmoothBrightness(brightness[oscillator] / channels, args.sampleTime * lightsDivider.getDivision());
+                const auto light = LIGHT_CHANNEL + 3 * (Namco106::OSC_COUNT - oscillator - 1);
+                // get the brightness level for the oscillator.  Because the
+                // signal is boolean, the root mean square will have no effect.
+                // Instead, the average over the channels is used as brightness
+                auto level = brightness[oscillator] / channels;
+                // set the light colors in BGR order.
+                lights[light + 2].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
+                // if there is more than one channel running (polyphonic), set
+                // red and green to 0 to produce a blue LED color. This is the
+                // standard for LEDs that indicate polyphonic signals in VCV
+                // Rack.
+                if (channels > 1) level *= 0;
+                lights[light + 1].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
+                lights[light + 0].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
             }
-
-            // for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-            //     auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
-            //     lights[light].setSmoothBrightness(oscillator < num_oscillators, args.sampleTime * lightsDivider.getDivision());
-            // }
         }
-
-        // if (lightsDivider.process()) {
-        //     for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-        //         auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
-        //         lights[light].setSmoothBrightness(oscillator < num_oscillators, args.sampleTime * lightsDivider.getDivision());
-        //     }
-        // }
     }
 };
 
@@ -440,7 +441,7 @@ struct Chip106Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, Chip106::INPUT_VOLUME + i  ));
             addParam(createParam<Rogan2PSNES>( Vec(350, 35 + i * 41), module, Chip106::PARAM_VOLUME + i  ));
             addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, Chip106::OUTPUT_OSCILLATOR + i));
-            addChild(createLight<SmallLight<WhiteLight>>(Vec(415, 60 + i * 41), module, Chip106::LIGHT_CHANNEL + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, Chip106::LIGHT_CHANNEL + 3 * i));
         }
     }
 };

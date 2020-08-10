@@ -104,3 +104,4 @@
     -   GBS
     -   AY-3-8910
     -   POKEY
+    -   FME7

@@ -21,7 +21,7 @@
 
 /// A widget that displays / edits a wave-table.
 template<typename Wavetable>
-struct WaveTableEditor : rack::OpaqueWidget {
+struct WaveTableEditor : rack::LightWidget {
  private:
     /// the vector containing the waveform
     Wavetable* waveform;
@@ -74,7 +74,7 @@ struct WaveTableEditor : rack::OpaqueWidget {
         NVGcolor background_ = ColorBackgroud,
         NVGcolor border_ = ColorBorder
     ) :
-        OpaqueWidget(),
+        rack::LightWidget(),
         waveform(waveform_),
         length(length_),
         bit_depth(bit_depth_),

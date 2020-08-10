@@ -66,7 +66,7 @@
       "leftModuleId": 139,
       "rightModuleId": 138,
       "data": {
-        "channels": 16,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -798,14 +798,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 834,
-      "outputModuleId": 137,
-      "outputId": 0,
-      "inputModuleId": 48,
-      "inputId": 13,
-      "color": "#c9b70e"
-    },
-    {
       "id": 835,
       "outputModuleId": 137,
       "outputId": 0,
@@ -844,6 +836,14 @@
       "inputModuleId": 48,
       "inputId": 9,
       "color": "#0c8e15"
+    },
+    {
+      "id": 834,
+      "outputModuleId": 137,
+      "outputId": 0,
+      "inputModuleId": 48,
+      "inputId": 13,
+      "color": "#c9b70e"
     }
   ]
 }

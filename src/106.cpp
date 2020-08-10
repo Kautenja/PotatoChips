@@ -29,11 +29,11 @@
 struct Chip106 : Module {
  private:
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[Namco106::OSC_COUNT];
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][Namco106::OSC_COUNT];
     /// The 106 instance to synthesize sound with
-    Namco106 apu;
+    Namco106 apu[POLYPHONY_CHANNELS];
     /// the number of active oscillators on the chip
-    unsigned num_oscillators = 1;
+    unsigned num_oscillators[POLYPHONY_CHANNELS];
 
     /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -62,7 +62,7 @@ struct Chip106 : Module {
     };
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, Namco106::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, Namco106::OSC_COUNT),
         OUTPUT_COUNT
     };
     /// the indexes of lights on the module
@@ -94,10 +94,15 @@ struct Chip106 : Module {
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
             configParam(PARAM_FREQ + oscillator, -30.f, 30.f, 0.f, "Channel " + std::to_string(oscillator + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_VOLUME + oscillator, 0,   15,  15,   "Channel " + std::to_string(oscillator + 1) + " Volume",     "%",   0,                  100.f / 15.f);
-            apu.set_output(oscillator, &buffers[oscillator]);
         }
-        // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        // set the output buffer for each individual voice
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
+            // volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[channel].set_volume(3.f);
+        }
+        memset(num_oscillators, 1, sizeof num_oscillators);
         // update the sample rate on the engine
         onSampleRateChange();
         // reset the wave-tables to default values
@@ -106,8 +111,12 @@ struct Chip106 : Module {
 
     /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
-            buffers[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator and polyphony channel
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
     }
 
     /// @brief Respond to the user resetting the module with the "Initialize" action.
@@ -167,26 +176,28 @@ struct Chip106 : Module {
 
     /// @brief Return the active oscillators parameter.
     ///
+    /// @param channel the polyphonic channel to return the active oscillators for
     /// @returns the active oscillator count \f$\in [1, 8]\f$
     ///
-    inline uint8_t getActiveOscillators() {
+    inline uint8_t getActiveOscillators(unsigned channel) {
         auto param = params[PARAM_NUM_OSCILLATORS].getValue();
         auto att = params[PARAM_NUM_OSCILLATORS_ATT].getValue();
         // get the CV as 1V per oscillator
-        auto cv = 8.f * inputs[INPUT_NUM_OSCILLATORS].getVoltage() / 10.f;
+        auto cv = 8.f * inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel) / 10.f;
         // oscillators are indexed maths style on the chip, not CS style
         return rack::math::clamp(param + att * cv, 1.f, 8.f);
     }
 
     /// @brief Return the wave-table position parameter.
     ///
+    /// @param channel the polyphonic channel to return the wavetable position for
     /// @returns the floating index of the wave-table position \f$\in [0, 4]\f$
     ///
-    inline float getWavetablePosition() {
+    inline float getWavetablePosition(unsigned channel) {
         auto param = params[PARAM_WAVETABLE].getValue();
         auto att = params[PARAM_WAVETABLE_ATT].getValue();
         // get the CV as 1V per wave-table
-        auto cv = inputs[INPUT_WAVETABLE].getVoltage() / 2.f;
+        auto cv = inputs[INPUT_WAVETABLE].getPolyVoltage(channel) / 2.f;
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
         return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
     }
@@ -194,21 +205,22 @@ struct Chip106 : Module {
     /// @brief Return the frequency parameter for the given oscillator.
     ///
     /// @param oscillator the oscillator to get the frequency parameter for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the frequency parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint32_t getFrequency(unsigned oscillator) {
+    inline uint32_t getFrequency(unsigned oscillator, unsigned channel) {
         // get the frequency of the oscillator from the parameter and CVs
         float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + oscillator].getVoltage();
-        pitch += inputs[INPUT_FM + oscillator].getVoltage() / 5.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
         // ignoring num_oscillators in the calculation allows the standard 103
         // function where additional oscillators reduce the frequency of all
-        freq *= (wave_length * 15.f * 65536.f) / buffers[oscillator].get_clock_rate();
+        freq *= (wave_length * 15.f * 65536.f) / buffers[channel][oscillator].get_clock_rate();
         // clamp within the legal bounds for the frequency value
         freq = rack::clamp(freq, 4.f, 262143.f);
         // OR the waveform length into the high 6 bits of "frequency Hi"
@@ -219,10 +231,11 @@ struct Chip106 : Module {
     /// @brief Return the volume parameter for the given oscillator.
     ///
     /// @param oscillator the oscillator to get the volume parameter for
+    /// @param channel the polyphonic channel to return the volume for
     /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(unsigned oscillator) {
+    inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
@@ -231,7 +244,7 @@ struct Chip106 : Module {
         auto param = params[PARAM_VOLUME + oscillator].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_VOLUME + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_VOLUME + oscillator].getVoltage() / 10.f;
+            auto cv = inputs[INPUT_VOLUME + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -243,14 +256,61 @@ struct Chip106 : Module {
     /// @brief Return a 10V signed sample from the chip.
     ///
     /// @param oscillator the oscillator to get the audio sample for
+    /// @param channel the polyphonic channel to return the audio output for
     ///
-    inline float getAudioOut(unsigned oscillator) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[oscillator].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
+    }
+
+    void processCV(unsigned channel) {
+        // write waveform data to the chip's RAM based on the position in
+        // the wave-table
+        auto position = getWavetablePosition(channel);
+        // calculate the address of the base waveform in the table
+        int wavetable0 = floor(position);
+        // calculate the address of the next waveform in the table
+        int wavetable1 = ceil(position);
+        // calculate floating point offset between the base and next table
+        float interpolate = position - wavetable0;
+        for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
+            // get the first waveform data
+            auto nibbleHi0 = wavetable[wavetable0][2 * i];
+            auto nibbleLo0 = wavetable[wavetable0][2 * i + 1];
+            // get the second waveform data
+            auto nibbleHi1 = wavetable[wavetable1][2 * i];
+            auto nibbleLo1 = wavetable[wavetable1][2 * i + 1];
+            // floating point interpolation
+            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+            // combine the two nibbles into a byte for the RAM
+            apu[channel].write(i, (nibbleHi << 4) | nibbleLo);
+        }
+        // get the number of active oscillators from the panel
+        num_oscillators[channel] = getActiveOscillators(channel);
+        // set the frequency for all oscillators on the chip
+        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+            // extract the low, medium, and high frequency register values
+            auto freq = getFrequency(oscillator, channel);
+            // FREQUENCY LOW
+            uint8_t low = (freq & 0b000000000000000011111111) >> 0;
+            apu[channel].write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * oscillator, low);
+            // FREQUENCY MEDIUM
+            uint8_t med = (freq & 0b000000001111111100000000) >> 8;
+            apu[channel].write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * oscillator, med);
+            // WAVEFORM LENGTH + FREQUENCY HIGH
+            uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
+            apu[channel].write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * oscillator, hig);
+            // WAVE ADDRESS
+            apu[channel].write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * oscillator, 0);
+            // VOLUME (and oscillator selection on oscillator 8, this has
+            // no effect on other oscillators, so check logic is skipped)
+            apu[channel].write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * oscillator, ((num_oscillators[channel] - 1) << 4) | getVolume(oscillator, channel));
+        }
     }
 
     /// @brief Process a sample.
@@ -258,62 +318,54 @@ struct Chip106 : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     void process(const ProcessArgs &args) override {
+        // determine the number of channels based on the inputs
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        // process the CV inputs to the chip
         if (cvDivider.process()) {
-            // write waveform data to the chip's RAM based on the position in
-            // the wave-table
-            auto position = getWavetablePosition();
-            // calculate the address of the base waveform in the table
-            int wavetable0 = floor(position);
-            // calculate the address of the next waveform in the table
-            int wavetable1 = ceil(position);
-            // calculate floating point offset between the base and next table
-            float interpolate = position - wavetable0;
-            for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
-                // get the first waveform data
-                auto nibbleHi0 = wavetable[wavetable0][2 * i];
-                auto nibbleLo0 = wavetable[wavetable0][2 * i + 1];
-                // get the second waveform data
-                auto nibbleHi1 = wavetable[wavetable1][2 * i];
-                auto nibbleLo1 = wavetable[wavetable1][2 * i + 1];
-                // floating point interpolation
-                uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-                uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-                // combine the two nibbles into a byte for the RAM
-                apu.write(i, (nibbleHi << 4) | nibbleLo);
-            }
-            // get the number of active oscillators from the panel
-            num_oscillators = getActiveOscillators();
-            // set the frequency for all oscillators on the chip
-            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                // extract the low, medium, and high frequency register values
-                auto freq = getFrequency(oscillator);
-                // FREQUENCY LOW
-                uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-                apu.write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * oscillator, low);
-                // FREQUENCY MEDIUM
-                uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-                apu.write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * oscillator, med);
-                // WAVEFORM LENGTH + FREQUENCY HIGH
-                uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-                apu.write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * oscillator, hig);
-                // WAVE ADDRESS
-                apu.write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * oscillator, 0);
-                // VOLUME (and oscillator selection on oscillator 8, this has
-                // no effect on other oscillators -> check logic is skipped)
-                apu.write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * oscillator, ((num_oscillators - 1) << 4) | getVolume(oscillator));
+            for (unsigned channel = 0; channel < channels; channel++) {
+                processCV(channel);
             }
         }
-        // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
+        // set output polyphony channels
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
-            outputs[oscillator].setVoltage(getAudioOut(oscillator));
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
+        // process audio samples on the chip engine.
+        for (unsigned channel = 0; channel < channels; channel++) {
+            // end the frame on the engine
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            // get the output from each oscillator and accumulate into the sum
+            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
+            }
+        }
+
         // set the VU meter lights if the light divider is high
         if (lightsDivider.process()) {
+            float brightness[Namco106::OSC_COUNT] = {};
+            for (unsigned channel = 0; channel < channels; channel++) {
+                for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+                    brightness[oscillator] = brightness[oscillator] + (oscillator < num_oscillators[channel]);
+                }
+            }
             for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
                 auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
-                lights[light].setSmoothBrightness(oscillator < num_oscillators, args.sampleTime * lightsDivider.getDivision());
+                lights[light].setSmoothBrightness(brightness[oscillator] / channels, args.sampleTime * lightsDivider.getDivision());
             }
+
+            // for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+            //     auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
+            //     lights[light].setSmoothBrightness(oscillator < num_oscillators, args.sampleTime * lightsDivider.getDivision());
+            // }
         }
+
+        // if (lightsDivider.process()) {
+        //     for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+        //         auto light = LIGHT_CHANNEL + Namco106::OSC_COUNT - oscillator - 1;
+        //         lights[light].setSmoothBrightness(oscillator < num_oscillators, args.sampleTime * lightsDivider.getDivision());
+        //     }
+        // }
     }
 };
 
@@ -387,7 +439,7 @@ struct Chip106Widget : ModuleWidget {
             addParam(createParam<Rogan2PSNES>( Vec(275, 35 + i * 41), module, Chip106::PARAM_FREQ + i    ));
             addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, Chip106::INPUT_VOLUME + i  ));
             addParam(createParam<Rogan2PSNES>( Vec(350, 35 + i * 41), module, Chip106::PARAM_VOLUME + i  ));
-            addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, Chip106::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, Chip106::OUTPUT_OSCILLATOR + i));
             addChild(createLight<SmallLight<WhiteLight>>(Vec(415, 60 + i * 41), module, Chip106::LIGHT_CHANNEL + i));
         }
     }

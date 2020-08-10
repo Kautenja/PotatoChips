@@ -96,6 +96,13 @@ struct ChipSN76489 : Module {
         onSampleRateChange();
     }
 
+    /// Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each oscillator
+        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
+            buf[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
     /// Get the 10-bit frequency parameter for the given pulse oscillator.
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -219,13 +226,6 @@ struct ChipSN76489 : Module {
                 lights[LIGHTS_LEVEL + oscillator].setBrightness(b);
             }
         }
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator
-        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-            buf[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 };
 

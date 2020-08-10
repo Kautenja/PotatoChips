@@ -124,6 +124,60 @@ struct ChipTurboGrafx16 : Module {
         }
     }
 
+    /// Respond to the change of sample rate in the engine.
+    inline void onSampleRateChange() override {
+        // update the buffer for each channel
+        for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
+            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    // /// Respond to the user resetting the module with the "Initialize" action.
+    // void onReset() override {
+    //     for (int i = 0; i < NUM_WAVETABLES; i++)
+    //         memcpy(values[i], default_values, num_samples);
+    // }
+
+    // /// Respond to the user randomizing the module with the "Randomize" action.
+    // void onRandomize() override {
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
+    //         for (int sample = 0; sample < num_samples; sample++) {
+    //             values[table][sample] = random::u32() % bit_depth;
+    //             // interpolate between random samples to smooth slightly
+    //             if (sample > 0) {
+    //                 auto last = values[table][sample - 1];
+    //                 auto next = values[table][sample];
+    //                 values[table][sample] = (last + next) / 2;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // /// Convert the module's state to a JSON object.
+    // json_t* dataToJson() override {
+    //     json_t* rootJ = json_object();
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
+    //         json_t* array = json_array();
+    //         for (int sample = 0; sample < num_samples; sample++)
+    //             json_array_append_new(array, json_integer(values[table][sample]));
+    //         auto key = "values" + std::to_string(table);
+    //         json_object_set_new(rootJ, key.c_str(), array);
+    //     }
+    //
+    //     return rootJ;
+    // }
+
+    // /// Load the module's state from a JSON object.
+    // void dataFromJson(json_t* rootJ) override {
+    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
+    //         auto key = "values" + std::to_string(table);
+    //         json_t* data = json_object_get(rootJ, key.c_str());
+    //         if (data) {
+    //             for (int sample = 0; sample < num_samples; sample++)
+    //                 values[table][sample] = json_integer_value(json_array_get(data, sample));
+    //         }
+    //     }
+    // }
+
     // /// Return the wave-table parameter.
     // ///
     // /// @returns the floating index of the wave-table table in [0, 4]
@@ -252,60 +306,6 @@ struct ChipTurboGrafx16 : Module {
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
             outputs[i].setVoltage(getAudioOut(i));
     }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each channel
-        for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
-            buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-    }
-
-    // /// Respond to the user resetting the module with the "Initialize" action.
-    // void onReset() override {
-    //     for (int i = 0; i < NUM_WAVETABLES; i++)
-    //         memcpy(values[i], default_values, num_samples);
-    // }
-
-    // /// Respond to the user randomizing the module with the "Randomize" action.
-    // void onRandomize() override {
-    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
-    //         for (int sample = 0; sample < num_samples; sample++) {
-    //             values[table][sample] = random::u32() % bit_depth;
-    //             // interpolate between random samples to smooth slightly
-    //             if (sample > 0) {
-    //                 auto last = values[table][sample - 1];
-    //                 auto next = values[table][sample];
-    //                 values[table][sample] = (last + next) / 2;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // /// Convert the module's state to a JSON object.
-    // json_t* dataToJson() override {
-    //     json_t* rootJ = json_object();
-    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
-    //         json_t* array = json_array();
-    //         for (int sample = 0; sample < num_samples; sample++)
-    //             json_array_append_new(array, json_integer(values[table][sample]));
-    //         auto key = "values" + std::to_string(table);
-    //         json_object_set_new(rootJ, key.c_str(), array);
-    //     }
-    //
-    //     return rootJ;
-    // }
-
-    // /// Load the module's state from a JSON object.
-    // void dataFromJson(json_t* rootJ) override {
-    //     for (int table = 0; table < NUM_WAVETABLES; table++) {
-    //         auto key = "values" + std::to_string(table);
-    //         json_t* data = json_object_get(rootJ, key.c_str());
-    //         if (data) {
-    //             for (int sample = 0; sample < num_samples; sample++)
-    //                 values[table][sample] = json_integer_value(json_array_get(data, sample));
-    //         }
-    //     }
-    // }
 };
 
 // ---------------------------------------------------------------------------

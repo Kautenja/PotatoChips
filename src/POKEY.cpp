@@ -27,12 +27,12 @@
 struct ChipPOKEY : Module {
  private:
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[AtariPOKEY::OSC_COUNT];
+    BLIPBuffer buffers[POLYPHONY_CHANNELS][AtariPOKEY::OSC_COUNT];
     /// The POKEY instance to synthesize sound with
-    AtariPOKEY apu;
+    AtariPOKEY apu[POLYPHONY_CHANNELS];
 
     /// triggers for handling inputs to the control ports
-    dsp::BooleanTrigger controlTriggers[8];
+    dsp::BooleanTrigger controlTriggers[POLYPHONY_CHANNELS][8];
 
     /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -62,7 +62,7 @@ struct ChipPOKEY : Module {
     };
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_CHANNEL, AtariPOKEY::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, AtariPOKEY::OSC_COUNT),
         OUTPUT_COUNT
     };
     /// the indexes of lights on the module
@@ -91,26 +91,32 @@ struct ChipPOKEY : Module {
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
-        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
-            apu.set_output(oscillator, &buffers[oscillator]);
-        // volume of 3 produces a roughly 5Vpp signal from all voices
-        apu.set_volume(3.f);
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
+                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
+            // volume of 3 produces a roughly 5Vpp signal from all voices
+            apu[channel].set_volume(3.f);
+        }
         onSampleRateChange();
     }
 
     /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() override {
-        // update the sample rate for each oscillator
-        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
-            buffers[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        // update the buffer for each oscillator and polyphony channel
+        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+            for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
+                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            }
+        }
     }
 
     /// @brief Return the frequency for the given oscillator.
     ///
     /// @param oscillator the oscillator to return the frequency for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 8-bit frequency value from parameters and CV inputs
     ///
-    inline uint8_t getFrequency(unsigned oscillator) {
+    inline uint8_t getFrequency(unsigned oscillator, unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ8BIT_MIN = 2;
         // the maximal value for the frequency register
@@ -119,22 +125,23 @@ struct ChipPOKEY : Module {
         static constexpr auto CLOCK_DIVISION = 56;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
-        pitch += inputs[INPUT_VOCT + oscillator].getVoltage();
-        pitch += inputs[INPUT_FM + oscillator].getVoltage() / 5.f;
+        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // calculate the frequency based on the clock division
-        freq = (buffers[oscillator].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
+        freq = (buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
         return rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
     }
 
     /// @brief Return the noise for the given oscillator.
     ///
     /// @param oscillator the oscillator to return the noise for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 3-bit noise value from parameters and CV inputs
     ///
-    inline uint8_t getNoise(unsigned oscillator) {
+    inline uint8_t getNoise(unsigned oscillator, unsigned channel) {
         // the minimal value for the noise register
         static constexpr float NOISE_MIN = 0;
         // the maximal value for the noise register
@@ -143,7 +150,7 @@ struct ChipPOKEY : Module {
         auto noiseParam = params[PARAM_NOISE + oscillator].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_NOISE + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_NOISE + oscillator].getVoltage() / 10.f;
+            auto cv = inputs[INPUT_NOISE + oscillator].getPolyVoltage(channel) / 10.f;
             cv = 1.f - rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             noiseParam *= 2 * cv;
@@ -154,9 +161,10 @@ struct ChipPOKEY : Module {
     /// @brief Return the level for the given oscillator.
     ///
     /// @param oscillator the oscillator to return the level for
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 4-bit level value from parameters and CV inputs
     ///
-    inline uint8_t getLevel(unsigned oscillator) {
+    inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume register
         static constexpr float ATT_MIN = 0;
         // the maximal value for the volume register
@@ -165,7 +173,7 @@ struct ChipPOKEY : Module {
         auto levelParam = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the level
         if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getVoltage();
+            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel);
             cv = rack::clamp(cv / 10.f, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             levelParam *= 2 * cv;
@@ -175,16 +183,17 @@ struct ChipPOKEY : Module {
 
     /// @brief Return the control byte.
     ///
+    /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 8-bit control byte from parameters and CV inputs
     ///
-    inline uint8_t getControl() {
+    inline uint8_t getControl(unsigned channel) {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < 8; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
-            auto cv = math::clamp(inputs[INPUT_CONTROL + bit].getVoltage(), 0.f, 10.f);
-            controlTriggers[bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+            auto cv = math::clamp(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 10.f);
+            controlTriggers[channel][bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
-                !controlTriggers[bit].state;
+                !controlTriggers[channel][bit].state;
             // the position for the current button's index
             controlByte |= state << bit;
         }
@@ -194,14 +203,15 @@ struct ChipPOKEY : Module {
     /// @brief Return a 10V signed sample from the APU.
     ///
     /// @param oscillator the oscillator to get the audio sample for
+    /// @param channel the polyphonic channel to return the frequency for
     ///
-    inline float getAudioOut(unsigned oscillator) {
+    inline float getAudioOut(unsigned oscillator, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[oscillator].read_sample() / divisor;
+        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
     }
 
     /// @brief Process a sample.
@@ -209,30 +219,49 @@ struct ChipPOKEY : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     void process(const ProcessArgs &args) override {
-        if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
-                // there are 2 registers per oscillator, multiply first
-                // oscillator by 2 to produce an offset between registers
-                // based on oscillator index. the 3 noise bit occupy the MSB
-                // of the control register
-                apu.write(AtariPOKEY::AUDF1 + AtariPOKEY::REGS_PER_VOICE * oscillator, getFrequency(oscillator));
-                apu.write(AtariPOKEY::AUDC1 + AtariPOKEY::REGS_PER_VOICE * oscillator, (getNoise(oscillator) << 5) | getLevel(oscillator));
+        // determine the number of channels based on the inputs
+        unsigned channels = 1;
+        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
+            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        // process the CV inputs to the chip
+        if (cvDivider.process()) {
+            for (unsigned channel = 0; channel < channels; channel++) {
+                for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
+                    // there are 2 registers per oscillator, multiply first
+                    // oscillator by 2 to produce an offset between registers
+                    // based on oscillator index. the 3 noise bit occupy the MSB
+                    // of the control register
+                    apu[channel].write(AtariPOKEY::AUDF1 + AtariPOKEY::REGS_PER_VOICE * oscillator, getFrequency(oscillator, channel));
+                    apu[channel].write(AtariPOKEY::AUDC1 + AtariPOKEY::REGS_PER_VOICE * oscillator, (getNoise(oscillator, channel) << 5) | getLevel(oscillator, channel));
+                }
+                // write the control byte to the chip
+                apu[channel].write(AtariPOKEY::AUDCTL, getControl(channel));
             }
-            // write the control byte to the chip
-            apu.write(AtariPOKEY::AUDCTL, getControl());
         }
-        // process audio samples on the chip engine
-        apu.end_frame(CLOCK_RATE / args.sampleRate);
-        // set outputs
-        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
-            auto output = getAudioOut(oscillator);
-            chMeters[oscillator].process(args.sampleTime, output / 5.f);
-            outputs[OUTPUT_CHANNEL + oscillator].setVoltage(output);
-        }
-        if (lightDivider.process()) {  // update the mixer lights
+        // set output polyphony channels
+        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
+            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
+        // process audio samples on the chip engine. keep a sum of the output
+        // of each channel for the VU meters
+        float sum[AtariPOKEY::OSC_COUNT] = {0, 0, 0, 0};
+        for (unsigned channel = 0; channel < channels; channel++) {
+            // end the frame on the engine
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            // get the output from each oscillator and accumulate into the sum
             for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
-                float b = chMeters[oscillator].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_LEVEL + oscillator].setBrightness(b);
+                auto output = getAudioOut(oscillator, channel);
+                sum[oscillator] += output;
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(output, channel);
+            }
+        }
+        // process the VU meter for each oscillator based on the summed outputs
+        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
+            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
+        // update the VU meter lights
+        if (lightDivider.process()) {
+            for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
+                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
+                lights[LIGHTS_LEVEL + oscillator].setBrightness(brightness);
             }
         }
     }
@@ -270,7 +299,7 @@ struct ChipPOKEYWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(    Vec(116, 73 + i * VERT_SEP), module, ChipPOKEY::INPUT_NOISE + i));
             addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, ChipPOKEY::PARAM_LEVEL + i, ChipPOKEY::LIGHTS_LEVEL + i));
             addInput(createInput<PJ301MPort>(    Vec(172, 28 + i * VERT_SEP), module, ChipPOKEY::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_CHANNEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_OSCILLATOR + i));
         }
         // global control
         for (int i = 0; i < 8; i++) {

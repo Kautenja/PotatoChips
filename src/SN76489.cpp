@@ -183,15 +183,17 @@ struct ChipSN76489 : Module {
     ///
     void process(const ProcessArgs &args) override {
         if (cvDivider.process()) {  // process the CV inputs to the chip
-            auto lfsrV = math::clamp(inputs[INPUT_LFSR].getVoltage(), 0.f, 10.f);
-            lfsr.process(rescale(lfsrV, 0.f, 2.f, 0.f, 1.f));
+            lfsr.process(rescale(
+                math::clamp(inputs[INPUT_LFSR].getVoltage(), 0.f, 10.f),
+                0.f, 2.f, 0.f, 1.f
+            ));
             // process the data on the chip
             for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT - 1; i++) {
                 // 10-bit frequency
                 auto freq = getFrequency(i);
                 uint8_t lo = 0b00001111 & freq;
                 uint8_t hi = 0b00111111 & (freq >> 4);
-                const auto offset = (2 * i) << 4;
+                auto offset = (2 * i) << 4;
                 apu.write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + offset) | lo);
                 apu.write(hi);
                 // 4-bit attenuation
@@ -199,7 +201,9 @@ struct ChipSN76489 : Module {
             }
             // 2-bit noise period
             auto period = getNoisePeriod();
+            // determine the state of the LFSR switch
             bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr.state;
+            // update noise registers if a variable has changed
             if (period != noise_period or update_noise_control != state) {
                 apu.write(
                     TexasInstrumentsSN76489::NOISE_CONTROL |
@@ -209,7 +213,7 @@ struct ChipSN76489 : Module {
                 noise_period = period;
                 update_noise_control = state;
             }
-            // 4-bit attenuation
+            // set the 4-bit attenuation value
             apu.write(TexasInstrumentsSN76489::NOISE_ATTENUATION | getVolume(TexasInstrumentsSN76489::NOISE));
         }
         // process audio samples on the chip engine

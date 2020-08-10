@@ -32,7 +32,7 @@ struct ChipSN76489 : Module {
     uint8_t noise_period = 0;
 
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buf[TexasInstrumentsSN76489::OSC_COUNT];
+    BLIPBuffer buffers[TexasInstrumentsSN76489::OSC_COUNT];
     /// The SN76489 instance to synthesize sound with
     TexasInstrumentsSN76489 apu;
 
@@ -90,7 +90,7 @@ struct ChipSN76489 : Module {
         lightDivider.setDivision(512);
         // set the output buffer for each individual voice
         for (int i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++)
-            apu.set_output(i, &buf[i]);
+            apu.set_output(i, &buffers[i]);
         // volume of 3 produces a roughly 5Vpp signal from all voices
         apu.set_volume(3.f);
         onSampleRateChange();
@@ -100,7 +100,7 @@ struct ChipSN76489 : Module {
     inline void onSampleRateChange() override {
         // update the buffer for each oscillator
         for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-            buf[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            buffers[oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// Get the 10-bit frequency parameter for the given pulse oscillator.
@@ -123,7 +123,7 @@ struct ChipSN76489 : Module {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buf[oscillator].get_clock_rate() / (CLOCK_DIVISION * freq));
+        freq = (buffers[oscillator].get_clock_rate() / (CLOCK_DIVISION * freq));
         return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
@@ -174,7 +174,7 @@ struct ChipSN76489 : Module {
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[oscillator].read_sample() / divisor;
+        return Vpp * buffers[oscillator].read_sample() / divisor;
     }
 
     /// @brief Process a sample.

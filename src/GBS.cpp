@@ -318,10 +318,7 @@ struct ChipGBS : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(unsigned channel) {
-        lfsr[channel].process(rescale(
-            math::clamp(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 10.f),
-            0.f, 2.f, 0.f, 1.f
-        ));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
         // set the global volume

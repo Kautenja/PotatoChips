@@ -190,8 +190,7 @@ struct ChipPOKEY : Module {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < 8; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
-            auto cv = math::clamp(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 10.f);
-            controlTriggers[channel][bit].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+            controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
             bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
                 !controlTriggers[channel][bit].state;
             // the position for the current button's index

@@ -197,7 +197,7 @@ struct Chip2413 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for 2413.
 struct Chip2413Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

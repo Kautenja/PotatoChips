@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A General Instrument AY-3-8910 Chip module.
+/// A General Instrument AY-3-8910 chip emulator module.
 struct ChipAY_3_8910 : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -275,7 +275,7 @@ struct ChipAY_3_8910 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for AY-3-8910.
 struct ChipAY_3_8910Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

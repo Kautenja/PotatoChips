@@ -192,7 +192,7 @@ struct ChipFME7 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for FME7.
 struct ChipFME7Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Konami VRC6 Chip module.
+/// A Konami VRC6 chip emulator module.
 struct ChipVRC6 : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -240,7 +240,7 @@ struct ChipVRC6 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for VRC6.
 struct ChipVRC6Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

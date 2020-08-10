@@ -30,7 +30,7 @@ const int8_t default_values[32] = {
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Konami SCC Chip module.
+/// A Konami SCC chip emulator module.
 struct ChipSCC : Module {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -295,7 +295,7 @@ struct ChipSCC : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for SCC.
 struct ChipSCCWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

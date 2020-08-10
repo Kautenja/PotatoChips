@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Ricoh 2A03 Chip module.
+/// A Ricoh 2A03 chip emulator module.
 struct Chip2A03 : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -309,7 +309,7 @@ struct Chip2A03 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for 2A03.
 struct Chip2A03Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

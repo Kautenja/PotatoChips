@@ -25,7 +25,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Nintendo GBS Chip module.
+/// A Nintendo GBS chip emulator module.
 struct ChipGBS : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -455,7 +455,7 @@ struct ChipGBS : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for GBS.
 struct ChipGBSWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

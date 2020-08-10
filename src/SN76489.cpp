@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Texas Instruments SN76489 Chip module.
+/// A Texas Instruments SN76489 chip emulator module.
 struct ChipSN76489 : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -237,7 +237,7 @@ struct ChipSN76489 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for SN76489.
 struct ChipSN76489Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

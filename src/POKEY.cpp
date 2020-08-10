@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Atari POKEY Chip module.
+/// A Atari POKEY chip emulator module.
 struct ChipPOKEY : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -271,7 +271,7 @@ struct ChipPOKEY : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for POKEY.
 struct ChipPOKEYWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

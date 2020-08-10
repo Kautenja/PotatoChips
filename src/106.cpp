@@ -25,7 +25,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Namco 106 Chip module.
+/// A Namco 106 chip emulator module.
 struct Chip106 : Module {
  private:
     /// The BLIP buffer to render audio samples from
@@ -321,7 +321,7 @@ struct Chip106 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for 106.
 struct Chip106Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

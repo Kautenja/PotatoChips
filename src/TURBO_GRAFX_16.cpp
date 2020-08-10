@@ -31,7 +31,7 @@ const uint8_t default_values[32] = {
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A NEC Turbo-Grafx-16 Chip module.
+/// A NEC Turbo-Grafx-16 chip emulator module.
 struct ChipTurboGrafx16 : Module {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -312,7 +312,7 @@ struct ChipTurboGrafx16 : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The widget structure that lays out the panel of the module and the UI menus.
+/// The panel widget for TurboGrafx16.
 struct ChipTurboGrafx16Widget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///

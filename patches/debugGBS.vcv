@@ -50,9 +50,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 55,
+      "leftModuleId": 48,
+      "rightModuleId": 53,
       "pos": [
-        71,
+        51,
         0
       ]
     },
@@ -65,7 +66,7 @@
       "leftModuleId": 139,
       "rightModuleId": 138,
       "data": {
-        "channels": 4,
+        "channels": 16,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -186,7 +187,7 @@
         }
       ],
       "leftModuleId": 137,
-      "rightModuleId": 52,
+      "rightModuleId": 2,
       "data": {
         "wavetable0": [
           8,
@@ -520,10 +521,10 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
-      "leftModuleId": 48,
-      "rightModuleId": 53,
+      "leftModuleId": 53,
+      "rightModuleId": 54,
       "pos": [
-        51,
+        66,
         0
       ]
     },
@@ -533,10 +534,10 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
-      "leftModuleId": 52,
-      "rightModuleId": 54,
+      "leftModuleId": 2,
+      "rightModuleId": 52,
       "pos": [
-        56,
+        61,
         0
       ]
     },
@@ -546,10 +547,10 @@
       "version": "1.0.0",
       "model": "CountingHertz",
       "params": [],
-      "leftModuleId": 53,
+      "leftModuleId": 52,
       "rightModuleId": 55,
       "pos": [
-        61,
+        71,
         0
       ]
     },
@@ -560,9 +561,8 @@
       "model": "CountingHertz",
       "params": [],
       "leftModuleId": 54,
-      "rightModuleId": 2,
       "pos": [
-        66,
+        76,
         0
       ]
     },
@@ -574,7 +574,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.782000005
+          "value": 1.0
         },
         {
           "id": 1,

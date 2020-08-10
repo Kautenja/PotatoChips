@@ -47,12 +47,12 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "leftModuleId": 55,
       "pos": [
-        62,
+        71,
         0
       ]
     },
@@ -62,7 +62,8 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 137,
+      "leftModuleId": 139,
+      "rightModuleId": 138,
       "data": {
         "channels": 4,
         "polyMode": 0,
@@ -70,13 +71,13 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
       "pos": [
-        0,
+        1,
         0
       ]
     },
@@ -132,7 +133,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.1",
+      "version": "1.6.0",
       "model": "GBS",
       "params": [
         {
@@ -161,7 +162,7 @@
         },
         {
           "id": 6,
-          "value": 3.78499985
+          "value": 0.0
         },
         {
           "id": 7,
@@ -359,7 +360,7 @@
         ]
       },
       "pos": [
-        16,
+        25,
         0
       ]
     },
@@ -522,7 +523,7 @@
       "leftModuleId": 48,
       "rightModuleId": 53,
       "pos": [
-        42,
+        51,
         0
       ]
     },
@@ -535,7 +536,7 @@
       "leftModuleId": 52,
       "rightModuleId": 54,
       "pos": [
-        47,
+        56,
         0
       ]
     },
@@ -548,7 +549,7 @@
       "leftModuleId": 53,
       "rightModuleId": 55,
       "pos": [
-        52,
+        61,
         0
       ]
     },
@@ -561,7 +562,7 @@
       "leftModuleId": 54,
       "rightModuleId": 2,
       "pos": [
-        57,
+        66,
         0
       ]
     },
@@ -588,10 +589,10 @@
           "value": 0.5
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 138,
       "rightModuleId": 48,
       "pos": [
-        8,
+        17,
         0
       ]
     },
@@ -607,20 +608,39 @@
         },
         {
           "id": 1,
-          "value": 0.5
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.5
         },
         {
           "id": 3,
-          "value": 0.5
+          "value": 1.0
         }
       ],
+      "leftModuleId": 5,
+      "rightModuleId": 137,
       "pos": [
-        28,
-        2
+        9,
+        0
+      ]
+    },
+    {
+      "id": 139,
+      "plugin": "ModularFungi",
+      "version": "1.1.2",
+      "model": "LightsOff",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.800000012
+        }
+      ],
+      "rightModuleId": 5,
+      "pos": [
+        0,
+        0
       ]
     }
   ],

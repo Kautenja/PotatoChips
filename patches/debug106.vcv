@@ -15,8 +15,8 @@
           "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 44100,
-          "blockSize": 512
+          "sampleRate": 96000,
+          "blockSize": 1024
         }
       },
       "pos": [
@@ -30,6 +30,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
+      "leftModuleId": 137,
       "rightModuleId": 136,
       "data": {
         "channels": 4,
@@ -208,12 +209,12 @@
           6,
           5,
           3,
-          2,
-          1,
-          1,
-          0,
-          0,
-          0,
+          6,
+          6,
+          6,
+          6,
+          9,
+          9,
           1,
           1,
           2,
@@ -879,6 +880,23 @@
       "rightModuleId": 11,
       "pos": [
         9,
+        0
+      ]
+    },
+    {
+      "id": 137,
+      "plugin": "ModularFungi",
+      "version": "1.1.2",
+      "model": "LightsOff",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.800000012
+        }
+      ],
+      "rightModuleId": 5,
+      "pos": [
+        0,
         0
       ]
     }

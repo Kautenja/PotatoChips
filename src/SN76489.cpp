@@ -26,15 +26,15 @@
 /// A Texas Instruments SN76489 Chip module.
 struct ChipSN76489 : Module {
  private:
-    /// whether to update the noise control (based on LFSR update)
-    bool update_noise_control = true;
-    /// the current noise period
-    uint8_t noise_period = 0;
-
     /// The BLIP buffer to render audio samples from
     BLIPBuffer buffers[TexasInstrumentsSN76489::OSC_COUNT];
     /// The SN76489 instance to synthesize sound with
     TexasInstrumentsSN76489 apu;
+
+    /// whether to update the noise control (based on LFSR update)
+    bool update_noise_control = true;
+    /// the current noise period
+    uint8_t noise_period = 0;
 
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr;

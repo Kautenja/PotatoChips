@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        30,
+        38,
         0
       ]
     },
@@ -54,7 +54,7 @@
       "leftModuleId": 76,
       "rightModuleId": 1,
       "pos": [
-        20,
+        28,
         0
       ]
     },
@@ -64,9 +64,9 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 76,
+      "rightModuleId": 135,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -288,14 +288,14 @@
       "params": [],
       "leftModuleId": 1,
       "pos": [
-        40,
+        48,
         0
       ]
     },
     {
       "id": 76,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.4.1",
+      "version": "1.5.1",
       "model": "SN76489",
       "params": [
         {
@@ -335,8 +335,38 @@
           "value": 0.5
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 135,
       "rightModuleId": 2,
+      "pos": [
+        16,
+        0
+      ]
+    },
+    {
+      "id": 135,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.5
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 76,
       "pos": [
         8,
         0
@@ -479,6 +509,54 @@
       "inputModuleId": 76,
       "inputId": 7,
       "color": "#c9b70e"
+    },
+    {
+      "id": 827,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 76,
+      "inputId": 8,
+      "color": "#c91847"
+    },
+    {
+      "id": 828,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 76,
+      "inputId": 9,
+      "color": "#0986ad"
+    },
+    {
+      "id": 829,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 76,
+      "inputId": 10,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 830,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 76,
+      "inputId": 11,
+      "color": "#c91847"
+    },
+    {
+      "id": 831,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 135,
+      "inputId": 4,
+      "color": "#0986ad"
+    },
+    {
+      "id": 832,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 76,
+      "inputId": 4,
+      "color": "#c91847"
     }
   ]
 }

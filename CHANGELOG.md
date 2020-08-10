@@ -103,3 +103,4 @@
     -   VRC6
     -   GBS
     -   AY-3-8910
+    -   POKEY

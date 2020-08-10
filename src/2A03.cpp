@@ -223,7 +223,7 @@ struct Chip2A03 : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(unsigned channel) {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (2)
         // ---------------------------------------------------------------

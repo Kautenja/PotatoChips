@@ -47,7 +47,7 @@ struct Chip2A03 : Module {
         ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
         ENUMS(PARAM_VOLUME, 3),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -56,22 +56,22 @@ struct Chip2A03 : Module {
         ENUMS(INPUT_VOLUME, 3),
         ENUMS(INPUT_PW, 2),
         INPUT_LFSR,
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, Ricoh2A03::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_VOLUME, 3),
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// @brief Initialize a new 2A03 Chip module.
     Chip2A03() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,   "Triangle Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -268,8 +268,8 @@ struct Chip2A03 : Module {
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {

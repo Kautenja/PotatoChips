@@ -37,7 +37,7 @@ struct ChipSCC : Module {
         ENUMS(PARAM_FREQ, KonamiSCC::OSC_COUNT),
         ENUMS(PARAM_VOLUME, KonamiSCC::OSC_COUNT),
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -45,16 +45,16 @@ struct ChipSCC : Module {
         ENUMS(INPUT_FM, KonamiSCC::OSC_COUNT),
         ENUMS(INPUT_VOLUME, KonamiSCC::OSC_COUNT),
         INPUT_WAVETABLE,
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, KonamiSCC::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// The BLIP buffer to render audio samples from
@@ -95,7 +95,7 @@ struct ChipSCC : Module {
 
     /// Initialize a new Konami SCC Chip module.
     ChipSCC() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
         cvDivider.setDivision(16);

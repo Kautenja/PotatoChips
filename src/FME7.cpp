@@ -39,26 +39,26 @@ struct ChipFME7 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, SunSoftFME7::OSC_COUNT),
         ENUMS(PARAM_LEVEL, SunSoftFME7::OSC_COUNT),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, SunSoftFME7::OSC_COUNT),
         ENUMS(INPUT_FM, SunSoftFME7::OSC_COUNT),
         ENUMS(INPUT_LEVEL, SunSoftFME7::OSC_COUNT),
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, SunSoftFME7::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds { NUM_LIGHTS };
 
     /// @brief Initialize a new FME7 Chip module.
     ChipFME7() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
@@ -159,8 +159,8 @@ struct ChipFME7 : Module {
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         if (cvDivider.process()) {  // process the CV inputs to the chip
             for (unsigned channel = 0; channel < channels; channel++) {
                 for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {

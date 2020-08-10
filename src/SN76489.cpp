@@ -54,7 +54,7 @@ struct ChipSN76489 : Module {
         PARAM_NOISE_PERIOD,
         PARAM_LFSR,
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -63,22 +63,22 @@ struct ChipSN76489 : Module {
         INPUT_LFSR,
         ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT - 1),
         ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, TexasInstrumentsSN76489::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// Initialize a new SN76489 Chip module.
     ChipSN76489() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
                 configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -239,8 +239,8 @@ struct ChipSN76489 : Module {
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {

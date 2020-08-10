@@ -51,7 +51,7 @@ struct ChipGBS : Module {
         PARAM_WAVETABLE,
         PARAM_LFSR,
         ENUMS(PARAM_LEVEL, NintendoGBS::OSC_COUNT),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -62,17 +62,17 @@ struct ChipGBS : Module {
         INPUT_WAVETABLE,
         INPUT_LFSR,
         ENUMS(INPUT_LEVEL, NintendoGBS::OSC_COUNT),
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, NintendoGBS::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, NintendoGBS::OSC_COUNT),
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// the bit-depth of the wave-table
@@ -87,7 +87,7 @@ struct ChipGBS : Module {
 
     /// @brief Initialize a new GBS Chip module.
     ChipGBS() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Wave Frequency",    " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -413,8 +413,8 @@ struct ChipGBS : Module {
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {

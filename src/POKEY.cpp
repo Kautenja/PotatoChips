@@ -49,7 +49,7 @@ struct ChipPOKEY : Module {
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_LEVEL, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_CONTROL, 8),  // 1 button per bit (control flag)
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -58,22 +58,22 @@ struct ChipPOKEY : Module {
         ENUMS(INPUT_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_LEVEL, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_CONTROL, 8),  // 1 input per bit (control flag)
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, AtariPOKEY::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, AtariPOKEY::OSC_COUNT),
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// @brief Initialize a new POKEY Chip module.
     ChipPOKEY() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
             configParam(PARAM_FREQ  + i, -30.f, 30.f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_NOISE + i,   0,    7,   7,   "Channel " + std::to_string(i + 1) + " Noise"                                             );
@@ -219,9 +219,10 @@ struct ChipPOKEY : Module {
     ///
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
+        // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {

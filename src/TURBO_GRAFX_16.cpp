@@ -38,7 +38,7 @@ struct ChipTurboGrafx16 : Module {
         ENUMS(PARAM_FREQ, NECTurboGrafx16::OSC_COUNT),
         ENUMS(PARAM_VOLUME, NECTurboGrafx16::OSC_COUNT),
         PARAM_WAVETABLE, PARAM_WAVETABLE_ATT,
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -46,17 +46,17 @@ struct ChipTurboGrafx16 : Module {
         ENUMS(INPUT_FM, NECTurboGrafx16::OSC_COUNT),
         ENUMS(INPUT_VOLUME, NECTurboGrafx16::OSC_COUNT),
         INPUT_WAVETABLE,
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, NECTurboGrafx16::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHT_CHANNEL, NECTurboGrafx16::OSC_COUNT),
-        LIGHT_COUNT
+        NUM_LIGHTS
     };
 
     /// The BLIP buffer to render audio samples from
@@ -95,7 +95,7 @@ struct ChipTurboGrafx16 : Module {
 
     /// Initialize a new NEC Turbo-Grafx-16 Chip module.
     ChipTurboGrafx16() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_WAVETABLE, 1, 5, 1, "Wavetable Morph");
         configParam(PARAM_WAVETABLE_ATT, -1, 1, 0, "Wavetable Morph Attenuverter");
         cvDivider.setDivision(16);

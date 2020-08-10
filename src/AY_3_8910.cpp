@@ -44,7 +44,7 @@ struct ChipAY_3_8910 : Module {
         ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
@@ -53,19 +53,19 @@ struct ChipAY_3_8910 : Module {
         ENUMS(INPUT_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds { NUM_LIGHTS };
 
     /// @brief Initialize a new FME7 Chip module.
     ChipAY_3_8910() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         cvDivider.setDivision(16);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
@@ -251,8 +251,8 @@ struct ChipAY_3_8910 : Module {
     void process(const ProcessArgs &args) override {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
-        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
-            channels = std::max(inputs[INPUT_VOCT + oscillator].getChannels(), (int)channels);
+        for (unsigned input = 0; input < NUM_INPUTS; input++)
+            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {

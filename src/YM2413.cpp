@@ -29,22 +29,22 @@ struct Chip2413 : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ, YamahaYM2413::channel_count),
         ENUMS(PARAM_LEVEL, YamahaYM2413::channel_count),
-        PARAM_COUNT
+        NUM_PARAMS
     };
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, YamahaYM2413::channel_count),
         ENUMS(INPUT_FM, YamahaYM2413::channel_count),
         ENUMS(INPUT_GATE, YamahaYM2413::channel_count),
-        INPUT_COUNT
+        NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_CHANNEL, YamahaYM2413::channel_count),
-        OUTPUT_COUNT
+        NUM_OUTPUTS
     };
     /// the indexes of lights on the module
-    enum LightIds { LIGHT_COUNT };
+    enum LightIds { NUM_LIGHTS };
 
     /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -54,7 +54,7 @@ struct Chip2413 : Module {
 
     /// Initialize a new YM2413 Chip module.
     Chip2413() {
-        config(PARAM_COUNT, INPUT_COUNT, OUTPUT_COUNT, LIGHT_COUNT);
+        config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // configParam(PARAM_FREQ + 0, -56.f, 56.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // configParam(PARAM_FREQ + 1, -56.f, 56.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         // configParam(PARAM_FREQ + 2, -56.f, 56.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);

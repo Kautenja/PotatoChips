@@ -274,9 +274,7 @@ struct ChipGBS : Module {
     /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(unsigned oscillator, unsigned channel, float max_) {
-        // the minimal value for the volume width register
-        static constexpr float VOLUME_MIN = 0;
+    inline uint8_t getVolume(unsigned oscillator, unsigned channel, uint8_t max_) {
         // get the volume from the parameter knob
         auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
@@ -287,7 +285,7 @@ struct ChipGBS : Module {
             param *= 2 * cv;
         }
         // get the 8-bit volume clamped within legal limits
-        uint8_t volume = rack::clamp(max_ * param, VOLUME_MIN, max_);
+        uint8_t volume = rack::clamp(max_ * param, 0.f, static_cast<float>(max_));
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%

@@ -159,7 +159,7 @@ struct ChipVRC6 : Module {
     /// @param max_level the maximal level for the input oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    inline uint8_t getLevel(unsigned oscillator, unsigned channel, float max_level) {
+    inline uint8_t getLevel(unsigned oscillator, unsigned channel, uint8_t max_level) {
         // get the level from the parameter knob
         auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the level
@@ -170,7 +170,7 @@ struct ChipVRC6 : Module {
             param *= 2 * cv;
         }
         // get the 8-bit level clamped within legal limits
-        return rack::clamp(max_level * param, 0.f, max_level);
+        return rack::clamp(max_level * param, 0.f, static_cast<float>(max_level));
     }
 
     /// @brief Return a 10V signed sample from the APU.

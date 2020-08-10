@@ -188,7 +188,7 @@ struct ChipSCC : Module {
     /// @param channel the index of the channel to get the frequency of
     /// @returns the 12-bit frequency in a 16-bit container
     ///
-    inline uint16_t getFrequency(int channel) {
+    inline uint16_t getFrequency(unsigned channel) {
         // TODO update min max for Freq and Level
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ12BIT_MIN = 4;
@@ -214,7 +214,7 @@ struct ChipSCC : Module {
     /// @returns the volume parameter for the given channel. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(uint8_t channel) {
+    inline uint8_t getVolume(unsigned channel) {
         // the minimal value for the volume width register
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
@@ -236,7 +236,7 @@ struct ChipSCC : Module {
     ///
     /// @param channel the channel to get the audio sample for
     ///
-    inline float getAudioOut(uint8_t channel) {
+    inline float getAudioOut(unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume

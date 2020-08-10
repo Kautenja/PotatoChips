@@ -110,7 +110,7 @@ struct ChipPOKEY : Module {
     /// @param oscillator the oscillator to return the frequency for
     /// @returns the 8-bit frequency value from parameters and CV inputs
     ///
-    inline uint8_t getFrequency(int oscillator) {
+    inline uint8_t getFrequency(unsigned oscillator) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ8BIT_MIN = 2;
         // the maximal value for the frequency register
@@ -134,7 +134,7 @@ struct ChipPOKEY : Module {
     /// @param oscillator the oscillator to return the noise for
     /// @returns the 3-bit noise value from parameters and CV inputs
     ///
-    inline uint8_t getNoise(int oscillator) {
+    inline uint8_t getNoise(unsigned oscillator) {
         // the minimal value for the noise register
         static constexpr float NOISE_MIN = 0;
         // the maximal value for the noise register
@@ -156,7 +156,7 @@ struct ChipPOKEY : Module {
     /// @param oscillator the oscillator to return the level for
     /// @returns the 4-bit level value from parameters and CV inputs
     ///
-    inline uint8_t getLevel(int oscillator) {
+    inline uint8_t getLevel(unsigned oscillator) {
         // the minimal value for the volume register
         static constexpr float ATT_MIN = 0;
         // the maximal value for the volume register

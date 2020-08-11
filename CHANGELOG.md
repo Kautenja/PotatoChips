@@ -108,6 +108,10 @@
     -   SN76489
     -   106
 
-### 1.6.0 (2020-08-10)
+### 1.6.1 (2020-08-10)
 
 -   fix to check all input ports for polyphonic cables
+
+### 1.6.2 (2020-08-10)
+
+-   fix frequency range of 106 to resolve hang & crash

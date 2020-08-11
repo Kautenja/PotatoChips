@@ -17,6 +17,7 @@ manual:
 	mkdir -p ${BUILD}
 	cp -r img ${BUILD}
 	cp *.tex ${BUILD}
+	cp ../KautenjaDSP.sty ${BUILD}
 	cp *.bib ${BUILD}
 	cd ${BUILD} && ${PDFLATEX} ${SOURCE} | grep -a3 "^!" || true
 	cd ${BUILD} && ${PDFLATEX} ${SOURCE} | grep -a3 "^!" || true

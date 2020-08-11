@@ -1,0 +1,121 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{KautenjaDSP}[KautenjaDSP LaTeX package]
+
+% ----------------------------------------------------------------------------
+% MARK: Packages
+% ----------------------------------------------------------------------------
+
+% set the font to Helvetica
+\RequirePackage[scaled]{helvet}
+\renewcommand\familydefault{\sfdefault}
+% for type-setting
+\RequirePackage{amsmath, amssymb, amsfonts, verbatim, pifont, microtype}
+% for slashed out text
+\RequirePackage[normalem]{ulem}
+% for units and scientific notation
+\RequirePackage[table]{xcolor}
+\RequirePackage{siunitx}
+% for references and URLs
+\RequirePackage{hyperref, url}
+% Natbib setup for author-year style
+\RequirePackage{natbib}
+ \bibpunct[, ]{(}{)}{,}{a}{}{,}%
+ \def\bibfont{\small}%
+ \def\bibsep{\smallskipamount}%
+ \def\bibhang{24pt}%
+ \def\newblock{\ }%
+ \def\BIBand{and}%
+% for graphics and figures
+\RequirePackage{graphicx, subfig, tikz}
+% force figures to stay in their sections
+\RequirePackage[section]{placeins}
+% for tables
+\RequirePackage{booktabs, longtable, tabularx}
+\RequirePackage{multicol, multirow}
+\RequirePackage{adjustbox}
+\RequirePackage[flushleft]{threeparttable}
+% setup the algorithm package
+% ruled: show bars around title and bar at bottom
+% lined: show the line column on the left of the algorithm
+% linesnumbered: print line numbers for each line
+\RequirePackage[ruled,lined,linesnumbered]{algorithm2e}
+\DontPrintSemicolon % don't print the semicolon that \; usually prints
+% headers and footers
+\RequirePackage{fancyhdr}
+
+% ----------------------------------------------------------------------------
+% MARK: Options
+% ----------------------------------------------------------------------------
+
+\RequirePackage{kvoptions}
+
+% \SetupKeyvalOptions{family=threshold,prefix=threshold@}
+\DeclareStringOption[Module]{moduleName}[Module]
+\ProcessKeyvalOptions*
+
+% ----------------------------------------------------------------------------
+% MARK: Declarations
+% ----------------------------------------------------------------------------
+
+% setup captions for tables
+\captionsetup[table]{%
+  labelfont={bf},
+  name={Table},
+  labelsep=colon,
+  justification=raggedright,
+  singlelinecheck=false
+}
+
+% setup captions for figures
+\captionsetup[figure]{%
+  labelfont={bf},
+  name={Figure},
+  labelsep=colon,
+  justification=raggedright,
+  singlelinecheck=false
+}
+
+% setup captions for algorithms
+\captionsetup[algorithm2e]{%
+  labelfont={bf},
+  name={Figure},
+  labelsep=colon,
+  justification=raggedright,
+  singlelinecheck=false
+}
+
+% ----------------------------------------------------------------------------
+% Headers / Footers
+% ----------------------------------------------------------------------------
+
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\lhead{KautenjaDSP}
+\rhead{\itshape {\KautenjaDSP@moduleName} v1.6.0}
+\cfoot{\thepage}
+
+% ----------------------------------------------------------------------------
+% Commands
+% ----------------------------------------------------------------------------
+
+% Create the title page.
+%
+% @param 1 the path to the logo image
+% @param 2 the path to the module image
+% @param 3 the path to the brand logo
+%
+\newcommand{\titlePage}[3]{%
+% fancyhdr directive to remove headers from this title page
+\thispagestyle{empty}
+% center the title page contents
+\vspace*{\fill}
+\begin{center}
+\includegraphics{#1}
+\linebreak\linebreak\linebreak\linebreak
+\includegraphics{#2}
+\linebreak\linebreak\linebreak\linebreak
+\includegraphics{#3}
+\end{center}
+\vspace*{\fill}
+\clearpage
+}

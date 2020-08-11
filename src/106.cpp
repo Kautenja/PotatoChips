@@ -222,7 +222,8 @@ struct Chip106 : Module {
         // function where additional oscillators reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buffers[channel][oscillator].get_clock_rate();
         // clamp within the legal bounds for the frequency value
-        freq = rack::clamp(freq, 4.f, 262143.f);
+        freq = rack::clamp(freq, 512.f, 262143.f);
+        std::cout << freq << std::endl;
         // OR the waveform length into the high 6 bits of "frequency Hi"
         // register, which is the third bite, i.e. shift left 2 + 16
         return static_cast<uint32_t>(freq) | (wave_length << 18);

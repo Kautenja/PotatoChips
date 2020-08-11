@@ -101,7 +101,7 @@
     {
       "id": 11,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "model": "106",
       "params": [
         {
@@ -873,7 +873,7 @@
         },
         {
           "id": 3,
-          "value": 0.718999982
+          "value": 0.641000032
         }
       ],
       "leftModuleId": 5,

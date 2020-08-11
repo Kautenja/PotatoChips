@@ -72,8 +72,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Arturia KeyStep 32",
           "channel": -1
         }
       },
@@ -245,7 +245,7 @@
     {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.5.1",
+      "version": "1.6.1",
       "model": "AY_3_8910",
       "params": [
         {

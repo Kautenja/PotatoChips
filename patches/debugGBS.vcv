@@ -66,7 +66,7 @@
       "leftModuleId": 139,
       "rightModuleId": 138,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -134,7 +134,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.0",
+      "version": "1.6.1",
       "model": "GBS",
       "params": [
         {
@@ -574,7 +574,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.629000008
         },
         {
           "id": 1,
@@ -604,7 +604,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.907999754
+          "value": 1.0
         },
         {
           "id": 1,
@@ -844,6 +844,14 @@
       "inputModuleId": 48,
       "inputId": 13,
       "color": "#c9b70e"
+    },
+    {
+      "id": 857,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 137,
+      "inputId": 5,
+      "color": "#0c8e15"
     }
   ]
 }

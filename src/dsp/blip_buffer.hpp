@@ -182,7 +182,6 @@ class BLIPBuffer {
 
     /// @brief Return the output sample from the buffer.
     ///
-    /// @param output the output array to push samples from the buffer into
     /// @returns the sample
     ///
     blip_sample_t read_sample() {
@@ -197,6 +196,14 @@ class BLIPBuffer {
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         return sample;
+    }
+
+    /// @brief Return the output sample from the buffer as a voltage.
+    ///
+    /// @returns the sample \f$\in [-10, 10]V\f$
+    ///
+    inline float read_sample_10V() {
+        return 10.f * read_sample() / std::numeric_limits<blip_sample_t>::max();
     }
 };
 

@@ -253,20 +253,6 @@ struct Chip106 : Module {
         return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// @brief Return a 10V signed sample from the chip.
-    ///
-    /// @param oscillator the oscillator to get the audio sample for
-    /// @param channel the polyphonic channel to return the audio output for
-    ///
-    inline float getAudioOut(unsigned oscillator, unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
-    }
-
     void processCV(unsigned channel) {
         // write waveform data to the chip's RAM based on the position in
         // the wave-table
@@ -337,7 +323,8 @@ struct Chip106 : Module {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and accumulate into the sum
             for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
+                const auto sample = buffers[channel][oscillator].read_sample_10V();
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
             }
         }
         // set the VU meter lights if the light divider is high

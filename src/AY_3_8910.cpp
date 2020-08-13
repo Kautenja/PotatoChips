@@ -198,20 +198,6 @@ struct ChipAY_3_8910 : Module {
         return mixerByte;
     }
 
-    /// @brief Return a 10V signed sample from the FME7.
-    ///
-    /// @param oscillator the oscillator to return the frequency for
-    /// @param channel the polyphonic channel to return the frequency for
-    ///
-    inline float getAudioOut(unsigned oscillator, unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
-    }
-
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
@@ -265,8 +251,10 @@ struct ChipAY_3_8910 : Module {
         // process audio samples on the chip engine
         for (unsigned channel = 0; channel < channels; channel++) {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
+            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
+                const auto sample = buffers[channel][oscillator].read_sample_10V();
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
+            }
         }
     }
 };

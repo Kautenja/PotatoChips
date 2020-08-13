@@ -239,19 +239,6 @@ struct ChipTurboGrafx16 : Module {
         return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// Return a 10V signed sample from the chip.
-    ///
-    /// @param channel the channel to get the audio sample for
-    ///
-    inline float getAudioOut(unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buf[channel].read_sample() / divisor;
-    }
-
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -303,8 +290,10 @@ struct ChipTurboGrafx16 : Module {
         }
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
-        for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
-            outputs[i].setVoltage(getAudioOut(i));
+        for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
+            const auto sample = buf[i].read_sample_10V();
+            outputs[i].setVoltage(sample);
+        }
     }
 };
 

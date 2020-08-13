@@ -138,20 +138,6 @@ struct ChipFME7 : Module {
         return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
     }
 
-    /// @brief Return a 10V signed sample from the FME7.
-    ///
-    /// @param oscillator the oscillator to get the audio sample for
-    /// @param channel the polyphonic channel to return the audio sample for
-    ///
-    inline float getAudioOut(unsigned oscillator, unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
-    }
-
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -182,8 +168,10 @@ struct ChipFME7 : Module {
         // process audio samples on the chip engine
         for (unsigned channel = 0; channel < channels; channel++) {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(getAudioOut(oscillator, channel), channel);
+            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
+                const auto sample = buffers[channel][oscillator].read_sample_10V();
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
+            }
         }
     }
 };

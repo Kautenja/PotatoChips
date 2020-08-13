@@ -299,20 +299,6 @@ struct ChipGBS : Module {
         return volume << 4;
     }
 
-    /// @brief Return a 10V signed sample from the APU.
-    ///
-    /// @param oscillator the oscillator to get the audio sample for
-    /// @param channel the polyphonic channel to return the output for
-    ///
-    inline float getAudioOut(unsigned oscillator, unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
-    }
-
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
@@ -430,9 +416,9 @@ struct ChipGBS : Module {
         for (unsigned channel = 0; channel < channels; channel++) {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
-                auto output = getAudioOut(oscillator, channel);
-                sum[oscillator] += output;
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(output, channel);
+                const auto sample = buffers[channel][oscillator].read_sample_10V();
+                sum[oscillator] += sample;
+                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
             }
         }
         // process the VU meter for each oscillator based on the summed outputs

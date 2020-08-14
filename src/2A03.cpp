@@ -29,8 +29,6 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
-    /// VU meters for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -179,7 +177,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) {
+    inline void processCV(unsigned channel) override {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (2)
@@ -218,46 +216,8 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
         apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
     }
 
-    /// @brief Process a sample.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    ///
-    void process(const ProcessArgs &args) override {
-        // get the number of polyphonic channels (defaults to 1 for monophonic).
-        // also set the channels on the output ports based on the number of
-        // channels
-        unsigned channels = get_polyphonic_channels();
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // process audio samples on the chip engine. keep a sum of the output
-        // of each channel for the VU meters
-        float sum[Ricoh2A03::OSC_COUNT];
-        memset(sum, 0, Ricoh2A03::OSC_COUNT);
-        for (unsigned channel = 0; channel < channels; channel++) {
-            // end the frame on the engine
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            // get the output from each oscillator and accumulate into the sum
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                sum[oscillator] += sample;
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
-        }
-        // process the VU meter for each oscillator based on the summed outputs
-        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
-        // update the VU meter lights
-        if (lightDivider.process()) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_VOLUME + oscillator].setBrightness(brightness);
-            }
-        }
-    }
+    /// @brief Process the lights on the module.
+    inline void processLights() override { }
 };
 
 // ---------------------------------------------------------------------------

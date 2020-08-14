@@ -36,24 +36,6 @@ struct ChipModule : rack::engine::Module {
     /// a clock divider for running LED updates slower than audio rate
     rack::dsp::ClockDivider lightDivider;
 
-    /// @brief Return the number of active polyphonic input channels.
-    ///
-    /// @returns 1 if in monophonic mode, or a number in [2, 16] if polyphonic
-    /// inputs are present on any input port
-    /// @details this function also updates the number of polyphonic channels
-    /// on all the output ports of the module
-    ///
-    unsigned get_polyphonic_channels() {
-        // get the number of polyphonic channels
-        unsigned channels = 1;
-        for (unsigned port = 0; port < inputs.size(); port++)
-            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
-        // set the number of polyphony channels for output ports
-        for (unsigned port = 0; port < outputs.size(); port++)
-            outputs[port].setChannels(channels);
-        return channels;
-    }
-
  public:
     /// @brief Initialize a new Chip module.
     ChipModule() {
@@ -83,7 +65,45 @@ struct ChipModule : rack::engine::Module {
             }
         }
     }
-};
 
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    virtual void processCV(unsigned channel) = 0;
+
+    /// @brief Process the lights on the module.
+    virtual void processLights() = 0;
+
+    /// @brief Process a sample.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
+    void process(const ProcessArgs &args) override {
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+        // process the CV inputs to the chip using the overridden function
+        if (cvDivider.process())
+            for (unsigned channel = 0; channel < channels; channel++)
+                processCV(channel);
+        // process audio samples on the chip engine.
+        for (unsigned channel = 0; channel < channels; channel++) {
+            // end the frame on the engine
+            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
+            // get the output from each oscillator and set the output port
+            for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++)
+                outputs[oscillator].setVoltage(buffers[channel][oscillator].read_sample_10V(), channel);
+        }
+        // process lights using the overridden function
+        processLights();
+    }
+};
 
 #endif  // ENGINE_CHIP_MODULE_HPP_

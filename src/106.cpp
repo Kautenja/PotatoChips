@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/namco_106.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -26,19 +27,10 @@
 // ---------------------------------------------------------------------------
 
 /// A Namco 106 chip emulator module.
-struct Chip106 : Module {
+struct Chip106 : ChipModule<Namco106> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][Namco106::OSC_COUNT];
-    /// The 106 instance to synthesize sound with
-    Namco106 apu[POLYPHONY_CHANNELS];
     /// the number of active oscillators on the chip
     unsigned num_oscillators[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-    /// a clock divider for running LED updates slower than audio rate
-    dsp::ClockDivider lightsDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -82,41 +74,18 @@ struct Chip106 : Module {
     uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
     /// @brief Initialize a new 106 Chip module.
-    Chip106() {
+    Chip106() : ChipModule<Namco106>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_NUM_OSCILLATORS,      1, Namco106::OSC_COUNT, 4, "Active Channels");
         configParam(PARAM_NUM_OSCILLATORS_ATT, -1, 1,                   0, "Active Channels Attenuverter");
         configParam(PARAM_WAVETABLE,            1, NUM_WAVEFORMS,       1, "Waveform Morph");
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
-        cvDivider.setDivision(16);
-        lightsDivider.setDivision(128);
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
             configParam(PARAM_FREQ + oscillator, -30.f, 30.f, 0.f, "Channel " + std::to_string(oscillator + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_VOLUME + oscillator, 0,   15,  15,   "Channel " + std::to_string(oscillator + 1) + " Volume",     "%",   0,                  100.f / 15.f);
         }
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
         memset(num_oscillators, 1, sizeof num_oscillators);
-        // update the sample rate on the engine
-        onSampleRateChange();
-        // reset the wave-tables to default values
-        onReset();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// @brief Respond to the user resetting the module with the "Initialize" action.
@@ -253,7 +222,12 @@ struct Chip106 : Module {
         return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    void processCV(unsigned channel) {
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) override {
         // write waveform data to the chip's RAM based on the position in
         // the wave-table
         auto position = getWavetablePosition(channel);
@@ -299,60 +273,35 @@ struct Chip106 : Module {
         }
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) final {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine.
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        float brightness[Namco106::OSC_COUNT] = {};
+        // accumulate brightness for all the channels
         for (unsigned channel = 0; channel < channels; channel++) {
-            // end the frame on the engine
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            // get the output from each oscillator and accumulate into the sum
             for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
+                brightness[oscillator] = brightness[oscillator] + (oscillator < num_oscillators[channel]);
             }
         }
-        // set the VU meter lights if the light divider is high
-        if (lightsDivider.process()) {
-            float brightness[Namco106::OSC_COUNT] = {};
-            // accumulate brightness for all the channels
-            for (unsigned channel = 0; channel < channels; channel++) {
-                for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                    brightness[oscillator] = brightness[oscillator] + (oscillator < num_oscillators[channel]);
-                }
-            }
-            // set the lights based on the accumulated brightness
-            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                const auto light = LIGHT_CHANNEL + 3 * (Namco106::OSC_COUNT - oscillator - 1);
-                // get the brightness level for the oscillator.  Because the
-                // signal is boolean, the root mean square will have no effect.
-                // Instead, the average over the channels is used as brightness
-                auto level = brightness[oscillator] / channels;
-                // set the light colors in BGR order.
-                lights[light + 2].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
-                // if there is more than one channel running (polyphonic), set
-                // red and green to 0 to produce a blue LED color. This is the
-                // standard for LEDs that indicate polyphonic signals in VCV
-                // Rack.
-                if (channels > 1) level *= 0;
-                lights[light + 1].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
-                lights[light + 0].setSmoothBrightness(level, args.sampleTime * lightsDivider.getDivision());
-            }
+        // set the lights based on the accumulated brightness
+        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+            const auto light = LIGHT_CHANNEL + 3 * (Namco106::OSC_COUNT - oscillator - 1);
+            // get the brightness level for the oscillator.  Because the
+            // signal is boolean, the root mean square will have no effect.
+            // Instead, the average over the channels is used as brightness
+            auto level = brightness[oscillator] / channels;
+            // set the light colors in BGR order.
+            lights[light + 2].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
+            // if there is more than one channel running (polyphonic), set
+            // red and green to 0 to produce a blue LED color. This is the
+            // standard for LEDs that indicate polyphonic signals in VCV
+            // Rack.
+            if (channels > 1) level *= 0;
+            lights[light + 1].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
+            lights[light + 0].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
         }
     }
 };

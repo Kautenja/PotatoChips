@@ -315,7 +315,7 @@
     {
       "id": 6,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.1",
+      "version": "1.6.2",
       "model": "POKEY",
       "params": [
         {
@@ -332,7 +332,7 @@
         },
         {
           "id": 3,
-          "value": -6.72000074
+          "value": 0.0
         },
         {
           "id": 4,
@@ -372,7 +372,7 @@
         },
         {
           "id": 13,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 14,

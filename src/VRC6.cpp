@@ -16,7 +16,8 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/konami_vrc6.hpp"
 
 // ---------------------------------------------------------------------------
@@ -24,16 +25,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Konami VRC6 chip emulator module.
-struct ChipVRC6 : Module {
- private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][KonamiVRC6::OSC_COUNT];
-    /// The VRC6 instance to synthesize sound with
-    KonamiVRC6 apu[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
+struct ChipVRC6 : ChipModule<KonamiVRC6> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -61,7 +53,7 @@ struct ChipVRC6 : Module {
     };
 
     /// @brief Initialize a new VRC6 Chip module.
-    ChipVRC6() {
+    ChipVRC6() : ChipModule<KonamiVRC6>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,  "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,  "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -71,25 +63,6 @@ struct ChipVRC6 : Module {
         configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.8f, "Pulse 1 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.8f, "Pulse 2 Level",            "%",   0.f,                100.f       );
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
-        cvDivider.setDivision(16);
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // global volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        onSampleRateChange();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// @brief Get the frequency for the given oscillator and polyphony channel.
@@ -175,9 +148,10 @@ struct ChipVRC6 : Module {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
@@ -195,33 +169,12 @@ struct ChipVRC6 : Module {
         }
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine
-        for (unsigned channel = 0; channel < channels; channel++) {
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
-        }
-    }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------
@@ -234,7 +187,7 @@ struct ChipVRC6Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipVRC6Widget(ChipVRC6 *module) {
+    explicit ChipVRC6Widget(ChipVRC6 *module) {
         setModule(module);
         static constexpr auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

@@ -16,7 +16,8 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/ricoh_2a03.hpp"
 
 // ---------------------------------------------------------------------------
@@ -24,22 +25,10 @@
 // ---------------------------------------------------------------------------
 
 /// A Ricoh 2A03 chip emulator module.
-struct Chip2A03 : Module {
+struct Chip2A03 : ChipModule<Ricoh2A03> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][Ricoh2A03::OSC_COUNT];
-    /// The 2A03 instance to synthesize sound with
-    Ricoh2A03 apu[POLYPHONY_CHANNELS];
-
-    /// a Schmitt Trigger for handling inputs to the LFSR port
+    /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-    /// a VU meter for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -70,7 +59,7 @@ struct Chip2A03 : Module {
     };
 
     /// @brief Initialize a new 2A03 Chip module.
-    Chip2A03() {
+    Chip2A03() : ChipModule<Ricoh2A03>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -81,26 +70,6 @@ struct Chip2A03 : Module {
         configParam(PARAM_VOLUME + 0,  0.f,  1.f, 0.9f, "Pulse 1 Volume", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Volume", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
-        cvDivider.setDivision(16);
-        lightDivider.setDivision(512);
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        onSampleRateChange();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// @brief Get the frequency for the given oscillator and polyphony channel
@@ -206,9 +175,10 @@ struct Chip2A03 : Module {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (2)
@@ -247,48 +217,12 @@ struct Chip2A03 : Module {
         apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine. keep a sum of the output
-        // of each channel for the VU meters
-        float sum[Ricoh2A03::OSC_COUNT] = {0, 0, 0, 0};
-        for (unsigned channel = 0; channel < channels; channel++) {
-            // end the frame on the engine
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            // get the output from each oscillator and accumulate into the sum
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                sum[oscillator] += sample;
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
-        }
-        // process the VU meter for each oscillator based on the summed outputs
-        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
-        // update the VU meter lights
-        if (lightDivider.process()) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_VOLUME + oscillator].setBrightness(brightness);
-            }
-        }
-    }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------
@@ -301,7 +235,7 @@ struct Chip2A03Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    Chip2A03Widget(Chip2A03 *module) {
+    explicit Chip2A03Widget(Chip2A03 *module) {
         setModule(module);
         static constexpr auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -313,7 +247,7 @@ struct Chip2A03Widget : ModuleWidget {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
             addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_OSCILLATOR + i));
-            if (i < 3) {  // pulse0, pulse1, triangle
+            if (i < 3) {  // pulse 1, pulse 2, & triangle
                 addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, Chip2A03::INPUT_FM + i));
                 addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, Chip2A03::PARAM_FREQ + i));
                 auto y = i == 2 ? 3 : i;

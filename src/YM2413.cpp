@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/yamaha_ym2413.hpp"
 
 // ---------------------------------------------------------------------------
@@ -203,7 +203,7 @@ struct Chip2413Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    Chip2413Widget(Chip2413 *module) {
+    explicit Chip2413Widget(Chip2413 *module) {
         setModule(module);
         static constexpr auto panel = "res/2413.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

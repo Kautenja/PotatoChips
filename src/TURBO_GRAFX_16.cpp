@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/nec_turbo_grafx_16.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -125,20 +125,20 @@ struct ChipTurboGrafx16 : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
+    inline void onSampleRateChange() final {
         // update the buffer for each channel
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     // /// Respond to the user resetting the module with the "Initialize" action.
-    // void onReset() override {
+    // void onReset() final {
     //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.
-    // void onRandomize() override {
+    // void onRandomize() final {
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         for (int sample = 0; sample < num_samples; sample++) {
     //             values[table][sample] = random::u32() % bit_depth;
@@ -153,7 +153,7 @@ struct ChipTurboGrafx16 : Module {
     // }
 
     // /// Convert the module's state to a JSON object.
-    // json_t* dataToJson() override {
+    // json_t* dataToJson() final {
     //     json_t* rootJ = json_object();
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         json_t* array = json_array();
@@ -167,7 +167,7 @@ struct ChipTurboGrafx16 : Module {
     // }
 
     // /// Load the module's state from a JSON object.
-    // void dataFromJson(json_t* rootJ) override {
+    // void dataFromJson(json_t* rootJ) final {
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         auto key = "values" + std::to_string(table);
     //         json_t* data = json_object_get(rootJ, key.c_str());
@@ -243,7 +243,7 @@ struct ChipTurboGrafx16 : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs &args) final {
         if (cvDivider.process()) {
             // set the main amplifier level
             apu.write(NECTurboGrafx16::MAIN_VOLUME, 0b11111111);
@@ -307,7 +307,7 @@ struct ChipTurboGrafx16Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipTurboGrafx16Widget(ChipTurboGrafx16 *module) {
+    explicit ChipTurboGrafx16Widget(ChipTurboGrafx16 *module) {
         setModule(module);
         static constexpr auto panel = "res/TURBO_GRAFX_16.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

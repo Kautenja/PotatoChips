@@ -32,7 +32,7 @@ struct ChipPOKEY : Module {
     AtariPOKEY apu[POLYPHONY_CHANNELS];
 
     /// triggers for handling inputs to the control ports
-    dsp::BooleanTrigger controlTriggers[POLYPHONY_CHANNELS][8];
+    dsp::BooleanTrigger controlTriggers[POLYPHONY_CHANNELS][AtariPOKEY::CTL_FLAGS];
 
     /// a clock divider for running CV acquisition slower than audio rate
     dsp::ClockDivider cvDivider;
@@ -48,7 +48,7 @@ struct ChipPOKEY : Module {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_LEVEL, AtariPOKEY::OSC_COUNT),
-        ENUMS(PARAM_CONTROL, 8),  // 1 button per bit (control flag)
+        ENUMS(PARAM_CONTROL, AtariPOKEY::CTL_FLAGS),
         NUM_PARAMS
     };
     /// the indexes of input ports on the module
@@ -57,7 +57,7 @@ struct ChipPOKEY : Module {
         ENUMS(INPUT_FM, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(INPUT_LEVEL, AtariPOKEY::OSC_COUNT),
-        ENUMS(INPUT_CONTROL, 8),  // 1 input per bit (control flag)
+        ENUMS(INPUT_CONTROL, AtariPOKEY::CTL_FLAGS),
         NUM_INPUTS
     };
     /// the indexes of output ports on the module
@@ -188,7 +188,7 @@ struct ChipPOKEY : Module {
     ///
     inline uint8_t getControl(unsigned channel) {
         uint8_t controlByte = 0;
-        for (std::size_t bit = 0; bit < 8; bit++) {
+        for (std::size_t bit = 0; bit < AtariPOKEY::CTL_FLAGS; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
             controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
             bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
@@ -288,7 +288,7 @@ struct ChipPOKEYWidget : ModuleWidget {
             addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_OSCILLATOR + i));
         }
         // global control
-        for (int i = 0; i < 8; i++) {
+        for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {
             if (i == 3 or i == 4) continue;  // ignore 16-bit
             addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
             addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, ChipPOKEY::INPUT_CONTROL + i));

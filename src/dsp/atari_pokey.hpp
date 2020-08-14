@@ -104,7 +104,10 @@ class AtariPOKEY {
     };
 
     /// the number of registers per voice on the chip
-    static constexpr int REGS_PER_VOICE = 2;
+    static constexpr unsigned REGS_PER_VOICE = 2;
+
+    /// the number of registers per voice on the chip
+    static constexpr unsigned CTL_FLAGS = 8;
 
     /// TODO:
     static constexpr int poly4_len = (1L <<  4) - 1;

@@ -220,7 +220,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------

@@ -188,7 +188,7 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------
@@ -201,7 +201,7 @@ struct ChipPOKEYWidget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipPOKEYWidget(ChipPOKEY *module) {
+    explicit ChipPOKEYWidget(ChipPOKEY *module) {
         setModule(module);
         static constexpr auto panel = "res/POKEY.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

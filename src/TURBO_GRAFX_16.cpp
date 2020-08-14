@@ -307,7 +307,7 @@ struct ChipTurboGrafx16Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipTurboGrafx16Widget(ChipTurboGrafx16 *module) {
+    explicit ChipTurboGrafx16Widget(ChipTurboGrafx16 *module) {
         setModule(module);
         static constexpr auto panel = "res/TURBO_GRAFX_16.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

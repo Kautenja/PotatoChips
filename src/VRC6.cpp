@@ -234,7 +234,7 @@ struct ChipVRC6Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipVRC6Widget(ChipVRC6 *module) {
+    explicit ChipVRC6Widget(ChipVRC6 *module) {
         setModule(module);
         static constexpr auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

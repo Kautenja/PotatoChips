@@ -133,7 +133,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------
@@ -146,7 +146,7 @@ struct ChipFME7Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipFME7Widget(ChipFME7 *module) {
+    explicit ChipFME7Widget(ChipFME7 *module) {
         setModule(module);
         static constexpr auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

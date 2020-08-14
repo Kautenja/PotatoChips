@@ -367,7 +367,7 @@ struct Chip106Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    Chip106Widget(Chip106 *module) {
+    explicit Chip106Widget(Chip106 *module) {
         setModule(module);
         static constexpr auto panel = "res/106.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

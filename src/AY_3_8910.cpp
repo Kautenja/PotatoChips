@@ -208,7 +208,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------
@@ -221,7 +221,7 @@ struct ChipAY_3_8910Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipAY_3_8910Widget(ChipAY_3_8910 *module) {
+    explicit ChipAY_3_8910Widget(ChipAY_3_8910 *module) {
         setModule(module);
         static constexpr auto panel = "res/AY_3_8910.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

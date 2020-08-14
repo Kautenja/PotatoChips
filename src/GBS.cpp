@@ -444,7 +444,7 @@ struct ChipGBSWidget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipGBSWidget(ChipGBS *module) {
+    explicit ChipGBSWidget(ChipGBS *module) {
         setModule(module);
         static constexpr auto panel = "res/GBS.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

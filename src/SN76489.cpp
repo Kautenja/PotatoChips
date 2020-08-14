@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
 
 // ---------------------------------------------------------------------------
@@ -24,28 +25,14 @@
 // ---------------------------------------------------------------------------
 
 /// A Texas Instruments SN76489 chip emulator module.
-struct ChipSN76489 : Module {
+struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][TexasInstrumentsSN76489::OSC_COUNT];
-    /// The SN76489 instance to synthesize sound with
-    TexasInstrumentsSN76489 apu[POLYPHONY_CHANNELS];
-
     /// whether to update the noise control (based on LFSR update)
     bool update_noise_control[POLYPHONY_CHANNELS];
     /// the current noise period
     uint8_t noise_period[POLYPHONY_CHANNELS];
-
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
-    /// a VU meter for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[TexasInstrumentsSN76489::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -77,7 +64,7 @@ struct ChipSN76489 : Module {
     };
 
     /// Initialize a new SN76489 Chip module.
-    ChipSN76489() {
+    ChipSN76489() : ChipModule<TexasInstrumentsSN76489>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
@@ -86,28 +73,9 @@ struct ChipSN76489 : Module {
         }
         configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
-        cvDivider.setDivision(16);
-        lightDivider.setDivision(512);
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
+        // setup the control register values
         memset(update_noise_control, true, sizeof update_noise_control);
         memset(noise_period, 0, sizeof noise_period);
-        onSampleRateChange();
-    }
-
-    /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// Get the 10-bit frequency parameter for the given pulse oscillator.
@@ -195,7 +163,7 @@ struct ChipSN76489 : Module {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    void processCV(unsigned channel) {
+    void processCV(unsigned channel) override {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (3)
@@ -232,48 +200,11 @@ struct ChipSN76489 : Module {
         apu[channel].write(TexasInstrumentsSN76489::NOISE_ATTENUATION | getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine. keep a sum of the output
-        // of each channel for the VU meters
-        float sum[TexasInstrumentsSN76489::OSC_COUNT] = {0, 0, 0, 0};
-        for (unsigned channel = 0; channel < channels; channel++) {
-            // end the frame on the engine
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            // get the output from each oscillator and accumulate into the sum
-            for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++) {
-                auto output = getAudioOut(oscillator, channel);
-                sum[oscillator] += output;
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(output, channel);
-            }
-        }
-        // process the VU meter for each oscillator based on the summed outputs
-        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++)
-            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
-        // update the VU meter lights
-        if (lightDivider.process()) {
-            for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT; oscillator++) {
-                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_LEVEL + oscillator].setBrightness(brightness);
-            }
-        }
-    }
+    inline void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------
@@ -286,7 +217,7 @@ struct ChipSN76489Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    ChipSN76489Widget(ChipSN76489 *module) {
+    explicit ChipSN76489Widget(ChipSN76489 *module) {
         setModule(module);
         static constexpr auto panel = "res/SN76489.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));

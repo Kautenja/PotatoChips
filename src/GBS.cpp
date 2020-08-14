@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -26,21 +27,10 @@
 // ---------------------------------------------------------------------------
 
 /// A Nintendo GBS chip emulator module.
-struct ChipGBS : Module {
+struct ChipGBS : ChipModule<NintendoGBS> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][NintendoGBS::OSC_COUNT];
-    /// The GBS instance to synthesize sound with
-    NintendoGBS apu[POLYPHONY_CHANNELS];
-
     /// a Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-    /// a VU meter for keeping track of the oscillator levels
-    dsp::VuMeter2 chMeters[NintendoGBS::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -86,7 +76,7 @@ struct ChipGBS : Module {
     uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
     /// @brief Initialize a new GBS Chip module.
-    ChipGBS() {
+    ChipGBS() : ChipModule<NintendoGBS>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -100,29 +90,6 @@ struct ChipGBS : Module {
         configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
-        cvDivider.setDivision(16);
-        lightDivider.setDivision(128);
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        // update the sample rate on the engine
-        onSampleRateChange();
-        // reset the wave-tables
-        onReset();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
-        // update the buffer for each oscillator
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// @brief Respond to the user resetting the module with the "Initialize" action.
@@ -304,7 +271,7 @@ struct ChipGBS : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
@@ -393,46 +360,12 @@ struct ChipGBS : Module {
         }
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) final {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine. keep a sum of the output
-        // of each channel for the VU meters
-        float sum[NintendoGBS::OSC_COUNT] = {0, 0, 0, 0};
-        for (unsigned channel = 0; channel < channels; channel++) {
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                sum[oscillator] += sample;
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
-        }
-        // process the VU meter for each oscillator based on the summed outputs
-        for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++)
-            chMeters[oscillator].process(args.sampleTime, sum[oscillator] / 5.f);
-        // update the VU meter lights
-        if (lightDivider.process()) {
-            for (unsigned oscillator = 0; oscillator < NintendoGBS::OSC_COUNT; oscillator++) {
-                float brightness = chMeters[oscillator].getBrightness(-24.f, 0.f);
-                lights[LIGHTS_LEVEL + oscillator].setBrightness(brightness);
-            }
-        }
-    }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

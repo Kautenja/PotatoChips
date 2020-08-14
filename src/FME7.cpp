@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/sunsoft_fme7.hpp"
 
 // ---------------------------------------------------------------------------
@@ -24,16 +25,7 @@
 // ---------------------------------------------------------------------------
 
 /// A SunSoft FME7 chip emulator module.
-struct ChipFME7 : Module {
- private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][SunSoftFME7::OSC_COUNT];
-    /// The FME7 instance to synthesize sound with
-    SunSoftFME7 apu[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
+struct ChipFME7 : ChipModule<SunSoftFME7> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -59,31 +51,12 @@ struct ChipFME7 : Module {
     /// @brief Initialize a new FME7 Chip module.
     ChipFME7() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // get the oscillator name starting with ACII code 65 (A)
             auto name = std::string(1, static_cast<char>(65 + oscillator));
             configParam(PARAM_FREQ  + oscillator, -56.f, 56.f, 0.f,  "Pulse " + name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_LEVEL + oscillator,   0.f,  1.f, 0.8f, "Pulse " + name + " Level",     "%",   0.f,                100.f       );
-        }
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        onSampleRateChange();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
         }
     }
 
@@ -138,42 +111,29 @@ struct ChipFME7 : Module {
         return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the CV inputs for the given channel.
     ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        if (cvDivider.process()) {  // process the CV inputs to the chip
-            for (unsigned channel = 0; channel < channels; channel++) {
-                for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
-                    // frequency. there are two frequency registers per voice.
-                    // shift the index left 1 instead of multiplying by 2
-                    auto freq = getFrequency(oscillator, channel);
-                    uint8_t lo =  freq & 0b11111111;
-                    apu[channel].write(SunSoftFME7::PULSE_A_LO + (oscillator << 1), lo);
-                    uint8_t hi = (freq & 0b0000111100000000) >> 8;
-                    apu[channel].write(SunSoftFME7::PULSE_A_HI + (oscillator << 1), hi);
-                    // level
-                    apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, getVolume(oscillator, channel));
-                }
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine
-        for (unsigned channel = 0; channel < channels; channel++) {
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
+    inline void processCV(unsigned channel) override {
+        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
+            // frequency. there are two frequency registers per voice.
+            // shift the index left 1 instead of multiplying by 2
+            auto freq = getFrequency(oscillator, channel);
+            uint8_t lo =  freq & 0b11111111;
+            apu[channel].write(SunSoftFME7::PULSE_A_LO + (oscillator << 1), lo);
+            uint8_t hi = (freq & 0b0000111100000000) >> 8;
+            apu[channel].write(SunSoftFME7::PULSE_A_HI + (oscillator << 1), hi);
+            // level
+            apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, getVolume(oscillator, channel));
         }
     }
+
+    /// @brief Process the lights on the module.
+    ///
+    /// @param channels the number of active polyphonic channels
+    ///
+    virtual void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------

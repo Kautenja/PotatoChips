@@ -13,6 +13,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 #include "rack.hpp"
 #include "../plugin.hpp"
 #include "../dsp/blip_buffer.hpp"

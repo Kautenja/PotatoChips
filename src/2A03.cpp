@@ -223,22 +223,20 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = get_polyphonic_channels();
         // process the CV inputs to the chip
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
                 processCV(channel);
             }
         }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
         // process audio samples on the chip engine. keep a sum of the output
         // of each channel for the VU meters
-        float sum[Ricoh2A03::OSC_COUNT] = {0, 0, 0, 0};
+        float sum[Ricoh2A03::OSC_COUNT];
+        memset(sum, 0, Ricoh2A03::OSC_COUNT);
         for (unsigned channel = 0; channel < channels; channel++) {
             // end the frame on the engine
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);

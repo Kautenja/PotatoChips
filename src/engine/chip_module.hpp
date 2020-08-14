@@ -36,12 +36,23 @@ struct ChipModule : rack::engine::Module {
     /// a clock divider for running LED updates slower than audio rate
     rack::dsp::ClockDivider lightDivider;
 
-    // unsigned get_channels() {
-    //     unsigned channels = 1;
-    //     for (unsigned input = 0; input < sizeof inputs; input++)
-    //         channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-    //     return channels;
-    // }
+    /// @brief Return the number of active polyphonic input channels.
+    ///
+    /// @returns 1 if in monophonic mode, or a number in [2, 16] if polyphonic
+    /// inputs are present on any input port
+    /// @details this function also updates the number of polyphonic channels
+    /// on all the output ports of the module
+    ///
+    unsigned get_polyphonic_channels() {
+        // get the number of polyphonic channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+        return channels;
+    }
 
  public:
     /// @brief Initialize a new Chip module.
@@ -49,7 +60,8 @@ struct ChipModule : rack::engine::Module {
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);
         lightDivider.setDivision(128);
-        // set the output buffer for each individual voice
+        // set the output buffer for each individual voice on each polyphonic
+        // channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++)
                 apu[channel].set_output(oscillator, &buffers[channel][oscillator]);

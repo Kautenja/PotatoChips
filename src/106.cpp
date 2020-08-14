@@ -30,7 +30,7 @@
 struct Chip106 : ChipModule<Namco106> {
  private:
     /// the number of active oscillators on the chip
-    unsigned num_oscillators[POLYPHONY_CHANNELS];
+    unsigned num_oscillators[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

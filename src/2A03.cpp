@@ -28,7 +28,7 @@
 struct Chip2A03 : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
+    dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

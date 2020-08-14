@@ -28,7 +28,7 @@
 struct ChipPOKEY : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
-    dsp::BooleanTrigger controlTriggers[POLYPHONY_CHANNELS][AtariPOKEY::CTL_FLAGS];
+    dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

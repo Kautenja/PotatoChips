@@ -30,7 +30,7 @@
 struct ChipGBS : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[POLYPHONY_CHANNELS];
+    dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

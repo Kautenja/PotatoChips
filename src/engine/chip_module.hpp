@@ -28,9 +28,9 @@ template<typename ChipEmulator>
 struct ChipModule : rack::engine::Module {
  protected:
     /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][ChipEmulator::OSC_COUNT];
+    BLIPBuffer buffers[PORT_MAX_CHANNELS][ChipEmulator::OSC_COUNT];
     /// The 106 instance to synthesize sound with
-    ChipEmulator apu[POLYPHONY_CHANNELS];
+    ChipEmulator apu[PORT_MAX_CHANNELS];
 
     /// a clock divider for running CV acquisition slower than audio rate
     rack::dsp::ClockDivider cvDivider;
@@ -45,7 +45,7 @@ struct ChipModule : rack::engine::Module {
         lightDivider.setDivision(128);
         // set the output buffer for each individual voice on each polyphonic
         // channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++)
                 apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
             // volume of 3 produces a 5V (10Vpp) signal from all voices
@@ -60,7 +60,7 @@ struct ChipModule : rack::engine::Module {
     /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++) {
                 buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
             }

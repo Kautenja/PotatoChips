@@ -71,13 +71,13 @@ struct ChipModule : rack::engine::Module {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    virtual void processCV(unsigned channel) = 0;
+    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
 
     /// @brief Process the lights on the module.
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(unsigned channels) = 0;
+    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
 
     /// @brief Process a sample.
     ///
@@ -96,7 +96,7 @@ struct ChipModule : rack::engine::Module {
         // process the CV inputs to the chip using the overridden function
         if (cvDivider.process())
             for (unsigned channel = 0; channel < channels; channel++)
-                processCV(channel);
+                processCV(args, channel);
         // process audio samples on the chip engine.
         for (unsigned channel = 0; channel < channels; channel++) {
             // end the frame on the engine
@@ -106,7 +106,7 @@ struct ChipModule : rack::engine::Module {
                 outputs[oscillator].setVoltage(buffers[channel][oscillator].read_sample_10V(), channel);
         }
         // process lights using the overridden function
-        if (lightDivider.process()) processLights(channels);
+        if (lightDivider.process()) processLights(args, channels);
     }
 };
 

@@ -174,9 +174,10 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) final {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // 2 frequency registers per voice, shift over by 1 instead of
             // multiplying
@@ -206,9 +207,10 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
 
     /// @brief Process the lights on the module.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

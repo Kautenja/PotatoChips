@@ -301,6 +301,7 @@ struct ChipGBS : Module {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(unsigned channel) {

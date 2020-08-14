@@ -148,9 +148,10 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) final {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
@@ -170,9 +171,10 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
 
     /// @brief Process the lights on the module.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

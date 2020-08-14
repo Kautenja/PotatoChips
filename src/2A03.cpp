@@ -175,9 +175,10 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) final {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (2)
@@ -218,9 +219,10 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
 
     /// @brief Process the lights on the module.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

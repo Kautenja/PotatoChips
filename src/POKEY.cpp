@@ -169,9 +169,10 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
 
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) final {
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
             // there are 2 registers per oscillator, multiply first
             // oscillator by 2 to produce an offset between registers
@@ -186,9 +187,10 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
 
     /// @brief Process the lights on the module.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

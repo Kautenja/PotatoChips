@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
+#include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
 // ---------------------------------------------------------------------------
@@ -24,18 +25,10 @@
 // ---------------------------------------------------------------------------
 
 /// A General Instrument AY-3-8910 chip emulator module.
-struct ChipAY_3_8910 : Module {
+struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
-    /// The General Instrument AY-3-8910 instance to synthesize sound with
-    GeneralInstrumentAy_3_8910 apu[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-
     /// triggers for handling inputs to the tone and noise enable switches
-    dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+    rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -64,9 +57,8 @@ struct ChipAY_3_8910 : Module {
     enum LightIds { NUM_LIGHTS };
 
     /// @brief Initialize a new FME7 Chip module.
-    ChipAY_3_8910() {
+    ChipAY_3_8910() : ChipModule<GeneralInstrumentAy_3_8910>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        cvDivider.setDivision(16);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
             auto channel_name = std::string(1, static_cast<char>(65 + oscillator));
@@ -74,24 +66,6 @@ struct ChipAY_3_8910 : Module {
             configParam(PARAM_LEVEL + oscillator,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
             configParam(PARAM_TONE  + oscillator,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
             configParam(PARAM_NOISE + oscillator,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
-        }
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        onSampleRateChange();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
         }
     }
 
@@ -202,7 +176,7 @@ struct ChipAY_3_8910 : Module {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) {
+    inline void processCV(unsigned channel) override {
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // 2 frequency registers per voice, shift over by 1 instead of
             // multiplying
@@ -230,33 +204,11 @@ struct ChipAY_3_8910 : Module {
         // );
     }
 
-    /// @brief Process a sample.
+    /// @brief Process the lights on the module.
     ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
     ///
-    void process(const ProcessArgs &args) override {
-        // determine the number of channels based on the inputs
-        unsigned channels = 1;
-        for (unsigned input = 0; input < NUM_INPUTS; input++)
-            channels = std::max(inputs[input].getChannels(), static_cast<int>(channels));
-        // process the CV inputs to the chip
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                processCV(channel);
-            }
-        }
-        // set output polyphony channels
-        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++)
-            outputs[OUTPUT_OSCILLATOR + oscillator].setChannels(channels);
-        // process audio samples on the chip engine
-        for (unsigned channel = 0; channel < channels; channel++) {
-            apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
-            for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
-                const auto sample = buffers[channel][oscillator].read_sample_10V();
-                outputs[OUTPUT_OSCILLATOR + oscillator].setVoltage(sample, channel);
-            }
-        }
-    }
+    virtual void processLights(unsigned channels) override { }
 };
 
 // ---------------------------------------------------------------------------

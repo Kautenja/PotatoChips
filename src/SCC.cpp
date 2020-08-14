@@ -117,20 +117,20 @@ struct ChipSCC : Module {
     }
 
     /// Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
+    inline void onSampleRateChange() final {
         // update the buffer for each channel
         for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++)
             buf[i].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     // /// Respond to the user resetting the module with the "Initialize" action.
-    // void onReset() override {
+    // void onReset() final {
     //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.
-    // void onRandomize() override {
+    // void onRandomize() final {
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         for (int sample = 0; sample < num_samples; sample++) {
     //             values[table][sample] = random::u32() % bit_depth;
@@ -145,7 +145,7 @@ struct ChipSCC : Module {
     // }
 
     // /// Convert the module's state to a JSON object.
-    // json_t* dataToJson() override {
+    // json_t* dataToJson() final {
     //     json_t* rootJ = json_object();
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         json_t* array = json_array();
@@ -159,7 +159,7 @@ struct ChipSCC : Module {
     // }
 
     // /// Load the module's state from a JSON object.
-    // void dataFromJson(json_t* rootJ) override {
+    // void dataFromJson(json_t* rootJ) final {
     //     for (int table = 0; table < NUM_WAVETABLES; table++) {
     //         auto key = "values" + std::to_string(table);
     //         json_t* data = json_object_get(rootJ, key.c_str());
@@ -236,7 +236,7 @@ struct ChipSCC : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs &args) final {
         if (cvDivider.process()) {
             // write the waveform data to the chip's RAM
             auto wavetable = getWavetable();

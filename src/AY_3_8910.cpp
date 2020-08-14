@@ -176,7 +176,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) override {
+    inline void processCV(unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // 2 frequency registers per voice, shift over by 1 instead of
             // multiplying
@@ -208,7 +208,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

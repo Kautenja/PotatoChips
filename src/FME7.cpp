@@ -115,7 +115,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) override {
+    inline void processCV(unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // frequency. there are two frequency registers per voice.
             // shift the index left 1 instead of multiplying by 2
@@ -133,7 +133,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

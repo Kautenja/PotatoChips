@@ -163,7 +163,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    void processCV(unsigned channel) override {
+    void processCV(unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (3)
@@ -204,7 +204,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

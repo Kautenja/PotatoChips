@@ -110,7 +110,7 @@ struct Chip106 : Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
+    inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
@@ -120,7 +120,7 @@ struct Chip106 : Module {
     }
 
     /// @brief Respond to the user resetting the module with the "Initialize" action.
-    void onReset() override {
+    void onReset() final {
         /// the default wave-table for each page of the wave-table editor
         static constexpr uint8_t* WAVETABLE[NUM_WAVEFORMS] = {
             SINE,
@@ -134,7 +134,7 @@ struct Chip106 : Module {
     }
 
     /// @brief Respond to the user randomizing the module with the "Randomize" action.
-    void onRandomize() override {
+    void onRandomize() final {
         for (unsigned table = 0; table < NUM_WAVEFORMS; table++) {
             for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
                 wavetable[table][sample] = random::u32() % BIT_DEPTH;
@@ -149,7 +149,7 @@ struct Chip106 : Module {
     }
 
     /// @brief Convert the module's state to a JSON object.
-    json_t* dataToJson() override {
+    json_t* dataToJson() final {
         json_t* rootJ = json_object();
         for (int table = 0; table < NUM_WAVEFORMS; table++) {
             json_t* array = json_array();
@@ -163,7 +163,7 @@ struct Chip106 : Module {
     }
 
     /// @brief Load the module's state from a JSON object.
-    void dataFromJson(json_t* rootJ) override {
+    void dataFromJson(json_t* rootJ) final {
         for (int table = 0; table < NUM_WAVEFORMS; table++) {
             auto key = "wavetable" + std::to_string(table);
             json_t* data = json_object_get(rootJ, key.c_str());
@@ -303,7 +303,7 @@ struct Chip106 : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs &args) final {
         // determine the number of channels based on the inputs
         unsigned channels = 1;
         for (unsigned input = 0; input < NUM_INPUTS; input++)

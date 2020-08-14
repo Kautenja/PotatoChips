@@ -177,7 +177,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     ///
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(unsigned channel) override {
+    inline void processCV(unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
         // pulse oscillator (2)
@@ -220,7 +220,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     ///
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(unsigned channels) override { }
+    inline void processLights(unsigned channels) final { }
 };
 
 // ---------------------------------------------------------------------------

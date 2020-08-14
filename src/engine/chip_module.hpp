@@ -58,7 +58,7 @@ struct ChipModule : rack::engine::Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
+    inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
             for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++) {
@@ -83,7 +83,7 @@ struct ChipModule : rack::engine::Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs &args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

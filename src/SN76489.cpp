@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
 
 // ---------------------------------------------------------------------------

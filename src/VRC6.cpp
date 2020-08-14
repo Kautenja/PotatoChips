@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/konami_vrc6.hpp"
 
 // ---------------------------------------------------------------------------

@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
 // ---------------------------------------------------------------------------

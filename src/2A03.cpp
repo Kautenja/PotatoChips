@@ -16,30 +16,21 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/ricoh_2a03.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
 
 /// A Ricoh 2A03 chip emulator module.
-struct Chip2A03 : Module {
+struct Chip2A03 : ChipModule<Ricoh2A03> {
  private:
-    /// The BLIP buffer to render audio samples from
-    BLIPBuffer buffers[POLYPHONY_CHANNELS][Ricoh2A03::OSC_COUNT];
-    /// The 2A03 instance to synthesize sound with
-    Ricoh2A03 apu[POLYPHONY_CHANNELS];
-
-    /// a Schmitt Trigger for handling inputs to the LFSR port
+    /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[POLYPHONY_CHANNELS];
-
-    /// a clock divider for running CV acquisition slower than audio rate
-    dsp::ClockDivider cvDivider;
-    /// a VU meter for keeping track of the oscillator levels
+    /// VU meters for keeping track of the oscillator levels
     dsp::VuMeter2 chMeters[Ricoh2A03::OSC_COUNT];
-    /// a clock divider for updating the mixer LEDs
-    dsp::ClockDivider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -70,7 +61,7 @@ struct Chip2A03 : Module {
     };
 
     /// @brief Initialize a new 2A03 Chip module.
-    Chip2A03() {
+    Chip2A03() : ChipModule<Ricoh2A03>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,   "Pulse 1 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,   "Pulse 2 Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -81,26 +72,6 @@ struct Chip2A03 : Module {
         configParam(PARAM_VOLUME + 0,  0.f,  1.f, 0.9f, "Pulse 1 Volume", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 1,  0.f,  1.f, 0.9f, "Pulse 2 Volume", "%", 0.f, 100.f);
         configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
-        cvDivider.setDivision(16);
-        lightDivider.setDivision(512);
-        // set the output buffer for each individual voice
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
-            // volume of 3 produces a roughly 5Vpp signal from all voices
-            apu[channel].set_volume(3.f);
-        }
-        onSampleRateChange();
-    }
-
-    /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() override {
-        // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < POLYPHONY_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < Ricoh2A03::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
-        }
     }
 
     /// @brief Get the frequency for the given oscillator and polyphony channel

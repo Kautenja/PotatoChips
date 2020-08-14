@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/konami_scc.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"

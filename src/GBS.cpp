@@ -16,7 +16,7 @@
 //
 
 #include "plugin.hpp"
-#include "components.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"

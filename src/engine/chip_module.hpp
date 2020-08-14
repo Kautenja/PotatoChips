@@ -21,7 +21,7 @@
 #ifndef ENGINE_CHIP_MODULE_HPP_
 #define ENGINE_CHIP_MODULE_HPP_
 
-/// A chip emulator module.
+/// @brief An abstract chip emulator module.
 /// @tparam ChipEmulator the class of the chip emulator
 ///
 template<typename ChipEmulator>

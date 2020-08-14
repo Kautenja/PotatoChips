@@ -17,8 +17,8 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
-#include "dsp/ricoh_2a03.hpp"
 #include "engine/chip_module.hpp"
+#include "dsp/ricoh_2a03.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -230,7 +230,7 @@ struct Chip2A03Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    Chip2A03Widget(Chip2A03 *module) {
+    explicit Chip2A03Widget(Chip2A03 *module) {
         setModule(module);
         static constexpr auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -242,7 +242,7 @@ struct Chip2A03Widget : ModuleWidget {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
             addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_OSCILLATOR + i));
-            if (i < 3) {  // pulse0, pulse1, triangle
+            if (i < 3) {  // pulse 1, pulse 2, & triangle
                 addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, Chip2A03::INPUT_FM + i));
                 addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, Chip2A03::PARAM_FREQ + i));
                 auto y = i == 2 ? 3 : i;

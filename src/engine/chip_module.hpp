@@ -74,7 +74,10 @@ struct ChipModule : rack::engine::Module {
     virtual void processCV(unsigned channel) = 0;
 
     /// @brief Process the lights on the module.
-    virtual void processLights() = 0;
+    ///
+    /// @param channels the number of active polyphonic channels
+    ///
+    virtual void processLights(unsigned channels) = 0;
 
     /// @brief Process a sample.
     ///
@@ -103,7 +106,7 @@ struct ChipModule : rack::engine::Module {
                 outputs[oscillator].setVoltage(buffers[channel][oscillator].read_sample_10V(), channel);
         }
         // process lights using the overridden function
-        processLights();
+        if (lightDivider.process()) processLights(channels);
     }
 };
 

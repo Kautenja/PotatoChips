@@ -34,16 +34,24 @@ class Namco106 {
     /// the number of registers on the chip
     static constexpr unsigned REG_COUNT = 0x80;
 
-    /// Addresses to the registers for channel 1. To get channel \f$n\f$,
-    /// multiply by \f$8n\f$.
+    /// Addresses to the registers for channel 0. To get the register for
+    /// channel \f$n\f$, add \f$8n\f$.
     enum Register : uint16_t {
+        /// The register for the low 8 bits of the 18-bit frequency for channel 0
         FREQ_LOW = 0x40,
+        /// The register for the low 8 bits of the 18-bit phase for channel 0
         PHASE_LOW,
+        /// The register for the middle 8 bits of the 18-bit frequency for channel 0
         FREQ_MEDIUM,
+        /// The register for the middle 8 bits of the 18-bit phase for channel 0
         PHASE_MEDIUM,
+        /// The register for the high 2 bits of the 18-bit frequency for channel 0
         FREQ_HIGH,
+        /// The register for the high 2 bits of the 18-bit phase for channel 0
         PHASE_HIGH,
+        /// The register for the address of the waveform for channel 0
         WAVE_ADDRESS,
+        /// The register for the volume level for channel 0
         VOLUME
     };
 

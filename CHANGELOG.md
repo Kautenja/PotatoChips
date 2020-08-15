@@ -1,28 +1,30 @@
-### 1.0.0 (2020-06-22)
+# Change Log
+
+## 1.0.0 (2020-06-22)
 
 -   2A03 implementation
 
-### 1.1.0 (2020-06-23)
+## 1.1.0 (2020-06-23)
 
 -   VRC6 implementation
 
-### 1.1.1 (2020-06-23)
+## 1.1.1 (2020-06-23)
 
 -   minor improvements and optimizations
 
-### 1.1.2 (2020-06-30)
+## 1.1.2 (2020-06-30)
 
 -   minor improvements and optimizations
 
-### 1.2.0 (2020-07-09)
+## 1.2.0 (2020-07-09)
 
 -   FME7 implementation
 
-### 1.2.1 (2020-07-09)
+## 1.2.1 (2020-07-09)
 
 -   fix issues with FME7 panel
 
-### 1.3.0 (2020-07-14)
+## 1.3.0 (2020-07-14)
 
 -   106 Module
     -   new panel design
@@ -30,37 +32,37 @@
     -   waveform morph with 5 tables
     -   all 8 channels active
 
-### 1.3.1 (2020-07-14)
+## 1.3.1 (2020-07-14)
 
 -   performance improvements
     -   CV acquisition at _1/16x_ sample rate
     -   LED update at _1/128x_ sample rate
 
-### 1.3.2 (2020-07-14)
+## 1.3.2 (2020-07-14)
 
 -   fix issue where oscillator increased in pitch when increasing sampling rate
 -   fix issue where 106 was not tuned to C4
 
-### 1.3.3 (2020-07-15)
+## 1.3.3 (2020-07-15)
 
 -   minor optimizations to 106
 
-### 1.3.4 (2020-07-17)
+## 1.3.4 (2020-07-17)
 
 -   update Blip_Buffer to 0.4.1 and refactor
 -   fix "click" from sample rates: 44.1kHz, 88.2kHz, etc.
 -   fix issue where 2A03, VRC6, FME7 were detuned at sample rates:
     44.1kHz, 88.2kHz, etc.
 
-### 1.3.5 (2020-07-17)
+## 1.3.5 (2020-07-17)
 
 -   refactor BLIPBuffer to be more C++17-ish and CPU friendly
 
-### 1.4.0 (2020-07-18)
+## 1.4.0 (2020-07-18)
 
 -   Texas Instruments SN76489 from Sega Master System
 
-### 1.4.1 (2020-07-25)
+## 1.4.1 (2020-07-25)
 
 -   fix issue where CV modulated SN76489 VCA wouldn't return to 0
 -   fix issue where SN76489 at high-frequency would produce no output
@@ -70,11 +72,11 @@
 -   fix issue where SN76489 trigger input wasn't responding to bipolar inputs
 -   updated default wave-tables for 106, sine, ramps, pulse, triangle
 
-### 1.4.2 (2020-07-31)
+## 1.4.2 (2020-07-31)
 
 -   fix build break for MacOS platform
 
-### 1.5.0 (2020-08-04)
+## 1.5.0 (2020-08-04)
 
 -   strong FM for all modules by a factor of 2
 -   new modules!
@@ -82,13 +84,13 @@
     -   POKEY
     -   GBS
 
-### 1.5.1 (2020-08-04)
+## 1.5.1 (2020-08-04)
 
 -   improve the CV input for noise period on:
     -   2A03
     -   GBS
 
-### 1.5.2 (2020-08-08)
+## 1.5.2 (2020-08-08)
 
 -   fix CV volume control for:
     -   VRC6
@@ -96,7 +98,7 @@
     -   AY-3-8910
     -   106
 
-### 1.6.0 (2020-08-10)
+## 1.6.0 (2020-08-10)
 
 -   polyphonic support for:
     -   2A03
@@ -108,10 +110,10 @@
     -   SN76489
     -   106
 
-### 1.6.1 (2020-08-10)
+## 1.6.1 (2020-08-10)
 
 -   fix to check all input ports for polyphonic cables
 
-### 1.6.2 (2020-08-10)
+## 1.6.2 (2020-08-10)
 
 -   fix frequency range of 106 to resolve hang & crash

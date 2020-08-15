@@ -23,6 +23,8 @@
 
 /// @brief An abstract chip emulator module.
 /// @tparam ChipEmulator the class of the chip emulator
+/// @details All ports are assumed to be polyphonic. I.e., all inputs ports
+/// allow a polyphonic signal and all output ports can emit polyphonic signals.
 ///
 template<typename ChipEmulator>
 struct ChipModule : rack::engine::Module {

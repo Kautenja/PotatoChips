@@ -45,7 +45,8 @@ class Namco106 {
         FREQ_MEDIUM,
         /// The register for the middle 8 bits of the 18-bit phase for channel 0
         PHASE_MEDIUM,
-        /// The register for the high 2 bits of the 18-bit frequency for channel 0
+        /// The register for the high 2 bits of the 18-bit frequency for channel 0.
+        /// The high 6-bits of this register determine the waveform length.
         FREQ_HIGH,
         /// The register for the high 2 bits of the 18-bit phase for channel 0
         PHASE_HIGH,

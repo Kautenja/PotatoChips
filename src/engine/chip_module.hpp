@@ -27,9 +27,9 @@
 template<typename ChipEmulator>
 struct ChipModule : rack::engine::Module {
  protected:
-    /// The BLIP buffer to render audio samples from
+    /// The BLIP buffers to render audio samples from
     BLIPBuffer buffers[PORT_MAX_CHANNELS][ChipEmulator::OSC_COUNT];
-    /// The 106 instance to synthesize sound with
+    /// The chip emulators to synthesize sound with
     ChipEmulator apu[PORT_MAX_CHANNELS];
 
     /// a clock divider for running CV acquisition slower than audio rate
@@ -67,18 +67,6 @@ struct ChipModule : rack::engine::Module {
         }
     }
 
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param channel the polyphonic channel to process the CV inputs to
-    ///
-    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
-
-    /// @brief Process the lights on the module.
-    ///
-    /// @param channels the number of active polyphonic channels
-    ///
-    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
-
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -108,6 +96,19 @@ struct ChipModule : rack::engine::Module {
         // process lights using the overridden function
         if (lightDivider.process()) processLights(args, channels);
     }
+
+ protected:
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
+
+    /// @brief Process the lights on the module.
+    ///
+    /// @param channels the number of active polyphonic channels
+    ///
+    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
 };
 
 #endif  // ENGINE_CHIP_MODULE_HPP_

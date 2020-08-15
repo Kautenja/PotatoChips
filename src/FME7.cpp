@@ -60,6 +60,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         }
     }
 
+ protected:
     /// @brief Return the frequency for the given oscillator.
     ///
     /// @param oscillator the index of the oscillator to get the frequency of

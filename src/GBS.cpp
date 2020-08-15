@@ -153,6 +153,7 @@ struct ChipGBS : ChipModule<NintendoGBS> {
         }
     }
 
+ protected:
     /// @brief Get the frequency for the given oscillator
     ///
     /// @param oscillator the oscillator to return the frequency for

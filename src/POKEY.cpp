@@ -78,6 +78,7 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
         configParam(PARAM_CONTROL + 7, 0, 1, 0, "LFSR", "");
     }
 
+ protected:
     /// @brief Return the frequency for the given oscillator.
     ///
     /// @param oscillator the oscillator to return the frequency for

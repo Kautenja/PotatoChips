@@ -69,6 +69,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
         }
     }
 
+ protected:
     /// @brief Return the frequency for the given channel.
     ///
     /// @param oscillator the oscillator to return the frequency for

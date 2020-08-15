@@ -78,6 +78,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         memset(noise_period, 0, sizeof noise_period);
     }
 
+ protected:
     /// Get the 10-bit frequency parameter for the given pulse oscillator.
     ///
     /// @param oscillator the oscillator to return the frequency for

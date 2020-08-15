@@ -65,6 +65,7 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
         configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
     }
 
+ protected:
     /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///
     /// @param oscillator the oscillator to return the frequency for

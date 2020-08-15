@@ -72,6 +72,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
         configParam(PARAM_VOLUME + 2,  0.f,  1.f, 0.9f, "Noise Volume",  "%", 0.f, 100.f);
     }
 
+ protected:
     /// @brief Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the frequency for

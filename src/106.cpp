@@ -143,6 +143,7 @@ struct Chip106 : ChipModule<Namco106> {
         }
     }
 
+ protected:
     /// @brief Return the active oscillators parameter.
     ///
     /// @param channel the polyphonic channel to return the active oscillators for

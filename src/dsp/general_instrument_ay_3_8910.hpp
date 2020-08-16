@@ -228,7 +228,7 @@ class GeneralInstrumentAy_3_8910 {
 
     /// Run the oscillators until the given end time.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param final_end_time the time to run the oscillators until
     ///
     void run_until(blip_time_t final_end_time) {
         if (final_end_time < last_time)  // invalid end time
@@ -524,16 +524,16 @@ class GeneralInstrumentAy_3_8910 {
     /// @param address the address of the register to write
     /// @param data the data to write to the register
     ///
-    inline void write(uint16_t addr, uint8_t data) {
+    inline void write(uint16_t address, uint8_t data) {
         static constexpr blip_time_t time = 0;
         run_until(time);
-        _write(addr, data);
+        _write(address, data);
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t time) {
         run_until(time);

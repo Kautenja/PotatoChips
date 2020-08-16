@@ -249,7 +249,7 @@ class SunSoftFME7 {
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t time) {
         run_until(time);

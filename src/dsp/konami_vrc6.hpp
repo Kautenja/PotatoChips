@@ -115,7 +115,7 @@ class KonamiVRC6 {
     ///
     void run_until(blip_time_t time) {
         if (time < last_time)
-            throw Exception("end_time must be >= last_time");
+            throw Exception("time must be >= last_time");
         else if (time == last_time)
             return;
         run_square(oscs[0], time);
@@ -127,7 +127,7 @@ class KonamiVRC6 {
     /// @brief Run a square waveform until specified time.
     ///
     /// @param osc the oscillator to run
-    /// @param time the number of elapsed cycles
+    /// @param end_time the number of elapsed cycles
     ///
     void run_square(Oscillator& osc, blip_time_t end_time) {
         BLIPBuffer* output = osc.output;
@@ -172,7 +172,7 @@ class KonamiVRC6 {
 
     /// @brief Run a saw waveform until specified time.
     ///
-    /// @param time the number of elapsed cycles
+    /// @param end_time the number of elapsed cycles
     ///
     void run_saw(blip_time_t end_time) {
         Oscillator& osc = oscs[2];
@@ -317,7 +317,7 @@ class KonamiVRC6 {
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param time the time to run the oscillators until
     ///
     inline void end_frame(blip_time_t time) {
         run_until(time);

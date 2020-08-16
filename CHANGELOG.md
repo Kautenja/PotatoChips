@@ -117,3 +117,7 @@
 ## 1.6.2 (2020-08-10)
 
 -   fix frequency range of 106 to resolve hang & crash
+
+## 1.6.3 (2020-08-16)
+
+-  fix ordering of pairs of samples (nibbles) for 106 wavetable editor

@@ -240,14 +240,14 @@ struct Chip106 : ChipModule<Namco106> {
         float interpolate = position - wavetable0;
         for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
             // get the first waveform data
-            auto nibbleHi0 = wavetable[wavetable0][2 * i];
-            auto nibbleLo0 = wavetable[wavetable0][2 * i + 1];
+            auto nibbleLo0 = wavetable[wavetable0][2 * i];
+            auto nibbleHi0 = wavetable[wavetable0][2 * i + 1];
             // get the second waveform data
-            auto nibbleHi1 = wavetable[wavetable1][2 * i];
-            auto nibbleLo1 = wavetable[wavetable1][2 * i + 1];
+            auto nibbleLo1 = wavetable[wavetable1][2 * i];
+            auto nibbleHi1 = wavetable[wavetable1][2 * i + 1];
             // floating point interpolation
-            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
             uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
             // combine the two nibbles into a byte for the RAM
             apu[channel].write(i, (nibbleHi << 4) | nibbleLo);
         }

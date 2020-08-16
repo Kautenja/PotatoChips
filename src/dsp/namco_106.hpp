@@ -96,7 +96,7 @@ class Namco106 {
 
     /// Run the emulator until specified time.
     ///
-    /// @param time the number of elapsed cycles
+    /// @param nes_end_time the number of elapsed cycles
     ///
     void run_until(cpu_time_t nes_end_time) {
         if (nes_end_time < last_time)
@@ -242,7 +242,7 @@ class Namco106 {
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param time the time to run the oscillators until
     ///
     inline void end_frame(cpu_time_t time) {
         run_until(time);

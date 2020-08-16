@@ -102,12 +102,14 @@ struct ChipModule : rack::engine::Module {
  protected:
     /// @brief Process the CV inputs for the given channel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
 
     /// @brief Process the lights on the module.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
     virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;

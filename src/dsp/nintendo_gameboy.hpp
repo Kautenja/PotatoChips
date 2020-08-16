@@ -577,9 +577,8 @@ class NintendoGBS {
     /// NULL, silences the given oscillator.
     ///
     /// @param channel the index of the oscillator to set the output for
-    /// @param center the BLIPBuffer to output the center channel of the given voice to
-    /// @param left the BLIPBuffer to output the left channel of the given voice to
-    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    /// @param buffer the BLIPBuffer to output the left, center, and right
+    /// channels to
     /// @details
     /// If a buffer is NULL, the specified oscillator is muted and emulation
     /// accuracy is reduced.
@@ -603,7 +602,8 @@ class NintendoGBS {
     /// @brief Assign all oscillator outputs to specified buffer (mono). If
     /// buffer is NULL, silences all oscillators.
     ///
-    /// @param buffer the single buffer to output the all the voices to
+    /// @param buffer the BLIPBuffer to output the left, center, and right
+    /// channels to for all voices on the chip
     ///
     inline void set_output(BLIPBuffer* buffer) {
         set_output(buffer, buffer, buffer);
@@ -673,7 +673,7 @@ class NintendoGBS {
     /// @param address the address of the register to write
     /// @param data the data to write to the register
     ///
-    void write(uint16_t addr, uint8_t data) {
+    void write(uint16_t address, uint8_t data) {
         static constexpr blip_time_t time = 0;
         static constexpr unsigned char powerup_regs[0x20] = {
             0x80,0x3F,0x00,0xFF,0xBF,                     // square 1
@@ -686,19 +686,19 @@ class NintendoGBS {
             0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF  // wave-table
         };
         // make sure the given address is legal
-        if (addr < ADDR_START or addr > ADDR_END)
-            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
+        if (address < ADDR_START or address > ADDR_END)
+            throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         // run the emulator up to the given time
         run_until(time);
         // calculate the register index from the address
-        auto reg = addr - ADDR_START;
+        auto reg = address - ADDR_START;
         // store the old value from the register
         auto old_reg = regs[reg];
         // update the register with the new value
         regs[reg] = data;
-        if (addr < STEREO_VOLUME) {  // stereo volume
+        if (address < STEREO_VOLUME) {  // stereo volume
             write_osc(reg / 5, reg, data);
-        } else if (addr == STEREO_VOLUME && data != old_reg) {  // global volume
+        } else if (address == STEREO_VOLUME && data != old_reg) {  // global vol
             // return all oscs to 0
             for (unsigned i = 0; i < OSC_COUNT; i++) {
                 Oscillator& osc = *oscs[i];
@@ -717,7 +717,7 @@ class NintendoGBS {
                 other_synth.offset(time, -30, wave.outputs[3]);
 
             // oscs will update with new amplitude when next run
-        } else if (addr == 0xFF25 || addr == POWER_CONTROL_STATUS) {
+        } else if (address == 0xFF25 || address == POWER_CONTROL_STATUS) {
             int mask = (regs[POWER_CONTROL_STATUS - ADDR_START] & 0x80) ? ~0 : 0;
             int flags = regs[0xFF25 - ADDR_START] & mask;
             // left / right assignments
@@ -736,7 +736,7 @@ class NintendoGBS {
                 }
             }
 
-            if (addr == POWER_CONTROL_STATUS && data != old_reg) {
+            if (address == POWER_CONTROL_STATUS && data != old_reg) {
                 if (!(data & 0x80)) {
                     for (unsigned i = 0; i < sizeof powerup_regs; i++) {
                         if (i != POWER_CONTROL_STATUS - ADDR_START)
@@ -746,8 +746,8 @@ class NintendoGBS {
                     // std::cout << "APU powered on\n" << std::endl;
                 }
             }
-        } else if (addr >= 0xFF30) {  // update wave-table
-            int index = (addr & 0x0F) * 2;
+        } else if (address >= 0xFF30) {  // update wave-table
+            int index = (address & 0x0F) * 2;
             wave.wave[index] = data >> 4;
             wave.wave[index + 1] = data & 0x0F;
         }

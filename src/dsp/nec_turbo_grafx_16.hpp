@@ -293,8 +293,13 @@ class NECTurboGrafx16 {
     /// silences the given oscillator.
     ///
     /// @param channel the index of the oscillator to set the output for
-    /// @param buffer the BLIPBuffer to output the given voice to
-    /// @returns 0 if the output was set successfully, 1 if the index is invalid
+    /// @param center the BLIPBuffer to output the center channel of the given voice to
+    /// @param left the BLIPBuffer to output the left channel of the given voice to
+    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    /// @details
+    /// If a buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced. all buffers must be NULL if one is NULL, i.e.,
+    /// NULL = center = left = right
     ///
     inline void set_output(unsigned channel, BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
         if (channel >= OSC_COUNT)  // make sure the channel is within bounds
@@ -302,17 +307,44 @@ class NECTurboGrafx16 {
         oscs[channel].chans[0] = center;
         oscs[channel].chans[1] = left;
         oscs[channel].chans[2] = right;
-        for (unsigned i = 0; i < OSC_COUNT; i++) balance_changed(oscs[i]);
+        for (unsigned i = 0; i < OSC_COUNT; i++)
+            balance_changed(oscs[i]);
     }
 
-    /// @brief Assign all oscillator outputs to specified buffer. If buffer
+    /// @brief Assign single oscillator output to buffer (mono). If buffer is
+    /// NULL, silences the given oscillator.
+    ///
+    /// @param channel the index of the oscillator to set the output for
+    /// @param buffer the BLIPBuffer to output the left, center, and right
+    /// channels to
+    /// @details
+    /// If a buffer is NULL, the specified oscillator is muted and emulation
+    /// accuracy is reduced.
+    ///
+    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
+        set_output(channel, buffer, buffer, buffer);
+    }
+
+    /// @brief Assign all oscillator outputs to buffers (surround). If buffer
     /// is NULL, silences all oscillators.
     ///
-    /// @param buffer the single buffer to output the all the voices to
+    /// @param center the BLIPBuffer to output the center channel of the given voice to
+    /// @param left the BLIPBuffer to output the left channel of the given voice to
+    /// @param right the BLIPBuffer to output the right channel of the given voice to
+    ///
+    inline void set_output(BLIPBuffer* center, BLIPBuffer* left, BLIPBuffer* right) {
+        for (unsigned i = 0; i < OSC_COUNT; i++)
+            set_output(i, center, left, right);
+    }
+
+    /// @brief Assign all oscillator outputs to specified buffer (mono). If
+    /// buffer is NULL, silences all oscillators.
+    ///
+    /// @param buffer the BLIPBuffer to output the left, center, and right
+    /// channels to for all voices on the chip
     ///
     inline void set_output(BLIPBuffer* buffer) {
-        for (unsigned i = 0; i < OSC_COUNT; i++)
-            set_output(i, buffer, buffer, buffer);
+        set_output(buffer, buffer, buffer);
     }
 
     /// @brief Set the volume level of all oscillators.

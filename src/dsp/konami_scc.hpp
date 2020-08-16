@@ -243,7 +243,7 @@ class KonamiSCC {
 
     /// @brief Write to the data port.
     ///
-    /// @param addr the register to write the data to
+    /// @param address the register to write the data to
     /// @param data the byte to write to the register at given address
     ///
     inline void write(uint16_t address, uint8_t data) {

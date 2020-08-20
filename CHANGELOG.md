@@ -121,3 +121,4 @@
 ## 1.6.3 (2020-08-16)
 
 -  fix ordering of pairs of samples (nibbles) for 106 wavetable editor
+-  fix triangle waveforms for wave-table editors

@@ -46,13 +46,6 @@ struct WaveTableEditor : rack::LightWidget {
     } drag_state;
 
  public:
-    /// the default background color
-    static constexpr NVGcolor ColorBackgroud =  {{{0.f,  0.f,  0.f,  1.f}}};
-    /// the default fill color
-    static constexpr NVGcolor ColorFill =       {{{0.f,  0.f,  1.f,  1.f}}};
-    /// the default border color
-    static constexpr NVGcolor ColorBorder =     {{{0.2f, 0.2f, 0.2f, 1.f}}};
-
     /// @brief Initialize a new wave-table editor widget.
     ///
     /// @param position the position of the screen on the module
@@ -70,9 +63,9 @@ struct WaveTableEditor : rack::LightWidget {
         uint64_t bit_depth_,
         rack::Vec position,
         rack::Vec size,
-        NVGcolor fill_ = ColorFill,
-        NVGcolor background_ = ColorBackgroud,
-        NVGcolor border_ = ColorBorder
+        NVGcolor fill_ =       {{{0.f,  0.f,  1.f,  1.f}}},
+        NVGcolor background_ = {{{0.f,  0.f,  0.f,  1.f}}},
+        NVGcolor border_ =     {{{0.2f, 0.2f, 0.2f, 1.f}}}
     ) :
         rack::LightWidget(),
         waveform(waveform_),

@@ -4,8 +4,16 @@ matrix:
   include:
     - os: linux
       dist: xenial
+      arch: amd64
+    - os: linux
+      dist: xenial
+      arch: arm64
     - os: linux
       dist: bionic
+      arch: amd64
+    - os: linux
+      dist: bionic
+      arch: arm64
     - os: osx
       osx_image: xcode11
     - os: osx

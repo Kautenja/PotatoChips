@@ -78,9 +78,9 @@ struct ChipGBS : ChipModule<NintendoGBS> {
     /// @brief Initialize a new GBS Chip module.
     ChipGBS() : ChipModule<NintendoGBS>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f, "Wave Frequency",    " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -2.5f, 2.5f, 0.f, "Pulse 2 Frequency", " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2, -2.5f, 2.5f, 0.f, "Wave Frequency",    " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_NOISE_PERIOD, 0, 7, 0, "Noise Period", "", 0, 1, -7);
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
@@ -166,7 +166,7 @@ struct ChipGBS : ChipModule<NintendoGBS> {
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 2035;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale

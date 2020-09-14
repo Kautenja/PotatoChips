@@ -62,8 +62,8 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
             auto channel_name = std::string(1, static_cast<char>(65 + oscillator));
-            configParam(PARAM_FREQ  + oscillator, -60.f, 60.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + oscillator,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f,                100.f       );
+            configParam(PARAM_FREQ  + oscillator, -5.f,   5.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", 2,   dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + oscillator,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f, 100.f       );
             configParam(PARAM_TONE  + oscillator,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
             configParam(PARAM_NOISE + oscillator,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
         }
@@ -84,7 +84,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
@@ -134,8 +134,8 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
         // the maximal value for the noise frequency register
         static constexpr float FREQ_MAX = 31;
         // get the parameter value from the UI knob. the knob represents
-        // frequency, so translate to a simple [0, 1] scale.
-        auto param = (0.5f + params[PARAM_FREQ + oscillator].getValue() / 120.f);
+        // pitch in [-5, 5], so translate to a simple [0, 1] scale.
+        auto param = (0.5f + params[PARAM_FREQ + oscillator].getValue() / 10.f);
         // 5V scale for V/OCT input
         param += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel) / 5.f;
         // 10V scale for mod input

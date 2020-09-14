@@ -69,6 +69,13 @@ struct ChipModule : rack::engine::Module {
         }
     }
 
+    /// @brief Respond to the module being reset by the engine.
+    inline void onReset() override {
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+            apu[channel].reset();
+        }
+    }
+
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

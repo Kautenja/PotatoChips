@@ -147,39 +147,39 @@ class GeneralInstrumentAy_3_8910 {
     /// the oscillators on the chip (three pulse waveform generators)
     struct Oscillator {
         /// the period of the oscillator
-        blip_time_t period;
+        blip_time_t period = 0;
         /// TODO:
-        blip_time_t delay;
+        blip_time_t delay = 0;
         /// the value of the last output from the oscillator
-        short last_amp;
+        int16_t last_amp = 0;
         /// the current phase of the oscillator
-        short phase;
+        int16_t phase = 0;
         /// the buffer the oscillator writes samples to
         BLIPBuffer* output;
     } oscs[OSC_COUNT];
     /// the synthesizer shared by the 5 oscillator channels
     BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
     /// the last time the oscillators were updated
-    blip_time_t last_time;
+    blip_time_t last_time = 0;
     /// the registers on the chip
     uint8_t regs[NUM_REGISTERS];
 
     /// the noise generator on the chip
     struct {
         /// TODO:
-        blip_time_t delay;
+        blip_time_t delay = 0;
         /// the linear feedback shift register for generating noise values
-        uint32_t lfsr;
+        uint32_t lfsr = 1;
     } noise;
 
     /// the envelope generator on the chip
     struct {
         /// TODO:
-        blip_time_t delay;
+        blip_time_t delay = 0;
         /// TODO:
-        uint8_t const* wave;
+        uint8_t const* wave = nullptr;
         /// the position in the waveform
-        int pos;
+        int pos = 0;
         /// values already passed through volume table
         uint8_t modes[8][48];
     } env;

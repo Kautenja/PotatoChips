@@ -124,3 +124,6 @@
 -   update triangle waveforms for wave-table editors to be subjectively better
 -   fix compilation issue for ARM builds!
 -   change internal representation of Frequency parameters to be more efficient
+-   fix emulator initialization to address and issue where oscillators would
+    be initialized perfectly out of phase (and thus mix together to produce
+    silence)

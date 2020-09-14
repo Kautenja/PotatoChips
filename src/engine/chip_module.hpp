@@ -48,8 +48,8 @@ struct ChipModule : rack::engine::Module {
         // set the output buffer for each individual voice on each polyphonic
         // channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++)
-                apu[channel].set_output(oscillator, &buffers[channel][oscillator]);
+            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
+                apu[channel].set_output(osc, &buffers[channel][osc]);
             // volume of 3 produces a 5V (10Vpp) signal from all voices
             apu[channel].set_volume(3.f);
         }
@@ -63,8 +63,8 @@ struct ChipModule : rack::engine::Module {
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-            for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++) {
-                buffers[channel][oscillator].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
+                buffers[channel][osc].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
             }
         }
     }
@@ -92,8 +92,8 @@ struct ChipModule : rack::engine::Module {
             // end the frame on the engine
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and set the output port
-            for (unsigned oscillator = 0; oscillator < ChipEmulator::OSC_COUNT; oscillator++)
-                outputs[oscillator].setVoltage(buffers[channel][oscillator].read_sample_10V(), channel);
+            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
+                outputs[osc].setVoltage(buffers[channel][osc].read_sample_10V(), channel);
         }
         // process lights using the overridden function
         if (lightDivider.process()) processLights(args, channels);

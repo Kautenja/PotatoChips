@@ -55,9 +55,9 @@ struct Chip2413 : Module {
     /// Initialize a new YM2413 Chip module.
     Chip2413() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        // configParam(PARAM_FREQ + 0, -56.f, 56.f, 0.f,  "Pulse A Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        // configParam(PARAM_FREQ + 1, -56.f, 56.f, 0.f,  "Pulse B Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        // configParam(PARAM_FREQ + 2, -56.f, 56.f, 0.f,  "Pulse C Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        // configParam(PARAM_FREQ + 0, -4.5f, 4.5f, 0.f,  "Pulse A Frequency", " Hz", 2, dsp::FREQ_C4);
+        // configParam(PARAM_FREQ + 1, -4.5f, 4.5f, 0.f,  "Pulse B Frequency", " Hz", 2, dsp::FREQ_C4);
+        // configParam(PARAM_FREQ + 2, -4.5f, 4.5f, 0.f,  "Pulse C Frequency", " Hz", 2, dsp::FREQ_C4);
         // configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.5f, "Pulse A Level", "%", 0.f, 100.f);
         // configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.5f, "Pulse B Level", "%", 0.f, 100.f);
         // configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Pulse C Level", "%", 0.f, 100.f);
@@ -80,7 +80,7 @@ struct Chip2413 : Module {
     //     // the constant modulation factor
     //     static constexpr auto MOD_FACTOR = 10.f;
     //     // get the pitch from the parameter and control voltage
-    //     float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+    //     float pitch = params[PARAM_FREQ + channel].getValue();
     //     pitch += inputs[INPUT_VOCT + channel].getVoltage();
     //     // convert the pitch to frequency based on standard exponential scale
     //     // and clamp within [0, 20000] Hz

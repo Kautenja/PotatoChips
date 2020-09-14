@@ -127,6 +127,7 @@ struct ChipSCC : Module {
     // void onReset() final {
     //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
+    //     ChipModule<KonamiSCC>::onReset();
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.

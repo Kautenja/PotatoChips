@@ -104,6 +104,7 @@ struct ChipGBS : ChipModule<NintendoGBS> {
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
             memcpy(wavetable[i], wavetables[i], SAMPLES_PER_WAVETABLE);
+        ChipModule<NintendoGBS>::onReset();
     }
 
     /// @brief Respond to the user randomizing the module with the "Randomize" action.

@@ -135,6 +135,7 @@ struct ChipTurboGrafx16 : Module {
     // void onReset() final {
     //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
+    //     ChipModule<NECTurboGrafx16>::onReset();
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.

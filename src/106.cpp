@@ -101,6 +101,7 @@ struct Chip106 : ChipModule<Namco106> {
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
             memcpy(wavetable[i], WAVETABLE[i], SAMPLES_PER_WAVETABLE);
+        ChipModule<Namco106>::onReset();
     }
 
     /// @brief Respond to the user randomizing the module with the "Randomize" action.

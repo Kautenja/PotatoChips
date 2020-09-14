@@ -118,8 +118,9 @@
 
 -   fix frequency range of 106 to resolve hang & crash
 
-## 1.6.3 (2020-08-16)
+## 1.6.3 (2020-09-14)
 
--   fix ordering of pairs of samples (nibbles) for 106 wavetable editor
--   fix triangle waveforms for wave-table editors
--   fix compilation issue for ARM builds
+-   fix ordering of pairs of samples (nibbles) for wavetable editor on 106
+-   update triangle waveforms for wave-table editors to be subjectively better
+-   fix compilation issue for ARM builds!
+-   change internal representation of Frequency parameters to be more efficient

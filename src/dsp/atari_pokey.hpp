@@ -193,7 +193,7 @@ class AtariPOKEY {
     /// the oscillators on the chip
     Oscillator oscs[OSC_COUNT];
     /// the synthesizer implementation for computing samples
-    Engine* impl;
+    Engine* impl = nullptr;
     /// has been run until this time in current frame
     blip_time_t last_time;
     /// the position in Poly5
@@ -440,8 +440,12 @@ class AtariPOKEY {
     ///
     /// @param new_engine the engine to use after resetting the chip
     ///
-    inline void reset(Engine* new_engine) {
-        impl = new_engine;
+    inline void reset(Engine* new_engine = nullptr) {
+        if (new_engine == nullptr && impl == nullptr)  // cannot reset without engine
+            throw Exception("cannot reset with implied engine without setting engine");
+        else if (new_engine != nullptr)  // set the engine
+            impl = new_engine;
+        // reset the instance variables
         last_time = 0;
         poly5_pos = 0;
         poly4_pos = 0;

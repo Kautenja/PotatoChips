@@ -103,7 +103,7 @@ struct ChipSCC : Module {
         // set the output buffer for each individual voice
         for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
             auto descFreq = "Channel " + std::to_string(i + 1) + " Frequency";
-            configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, descFreq,  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, descFreq,  " Hz", 2, dsp::FREQ_C4);
             auto descVol = "Channel " + std::to_string(i + 1) + " Volume";
             configParam(PARAM_VOLUME + i, 0, 15, 15, descVol,  "%", 0, 100.f / 15.f);
             apu.set_output(i, &buf[i]);
@@ -197,7 +197,7 @@ struct ChipSCC : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + channel].getValue();
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
         // convert the pitch to frequency based on standard exponential scale

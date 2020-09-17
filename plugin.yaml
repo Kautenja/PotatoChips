@@ -95,10 +95,10 @@ modules:
   #   tags:
   #     - Oscillator
   #     - Noise
-  # - slug: '2612'
-  #   name: '2612'
-  #   description: An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive.
-  #   manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2612.pdf
-  #   tags:
-  #     - Oscillator
-  #     - Noise
+  - slug: '2612'
+    name: '2612'
+    description: An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive.
+    manualUrl: https://github.com/Kautenja/PotatoChips/releases/latest/download/2612.pdf
+    tags:
+      - Oscillator
+      - Noise

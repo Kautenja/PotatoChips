@@ -45,12 +45,12 @@ struct Chip2612 : rack::Module {
         PARAM_LFO,
         PARAM_AMS,
         PARAM_FMS,
+        ENUMS(PARAM_TL,  NUM_OPERATORS),
         ENUMS(PARAM_AR,  NUM_OPERATORS),
         ENUMS(PARAM_D1,  NUM_OPERATORS),
         ENUMS(PARAM_SL,  NUM_OPERATORS),
         ENUMS(PARAM_D2,  NUM_OPERATORS),
         ENUMS(PARAM_RR,  NUM_OPERATORS),
-        ENUMS(PARAM_TL,  NUM_OPERATORS),
         ENUMS(PARAM_MUL, NUM_OPERATORS),
         ENUMS(PARAM_DET, NUM_OPERATORS),
         ENUMS(PARAM_RS,  NUM_OPERATORS),
@@ -65,12 +65,12 @@ struct Chip2612 : rack::Module {
         INPUT_LFO,
         INPUT_AMS,
         INPUT_FMS,
+        ENUMS(INPUT_TL,  NUM_OPERATORS),
         ENUMS(INPUT_AR,  NUM_OPERATORS),
         ENUMS(INPUT_D1,  NUM_OPERATORS),
         ENUMS(INPUT_SL,  NUM_OPERATORS),
         ENUMS(INPUT_D2,  NUM_OPERATORS),
         ENUMS(INPUT_RR,  NUM_OPERATORS),
-        ENUMS(INPUT_TL,  NUM_OPERATORS),
         ENUMS(INPUT_MUL, NUM_OPERATORS),
         ENUMS(INPUT_DET, NUM_OPERATORS),
         ENUMS(INPUT_RS,  NUM_OPERATORS),
@@ -106,12 +106,12 @@ struct Chip2612 : rack::Module {
         configParam(PARAM_FMS, 0, 7, 0, "Frequency modulation sensitivity");
         for (unsigned i = 0; i < NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
+            configParam(PARAM_TL  + i, 0, 127, 0,  opName + " Total Level");
             configParam(PARAM_AR  + i, 0, 31,  31, opName + " Attack Rate");
             configParam(PARAM_D1  + i, 0, 31,  0,  opName + " 1st Decay Rate");
             configParam(PARAM_SL  + i, 0, 15,  0,  opName + " Sustain Level");
             configParam(PARAM_D2  + i, 0, 31,  0,  opName + " 2nd Decay Rate");
             configParam(PARAM_RR  + i, 0, 15,  15, opName + " Release Rate");
-            configParam(PARAM_TL  + i, 0, 127, 0,  opName + " Total Level");
             configParam(PARAM_MUL + i, 0, 15,  1,  opName + " Multiplier");
             configParam(PARAM_DET + i, 0, 7,   0,  opName + " Detune");
             configParam(PARAM_RS  + i, 0, 3,   0,  opName + " Rate Scaling");
@@ -228,40 +228,29 @@ struct Chip2612Widget : ModuleWidget {
             Vec(110, 70)
         ));
         // global parameters and inputs
-        addParam(createParam<Rogan3PBlue>(Vec(115, 113), module, Chip2612::PARAM_AL));
-        addInput(createInput<PJ301MPort>(Vec(124, 171), module, Chip2612::INPUT_AL));
-        addParam(createParam<Rogan3PBlue>(Vec(182, 113), module, Chip2612::PARAM_FB));
-        addInput(createInput<PJ301MPort>(Vec(191, 171), module, Chip2612::INPUT_FB));
+        addParam(createParam<Rogan3PBlue>(Vec(115, 113),  module, Chip2612::PARAM_AL));
+        addInput(createInput<PJ301MPort>( Vec(124, 171),  module, Chip2612::INPUT_AL));
+        addParam(createParam<Rogan3PBlue>(Vec(182, 113),  module, Chip2612::PARAM_FB));
+        addInput(createInput<PJ301MPort>( Vec(191, 171),  module, Chip2612::INPUT_FB));
         addParam(createParam<Rogan2PWhite>(Vec(187, 223), module, Chip2612::PARAM_LFO));
-        addInput(createInput<PJ301MPort>(Vec(124, 226), module, Chip2612::INPUT_LFO));
+        addInput(createInput<PJ301MPort>( Vec(124, 226),  module, Chip2612::INPUT_LFO));
         addParam(createParam<Rogan2PWhite>(Vec(187, 279), module, Chip2612::PARAM_AMS));
-        addInput(createInput<PJ301MPort>(Vec(124, 282), module, Chip2612::INPUT_AMS));
+        addInput(createInput<PJ301MPort>(  Vec(124, 282), module, Chip2612::INPUT_AMS));
         addParam(createParam<Rogan2PWhite>(Vec(187, 335), module, Chip2612::PARAM_FMS));
-        addInput(createInput<PJ301MPort>(Vec(124, 338), module, Chip2612::INPUT_FMS));
+        addInput(createInput<PJ301MPort>(  Vec(124, 338), module, Chip2612::INPUT_FMS));
         // operator parameters and inputs
-        const uint8_t spacing = 20;
         for (unsigned i = 0; i < Chip2612::NUM_OPERATORS; i++) {
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 21.591)),  module, Chip2612::PARAM_AR  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 31.751)),  module, Chip2612::PARAM_D1  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 41.911)),  module, Chip2612::PARAM_SL  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 52.071)),  module, Chip2612::PARAM_D2  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 62.231)),  module, Chip2612::PARAM_RR  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 72.391)),  module, Chip2612::PARAM_TL  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 83.503)),  module, Chip2612::PARAM_MUL + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 93.663)),  module, Chip2612::PARAM_DET + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 103.823)), module, Chip2612::PARAM_RS  + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 113.983)), module, Chip2612::PARAM_AM  + i));
-
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 21.591)),  module, Chip2612::INPUT_AR  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 31.751)),  module, Chip2612::INPUT_D1  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 41.911)),  module, Chip2612::INPUT_SL  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 52.071)),  module, Chip2612::INPUT_D2  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 62.231)),  module, Chip2612::INPUT_RR  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 72.391)),  module, Chip2612::INPUT_TL  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 83.503)),  module, Chip2612::INPUT_MUL + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 93.663)),  module, Chip2612::INPUT_DET + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 103.823)), module, Chip2612::INPUT_RS  + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 113.983)), module, Chip2612::INPUT_AM  + i));
+            // the X & Y offsets for the operator bank
+            auto offsetX = 348 * (i % (Chip2612::NUM_OPERATORS / 2));
+            auto offsetY = 165 * (i / (Chip2612::NUM_OPERATORS / 2));
+            for (unsigned parameter = 0; parameter < 10; parameter++) {
+                // the parameter & input offset
+                auto offset = i + parameter * Chip2612::NUM_OPERATORS;
+                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 30 + offsetY), module, Chip2612::PARAM_TL + offset);
+                param->snap = true;
+                addParam(param);
+                addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_TL + offset));
+            }
         }
         // left + right master outputs
         addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(184.182, 112.501)), module, Chip2612::OUTPUT_MASTER + 0));

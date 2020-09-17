@@ -212,10 +212,8 @@ struct Chip2612Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // voice inputs (pitch and gate)
         for (unsigned i = 0; i < Chip2612::NUM_VOICES; i++) {
-            auto offsetX = 45 * (i / (Chip2612::NUM_VOICES / 2));
-            auto offsetY = 112 * (i % (Chip2612::NUM_VOICES / 2));
-            addInput(createInput<PJ301MPort>(Vec(26 + offsetX, 46 + offsetY), module, Chip2612::INPUT_PITCH + i));
-            addInput(createInput<PJ301MPort>(Vec(26 + offsetX, 97 + offsetY), module, Chip2612::INPUT_GATE  + i));
+            addInput(createInput<PJ301MPort>(Vec(26, 84 + 34 * i), module, Chip2612::INPUT_PITCH + i));
+            addInput(createInput<PJ301MPort>(Vec(71, 84 + 34 * i), module, Chip2612::INPUT_GATE  + i));
         }
         // algorithm display
         uint8_t defaultAlgorithm = 0;
@@ -242,19 +240,19 @@ struct Chip2612Widget : ModuleWidget {
         for (unsigned i = 0; i < Chip2612::NUM_OPERATORS; i++) {
             // the X & Y offsets for the operator bank
             auto offsetX = 348 * (i % (Chip2612::NUM_OPERATORS / 2));
-            auto offsetY = 165 * (i / (Chip2612::NUM_OPERATORS / 2));
+            auto offsetY = 175 * (i / (Chip2612::NUM_OPERATORS / 2));
             for (unsigned parameter = 0; parameter < 10; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * Chip2612::NUM_OPERATORS;
-                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 30 + offsetY), module, Chip2612::PARAM_TL + offset);
+                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_TL + offset);
                 param->snap = true;
                 addParam(param);
                 addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_TL + offset));
             }
         }
         // left + right master outputs
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(184.182, 112.501)), module, Chip2612::OUTPUT_MASTER + 0));
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(194.342, 112.501)), module, Chip2612::OUTPUT_MASTER + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(71, 325), module, Chip2612::OUTPUT_MASTER + 1));
     }
 };
 

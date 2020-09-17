@@ -213,7 +213,7 @@ struct Chip2612Widget : ModuleWidget {
             "res/2612algorithms/",
             Chip2612::NUM_ALGORITHMS,
             mm2px(Vec(4.749, 29.698)),
-            mm2px(Vec(28.073, 17))
+            Vec(110, 70)
         ));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));

@@ -1,4 +1,4 @@
-// A VCV Rack for viewing and editing a wave-table using the mouse pointer.
+// A VCV Rack widget for viewing and editing samples in waveform.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify

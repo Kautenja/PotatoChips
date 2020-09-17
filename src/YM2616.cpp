@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "dsp/yamaha_ym2612.hpp"
+#include "widget/indexed_frame_display.hpp"
 #include <limits>
 
 // TODO: remove algorithm widget
@@ -195,47 +196,6 @@ struct Chip2612 : rack::Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// A display for showing the active FM algorithm.
-struct Chip2612AlgorithmDisplay : TransparentWidget {
-    /// the Chip2612 module to display the data model of
-    Chip2612 *module = nullptr;
-    /// the SVG images representing the algorithms
-    std::vector<NSVGimage*> frames;
-
-    /// Initialize a new algorithm display
-    Chip2612AlgorithmDisplay() {
-        for (int i = 0; i < 8; i++) {  // load an image for each algorithm
-            // create the path for the image to load based on the plugin's
-            // location on the system disk
-            auto path = asset::plugin(plugin_instance, "res/2612algorithms/" + std::to_string(i) + ".svg");
-            // load the image from disk
-            NSVGimage* image;
-            // TODO: rescale images appropriately in Sketch and remove 16.5mm
-            image = nsvgParseFromFile(path.c_str(), "mm", 16.5);
-            // add the image to the set of frames
-            frames.push_back(image);
-        }
-    }
-
-    /// @brief Draw the display on the main context.
-    ///
-    /// @param args the arguments for the draw context for this widget
-    ///
-    void draw(const DrawArgs &args) override {
-        uint8_t algorithm = module ? module->algorithm : 7;
-        // create the frame of the display
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 2.0);
-        nvgFillColor(args.vg, nvgRGB(0x38, 0x38, 0x38));
-        nvgFill(args.vg);
-        nvgStrokeWidth(args.vg, 1.0);
-        nvgStrokeColor(args.vg, nvgRGB(0x50, 0x9e, 0xec));
-        nvgStroke(args.vg);
-        // draw the image for the selected algorithm
-        svgDraw(args.vg, frames[algorithm]);
-    }
-};
-
 /// The panel widget for 2612.
 struct Chip2612Widget : ModuleWidget {
     /// @brief Initialize a new widget.
@@ -246,13 +206,13 @@ struct Chip2612Widget : ModuleWidget {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/2612.svg")));
         // algorithm display
-        {
-            Chip2612AlgorithmDisplay *display = new Chip2612AlgorithmDisplay();
-            display->box.pos = mm2px(Vec(4.749, 29.698));
-            display->box.size = mm2px(Vec(28.073, 17));
-            display->module = module;
-            addChild(display);
-        }
+        addChild(new IndexedFrameDisplay<Chip2612>(
+            module,
+            "res/2612algorithms/",
+            8,
+            mm2px(Vec(4.749, 29.698)),
+            mm2px(Vec(28.073, 17))
+        ));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

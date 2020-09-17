@@ -21,7 +21,7 @@
 
 /// A display for showing indexed images from a frame buffer.
 template<typename T>
-struct IndexedFrameDisplay : TransparentWidget {
+struct IndexedFrameDisplay : rack::LightWidget {
  private:
     /// TODO:
     T* module = nullptr;

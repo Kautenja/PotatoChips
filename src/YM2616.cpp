@@ -148,6 +148,8 @@ struct Chip2612 : rack::Module {
         algorithm = clamp(algorithm, 0, 7);
         ym2612.setLFO(computeValue(0, PARAM_LFO, INPUT_LFO, 7));
         // iterate over each oscillator on the chip
+        float pitch = 0;
+        float gate = 0;
         for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
             // set the global parameters
             ym2612.setAL (osc, computeValue(osc, PARAM_AL,  INPUT_AL,  7));
@@ -168,11 +170,12 @@ struct Chip2612 : rack::Module {
                 ym2612.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
             }
             // Compute the frequency from the pitch parameter and input
-            float pitch = inputs[INPUT_PITCH + osc].getVoltage();
+            pitch = inputs[INPUT_PITCH + osc].getNormalVoltage(pitch);
             float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
             ym2612.setFREQ(osc, freq);
             // process the gate trigger
-            gate_triggers[osc].process(rescale(inputs[INPUT_GATE + osc].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate);
+            gate_triggers[osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
             ym2612.setGATE(osc, gate_triggers[osc].state);
         }
     }

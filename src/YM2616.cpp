@@ -285,11 +285,9 @@ struct Chip2612Widget : ModuleWidget {
         }
         // voice inputs (pitch and gate)
         for (unsigned i = 0; i < Chip2612::NUM_VOICES; i++) {
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(13.758, 13.547+10*i)), module, Chip2612::INPUT_PITCH + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(26.458, 13.547+10*i)), module, Chip2612::INPUT_GATE  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(160, 13.547+10*i)), module, Chip2612::INPUT_PITCH + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(170, 13.547+10*i)), module, Chip2612::INPUT_GATE  + i));
         }
-        // addInput(createInputCentered<PJ301MPort>(mm2px(Vec(13.758, 13.547)), module, Chip2612::INPUT_PITCH));
-        // addInput(createInputCentered<PJ301MPort>(mm2px(Vec(26.458, 13.547)), module, Chip2612::INPUT_GATE));
         // global parameters and inputs
         addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 56.621)), module, Chip2612::PARAM_AL));
         addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 66.252)), module, Chip2612::PARAM_FB));

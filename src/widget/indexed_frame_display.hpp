@@ -41,8 +41,10 @@ struct IndexedFrameDisplay : rack::LightWidget {
     /// @param num_images the number of frames to load from disk
     /// @param position the position of the image display
     /// @param size the size of the image display
-    /// @param background_ the background color for the widget
-    /// @param border_ the border color for the widget
+    /// @param unit the unit for loading the image (default: pixels)
+    /// @param dpi the scaling factor when rendering the pixels (default: 1)
+    /// @param background_ the background color for the widget (default: black)
+    /// @param border_ the border color for the widget (default: dark gray)
     ///
     IndexedFrameDisplay(
         T* index_,
@@ -50,6 +52,8 @@ struct IndexedFrameDisplay : rack::LightWidget {
         unsigned num_images,
         rack::Vec position,
         rack::Vec size,
+        std::string unit = "px",
+        float dpi = 1,
         NVGcolor background_ = {{{0.f,  0.f,  0.f,  1.f}}},
         NVGcolor border_ =     {{{0.2f, 0.2f, 0.2f, 1.f}}}
     ) : index(index_), background(background_), border(border_) {
@@ -57,8 +61,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
         setSize(size);
         for (unsigned i = 0; i < num_images; i++) {  // load each image
             auto imagePath = asset::plugin(plugin_instance, path + std::to_string(i) + ".svg");
-            // TODO: rescale images appropriately in Sketch and remove 16.5mm
-            frames.push_back(nsvgParseFromFile(imagePath.c_str(), "mm", 16.5));
+            frames.push_back(nsvgParseFromFile(imagePath.c_str(), unit.c_str(), dpi));
         }
     }
 

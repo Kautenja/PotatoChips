@@ -206,8 +206,10 @@ struct Chip2612Widget : ModuleWidget {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/2612.svg")));
         // algorithm display
-        addChild(new IndexedFrameDisplay<Chip2612>(
-            module,
+        uint8_t defaultAlgorithm = 0;
+        uint8_t* index = module ? &module->algorithm : &defaultAlgorithm;
+        addChild(new IndexedFrameDisplay<uint8_t>(
+            index,
             "res/2612algorithms/",
             8,
             mm2px(Vec(4.749, 29.698)),

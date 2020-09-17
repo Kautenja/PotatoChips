@@ -189,6 +189,7 @@ struct Chip2612 : rack::Module {
         if (cvDivider.process()) processCV();
         // advance one sample in the emulator
         ym2612.step();
+        // TODO: Normal master outputs
         // set the outputs of the module
         outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(ym2612.MOL) / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(ym2612.MOR) / std::numeric_limits<int16_t>::max());

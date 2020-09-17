@@ -167,11 +167,11 @@ struct Chip2612 : rack::Module {
                 ym2612.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
             }
             // Compute the frequency from the pitch parameter and input
-            float pitch = inputs[INPUT_PITCH].getVoltage();
+            float pitch = inputs[INPUT_PITCH + osc].getVoltage();
             float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
             ym2612.setFREQ(osc, freq);
             // process the gate trigger
-            gate_triggers[osc].process(rescale(inputs[INPUT_GATE].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            gate_triggers[osc].process(rescale(inputs[INPUT_GATE + osc].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             ym2612.setGATE(osc, gate_triggers[osc].state);
         }
     }

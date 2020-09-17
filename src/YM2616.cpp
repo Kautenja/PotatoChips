@@ -17,6 +17,7 @@
 
 #include "plugin.hpp"
 #include "dsp/yamaha_ym2612.hpp"
+#include "widget/indexed_frame_display.hpp"
 #include <limits>
 
 // TODO: remove algorithm widget
@@ -57,8 +58,8 @@ struct Chip2612 : rack::Module {
         NUM_PARAMS
     };
     enum InputIds {
-        INPUT_PITCH,
-        INPUT_GATE,
+        ENUMS(INPUT_PITCH, NUM_VOICES),
+        ENUMS(INPUT_GATE,  NUM_VOICES),
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
@@ -167,11 +168,11 @@ struct Chip2612 : rack::Module {
                 ym2612.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
             }
             // Compute the frequency from the pitch parameter and input
-            float pitch = inputs[INPUT_PITCH].getVoltage();
+            float pitch = inputs[INPUT_PITCH + osc].getVoltage();
             float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
             ym2612.setFREQ(osc, freq);
             // process the gate trigger
-            gate_triggers[osc].process(rescale(inputs[INPUT_GATE].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+            gate_triggers[osc].process(rescale(inputs[INPUT_GATE + osc].getVoltage(), 0.f, 2.f, 0.f, 1.f));
             ym2612.setGATE(osc, gate_triggers[osc].state);
         }
     }
@@ -195,47 +196,6 @@ struct Chip2612 : rack::Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// A display for showing the active FM algorithm.
-struct Chip2612AlgorithmDisplay : TransparentWidget {
-    /// the Chip2612 module to display the data model of
-    Chip2612 *module = nullptr;
-    /// the SVG images representing the algorithms
-    std::vector<NSVGimage*> frames;
-
-    /// Initialize a new algorithm display
-    Chip2612AlgorithmDisplay() {
-        for (int i = 0; i < 8; i++) {  // load an image for each algorithm
-            // create the path for the image to load based on the plugin's
-            // location on the system disk
-            auto path = asset::plugin(plugin_instance, "res/2612algorithms/" + std::to_string(i) + ".svg");
-            // load the image from disk
-            NSVGimage* image;
-            // TODO: rescale images appropriately in Sketch and remove 16.5mm
-            image = nsvgParseFromFile(path.c_str(), "mm", 16.5);
-            // add the image to the set of frames
-            frames.push_back(image);
-        }
-    }
-
-    /// @brief Draw the display on the main context.
-    ///
-    /// @param args the arguments for the draw context for this widget
-    ///
-    void draw(const DrawArgs &args) override {
-        uint8_t algorithm = module ? module->algorithm : 7;
-        // create the frame of the display
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 2.0);
-        nvgFillColor(args.vg, nvgRGB(0x38, 0x38, 0x38));
-        nvgFill(args.vg);
-        nvgStrokeWidth(args.vg, 1.0);
-        nvgStrokeColor(args.vg, nvgRGB(0x50, 0x9e, 0xec));
-        nvgStroke(args.vg);
-        // draw the image for the selected algorithm
-        svgDraw(args.vg, frames[algorithm]);
-    }
-};
-
 /// The panel widget for 2612.
 struct Chip2612Widget : ModuleWidget {
     /// @brief Initialize a new widget.
@@ -245,61 +205,67 @@ struct Chip2612Widget : ModuleWidget {
     Chip2612Widget(Chip2612 *module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/2612.svg")));
-
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-        uint8_t spacing = 20;
-        for (int i = 0; i < 4; i++) {
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 21.591)), module, Chip2612::PARAM_AR + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 31.751)), module, Chip2612::PARAM_D1 + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 41.911)), module, Chip2612::PARAM_SL + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 52.071)), module, Chip2612::PARAM_D2 + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 62.231)), module, Chip2612::PARAM_RR + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 72.391)), module, Chip2612::PARAM_TL + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 83.503)), module, Chip2612::PARAM_MUL + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 93.663)), module, Chip2612::PARAM_DET + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 103.823)), module, Chip2612::PARAM_RS + i));
-            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(62+spacing*i, 113.983)), module, Chip2612::PARAM_AM + i));
-
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 21.591)), module, Chip2612::INPUT_AR + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 31.751)), module, Chip2612::INPUT_D1 + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 41.911)), module, Chip2612::INPUT_SL + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 52.071)), module, Chip2612::INPUT_D2 + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 62.231)), module, Chip2612::INPUT_RR + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 72.391)), module, Chip2612::INPUT_TL + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 83.503)), module, Chip2612::INPUT_MUL + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 93.663)), module, Chip2612::INPUT_DET + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 103.823)), module, Chip2612::INPUT_RS + i));
-            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(52+spacing*i, 113.983)), module, Chip2612::INPUT_AM + i));
+        // panel screws
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // voice inputs (pitch and gate)
+        for (unsigned i = 0; i < Chip2612::NUM_VOICES; i++) {
+            auto offsetX = 45 * (i / (Chip2612::NUM_VOICES / 2));
+            auto offsetY = 112 * (i % (Chip2612::NUM_VOICES / 2));
+            addInput(createInput<PJ301MPort>(Vec(26 + offsetX, 46 + offsetY), module, Chip2612::INPUT_PITCH + i));
+            addInput(createInput<PJ301MPort>(Vec(26 + offsetX, 97 + offsetY), module, Chip2612::INPUT_GATE  + i));
         }
+        // algorithm display
+        uint8_t defaultAlgorithm = 0;
+        uint8_t* index = module ? &module->algorithm : &defaultAlgorithm;
+        addChild(new IndexedFrameDisplay<uint8_t>(
+            index,
+            "res/2612algorithms/",
+            Chip2612::NUM_ALGORITHMS,
+            Vec(115, 20),
+            Vec(110, 70)
+        ));
+        // global parameters and inputs
+        addParam(createParam<Rogan3PBlue>(Vec(115, 113), module, Chip2612::PARAM_AL));
+        addInput(createInput<PJ301MPort>(Vec(124, 171), module, Chip2612::INPUT_AL));
+        addParam(createParam<Rogan3PBlue>(Vec(182, 113), module, Chip2612::PARAM_FB));
+        addInput(createInput<PJ301MPort>(Vec(191, 171), module, Chip2612::INPUT_FB));
+        addParam(createParam<Rogan2PWhite>(Vec(187, 223), module, Chip2612::PARAM_LFO));
+        addInput(createInput<PJ301MPort>(Vec(124, 226), module, Chip2612::INPUT_LFO));
+        addParam(createParam<Rogan2PWhite>(Vec(187, 279), module, Chip2612::PARAM_AMS));
+        addInput(createInput<PJ301MPort>(Vec(124, 282), module, Chip2612::INPUT_AMS));
+        addParam(createParam<Rogan2PWhite>(Vec(187, 335), module, Chip2612::PARAM_FMS));
+        addInput(createInput<PJ301MPort>(Vec(124, 338), module, Chip2612::INPUT_FMS));
+        // operator parameters and inputs
+        const uint8_t spacing = 20;
+        for (unsigned i = 0; i < Chip2612::NUM_OPERATORS; i++) {
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 21.591)),  module, Chip2612::PARAM_AR  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 31.751)),  module, Chip2612::PARAM_D1  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 41.911)),  module, Chip2612::PARAM_SL  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 52.071)),  module, Chip2612::PARAM_D2  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 62.231)),  module, Chip2612::PARAM_RR  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 72.391)),  module, Chip2612::PARAM_TL  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 83.503)),  module, Chip2612::PARAM_MUL + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 93.663)),  module, Chip2612::PARAM_DET + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 103.823)), module, Chip2612::PARAM_RS  + i));
+            addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(110+spacing*i, 113.983)), module, Chip2612::PARAM_AM  + i));
 
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(13.758, 13.547)), module, Chip2612::INPUT_PITCH));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(26.458, 13.547)), module, Chip2612::INPUT_GATE));
-
-        addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 56.621)), module, Chip2612::PARAM_AL));
-        addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 66.252)), module, Chip2612::PARAM_FB));
-        addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 75.988)), module, Chip2612::PARAM_LFO));
-        addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 85.619)), module, Chip2612::PARAM_AMS));
-        addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(26.882, 94.721)), module, Chip2612::PARAM_FMS));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.722, 56.621)), module, Chip2612::INPUT_AL));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.722, 66.252)), module, Chip2612::INPUT_FB));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.722, 75.988)), module, Chip2612::INPUT_LFO));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.722, 85.619)), module, Chip2612::INPUT_AMS));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.722, 94.721)), module, Chip2612::INPUT_FMS));
-
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(14.182, 112.501)), module, Chip2612::OUTPUT_MASTER + 0));
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(24.342, 112.501)), module, Chip2612::OUTPUT_MASTER + 1));
-
-        {
-            Chip2612AlgorithmDisplay *display = new Chip2612AlgorithmDisplay();
-            display->box.pos = mm2px(Vec(4.749, 29.698));
-            display->box.size = mm2px(Vec(28.073, 17));
-            display->module = module;
-            addChild(display);
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 21.591)),  module, Chip2612::INPUT_AR  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 31.751)),  module, Chip2612::INPUT_D1  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 41.911)),  module, Chip2612::INPUT_SL  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 52.071)),  module, Chip2612::INPUT_D2  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 62.231)),  module, Chip2612::INPUT_RR  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 72.391)),  module, Chip2612::INPUT_TL  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 83.503)),  module, Chip2612::INPUT_MUL + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 93.663)),  module, Chip2612::INPUT_DET + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 103.823)), module, Chip2612::INPUT_RS  + i));
+            addInput(createInputCentered<PJ301MPort>(mm2px(Vec(100+spacing*i, 113.983)), module, Chip2612::INPUT_AM  + i));
         }
+        // left + right master outputs
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(184.182, 112.501)), module, Chip2612::OUTPUT_MASTER + 0));
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(194.342, 112.501)), module, Chip2612::OUTPUT_MASTER + 1));
     }
 };
 

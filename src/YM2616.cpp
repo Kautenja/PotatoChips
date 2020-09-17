@@ -211,7 +211,7 @@ struct Chip2612Widget : ModuleWidget {
         addChild(new IndexedFrameDisplay<uint8_t>(
             index,
             "res/2612algorithms/",
-            8,
+            Chip2612::NUM_ALGORITHMS,
             mm2px(Vec(4.749, 29.698)),
             mm2px(Vec(28.073, 17))
         ));

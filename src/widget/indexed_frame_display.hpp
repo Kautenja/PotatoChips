@@ -15,6 +15,7 @@
 
 #include "rack.hpp"
 #include <cstdint>
+#include <vector>
 
 #ifndef WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 #define WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
@@ -66,19 +67,36 @@ struct IndexedFrameDisplay : rack::LightWidget {
     /// @param args the arguments for the draw context for this widget
     ///
     void draw(const DrawArgs &args) override {
-        // create the frame of the display
+        // the x position of the widget
+        static constexpr int x = 0;
+        // the y position of the widget
+        static constexpr int y = 0;
+        // the radius for the corner on the rectangle
+        static constexpr int corner_radius = 3;
+        // arbitrary padding
+        static constexpr int pad = 1;
+        // -------------------------------------------------------------------
+        // draw the background
+        // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, 0.0, 0.0, box.size.x, box.size.y, 2.0);
+        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
         nvgFillColor(args.vg, background);
         nvgFill(args.vg);
-        nvgStrokeWidth(args.vg, 1.0);
-        nvgStrokeColor(args.vg, border);
-        nvgStroke(args.vg);
         nvgClosePath(args.vg);
-        // draw the image for the selected index
+        // -------------------------------------------------------------------
+        // draw the image
+        // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
         auto index = (module == nullptr) ? 0 : module->algorithm;
         svgDraw(args.vg, frames[index]);
+        nvgClosePath(args.vg);
+        // -------------------------------------------------------------------
+        // draw the border
+        // -------------------------------------------------------------------
+        nvgBeginPath(args.vg);
+        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
+        nvgStrokeColor(args.vg, border);
+        nvgStroke(args.vg);
         nvgClosePath(args.vg);
     }
 };

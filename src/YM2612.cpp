@@ -146,10 +146,8 @@ struct Chip2612 : rack::Module {
     /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-            // TODO: why is it necessary to divide by 1.455 to tune to C4?
-            apu[channel].set_sample_rate(CLOCK_RATE / 1.455, APP->engine->getSampleRate());
-        }
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
+            apu[channel].set_sample_rate(CLOCK_RATE, APP->engine->getSampleRate());
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -187,8 +185,7 @@ struct Chip2612 : rack::Module {
             // Compute the frequency from the pitch parameter and input. low
             // range of -4 octaves, high range of 6 octaves
             pitch = inputs[INPUT_PITCH + osc].getNormalVoltage(pitch, channel);
-            float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
-            apu[channel].setFREQ(osc, freq);
+            apu[channel].setFREQ(osc, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate, channel);
             gate_triggers[channel][osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));

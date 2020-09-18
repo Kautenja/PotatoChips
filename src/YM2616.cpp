@@ -81,7 +81,7 @@ struct Chip2612 : rack::Module {
     enum LightIds { NUM_LIGHTS };
 
     /// the current FM algorithm
-    uint8_t algorithm = 7;
+    uint8_t algorithm = 0;
 
     /// the YM2612 chip emulator
     YM2612 ym2612;
@@ -110,7 +110,7 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_D2  + i, 0, 31,  0,  opName + " 2nd Decay Rate");
             configParam(PARAM_RR  + i, 0, 15,  15, opName + " Release Rate");
             configParam(PARAM_MUL + i, 0, 15,  1,  opName + " Multiplier");
-            configParam(PARAM_DET + i, 0, 7,   0,  opName + " Detune");
+            configParam(PARAM_DET + i, 0, 7,   4,  opName + " Detune");
             configParam(PARAM_RS  + i, 0, 3,   0,  opName + " Rate Scaling");
             configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
         }

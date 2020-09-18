@@ -91,12 +91,17 @@
 \setlength{\headheight}{15pt}
 \pagestyle{fancy}
 \lhead{KautenjaDSP}
-\rhead{\itshape {\KautenjaDSP@moduleName} v1.6.3}
+\rhead{\itshape {\KautenjaDSP@moduleName} v1.7.0}
 \cfoot{\thepage}
 
 % ----------------------------------------------------------------------------
 % Commands
 % ----------------------------------------------------------------------------
+
+% a command for setting the max width of an image using graphicx
+\makeatletter
+\def\maxwidth#1{\ifdim\Gin@nat@width>#1 #1\else\Gin@nat@width\fi}
+\makeatother
 
 % Create the title page.
 %
@@ -110,11 +115,11 @@
 % center the title page contents
 \vspace*{\fill}
 \begin{center}
-\includegraphics{#1}
+\includegraphics[width=\maxwidth{\textwidth}]{#1}
 \linebreak\linebreak\linebreak\linebreak
-\includegraphics{#2}
+\includegraphics[width=\maxwidth{\textwidth}]{#2}
 \linebreak\linebreak\linebreak\linebreak
-\includegraphics{#3}
+\includegraphics[width=\maxwidth{\textwidth}]{#3}
 \end{center}
 \vspace*{\fill}
 \clearpage

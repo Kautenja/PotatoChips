@@ -521,25 +521,41 @@ struct FM_OPN
 
 
 
-
+/// A structure with operator data for a YM2612 voice.
 struct Operator {
-    uint8_t AR;
-    uint8_t D1;
-    uint8_t SL;
-    uint8_t D2;
-    uint8_t RR;
-    uint8_t TL;
-    uint8_t MUL;
-    uint8_t DET;
-    uint8_t RS;
-    uint8_t AM;
+    /// the attack rate
+    uint8_t AR = 0;
+    /// the 1st decay stage rate
+    uint8_t D1 = 0;
+    /// the amplitude to start the second decay stage
+    uint8_t SL = 0;
+    /// the 2nd decay stage rate
+    uint8_t D2 = 0;
+    /// the release rate
+    uint8_t RR = 0;
+    /// the total amplitude of the envelope
+    uint8_t TL = 0;
+    /// the multiplier for the FM frequency
+    uint8_t MUL = 0;
+    /// the amount of detuning to apply (DET * epsilon + frequency)
+    uint8_t DET = 0;
+    /// the Rate scale for key-tracking the envelope rates
+    uint8_t RS = 0;
+    /// whether the operator has amplitude modulation from the LFO enabled
+    uint8_t AM = 0;
 };
 
+/// A structure with channel data for a YM2612 voice.
 struct Channel {
-    uint8_t AL;
-    uint8_t FB;
-    uint8_t AMS;
-    uint8_t FMS;
+    /// the index of the active FM algorithm
+    uint8_t AL = 0;
+    /// the amount of feedback being applied to operator 1
+    uint8_t FB = 0;
+    /// the attenuator (and switch) for amplitude modulation from the LFO
+    uint8_t AMS = 0;
+    /// the attenuator (and switch) for frequency modulation from the LFO
+    uint8_t FMS = 0;
+    /// the four FM operators for the channel
     Operator operators[4];
 };
 
@@ -570,9 +586,9 @@ class YM2612 {
 
     explicit YM2612(double sample_rate = 44100);
 
-    inline void set_sample_rate(double sample_rate) {
-        OPN.ST.rate = sample_rate;
-    }
+    // inline void set_sample_rate(double sample_rate) {
+    //     OPN.ST.rate = sample_rate;
+    // }
 
     void reset();
     void step();

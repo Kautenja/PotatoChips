@@ -16,9 +16,9 @@
 //
 
 #include "plugin.hpp"
+#include "componentlibrary.hpp"
 #include "dsp/yamaha_ym2612.hpp"
 #include "widget/indexed_frame_display.hpp"
-#include <limits>
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -26,6 +26,7 @@
 
 /// A Yamaha YM2612 chip emulator module.
 struct Chip2612 : rack::Module {
+ public:
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
     /// the number of FM operators on the module
@@ -33,6 +34,36 @@ struct Chip2612 : rack::Module {
     /// the number of independent FM synthesis oscillators on the module
     static constexpr unsigned NUM_VOICES = 6;
 
+ private:
+    /// the YM2612 chip emulator
+    YM2612 apu[PORT_MAX_CHANNELS];
+
+    /// triggers for opening and closing the oscillator gates
+    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS][NUM_VOICES];
+
+    /// a clock divider for reducing computation (on CV acquisition)
+    dsp::ClockDivider cvDivider;
+
+    /// Return the binary value for the given parameter.
+    ///
+    /// @param channel the channel to get the parameter value for
+    /// @param paramIndex the index of the parameter in the params list
+    /// @param inputIndex the index of the CV input in the inputs list
+    /// @param int max the maximal value for the parameter
+    ///
+    inline uint8_t getParam(
+        unsigned channel,
+        unsigned paramIndex,
+        unsigned inputIndex,
+        unsigned max
+    ) {
+        auto param = params[paramIndex].getValue();
+        auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
+        return clamp(static_cast<int>(param + cv), 0, max);
+    }
+
+ public:
+    /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         PARAM_AL,
         PARAM_FB,
@@ -51,6 +82,7 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_AM,  NUM_OPERATORS),
         NUM_PARAMS
     };
+    /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_PITCH, NUM_VOICES),
         ENUMS(INPUT_GATE,  NUM_VOICES),
@@ -71,23 +103,16 @@ struct Chip2612 : rack::Module {
         ENUMS(INPUT_AM,  NUM_OPERATORS),
         NUM_INPUTS
     };
+    /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_MASTER, 2),
         NUM_OUTPUTS
     };
+    /// the indexes of lights on the module
     enum LightIds { NUM_LIGHTS };
 
     /// the current FM algorithm
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-    /// the YM2612 chip emulator
-    YM2612 apu[PORT_MAX_CHANNELS];
-
-    /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS][NUM_VOICES];
-
-    /// a clock divider for reducing computation (on CV acquisition)
-    dsp::ClockDivider cvDivider;
 
     /// Initialize a new Yamaha YM2612 module.
     Chip2612() {
@@ -116,24 +141,6 @@ struct Chip2612 : rack::Module {
             apu[channel].reset();
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
-    }
-
-    /// Return the binary value for the given parameter.
-    ///
-    /// @param channel the channel to get the parameter value for
-    /// @param paramIndex the index of the parameter in the params list
-    /// @param inputIndex the index of the CV input in the inputs list
-    /// @param int max the maximal value for the parameter
-    ///
-    inline uint8_t getParam(
-        unsigned channel,
-        unsigned paramIndex,
-        unsigned inputIndex,
-        unsigned max
-    ) {
-        auto param = params[paramIndex].getValue();
-        auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
-        return clamp(static_cast<int>(param + cv), 0, max);
     }
 
     /// @brief Process the CV inputs for the given channel.

@@ -20,11 +20,8 @@
 #include "widget/indexed_frame_display.hpp"
 #include <limits>
 
-// TODO: remove algorithm widget
 // TODO: attenuators for all inputs
 // TODO: polyphony
-// TODO: pitch and gate inputs for each of the 6 voices
-// -   normalled inputs for chords and stuff
 
 // ---------------------------------------------------------------------------
 // MARK: Module

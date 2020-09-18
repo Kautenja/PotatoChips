@@ -408,22 +408,6 @@
       "color": "#c91847"
     },
     {
-      "id": 1211,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1203,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 142,
-      "inputId": 6,
-      "color": "#0c8e15"
-    },
-    {
       "id": 1210,
       "outputModuleId": 142,
       "outputId": 0,
@@ -438,6 +422,22 @@
       "inputModuleId": 2,
       "inputId": 3,
       "color": "#c91847"
+    },
+    {
+      "id": 1221,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1220,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 142,
+      "inputId": 9,
+      "color": "#0c8e15"
     }
   ]
 }

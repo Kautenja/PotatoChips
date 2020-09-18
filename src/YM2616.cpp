@@ -81,13 +81,13 @@ struct Chip2612 : rack::Module {
     enum LightIds { NUM_LIGHTS };
 
     /// the current FM algorithm
-    uint8_t algorithm = 0;
+    uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
     /// the YM2612 chip emulator
-    YM2612 apu;
+    YM2612 apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[NUM_VOICES];
+    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS][NUM_VOICES];
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
@@ -115,7 +115,8 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
         }
         // reset the emulator
-        apu.reset();
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
+            apu[channel].reset();
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
     }
@@ -127,53 +128,58 @@ struct Chip2612 : rack::Module {
     /// @param inputIndex the index of the CV input in the inputs list
     /// @param int max the maximal value for the parameter
     ///
-    inline uint8_t computeValue(
+    inline uint8_t getParam(
         unsigned channel,
         unsigned paramIndex,
         unsigned inputIndex,
         unsigned max
     ) {
         auto param = params[paramIndex].getValue();
-        auto cv = max * inputs[inputIndex].getVoltage() / 10.0f;
+        auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
         return clamp(static_cast<int>(param + cv), 0, max);
     }
 
-    /// Process the CV inputs on the module.
-    inline void processCV() {
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) {
         // this value is used in the algorithm widget
-        algorithm = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage();
-        algorithm = clamp(algorithm, 0, 7);
-        apu.setLFO(computeValue(0, PARAM_LFO, INPUT_LFO, 7));
+        algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
+        algorithm[channel] = clamp(algorithm[channel], 0, 7);
+        apu[channel].setLFO(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         // iterate over each oscillator on the chip
         float pitch = 0;
         float gate = 0;
         for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
             // set the global parameters
-            apu.setAL (osc, computeValue(osc, PARAM_AL,  INPUT_AL,  7));
-            apu.setFB (osc, computeValue(osc, PARAM_FB,  INPUT_FB,  7));
-            apu.setAMS(osc, computeValue(osc, PARAM_AMS, INPUT_AMS, 3));
-            apu.setFMS(osc, computeValue(osc, PARAM_FMS, INPUT_FMS, 7));
+            apu[channel].setAL (osc, getParam(channel, PARAM_AL,  INPUT_AL,  7));
+            apu[channel].setFB (osc, getParam(channel, PARAM_FB,  INPUT_FB,  7));
+            apu[channel].setAMS(osc, getParam(channel, PARAM_AMS, INPUT_AMS, 3));
+            apu[channel].setFMS(osc, getParam(channel, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < NUM_OPERATORS; op++) {
-                apu.setTL (osc, op, computeValue(osc, PARAM_TL  + op, INPUT_TL  + op, 127));
-                apu.setAR (osc, op, computeValue(osc, PARAM_AR  + op, INPUT_AR  + op, 31 ));
-                apu.setD1 (osc, op, computeValue(osc, PARAM_D1  + op, INPUT_D1  + op, 31 ));
-                apu.setSL (osc, op, computeValue(osc, PARAM_SL  + op, INPUT_SL  + op, 15 ));
-                apu.setD2 (osc, op, computeValue(osc, PARAM_D2  + op, INPUT_D2  + op, 31 ));
-                apu.setRR (osc, op, computeValue(osc, PARAM_RR  + op, INPUT_RR  + op, 15 ));
-                apu.setMUL(osc, op, computeValue(osc, PARAM_MUL + op, INPUT_MUL + op, 15 ));
-                apu.setDET(osc, op, computeValue(osc, PARAM_DET + op, INPUT_DET + op, 7  ));
-                apu.setRS (osc, op, computeValue(osc, PARAM_RS  + op, INPUT_RS  + op, 3  ));
-                apu.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
+                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL  + op, INPUT_TL  + op, 127));
+                apu[channel].setAR (osc, op, getParam(channel, PARAM_AR  + op, INPUT_AR  + op, 31 ));
+                apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1  + op, INPUT_D1  + op, 31 ));
+                apu[channel].setSL (osc, op, getParam(channel, PARAM_SL  + op, INPUT_SL  + op, 15 ));
+                apu[channel].setD2 (osc, op, getParam(channel, PARAM_D2  + op, INPUT_D2  + op, 31 ));
+                apu[channel].setRR (osc, op, getParam(channel, PARAM_RR  + op, INPUT_RR  + op, 15 ));
+                apu[channel].setMUL(osc, op, getParam(channel, PARAM_MUL + op, INPUT_MUL + op, 15 ));
+                apu[channel].setDET(osc, op, getParam(channel, PARAM_DET + op, INPUT_DET + op, 7  ));
+                apu[channel].setRS (osc, op, getParam(channel, PARAM_RS  + op, INPUT_RS  + op, 3  ));
+                apu[channel].setAM (osc, op, getParam(channel, PARAM_AM  + op, INPUT_AM  + op, 1  ));
             }
-            // Compute the frequency from the pitch parameter and input
-            pitch = inputs[INPUT_PITCH + osc].getNormalVoltage(pitch);
+            // Compute the frequency from the pitch parameter and input. low
+            // range of -4 octaves, high range of 6 octaves
+            pitch = inputs[INPUT_PITCH + osc].getNormalVoltage(pitch, channel);
             float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
-            apu.setFREQ(osc, freq);
-            // process the gate trigger
-            gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate);
-            gate_triggers[osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-            apu.setGATE(osc, gate_triggers[osc].state);
+            apu[channel].setFREQ(osc, freq);
+            // process the gate trigger, high at 2V
+            gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate, channel);
+            gate_triggers[channel][osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+            apu[channel].setGATE(osc, gate_triggers[channel][osc].state);
         }
     }
 
@@ -182,13 +188,26 @@ struct Chip2612 : rack::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     void process(const ProcessArgs &args) override {
-        // only process control voltage when the CV divider is high
-        if (cvDivider.process()) processCV();
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+        // process control voltage when the CV divider is high
+        if (cvDivider.process())
+            for (unsigned channel = 0; channel < channels; channel++)
+                processCV(args, channel);
         // advance one sample in the emulator
-        apu.step();
-        // set the outputs of the module
-        outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(apu.MOL) / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(apu.MOR) / std::numeric_limits<int16_t>::max());
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+            apu[channel].step();
+            // set the outputs of the module
+            outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(apu[channel].MOL) / std::numeric_limits<int16_t>::max(), channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(apu[channel].MOR) / std::numeric_limits<int16_t>::max(), channel);
+        }
     }
 };
 
@@ -202,7 +221,7 @@ struct Chip2612Widget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    Chip2612Widget(Chip2612 *module) {
+    explicit Chip2612Widget(Chip2612 *module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/2612.svg")));
         // panel screws
@@ -217,7 +236,7 @@ struct Chip2612Widget : ModuleWidget {
         }
         // algorithm display
         uint8_t defaultAlgorithm = 0;
-        uint8_t* index = module ? &module->algorithm : &defaultAlgorithm;
+        uint8_t* index = module ? &module->algorithm[0] : &defaultAlgorithm;
         addChild(new IndexedFrameDisplay<uint8_t>(
             index,
             "res/2612algorithms/",

@@ -1,10 +1,12 @@
 
 manual:
 	mkdir -p build
-	make -C 2A03
-	cp 2A03/build/manual.pdf build/2A03.pdf
 	make -C 106
 	cp 106/build/manual.pdf build/106.pdf
+	make -C 2612
+	cp 2612/build/manual.pdf build/2612.pdf
+	make -C 2A03
+	cp 2A03/build/manual.pdf build/2A03.pdf
 	make -C AY-3-8910
 	cp AY-3-8910/build/manual.pdf build/AY-3-8910.pdf
 	make -C FME7

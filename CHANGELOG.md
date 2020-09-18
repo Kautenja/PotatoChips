@@ -135,3 +135,7 @@
     -    CV control of all parameters
     -    polyphony support
 
+## 1.7.1 (2020-09-18)
+
+-   fix 2612 to sound the same at all sample rates
+-   fix 2612 to be tuned to C4

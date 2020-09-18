@@ -158,12 +158,12 @@ struct Chip2612 : rack::Module {
             ym2612.setFMS(osc, computeValue(osc, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < NUM_OPERATORS; op++) {
+                ym2612.setTL (osc, op, computeValue(osc, PARAM_TL  + op, INPUT_TL  + op, 127));
                 ym2612.setAR (osc, op, computeValue(osc, PARAM_AR  + op, INPUT_AR  + op, 31 ));
                 ym2612.setD1 (osc, op, computeValue(osc, PARAM_D1  + op, INPUT_D1  + op, 31 ));
                 ym2612.setSL (osc, op, computeValue(osc, PARAM_SL  + op, INPUT_SL  + op, 15 ));
                 ym2612.setD2 (osc, op, computeValue(osc, PARAM_D2  + op, INPUT_D2  + op, 31 ));
                 ym2612.setRR (osc, op, computeValue(osc, PARAM_RR  + op, INPUT_RR  + op, 15 ));
-                ym2612.setTL (osc, op, computeValue(osc, PARAM_TL  + op, INPUT_TL  + op, 127));
                 ym2612.setMUL(osc, op, computeValue(osc, PARAM_MUL + op, INPUT_MUL + op, 15 ));
                 ym2612.setDET(osc, op, computeValue(osc, PARAM_DET + op, INPUT_DET + op, 7  ));
                 ym2612.setRS (osc, op, computeValue(osc, PARAM_RS  + op, INPUT_RS  + op, 3  ));
@@ -189,7 +189,6 @@ struct Chip2612 : rack::Module {
         if (cvDivider.process()) processCV();
         // advance one sample in the emulator
         ym2612.step();
-        // TODO: Normal master outputs
         // set the outputs of the module
         outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(ym2612.MOL) / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(ym2612.MOR) / std::numeric_limits<int16_t>::max());

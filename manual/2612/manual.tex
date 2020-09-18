@@ -42,16 +42,16 @@
 \includegraphics[width=\maxwidth{\textwidth}]{2612-Manual}
 \end{figure}
 
-\clearpage
 \begin{enumerate}
   \item Stereo master output from the module.
-  \item $V$/Octave inputs for each of the 6 synthesizer voices.
-  \item Gate inputs for each of the 6 synthesizer voices. The gate goes high at $2V$ and triggers the envelope generators on the module. Figure~\ref{fig:envelope-generator} illustrates how the enveloper generator interprets the gate signal.
+  \item $V$/Octave inputs for each of the 6 synthesizer voices. The inputs are normalled from top to bottom.
+  \item Gate inputs for each of the 6 synthesizer voices.  The inputs are normalled from top to bottom. The gate goes high at $2V$ and triggers the envelope generator on the operators. Figure~\ref{fig:envelope-generator} illustrates how the envelope generator interprets \texttt{key on} and \texttt{key off} events in the gate signal.
   \item Algorithm selector and display. The YM2612 offers eight distinct FM synthesis algorithm based on the four operators on the module. Figure~\ref{fig:fm-algorithms} describes the configuration of the operators in each of the algorithms. Table~\ref{tab:fm-algorithm-instruments} presents some possible uses for each of the algorithms.
   \item Feedback control for operator 1. The value of this parameters determines how much the output of operator 1 feeds back into itself.
   \item Frequency control for the LFO. The LFO modulates the amplitude and phase of the operators. The sensitivity to amplitude modulation can be controlled by \textit{7}. The sensitivity to frequency modulation can be controlled by \textit{8}. Amplitude modulation can be enabled / disabled using \textit{10(d)}.
   \item Amplitude modulation control. Controls the sensitivity to amplitude modulation for all 6 voices.
   \item Frequency modulation control. Controls the sensitivity to frequency modulation for all 6 voices.
+\clearpage
   \item Control over the envelope generator parameters for each of the four operators on the module. Figure~\ref{fig:envelope-generator} depicts the stages in the envelope generator. \begin{enumerate}
     \item \textbf{Total Level (\texttt{TL}):} The highest amplitude of the envelope generator. A change of one unit is about $0.75dB$.
     \item \textbf{Attack Rate (\texttt{AR}):} The angle of initial amplitude increase. This can be made very steep if desired. The problem with slow attack rates is that if the notes are short, the release (called \texttt{key off}) occurs before the note has reached a reasonable level.
@@ -60,7 +60,6 @@
     \item \textbf{Decay Rate 2 (\texttt{D2R}):} The angle of secondary amplitude decrease. This will continue indefinitely unless \texttt{key off} occurs.
     \item \textbf{Release Rate (\texttt{RR}):} The final angle of amplitude decrease, after \texttt{key off}.
   \end{enumerate}
-\clearpage
   \item Control over the FM parameters for each of the four operators on the module. \begin{enumerate}
     \item \textbf{Multiplier (\texttt{MUL}):} An integer multiplier for the frequency of the operator. MUL ranges from $0$ to $15$, and multiplies the overall frequency, with the exception that $0$ results in multiplication by $\frac{1}{2}$.
     \item \textbf{Detune (\texttt{DT1}):} Integer variation from the multiplied frequency. \texttt{DT1} can be thought of as a linear frequency modulation parameter.

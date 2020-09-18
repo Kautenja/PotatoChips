@@ -469,81 +469,83 @@ struct FM_ST
     int32_t       dt_tab[8][32];      /* DeTune table         */
 };
 
+// ---------------------------------------------------------------------------
+// MARK: OPN unit
+// ---------------------------------------------------------------------------
 
-
-/***********************************************************/
-/* OPN unit                                                */
-/***********************************************************/
-
-/* OPN 3slot struct */
-struct FM_3SLOT
-{
-    uint32_t  fc[3];          /* fnum3,blk3: calculated */
-    uint8_t   fn_h;           /* freq3 latch */
-    uint8_t   kcode[3];       /* key code */
-    uint32_t  block_fnum[3];  /* current fnum value for this slot (can be different betweeen slots of one channel in 3slot mode) */
+/// OPN 3slot struct
+struct FM_3SLOT {
+    /// fnum3,blk3: calculated
+    uint32_t fc[3];
+    /// freq3 latch
+    uint8_t fn_h;
+    /// key code
+    uint8_t kcode[3];
+    /// current fnum value for this slot (can be different between slots of
+    /// one channel in 3slot mode)
+    uint32_t block_fnum[3];
 };
 
-/* OPN/A/B common state */
-struct FM_OPN
-{
-    uint8_t   type;           /* chip type */
-    FM_ST   ST;             /* general state */
-    FM_3SLOT SL3;           /* 3 slot mode state */
-    FM_CH   *P_CH;          /* pointer of CH */
-    unsigned int pan[6*2];  /* fm channels output masks (0xffffffff = enable) */
+/// OPN/A/B common state
+struct FM_OPN {
+    /// chip type
+    uint8_t type;
+    /// general state
+    FM_ST ST;
+    /// 3 slot mode state
+    FM_3SLOT SL3;
+    /// pointer of CH
+    FM_CH *P_CH;
+    /// fm channels output masks (0xffffffff = enable) */
+    unsigned int pan[6 * 2];
 
-    uint32_t  eg_cnt;         /* global envelope generator counter */
-    uint32_t  eg_timer;       /* global envelope generator counter works at frequency = chipclock/144/3 */
-    uint32_t  eg_timer_add;   /* step of eg_timer */
-    uint32_t  eg_timer_overflow;/* envelope generator timer overflows every 3 samples (on real chip) */
+    /// global envelope generator counter
+    uint32_t eg_cnt;
+    /// global envelope generator counter works at frequency = chipclock/144/3
+    uint32_t eg_timer;
+    /// step of eg_timer
+    uint32_t eg_timer_add;
+    /// envelope generator timer overflows every 3 samples (on real chip)
+    uint32_t eg_timer_overflow;
 
+    /// there are 2048 FNUMs that can be generated using FNUM/BLK registers
+    /// but LFO works with one more bit of a precision so we really need 4096
+    /// elements. fnumber->increment counter
+    uint32_t fn_table[4096];
+    /// maximal phase increment (used for phase overflow)
+    uint32_t fn_max;
 
-    /* there are 2048 FNUMs that can be generated using FNUM/BLK registers
-       but LFO works with one more bit of a precision so we really need 4096 elements */
-    uint32_t  fn_table[4096]; /* fnumber->increment counter */
-    uint32_t fn_max;    /* maximal phase increment (used for phase overflow) */
+    // LFO
 
-    /* LFO */
-    uint8_t   lfo_cnt;            /* current LFO phase (out of 128) */
-    uint32_t  lfo_timer;          /* current LFO phase runs at LFO frequency */
-    uint32_t  lfo_timer_add;      /* step of lfo_timer */
-    uint32_t  lfo_timer_overflow; /* LFO timer overflows every N samples (depends on LFO frequency) */
-    uint32_t  LFO_AM;             /* current LFO AM step */
-    uint32_t  LFO_PM;             /* current LFO PM step */
+    /// current LFO phase (out of 128)
+    uint8_t lfo_cnt;
+    /// current LFO phase runs at LFO frequency
+    uint32_t lfo_timer;
+    /// step of lfo_timer
+    uint32_t lfo_timer_add;
+    /// LFO timer overflows every N samples (depends on LFO frequency)
+    uint32_t lfo_timer_overflow;
+    /// current LFO AM step
+    uint32_t LFO_AM;
+    /// current LFO PM step
+    uint32_t LFO_PM;
 
-    int32_t   m2,c1,c2;       /* Phase Modulation input for operators 2,3,4 */
-    int32_t   mem;            /* one sample delay memory */
-    int32_t   out_fm[8];      /* outputs of working channels */
+    /// Phase Modulation input for operator 2
+    int32_t m2;
+    /// Phase Modulation input for operator 3
+    int32_t c1;
+    /// Phase Modulation input for operator 4
+    int32_t c2;
 
+    /// one sample delay memory
+    int32_t mem;
+    /// outputs of working channels
+    int32_t out_fm[8];
 };
 
-
-
-
-/// A structure with operator data for a YM2612 voice.
-struct Operator {
-    /// the attack rate
-    uint8_t AR = 0;
-    /// the 1st decay stage rate
-    uint8_t D1 = 0;
-    /// the amplitude to start the second decay stage
-    uint8_t SL = 0;
-    /// the 2nd decay stage rate
-    uint8_t D2 = 0;
-    /// the release rate
-    uint8_t RR = 0;
-    /// the total amplitude of the envelope
-    uint8_t TL = 0;
-    /// the multiplier for the FM frequency
-    uint8_t MUL = 0;
-    /// the amount of detuning to apply (DET * epsilon + frequency)
-    uint8_t DET = 0;
-    /// the Rate scale for key-tracking the envelope rates
-    uint8_t RS = 0;
-    /// whether the operator has amplitude modulation from the LFO enabled
-    uint8_t AM = 0;
-};
+// ---------------------------------------------------------------------------
+// MARK: public interface
+// ---------------------------------------------------------------------------
 
 /// A structure with channel data for a YM2612 voice.
 struct Channel {
@@ -556,7 +558,28 @@ struct Channel {
     /// the attenuator (and switch) for frequency modulation from the LFO
     uint8_t FMS = 0;
     /// the four FM operators for the channel
-    Operator operators[4];
+    struct Operator {
+        /// the attack rate
+        uint8_t AR = 0;
+        /// the 1st decay stage rate
+        uint8_t D1 = 0;
+        /// the amplitude to start the second decay stage
+        uint8_t SL = 0;
+        /// the 2nd decay stage rate
+        uint8_t D2 = 0;
+        /// the release rate
+        uint8_t RR = 0;
+        /// the total amplitude of the envelope
+        uint8_t TL = 0;
+        /// the multiplier for the FM frequency
+        uint8_t MUL = 0;
+        /// the amount of detuning to apply (DET * epsilon + frequency)
+        uint8_t DET = 0;
+        /// the Rate scale for key-tracking the envelope rates
+        uint8_t RS = 0;
+        /// whether the operator has amplitude modulation from the LFO enabled
+        uint8_t AM = 0;
+    } operators[4];
 };
 
 class YM2612 {

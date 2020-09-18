@@ -127,3 +127,11 @@
 -   fix emulator initialization to address and issue where oscillators would
     be initialized perfectly out of phase (and thus mix together to produce
     silence)
+
+## 1.7.0 (2020-09-17)
+
+-   new module: 2616
+    -    6 voices of FM synthesis
+    -    CV control of all parameters
+    -    polyphony support
+

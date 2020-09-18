@@ -42,16 +42,45 @@
 \includegraphics[width=\maxwidth{\textwidth}]{2612-Manual}
 \end{figure}
 
-% \begin{enumerate}
-%   \item Coarse frequency control over the four oscillators.
-%   \item $V$/Octave inputs for pulse1, pulse2, and triangle waveform generators.
-%   \item linear CV frequency modulation for pulse1, pulse2, and triangle waveform generators.
-%   \item Pulse width selector. Chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$.
-%   \item CV LFSR gate, high at $2V$. Holds the LFSR generator as long as the input voltage is $>2V$.
-%   \item Period of randomness $\in [0, 15]$ for the noise generator. See Table~\ref{tab:noise-periods} for a mapping from period to sample rate, frequency, and MIDI note.
-%   \item Coarse amplitude control over the oscillators using the 4-bit amplifier. When no input is connected, the slider controls the level from $0\%$ to $100\%$. When an input is connected, the slider acts as an attenuator.
-%   \item Channel outputs, ${\approx}10V_{pp}$.
-% \end{enumerate}
+\begin{figure}[!htp]
+\centering
+\includegraphics[width=\maxwidth{\textwidth}]{2612-Operators}
+\caption{An illustration of the FM algorithms on the module.}
+\label{fig:fm-algorithms}
+\end{figure}
+
+\begin{figure}[!htp]
+\centering
+\includegraphics[width=\maxwidth{\textwidth}]{envelope}
+\caption{An illustration of the stages in the envelope generator.}
+\label{fig:envelope-generator}
+\end{figure}
+
+\clearpage
+\begin{enumerate}
+  \item Stereo master output from the module
+  \item $V$/Octave inputs for each of the 6 synthesizer voices.
+  \item Gate inputs for each of the 6 synthesizer voices. The gate goes high at $2V$ and triggers the envelope generators on the module. Figure~\ref{fig:envelope-generator} illustrates how the enveloper generator interprets the gate signal.
+  \item Algorithm selector and display. The YM2612 offers eight distinct FM synthesis algorithm based on the four operators on the module. Figure~\ref{fig:fm-algorithms} describes the configuration of the operators for each of the algorithms.
+  \item Feedback control for operator 1. The value of this parameters determines how much the output of operator 1 feeds back into itself.
+  \item Frequency control for the global LFO. TODO
+  \item Global amplitude modulation control. TODO
+  \item Global frequency modulation control. TODO
+  \item Control over the envelope generator parameters for each of the four operators on the module. Figure~\ref{fig:envelope-generator} depicts the stages in the envelope generator. \begin{enumerate}
+    \item \textbf{Total Level (\texttt{TL}):} The highest amplitude of the envelope generator
+    \item \textbf{Attack Rate (\texttt{AR}):} The angle of initial amplitude increase. This can be made very steep if desired. The problem with slow attack rates is that if the notes are short, the release (called \texttt{key off}) occurs before the note has reached a reasonable level.
+    \item \textbf{Decay Rate 1 (\texttt{D1R}):} The angle of initial amplitude decrease from the highest point in the envelope generator.
+    \item \textbf{Total Level 1 (\texttt{T1L}):} The amplitude where the second decay stage starts
+    \item \textbf{Decay Rate 2 (\texttt{D2R}):} The angle of secondary amplitude decrease. This will continue indefinitely unless \texttt{key off} occurs.
+    \item \textbf{Release Rate (\texttt{RR}):} The final angle of amplitude decrease, after \texttt{key off}.
+  \end{enumerate}
+  \item Control over the FM parameters for each of the four operators on the module. \begin{enumerate}
+    \item \textbf{Multiplier:} TODO
+    \item \textbf{Tuning:} TODO
+    \item \textbf{Rate Scale:} the degree to which envelopes become shorter as frequencies become higher. For example, high notes on a piano fade much more quickly than low notes.
+    \item \textbf{Amplitude Modulation:} Whether amplitude modulation is enabled for the given operator. The amplitude modulation is controlled by the global LFO.
+  \end{enumerate}
+\end{enumerate}
 
 % -------------------
 % MARK: References

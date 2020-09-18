@@ -611,15 +611,17 @@ class YM2612 {
  public:
     /// Initialize a new YM2612 with given sample rate.
     ///
+    /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    explicit YM2612(double sample_rate = 44100);
+    explicit YM2612(double clock_rate = 768000, double sample_rate = 44100);
 
     /// Set the sample rate the a new value.
     ///
-    /// @param new_rate the rate to draw samples from the emulator at
+    /// @param clock_rate the underlying clock rate of the system
+    /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    inline void set_sample_rate(double new_rate) { OPN.ST.rate = new_rate; }
+    void set_sample_rate(double clock_rate = 768000, double sample_rate = 44100);
 
     /// Reset the emulator to its initial state
     void reset();

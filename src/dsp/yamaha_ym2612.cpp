@@ -1266,14 +1266,20 @@ static void init_tables(void) {
 // MARK: YM2612 Emulator class
 // ---------------------------------------------------------------------------
 
-YM2612::YM2612(double sample_rate) {
+YM2612::YM2612(double clock_rate, double sample_rate) {
     /* allocate total level table (128kb space) */
     init_tables();
     OPN.P_CH = CH;
     OPN.type = TYPE_YM2612;
-    OPN.ST.clock = sample_rate;
+    OPN.ST.clock = clock_rate;
     OPN.ST.rate = sample_rate;
     reset();
+}
+
+void YM2612::set_sample_rate(double clock_rate, double sample_rate) {
+    OPN.ST.clock = clock_rate;
+    OPN.ST.rate = sample_rate;
+    OPNSetPres(&OPN);
 }
 
 void YM2612::reset() {

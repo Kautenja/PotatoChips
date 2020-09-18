@@ -147,7 +147,8 @@ struct Chip2612 : rack::Module {
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-            apu[channel].set_sample_rate(APP->engine->getSampleRate());
+            // TODO: why is it necessary to divide by 1.455 to tune to C4?
+            apu[channel].set_sample_rate(CLOCK_RATE / 1.455, APP->engine->getSampleRate());
         }
     }
 

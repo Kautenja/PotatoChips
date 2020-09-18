@@ -239,10 +239,10 @@ struct Chip2612Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(71, 84 + 34 * i), module, Chip2612::INPUT_GATE  + i));
         }
         // algorithm display
-        uint8_t defaultAlgorithm = 0;
-        uint8_t* index = module ? &module->algorithm[0] : &defaultAlgorithm;
-        addChild(new IndexedFrameDisplay<uint8_t>(
-            index,
+        addChild(new IndexedFrameDisplay<std::function<unsigned()>>(
+            [&]() {
+                return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
+            },
             "res/2612algorithms/",
             Chip2612::NUM_ALGORITHMS,
             Vec(115, 20),

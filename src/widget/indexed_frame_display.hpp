@@ -21,11 +21,11 @@
 #define WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 
 /// A display for showing indexed images from a frame buffer.
-template<typename T>
+template<typename Callback>
 struct IndexedFrameDisplay : rack::LightWidget {
  private:
-    /// the index of the algorithm to display
-    T* index;
+    /// the function to call to get the index
+    Callback getIndex;
     /// the SVG images representing the algorithms
     std::vector<NSVGimage*> frames;
     /// the background color for the widget
@@ -36,7 +36,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
  public:
     /// Initialize a new image display.
     ///
-    /// @param index_ a pointer to the index of the image to display
+    /// @param getIndex_ the function to call to get the index
     /// @param path the path to the directory containing the frames
     /// @param num_images the number of frames to load from disk
     /// @param position the position of the image display
@@ -47,7 +47,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
     /// @param border_ the border color for the widget (default: dark gray)
     ///
     IndexedFrameDisplay(
-        T* index_,
+        Callback getIndex_,
         const std::string& path,
         unsigned num_images,
         rack::Vec position,
@@ -56,7 +56,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
         float dpi = 1,
         NVGcolor background_ = {{{0.f,  0.f,  0.f,  1.f}}},
         NVGcolor border_ =     {{{0.2f, 0.2f, 0.2f, 1.f}}}
-    ) : index(index_), background(background_), border(border_) {
+    ) : getIndex(getIndex_), background(background_), border(border_) {
         setPosition(position);
         setSize(size);
         for (unsigned i = 0; i < num_images; i++) {  // load each image
@@ -88,7 +88,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
         // draw the image
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
-        svgDraw(args.vg, frames[*index]);
+        svgDraw(args.vg, frames[getIndex()]);
         nvgClosePath(args.vg);
         // -------------------------------------------------------------------
         // draw the border

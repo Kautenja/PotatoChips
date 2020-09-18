@@ -1158,13 +1158,10 @@ static void init_timetables(FM_OPN *OPN, double freqbase)
     OPN->fn_max = (uint32_t)( (double)0x20000 * freqbase * (1<<(FREQ_SH-10)) );
 }
 
-/* prescaler set (and make time tables) */
-static void OPNSetPres(FM_OPN *OPN)
-{
+/// Set prescaler and make time tables.
+static void OPNSetPres(FM_OPN *OPN) {
     /* frequency base */
-    // TODO: why is this set to 1? can this be adjusted to fix the sample rate bug?
     OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate): 0;
-    OPN->ST.freqbase = 1;
 
     /* EG is updated every 3 samples */
     OPN->eg_timer_add  = (uint32_t)((1<<EG_SH) * OPN->ST.freqbase);
@@ -1177,17 +1174,14 @@ static void OPNSetPres(FM_OPN *OPN)
     init_timetables(OPN, OPN->ST.freqbase);
 }
 
-
-/* initialize generic tables */
-static void init_tables(void)
-{
+/// initialize generic tables.
+static void init_tables(void) {
     signed int i,x;
     signed int n;
     double o,m;
 
     /* build Linear Power Table */
-    for (x=0; x<TL_RES_LEN; x++)
-    {
+    for (x=0; x<TL_RES_LEN; x++) {
         m = (1<<16) / pow(2, (x+1) * (ENV_STEP/4.0) / 8.0);
         m = floor(m);
 
@@ -1203,7 +1197,6 @@ static void init_tables(void)
                         /* 11 bits here (rounded) */
         n <<= 2;        /* 13 bits here (as in real chip) */
 
-
         /* 14 bits (with sign bit) */
         tl_tab[ x*2 + 0 ] = n;
         tl_tab[ x*2 + 1 ] = -tl_tab[ x*2 + 0 ];
@@ -1213,16 +1206,14 @@ static void init_tables(void)
         /* yyyyyyyy = 8-bits decimal part (0-TL_RES_LEN)                                            */
         /* xxxxx    = 5-bits integer 'shift' value (0-31) but, since Power table output is 13 bits, */
         /*            any value above 13 (included) would be discarded.                             */
-        for (i=1; i<13; i++)
-        {
+        for (i=1; i<13; i++) {
             tl_tab[ x*2+0 + i*2*TL_RES_LEN ] =  tl_tab[ x*2+0 ]>>i;
             tl_tab[ x*2+1 + i*2*TL_RES_LEN ] = -tl_tab[ x*2+0 + i*2*TL_RES_LEN ];
         }
     }
 
     /* build Logarithmic Sinus table */
-    for (i=0; i<SIN_LEN; i++)
-    {
+    for (i=0; i<SIN_LEN; i++) {
         /* non-standard sinus */
         m = sin( ((i*2)+1) * M_PI / SIN_LEN ); /* checked against the real chip */
         /* we never reach zero here due to ((i*2)+1) */
@@ -1245,24 +1236,18 @@ static void init_tables(void)
     }
 
     /* build LFO PM modulation table */
-    for(i = 0; i < 8; i++) /* 8 PM depths */
-    {
+    for(i = 0; i < 8; i++) {  /* 8 PM depths */
         uint8_t fnum;
-        for (fnum=0; fnum<128; fnum++) /* 7 bits meaningful of F-NUMBER */
-        {
+        for (fnum=0; fnum<128; fnum++) {  /* 7 bits meaningful of F-NUMBER */
             uint8_t value;
             uint8_t step;
             uint32_t offset_depth = i;
             uint32_t offset_fnum_bit;
             uint32_t bit_tmp;
-
-            for (step=0; step<8; step++)
-            {
+            for (step=0; step<8; step++) {
                 value = 0;
-                for (bit_tmp=0; bit_tmp<7; bit_tmp++) /* 7 bits */
-                {
-                    if (fnum & (1<<bit_tmp)) /* only if bit "bit_tmp" is set */
-                    {
+                for (bit_tmp=0; bit_tmp<7; bit_tmp++) {  /* 7 bits */
+                    if (fnum & (1<<bit_tmp)) {  /* only if bit "bit_tmp" is set */
                         offset_fnum_bit = bit_tmp * 8;
                         value += lfo_pm_output[offset_fnum_bit + offset_depth][step];
                     }
@@ -1273,10 +1258,8 @@ static void init_tables(void)
                 lfo_pm_table[(fnum*32*8) + (i*32) + step   +16] = -value;
                 lfo_pm_table[(fnum*32*8) + (i*32) +(step^7)+24] = -value;
             }
-
         }
     }
-
 }
 
 // ---------------------------------------------------------------------------
@@ -1288,7 +1271,7 @@ YM2612::YM2612(double sample_rate) {
     init_tables();
     OPN.P_CH = CH;
     OPN.type = TYPE_YM2612;
-    OPN.ST.clock = 1;
+    OPN.ST.clock = sample_rate;
     OPN.ST.rate = sample_rate;
     reset();
 }

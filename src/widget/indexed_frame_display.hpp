@@ -15,17 +15,17 @@
 
 #include "rack.hpp"
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 #ifndef WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 #define WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 
 /// A display for showing indexed images from a frame buffer.
-template<typename Callback>
 struct IndexedFrameDisplay : rack::LightWidget {
  private:
     /// the function to call to get the index
-    Callback getIndex;
+    std::function<unsigned()> getIndex;
     /// the SVG images representing the algorithms
     std::vector<NSVGimage*> frames;
     /// the background color for the widget
@@ -47,7 +47,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
     /// @param border_ the border color for the widget (default: dark gray)
     ///
     IndexedFrameDisplay(
-        Callback getIndex_,
+        std::function<unsigned()> getIndex_,
         const std::string& path,
         unsigned num_images,
         rack::Vec position,

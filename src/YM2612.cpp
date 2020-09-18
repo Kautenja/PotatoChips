@@ -245,7 +245,7 @@ struct Chip2612Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(71, 84 + 34 * i), module, Chip2612::INPUT_GATE  + i));
         }
         // algorithm display
-        addChild(new IndexedFrameDisplay<std::function<unsigned()>>(
+        addChild(new IndexedFrameDisplay(
             [&]() {
                 return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
             },

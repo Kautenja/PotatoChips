@@ -84,7 +84,7 @@ struct Chip2612 : rack::Module {
     uint8_t algorithm = 0;
 
     /// the YM2612 chip emulator
-    YM2612 ym2612;
+    YM2612 apu;
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[NUM_VOICES];
@@ -115,7 +115,7 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
         }
         // reset the emulator
-        ym2612.reset();
+        apu.reset();
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
     }
@@ -143,37 +143,37 @@ struct Chip2612 : rack::Module {
         // this value is used in the algorithm widget
         algorithm = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage();
         algorithm = clamp(algorithm, 0, 7);
-        ym2612.setLFO(computeValue(0, PARAM_LFO, INPUT_LFO, 7));
+        apu.setLFO(computeValue(0, PARAM_LFO, INPUT_LFO, 7));
         // iterate over each oscillator on the chip
         float pitch = 0;
         float gate = 0;
         for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
             // set the global parameters
-            ym2612.setAL (osc, computeValue(osc, PARAM_AL,  INPUT_AL,  7));
-            ym2612.setFB (osc, computeValue(osc, PARAM_FB,  INPUT_FB,  7));
-            ym2612.setAMS(osc, computeValue(osc, PARAM_AMS, INPUT_AMS, 3));
-            ym2612.setFMS(osc, computeValue(osc, PARAM_FMS, INPUT_FMS, 7));
+            apu.setAL (osc, computeValue(osc, PARAM_AL,  INPUT_AL,  7));
+            apu.setFB (osc, computeValue(osc, PARAM_FB,  INPUT_FB,  7));
+            apu.setAMS(osc, computeValue(osc, PARAM_AMS, INPUT_AMS, 3));
+            apu.setFMS(osc, computeValue(osc, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < NUM_OPERATORS; op++) {
-                ym2612.setTL (osc, op, computeValue(osc, PARAM_TL  + op, INPUT_TL  + op, 127));
-                ym2612.setAR (osc, op, computeValue(osc, PARAM_AR  + op, INPUT_AR  + op, 31 ));
-                ym2612.setD1 (osc, op, computeValue(osc, PARAM_D1  + op, INPUT_D1  + op, 31 ));
-                ym2612.setSL (osc, op, computeValue(osc, PARAM_SL  + op, INPUT_SL  + op, 15 ));
-                ym2612.setD2 (osc, op, computeValue(osc, PARAM_D2  + op, INPUT_D2  + op, 31 ));
-                ym2612.setRR (osc, op, computeValue(osc, PARAM_RR  + op, INPUT_RR  + op, 15 ));
-                ym2612.setMUL(osc, op, computeValue(osc, PARAM_MUL + op, INPUT_MUL + op, 15 ));
-                ym2612.setDET(osc, op, computeValue(osc, PARAM_DET + op, INPUT_DET + op, 7  ));
-                ym2612.setRS (osc, op, computeValue(osc, PARAM_RS  + op, INPUT_RS  + op, 3  ));
-                ym2612.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
+                apu.setTL (osc, op, computeValue(osc, PARAM_TL  + op, INPUT_TL  + op, 127));
+                apu.setAR (osc, op, computeValue(osc, PARAM_AR  + op, INPUT_AR  + op, 31 ));
+                apu.setD1 (osc, op, computeValue(osc, PARAM_D1  + op, INPUT_D1  + op, 31 ));
+                apu.setSL (osc, op, computeValue(osc, PARAM_SL  + op, INPUT_SL  + op, 15 ));
+                apu.setD2 (osc, op, computeValue(osc, PARAM_D2  + op, INPUT_D2  + op, 31 ));
+                apu.setRR (osc, op, computeValue(osc, PARAM_RR  + op, INPUT_RR  + op, 15 ));
+                apu.setMUL(osc, op, computeValue(osc, PARAM_MUL + op, INPUT_MUL + op, 15 ));
+                apu.setDET(osc, op, computeValue(osc, PARAM_DET + op, INPUT_DET + op, 7  ));
+                apu.setRS (osc, op, computeValue(osc, PARAM_RS  + op, INPUT_RS  + op, 3  ));
+                apu.setAM (osc, op, computeValue(osc, PARAM_AM  + op, INPUT_AM  + op, 1  ));
             }
             // Compute the frequency from the pitch parameter and input
             pitch = inputs[INPUT_PITCH + osc].getNormalVoltage(pitch);
             float freq = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f));
-            ym2612.setFREQ(osc, freq);
+            apu.setFREQ(osc, freq);
             // process the gate trigger
             gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate);
             gate_triggers[osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-            ym2612.setGATE(osc, gate_triggers[osc].state);
+            apu.setGATE(osc, gate_triggers[osc].state);
         }
     }
 
@@ -185,10 +185,10 @@ struct Chip2612 : rack::Module {
         // only process control voltage when the CV divider is high
         if (cvDivider.process()) processCV();
         // advance one sample in the emulator
-        ym2612.step();
+        apu.step();
         // set the outputs of the module
-        outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(ym2612.MOL) / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(ym2612.MOR) / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(apu.MOL) / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(apu.MOR) / std::numeric_limits<int16_t>::max());
     }
 };
 

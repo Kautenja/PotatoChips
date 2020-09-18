@@ -21,13 +21,13 @@
 
 2612 is an emulation of the Yamaha YM2612 audio processing unit from the Sega Master System and Sega Genesis for VCV Rack. The YM2612 is a 4-operator FM synthesis chip with 6 voices of polyphony.
 
-2612 provides the key features of the 2612 chip, namely,
+2612 provides the key features of the Yamaha YM2612 chip, namely,
 \begin{itemize}
   \item \textbf{16-bit:} 8 bits better than the previous generation of chips!
-  \item \textbf{6 Voice Polyphony:} 6 voices of polyphony with independent V/OCT and Gate inputs
-  \item \textbf{4-Operator FM Synthesis:} Full control over the FM-synthesis parameters for each of the four operators including: envelopes, multiplier rate scale, tuning, and amplitude modulation
-  \item \textbf{8 FM Algorithms:} 8 different arrangements of the four operators
-  \item \textbf{Stereo Outputs:} Output from the left and right channels on the chip
+  \item \textbf{6 Voice Polyphony:} 6 independent synthesis voices with independent V/OCT and Gate inputs (summed into a single mix output).
+  \item \textbf{4-Operator FM Synthesis:} Full control over the FM-synthesis parameters for each of the four operators including: envelopes, multiplier, rate scale, tuning, and amplitude modulation.
+  \item \textbf{8 FM Algorithms:} 8 different arrangements of the four operators.
+  \item \textbf{Stereo Outputs:} Output from the left and right channels on the chip.
 \end{itemize}
 
 % -------------------
@@ -44,7 +44,7 @@
 
 \clearpage
 \begin{enumerate}
-  \item Stereo master output from the module
+  \item Stereo master output from the module.
   \item $V$/Octave inputs for each of the 6 synthesizer voices.
   \item Gate inputs for each of the 6 synthesizer voices. The gate goes high at $2V$ and triggers the envelope generators on the module. Figure~\ref{fig:envelope-generator} illustrates how the enveloper generator interprets the gate signal.
   \item Algorithm selector and display. The YM2612 offers eight distinct FM synthesis algorithm based on the four operators on the module. Figure~\ref{fig:fm-algorithms} describes the configuration of the operators in each of the algorithms. Table~\ref{tab:fm-algorithm-instruments} presents some possible uses for each of the algorithms.
@@ -56,7 +56,7 @@
     \item \textbf{Total Level (\texttt{TL}):} The highest amplitude of the envelope generator. A change of one unit is about $0.75dB$.
     \item \textbf{Attack Rate (\texttt{AR}):} The angle of initial amplitude increase. This can be made very steep if desired. The problem with slow attack rates is that if the notes are short, the release (called \texttt{key off}) occurs before the note has reached a reasonable level.
     \item \textbf{Decay Rate 1 (\texttt{D1R}):} The angle of initial amplitude decrease from the highest point in the envelope generator.
-    \item \textbf{Total Level 1 (\texttt{T1L}):} The amplitude where the second decay stage starts
+    \item \textbf{Total Level 1 (\texttt{T1L}):} The amplitude where the second decay stage starts.
     \item \textbf{Decay Rate 2 (\texttt{D2R}):} The angle of secondary amplitude decrease. This will continue indefinitely unless \texttt{key off} occurs.
     \item \textbf{Release Rate (\texttt{RR}):} The final angle of amplitude decrease, after \texttt{key off}.
   \end{enumerate}
@@ -82,9 +82,9 @@
 \centering
 \caption{Suggested uses for the individual FM algorithms.}
 \label{tab:fm-algorithm-instruments}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|l|}
 \hline
-Algorithm & Suggested Uses                                               \\
+\textbf{Algorithm} & \textbf{Suggested Uses}                             \\
 \hline\hline
 1         & Distortion guitar, ``high hat chopper'' bass                 \\
 \hline

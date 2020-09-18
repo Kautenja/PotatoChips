@@ -1510,8 +1510,11 @@ void YM2612::setFREQ(uint8_t channel, float frequency) {
     // the base octave is defined as a 10-bit number, i.e., in [0, 1023]
     int octave = 2;
     for (; frequency >= 1024; octave++) frequency /= 2;
+    // NOTE: arbitrary shift calculated by producing note from a ground truth
+    //       oscillator and comparing the output from YM2612 via division.
+    //       1.458166333006277
     // TODO: why is this arbitrary shift necessary to tune to C4?
-    frequency = frequency / 1.45;
+    frequency = frequency / 1.458;
     uint16_t f = frequency;
     setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA4,channel), ((f >> 8) & 0x07) | ((octave & 0x07) << 3));
     setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0,channel), f & 0xff);

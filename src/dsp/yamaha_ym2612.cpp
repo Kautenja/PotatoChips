@@ -1161,6 +1161,7 @@ static void init_timetables(FM_OPN *OPN, double freqbase)
 static void OPNSetPres(FM_OPN *OPN)
 {
     /* frequency base */
+    // TODO: why is this set to 1? can this be adjusted to fix the sample rate bug?
     OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate): 0;
     OPN->ST.freqbase = 1;
 

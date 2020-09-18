@@ -40,11 +40,11 @@
         },
         {
           "id": 2,
-          "value": 1.41421354
+          "value": 1.0
         },
         {
           "id": 3,
-          "value": 1.41421354
+          "value": 1.0
         },
         {
           "id": 4,
@@ -66,7 +66,7 @@
       "params": [],
       "rightModuleId": 2,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -184,7 +184,7 @@
     {
       "id": 142,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.3",
+      "version": "1.7.0",
       "model": "2612",
       "params": [
         {
@@ -321,19 +321,19 @@
         },
         {
           "id": 33,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 34,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 35,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 36,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 37,
@@ -400,28 +400,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 1208,
-      "outputModuleId": 142,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 3,
-      "color": "#c91847"
-    },
-    {
       "id": 1209,
       "outputModuleId": 142,
       "outputId": 1,
       "inputModuleId": 140,
       "inputId": 0,
       "color": "#c91847"
-    },
-    {
-      "id": 1210,
-      "outputModuleId": 142,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#0986ad"
     },
     {
       "id": 1211,
@@ -438,6 +422,22 @@
       "inputModuleId": 142,
       "inputId": 6,
       "color": "#0c8e15"
+    },
+    {
+      "id": 1210,
+      "outputModuleId": 142,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1208,
+      "outputModuleId": 142,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 3,
+      "color": "#c91847"
     }
   ]
 }

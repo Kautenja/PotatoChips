@@ -137,11 +137,18 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
         }
         // reset the emulator
-        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
-            apu[channel].reset();
+        onSampleRateChange();
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
     }
+
+    /// @brief Respond to the change of sample rate in the engine.
+    // inline void onSampleRateChange() final {
+    //     // update the buffer for each oscillator and polyphony channel
+    //     for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+    //         apu[channel].set_sample_rate(APP->engine->getSampleRate());
+    //     }
+    // }
 
     /// @brief Process the CV inputs for the given channel.
     ///

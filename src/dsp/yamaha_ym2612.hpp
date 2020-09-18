@@ -543,65 +543,66 @@ struct Channel {
     Operator operators[4];
 };
 
-
-
 class YM2612 {
-    private:
-        uint8_t REGS[512]; /* registers            */
-        FM_OPN OPN;        /* OPN state            */
-        FM_CH CH[6];       /* channel state        */
-        uint8_t addr_A1;   /* address line A1      */
+ private:
+    /// registers
+    uint8_t REGS[512];
+    /// OPN state
+    FM_OPN OPN;
+    /// channel state
+    FM_CH CH[6];
+    /// address line A1
+    uint8_t addr_A1;
 
-        /* dac output (YM2612) */
-        int dacen;
-        int32_t dacout;
+    /* dac output (YM2612) */
+    int dacen;
+    int32_t dacout;
 
-    public:
-        int16_t MOL;  // master output left
-        int16_t MOR;  // master output right
+ public:
+    /// master output left
+    int16_t MOL;
+    /// master output right
+    int16_t MOR;
 
+    Channel channels[6];
 
-        Channel channels[6];
-        uint8_t LFO;
+    uint8_t LFO;
 
+    explicit YM2612(double sample_rate = 44100);
 
-        YM2612();
-        void reset();
-        void step();
-        void write(uint8_t a,uint8_t v);
-        void setREG(uint8_t part, uint8_t reg, uint8_t data);
+    inline void set_sample_rate(double sample_rate) {
+        OPN.ST.rate = sample_rate;
+    }
 
-        void setLFO(uint8_t value);
+    void reset();
+    void step();
+    void write(uint8_t a,uint8_t v);
+    void setREG(uint8_t part, uint8_t reg, uint8_t data);
 
-        void setFREQ(uint8_t channel, float value);
-        void setGATE(uint8_t channel, uint8_t value);
+    void setLFO(uint8_t value);
 
-        void setAL(uint8_t channel, uint8_t value);
-        void setST(uint8_t channel, uint8_t value);
-        void setFB(uint8_t channel, uint8_t value);
-        void setAMS(uint8_t channel, uint8_t value);
-        void setFMS(uint8_t channel, uint8_t value);
+    void setFREQ(uint8_t channel, float value);
+    void setGATE(uint8_t channel, uint8_t value);
 
+    void setAL(uint8_t channel, uint8_t value);
+    void setST(uint8_t channel, uint8_t value);
+    void setFB(uint8_t channel, uint8_t value);
+    void setAMS(uint8_t channel, uint8_t value);
+    void setFMS(uint8_t channel, uint8_t value);
 
-        void setAR(uint8_t channel, uint8_t slot, uint8_t value);
-        void setD1(uint8_t channel, uint8_t slot, uint8_t value);
-        void setSL(uint8_t channel, uint8_t slot, uint8_t value);
-        void setD2(uint8_t channel, uint8_t slot, uint8_t value);
-        void setRR(uint8_t channel, uint8_t slot, uint8_t value);
-        void setTL(uint8_t channel, uint8_t slot, uint8_t value);
-        void setMUL(uint8_t channel, uint8_t slot, uint8_t value);
-        void setDET(uint8_t channel, uint8_t slot, uint8_t value);
-        void setRS(uint8_t channel, uint8_t slot, uint8_t value);
-        void setAM(uint8_t channel, uint8_t slot, uint8_t value);
-
+    void setAR(uint8_t channel, uint8_t slot, uint8_t value);
+    void setD1(uint8_t channel, uint8_t slot, uint8_t value);
+    void setSL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setD2(uint8_t channel, uint8_t slot, uint8_t value);
+    void setRR(uint8_t channel, uint8_t slot, uint8_t value);
+    void setTL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setMUL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setDET(uint8_t channel, uint8_t slot, uint8_t value);
+    void setRS(uint8_t channel, uint8_t slot, uint8_t value);
+    void setAM(uint8_t channel, uint8_t slot, uint8_t value);
 };
 
-
-
-
-
-
-#endif /* DSP_YAMAHA_YM2612_HPP_ */
+#endif  // DSP_YAMAHA_YM2612_HPP_
 
 /*
 
@@ -661,6 +662,5 @@ Part I memory map
 +------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
 | B4H+ | L               | R   | AMS              |         |            | FMS            |              |        |
 +------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-
 
 */

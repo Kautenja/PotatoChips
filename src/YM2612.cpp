@@ -217,8 +217,8 @@ struct Chip2612 : rack::Module {
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
             apu[channel].step();
             // set the outputs of the module
-            outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(apu[channel].MOL) / std::numeric_limits<int16_t>::max(), channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(apu[channel].MOR) / std::numeric_limits<int16_t>::max(), channel);
+            outputs[OUTPUT_MASTER + 0].setVoltage(apu[channel].getVoltageLeft(), channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(apu[channel].getVoltageRight(), channel);
         }
     }
 };

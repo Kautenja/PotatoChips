@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <math.h>
 #include <cstdlib>
+#include <cstring>
 
 extern signed int tl_tab[];
 extern unsigned int sin_tab[];
@@ -1293,6 +1294,8 @@ YM2612::YM2612(double sample_rate) {
 }
 
 void YM2612::reset() {
+    memset(REGS, 0, sizeof REGS);
+
     OPNSetPres(&OPN);
     /* status clear */
     FM_IRQMASK_SET(&(OPN.ST), 0x03);
@@ -1510,7 +1513,7 @@ void YM2612::write(uint8_t a,uint8_t v) {
 
 void YM2612::setREG(uint8_t part, uint8_t reg, uint8_t data) {
     write((part * 2), reg);
-    write((part * 2 +1), data);
+    write((part * 2 + 1), data);
 }
 
 void YM2612::setFREQ(uint8_t channel, float value){

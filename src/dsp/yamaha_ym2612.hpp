@@ -24,6 +24,7 @@
 #define DSP_YAMAHA_YM2612_HPP_
 
 #include <cstdint>
+#include <limits>
 
 /* globals */
 #define TYPE_SSG 0x01    /* SSG support          */
@@ -547,41 +548,7 @@ struct FM_OPN {
 // MARK: public interface
 // ---------------------------------------------------------------------------
 
-/// A structure with channel data for a YM2612 voice.
-struct Channel {
-    /// the index of the active FM algorithm
-    uint8_t AL = 0;
-    /// the amount of feedback being applied to operator 1
-    uint8_t FB = 0;
-    /// the attenuator (and switch) for amplitude modulation from the LFO
-    uint8_t AMS = 0;
-    /// the attenuator (and switch) for frequency modulation from the LFO
-    uint8_t FMS = 0;
-    /// the four FM operators for the channel
-    struct Operator {
-        /// the attack rate
-        uint8_t AR = 0;
-        /// the 1st decay stage rate
-        uint8_t D1 = 0;
-        /// the amplitude to start the second decay stage
-        uint8_t SL = 0;
-        /// the 2nd decay stage rate
-        uint8_t D2 = 0;
-        /// the release rate
-        uint8_t RR = 0;
-        /// the total amplitude of the envelope
-        uint8_t TL = 0;
-        /// the multiplier for the FM frequency
-        uint8_t MUL = 0;
-        /// the amount of detuning to apply (DET * epsilon + frequency)
-        uint8_t DET = 0;
-        /// the Rate scale for key-tracking the envelope rates
-        uint8_t RS = 0;
-        /// whether the operator has amplitude modulation from the LFO enabled
-        uint8_t AM = 0;
-    } operators[4];
-};
-
+/// A YM2612 PSG emulator.
 class YM2612 {
  private:
     /// registers
@@ -593,29 +560,89 @@ class YM2612 {
     /// address line A1
     uint8_t addr_A1;
 
-    /* dac output (YM2612) */
+    /// TODO:
     int dacen;
+    /// TODO:
     int32_t dacout;
 
- public:
+    /// A structure with channel data for a YM2612 voice.
+    struct Channel {
+        /// the index of the active FM algorithm
+        uint8_t AL = 0;
+        /// the amount of feedback being applied to operator 1
+        uint8_t FB = 0;
+        /// the attenuator (and switch) for amplitude modulation from the LFO
+        uint8_t AMS = 0;
+        /// the attenuator (and switch) for frequency modulation from the LFO
+        uint8_t FMS = 0;
+        /// the four FM operators for the channel
+        struct Operator {
+            /// the attack rate
+            uint8_t AR = 0;
+            /// the 1st decay stage rate
+            uint8_t D1 = 0;
+            /// the amplitude to start the second decay stage
+            uint8_t SL = 0;
+            /// the 2nd decay stage rate
+            uint8_t D2 = 0;
+            /// the release rate
+            uint8_t RR = 0;
+            /// the total amplitude of the envelope
+            uint8_t TL = 0;
+            /// the multiplier for the FM frequency
+            uint8_t MUL = 0;
+            /// the amount of detuning to apply (DET * epsilon + frequency)
+            uint8_t DET = 0;
+            /// the Rate scale for key-tracking the envelope rates
+            uint8_t RS = 0;
+            /// whether the operator has amplitude modulation from the LFO enabled
+            uint8_t AM = 0;
+        } operators[4];
+    } channels[6];
+
+    /// the value of the global LFO parameter
+    uint8_t LFO;
+
     /// master output left
     int16_t MOL;
     /// master output right
     int16_t MOR;
 
-    Channel channels[6];
-
-    uint8_t LFO;
-
+ public:
+    /// Initialize a new YM2612 with given sample rate.
+    ///
+    /// @param sample_rate the rate to draw samples from the emulator at
+    ///
     explicit YM2612(double sample_rate = 44100);
 
-    // inline void set_sample_rate(double sample_rate) {
-    //     OPN.ST.rate = sample_rate;
-    // }
+    /// Set the sample rate the a new value.
+    ///
+    /// @param sample_rate the rate to draw samples from the emulator at
+    ///
+    inline void set_sample_rate(double sample_rate) {
+        OPN.ST.rate = sample_rate;
+        reset();
+    }
 
+    /// Reset the emulator to its initial state
     void reset();
+
+    /// Run a step on the emulator
     void step();
-    void write(uint8_t a,uint8_t v);
+
+    /// Write data to a register on the chip.
+    ///
+    /// @param address the address of the register to write data to
+    /// @param data the value of the data to write to the register
+    ///
+    void write(uint8_t address, uint8_t data);
+
+    /// Set part of a 16-bit register to a given 8-bit value.
+    ///
+    /// @param part TODO
+    /// @param reg the address of the register to write data to
+    /// @param data the value of the data to write to the register
+    ///
     void setREG(uint8_t part, uint8_t reg, uint8_t data);
 
     void setLFO(uint8_t value);
@@ -639,6 +666,34 @@ class YM2612 {
     void setDET(uint8_t channel, uint8_t slot, uint8_t value);
     void setRS(uint8_t channel, uint8_t slot, uint8_t value);
     void setAM(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// Return the output from the left channel of the mix output.
+    ///
+    /// @returns the left channel of the mix output
+    ///
+    inline int16_t getOutputLeft() { return MOL; }
+
+    /// Return the output from the right channel of the mix output.
+    ///
+    /// @returns the right channel of the mix output
+    ///
+    inline int16_t getOutputRight() { return MOR; }
+
+    /// Return the output voltage from the left channel of the mix output.
+    ///
+    /// @returns the voltage of the left channel of the mix output
+    ///
+    inline float getVoltageLeft() {
+        return static_cast<float>(MOL) / std::numeric_limits<int16_t>::max();
+    }
+
+    /// Return the output voltage from the right channel of the mix output.
+    ///
+    /// @returns the voltage of the right channel of the mix output
+    ///
+    inline float getVoltageRight() {
+        return static_cast<float>(MOR) / std::numeric_limits<int16_t>::max();
+    }
 };
 
 #endif  // DSP_YAMAHA_YM2612_HPP_

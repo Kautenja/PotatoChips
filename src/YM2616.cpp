@@ -20,9 +20,6 @@
 #include "widget/indexed_frame_display.hpp"
 #include <limits>
 
-// TODO: attenuators for all inputs
-// TODO: polyphony
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

@@ -617,12 +617,9 @@ class YM2612 {
 
     /// Set the sample rate the a new value.
     ///
-    /// @param sample_rate the rate to draw samples from the emulator at
+    /// @param new_rate the rate to draw samples from the emulator at
     ///
-    inline void set_sample_rate(double sample_rate) {
-        OPN.ST.rate = sample_rate;
-        reset();
-    }
+    inline void set_sample_rate(double new_rate) { OPN.ST.rate = new_rate; }
 
     /// Reset the emulator to its initial state
     void reset();

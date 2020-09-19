@@ -1158,19 +1158,21 @@ static void init_timetables(FM_OPN *OPN, double freqbase)
     OPN->fn_max = (uint32_t)( (double)0x20000 * freqbase * (1<<(FREQ_SH-10)) );
 }
 
-/// Set prescaler and make time tables.
+/// Set pre-scaler and make time tables.
+///
+/// @param OPN the OPN emulator to set the pre-scaler and create timetables for
+///
 static void OPNSetPres(FM_OPN *OPN) {
-    /* frequency base */
-    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate): 0;
-
-    /* EG is updated every 3 samples */
-    OPN->eg_timer_add  = (uint32_t)((1<<EG_SH) * OPN->ST.freqbase);
-    OPN->eg_timer_overflow = ( 3 ) * (1<<EG_SH);
-
-    /* LFO timer increment (every samples) */
-    OPN->lfo_timer_add  = (uint32_t)((1<<LFO_SH) * OPN->ST.freqbase);
-
-    /* make time tables */
+    // frequency base
+    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
+    // TODO: why is it necessary to scale these by a factor of 1/16 to get the
+    //       correct timings from the EG and LFO?
+    // EG timer increment (updates every 3 samples)
+    OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
+    OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+    // LFO timer increment (updates every 16 samples)
+    OPN->lfo_timer_add  = (1 << LFO_SH) * OPN->ST.freqbase / 16;
+    // make time tables
     init_timetables(OPN, OPN->ST.freqbase);
 }
 

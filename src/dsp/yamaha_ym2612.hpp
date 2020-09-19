@@ -678,10 +678,21 @@ class YM2612 {
         write((part << 1) + 1, data);
     }
 
-    // TODO: LFO is not changing rates correctly based on frequency scaling
     /// @brief Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
+    /// @details
+    /// ## Mapping values to frequencies in Hz
+    /// | value | LFO frequency (Hz)
+    /// |:------|:-------------------|
+    /// | 0     | 3.98
+    /// | 1     | 5.56
+    /// | 2     | 6.02
+    /// | 3     | 6.37
+    /// | 4     | 6.88
+    /// | 5     | 9.63
+    /// | 6     | 48.1
+    /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
         // don't set the value if it hasn't changed

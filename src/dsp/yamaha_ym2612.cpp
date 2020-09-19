@@ -1329,7 +1329,6 @@ void YM2612::reset() {
 }
 
 void YM2612::step() {
-
     int lt, rt;
 
     /* refresh PG and EG */
@@ -1373,8 +1372,7 @@ void YM2612::step() {
 
     /* advance envelope generator */
     OPN.eg_timer += OPN.eg_timer_add;
-    while (OPN.eg_timer >= OPN.eg_timer_overflow)
-    {
+    while (OPN.eg_timer >= OPN.eg_timer_overflow) {
         OPN.eg_timer -= OPN.eg_timer_overflow;
         OPN.eg_cnt++;
 
@@ -1430,16 +1428,11 @@ void YM2612::step() {
     MOR = rt;
 
     /* timer A control */
-    if ((OPN.ST.TAC -= (int)(OPN.ST.freqbase * 4096)) <= 0)
-    {
+    if ((OPN.ST.TAC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerAOver(&OPN.ST);
-    }
-
     /* timer B control */
-    if ((OPN.ST.TBC -= (int)(OPN.ST.freqbase * 4096)) <= 0)
-    {
+    if ((OPN.ST.TBC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerBOver(&OPN.ST);
-    }
 }
 
 void YM2612::write(uint8_t a,uint8_t v) {
@@ -1498,42 +1491,6 @@ void YM2612::write(uint8_t a,uint8_t v) {
         break;
     }
     //return F2612->OPN.ST.irq;
-}
-
-void YM2612::setREG(uint8_t part, uint8_t reg, uint8_t data) {
-    write((part * 2), reg);
-    write((part * 2 + 1), data);
-}
-
-void YM2612::setFREQ(uint8_t channel, float frequency) {
-    // shift the frequency to the base octave and calculate the octave to play.
-    // the base octave is defined as a 10-bit number, i.e., in [0, 1023]
-    int octave = 2;
-    for (; frequency >= 1024; octave++) frequency /= 2;
-    // NOTE: arbitrary shift calculated by producing note from a ground truth
-    //       oscillator and comparing the output from YM2612 via division.
-    //       1.458166333006277
-    // TODO: why is this arbitrary shift necessary to tune to C4?
-    frequency = frequency / 1.458;
-    // cast the shifted frequency to 16-bit container
-    uint16_t f = frequency;
-    // write the low and high portions of the frequency to the register
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA4, channel), ((f >> 8) & 0x07) | ((octave & 0x07) << 3));
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0, channel), f & 0xff);
-}
-
-void YM2612::setGATE(uint8_t channel, uint8_t value) {
-    // set the gate register based on the value. False = x00 and True = 0xF0
-    setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
-}
-
-void YM2612::setLFO(uint8_t value) {
-    // don't set the value if it hasn't changed
-    if (LFO == value) return;
-    // update the local LFO value
-    LFO = value;
-    // set the LFO on the OPN emulator
-    setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
 }
 
 void YM2612::setAL(uint8_t channel, uint8_t value){

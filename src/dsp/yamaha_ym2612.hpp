@@ -642,27 +642,57 @@ class YM2612 {
     /// @param reg the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///
-    void setREG(uint8_t part, uint8_t reg, uint8_t data);
+    inline void setREG(uint8_t part, uint8_t reg, uint8_t data) {
+        write(part << 1, reg);
+        write((part << 1) + 1, data);
+    }
 
     /// Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
     ///
-    void setLFO(uint8_t value);
+    inline void setLFO(uint8_t value) {
+        // don't set the value if it hasn't changed
+        if (LFO == value) return;
+        // update the local LFO value
+        LFO = value;
+        // set the LFO on the OPN emulator
+        setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
+    }
 
     /// Set the frequency for the given channel.
     ///
     /// @param channel the voice on the chip to set the frequency for
-    /// @param value the frequency value measured in Hz
+    /// @param frequency the frequency value measured in Hz
     ///
-    void setFREQ(uint8_t channel, float value);
+    inline void setFREQ(uint8_t channel, float frequency) {
+        // shift the frequency to the base octave and calculate the octave to play.
+        // the base octave is defined as a 10-bit number, i.e., in [0, 1023]
+        int octave = 2;
+        for (; frequency >= 1024; octave++) frequency /= 2;
+        // NOTE: arbitrary shift calculated by producing note from a ground truth
+        //       oscillator and comparing the output from YM2612 via division.
+        //       1.458166333006277
+        // TODO: why is this arbitrary shift necessary to tune to C4?
+        frequency = frequency / 1.458;
+        // cast the shifted frequency to a 16-bit container
+        const uint16_t freq16bit = frequency;
+        // write the low and high portions of the frequency to the register
+        const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA4, channel), freqHigh);
+        const auto freqLow = freq16bit & 0xff;
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0, channel), freqLow);
+    }
 
     /// Set the gate for the given channel.
     ///
     /// @param channel the voice on the chip to set the gate for
     /// @param value the boolean value of the gate signal
     ///
-    void setGATE(uint8_t channel, uint8_t value);
+    inline void setGATE(uint8_t channel, uint8_t value) {
+        // set the gate register based on the value. False = x00 and True = 0xF0
+        setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
+    }
 
     void setAL(uint8_t channel, uint8_t value);
     void setST(uint8_t channel, uint8_t value);

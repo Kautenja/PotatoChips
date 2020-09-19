@@ -1165,8 +1165,8 @@ static void init_timetables(FM_OPN *OPN, double freqbase)
 static void OPNSetPres(FM_OPN *OPN) {
     // frequency base
     OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
-    // TODO: why is it necessary to scale these by a factor of 1/16 to get the
-    //       correct timings from the EG and LFO?
+    // TODO: why is it necessary to scale these increments by a factor of 1/16
+    //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
     OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
     OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;

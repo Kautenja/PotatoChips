@@ -1267,7 +1267,7 @@ static void init_tables(void) {
 // ---------------------------------------------------------------------------
 
 YM2612::YM2612(double clock_rate, double sample_rate) {
-    /* allocate total level table (128kb space) */
+    // allocate total level table (128kb space)
     init_tables();
     OPN.P_CH = CH;
     OPN.type = TYPE_YM2612;
@@ -1283,23 +1283,24 @@ void YM2612::setSampleRate(double clock_rate, double sample_rate) {
 }
 
 void YM2612::reset() {
+    // clear instance variables
     memset(REGS, 0, sizeof REGS);
     LFO = MOL = MOR = 0;
-
+    // set the frequency scaling parameters of the OPN emulator
     OPNSetPres(&OPN);
-    /* status clear */
+    // status clear
     FM_IRQMASK_SET(&(OPN.ST), 0x03);
-    /* mode 0 , timer reset */
+    // mode 0 , timer reset
     OPNWriteMode(&OPN, 0x27, 0x30);
-
+    // envelope generator
     OPN.eg_timer = 0;
     OPN.eg_cnt = 0;
-
+    // LFO
     OPN.lfo_timer = 0;
     OPN.lfo_cnt = 0;
     OPN.LFO_AM = 126;
     OPN.LFO_PM = 0;
-
+    // state
     OPN.ST.status = 0;
     OPN.ST.mode = 0;
 
@@ -1320,7 +1321,7 @@ void YM2612::reset() {
         OPNWriteReg(&OPN, i | 0x100, 0);
     }
 
-    /* DAC mode clear */
+    // DAC mode clear
     dacen = dacout = 0;
     for (int c = 0; c < 6; c++) setST(c, 3);
 }

@@ -1288,7 +1288,8 @@ void YM2612::reset() {
     OPNSetPres(&OPN);
     /* status clear */
     FM_IRQMASK_SET(&(OPN.ST), 0x03);
-    OPNWriteMode(&OPN, 0x27, 0x30); /* mode 0 , timer reset */
+    /* mode 0 , timer reset */
+    OPNWriteMode(&OPN, 0x27, 0x30);
 
     OPN.eg_timer = 0;
     OPN.eg_cnt = 0;
@@ -1308,13 +1309,12 @@ void YM2612::reset() {
 
     reset_channels(&(OPN.ST), &CH[0], 6);
 
-    for (int i = 0xb6; i >= 0xb4; i--)
-    {
+    for (int i = 0xb6; i >= 0xb4; i--) {
         OPNWriteReg(&OPN, i, 0xc0);
         OPNWriteReg(&OPN, i | 0x100, 0xc0);
     }
-    for (int i = 0xb2; i >= 0x30; i--)
-    {
+
+    for (int i = 0xb2; i >= 0x30; i--) {
         OPNWriteReg(&OPN, i, 0);
         OPNWriteReg(&OPN, i | 0x100, 0);
     }
@@ -1323,9 +1323,7 @@ void YM2612::reset() {
     dacen = 0;
     dacout = 0;
 
-    for (int c = 0; c < 6; c++) {
-        setST(c,3);
-    }
+    for (int c = 0; c < 6; c++) setST(c,3);
 }
 
 void YM2612::step() {

@@ -601,12 +601,12 @@ class YM2612 {
     } channels[6];
 
     /// the value of the global LFO parameter
-    uint8_t LFO;
+    uint8_t LFO = 0;
 
     /// master output left
-    int16_t MOL;
+    int16_t MOL = 0;
     /// master output right
-    int16_t MOR;
+    int16_t MOR = 0;
 
  public:
     /// @brief Initialize a new YM2612 with given sample rate.

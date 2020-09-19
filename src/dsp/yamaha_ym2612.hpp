@@ -609,34 +609,34 @@ class YM2612 {
     int16_t MOR;
 
  public:
-    /// Initialize a new YM2612 with given sample rate.
+    /// @brief Initialize a new YM2612 with given sample rate.
     ///
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     explicit YM2612(double clock_rate = 768000, double sample_rate = 44100);
 
-    /// Set the sample rate the a new value.
+    /// @brief Set the sample rate the a new value.
     ///
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     void set_sample_rate(double clock_rate = 768000, double sample_rate = 44100);
 
-    /// Reset the emulator to its initial state
+    /// @brief Reset the emulator to its initial state
     void reset();
 
-    /// Run a step on the emulator
+    /// @brief Run a step on the emulator
     void step();
 
-    /// Write data to a register on the chip.
+    /// @brief Write data to a register on the chip.
     ///
     /// @param address the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///
     void write(uint8_t address, uint8_t data);
 
-    /// Set part of a 16-bit register to a given 8-bit value.
+    /// @brief Set part of a 16-bit register to a given 8-bit value.
     ///
     /// @param part TODO
     /// @param reg the address of the register to write data to
@@ -648,7 +648,7 @@ class YM2612 {
     }
 
     // TODO: LFO is not changing rates correctly based on frequency scaling
-    /// Set the global LFO for the chip.
+    /// @brief Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
     ///
@@ -665,7 +665,7 @@ class YM2612 {
     // MARK: Global control for each channel
     // -----------------------------------------------------------------------
 
-    /// Set the frequency for the given channel.
+    /// @brief Set the frequency for the given channel.
     ///
     /// @param channel the voice on the chip to set the frequency for
     /// @param frequency the frequency value measured in Hz
@@ -689,7 +689,7 @@ class YM2612 {
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0, channel), freqLow);
     }
 
-    /// Set the gate for the given channel.
+    /// @brief Set the gate for the given channel.
     ///
     /// @param channel the voice on the chip to set the gate for
     /// @param value the boolean value of the gate signal
@@ -699,7 +699,7 @@ class YM2612 {
         setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
     }
 
-    /// Set the algorithm (AL) register for the given channel.
+    /// @brief Set the algorithm (AL) register for the given channel.
     ///
     /// @param channel the channel to set the algorithm register of
     /// @param value the selected FM algorithm in [0, 7]
@@ -711,7 +711,7 @@ class YM2612 {
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0, channel), CH[channel].FB_ALG);
     }
 
-    /// Set the feedback (FB) register for the given channel.
+    /// @brief Set the feedback (FB) register for the given channel.
     ///
     /// @param channel the channel to set the feedback register of
     /// @param value the amount of feedback for operator 1
@@ -723,12 +723,17 @@ class YM2612 {
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0, channel), CH[channel].FB_ALG);
     }
 
-    /// TODO: document this function
+    // TODO: document this function
     inline void setST(uint8_t channel, uint8_t value) {
         CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
     }
 
+    /// @brief Set the AM sensitivity (AMS) register for the given channel.
+    ///
+    /// @param channel the channel to set the AM sensitivity register of
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
     inline void setAMS(uint8_t channel, uint8_t value){
         if (channels[channel].AMS == value) return;
         channels[channel].AMS = value;
@@ -736,6 +741,11 @@ class YM2612 {
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
     }
 
+    /// @brief Set the FM sensitivity (FMS) register for the given channel.
+    ///
+    /// @param channel the channel to set the FM sensitivity register of
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
     inline void setFMS(uint8_t channel, uint8_t value) {
         if (channels[channel].FMS == value) return;
         channels[channel].FMS = value;
@@ -762,19 +772,19 @@ class YM2612 {
     // MARK: Emulator output
     // -----------------------------------------------------------------------
 
-    /// Return the output from the left channel of the mix output.
+    /// @brief Return the output from the left channel of the mix output.
     ///
     /// @returns the left channel of the mix output
     ///
     inline int16_t getOutputLeft() { return MOL; }
 
-    /// Return the output from the right channel of the mix output.
+    /// @brief Return the output from the right channel of the mix output.
     ///
     /// @returns the right channel of the mix output
     ///
     inline int16_t getOutputRight() { return MOR; }
 
-    /// Return the output voltage from the left channel of the mix output.
+    /// @brief Return the voltage from the left channel of the mix output.
     ///
     /// @returns the voltage of the left channel of the mix output
     ///
@@ -782,7 +792,7 @@ class YM2612 {
         return static_cast<float>(MOL) / std::numeric_limits<int16_t>::max();
     }
 
-    /// Return the output voltage from the right channel of the mix output.
+    /// @brief Return the voltage from the right channel of the mix output.
     ///
     /// @returns the voltage of the right channel of the mix output
     ///

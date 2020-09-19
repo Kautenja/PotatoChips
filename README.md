@@ -55,11 +55,11 @@ See the [Manual][106] for more information about the features of this module.
 ## 2612
 
 2612 is an emulation of the
-[Yamaha YM2612]()
+[Yamaha YM2612](https://en.wikipedia.org/wiki/Yamaha_YM2612)
 audio processing unit from the
-[Sega Master System]()
+[Sega Master System](https://en.wikipedia.org/wiki/Master_System)
 and
-[Sega Genesis]()
+[Sega Genesis](https://en.wikipedia.org/wiki/Sega_Genesis)
 for VCV Rack. The YM2612 is a 4-operator FM synthesis chip with 6 voices of
 polyphony.
 

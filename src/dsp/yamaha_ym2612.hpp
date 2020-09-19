@@ -621,7 +621,7 @@ class YM2612 {
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    void set_sample_rate(double clock_rate = 768000, double sample_rate = 44100);
+    void setSampleRate(double clock_rate = 768000, double sample_rate = 44100);
 
     /// @brief Reset the emulator to its initial state
     void reset();
@@ -747,7 +747,7 @@ class YM2612 {
     /// @param channel the channel to set the feedback register of
     /// @param value the amount of feedback for operator 1
     ///
-    inline void setFB(uint8_t channel, uint8_t value){
+    inline void setFB(uint8_t channel, uint8_t value) {
         if (channels[channel].FB == value) return;
         channels[channel].FB = value;
         CH[channel].FB_ALG = (CH[channel].FB_ALG & 7)| ((value & 7) << 3);
@@ -769,7 +769,7 @@ class YM2612 {
     /// @param channel the channel to set the AM sensitivity register of
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
-    inline void setAMS(uint8_t channel, uint8_t value){
+    inline void setAMS(uint8_t channel, uint8_t value) {
         if (channels[channel].AMS == value) return;
         channels[channel].AMS = value;
         CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);

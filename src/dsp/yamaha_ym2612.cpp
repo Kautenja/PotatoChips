@@ -1515,27 +1515,25 @@ void YM2612::setFREQ(uint8_t channel, float frequency) {
     //       1.458166333006277
     // TODO: why is this arbitrary shift necessary to tune to C4?
     frequency = frequency / 1.458;
+    // cast the shifted frequency to 16-bit container
     uint16_t f = frequency;
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA4,channel), ((f >> 8) & 0x07) | ((octave & 0x07) << 3));
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0,channel), f & 0xff);
+    // write the low and high portions of the frequency to the register
+    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA4, channel), ((f >> 8) & 0x07) | ((octave & 0x07) << 3));
+    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xA0, channel), f & 0xff);
 }
 
-void YM2612::setGATE(uint8_t channel, uint8_t value){
-    if (value){
-        setREG(0, 0x28, 0xF0 + ((channel/3) * 4 + channel%3 ) );
-    }
-    else{
-        setREG(0, 0x28, 0x00 +((channel/3) * 4 + channel%3 ) );
-    }
+void YM2612::setGATE(uint8_t channel, uint8_t value) {
+    // set the gate register based on the value. False = x00 and True = 0xF0
+    setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
 }
 
-void YM2612::setLFO(uint8_t value){
-    if(LFO == value)
-        return;
-
+void YM2612::setLFO(uint8_t value) {
+    // don't set the value if it hasn't changed
+    if (LFO == value) return;
+    // update the local LFO value
     LFO = value;
-
-    setREG(0, 0x22, ((value>0)<<3)|(value&7));
+    // set the LFO on the OPN emulator
+    setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
 }
 
 void YM2612::setAL(uint8_t channel, uint8_t value){

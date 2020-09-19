@@ -560,9 +560,9 @@ class YM2612 {
     /// address line A1
     uint8_t addr_A1;
 
-    /// TODO:
+    /// whether the emulated DAC is enabled
     int dacen;
-    /// TODO:
+    /// the output value from the emulated DAC
     int32_t dacout;
 
     /// A structure with channel data for a YM2612 voice.
@@ -595,7 +595,7 @@ class YM2612 {
             uint8_t DET = 0;
             /// the Rate scale for key-tracking the envelope rates
             uint8_t RS = 0;
-            /// whether the operator has amplitude modulation from the LFO enabled
+            /// whether amplitude modulation from the LFO enabled
             uint8_t AM = 0;
         } operators[4];
     } channels[6];
@@ -644,9 +644,24 @@ class YM2612 {
     ///
     void setREG(uint8_t part, uint8_t reg, uint8_t data);
 
+    /// Set the global LFO for the chip.
+    ///
+    /// @param value the value of the LFO register
+    ///
     void setLFO(uint8_t value);
 
+    /// Set the frequency for the given channel.
+    ///
+    /// @param channel the voice on the chip to set the frequency for
+    /// @param value the frequency value measured in Hz
+    ///
     void setFREQ(uint8_t channel, float value);
+
+    /// Set the gate for the given channel.
+    ///
+    /// @param channel the voice on the chip to set the gate for
+    /// @param value the boolean value of the gate signal
+    ///
     void setGATE(uint8_t channel, uint8_t value);
 
     void setAL(uint8_t channel, uint8_t value);

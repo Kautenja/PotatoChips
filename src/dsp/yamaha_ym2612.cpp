@@ -1327,33 +1327,28 @@ void YM2612::reset() {
 
 void YM2612::step() {
     int lt, rt;
-
-    /* refresh PG and EG */
+    // refresh PG and EG
     refresh_fc_eg_chan(&OPN, &CH[0]);
     refresh_fc_eg_chan(&OPN, &CH[1]);
     refresh_fc_eg_chan(&OPN, &CH[2]);
     refresh_fc_eg_chan(&OPN, &CH[3]);
     refresh_fc_eg_chan(&OPN, &CH[4]);
     refresh_fc_eg_chan(&OPN, &CH[5]);
-
-    /* buffering */
-    /* clear outputs */
+    // clear outputs
     OPN.out_fm[0] = 0;
     OPN.out_fm[1] = 0;
     OPN.out_fm[2] = 0;
     OPN.out_fm[3] = 0;
     OPN.out_fm[4] = 0;
     OPN.out_fm[5] = 0;
-
-    /* update SSG-EG output */
+    // update SSG-EG output
     update_ssg_eg_channel(&(CH[0].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[1].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[2].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[3].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[4].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[5].SLOT[SLOT1]));
-
-    /* calculate FM */
+    // calculate FM
     chan_calc(&OPN, &CH[0]);
     chan_calc(&OPN, &CH[1]);
     chan_calc(&OPN, &CH[2]);
@@ -1363,16 +1358,13 @@ void YM2612::step() {
         *&CH[5].connect4 += dacout;
     else
         chan_calc(&OPN, &CH[5]);
-
-    /* advance LFO */
+    // advance LFO
     advance_lfo(&OPN);
-
-    /* advance envelope generator */
+    // advance envelope generator
     OPN.eg_timer += OPN.eg_timer_add;
     while (OPN.eg_timer >= OPN.eg_timer_overflow) {
         OPN.eg_timer -= OPN.eg_timer_overflow;
         OPN.eg_cnt++;
-
         advance_eg_channel(&OPN, &(CH[0].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[1].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[2].SLOT[SLOT1]));
@@ -1380,7 +1372,7 @@ void YM2612::step() {
         advance_eg_channel(&OPN, &(CH[4].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[5].SLOT[SLOT1]));
     }
-
+    // clip outputs
     if (OPN.out_fm[0] > 8191)
         OPN.out_fm[0] = 8191;
     else if (OPN.out_fm[0] < -8192)
@@ -1405,8 +1397,7 @@ void YM2612::step() {
         OPN.out_fm[5] = 8191;
     else if (OPN.out_fm[5] < -8192)
         OPN.out_fm[5] = -8192;
-
-    /* 6-channels mixing  */
+    // 6-channels mixing
     lt = ((OPN.out_fm[0] >> 0) & OPN.pan[0]);
     rt = ((OPN.out_fm[0] >> 0) & OPN.pan[1]);
     lt += ((OPN.out_fm[1] >> 0) & OPN.pan[2]);
@@ -1419,75 +1410,65 @@ void YM2612::step() {
     rt += ((OPN.out_fm[4] >> 0) & OPN.pan[9]);
     lt += ((OPN.out_fm[5] >> 0) & OPN.pan[10]);
     rt += ((OPN.out_fm[5] >> 0) & OPN.pan[11]);
-
-    /* buffering */
+    // output buffering
     MOL = lt;
     MOR = rt;
-
-    /* timer A control */
+    // timer A control
     if ((OPN.ST.TAC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerAOver(&OPN.ST);
-    /* timer B control */
+    // timer B control
     if ((OPN.ST.TBC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerBOver(&OPN.ST);
 }
 
-void YM2612::write(uint8_t a,uint8_t v) {
+void YM2612::write(uint8_t a, uint8_t v) {
     int addr;
-
-    v &= 0xff; /* adjust to 8 bit bus */
-
-    switch (a & 3)
-    {
-    case 0: /* address port 0 */
+    // adjust to 8 bit bus
+    v &= 0xff;
+    switch (a & 3) {
+    case 0:  // address port 0
         OPN.ST.address = v;
         addr_A1 = 0;
         break;
 
-    case 1: /* data port 0    */
-        if (addr_A1 != 0)
-            break; /* verified on real YM2608 */
+    case 1:  // data port 0
+        // verified on real YM2608
+        if (addr_A1 != 0) break;
 
         addr = OPN.ST.address;
         REGS[addr] = v;
-        switch (addr & 0xf0)
-        {
-        case 0x20: /* 0x20-0x2f Mode */
-            switch (addr)
-            {
-            case 0x2a:                                /* DAC data (YM2612) */
-                dacout = ((int)v - 0x80) << 6; /* level unknown */
+        switch (addr & 0xf0) {
+        case 0x20:  // 0x20-0x2f Mode
+            switch (addr) {
+            case 0x2a:  // DAC data (YM2612), level unknown
+                dacout = ((int)v - 0x80) << 6;
                 break;
-            case 0x2b: /* DAC Sel  (YM2612) */
-                /* b7 = dac enable */
+            case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
                 dacen = v & 0x80;
                 break;
-            default: /* OPN section */
-                /* write register */
+            default:  // OPN section, write register
                 OPNWriteMode(&OPN, addr, v);
             }
             break;
-        default: /* 0x30-0xff OPN section */
-            /* write register */
+        default:  // 0x30-0xff OPN section, write register
             OPNWriteReg(&OPN, addr, v);
         }
         break;
 
-    case 2: /* address port 1 */
+    case 2: // address port 1
         OPN.ST.address = v;
         addr_A1 = 1;
         break;
 
-    case 3: /* data port 1    */
-        if (addr_A1 != 1)
-            break; /* verified on real YM2608 */
+    case 3: // data port 1
+        // verified on real YM2608
+        if (addr_A1 != 1) break;
 
         addr = OPN.ST.address;
         REGS[addr | 0x100] = v;
         OPNWriteReg(&OPN, addr | 0x100, v);
         break;
     }
-    //return F2612->OPN.ST.irq;
 }
 
 void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {

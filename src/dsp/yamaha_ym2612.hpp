@@ -647,6 +647,7 @@ class YM2612 {
         write((part << 1) + 1, data);
     }
 
+    // TODO: LFO is not changing rates correctly based on frequency scaling
     /// Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
@@ -659,6 +660,10 @@ class YM2612 {
         // set the LFO on the OPN emulator
         setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
     }
+
+    // -----------------------------------------------------------------------
+    // MARK: Global control for each channel
+    // -----------------------------------------------------------------------
 
     /// Set the frequency for the given channel.
     ///
@@ -694,11 +699,53 @@ class YM2612 {
         setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
     }
 
-    void setAL(uint8_t channel, uint8_t value);
-    void setST(uint8_t channel, uint8_t value);
-    void setFB(uint8_t channel, uint8_t value);
-    void setAMS(uint8_t channel, uint8_t value);
-    void setFMS(uint8_t channel, uint8_t value);
+    /// Set the algorithm (AL) register for the given channel.
+    ///
+    /// @param channel the channel to set the algorithm register of
+    /// @param value the selected FM algorithm in [0, 7]
+    ///
+    inline void setAL(uint8_t channel, uint8_t value) {
+        if (channels[channel].AL == value) return;
+        channels[channel].AL = value;
+        CH[channel].FB_ALG = (CH[channel].FB_ALG & 0x38) | (value & 7);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0, channel), CH[channel].FB_ALG);
+    }
+
+    /// Set the feedback (FB) register for the given channel.
+    ///
+    /// @param channel the channel to set the feedback register of
+    /// @param value the amount of feedback for operator 1
+    ///
+    inline void setFB(uint8_t channel, uint8_t value){
+        if (channels[channel].FB == value) return;
+        channels[channel].FB = value;
+        CH[channel].FB_ALG = (CH[channel].FB_ALG & 7)| ((value & 7) << 3);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0, channel), CH[channel].FB_ALG);
+    }
+
+    /// TODO: document this function
+    inline void setST(uint8_t channel, uint8_t value) {
+        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
+    }
+
+    inline void setAMS(uint8_t channel, uint8_t value){
+        if (channels[channel].AMS == value) return;
+        channels[channel].AMS = value;
+        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
+    }
+
+    inline void setFMS(uint8_t channel, uint8_t value) {
+        if (channels[channel].FMS == value) return;
+        channels[channel].FMS = value;
+        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0xF8)| (value & 7);
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
+    }
+
+    // -----------------------------------------------------------------------
+    // MARK: Operator control for each channel
+    // -----------------------------------------------------------------------
 
     void setAR(uint8_t channel, uint8_t slot, uint8_t value);
     void setD1(uint8_t channel, uint8_t slot, uint8_t value);
@@ -710,6 +757,10 @@ class YM2612 {
     void setDET(uint8_t channel, uint8_t slot, uint8_t value);
     void setRS(uint8_t channel, uint8_t slot, uint8_t value);
     void setAM(uint8_t channel, uint8_t slot, uint8_t value);
+
+    // -----------------------------------------------------------------------
+    // MARK: Emulator output
+    // -----------------------------------------------------------------------
 
     /// Return the output from the left channel of the mix output.
     ///

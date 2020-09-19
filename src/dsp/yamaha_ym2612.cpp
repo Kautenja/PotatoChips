@@ -1493,57 +1493,6 @@ void YM2612::write(uint8_t a,uint8_t v) {
     //return F2612->OPN.ST.irq;
 }
 
-void YM2612::setAL(uint8_t channel, uint8_t value){
-
-    if(channels[channel].AL == value)
-        return;
-
-    channels[channel].AL = value;
-
-    CH[channel].FB_ALG = (CH[channel].FB_ALG&0x38) | (value&7);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0,channel), CH[channel].FB_ALG);
-}
-
-
-void YM2612::setFB(uint8_t channel, uint8_t value){
-    if(channels[channel].FB == value)
-        return;
-
-    channels[channel].FB = value;
-
-    CH[channel].FB_ALG = (CH[channel].FB_ALG&7)| ((value&7)<<3);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0,channel), CH[channel].FB_ALG);
-}
-
-void YM2612::setST(uint8_t channel, uint8_t value){
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0x3F)| ((value&3)<<6);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-void YM2612::setAMS(uint8_t channel, uint8_t value){
-    if(channels[channel].AMS == value)
-        return;
-
-    channels[channel].AMS = value;
-
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0xCF)| ((value&3)<<4);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-void YM2612::setFMS(uint8_t channel, uint8_t value){
-    if(channels[channel].FMS == value)
-        return;
-
-    channels[channel].FMS = value;
-
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0xF8)| (value&7);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-
-
-
-
 void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value){
     if(channels[channel].operators[slot].AR == value)
         return;

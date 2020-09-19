@@ -1284,6 +1284,7 @@ void YM2612::setSampleRate(double clock_rate, double sample_rate) {
 
 void YM2612::reset() {
     memset(REGS, 0, sizeof REGS);
+    LFO = MOL = MOR = 0;
 
     OPNSetPres(&OPN);
     /* status clear */
@@ -1320,10 +1321,8 @@ void YM2612::reset() {
     }
 
     /* DAC mode clear */
-    dacen = 0;
-    dacout = 0;
-
-    for (int c = 0; c < 6; c++) setST(c,3);
+    dacen = dacout = 0;
+    for (int c = 0; c < 6; c++) setST(c, 3);
 }
 
 void YM2612::step() {

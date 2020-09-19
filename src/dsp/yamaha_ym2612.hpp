@@ -642,6 +642,37 @@ class YM2612 {
     /// @param reg the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///
+    /// @details
+    ///
+    /// ## [Memory map](http://www.smspower.org/maxim/Documents/YM2612#reg27)
+    ///
+    /// | REG  | Bit 7           | Bit 6 | Bit 5            | Bit 4   | Bit 3      | Bit 2          | Bit 1        | Bit 0  |
+    /// |:-----|:----------------|:------|:-----------------|:--------|:-----------|:---------------|:-------------|:-------|
+    /// | 22H  |                 |       |                  |         | LFO enable | LFO frequency  |              |        |
+    /// | 24H  | Timer A MSBs    |       |                  |         |            |                |              |        |
+    /// | 25H  |                 |       |                  |         |            |                | Timer A LSBs |        |
+    /// | 26H  | Timer B         |       |                  |         |            |                |              |        |
+    /// | 27H  | Ch3 mode        |       | Reset B          | Reset A | Enable B   | Enable A       | Load B       | Load A |
+    /// | 28H  | Operator        |       |                  |         |            | Channel        |              |        |
+    /// | 29H  |                 |       |                  |         |            |                |              |        |
+    /// | 2AH  | DAC             |       |                  |         |            |                |              |        |
+    /// | 2BH  | DAC en          |       |                  |         |            |                |              |        |
+    /// |      |                 |       |                  |         |            |                |              |        |
+    /// | 30H+ |                 | DT1   |                  |         | MUL        |                |              |        |
+    /// | 40H+ |                 | TL    |                  |         |            |                |              |        |
+    /// | 50H+ | RS              |       |                  | AR      |            |                |              |        |
+    /// | 60H+ | AM              |       |                  | D1R     |            |                |              |        |
+    /// | 70H+ |                 |       |                  | D2R     |            |                |              |        |
+    /// | 80H+ | D1L             |       |                  |         | RR         |                |              |        |
+    /// | 90H+ |                 |       |                  |         | SSG-EG     |                |              |        |
+    /// |      |                 |       |                  |         |            |                |              |        |
+    /// | A0H+ | Freq. LSB       |       |                  |         |            |                |              |        |
+    /// | A4H+ |                 |       | Block            |         |            | Freq. MSB      |              |        |
+    /// | A8H+ | Ch3 suppl. freq.|       |                  |         |            |                |              |        |
+    /// | ACH+ |                 |       | Ch3 suppl. block |         |            | Ch3 suppl freq |              |        |
+    /// | B0H+ |                 |       | Feedback         |         |            | Algorithm      |              |        |
+    /// | B4H+ | L               | R     | AMS              |         |            | FMS            |              |        |
+    ///
     inline void setREG(uint8_t part, uint8_t reg, uint8_t data) {
         write(part << 1, reg);
         write((part << 1) + 1, data);
@@ -723,7 +754,11 @@ class YM2612 {
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0, channel), CH[channel].FB_ALG);
     }
 
-    // TODO: document this function
+    /// @brief Set the state (ST) register for the given channel.
+    ///
+    /// @param channel the channel to set the state register of
+    /// @param value the value of the state register
+    ///
     inline void setST(uint8_t channel, uint8_t value) {
         CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4, channel), CH[channel].LR_AMS_FMS);
@@ -757,15 +792,84 @@ class YM2612 {
     // MARK: Operator control for each channel
     // -----------------------------------------------------------------------
 
+    /// @brief Set the attack rate (AR) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the attack rate (AR) register of (in [0, 6])
+    /// @param slot the operator to set the attack rate (AR) register of (in [0, 3])
+    /// @param value the rate of the attack stage of the envelope generator
+    ///
     void setAR(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the 1st decay rate (D1) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the 1st decay rate (D1) register of (in [0, 6])
+    /// @param slot the operator to set the 1st decay rate (D1) register of (in [0, 3])
+    /// @param value the rate of decay for the 1st decay stage of the envelope generator
+    ///
     void setD1(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the sustain level (SL) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the sustain level (SL) register of (in [0, 6])
+    /// @param slot the operator to set the sustain level (SL) register of (in [0, 3])
+    /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
+    ///
     void setSL(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the 2nd decay rate (D2) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the 2nd decay rate (D2) register of (in [0, 6])
+    /// @param slot the operator to set the 2nd decay rate (D2) register of (in [0, 3])
+    /// @param value the rate of decay for the 2nd decay stage of the envelope generator
+    ///
     void setD2(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the release rate (RR) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the release rate (RR) register of (in [0, 6])
+    /// @param slot the operator to set the release rate (RR) register of (in [0, 3])
+    /// @param value the rate of release of the envelope generator after key-off
+    ///
     void setRR(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the total level (TL) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the total level (TL) register of (in [0, 6])
+    /// @param slot the operator to set the total level (TL) register of (in [0, 3])
+    /// @param value the total amplitude of envelope generator
+    ///
     void setTL(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the multiplier (MUL) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the multiplier (MUL) register of (in [0, 6])
+    /// @param slot the operator to set the multiplier  (MUL)register of (in [0, 3])
+    /// @param value the value of the FM phase multiplier
+    ///
     void setMUL(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the detune (DET) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the detune (DET) register of (in [0, 6])
+    /// @param slot the operator to set the detune (DET) register of (in [0, 3])
+    /// @param value the the level of detuning for the FM operator
+    ///
     void setDET(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the rate-scale (RS) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the rate-scale (RS) register of (in [0, 6])
+    /// @param slot the operator to set the rate-scale (RS) register of (in [0, 3])
+    /// @param value the amount of rate-scale applied to the FM operator
+    ///
     void setRS(uint8_t channel, uint8_t slot, uint8_t value);
+
+    /// @brief Set the amplitude modulation (AM) register for the given channel and operator.
+    ///
+    /// @param channel the channel to set the amplitude modulation (AM) register of (in [0, 6])
+    /// @param slot the operator to set the amplitude modulation (AM) register of (in [0, 3])
+    /// @param value the true to enable amplitude modulation from the LFO, false to disable it
+    ///
     void setAM(uint8_t channel, uint8_t slot, uint8_t value);
 
     // -----------------------------------------------------------------------
@@ -802,64 +906,3 @@ class YM2612 {
 };
 
 #endif  // DSP_YAMAHA_YM2612_HPP_
-
-/*
-
-from http://www.smspower.org/maxim/Documents/YM2612#reg27
-
-Part I memory map
-=================
-
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| REG  | D7              | D6  | D5               | D4      | D3         | D2             | D1           | D0     |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 22H  |                 |     |                  |         | LFO enable | LFO frequency  |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 24H  | Timer A MSBs    |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 25H  |                 |     |                  |         |            |                | Timer A LSBs |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 26H  | Timer B         |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 27H  | Ch3 mode        |     | Reset B          | Reset A | Enable B   | Enable A       | Load B       | Load A |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 28H  | Operator        |     |                  |         |            | Channel        |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 29H  |                 |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 2AH  | DAC             |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 2BH  | DAC en          |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-|      |                 |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 30H+ |                 | DT1 |                  |         | MUL        |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 40H+ |                 | TL  |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 50H+ | RS              |     |                  | AR      |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 60H+ | AM              |     |                  | D1R     |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 70H+ |                 |     |                  | D2R     |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 80H+ | D1L             |     |                  |         | RR         |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| 90H+ |                 |     |                  |         | SSG-EG     |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-|      |                 |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| A0H+ | Freq. LSB       |     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| A4H+ |                 |     | Block            |         |            | Freq. MSB      |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| A8H+ | Ch3 suppl. freq.|     |                  |         |            |                |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| ACH+ |                 |     | Ch3 suppl. block |         |            | Ch3 suppl freq |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| B0H+ |                 |     | Feedback         |         |            | Algorithm      |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-| B4H+ | L               | R   | AMS              |         |            | FMS            |              |        |
-+------+-----------------+-----+------------------+---------+------------+----------------+--------------+--------+
-
-*/

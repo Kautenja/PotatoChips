@@ -1291,7 +1291,7 @@ void YM2612::setSampleRate(double clock_rate, double sample_rate) {
 
 void YM2612::reset() {
     // clear instance variables
-    memset(REGS, 0, sizeof REGS);
+    memset(registers, 0, sizeof registers);
     LFO = MOL = MOR = 0;
     // set the frequency scaling parameters of the OPN emulator
     OPNSetPres(&OPN);
@@ -1329,7 +1329,7 @@ void YM2612::reset() {
     }
 
     // DAC mode clear
-    dacen = dacout = 0;
+    is_DAC_enabled = out_DAC = 0;
     for (int c = 0; c < 6; c++) setST(c, 3);
 }
 
@@ -1362,8 +1362,8 @@ void YM2612::step() {
     chan_calc(&OPN, &CH[2]);
     chan_calc(&OPN, &CH[3]);
     chan_calc(&OPN, &CH[4]);
-    if (dacen)
-        *&CH[5].connect4 += dacout;
+    if (is_DAC_enabled)
+        *&CH[5].connect4 += out_DAC;
     else
         chan_calc(&OPN, &CH[5]);
     // advance LFO
@@ -1444,15 +1444,15 @@ void YM2612::write(uint8_t a, uint8_t v) {
         if (addr_A1 != 0) break;
 
         addr = OPN.ST.address;
-        REGS[addr] = v;
+        registers[addr] = v;
         switch (addr & 0xf0) {
         case 0x20:  // 0x20-0x2f Mode
             switch (addr) {
             case 0x2a:  // DAC data (YM2612), level unknown
-                dacout = ((int)v - 0x80) << 6;
+                out_DAC = ((int)v - 0x80) << 6;
                 break;
             case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
-                dacen = v & 0x80;
+                is_DAC_enabled = v & 0x80;
                 break;
             default:  // OPN section, write register
                 OPNWriteMode(&OPN, addr, v);
@@ -1473,7 +1473,7 @@ void YM2612::write(uint8_t a, uint8_t v) {
         if (addr_A1 != 1) break;
 
         addr = OPN.ST.address;
-        REGS[addr | 0x100] = v;
+        registers[addr | 0x100] = v;
         OPNWriteReg(&OPN, addr | 0x100, v);
         break;
     }

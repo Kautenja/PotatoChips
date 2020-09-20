@@ -552,7 +552,7 @@ struct FM_OPN {
 class YM2612 {
  private:
     /// registers
-    uint8_t REGS[512];
+    uint8_t registers[512];
     /// OPN state
     FM_OPN OPN;
     /// channel state
@@ -561,9 +561,9 @@ class YM2612 {
     uint8_t addr_A1;
 
     /// whether the emulated DAC is enabled
-    int dacen;
+    bool is_DAC_enabled;
     /// the output value from the emulated DAC
-    int32_t dacout;
+    int32_t out_DAC;
 
     /// A structure with channel data for a YM2612 voice.
     struct Channel {

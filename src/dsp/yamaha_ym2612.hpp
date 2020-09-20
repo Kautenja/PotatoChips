@@ -443,31 +443,44 @@ struct FM_CH
     uint8_t   kcode;      /* key code:                        */
     uint32_t  block_fnum; /* current blk/fnum value for this slot (can be different betweeen slots of one channel in 3slot mode) */
 
-  uint8_t FB_ALG;
-  uint8_t LR_AMS_FMS;
-
+    uint8_t FB_ALG;
+    uint8_t LR_AMS_FMS;
 };
 
-
-struct FM_ST
-{
-    int         clock;              /* master clock  (Hz)   */
-    int         rate;               /* sampling rate (Hz)   */
-    double      freqbase;           /* frequency base       */
-    int         timer_prescaler;    /* timer prescaler      */
-    uint8_t       address;            /* address register     */
-    uint8_t       irq;                /* interrupt level      */
-    uint8_t       irqmask;            /* irq mask             */
-    uint8_t       status;             /* status flag          */
-    uint32_t      mode;               /* mode  CSM / 3SLOT    */
-    uint8_t       prescaler_sel;      /* prescaler selector   */
-    uint8_t       fn_h;               /* freq latch           */
-    int32_t       TA;                 /* timer a              */
-    int32_t       TAC;                /* timer a counter      */
-    uint8_t       TB;                 /* timer b              */
-    int32_t       TBC;                /* timer b counter      */
-    /* local time tables */
-    int32_t       dt_tab[8][32];      /* DeTune table         */
+/// The state of an FM synthesis operator.
+struct FM_ST {
+    /// master clock (Hz)
+    int clock = 0;
+    /// sampling rate (Hz)
+    int rate = 0;
+    /// frequency base
+    double freqbase = 0;
+    /// timer prescaler
+    int timer_prescaler = 0;
+    /// address register
+    uint8_t address = 0;
+    /// interrupt level
+    uint8_t irq = 0;
+    /// IRQ mask
+    uint8_t irqmask = 0;
+    /// status flag
+    uint8_t status = 0;
+    /// mode  CSM / 3SLOT
+    uint32_t mode = 0;
+    /// pre-scaler selector
+    uint8_t prescaler_sel = 0;
+    /// freq latch
+    uint8_t fn_h = 0;
+    /// timer A
+    int32_t TA = 0;
+    /// timer A counter
+    int32_t TAC = 0;
+    /// timer B
+    uint8_t TB = 0;
+    /// timer B counter
+    int32_t TBC = 0;
+    /// DETune table
+    int32_t dt_tab[8][32];
 };
 
 // ---------------------------------------------------------------------------
@@ -477,69 +490,67 @@ struct FM_ST
 /// OPN 3slot struct
 struct FM_3SLOT {
     /// fnum3,blk3: calculated
-    uint32_t fc[3];
+    uint32_t fc[3] = {0, 0, 0};
     /// freq3 latch
-    uint8_t fn_h;
+    uint8_t fn_h = 0;
     /// key code
-    uint8_t kcode[3];
+    uint8_t kcode[3] = {0, 0, 0};
     /// current fnum value for this slot (can be different between slots of
     /// one channel in 3slot mode)
-    uint32_t block_fnum[3];
+    uint32_t block_fnum[3] = {0, 0, 0};
 };
 
 /// OPN/A/B common state
 struct FM_OPN {
     /// chip type
-    uint8_t type;
+    uint8_t type = 0;
     /// general state
     FM_ST ST;
     /// 3 slot mode state
     FM_3SLOT SL3;
     /// pointer of CH
-    FM_CH *P_CH;
+    FM_CH *P_CH = nullptr;
     /// fm channels output masks (0xffffffff = enable) */
     unsigned int pan[6 * 2];
 
     /// global envelope generator counter
-    uint32_t eg_cnt;
+    uint32_t eg_cnt = 0;
     /// global envelope generator counter works at frequency = chipclock/144/3
-    uint32_t eg_timer;
+    uint32_t eg_timer = 0;
     /// step of eg_timer
-    uint32_t eg_timer_add;
+    uint32_t eg_timer_add = 0;
     /// envelope generator timer overflows every 3 samples (on real chip)
-    uint32_t eg_timer_overflow;
+    uint32_t eg_timer_overflow = 0;
 
     /// there are 2048 FNUMs that can be generated using FNUM/BLK registers
     /// but LFO works with one more bit of a precision so we really need 4096
     /// elements. fnumber->increment counter
     uint32_t fn_table[4096];
     /// maximal phase increment (used for phase overflow)
-    uint32_t fn_max;
-
-    // LFO
+    uint32_t fn_max = 0;
 
     /// current LFO phase (out of 128)
-    uint8_t lfo_cnt;
+    uint8_t lfo_cnt = 0;
     /// current LFO phase runs at LFO frequency
-    uint32_t lfo_timer;
+    uint32_t lfo_timer = 0;
     /// step of lfo_timer
-    uint32_t lfo_timer_add;
+    uint32_t lfo_timer_add = 0;
     /// LFO timer overflows every N samples (depends on LFO frequency)
-    uint32_t lfo_timer_overflow;
+    uint32_t lfo_timer_overflow = 0;
     /// current LFO AM step
-    uint32_t LFO_AM;
+    uint32_t LFO_AM = 0;
     /// current LFO PM step
-    uint32_t LFO_PM;
+    uint32_t LFO_PM = 0;
 
     /// Phase Modulation input for operator 2
-    int32_t m2;
+    int32_t m2 = 0;
     /// Phase Modulation input for operator 3
-    int32_t c1;
+    int32_t c1 = 0;
     /// Phase Modulation input for operator 4
-    int32_t c2;
+    int32_t c2 = 0;
 
     /// one sample delay memory
-    int32_t mem;
+    int32_t mem = 0;
     /// outputs of working channels
     int32_t out_fm[8];
 };

@@ -139,3 +139,11 @@
 
 -   fix 2612 to sound the same at all sample rates
 -   fix 2612 to be tuned to C4
+
+## 1.7.2 (2020-09-19)
+
+-   fix 2612 LFO to produce the correct frequencies
+-   fix 2612 Envelope generator to have correct timings
+-   fix 2612 TL parameter to reduce the dead range of the parameter
+-   remove invalid tags from plugin.json
+

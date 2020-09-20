@@ -48,7 +48,7 @@ static inline void FM_STATUS_SET(FM_ST *ST,int flag)
     {
         ST->irq = 1;
         /* callback user interrupt handler (IRQ is OFF to ON) */
-        //if(ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,1);
+        //if (ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,1);
     }
 }
 
@@ -61,7 +61,7 @@ static inline void FM_STATUS_RESET(FM_ST *ST,int flag)
     {
         ST->irq = 0;
         /* callback user interrupt handler (IRQ is ON to OFF) */
-        //if(ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,0);
+        //if (ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,0);
     }
 }
 
@@ -88,37 +88,37 @@ static inline void set_timers( FM_ST *ST, int v )
     ST->mode = v;
 
     /* reset Timer b flag */
-    if( v & 0x20 )
+    if ( v & 0x20 )
         FM_STATUS_RESET(ST,0x02);
     /* reset Timer a flag */
-    if( v & 0x10 )
+    if ( v & 0x10 )
         FM_STATUS_RESET(ST,0x01);
     /* load b */
-    if( v & 0x02 )
+    if ( v & 0x02 )
     {
-        if( ST->TBC == 0 )
+        if ( ST->TBC == 0 )
         {
             ST->TBC = ( 256-ST->TB)<<4;
         }
     }
     else
     {   /* stop timer b */
-        if( ST->TBC != 0 )
+        if ( ST->TBC != 0 )
         {
             ST->TBC = 0;
         }
     }
     /* load a */
-    if( v & 0x01 )
+    if ( v & 0x01 )
     {
-        if( ST->TAC == 0 )
+        if ( ST->TAC == 0 )
         {
             ST->TAC = (1024-ST->TA);
         }
     }
     else
     {   /* stop timer a */
-        if( ST->TAC != 0 )
+        if ( ST->TAC != 0 )
         {
             ST->TAC = 0;
         }
@@ -130,7 +130,7 @@ static inline void set_timers( FM_ST *ST, int v )
 static inline void TimerAOver(FM_ST *ST)
 {
     /* set status (if enabled) */
-    if(ST->mode & 0x04) FM_STATUS_SET(ST,0x01);
+    if (ST->mode & 0x04) FM_STATUS_SET(ST,0x01);
     /* clear or reload the counter */
     ST->TAC = (1024-ST->TA);
 }
@@ -138,7 +138,7 @@ static inline void TimerAOver(FM_ST *ST)
 static inline void TimerBOver(FM_ST *ST)
 {
     /* set status (if enabled) */
-    if(ST->mode & 0x08) FM_STATUS_SET(ST,0x02);
+    if (ST->mode & 0x08) FM_STATUS_SET(ST,0x02);
     /* clear or reload the counter */
     ST->TBC = ( 256-ST->TB)<<4;
 }
@@ -147,7 +147,7 @@ static inline void TimerBOver(FM_ST *ST)
 static inline void FM_KEYON(FM_CH *CH , int s )
 {
     FM_SLOT *SLOT = &CH->SLOT[s];
-    if( !SLOT->key )
+    if ( !SLOT->key )
     {
         SLOT->key = 1;
         SLOT->phase = 0;        /* restart Phase Generator */
@@ -159,7 +159,7 @@ static inline void FM_KEYON(FM_CH *CH , int s )
 static inline void FM_KEYOFF(FM_CH *CH , int s )
 {
     FM_SLOT *SLOT = &CH->SLOT[s];
-    if( SLOT->key )
+    if ( SLOT->key )
     {
         SLOT->key = 0;
         if (SLOT->state>EG_REL)
@@ -263,10 +263,15 @@ static inline void set_det_mul(FM_ST *ST,FM_CH *CH,FM_SLOT *SLOT,int v)
     CH->SLOT[SLOT1].Incr=-1;
 }
 
-/* set total level */
-static inline void set_tl(FM_CH *CH,FM_SLOT *SLOT , int v)
-{
-    SLOT->tl = (v&0x7f)<<(ENV_BITS-7); /* 7bit TL */
+/// Set total level.
+///
+/// @param CH a pointer to the channel
+/// @param FM_SLOT a pointer to the operator
+/// @param v the value for the TL register
+///
+static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
+    // the TL is 7 bits
+    SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
 }
 
 /* set attack rate & key scale  */
@@ -631,7 +636,7 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH)
         int32_t out = CH->op1_out[0] + CH->op1_out[1];
         CH->op1_out[0] = CH->op1_out[1];
 
-        if( !CH->connect1 )
+        if ( !CH->connect1 )
         {
             /* algorithm 5  */
             OPN->mem = OPN->c1 = OPN->c2 = CH->op1_out[0];
@@ -643,7 +648,7 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH)
         }
 
         CH->op1_out[1] = 0;
-        if( eg_out < ENV_QUIET )    /* SLOT 1 */
+        if ( eg_out < ENV_QUIET )    /* SLOT 1 */
         {
             if (!CH->FB)
                 out=0;
@@ -655,16 +660,16 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH)
 
 
     eg_out = volume_calc(&CH->SLOT[SLOT3]);
-    if( eg_out < ENV_QUIET )        /* SLOT 3 */
+    if ( eg_out < ENV_QUIET )        /* SLOT 3 */
         *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
 
 
     eg_out = volume_calc(&CH->SLOT[SLOT2]);
-    if( eg_out < ENV_QUIET )        /* SLOT 2 */
+    if ( eg_out < ENV_QUIET )        /* SLOT 2 */
         *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
 
     eg_out = volume_calc(&CH->SLOT[SLOT4]);
-    if( eg_out < ENV_QUIET )        /* SLOT 4 */
+    if ( eg_out < ENV_QUIET )        /* SLOT 4 */
         *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
 
 
@@ -673,7 +678,7 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH)
 
 
     /* update phase counters AFTER output calculations */
-    if(CH->pms)
+    if (CH->pms)
     {
         update_phase_lfo_channel(OPN, CH);
     }
@@ -702,7 +707,7 @@ static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT , int fc , int 
     /* (frequency) phase increment counter */
     SLOT->Incr = (fc * SLOT->mul) >> 1;
 
-    if( SLOT->ksr != ksr )
+    if ( SLOT->ksr != ksr )
     {
         SLOT->ksr = ksr;
 
@@ -734,7 +739,7 @@ static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT , int fc , int 
 
 static void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH )
 {
-    if( CH->SLOT[SLOT1].Incr==-1)
+    if ( CH->SLOT[SLOT1].Incr==-1)
     {
         int fc = CH->fc;
         int kc = CH->kcode;
@@ -903,14 +908,14 @@ static void OPNWriteMode(FM_OPN *OPN, int r, int v)
         break;
     case 0x28:  /* key on / off */
         c = v & 0x03;
-        if( c == 3 ) break;
-        if( (v&0x04) && (OPN->type & TYPE_6CH) ) c+=3;
+        if ( c == 3 ) break;
+        if ( (v&0x04) && (OPN->type & TYPE_6CH) ) c+=3;
         CH = OPN->P_CH;
         CH = &CH[c];
-        if(v&0x10) FM_KEYON(CH,SLOT1); else FM_KEYOFF(CH,SLOT1);
-        if(v&0x20) FM_KEYON(CH,SLOT2); else FM_KEYOFF(CH,SLOT2);
-        if(v&0x40) FM_KEYON(CH,SLOT3); else FM_KEYOFF(CH,SLOT3);
-        if(v&0x80) FM_KEYON(CH,SLOT4); else FM_KEYOFF(CH,SLOT4);
+        if (v&0x10) FM_KEYON(CH,SLOT1); else FM_KEYOFF(CH,SLOT1);
+        if (v&0x20) FM_KEYON(CH,SLOT2); else FM_KEYOFF(CH,SLOT2);
+        if (v&0x40) FM_KEYON(CH,SLOT3); else FM_KEYOFF(CH,SLOT3);
+        if (v&0x80) FM_KEYON(CH,SLOT4); else FM_KEYOFF(CH,SLOT4);
         break;
     }
 }
@@ -948,7 +953,7 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
     case 0x60:  /* bit7 = AM ENABLE, DR */
         set_dr(SLOT,v);
 
-        if(OPN->type & TYPE_LFOPAN) /* YM2608/2610/2610B/2612 */
+        if (OPN->type & TYPE_LFOPAN) /* YM2608/2610/2610B/2612 */
         {
             SLOT->AMmask = (v&0x80) ? ~0 : 0;
         }
@@ -1070,7 +1075,7 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
             OPN->ST.fn_h = v&0x3f;
             break;
         case 2:     /* 0xa8-0xaa : 3CH FNUM1 */
-            if(r < 0x100)
+            if (r < 0x100)
             {
                 uint32_t fn = (((uint32_t)(OPN->SL3.fn_h&7))<<8) + v;
                 uint8_t blk = OPN->SL3.fn_h>>3;
@@ -1083,7 +1088,7 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
             }
             break;
         case 3:     /* 0xac-0xae : 3CH FNUM2,BLK */
-            if(r < 0x100)
+            if (r < 0x100)
                 OPN->SL3.fn_h = v&0x3f;
             break;
         }
@@ -1103,7 +1108,7 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
             }
             break;
         case 1:     /* 0xb4-0xb6 : L , R , AMS , PMS (YM2612/YM2610B/YM2610/YM2608) */
-            if( OPN->type & TYPE_LFOPAN)
+            if ( OPN->type & TYPE_LFOPAN)
             {
                 /* b0-2 PMS */
                 CH->pms = (v & 7) * 32; /* CH->pms = PM depth * 32 (index in lfo_pm_table) */
@@ -1158,19 +1163,21 @@ static void init_timetables(FM_OPN *OPN, double freqbase)
     OPN->fn_max = (uint32_t)( (double)0x20000 * freqbase * (1<<(FREQ_SH-10)) );
 }
 
-/// Set prescaler and make time tables.
+/// Set pre-scaler and make time tables.
+///
+/// @param OPN the OPN emulator to set the pre-scaler and create timetables for
+///
 static void OPNSetPres(FM_OPN *OPN) {
-    /* frequency base */
-    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate): 0;
-
-    /* EG is updated every 3 samples */
-    OPN->eg_timer_add  = (uint32_t)((1<<EG_SH) * OPN->ST.freqbase);
-    OPN->eg_timer_overflow = ( 3 ) * (1<<EG_SH);
-
-    /* LFO timer increment (every samples) */
-    OPN->lfo_timer_add  = (uint32_t)((1<<LFO_SH) * OPN->ST.freqbase);
-
-    /* make time tables */
+    // frequency base
+    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
+    // TODO: why is it necessary to scale these increments by a factor of 1/16
+    //       to get the correct timings from the EG and LFO?
+    // EG timer increment (updates every 3 samples)
+    OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
+    OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+    // LFO timer increment (updates every 16 samples)
+    OPN->lfo_timer_add  = (1 << LFO_SH) * OPN->ST.freqbase / 16;
+    // make time tables
     init_timetables(OPN, OPN->ST.freqbase);
 }
 
@@ -1267,7 +1274,7 @@ static void init_tables(void) {
 // ---------------------------------------------------------------------------
 
 YM2612::YM2612(double clock_rate, double sample_rate) {
-    /* allocate total level table (128kb space) */
+    // allocate total level table (128kb space)
     init_tables();
     OPN.P_CH = CH;
     OPN.type = TYPE_YM2612;
@@ -1276,28 +1283,31 @@ YM2612::YM2612(double clock_rate, double sample_rate) {
     reset();
 }
 
-void YM2612::set_sample_rate(double clock_rate, double sample_rate) {
+void YM2612::setSampleRate(double clock_rate, double sample_rate) {
     OPN.ST.clock = clock_rate;
     OPN.ST.rate = sample_rate;
     OPNSetPres(&OPN);
 }
 
 void YM2612::reset() {
+    // clear instance variables
     memset(REGS, 0, sizeof REGS);
-
+    LFO = MOL = MOR = 0;
+    // set the frequency scaling parameters of the OPN emulator
     OPNSetPres(&OPN);
-    /* status clear */
+    // status clear
     FM_IRQMASK_SET(&(OPN.ST), 0x03);
-    OPNWriteMode(&OPN, 0x27, 0x30); /* mode 0 , timer reset */
-
+    // mode 0 , timer reset
+    OPNWriteMode(&OPN, 0x27, 0x30);
+    // envelope generator
     OPN.eg_timer = 0;
     OPN.eg_cnt = 0;
-
+    // LFO
     OPN.lfo_timer = 0;
     OPN.lfo_cnt = 0;
     OPN.LFO_AM = 126;
     OPN.LFO_PM = 0;
-
+    // state
     OPN.ST.status = 0;
     OPN.ST.mode = 0;
 
@@ -1308,55 +1318,45 @@ void YM2612::reset() {
 
     reset_channels(&(OPN.ST), &CH[0], 6);
 
-    for (int i = 0xb6; i >= 0xb4; i--)
-    {
+    for (int i = 0xb6; i >= 0xb4; i--) {
         OPNWriteReg(&OPN, i, 0xc0);
         OPNWriteReg(&OPN, i | 0x100, 0xc0);
     }
-    for (int i = 0xb2; i >= 0x30; i--)
-    {
+
+    for (int i = 0xb2; i >= 0x30; i--) {
         OPNWriteReg(&OPN, i, 0);
         OPNWriteReg(&OPN, i | 0x100, 0);
     }
 
-    /* DAC mode clear */
-    dacen = 0;
-    dacout = 0;
-
-    for (int c = 0; c < 6; c++) {
-        setST(c,3);
-    }
+    // DAC mode clear
+    dacen = dacout = 0;
+    for (int c = 0; c < 6; c++) setST(c, 3);
 }
 
 void YM2612::step() {
     int lt, rt;
-
-    /* refresh PG and EG */
+    // refresh PG and EG
     refresh_fc_eg_chan(&OPN, &CH[0]);
     refresh_fc_eg_chan(&OPN, &CH[1]);
     refresh_fc_eg_chan(&OPN, &CH[2]);
     refresh_fc_eg_chan(&OPN, &CH[3]);
     refresh_fc_eg_chan(&OPN, &CH[4]);
     refresh_fc_eg_chan(&OPN, &CH[5]);
-
-    /* buffering */
-    /* clear outputs */
+    // clear outputs
     OPN.out_fm[0] = 0;
     OPN.out_fm[1] = 0;
     OPN.out_fm[2] = 0;
     OPN.out_fm[3] = 0;
     OPN.out_fm[4] = 0;
     OPN.out_fm[5] = 0;
-
-    /* update SSG-EG output */
+    // update SSG-EG output
     update_ssg_eg_channel(&(CH[0].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[1].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[2].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[3].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[4].SLOT[SLOT1]));
     update_ssg_eg_channel(&(CH[5].SLOT[SLOT1]));
-
-    /* calculate FM */
+    // calculate FM
     chan_calc(&OPN, &CH[0]);
     chan_calc(&OPN, &CH[1]);
     chan_calc(&OPN, &CH[2]);
@@ -1366,16 +1366,13 @@ void YM2612::step() {
         *&CH[5].connect4 += dacout;
     else
         chan_calc(&OPN, &CH[5]);
-
-    /* advance LFO */
+    // advance LFO
     advance_lfo(&OPN);
-
-    /* advance envelope generator */
+    // advance envelope generator
     OPN.eg_timer += OPN.eg_timer_add;
     while (OPN.eg_timer >= OPN.eg_timer_overflow) {
         OPN.eg_timer -= OPN.eg_timer_overflow;
         OPN.eg_cnt++;
-
         advance_eg_channel(&OPN, &(CH[0].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[1].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[2].SLOT[SLOT1]));
@@ -1383,7 +1380,7 @@ void YM2612::step() {
         advance_eg_channel(&OPN, &(CH[4].SLOT[SLOT1]));
         advance_eg_channel(&OPN, &(CH[5].SLOT[SLOT1]));
     }
-
+    // clip outputs
     if (OPN.out_fm[0] > 8191)
         OPN.out_fm[0] = 8191;
     else if (OPN.out_fm[0] < -8192)
@@ -1408,8 +1405,7 @@ void YM2612::step() {
         OPN.out_fm[5] = 8191;
     else if (OPN.out_fm[5] < -8192)
         OPN.out_fm[5] = -8192;
-
-    /* 6-channels mixing  */
+    // 6-channels mixing
     lt = ((OPN.out_fm[0] >> 0) & OPN.pan[0]);
     rt = ((OPN.out_fm[0] >> 0) & OPN.pan[1]);
     lt += ((OPN.out_fm[1] >> 0) & OPN.pan[2]);
@@ -1422,239 +1418,138 @@ void YM2612::step() {
     rt += ((OPN.out_fm[4] >> 0) & OPN.pan[9]);
     lt += ((OPN.out_fm[5] >> 0) & OPN.pan[10]);
     rt += ((OPN.out_fm[5] >> 0) & OPN.pan[11]);
-
-    /* buffering */
+    // output buffering
     MOL = lt;
     MOR = rt;
-
-    /* timer A control */
+    // timer A control
     if ((OPN.ST.TAC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerAOver(&OPN.ST);
-    /* timer B control */
+    // timer B control
     if ((OPN.ST.TBC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
         TimerBOver(&OPN.ST);
 }
 
-void YM2612::write(uint8_t a,uint8_t v) {
+void YM2612::write(uint8_t a, uint8_t v) {
     int addr;
-
-    v &= 0xff; /* adjust to 8 bit bus */
-
-    switch (a & 3)
-    {
-    case 0: /* address port 0 */
+    // adjust to 8 bit bus
+    v &= 0xff;
+    switch (a & 3) {
+    case 0:  // address port 0
         OPN.ST.address = v;
         addr_A1 = 0;
         break;
 
-    case 1: /* data port 0    */
-        if (addr_A1 != 0)
-            break; /* verified on real YM2608 */
+    case 1:  // data port 0
+        // verified on real YM2608
+        if (addr_A1 != 0) break;
 
         addr = OPN.ST.address;
         REGS[addr] = v;
-        switch (addr & 0xf0)
-        {
-        case 0x20: /* 0x20-0x2f Mode */
-            switch (addr)
-            {
-            case 0x2a:                                /* DAC data (YM2612) */
-                dacout = ((int)v - 0x80) << 6; /* level unknown */
+        switch (addr & 0xf0) {
+        case 0x20:  // 0x20-0x2f Mode
+            switch (addr) {
+            case 0x2a:  // DAC data (YM2612), level unknown
+                dacout = ((int)v - 0x80) << 6;
                 break;
-            case 0x2b: /* DAC Sel  (YM2612) */
-                /* b7 = dac enable */
+            case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
                 dacen = v & 0x80;
                 break;
-            default: /* OPN section */
-                /* write register */
+            default:  // OPN section, write register
                 OPNWriteMode(&OPN, addr, v);
             }
             break;
-        default: /* 0x30-0xff OPN section */
-            /* write register */
+        default:  // 0x30-0xff OPN section, write register
             OPNWriteReg(&OPN, addr, v);
         }
         break;
 
-    case 2: /* address port 1 */
+    case 2: // address port 1
         OPN.ST.address = v;
         addr_A1 = 1;
         break;
 
-    case 3: /* data port 1    */
-        if (addr_A1 != 1)
-            break; /* verified on real YM2608 */
+    case 3: // data port 1
+        // verified on real YM2608
+        if (addr_A1 != 1) break;
 
         addr = OPN.ST.address;
         REGS[addr | 0x100] = v;
         OPNWriteReg(&OPN, addr | 0x100, v);
         break;
     }
-    //return F2612->OPN.ST.irq;
 }
 
-void YM2612::setAL(uint8_t channel, uint8_t value){
-
-    if(channels[channel].AL == value)
-        return;
-
-    channels[channel].AL = value;
-
-    CH[channel].FB_ALG = (CH[channel].FB_ALG&0x38) | (value&7);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0,channel), CH[channel].FB_ALG);
-}
-
-
-void YM2612::setFB(uint8_t channel, uint8_t value){
-    if(channels[channel].FB == value)
-        return;
-
-    channels[channel].FB = value;
-
-    CH[channel].FB_ALG = (CH[channel].FB_ALG&7)| ((value&7)<<3);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB0,channel), CH[channel].FB_ALG);
-}
-
-void YM2612::setST(uint8_t channel, uint8_t value){
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0x3F)| ((value&3)<<6);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-void YM2612::setAMS(uint8_t channel, uint8_t value){
-    if(channels[channel].AMS == value)
-        return;
-
-    channels[channel].AMS = value;
-
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0xCF)| ((value&3)<<4);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-void YM2612::setFMS(uint8_t channel, uint8_t value){
-    if(channels[channel].FMS == value)
-        return;
-
-    channels[channel].FMS = value;
-
-    CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS&0xF8)| (value&7);
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0xB4,channel), CH[channel].LR_AMS_FMS);
-}
-
-
-
-
-
-void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value){
-    if(channels[channel].operators[slot].AR == value)
-        return;
-
+void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].AR == value) return;
     channels[channel].operators[slot].AR = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->ar_ksr = (s->ar_ksr&0xC0)|(value&0x1f);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 
 /* set decay rate */
-void YM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value){
-    if(channels[channel].operators[slot].D1 == value)
-        return;
-
+void YM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].D1 == value) return;
     channels[channel].operators[slot].D1 = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->dr = (s->dr&0x80)|(value&0x1F);
-  set_dr(s, s->dr);
+    set_dr(s, s->dr);
 }
 
-void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].SL == value)
-        return;
-
+void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].SL == value) return;
     channels[channel].operators[slot].SL = value;
-
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
     s->sl_rr = (s->sl_rr&0x0f)|((value&0x0f)<<4);
     set_sl_rr(s, s->sl_rr);
 }
 
 /* set sustain rate */
-void YM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].D2 == value)
-        return;
-
+void YM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].D2 == value) return;
     channels[channel].operators[slot].D2 = value;
-
     set_sr(&CH[channel].SLOT[slots_idx[slot]], value);
 }
 
-void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].RR == value)
-        return;
-
+void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].RR == value) return;
     channels[channel].operators[slot].RR = value;
-
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
     s->sl_rr = (s->sl_rr&0xf0)|(value&0x0f);
     set_sl_rr(s, s->sl_rr);
 }
 
-void YM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value){
-    if(channels[channel].operators[slot].TL == value)
-        return;
-
+void YM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].TL == value) return;
     channels[channel].operators[slot].TL = value;
-
-
-    CH[channel].SLOT[slots_idx[slot]].tl = (value&0x7f)<<(ENV_BITS-7); /* 7bit TL */
+    set_tl(&CH[channel], &CH[channel].SLOT[slots_idx[slot]], value);
 }
 
-
-void YM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].MUL == value)
-        return;
-
+void YM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].MUL == value) return;
     channels[channel].operators[slot].MUL = value;
-
     CH[channel].SLOT[slots_idx[slot]].mul = (value&0x0f)? (value&0x0f)*2 : 1;
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
-void YM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value){
-    if(channels[channel].operators[slot].DET == value)
-        return;
-
+void YM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].DET == value) return;
     channels[channel].operators[slot].DET = value;
-
-
     CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
-void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].RS == value)
-        return;
-
+void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].RS == value) return;
     channels[channel].operators[slot].RS = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->ar_ksr = (s->ar_ksr&0x1F)|((value&0x03)<<6);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 
-void YM2612::setAM(uint8_t channel, uint8_t slot, uint8_t value){
-
-    if(channels[channel].operators[slot].AM == value)
-        return;
-
+void YM2612::setAM(uint8_t channel, uint8_t slot, uint8_t value) {
+    if (channels[channel].operators[slot].AM == value) return;
     channels[channel].operators[slot].AM = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
-
     s->AMmask = (value) ? ~0 : 0;
 }

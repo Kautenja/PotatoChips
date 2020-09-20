@@ -229,7 +229,7 @@ static const uint8_t eg_rate_shift[32 + 64 + 32] = {/* Envelope Generator counte
 #undef O
 
 static const uint8_t dt_tab[4 * 32] = {
-    /* this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)*/
+// this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)
     /* FD=0 */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -241,57 +241,60 @@ static const uint8_t dt_tab[4 * 32] = {
     5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 16, 16, 16, 16,
     /* FD=3 */
     2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7,
-    8, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 20, 22, 22, 22, 22};
+    8, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 20, 22, 22, 22, 22
+};
 
-/* OPN key frequency number -> key code follow table */
-/* fnum higher 4bit -> keycode lower 2bit */
+/// OPN key frequency number -> key code follow table
+/// fnum higher 4bit -> keycode lower 2bit
 static const uint8_t opn_fktable[16] = {0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3};
 
-/* 8 LFO speed parameters */
-/* each value represents number of samples that one LFO level will last for */
+/// 8 LFO speed parameters. Each value represents number of samples that one
+/// LFO level will last for
 static const uint32_t lfo_samples_per_step[8] = {108, 77, 71, 67, 62, 44, 8, 5};
 
-/*There are 4 different LFO AM depths available, they are:
-  0 dB, 1.4 dB, 5.9 dB, 11.8 dB
-  Here is how it is generated (in EG steps):
-
-  11.8 dB = 0, 2, 4, 6, 8, 10,12,14,16...126,126,124,122,120,118,....4,2,0
-   5.9 dB = 0, 1, 2, 3, 4, 5, 6, 7, 8....63, 63, 62, 61, 60, 59,.....2,1,0
-   1.4 dB = 0, 0, 0, 0, 1, 1, 1, 1, 2,...15, 15, 15, 15, 14, 14,.....0,0,0
-
-  (1.4 dB is losing precision as you can see)
-
-  It's implemented as generator from 0..126 with step 2 then a shift
-  right N times, where N is:
-    8 for 0 dB
-    3 for 1.4 dB
-    1 for 5.9 dB
-    0 for 11.8 dB
-*/
+/// There are 4 different LFO AM depths available, they are:
+/// 0 dB, 1.4 dB, 5.9 dB, 11.8 dB
+/// Here is how it is generated (in EG steps):
+///
+/// 11.8 dB = 0, 2, 4, 6, 8, 10,12,14,16...126,126,124,122,120,118,....4,2,0
+///  5.9 dB = 0, 1, 2, 3, 4, 5, 6, 7, 8....63, 63, 62, 61, 60, 59,.....2,1,0
+///  1.4 dB = 0, 0, 0, 0, 1, 1, 1, 1, 2,...15, 15, 15, 15, 14, 14,.....0,0,0
+///
+/// (1.4 dB is losing precision as you can see)
+///
+/// It's implemented as generator from 0..126 with step 2 then a shift
+/// right N times, where N is:
+/// -   8 for 0 dB
+/// -   3 for 1.4 dB
+/// -   1 for 5.9 dB
+/// -   0 for 11.8 dB
+///
 static const uint8_t lfo_ams_depth_shift[4] = {8, 3, 1, 0};
 
-/*There are 8 different LFO PM depths available, they are:
-  0, 3.4, 6.7, 10, 14, 20, 40, 80 (cents)
-
-  Modulation level at each depth depends on F-NUMBER bits: 4,5,6,7,8,9,10
-  (bits 8,9,10 = FNUM MSB from OCT/FNUM register)
-
-  Here we store only first quarter (positive one) of full waveform.
-  Full table (lfo_pm_table) containing all 128 waveforms is build
-  at run (init) time.
-
-  One value in table below represents 4 (four) basic LFO steps
-  (1 PM step = 4 AM steps).
-
-  For example:
-   at LFO SPEED=0 (which is 108 samples per basic LFO step)
-   one value from "lfo_pm_output" table lasts for 432 consecutive
-   samples (4*108=432) and one full LFO waveform cycle lasts for 13824
-   samples (32*432=13824; 32 because we store only a quarter of whole
-            waveform in the table below)
-*/
+/// There are 8 different LFO PM depths available, they are:
+///   0, 3.4, 6.7, 10, 14, 20, 40, 80 (cents)
+///
+///   Modulation level at each depth depends on F-NUMBER bits: 4,5,6,7,8,9,10
+///   (bits 8,9,10 = FNUM MSB from OCT/FNUM register)
+///
+///   Here we store only first quarter (positive one) of full waveform.
+///   Full table (lfo_pm_table) containing all 128 waveforms is build
+///   at run (init) time.
+///
+///   One value in table below represents 4 (four) basic LFO steps
+///   (1 PM step = 4 AM steps).
+///
+///   For example:
+///    at LFO SPEED=0 (which is 108 samples per basic LFO step)
+///    one value from "lfo_pm_output" table lasts for 432 consecutive
+///    samples (4*108=432) and one full LFO waveform cycle lasts for 13824
+///    samples (32*432=13824; 32 because we store only a quarter of whole
+///             waveform in the table below)
+///
 static const uint8_t lfo_pm_output[7 * 8][8] = {
-    /* 7 bits meaningful (of F-NUMBER), 8 LFO output levels per one depth (out of 32), 8 LFO depths */
+// 7 bits meaningful (of F-NUMBER), 8 LFO output levels per one depth
+// (out of 32), 8 LFO depths
+
     /* FNUM BIT 4: 000 0001xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -361,7 +364,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 8, 0xc, 0x10, 0x10, 0x14, 0x18},
     /* DEPTH 6 */ {0, 0, 0x10, 0x18, 0x20, 0x20, 0x28, 0x30},
     /* DEPTH 7 */ {0, 0, 0x20, 0x30, 0x40, 0x40, 0x50, 0x60},
-
 };
 
 /// @brief all 128 LFO PM waveforms
@@ -451,27 +453,44 @@ struct FM_CH {
     /// four SLOTs (operators)
     FM_SLOT SLOT[4];
 
-    uint8_t   ALGO;       /* algorithm */
-    uint8_t   FB;         /* feedback shift */
-    int32_t   op1_out[2]; /* op1 output for feedback */
+    /// algorithm
+    uint8_t ALGO = 0;
+    /// feedback shift
+    uint8_t FB = 0;
+    /// op1 output for feedback
+    int32_t op1_out[2] = {0, 0};
 
-    int32_t   *connect1;  /* SLOT1 output pointer */
-    int32_t   *connect3;  /* SLOT3 output pointer */
-    int32_t   *connect2;  /* SLOT2 output pointer */
-    int32_t   *connect4;  /* SLOT4 output pointer */
+    /// SLOT1 output pointer
+    int32_t *connect1 = nullptr;
+    /// SLOT3 output pointer
+    int32_t *connect3 = nullptr;
+    /// SLOT2 output pointer
+    int32_t *connect2 = nullptr;
+    /// SLOT4 output pointer
+    int32_t *connect4 = nullptr;
 
-    int32_t   *mem_connect;/* where to put the delayed sample (MEM) */
-    int32_t   mem_value;  /* delayed sample (MEM) value */
+    /* where to put the delayed sample (MEM) */
+    int32_t *mem_connect = nullptr;
+    /* delayed sample (MEM) value */
+    int32_t mem_value = 0;
 
-    int32_t   pms;        /* channel PMS */
-    uint8_t   ams;        /* channel AMS */
+    /// channel phase modulation sensitivity (PMS)
+    int32_t pms = 0;
+    /// channel amplitude modulation sensitivity (AMS)
+    uint8_t ams = 0;
 
-    uint32_t  fc;         /* fnum,blk:adjusted to sample rate */
-    uint8_t   kcode;      /* key code:                        */
-    uint32_t  block_fnum; /* current blk/fnum value for this slot (can be different betweeen slots of one channel in 3slot mode) */
+    /// fnum, blk : adjusted to sample rate
+    uint32_t fc = 0;
+    /// key code:
+    uint8_t kcode = 0;
+    /// current blk/fnum value for this slot (can be different betweeen slots
+    /// of one channel in 3slot mode)
+    uint32_t block_fnum = 0;
 
-    uint8_t FB_ALG;
-    uint8_t LR_AMS_FMS;
+    /// TODO
+    uint8_t FB_ALG = 0;
+    /// TODO
+    uint8_t LR_AMS_FMS = 0;
 };
 
 /// The state of an FM synthesis operator.

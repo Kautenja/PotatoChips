@@ -263,10 +263,15 @@ static inline void set_det_mul(FM_ST *ST,FM_CH *CH,FM_SLOT *SLOT,int v)
     CH->SLOT[SLOT1].Incr=-1;
 }
 
-/* set total level */
-static inline void set_tl(FM_CH *CH,FM_SLOT *SLOT , int v)
-{
-    SLOT->tl = (v&0x7f)<<(ENV_BITS-7); /* 7bit TL */
+/// Set total level.
+///
+/// @param CH a pointer to the channel
+/// @param FM_SLOT a pointer to the operator
+/// @param v the value for the TL register
+///
+static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
+    // the TL is 7 bits
+    SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
 }
 
 /* set attack rate & key scale  */
@@ -1476,9 +1481,7 @@ void YM2612::write(uint8_t a, uint8_t v) {
 
 void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AR == value) return;
-
     channels[channel].operators[slot].AR = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->ar_ksr = (s->ar_ksr&0xC0)|(value&0x1f);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
@@ -1486,22 +1489,16 @@ void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
 
 /* set decay rate */
 void YM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
-    if (channels[channel].operators[slot].D1 == value)
-        return;
-
+    if (channels[channel].operators[slot].D1 == value) return;
     channels[channel].operators[slot].D1 = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->dr = (s->dr&0x80)|(value&0x1F);
     set_dr(s, s->dr);
 }
 
 void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
-    if (channels[channel].operators[slot].SL == value)
-        return;
-
+    if (channels[channel].operators[slot].SL == value) return;
     channels[channel].operators[slot].SL = value;
-
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
     s->sl_rr = (s->sl_rr&0x0f)|((value&0x0f)<<4);
     set_sl_rr(s, s->sl_rr);
@@ -1509,19 +1506,14 @@ void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
 
 /* set sustain rate */
 void YM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value) {
-
     if (channels[channel].operators[slot].D2 == value) return;
-
     channels[channel].operators[slot].D2 = value;
-
     set_sr(&CH[channel].SLOT[slots_idx[slot]], value);
 }
 
 void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RR == value) return;
-
     channels[channel].operators[slot].RR = value;
-
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
     s->sl_rr = (s->sl_rr&0xf0)|(value&0x0f);
     set_sl_rr(s, s->sl_rr);
@@ -1529,35 +1521,27 @@ void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
 
 void YM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].TL == value) return;
-
     channels[channel].operators[slot].TL = value;
-
-    CH[channel].SLOT[slots_idx[slot]].tl = (value&0x7f)<<(ENV_BITS-7); /* 7bit TL */
+    set_tl(&CH[channel], &CH[channel].SLOT[slots_idx[slot]], value);
 }
 
 void YM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].MUL == value) return;
-
     channels[channel].operators[slot].MUL = value;
-
     CH[channel].SLOT[slots_idx[slot]].mul = (value&0x0f)? (value&0x0f)*2 : 1;
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
 void YM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].DET == value) return;
-
     channels[channel].operators[slot].DET = value;
-
     CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
 void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RS == value) return;
-
     channels[channel].operators[slot].RS = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->ar_ksr = (s->ar_ksr&0x1F)|((value&0x03)<<6);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
@@ -1565,9 +1549,7 @@ void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
 
 void YM2612::setAM(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AM == value) return;
-
     channels[channel].operators[slot].AM = value;
-
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
     s->AMmask = (value) ? ~0 : 0;
 }

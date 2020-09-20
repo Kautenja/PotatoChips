@@ -126,7 +126,9 @@ struct Chip2612 : rack::Module {
         configParam(PARAM_FMS, 0, 7, 0, "Frequency modulation sensitivity");
         for (unsigned i = 0; i < NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
-            configParam(PARAM_TL  + i, 0, 127, 0,  opName + " Total Level");
+            // total level is defined on the domain [0, 127], but values above
+            // 70 cause the operator to drop below usable levels
+            configParam(PARAM_TL  + i, 0, 70,  0,  opName + " Total Level");
             configParam(PARAM_AR  + i, 0, 31,  31, opName + " Attack Rate");
             configParam(PARAM_D1  + i, 0, 31,  0,  opName + " 1st Decay Rate");
             configParam(PARAM_SL  + i, 0, 15,  0,  opName + " Sustain Level");
@@ -171,7 +173,7 @@ struct Chip2612 : rack::Module {
             apu[channel].setFMS(osc, getParam(channel, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < NUM_OPERATORS; op++) {
-                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL  + op, INPUT_TL  + op, 127));
+                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL  + op, INPUT_TL  + op, 70 ));
                 apu[channel].setAR (osc, op, getParam(channel, PARAM_AR  + op, INPUT_AR  + op, 31 ));
                 apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1  + op, INPUT_D1  + op, 31 ));
                 apu[channel].setSL (osc, op, getParam(channel, PARAM_SL  + op, INPUT_SL  + op, 15 ));

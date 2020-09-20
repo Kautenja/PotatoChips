@@ -8,7 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
-      "rightModuleId": 144,
+      "rightModuleId": 150,
       "data": {
         "audio": {
           "driver": 1,
@@ -90,7 +90,7 @@
       "params": [
         {
           "id": 0,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 1,
@@ -98,11 +98,11 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 3.62249994
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 0.00449999981
         },
         {
           "id": 4,
@@ -110,15 +110,15 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 127.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 127.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 127.0
         },
         {
           "id": 8,
@@ -266,7 +266,7 @@
         },
         {
           "id": 44,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "pos": [
@@ -328,7 +328,7 @@
       "version": "1.1.31",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
-      "leftModuleId": 1,
+      "leftModuleId": 150,
       "data": {
         "range": 0.0,
         "range_db": 80.0,
@@ -336,6 +336,19 @@
         "quality": "good",
         "window": "kaiser"
       },
+      "pos": [
+        31,
+        0
+      ]
+    },
+    {
+      "id": 150,
+      "plugin": "Bogaudio",
+      "version": "1.1.31",
+      "model": "Bogaudio-VU",
+      "params": [],
+      "leftModuleId": 1,
+      "rightModuleId": 144,
       "pos": [
         28,
         0
@@ -350,14 +363,6 @@
       "inputModuleId": 2,
       "inputId": 2,
       "color": "#0986ad"
-    },
-    {
-      "id": 1221,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 0,
-      "color": "#c91847"
     },
     {
       "id": 1241,
@@ -376,30 +381,6 @@
       "color": "#c91847"
     },
     {
-      "id": 1251,
-      "outputModuleId": 2,
-      "outputId": 2,
-      "inputModuleId": 144,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 1252,
-      "outputModuleId": 2,
-      "outputId": 3,
-      "inputModuleId": 144,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1253,
-      "outputModuleId": 2,
-      "outputId": 4,
-      "inputModuleId": 144,
-      "inputId": 2,
-      "color": "#c9b70e"
-    },
-    {
       "id": 1208,
       "outputModuleId": 142,
       "outputId": 1,
@@ -414,6 +395,38 @@
       "inputModuleId": 143,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 1260,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1261,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 144,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1262,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 150,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 1263,
+      "outputModuleId": 2,
+      "outputId": 3,
+      "inputModuleId": 150,
+      "inputId": 1,
+      "color": "#c91847"
     },
     {
       "id": 1222,

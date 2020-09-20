@@ -364,65 +364,92 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
 
 };
 
-/* all 128 LFO PM waveforms */
-static int32_t lfo_pm_table[128 * 8 * 32]; /* 128 combinations of 7 bits meaningful (of F-NUMBER), 8 LFO depths, 32 LFO output levels per one depth */
+/// @brief all 128 LFO PM waveforms
+/// @details
+/// 128 combinations of 7 bits meaningful (of F-NUMBER), 8 LFO depths, 32 LFO
+/// output levels per one depth
+static int32_t lfo_pm_table[128 * 8 * 32];
 
 #define YM_CH_PART(ch) (ch/3)
-#define YM_CH_OFFSET(reg,ch)    (reg + (ch % 3))
+#define YM_CH_OFFSET(reg, ch) (reg + (ch % 3))
 
-/* struct describing a single operator (SLOT) */
-struct FM_SLOT
-{
-    int32_t   *DT;        /* detune          :dt_tab[DT] */
-    uint8_t   KSR;        /* key scale rate  :3-KSR */
-    uint32_t  ar;         /* attack rate  */
-    uint32_t  d1r;        /* decay rate   */
-    uint32_t  d2r;        /* sustain rate */
-    uint32_t  rr;         /* release rate */
-    uint8_t   ksr;        /* key scale rate  :kcode>>(3-KSR) */
-    uint32_t  mul;        /* multiple        :ML_TABLE[ML] */
+/// A single FM operator (SLOT)
+struct FM_SLOT {
+    /// detune :dt_tab[DT]
+    int32_t *DT = 0;
+    /// key scale rate :3-KSR
+    uint8_t KSR = 0;
+    /// attack rate
+    uint32_t ar = 0;
+    /// decay rate
+    uint32_t d1r = 0;
+    /// sustain rate
+    uint32_t d2r = 0;
+    /// release rate
+    uint32_t rr = 0;
+    /// key scale rate :kcode>>(3-KSR)
+    uint8_t ksr = 0;
+    /// multiple :ML_TABLE[ML]
+    uint32_t mul = 0;
 
-    /* Phase Generator */
-    uint32_t  phase;      /* phase counter */
-    int32_t   Incr;       /* phase step */
+    /// phase counter
+    uint32_t phase = 0;
+    /// phase step
+    int32_t Incr = 0;
 
-    /* Envelope Generator */
-    uint8_t   state;      /* phase type */
-    uint32_t  tl;         /* total level: TL << 3 */
-    int32_t   volume;     /* envelope counter */
-    uint32_t  sl;         /* sustain level:sl_table[SL] */
-    uint32_t  vol_out;    /* current output from EG circuit (without AM from LFO) */
+    /// phase type
+    uint8_t state = 0;
+    /// total level: TL << 3
+    uint32_t tl = 0;
+    /// envelope counter
+    int32_t volume = 0;
+    /// sustain level:sl_table[SL]
+    uint32_t sl = 0;
+    /// current output from EG circuit (without AM from LFO)
+    uint32_t vol_out = 0;
 
-    uint8_t   eg_sh_ar;   /*  (attack state) */
-    uint8_t   eg_sel_ar;  /*  (attack state) */
-    uint8_t   eg_sh_d1r;  /*  (decay state) */
-    uint8_t   eg_sel_d1r; /*  (decay state) */
-    uint8_t   eg_sh_d2r;  /*  (sustain state) */
-    uint8_t   eg_sel_d2r; /*  (sustain state) */
-    uint8_t   eg_sh_rr;   /*  (release state) */
-    uint8_t   eg_sel_rr;  /*  (release state) */
+    ///  (attack state)
+    uint8_t eg_sh_ar = 0;
+    ///  (attack state)
+    uint8_t eg_sel_ar = 0;
+    ///  (decay state)
+    uint8_t eg_sh_d1r = 0;
+    ///  (decay state)
+    uint8_t eg_sel_d1r = 0;
+    ///  (sustain state)
+    uint8_t eg_sh_d2r = 0;
+    ///  (sustain state)
+    uint8_t eg_sel_d2r = 0;
+    ///  (release state)
+    uint8_t eg_sh_rr = 0;
+    ///  (release state)
+    uint8_t eg_sel_rr = 0;
 
-    uint8_t   ssg;        /* SSG-EG waveform */
-    uint8_t   ssgn;       /* SSG-EG negated output */
+    /// SSG-EG waveform
+    uint8_t ssg = 0;
+    /// SSG-EG negated output
+    uint8_t ssgn = 0;
 
-    uint32_t  key;        /* 0=last key was KEY OFF, 1=KEY ON */
+    /// 0=last key was KEY OFF, 1=KEY ON
+    uint32_t key = 0;
 
-    /* LFO */
-    uint32_t  AMmask;     /* AM enable flag */
+    /// AM enable flag
+    uint32_t AMmask = 0;
 
-    uint8_t   det_mul;
-    uint8_t   ar_ksr;
-    uint8_t   sl_rr;
-    uint8_t   dr;
-
+    /// TODO
+    uint8_t det_mul = 0;
+    /// TODO
+    uint8_t ar_ksr = 0;
+    /// TODO
+    uint8_t sl_rr = 0;
+    /// TODO
+    uint8_t dr = 0;
 };
 
-
-
-
-struct FM_CH
-{
-    FM_SLOT SLOT[4];    /* four SLOTs (operators) */
+/// A single FM voice (4-operator)
+struct FM_CH {
+    /// four SLOTs (operators)
+    FM_SLOT SLOT[4];
 
     uint8_t   ALGO;       /* algorithm */
     uint8_t   FB;         /* feedback shift */

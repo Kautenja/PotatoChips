@@ -605,8 +605,8 @@ struct FM_OPN {
 // MARK: public interface
 // ---------------------------------------------------------------------------
 
-/// A YM2612 PSG emulator.
-class YM2612 {
+/// Yamaha YM2612 chip emulator
+class YamahaYM2612 {
  private:
     /// registers
     uint8_t registers[512];
@@ -666,19 +666,19 @@ class YM2612 {
     int16_t MOR = 0;
 
  public:
-    /// @brief Initialize a new YM2612 with given sample rate.
+    /// @brief Initialize a new YamahaYM2612 with given sample rate.
     ///
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    explicit YM2612(double clock_rate = 768000, double sample_rate = 44100);
+    YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100);
 
     /// @brief Set the sample rate the a new value.
     ///
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    void setSampleRate(double clock_rate = 768000, double sample_rate = 44100);
+    void setSampleRate(double clock_rate, double sample_rate);
 
     /// @brief Reset the emulator to its initial state
     void reset();

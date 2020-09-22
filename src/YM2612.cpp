@@ -37,7 +37,7 @@ struct Chip2612 : rack::Module {
 
  private:
     /// the YM2612 chip emulator
-    YM2612 apu[PORT_MAX_CHANNELS];
+    YamahaYM2612 apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS][NUM_VOICES];

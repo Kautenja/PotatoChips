@@ -1273,7 +1273,7 @@ static void init_tables(void) {
 // MARK: YM2612 Emulator class
 // ---------------------------------------------------------------------------
 
-YM2612::YM2612(double clock_rate, double sample_rate) {
+YamahaYM2612::YamahaYM2612(double clock_rate, double sample_rate) {
     // allocate total level table (128kb space)
     init_tables();
     OPN.P_CH = CH;
@@ -1283,13 +1283,13 @@ YM2612::YM2612(double clock_rate, double sample_rate) {
     reset();
 }
 
-void YM2612::setSampleRate(double clock_rate, double sample_rate) {
+void YamahaYM2612::setSampleRate(double clock_rate, double sample_rate) {
     OPN.ST.clock = clock_rate;
     OPN.ST.rate = sample_rate;
     OPNSetPres(&OPN);
 }
 
-void YM2612::reset() {
+void YamahaYM2612::reset() {
     // clear instance variables
     memset(registers, 0, sizeof registers);
     LFO = MOL = MOR = 0;
@@ -1333,7 +1333,7 @@ void YM2612::reset() {
     for (int c = 0; c < 6; c++) setST(c, 3);
 }
 
-void YM2612::step() {
+void YamahaYM2612::step() {
     int lt, rt;
     // refresh PG and EG
     refresh_fc_eg_chan(&OPN, &CH[0]);
@@ -1429,7 +1429,7 @@ void YM2612::step() {
         TimerBOver(&OPN.ST);
 }
 
-void YM2612::write(uint8_t a, uint8_t v) {
+void YamahaYM2612::write(uint8_t a, uint8_t v) {
     int addr;
     // adjust to 8 bit bus
     v &= 0xff;
@@ -1479,7 +1479,7 @@ void YM2612::write(uint8_t a, uint8_t v) {
     }
 }
 
-void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AR == value) return;
     channels[channel].operators[slot].AR = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
@@ -1488,7 +1488,7 @@ void YM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
 }
 
 /* set decay rate */
-void YM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].D1 == value) return;
     channels[channel].operators[slot].D1 = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
@@ -1496,7 +1496,7 @@ void YM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
     set_dr(s, s->dr);
 }
 
-void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].SL == value) return;
     channels[channel].operators[slot].SL = value;
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
@@ -1505,13 +1505,13 @@ void YM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
 }
 
 /* set sustain rate */
-void YM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].D2 == value) return;
     channels[channel].operators[slot].D2 = value;
     set_sr(&CH[channel].SLOT[slots_idx[slot]], value);
 }
 
-void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RR == value) return;
     channels[channel].operators[slot].RR = value;
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
@@ -1519,27 +1519,27 @@ void YM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
     set_sl_rr(s, s->sl_rr);
 }
 
-void YM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].TL == value) return;
     channels[channel].operators[slot].TL = value;
     set_tl(&CH[channel], &CH[channel].SLOT[slots_idx[slot]], value);
 }
 
-void YM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].MUL == value) return;
     channels[channel].operators[slot].MUL = value;
     CH[channel].SLOT[slots_idx[slot]].mul = (value&0x0f)? (value&0x0f)*2 : 1;
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
-void YM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].DET == value) return;
     channels[channel].operators[slot].DET = value;
     CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
     CH[channel].SLOT[SLOT1].Incr=-1;
 }
 
-void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RS == value) return;
     channels[channel].operators[slot].RS = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
@@ -1547,7 +1547,7 @@ void YM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 
-void YM2612::setAM(uint8_t channel, uint8_t slot, uint8_t value) {
+void YamahaYM2612::setAM(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AM == value) return;
     channels[channel].operators[slot].AM = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];

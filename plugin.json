@@ -82,15 +82,14 @@
       ]
     },
     {
-      "slug": "S_SMP",
-      "name": "S-SMP",
-      "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf",
+      "slug": "SPC700",
+      "name": "SPC700",
+      "description": "An emulation of the Sony SPC700 chip from the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SPC700.pdf",
       "tags": [
         "Oscillator",
         "Effect"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "2A03",

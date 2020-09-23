@@ -102,7 +102,7 @@ class Sony_S_DSP {
     ///
     /// $frequency = 32000 * (pitch / 2^12)$
     ///
-    inline uint16_t convert_pitch(float frequency) {
+    static inline uint16_t convert_pitch(float frequency) {
         const auto pitch = static_cast<float>(1 << 12) * frequency / 32000.f;
         return 0x3FFF & static_cast<uint16_t>(pitch);
     }

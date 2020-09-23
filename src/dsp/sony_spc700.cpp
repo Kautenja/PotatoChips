@@ -26,8 +26,8 @@
 SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
-    assert(offsetof(GlobalData, unused9[2]) == REGISTER_COUNT);
-    assert(sizeof(voice) == REGISTER_COUNT);
+    assert(REGISTER_COUNT == sizeof(GlobalData));
+    assert(REGISTER_COUNT == sizeof(voice));
     // setup the default state of the chip
     set_gain(1.0);
     mute_voices(0);

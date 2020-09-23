@@ -37,6 +37,9 @@ struct ChipSPC700 : Module {
     /// @brief Fill the RAM with 0's.
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
+    /// triggers for handling gate inputs for the voices
+    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP::VOICE_COUNT][2];
+
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -141,7 +144,7 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $5C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::KEY_ON, 0xff);
+        // apu.write(Sony_S_DSP::KEY_ON, 0xff);
         // apu.write(Sony_S_DSP::KEY_OFF, 0);
         // Flags
         //          7     6     5     4     3     2     1     0
@@ -392,8 +395,8 @@ struct ChipSPC700 : Module {
             //
             //      key on                                Key off
             // (cool ascii picture taken from "APU MANUAL IN TEXT BY LEDI")
-            apu.write(mask | Sony_S_DSP::ADSR_1, 0);
-            apu.write(mask | Sony_S_DSP::ADSR_2, 0);
+            apu.write(mask | Sony_S_DSP::ADSR_1, 0b10100100);
+            apu.write(mask | Sony_S_DSP::ADSR_2, 0b01000100);
             // GAIN can be used to implement custom envelopes in your program.
             // There are 5 modes GAIN uses.
             // DIRECT
@@ -481,7 +484,7 @@ struct ChipSPC700 : Module {
             // 1E  4ms 7ms 4ms 37ms
             // 1F  2ms 3.5ms   2ms 18ms
             //
-            apu.write(mask | Sony_S_DSP::GAIN, 64);
+            // apu.write(mask | Sony_S_DSP::GAIN, 64);
             // ENVX gets written to by the DSP. It contains the present ADSR/GAIN envelope value.
             // ENVX
             //          7     6     5     4     3     2     1     0
@@ -521,6 +524,18 @@ struct ChipSPC700 : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
+        uint8_t key_on = 0;
+        uint8_t key_off = 0;
+        for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
+            const auto gate = inputs[INPUT_GATE + voice].getVoltage();
+            if (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)))
+                key_on = key_on | (1 << voice);
+            if (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)))
+                key_off = key_off | (1 << voice);
+        }
+        if (key_on) apu.write(Sony_S_DSP::KEY_ON, key_on);
+        if (key_off) apu.write(Sony_S_DSP::KEY_OFF, key_off);
+
         short sample[2] = {0, 0};
         apu.run(1, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());

@@ -44,8 +44,7 @@ struct ChipSPC700 : Module {
         ENUMS(PARAM_NOISE_FREQ, Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_L,   Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_R,   Sony_S_DSP::VOICE_COUNT),
-        PARAM_VOLUME_MAIN_L,
-        PARAM_VOLUME_MAIN_R,
+        ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
     };
 
@@ -57,8 +56,7 @@ struct ChipSPC700 : Module {
         ENUMS(INPUT_GATE,     Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_L, Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_R, Sony_S_DSP::VOICE_COUNT),
-        INPUT_VOLUME_MAIN_L,
-        INPUT_VOLUME_MAIN_R,
+        ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
     };
 
@@ -76,6 +74,16 @@ struct ChipSPC700 : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
+            auto osc_name = std::to_string(osc + 1);
+            configParam(PARAM_FREQ + osc, -4.f, 4.f, 0.f, "Voice " + osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_NOISE_FREQ + osc, 0, 32, 0, "Voice " + osc_name + " Noise Frequency");
+            configParam(PARAM_VOLUME_L + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Left)");
+            configParam(PARAM_VOLUME_R + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Right)");
+        }
+        configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 0, "Main Volume (Left)");
+        configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 0, "Main Volume (Right)");
+
         // clear the shared RAM between the CPU and the S-DSP
         clearRAM();
         // reset the S-DSP emulator
@@ -186,7 +194,7 @@ struct ChipSPC700 : Module {
         // 1D  10.7 KHz
         // 1E  16 KHz
         // 1F  32 KHz
-        apu.write(Sony_S_DSP::FLAGS, 15);
+        apu.write(Sony_S_DSP::FLAGS, 0x0D);
         // This register is written to during DSP activity.
         //
         // Each voice gets 1 bit. If the bit is set then it means the BRR
@@ -292,22 +300,6 @@ struct ChipSPC700 : Module {
         // will be [ESA*100h] -> [ESA*100h + EDL*800h -1]. If EDL is zero, 4
         // bytes of memory at [ESA*100h] -> [ESA*100h + 3] will still be used.
         apu.write(Sony_S_DSP::ECHO_DELAY, 0);
-
-        // apu.write(Sony_S_DSP::MAIN_VOLUME_LEFT, 127);
-        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
-        // apu.write(Sony_S_DSP::MAIN_VOLUME_RIGHT, 127);
-        // apu.write(Sony_S_DSP::ECHO_VOLUME_LEFT, 127);
-        // apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
-        // apu.write(Sony_S_DSP::ECHO_VOLUME_RIGHT, 127);
-        // apu.write(Sony_S_DSP::NOISE_ENABLE, 0);
-        // apu.write(Sony_S_DSP::KEY_ON, 0);
-        // apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
-        // apu.write(Sony_S_DSP::KEY_OFF, 0);
-        // apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
-        // apu.write(Sony_S_DSP::FLAGS, 0);
-        // apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
-        // apu.write(Sony_S_DSP::ENDX, 0);
-        // apu.write(Sony_S_DSP::ECHO_DELAY, 0);
 
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
@@ -574,12 +566,12 @@ struct ChipSPC700Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i  ));
         }
 
-        addParam(createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN_L));
-        addInput(createInput<PJ301MPort>(  Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN_L));
+        addParam(createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0));
+        addInput(createInput<PJ301MPort>(  Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
         addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0   ));
 
-        addParam(createParam<Rogan2PRed>(  Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN_R));
-        addInput(createInput<PJ301MPort>(  Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN_R));
+        addParam(createParam<Rogan2PRed>(  Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1));
+        addInput(createInput<PJ301MPort>(  Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
         addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1   ));
     }
 };

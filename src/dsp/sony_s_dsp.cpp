@@ -274,10 +274,14 @@ inline int clamp_16(int n) {
     return n;
 }
 
+#include <iostream>
+
 void Sony_S_DSP::run(long count, short* out_buf) {
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.
-    if (g.flags & 0x80) reset();
+    if (g.flags & 0x80) {
+        reset();
+    }
 
     struct src_dir {
         char start[2];
@@ -301,12 +305,17 @@ void Sony_S_DSP::run(long count, short* out_buf) {
         // once however, since the regs haven't changed over the whole
         // period we need to catch up with.
 
-        g.wave_ended &= ~g.key_ons; // Keying on a voice resets that bit in ENDX.
+        // Keying on a voice resets that bit in ENDX.
+        g.wave_ended &= ~g.key_ons;
 
-        if (g.noise_enables) {
+        if (g.noise_enables) {  // noise enabled for at least one voice
+            // update the noise period based on the index of the rate in the
+            // global flags register
             noise_count -= env_rates[g.flags & 0x1F];
-            if (noise_count <= 0) {
+            if (noise_count <= 0) {  // rising edge of noise generator
+                // reset the noise period to the initial value
                 noise_count = env_rate_init;
+                // calculate the output noise signal
                 noise_amp = int16_t (noise * 2);
                 // TODO: switch to Galios style
                 int feedback = (noise << 13) ^ (noise << 14);

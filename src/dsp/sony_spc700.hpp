@@ -31,11 +31,11 @@ class SonySPC700 {
     static constexpr unsigned REGISTER_COUNT = 128;
 
  private:
-    /// TODO
-    struct raw_voice_t {
-        /// TODO
+    /// a single synthesizer voice (channel) on the chip.
+    struct RawVoice {
+        /// the volume of the left channel
         int8_t left_vol;
-        /// TODO
+        /// the volume of the right channel
         int8_t right_vol;
         /// TODO
         uint8_t rate[2];
@@ -49,12 +49,12 @@ class SonySPC700 {
         int8_t envx;
         /// current sample
         int8_t outx;
-        /// TODO
+        /// filler bytes to align to 16-bytes
         int8_t unused[6];
     };
 
-    /// TODO
-    struct globals_t {
+    /// global data structure used by the chip
+    struct GlobalData {
         /// TODO
         int8_t unused1[12];
         /// 0C   Main Volume Left (-.7)
@@ -106,15 +106,15 @@ class SonySPC700 {
     };
 
     union {
-        /// TODO
-        raw_voice_t voice[VOICE_COUNT];
-        /// TODO
+        /// the voices on the chip
+        RawVoice voice[VOICE_COUNT];
+        /// the register bank on the chip
         uint8_t reg[REGISTER_COUNT];
-        /// TODO
-        globals_t g;
+        /// global data on the chip
+        GlobalData g;
     };
 
-    /// TODO
+    /// a pointer to the shared RAM bank
     uint8_t* const ram;
 
     /// Cache of echo FIR values for faster access
@@ -148,8 +148,8 @@ class SonySPC700 {
     /// TODO
     static int16_t const gauss[];
 
-    /// the states of the ADSR envelope generator
-    enum state_t {
+    /// The states of the ADSR envelope generator.
+    enum EnvelopeState : short {
         /// the attack stage of the envelope generator
         state_attack,
         /// the decay stage of the envelope generator
@@ -160,8 +160,8 @@ class SonySPC700 {
         state_release
     };
 
-    /// TODO
-    struct voice_t {
+    /// The state of a synthesizer voice (channel) on the chip.
+    struct VoiceState {
         /// TODO
         short volume[2];
         /// 12-bit fractional position
@@ -174,7 +174,7 @@ class SonySPC700 {
         short interp1;
         /// TODO
         short interp0;
-        /// number of nybbles remaining in current block
+        /// number of nibbles remaining in current block
         short block_remain;
         /// TODO
         unsigned short addr;
@@ -189,24 +189,25 @@ class SonySPC700 {
         /// 7 if enabled, 31 if disabled
         short enabled;
         /// TODO
-        short envstate;
+        short envstate;  // TODO: change type to EnvelopeState
         /// pad to power of 2
         short unused;
     };
 
-    /// TODO
-    voice_t voice_state[VOICE_COUNT];
+    /// The states of the voices on the chip.
+    VoiceState voice_state[VOICE_COUNT];
 
-    /// TODO
+    /// TODO.
+    ///
+    /// @param TODO
+    ///
     int clock_envelope(int);
 
  public:
     /// Initialize a new SonySPC700.
     ///
-    /// @param ram TODO
+    /// @param ram a pointer to the 64KB shared RAM
     ///
-    /// @details
-    /// Keeps pointer to 64K ram
     explicit SonySPC700(uint8_t* ram);
 
     /// Mute voice n if bit n (1 << n) of mask is clear.
@@ -241,12 +242,12 @@ class SonySPC700 {
         return reg[i];
     }
 
-    /// TODO.
+    /// Write data to the registers on the chip.
     ///
-    /// @param n TODO
-    /// @param ? TODO
+    /// @param address the address of the register to write data to
+    /// @param data the data to write to the register on the chip
     ///
-    void write(int n, int);
+    void write(unsigned address, int data);
 
     /// Run DSP for 'count' samples. Write resulting samples to 'buf' if not
     /// NULL.

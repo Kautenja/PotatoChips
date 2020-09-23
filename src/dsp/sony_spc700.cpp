@@ -24,12 +24,15 @@
 #include <cstddef>
 
 SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
+    // validate that the structures are of expected size
+    // TODO: move to unit testing code and remove from here
+    assert(offsetof(GlobalData, unused9[2]) == REGISTER_COUNT);
+    assert(sizeof(voice) == REGISTER_COUNT);
+    // setup the default state of the chip
     set_gain(1.0);
     mute_voices(0);
     disable_surround(false);
-
-    assert(offsetof (globals_t,unused9[2]) == REGISTER_COUNT);
-    assert(sizeof (voice) == REGISTER_COUNT);
+    // verify the byte order of the host machine
     blargg_verify_byte_order();
 }
 
@@ -49,7 +52,7 @@ void SonySPC700::reset() {
     g.key_ons = 0;
 
     for (int i = 0; i < VOICE_COUNT; i++) {
-        voice_t& v = voice_state[i];
+        VoiceState& v = voice_state[i];
         v.on_cnt = 0;
         v.volume[0] = 0;
         v.volume[1] = 0;
@@ -59,18 +62,21 @@ void SonySPC700::reset() {
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void SonySPC700::write(int i, int data) {
-    assert((unsigned) i < REGISTER_COUNT);
-
-    reg[i] = data;
-    int high = i >> 4;
-    switch (i & 0x0F) {
+void SonySPC700::write(unsigned address, int data) {
+    // make sure the given address is legal
+    if (address >= REGISTER_COUNT)
+        throw AddressSpaceException<uint16_t>(address, 0, REGISTER_COUNT);
+    // store the data in the register with given address
+    reg[address] = data;
+    int high = address >> 4;
+    // update volume / FIR coefficients
+    switch (address & 0x0F) {
         // voice volume
         case 0:
         case 1: {
             short* volume = voice_state[high].volume;
-            int left  = (int8_t) reg[i & ~1];
-            int right = (int8_t) reg[i |  1];
+            int left  = (int8_t) reg[address & ~1];
+            int right = (int8_t) reg[address |  1];
             volume[0] = left;
             volume[1] = right;
             // kill surround only if enabled and signs of volumes differ
@@ -82,9 +88,8 @@ void SonySPC700::write(int i, int data) {
             }
             break;
         }
-        // fir coefficients
-        case 0x0F:
-            fir_coeff[high] = (int8_t) data; // sign-extend
+        case 0x0F:  // FIR coefficients
+            fir_coeff[high] = (int8_t) data;  // sign-extend
             break;
     }
 }
@@ -104,8 +109,8 @@ static const short env_rates[0x20] = {
 const int env_range = 0x800;
 
 inline int SonySPC700::clock_envelope(int v) {
-    raw_voice_t& raw_voice = this->voice[v];
-    voice_t& voice = voice_state[v];
+    RawVoice& raw_voice = this->voice[v];
+    VoiceState& voice = voice_state[v];
 
     int envx = voice.envx;
     if (voice.envstate == state_release) {
@@ -319,8 +324,8 @@ void SonySPC700::run(long count, short* out_buf) {
         int right = 0;
         for (int vidx = 0; vidx < VOICE_COUNT; vidx++) {
             const int vbit = 1 << vidx;
-            raw_voice_t& raw_voice = voice[vidx];
-            voice_t& voice = voice_state[vidx];
+            RawVoice& raw_voice = voice[vidx];
+            VoiceState& voice = voice_state[vidx];
 
             if (voice.on_cnt && !--voice.on_cnt) {
                 // key on

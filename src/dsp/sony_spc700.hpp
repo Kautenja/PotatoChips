@@ -197,29 +197,29 @@ class SonySPC700 {
     /// The states of the voices on the chip.
     VoiceState voice_state[VOICE_COUNT];
 
-    /// Process the envelope for the voice with given index.
+    /// @brief Process the envelope for the voice with given index.
     ///
     /// @param voice_index the index of the voice to clock the envelope of
     ///
     int clock_envelope(unsigned voice_idx);
 
  public:
-    /// Initialize a new SonySPC700.
+    /// @brief Initialize a new SonySPC700.
     ///
     /// @param ram a pointer to the 64KB shared RAM
     ///
     explicit SonySPC700(uint8_t* ram);
 
-    /// Mute voice `n` if bit $n$ ($1 << n$) of mask is clear.
+    /// @brief Mute voice `n` if bit $n$ ($1 << n$) of mask is clear.
     ///
     /// @param mask the bit-mask representing the activation of voices
     ///
     void mute_voices(uint8_t mask);
 
-    /// Clear state and silence everything.
+    /// @brief Clear state and silence everything.
     void reset();
 
-    /// Set gain, where 1.0 is normal. When greater than 1.0, output is
+    /// @brief Set gain, where 1.0 is normal. When greater than 1.0, output is
     /// clamped to the 16-bit sample range.
     ///
     /// @param value the value to set the gain to
@@ -228,7 +228,7 @@ class SonySPC700 {
         emu_gain = static_cast<int>(value * (1 << EMU_GAIN_BITS));
     }
 
-    /// If true, prevent channels and global volumes from being phase-negated.
+    /// @brief If true, prevent channels and global volumes from being phase-negated.
     ///
     /// @param disable true to disable surround, false to enable surround
     ///
@@ -236,7 +236,7 @@ class SonySPC700 {
         surround_threshold = disable ? 0 : -0x7FFF;
     }
 
-    /// Read data from the register at the given address.
+    /// @brief Read data from the register at the given address.
     ///
     /// @param address the address of the register to read data from
     ///
@@ -246,15 +246,15 @@ class SonySPC700 {
         return reg[address];
     }
 
-    /// Write data to the registers at the given address.
+    /// @brief Write data to the registers at the given address.
     ///
     /// @param address the address of the register to write data to
     /// @param data the data to write to the register
     ///
     void write(unsigned address, int data);
 
-    /// Run DSP for 'count' samples. Write resulting samples to 'buf' if not
-    /// NULL.
+    /// @brief Run DSP for 'count' samples. Write resulting samples to 'buf'
+    /// if not NULL.
     ///
     /// @param num_samples the number of samples to run on the DSP
     /// @param buffer the output buffer to write samples to

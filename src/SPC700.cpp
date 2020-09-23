@@ -20,6 +20,8 @@
 #include "engine/chip_module.hpp"
 #include "dsp/sony_s_dsp.hpp"
 
+#include <iostream>
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -63,14 +65,13 @@ struct ChipSPC700 : Module {
         apu.reset();
         // activate all the voices
         apu.mute_voices(0xff);
+
+        apu.run(1, NULL);
+        processCV();
     }
 
  protected:
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    ///
-    inline void process(const ProcessArgs &args) final {
+    inline void processCV() {
         // Main/Echo volume! 8-bit signed values. Regular sound is scaled by
         // the main volume. Echoed sound is scaled by the echo volume.
         //
@@ -117,8 +118,8 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $5C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::KEY_ON, 0);
-        apu.write(Sony_S_DSP::KEY_OFF, 0);
+        // apu.write(Sony_S_DSP::KEY_ON, 0);
+        // apu.write(Sony_S_DSP::KEY_OFF, 0);
         // Flags
         //          7     6     5     4     3     2     1     0
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
@@ -170,7 +171,7 @@ struct ChipSPC700 : Module {
         // 1D  10.7 KHz
         // 1E  16 KHz
         // 1F  32 KHz
-        apu.write(Sony_S_DSP::FLAGS, 0);
+        apu.write(Sony_S_DSP::FLAGS, 15);
         // This register is written to during DSP activity.
         //
         // Each voice gets 1 bit. If the bit is set then it means the BRR
@@ -181,7 +182,7 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::ENDX, 0);
+        // apu.write(Sony_S_DSP::ENDX, 0);
         // Writing to this register sets the Echo Feedback. It's an 8-bit
         // signed value. Some more information on how the feedback works
         // would be nice.
@@ -216,7 +217,7 @@ struct ChipSPC700 : Module {
         // noise is set in the FLG register. The white noise still requires a
         // (dummy) sample to determine the length of sound (or unlimited sound
         // if the sample loops).
-        apu.write(Sony_S_DSP::NOISE_ENABLE, 0);
+        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xff);
         // Echo enable.
         //
         // EON
@@ -473,7 +474,7 @@ struct ChipSPC700 : Module {
             // 1E  4ms 7ms 4ms 37ms
             // 1F  2ms 3.5ms   2ms 18ms
             //
-            apu.write(mask | Sony_S_DSP::GAIN, 0);
+            apu.write(mask | Sony_S_DSP::GAIN, 64);
             // ENVX gets written to by the DSP. It contains the present ADSR/GAIN envelope value.
             // ENVX
             //          7     6     5     4     3     2     1     0
@@ -506,7 +507,13 @@ struct ChipSPC700 : Module {
             // but the filter is applied to the echo output.
             // apu.write(mask | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         }
+    }
 
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
+    inline void process(const ProcessArgs &args) final {
         short sample[2] = {0, 0};
         apu.run(1, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());

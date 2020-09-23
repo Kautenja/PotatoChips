@@ -18,12 +18,12 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#include "sony_spc700.hpp"
-#include "sony_spc700_endian.hpp"
+#include "sony_s_dsp.hpp"
+#include "sony_s_dsp_endian.hpp"
 #include <cstring>
 #include <cstddef>
 
-SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
+Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));
@@ -36,12 +36,12 @@ SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     blargg_verify_byte_order();
 }
 
-void SonySPC700::mute_voices(uint8_t mask) {
+void Sony_S_DSP::mute_voices(uint8_t mask) {
     for (unsigned i = 0; i < VOICE_COUNT; i++)
         voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
-void SonySPC700::reset() {
+void Sony_S_DSP::reset() {
     keys = 0;
     echo_ptr = 0;
     noise_count = 0;
@@ -62,7 +62,7 @@ void SonySPC700::reset() {
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void SonySPC700::write(unsigned address, int data) {
+void Sony_S_DSP::write(unsigned address, int data) {
     // make sure the given address is legal
     if (address >= NUM_REGISTERS)
         throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
@@ -108,7 +108,7 @@ static const short env_rates[0x20] = {
 
 const int env_range = 0x800;
 
-inline int SonySPC700::clock_envelope(unsigned voice_idx) {
+inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voice[voice_idx];
     VoiceState& voice = voice_state[voice_idx];
 
@@ -274,7 +274,7 @@ inline int clamp_16(int n) {
     return n;
 }
 
-void SonySPC700::run(long count, short* out_buf) {
+void Sony_S_DSP::run(long count, short* out_buf) {
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.
     if (g.flags & 0x80) reset();
@@ -561,7 +561,7 @@ void SonySPC700::run(long count, short* out_buf) {
 
 // Interleved gauss table (to improve cache coherency).
 // gauss[i * 2 + j] = normal_gauss[(1 - j) * 256 + i]
-const int16_t SonySPC700::gauss[512] = {
+const int16_t Sony_S_DSP::gauss[512] = {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,
  311,1298, 307,1297, 304,1297, 300,1296, 297,1295, 293,1294, 290,1293, 286,1292,

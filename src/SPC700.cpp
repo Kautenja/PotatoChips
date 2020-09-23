@@ -18,7 +18,7 @@
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
 #include "engine/chip_module.hpp"
-#include "dsp/sony_spc700.hpp"
+#include "dsp/sony_s_dsp.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -30,7 +30,7 @@ struct ChipSPC700 : Module {
     /// the RAM for the SPC chip (64KB = 16-bit address space)
     uint8_t ram[1 << 16];
     /// the Sony SPC700 sound chip emulator
-    SonySPC700 apu{ram};
+    Sony_S_DSP apu{ram};
 
     /// @brief Fill the RAM with 0's.
     inline void clearRAM() { memset(ram, 0, sizeof ram); }

@@ -1,4 +1,4 @@
-// Sony SPC700 emulator.
+// Sony S-DSP emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -16,19 +16,24 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_SONY_SPC700_HPP_
-#define DSP_SONY_SPC700_HPP_
+#ifndef DSP_SONY_S_DSP_HPP_
+#define DSP_SONY_S_DSP_HPP_
 
 #include "exceptions.hpp"
 #include <cassert>
 
-/// @brief Sony SPC700 chip emulator.
-class SonySPC700 {
+/// @brief Sony S-DSP chip emulator.
+class Sony_S_DSP {
  public:
     /// the number of oscillators on the chip
     static constexpr unsigned VOICE_COUNT = 8;
     /// the number of RAM registers on the chip
     static constexpr unsigned NUM_REGISTERS = 128;
+
+    /// the registers on the S-DSP
+    enum Register : uint16_t {
+
+    };
 
  private:
     /// a single synthesizer voice (channel) on the chip.
@@ -204,11 +209,11 @@ class SonySPC700 {
     int clock_envelope(unsigned voice_idx);
 
  public:
-    /// @brief Initialize a new SonySPC700.
+    /// @brief Initialize a new Sony_S_DSP.
     ///
     /// @param ram a pointer to the 64KB shared RAM
     ///
-    explicit SonySPC700(uint8_t* ram);
+    explicit Sony_S_DSP(uint8_t* ram);
 
     /// @brief Mute voice `n` if bit $n$ ($1 << n$) of mask is clear.
     ///
@@ -267,4 +272,4 @@ class SonySPC700 {
     void run(long num_samples, short* buffer = NULL);
 };
 
-#endif  // DSP_SONY_SPC700_HPP_
+#endif  // DSP_SONY_S_DSP_HPP_

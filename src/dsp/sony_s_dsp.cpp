@@ -475,8 +475,9 @@ void Sony_S_DSP::run(long count, short* out_buf) {
             s = (int16_t) (s * 2);
             s += (table2[0] * voice.interp0) >> 11 & ~1;
             int output = clamp_16(s);
-            if (g.noise_enables & vbit)
+            if (g.noise_enables & vbit) {
                 output = noise_amp;
+            }
 
             // scale output and set outx values
             output = (output * envx) >> 11 & ~1;
@@ -485,6 +486,7 @@ void Sony_S_DSP::run(long count, short* out_buf) {
             // if voice is externally disabled (not a SNES feature)
             int l = (voice.volume[0] * output) >> voice.enabled;
             int r = (voice.volume[1] * output) >> voice.enabled;
+
             prev_outx = output;
             raw_voice.outx = int8_t (output >> 8);
             if (g.echo_ons & vbit) {

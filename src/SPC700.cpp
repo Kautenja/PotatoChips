@@ -63,8 +63,6 @@ struct ChipSPC700 : Module {
         // clearRAM();
         // reset the S-DSP emulator
         apu.reset();
-        // activate all the voices
-        apu.mute_voices(0xff);
 
         apu.run(1, NULL);
         processCV();
@@ -118,7 +116,7 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $5C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::KEY_ON, 0);
+        apu.write(Sony_S_DSP::KEY_ON, 0xff);
         // apu.write(Sony_S_DSP::KEY_OFF, 0);
         // Flags
         //          7     6     5     4     3     2     1     0

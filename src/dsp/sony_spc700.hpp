@@ -28,7 +28,7 @@ class SonySPC700 {
     /// the number of oscillators on the chip
     static constexpr unsigned VOICE_COUNT = 8;
     /// the number of RAM registers on the chip
-    static constexpr unsigned REGISTER_COUNT = 128;
+    static constexpr unsigned NUM_REGISTERS = 128;
 
  private:
     /// a single synthesizer voice (channel) on the chip.
@@ -109,7 +109,7 @@ class SonySPC700 {
         /// the voices on the chip
         RawVoice voice[VOICE_COUNT];
         /// the register bank on the chip
-        uint8_t reg[REGISTER_COUNT];
+        uint8_t reg[NUM_REGISTERS];
         /// global data on the chip
         GlobalData g;
     };
@@ -241,8 +241,8 @@ class SonySPC700 {
     /// @param address the address of the register to read data from
     ///
     inline int read(int address) {
-        if (address >= REGISTER_COUNT)  // make sure the given address is legal
-            throw AddressSpaceException<uint16_t>(address, 0, REGISTER_COUNT);
+        if (address >= NUM_REGISTERS)  // make sure the given address is legal
+            throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
         return reg[address];
     }
 

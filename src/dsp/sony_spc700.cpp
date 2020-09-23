@@ -26,8 +26,8 @@
 SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
-    assert(REGISTER_COUNT == sizeof(GlobalData));
-    assert(REGISTER_COUNT == sizeof(voice));
+    assert(NUM_REGISTERS == sizeof(GlobalData));
+    assert(NUM_REGISTERS == sizeof(voice));
     // setup the default state of the chip
     set_gain(1.0);
     mute_voices(0);
@@ -64,8 +64,8 @@ void SonySPC700::reset() {
 
 void SonySPC700::write(unsigned address, int data) {
     // make sure the given address is legal
-    if (address >= REGISTER_COUNT)
-        throw AddressSpaceException<uint16_t>(address, 0, REGISTER_COUNT);
+    if (address >= NUM_REGISTERS)
+        throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
     // store the data in the register with given address
     reg[address] = data;
     int high = address >> 4;

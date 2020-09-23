@@ -24,12 +24,12 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Sony SPC700 chip (from Nintendo SNES) emulator module.
+/// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipSPC700 : Module {
  private:
-    /// the RAM for the SPC chip (64KB = 16-bit address space)
+    /// the RAM for the S-DSP chip (64KB = 16-bit address space)
     uint8_t ram[1 << 16];
-    /// the Sony SPC700 sound chip emulator
+    /// the Sony S-DSP sound chip emulator
     Sony_S_DSP apu{ram};
 
     /// @brief Fill the RAM with 0's.
@@ -54,11 +54,15 @@ struct ChipSPC700 : Module {
         NUM_LIGHTS
     };
 
-    /// @brief Initialize a new SPC700 Chip module.
+    /// @brief Initialize a new S-DSP Chip module.
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        // clear the shared RAM between the CPU and the S-DSP
         clearRAM();
+        // reset the S-DSP emulator
         apu.reset();
+        // activate all the voices
+        apu.mute_voices(0xff);
     }
 
  protected:

@@ -91,7 +91,7 @@ class Sony_S_DSP {
         /// multiplication and before volume multiplication.
         WAVEFORM_OUT     = 0x09,
         /// 8-tap FIR Filter coefficients
-        FIR_COEFFICIENTS = 0x0F
+        // FIR_COEFFICIENTS = 0x0F
     };
 
     /// Returns the 14-bit pitch based on th given frequency.

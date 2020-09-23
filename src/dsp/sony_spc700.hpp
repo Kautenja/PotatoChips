@@ -22,7 +22,7 @@
 #include "exceptions.hpp"
 #include <cassert>
 
-/// @brief Sony Sony SPC700 chip emulator.
+/// @brief Sony SPC700 chip emulator.
 class SonySPC700 {
  public:
     /// the number of oscillators on the chip

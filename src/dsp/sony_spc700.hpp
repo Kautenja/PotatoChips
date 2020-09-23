@@ -230,7 +230,7 @@ class SonySPC700 {
 
     /// If true, prevent channels and global volumes from being phase-negated.
     ///
-    /// @param disable TODO
+    /// @param disable true to disable surround, false to enable surround
     ///
     inline void disable_surround(bool disable) {
         surround_threshold = disable ? 0 : -0x7FFF;
@@ -253,14 +253,19 @@ class SonySPC700 {
     ///
     void write(unsigned address, int data);
 
-    // TODO: make clock_envelope() inline so that this becomes a leaf function?
     /// Run DSP for 'count' samples. Write resulting samples to 'buf' if not
     /// NULL.
     ///
-    /// @param count TODO
-    /// @param buf TODO
+    /// @param num_samples the number of samples to run on the DSP
+    /// @param buffer the output buffer to write samples to
     ///
-    void run(long count, short* buf = NULL);
+    /// @details
+    /// the sample rate of the system is locked to 32kHz just like the SNES
+    ///
+    /// @TODO
+    /// make clock_envelope() inline so that this becomes a leaf function?
+    ///
+    void run(long num_samples, short* buffer = NULL);
 };
 
 #endif  // DSP_SONY_SPC700_HPP_

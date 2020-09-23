@@ -40,17 +40,34 @@ struct ChipSPC700 : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
+        ENUMS(PARAM_FREQ,       Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_NOISE_FREQ, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_VOLUME_L,   Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_VOLUME_R,   Sony_S_DSP::VOICE_COUNT),
+        PARAM_VOLUME_MAIN_L,
+        PARAM_VOLUME_MAIN_R,
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
+        ENUMS(INPUT_VOCT,     Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_NOISE_FM, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_FM,       Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_GATE,     Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_VOLUME_L, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_VOLUME_R, Sony_S_DSP::VOICE_COUNT),
+        INPUT_VOLUME_MAIN_L,
+        INPUT_VOLUME_MAIN_R,
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_AUDIO, 2),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
     enum LightIds {
         NUM_LIGHTS
@@ -538,9 +555,32 @@ struct ChipSPC700Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // left + right audio outputs
-        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, ChipSPC700::OUTPUT_AUDIO + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(71, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
+
+        // individual oscillator controls
+        for (unsigned i = 0; i < Sony_S_DSP::VOICE_COUNT; i++) {
+            // frequency
+            addInput(createInput<PJ301MPort>(  Vec(15, 40 + i * 41),  module, ChipSPC700::INPUT_VOCT + i      ));
+            addInput(createInput<PJ301MPort>(  Vec(45, 40 + i * 41),  module, ChipSPC700::INPUT_FM + i        ));
+            addParam(createParam<Rogan2PSNES>( Vec(75, 35 + i * 41),  module, ChipSPC700::PARAM_FREQ + i      ));
+            // noise frequency
+            addInput(createInput<PJ301MPort>(  Vec(115, 40 + i * 41), module, ChipSPC700::INPUT_NOISE_FM + i  ));
+            addParam(createParam<Rogan2PSNES>( Vec(145, 35 + i * 41), module, ChipSPC700::PARAM_NOISE_FREQ + i));
+            // gate
+            addInput(createInput<PJ301MPort>(  Vec(185, 40 + i * 41), module, ChipSPC700::INPUT_GATE + i      ));
+            // volume
+            addParam(createParam<Rogan2PWhite>(Vec(220, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_L + i  ));
+            addInput(createInput<PJ301MPort>(  Vec(260, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_L + i  ));
+            addParam(createParam<Rogan2PRed>(  Vec(300, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i  ));
+            addInput(createInput<PJ301MPort>(  Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i  ));
+        }
+
+        addParam(createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN_L));
+        addInput(createInput<PJ301MPort>(  Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN_L));
+        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0   ));
+
+        addParam(createParam<Rogan2PRed>(  Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN_R));
+        addInput(createInput<PJ301MPort>(  Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN_R));
+        addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1   ));
     }
 };
 

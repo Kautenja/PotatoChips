@@ -547,7 +547,6 @@ struct ChipSPC700Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
         // individual oscillator controls
         for (unsigned i = 0; i < Sony_S_DSP::VOICE_COUNT; i++) {
             // frequency
@@ -565,11 +564,11 @@ struct ChipSPC700Widget : ModuleWidget {
             addParam(createParam<Rogan2PRed>(  Vec(300, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i  ));
             addInput(createInput<PJ301MPort>(  Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i  ));
         }
-
+        // left channel output
         addParam(createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0));
         addInput(createInput<PJ301MPort>(  Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
         addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0   ));
-
+        // right channel output
         addParam(createParam<Rogan2PRed>(  Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1));
         addInput(createInput<PJ301MPort>(  Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
         addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1   ));
@@ -577,4 +576,4 @@ struct ChipSPC700Widget : ModuleWidget {
 };
 
 /// the global instance of the model
-Model *modelChipSPC700 = createModel<ChipSPC700, ChipSPC700Widget>("SPC700");
+rack::Model *modelChipSPC700 = createModel<ChipSPC700, ChipSPC700Widget>("SPC700");

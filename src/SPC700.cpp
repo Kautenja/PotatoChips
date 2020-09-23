@@ -60,10 +60,11 @@ struct ChipSPC700 : Module {
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // clear the shared RAM between the CPU and the S-DSP
-        // clearRAM();
+        clearRAM();
         // reset the S-DSP emulator
         apu.reset();
 
+        apu.mute_voices(0x00);
         apu.run(1, NULL);
         processCV();
     }

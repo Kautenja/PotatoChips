@@ -308,6 +308,8 @@ void Sony_S_DSP::run(long count, short* out_buf) {
         // Keying on a voice resets that bit in ENDX.
         g.wave_ended &= ~g.key_ons;
 
+        // the `noise_enables` register is a length 8 bit-mask for enabling /
+        // disabling noise for each individual voice.
         if (g.noise_enables) {  // noise enabled for at least one voice
             // update the noise period based on the index of the rate in the
             // global flags register

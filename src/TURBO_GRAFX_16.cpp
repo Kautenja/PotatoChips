@@ -101,8 +101,8 @@ struct ChipTurboGrafx16 : Module {
         cvDivider.setDivision(16);
         // set the output buffer for each individual voice
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
-            configParam(PARAM_FREQ   + i, -42.f, 42.f,  0.f, "Channel " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME + i,   0,   31,   31,   "Channel " + std::to_string(i + 1) + " Volume",     "%",   0,                  100.f / 31.f);
+            configParam(PARAM_FREQ   + i,  -3.5f, 3.5f,  0.f, "Channel " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_VOLUME + i,   0,   31,    31,   "Channel " + std::to_string(i + 1) + " Volume",     "%",   0, 100.f / 31.f);
             apu.set_output(i, &buf[i], &buf[i], &buf[i]);
         }
         // set the wave-forms to the default values
@@ -135,6 +135,7 @@ struct ChipTurboGrafx16 : Module {
     // void onReset() final {
     //     for (int i = 0; i < NUM_WAVETABLES; i++)
     //         memcpy(values[i], default_values, num_samples);
+    //     ChipModule<NECTurboGrafx16>::onReset();
     // }
 
     // /// Respond to the user randomizing the module with the "Randomize" action.
@@ -204,7 +205,7 @@ struct ChipTurboGrafx16 : Module {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + channel].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + channel].getValue();
         pitch += inputs[INPUT_VOCT + channel].getVoltage();
         pitch += inputs[INPUT_FM + channel].getVoltage() / 5.f;
         // convert the pitch to frequency based on standard exponential scale

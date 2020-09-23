@@ -1,4 +1,4 @@
-// A VCV Rack for viewing and editing a wave-table using the mouse pointer.
+// A VCV Rack widget for viewing and editing samples in waveform.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -48,14 +48,14 @@ struct WaveTableEditor : rack::LightWidget {
  public:
     /// @brief Initialize a new wave-table editor widget.
     ///
+    /// @param waveform_ the waveform buffer to read and update
+    /// @param length_ the length of the wave-table to edit
+    /// @param bit_depth_ the bit-depth of the waveform samples to generate
     /// @param position the position of the screen on the module
     /// @param size the output size of the display to render
     /// @param fill_ the fill color for the widget
     /// @param background_ the background color for the widget
     /// @param border_ the border color for the widget
-    /// @param length_ the length of the wave-table to edit
-    /// @param bit_depth_ the bit-depth of the waveform samples to generate
-    /// @param waveform_ the waveform buffer to read and update
     ///
     explicit WaveTableEditor(
         Wavetable* waveform_,

@@ -55,8 +55,8 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // get the oscillator name starting with ACII code 65 (A)
             auto name = std::string(1, static_cast<char>(65 + oscillator));
-            configParam(PARAM_FREQ  + oscillator, -56.f, 56.f, 0.f,  "Pulse " + name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f, 0.8f, "Pulse " + name + " Level",     "%",   0.f,                100.f       );
+            configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f, "Pulse " + name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
+            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f, 0.8f, "Pulse " + name + " Level",     "%",   0.f, 100.f       );
         }
     }
 
@@ -75,7 +75,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale

@@ -55,14 +55,14 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     /// @brief Initialize a new VRC6 Chip module.
     ChipVRC6() : ChipModule<KonamiVRC6>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0, -30.f, 30.f, 0.f,  "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -30.f, 30.f, 0.f,  "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2, -30.f, 30.f, 0.f,  "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW + 0,     0,    7,   4,    "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_PW + 1,     0,    7,   4,    "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f, 0.8f, "Pulse 1 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f, 0.8f, "Pulse 2 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f, 0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
+        configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1,  -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2,  -2.5f, 2.5f, 0.f,  "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_PW + 0,     0,    7,    4,    "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_PW + 1,     0,    7,    4,    "Pulse 1 Duty Cycle"                                               );
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f,  0.8f, "Pulse 1 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f,  0.8f, "Pulse 2 Level",            "%",   0.f,                100.f       );
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f,  0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
     }
 
  protected:
@@ -90,7 +90,7 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
         float clock_division
     ) {
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale

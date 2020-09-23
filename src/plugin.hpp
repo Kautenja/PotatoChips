@@ -49,5 +49,7 @@ extern rack::Model *modelChipAY_3_8910;
 extern rack::Model *modelChipPOKEY;
 // the global instance of each the 2413 module
 extern rack::Model *modelChip2413;
+// the global instance of each the 2612 module
+extern rack::Model *modelChip2612;
 
 #endif  // PLUGIN_HPP

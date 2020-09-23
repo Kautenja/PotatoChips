@@ -68,7 +68,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
-                configParam(PARAM_FREQ + i, -30.f, 30.f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+                configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_LEVEL + i, 0, 1, 0.8, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
         }
         configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
@@ -93,7 +93,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale

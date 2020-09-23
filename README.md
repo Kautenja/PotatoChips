@@ -49,6 +49,40 @@ See the [Manual][106] for more information about the features of this module.
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: 2612 -->
+<!-- ------------------------------------------------------------ -->
+
+## 2612
+
+2612 is an emulation of the
+[Yamaha YM2612](https://en.wikipedia.org/wiki/Yamaha_YM2612)
+audio processing unit from the
+[Sega Master System](https://en.wikipedia.org/wiki/Master_System)
+and
+[Sega Genesis](https://en.wikipedia.org/wiki/Sega_Genesis)
+for VCV Rack. The YM2612 is a 4-operator FM synthesis chip with 6 voices of
+polyphony.
+
+<p align="center">
+<img alt="2612" src="manual/2612/img/2612-Module.svg">
+</p>
+
+### Features
+
+-   **16-bit:** 8 bits better than the previous generation of chips!
+-   **6 Voice Polyphony:** 6 voices of polyphony with independent V/OCT and
+    Gate inputs
+-   **4-Operator FM Synthesis:** Full control over the FM-synthesis parameters
+    for each of the four operators including: envelopes, multiplier rate scale,
+    tuning, and amplitude modulation
+-   **8 FM Algorithms:** 8 different arrangements of the four operators
+-   **Stereo Outputs:** Output from the left and right channels on the chip
+
+See the [Manual][2612] for more information about the features of this module.
+
+[2612]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2612.pdf
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: 2A03 -->
 <!-- ------------------------------------------------------------ -->
 

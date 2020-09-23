@@ -81,9 +81,10 @@ struct Chip106 : ChipModule<Namco106> {
         configParam(PARAM_WAVETABLE,            1, NUM_WAVEFORMS,       1, "Waveform Morph");
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-            configParam(PARAM_FREQ + oscillator, -30.f, 30.f, 0.f, "Channel " + std::to_string(oscillator + 1) + " Frequency",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME + oscillator, 0,   15,  15,   "Channel " + std::to_string(oscillator + 1) + " Volume",     "%",   0,                  100.f / 15.f);
+        for (unsigned osc = 0; osc < Namco106::OSC_COUNT; osc++) {
+            auto osc_name = std::to_string(osc + 1);
+            configParam(PARAM_FREQ + osc,  -2.5f, 2.5f,  0.f, "Channel " + osc_name + " Frequency",  " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_VOLUME + osc, 0,    15,   15,   "Channel " + osc_name + " Volume",     "%",   0, 100.f / 15.f);
         }
         memset(num_oscillators, 1, sizeof num_oscillators);
     }
@@ -100,6 +101,7 @@ struct Chip106 : ChipModule<Namco106> {
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
             memcpy(wavetable[i], WAVETABLE[i], SAMPLES_PER_WAVETABLE);
+        ChipModule<Namco106>::onReset();
     }
 
     /// @brief Respond to the user randomizing the module with the "Randomize" action.
@@ -181,7 +183,7 @@ struct Chip106 : ChipModule<Namco106> {
     ///
     inline uint32_t getFrequency(unsigned oscillator, unsigned channel) {
         // get the frequency of the oscillator from the parameter and CVs
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);

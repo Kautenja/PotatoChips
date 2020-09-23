@@ -63,9 +63,9 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
     ChipPOKEY() : ChipModule<AtariPOKEY>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            configParam(PARAM_FREQ  + i, -30.f, 30.f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_NOISE + i,   0,    7,   7,   "Channel " + std::to_string(i + 1) + " Noise"                                             );
-            configParam(PARAM_LEVEL + i,   0,    1,   0.5, "Channel " + std::to_string(i + 1) + " Level",     "%",   0,                  100         );
+            configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_NOISE + i,  0,    7,   7,    "Channel " + std::to_string(i + 1) + " Noise"                                             );
+            configParam(PARAM_LEVEL + i,  0,    1,   0.5,  "Channel " + std::to_string(i + 1) + " Level",     "%",   0,                  100         );
         }
         // control register controls
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
@@ -93,7 +93,7 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 56;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue() / 12.f;
+        float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale

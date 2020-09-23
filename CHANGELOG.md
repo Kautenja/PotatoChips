@@ -118,8 +118,28 @@
 
 -   fix frequency range of 106 to resolve hang & crash
 
-## 1.6.3 (2020-08-16)
+## 1.6.3 (2020-09-14)
 
--   fix ordering of pairs of samples (nibbles) for 106 wavetable editor
--   fix triangle waveforms for wave-table editors
--   fix compilation issue for ARM builds
+-   fix ordering of pairs of samples (nibbles) for wavetable editor on 106
+-   update triangle waveforms for wave-table editors to be subjectively better
+-   fix compilation issue for ARM builds!
+-   change internal representation of Frequency parameters to be more efficient
+-   fix emulator initialization to address and issue where oscillators would
+    be initialized perfectly out of phase (and thus mix together to produce
+    silence)
+
+## 1.7.0 (2020-09-17)
+
+-   new module: 2616
+    -    6 voices of FM synthesis
+    -    CV control of all parameters
+    -    polyphony support
+
+## 1.7.1 (2020-09-18)
+
+-   fix 2612 to sound the same at all sample rates
+-   fix 2612 to be tuned to C4
+-   fix 2612 LFO to produce the correct frequencies
+-   fix 2612 Envelope generator to have correct timings
+-   fix 2612 TL parameter to reduce the dead range of the parameter
+-   remove invalid tags from plugin.json

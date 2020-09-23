@@ -173,37 +173,36 @@ class AtariPOKEY {
     // the maximal period for an oscillator
     static constexpr int MAX_PERIOD = CLOCK_RATE / 2 / MAX_FREQUENCY;
 
-    /// a pulse oscillator on the chip
+    /// a pulse oscillator on the Atari POKEY chip.
     struct Oscillator {
         /// the registers for the oscillator data
-        uint8_t regs[2];
+        uint8_t regs[2] = {0, 0};
         /// the phase of the oscillators
-        uint8_t phase;
+        uint8_t phase = 0;
         /// TODO:
-        uint8_t invert;
+        uint8_t invert = 0;
         /// the last amplitude value of the oscillator
-        int last_amp;
+        int last_amp = 0;
         /// TODO:
-        blip_time_t delay;
+        blip_time_t delay = 0;
         /// always recalculated before use; here for convenience
-        blip_time_t period;
+        blip_time_t period = 0;
         /// the output buffer the oscillator writes samples to
-        BLIPBuffer* output;
-    };
-    /// the oscillators on the chip
-    Oscillator oscs[OSC_COUNT];
+        BLIPBuffer* output = nullptr;
+    } oscs[OSC_COUNT];
+
     /// the synthesizer implementation for computing samples
-    Engine* impl;
+    Engine* impl = nullptr;
     /// has been run until this time in current frame
-    blip_time_t last_time;
+    blip_time_t last_time = 0;
     /// the position in Poly5
-    int poly5_pos;
+    int poly5_pos = 0;
     /// the position in Poly4
-    int poly4_pos;
+    int poly4_pos = 0;
     /// the position in PolyM
-    int polym_pos;
+    int polym_pos = 0;
     /// the control register
-    int control;
+    int control = 0;
 
     /// Calculate the periods of the oscillators on the chip.
     inline void calc_periods() {
@@ -440,8 +439,12 @@ class AtariPOKEY {
     ///
     /// @param new_engine the engine to use after resetting the chip
     ///
-    inline void reset(Engine* new_engine) {
-        impl = new_engine;
+    inline void reset(Engine* new_engine = nullptr) {
+        if (new_engine == nullptr && impl == nullptr)  // cannot reset without engine
+            throw Exception("cannot reset with implied engine without setting engine");
+        else if (new_engine != nullptr)  // set the engine
+            impl = new_engine;
+        // reset the instance variables
         last_time = 0;
         poly5_pos = 0;
         poly4_pos = 0;

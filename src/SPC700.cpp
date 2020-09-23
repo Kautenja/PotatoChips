@@ -65,7 +65,6 @@ struct ChipSPC700 : Module {
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void process(const ProcessArgs &args) final {
         short sample[2] = {0, 0};

@@ -37,9 +37,9 @@ class SonySPC700 {
         int8_t left_vol;
         /// the volume of the right channel
         int8_t right_vol;
-        /// TODO
+        /// the rate of the oscillator
         uint8_t rate[2];
-        /// TODO
+        /// the oscillator's waveform sample
         uint8_t waveform;
         /// envelope rates for attack, decay, and sustain
         uint8_t adsr[2];
@@ -55,53 +55,53 @@ class SonySPC700 {
 
     /// global data structure used by the chip
     struct GlobalData {
-        /// TODO
+        /// padding
         int8_t unused1[12];
         /// 0C   Main Volume Left (-.7)
         int8_t left_volume;
         /// 0D   Echo Feedback (-.7)
         int8_t echo_feedback;
-        /// TODO
+        /// padding
         int8_t unused2[14];
         /// 1C   Main Volume Right (-.7)
         int8_t right_volume;
-        /// TODO
+        /// padding
         int8_t unused3[15];
         /// 2C   Echo Volume Left (-.7)
         int8_t left_echo_volume;
         /// 2D   Pitch Modulation on/off for each voice
         uint8_t pitch_mods;
-        /// TODO
+        /// padding
         int8_t unused4[14];
         /// 3C   Echo Volume Right (-.7)
         int8_t right_echo_volume;
         /// 3D   Noise output on/off for each voice
         uint8_t noise_enables;
-        /// TODO
+        /// padding
         int8_t unused5[14];
         /// 4C   Key On for each voice
         uint8_t key_ons;
         /// 4D   Echo on/off for each voice
         uint8_t echo_ons;
-        /// TODO
+        /// padding
         int8_t unused6[14];
         /// 5C   key off for each voice (instantiates release mode)
         uint8_t key_offs;
         /// 5D   source directory (wave table offsets)
         uint8_t wave_page;
-        /// TODO
+        /// padding
         int8_t unused7[14];
         /// 6C   flags and noise freq
         uint8_t flags;
         /// 6D
         uint8_t echo_page;
-        /// TODO
+        /// padding
         int8_t unused8[14];
         /// 7C
         uint8_t wave_ended;
         /// 7D   ms >> 4
         uint8_t echo_delay;
-        /// TODO
+        /// padding
         char unused9[2];
     };
 

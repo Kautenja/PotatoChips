@@ -26,6 +26,15 @@
 
 /// A Sony SPC700 chip (from Nintendo SNES) emulator module.
 struct ChipSPC700 : Module {
+ private:
+    /// the RAM for the SPC chip (64KB = 16-bit address space)
+    uint8_t ram[64 * (1 << 10)];
+    /// the Sony SPC700 sound chip emulator
+    SonySPC700 apu{ram};
+
+    /// @brief Fill the RAM with 0's.
+    inline void clearRAM() { memset(ram, 0, sizeof ram); }
+
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -47,6 +56,8 @@ struct ChipSPC700 : Module {
     /// @brief Initialize a new SPC700 Chip module.
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        clearRAM();
+        // apu.reset();
     }
 
  protected:
@@ -56,7 +67,8 @@ struct ChipSPC700 : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void process(const ProcessArgs &args) final {
-
+        short sample[2] = {0, 0};
+        apu.run(1, sample);
     }
 };
 

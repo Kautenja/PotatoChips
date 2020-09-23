@@ -207,7 +207,7 @@ class SonySPC700 {
     ///
     /// @details
     /// Keeps pointer to 64K ram
-    SonySPC700(uint8_t* ram);
+    explicit SonySPC700(uint8_t* ram);
 
     /// Mute voice n if bit n (1 << n) of mask is clear.
     void mute_voices(int mask);

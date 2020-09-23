@@ -143,3 +143,8 @@
 -   fix 2612 Envelope generator to have correct timings
 -   fix 2612 TL parameter to reduce the dead range of the parameter
 -   remove invalid tags from plugin.json
+
+## 1.7.2 (2020-09-23)
+
+-   fix 2612 to use less CPU resources (disable emulators of polyphonic channels
+    that are not in use)

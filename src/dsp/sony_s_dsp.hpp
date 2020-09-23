@@ -243,6 +243,8 @@ class Sony_S_DSP {
         short volume[2];
         /// 12-bit fractional position
         short fraction;
+        /// padding (placement here keeps interp's in a 64-bit line)
+        short unused0;
         /// most recent four decoded samples
         short interp3;
         /// TODO
@@ -257,6 +259,8 @@ class Sony_S_DSP {
         unsigned short addr;
         /// header byte from current block
         short block_header;
+        /// padding (placement here keeps envelope data in a 64-bit line)
+        short unused1;
         /// TODO
         short envcnt;
         /// TODO
@@ -265,8 +269,6 @@ class Sony_S_DSP {
         short on_cnt;
         /// TODO
         short envstate;  // TODO: change type to EnvelopeState
-        /// pad to power of 2
-        short unused[2];
     };
 
     /// The states of the voices on the chip.

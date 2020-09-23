@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "default",
+          "deviceName": "hw:Sanskrit 6th,0",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -50,7 +50,7 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.1",
+      "version": "1.7.2",
       "model": "SPC700",
       "params": [],
       "leftModuleId": 5,
@@ -114,6 +114,7 @@
       "version": "1.1.31",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
+      "rightModuleId": 156,
       "data": {
         "range": 0.0,
         "range_db": 80.0,
@@ -173,6 +174,39 @@
         0,
         3
       ]
+    },
+    {
+      "id": 156,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "VCMixer",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 154,
+      "pos": [
+        42,
+        0
+      ]
     }
   ],
   "cables": [
@@ -207,6 +241,38 @@
       "inputModuleId": 154,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 12,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 13,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 156,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 14,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 15,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

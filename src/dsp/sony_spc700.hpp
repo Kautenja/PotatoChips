@@ -262,8 +262,7 @@ class SonySPC700 {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    /// @TODO
-    /// make clock_envelope() inline so that this becomes a leaf function?
+    /// TODO: make clock_envelope() inline so that this becomes a leaf function?
     ///
     void run(long num_samples, short* buffer = NULL);
 };

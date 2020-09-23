@@ -46,6 +46,7 @@ struct ChipSPC700 : Module {
     };
     /// the indexes of output ports on the module
     enum OutputIds {
+        ENUMS(OUTPUT_AUDIO, 2),
         NUM_OUTPUTS
     };
     /// the indexes of lights on the module
@@ -69,6 +70,8 @@ struct ChipSPC700 : Module {
     inline void process(const ProcessArgs &args) final {
         short sample[2] = {0, 0};
         apu.run(1, sample);
+        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }
 };
 
@@ -91,6 +94,9 @@ struct ChipSPC700Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // left + right audio outputs
+        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, ChipSPC700::OUTPUT_AUDIO + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(71, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
     }
 };
 

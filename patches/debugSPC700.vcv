@@ -7,9 +7,11 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
+      "leftModuleId": 152,
       "data": {
         "audio": {
           "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -17,8 +19,8 @@
         }
       },
       "pos": [
-        57,
-        0
+        37,
+        1
       ]
     },
     {
@@ -27,6 +29,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
+      "rightModuleId": 152,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -41,7 +44,7 @@
       },
       "pos": [
         0,
-        0
+        1
       ]
     },
     {
@@ -50,11 +53,160 @@
       "version": "1.7.1",
       "model": "SPC700",
       "params": [],
+      "leftModuleId": 5,
+      "rightModuleId": 1,
       "pos": [
-        12,
+        8,
         1
+      ]
+    },
+    {
+      "id": 153,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        2
+      ]
+    },
+    {
+      "id": 154,
+      "plugin": "Bogaudio",
+      "version": "1.1.31",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "data": {
+        "range": 0.0,
+        "range_db": 80.0,
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 155,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        3
       ]
     }
   ],
-  "cables": []
+  "cables": [
+    {
+      "id": 7,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 153,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 6,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 155,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 10,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 154,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 11,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 154,
+      "inputId": 0,
+      "color": "#0986ad"
+    }
+  ]
 }

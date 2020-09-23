@@ -58,7 +58,7 @@ struct ChipSPC700 : Module {
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         clearRAM();
-        // apu.reset();
+        apu.reset();
     }
 
  protected:

@@ -28,7 +28,7 @@
 struct ChipSPC700 : Module {
  private:
     /// the RAM for the SPC chip (64KB = 16-bit address space)
-    uint8_t ram[64 * (1 << 10)];
+    uint8_t ram[1 << 16];
     /// the Sony SPC700 sound chip emulator
     SonySPC700 apu{ram};
 

@@ -197,11 +197,11 @@ class SonySPC700 {
     /// The states of the voices on the chip.
     VoiceState voice_state[VOICE_COUNT];
 
-    /// TODO.
+    /// Process the envelope for the voice with given index.
     ///
-    /// @param TODO
+    /// @param voice_index the index of the voice to clock the envelope of
     ///
-    int clock_envelope(int);
+    int clock_envelope(unsigned voice_idx);
 
  public:
     /// Initialize a new SonySPC700.
@@ -210,8 +210,11 @@ class SonySPC700 {
     ///
     explicit SonySPC700(uint8_t* ram);
 
-    /// Mute voice n if bit n (1 << n) of mask is clear.
-    void mute_voices(int mask);
+    /// Mute voice `n` if bit $n$ ($1 << n$) of mask is clear.
+    ///
+    /// @param mask the bit-mask representing the activation of voices
+    ///
+    void mute_voices(uint8_t mask);
 
     /// Clear state and silence everything.
     void reset();
@@ -219,10 +222,10 @@ class SonySPC700 {
     /// Set gain, where 1.0 is normal. When greater than 1.0, output is
     /// clamped to the 16-bit sample range.
     ///
-    /// @param v TODO
+    /// @param value the value to set the gain to
     ///
-    inline void set_gain(double v) {
-        emu_gain = static_cast<int>(v * (1 << EMU_GAIN_BITS));
+    inline void set_gain(double value) {
+        emu_gain = static_cast<int>(value * (1 << EMU_GAIN_BITS));
     }
 
     /// If true, prevent channels and global volumes from being phase-negated.
@@ -233,22 +236,24 @@ class SonySPC700 {
         surround_threshold = disable ? 0 : -0x7FFF;
     }
 
-    /// Read/write register 'n', where n ranges from 0 to REGISTER_COUNT - 1.
+    /// Read data from the register at the given address.
     ///
-    /// @param i TODO
+    /// @param address the address of the register to read data from
     ///
-    inline int read(int i) {
-        assert((unsigned) i < REGISTER_COUNT);
-        return reg[i];
+    inline int read(int address) {
+        if (address >= REGISTER_COUNT)  // make sure the given address is legal
+            throw AddressSpaceException<uint16_t>(address, 0, REGISTER_COUNT);
+        return reg[address];
     }
 
-    /// Write data to the registers on the chip.
+    /// Write data to the registers at the given address.
     ///
     /// @param address the address of the register to write data to
-    /// @param data the data to write to the register on the chip
+    /// @param data the data to write to the register
     ///
     void write(unsigned address, int data);
 
+    // TODO: make clock_envelope() inline so that this becomes a leaf function?
     /// Run DSP for 'count' samples. Write resulting samples to 'buf' if not
     /// NULL.
     ///

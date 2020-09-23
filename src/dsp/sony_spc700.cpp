@@ -36,8 +36,8 @@ SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
     blargg_verify_byte_order();
 }
 
-void SonySPC700::mute_voices(int mask) {
-    for (int i = 0; i < VOICE_COUNT; i++)
+void SonySPC700::mute_voices(uint8_t mask) {
+    for (unsigned i = 0; i < VOICE_COUNT; i++)
         voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
@@ -108,9 +108,9 @@ static const short env_rates[0x20] = {
 
 const int env_range = 0x800;
 
-inline int SonySPC700::clock_envelope(int v) {
-    RawVoice& raw_voice = this->voice[v];
-    VoiceState& voice = voice_state[v];
+inline int SonySPC700::clock_envelope(unsigned voice_idx) {
+    RawVoice& raw_voice = this->voice[voice_idx];
+    VoiceState& voice = voice_state[voice_idx];
 
     int envx = voice.envx;
     if (voice.envstate == state_release) {
@@ -123,7 +123,7 @@ inline int SonySPC700::clock_envelope(int v) {
         envx -= env_range / 256;
         if (envx <= 0) {
             envx = 0;
-            keys &= ~(1 << v);
+            keys &= ~(1 << voice_idx);
             return -1;
         }
         voice.envx = envx;
@@ -264,6 +264,9 @@ inline int SonySPC700::clock_envelope(int v) {
     return envx;
 }
 
+// TODO: replace with generic clamp function from std. n >> 31 is undefined
+//       for 32-bit values. This function smells bad
+//
 // Clamp n into range -32768 <= n <= 32767
 inline int clamp_16(int n) {
     if ((int16_t) n != n)
@@ -272,12 +275,9 @@ inline int clamp_16(int n) {
 }
 
 void SonySPC700::run(long count, short* out_buf) {
-    // to do: make clock_envelope() inline so that this becomes a leaf function?
-
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.
-    if (g.flags & 0x80)
-        reset();
+    if (g.flags & 0x80) reset();
 
     struct src_dir {
         char start[2];
@@ -288,8 +288,8 @@ void SonySPC700::run(long count, short* out_buf) {
 
     int left_volume  = g.left_volume;
     int right_volume = g.right_volume;
-    if (left_volume * right_volume < surround_threshold)
-        right_volume = -right_volume; // kill global surround
+    if (left_volume * right_volume < surround_threshold)  // kill global surround
+        right_volume = -right_volume;
     left_volume  *= emu_gain;
     right_volume *= emu_gain;
 
@@ -511,7 +511,7 @@ void SonySPC700::run(long count, short* out_buf) {
         fir_pos[8][1] = (short) fb_right;
 
         // FIR
-        fb_left =       fb_left * fir_coeff[7] +
+        fb_left =     fb_left * fir_coeff[7] +
                 fir_pos[1][0] * fir_coeff[6] +
                 fir_pos[2][0] * fir_coeff[5] +
                 fir_pos[3][0] * fir_coeff[4] +
@@ -520,7 +520,7 @@ void SonySPC700::run(long count, short* out_buf) {
                 fir_pos[6][0] * fir_coeff[1] +
                 fir_pos[7][0] * fir_coeff[0];
 
-        fb_right =     fb_right * fir_coeff[7] +
+        fb_right =   fb_right * fir_coeff[7] +
                 fir_pos[1][1] * fir_coeff[6] +
                 fir_pos[2][1] * fir_coeff[5] +
                 fir_pos[3][1] * fir_coeff[4] +
@@ -532,28 +532,22 @@ void SonySPC700::run(long count, short* out_buf) {
         left  += (fb_left  * g.left_echo_volume) >> 14;
         right += (fb_right * g.right_echo_volume) >> 14;
 
-        // echo buffer feedback
-        if (!(g.flags & 0x20)) {
+        if (!(g.flags & 0x20)) {  // echo buffer feedback
             echol += (fb_left  * g.echo_feedback) >> 14;
             echor += (fb_right * g.echo_feedback) >> 14;
             SET_LE16(echo_buf    , clamp_16(echol));
             SET_LE16(echo_buf + 2, clamp_16(echor));
         }
 
-        if (out_buf) {
-            // write final samples
-
+        if (out_buf) {  // write final samples
             left  = clamp_16(left );
             right = clamp_16(right);
-
-            int mute = g.flags & 0x40;
 
             out_buf[0] = (short) left;
             out_buf[1] = (short) right;
             out_buf += 2;
 
-            // muting
-            if (mute) {
+            if (g.flags & 0x40) {  // muting
                 out_buf[-2] = 0;
                 out_buf[-1] = 0;
             }

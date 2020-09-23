@@ -33,37 +33,37 @@ class Sony_S_DSP {
     /// the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {
         /// The volume for the left channel of the main output
-        MAIN_VOLUME_LEFT = 0x0C,
+        MAIN_VOLUME_LEFT =         0x0C,
         /// Echo Feedback
-        ECHO_FEEDBACK = 0x0D,
+        ECHO_FEEDBACK =            0x0D,
         /// The volume for the right channel of the main output
-        MAIN_VOLUME_RIGHT = 0x1C,
+        MAIN_VOLUME_RIGHT =        0x1C,
         /// The volume for the left channel of the echo effect
-        ECHO_VOLUME_LEFT = 0x2C,
+        ECHO_VOLUME_LEFT =         0x2C,
         /// pitch modulation
-        PITCH_MODULATION = 0x2D,
+        PITCH_MODULATION =         0x2D,
         /// The volume for the right channel of the echo effect
-        ECHO_VOLUME_RIGHT = 0x3C,
+        ECHO_VOLUME_RIGHT =        0x3C,
         /// Noise enable
-        NOISE_ENABLE = 0x3D,
+        NOISE_ENABLE =             0x3D,
         /// Key-on (1 bit for each voice)
-        KEY_ON = 0x4C,
+        KEY_ON =                   0x4C,
         /// Echo enable
-        ECHO_ENABLE = 0x4D,
+        ECHO_ENABLE =              0x4D,
         /// Key-off (1 bit for each voice)
-        KEY_OFF = 0x5C,
+        KEY_OFF =                  0x5C,
         /// Offset of source directory
         /// (OFFSET_SOURCE_DIRECTORY * 100h = memory offset)
-        OFFSET_SOURCE_DIRECTORY = 0x5D,
+        OFFSET_SOURCE_DIRECTORY =  0x5D,
         /// DSP flags for MUTE, ECHO, RESET, NOISE CLOCK
-        FLAGS = 0x6C,
+        FLAGS =                    0x6C,
         /// Echo buffer start offset
         /// (ECHO_BUFFER_START_OFFSET * 100h = memory offset)
         ECHO_BUFFER_START_OFFSET = 0x6D,
         /// ENDX - 1 bit for each voice.
-        ENDX = 0x7C,
+        ENDX =                     0x7C,
         /// Echo delay, 4-bits, higher values require more memory.
-        ECHO_DELAY = 0x7D
+        ECHO_DELAY =               0x7D
     };
 
     /// the channel registers on the S-DSP. To get the register for channel

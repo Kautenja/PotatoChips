@@ -268,6 +268,8 @@ inline int clamp_16(int n) {
     return n;
 }
 
+#include <iostream>
+
 void Sony_S_DSP::run(long count, short* out_buf) {
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.

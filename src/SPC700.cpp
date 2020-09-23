@@ -533,8 +533,12 @@ struct ChipSPC700 : Module {
             if (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)))
                 key_off = key_off | (1 << voice);
         }
-        if (key_on) apu.write(Sony_S_DSP::KEY_ON, key_on);
-        if (key_off) apu.write(Sony_S_DSP::KEY_OFF, key_off);
+        if (key_on) {
+            apu.write(Sony_S_DSP::KEY_OFF, 0);
+            apu.write(Sony_S_DSP::KEY_ON, key_on);
+        }
+        if (key_off)
+            apu.write(Sony_S_DSP::KEY_OFF, key_off);
 
         short sample[2] = {0, 0};
         apu.run(1, sample);

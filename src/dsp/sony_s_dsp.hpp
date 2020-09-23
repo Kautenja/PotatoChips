@@ -269,10 +269,7 @@ class Sony_S_DSP {
         short on_cnt;
         /// TODO
         short envstate;  // TODO: change type to EnvelopeState
-    };
-
-    /// The states of the voices on the chip.
-    VoiceState voice_state[VOICE_COUNT];
+    } voice_state[VOICE_COUNT];
 
     /// @brief Process the envelope for the voice with given index.
     ///

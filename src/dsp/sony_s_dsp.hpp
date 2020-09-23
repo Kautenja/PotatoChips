@@ -263,12 +263,10 @@ class Sony_S_DSP {
         short envx;
         /// TODO
         short on_cnt;
-        /// 7 if enabled, 31 if disabled
-        short enabled;
         /// TODO
         short envstate;  // TODO: change type to EnvelopeState
         /// pad to power of 2
-        short unused;
+        short unused[2];
     };
 
     /// The states of the voices on the chip.
@@ -286,12 +284,6 @@ class Sony_S_DSP {
     /// @param ram a pointer to the 64KB shared RAM
     ///
     explicit Sony_S_DSP(uint8_t* ram);
-
-    /// @brief Mute voice `n` if bit $n$ ($1 << n$) of mask is clear.
-    ///
-    /// @param mask the bit-mask representing the activation of voices
-    ///
-    void mute_voices(uint8_t mask);
 
     /// @brief Clear state and silence everything.
     void reset();

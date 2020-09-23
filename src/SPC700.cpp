@@ -64,7 +64,6 @@ struct ChipSPC700 : Module {
         // reset the S-DSP emulator
         apu.reset();
 
-        // apu.mute_voices(0x00);
         // apu.run(1, NULL);
         processCV();
     }

@@ -30,15 +30,9 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(NUM_REGISTERS == sizeof(voice));
     // setup the default state of the chip
     set_gain(1.0);
-    mute_voices(0);
     disable_surround(false);
     // verify the byte order of the host machine
     blargg_verify_byte_order();
-}
-
-void Sony_S_DSP::mute_voices(uint8_t mask) {
-    for (unsigned i = 0; i < VOICE_COUNT; i++)
-        voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
 }
 
 void Sony_S_DSP::reset() {
@@ -481,11 +475,8 @@ void Sony_S_DSP::run(long count, short* out_buf) {
 
             // scale output and set outx values
             output = (output * envx) >> 11 & ~1;
-
-            // output and apply muting (by setting voice.enabled to 31)
-            // if voice is externally disabled (not a SNES feature)
-            int l = (voice.volume[0] * output) >> voice.enabled;
-            int r = (voice.volume[1] * output) >> voice.enabled;
+            int l = (voice.volume[0] * output) >> 7;
+            int r = (voice.volume[1] * output) >> 7;
 
             prev_outx = output;
             raw_voice.outx = int8_t (output >> 8);

@@ -593,28 +593,39 @@ struct ChipSPC700Widget : ModuleWidget {
         // individual oscillator controls
         for (unsigned i = 0; i < Sony_S_DSP::VOICE_COUNT; i++) {
             // frequency
-            addInput(createInput<PJ301MPort>(  Vec(15, 40 + i * 41),  module, ChipSPC700::INPUT_VOCT + i      ));
-            addInput(createInput<PJ301MPort>(  Vec(45, 40 + i * 41),  module, ChipSPC700::INPUT_FM + i        ));
-            addParam(createParam<Rogan2PSNES>( Vec(75, 35 + i * 41),  module, ChipSPC700::PARAM_FREQ + i      ));
+            addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipSPC700::INPUT_VOCT + i));
+            addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipSPC700::INPUT_FM + i));
+            addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipSPC700::PARAM_FREQ + i));
             // noise frequency
-            addInput(createInput<PJ301MPort>(  Vec(115, 40 + i * 41), module, ChipSPC700::INPUT_NOISE_FM + i  ));
-            addParam(createParam<Rogan2PSNES>( Vec(145, 35 + i * 41), module, ChipSPC700::PARAM_NOISE_FREQ + i));
+            addInput(createInput<PJ301MPort>(Vec(115, 40 + i * 41), module, ChipSPC700::INPUT_NOISE_FM + i));
+            auto noise = createParam<Rogan2PSNES>(Vec(145, 35 + i * 41), module, ChipSPC700::PARAM_NOISE_FREQ + i);
+            noise->snap = true;
+            addParam(noise);
             // gate
-            addInput(createInput<PJ301MPort>(  Vec(185, 40 + i * 41), module, ChipSPC700::INPUT_GATE + i      ));
-            // volume
-            addParam(createParam<Rogan2PWhite>(Vec(220, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_L + i  ));
-            addInput(createInput<PJ301MPort>(  Vec(260, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_L + i  ));
-            addParam(createParam<Rogan2PRed>(  Vec(300, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i  ));
-            addInput(createInput<PJ301MPort>(  Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i  ));
+            addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipSPC700::INPUT_GATE + i));
+            // volume left
+            auto left = createParam<Rogan2PWhite>(Vec(220, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_L + i);
+            left->snap = true;
+            addParam(left);
+            addInput(createInput<PJ301MPort>(Vec(260, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_L + i));
+            // volume right
+            auto right = createParam<Rogan2PRed>(Vec(300, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i);
+            right->snap = true;
+            addParam(right);
+            addInput(createInput<PJ301MPort>(Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i));
         }
         // left channel output
-        addParam(createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0));
-        addInput(createInput<PJ301MPort>(  Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0   ));
+        auto left = createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0);
+        left->snap = true;
+        addParam(left);
+        addInput(createInput<PJ301MPort>(Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0));
         // right channel output
-        addParam(createParam<Rogan2PRed>(  Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1));
-        addInput(createInput<PJ301MPort>(  Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1   ));
+        auto right = createParam<Rogan2PRed>(Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1);
+        right->snap = true;
+        addParam(right);
+        addInput(createInput<PJ301MPort>(Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
     }
 };
 

@@ -41,10 +41,14 @@ struct ChipSPC700 : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,       Sony_S_DSP::VOICE_COUNT),
-        ENUMS(PARAM_NOISE_FREQ, Sony_S_DSP::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_L,   Sony_S_DSP::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_R,   Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_FREQ,          Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_NOISE_FREQ,    Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_ATTACK,        Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_DECAY,         Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
     };

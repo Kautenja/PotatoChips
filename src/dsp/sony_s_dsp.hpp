@@ -266,6 +266,7 @@ class Sony_S_DSP {
         short envstate;  // TODO: change type to EnvelopeState
     } voice_state[VOICE_COUNT];
 
+    /// TODO: make inline so that `run` becomes a leaf function?
     /// @brief Process the envelope for the voice with given index.
     ///
     /// @param voice_index the index of the voice to clock the envelope of
@@ -282,11 +283,11 @@ class Sony_S_DSP {
     /// @brief Clear state and silence everything.
     void reset();
 
-    /// @brief If true, prevent channels and global volumes from being phase-negated.
+    /// @brief Prevent channels and global volumes from being phase-negated.
     ///
     /// @param disable true to disable surround, false to enable surround
     ///
-    inline void disable_surround(bool disable) {
+    inline void disable_surround(bool disable = true) {
         surround_threshold = disable ? 0 : -0x7FFF;
     }
 
@@ -294,9 +295,9 @@ class Sony_S_DSP {
     ///
     /// @param address the address of the register to read data from
     ///
-    inline uint8_t read(unsigned address) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is legal
-            throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
+    inline uint8_t read(uint8_t address) {
+        if (address >= NUM_REGISTERS)  // make sure the given address is valid
+            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
         return reg[address];
     }
 
@@ -305,18 +306,15 @@ class Sony_S_DSP {
     /// @param address the address of the register to write data to
     /// @param data the data to write to the register
     ///
-    void write(unsigned address, int data);
+    void write(uint8_t address, uint8_t data);
 
-    /// @brief Run DSP for 'count' samples. Write resulting samples to 'buf'
-    /// if not NULL.
+    /// @brief Run DSP for some samples and write them to the given buffer.
     ///
     /// @param num_samples the number of samples to run on the DSP
-    /// @param buffer the output buffer to write samples to
+    /// @param buffer the output buffer to write samples to (optional)
     ///
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
-    ///
-    /// TODO: make clock_envelope() inline so that this becomes a leaf function?
     ///
     void run(int32_t num_samples, int16_t* buffer = NULL);
 };

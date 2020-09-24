@@ -55,10 +55,9 @@ void Sony_S_DSP::reset() {
     memset(fir_buf, 0, sizeof fir_buf);
 }
 
-void Sony_S_DSP::write(unsigned address, int data) {
-    // make sure the given address is legal
-    if (address >= NUM_REGISTERS)
-        throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
+void Sony_S_DSP::write(uint8_t address, uint8_t data) {
+    if (address >= NUM_REGISTERS)  // make sure the given address is valid
+        throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
     // store the data in the register with given address
     reg[address] = data;
     int high = address >> 4;

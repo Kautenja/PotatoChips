@@ -301,61 +301,6 @@ struct ChipSPC700 : Module {
             // $x4   |                 Source Number                 |
             //       +-----+-----+-----+-----+-----+-----+-----+-----+
             apu.write(mask | Sony_S_DSP::SOURCE_NUMBER, 0);
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x5   |ENABL|        DR       |          AR           |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x6   |     SL          |          SR                 |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // The ENABL bit determines which envelope mode to use. If this bit
-            // is set then ADSR is used, otherwise GAIN is operative.
-            //
-            // My knowledge about DSP stuff is a bit low. Some enlightenment on
-            // how the ADSR works would be greatly appreciated!
-            // Table 2.2 ADSR Parameters
-            //
-            // AR  TIME FROM 0->1    DR  TIME FROM 1->SL    SL  RATIO    SR  TIME FROM 0->1
-            // 00  4.1 sec           00  1.2 sec            00  1/8      00  Infinite
-            // 01  2.5 sec           01  740 msec           01  2/8      01   38 sec
-            // 02  1.5 sec           02  440 msec           02  3/8      02   28 sec
-            // 03  1.0 sec           03  290 msec           03  4/8      03   24 sec
-            // 04  640 msec          04  180 msec           04  5/8      04   19 sec
-            // 05  380 msec          05  110 msec           05  6/8      05   14 sec
-            // 06  260 msec          06   74 msec           06  7/8      06   12 sec
-            // 07  160 msec          07   37 msec           07  8/8      07  9.4 sec
-            // 08   96 msec                                              08  7.1 sec
-            // 09   64 msec                                              09  5.9 sec
-            // 0A   40 msec                                              0A  4.7 sec
-            // 0B   24 msec                                              0B  3.5 sec
-            // 0C   16 msec                                              0C  2.9 sec
-            // 0D   10 msec                                              0D  2.4 sec
-            // 0E    6 msec                                              0E  1.8 sec
-            // 0F    0 msec                                              0F  1.5 sec
-            //                                                           10  1.2 sec
-            //                                                           11  880 msec
-            //                                                           12  740 msec
-            //      |                                                    13  590 msec
-            //      |                                                    14  440 msec
-            //    1 |--------                                            15  370 msec
-            //      |       /\                                           16  290 msec
-            //      |      /| \                                          17  220 msec
-            //      |     / |  \                                         18  180 msec
-            //      |    /  |   \                                        19  150 msec
-            //    SL|---/---|-----\__                                    1A  110 msec
-            //      |  /    |    |   \___                                1B   92 msec
-            //      | /     |    |       \_________________              1C   74 msec
-            //      |/AR    | DR |           SR            \   t         1D   55 msec
-            //      |-------------------------------------------         1E   37 msec
-            //      0                                      |             1F   18 msec
-            //
-            //      key on                                Key off
-            // (cool ascii picture taken from "APU MANUAL IN TEXT BY LEDI")
-            apu.write(mask | Sony_S_DSP::ADSR_1, 0b10100100);
-            apu.write(mask | Sony_S_DSP::ADSR_2, 0b01000100);
             // GAIN can be used to implement custom envelopes in your program.
             // There are 5 modes GAIN uses.
             // DIRECT
@@ -453,28 +398,6 @@ struct ChipSPC700 : Module {
             //
             // 7-bit unsigned value
             // apu.write(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
-            // OUTX is written to by the DSP. It contains the present wave
-            // height multiplied by the ADSR/GAIN envelope value. It isn't
-            // multiplied by the voice volume though.
-            // OUTX
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x9   | sign|                 VALUE                   |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // 8-bit signed value
-            // apu.write(mask | Sony_S_DSP::WAVEFORM_OUT, 0);
-            // Echo FIR filter coefficients.
-            //
-            // COEF
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $xF   | sign|         Filter Coefficient X            |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // The 8-bytes at $0F,$1F,$2F,$3F,$4F,$5F,$6F,$7F are used by the
-            // 8-tap FIR filter. I really have no idea how FIR filters work...
-            // but the filter is applied to the echo output.
-            // apu.write(mask | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         }
     }
 
@@ -518,13 +441,13 @@ struct ChipSPC700 : Module {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
-            // -------------------------------------------------------------------
+            // ---------------------------------------------------------------
             // MARK: Frequency
-            // -------------------------------------------------------------------
+            // ---------------------------------------------------------------
             // TODO
-            // -------------------------------------------------------------------
+            // ---------------------------------------------------------------
             // MARK: ADSR
-            // -------------------------------------------------------------------
+            // ---------------------------------------------------------------
             // the ADSR1 register is set from the attack and decay values
             auto attack = (uint8_t) params[PARAM_ATTACK + voice].getValue();
             auto decay = (uint8_t) params[PARAM_DECAY + voice].getValue();
@@ -537,9 +460,6 @@ struct ChipSPC700 : Module {
             auto adsr2 = (sustainLevel << 5) | sustainRate;
             apu.write(mask | Sony_S_DSP::ADSR_2, adsr2);
         }
-
-
-        // }
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------

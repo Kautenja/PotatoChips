@@ -87,15 +87,15 @@ struct ChipSPC700 : Module {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ          + osc, -4.f, 4.f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_NOISE_FREQ    + osc,    0,  31,  16, osc_name + " Noise Frequency");
-            configParam(PARAM_VOLUME_L      + osc, -128, 127,   0, osc_name + " Volume (Left)");
-            configParam(PARAM_VOLUME_R      + osc, -128, 127,   0, osc_name + " Volume (Right)");
+            configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
+            configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
             configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
         }
-        configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 0, "Main Volume (Left)");
-        configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 0, "Main Volume (Right)");
+        configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
+        configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
 
         // clear the shared RAM between the CPU and the S-DSP
         clearRAM();
@@ -108,55 +108,6 @@ struct ChipSPC700 : Module {
 
  protected:
     inline void processCV() {
-        // Main/Echo volume! 8-bit signed values. Regular sound is scaled by
-        // the main volume. Echoed sound is scaled by the echo volume.
-        //
-        // I also had a problem with writing to these registers, sometimes my
-        // writes would get ignored, or zeroed?
-        //
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $0C   | sign|         Left Output Main Volume         |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        //
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $1C   | sign|        Right Output Main Volume         |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        //
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $2C   | sign|         Left Output Echo Volume         |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        //
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $3C   | sign|        Right Output Echo Volume         |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::MAIN_VOLUME_LEFT,  127);
-        apu.write(Sony_S_DSP::MAIN_VOLUME_RIGHT, 127);
-        apu.write(Sony_S_DSP::ECHO_VOLUME_LEFT,  127);
-        apu.write(Sony_S_DSP::ECHO_VOLUME_RIGHT, 127);
-        // Writing bits to KON will start / restart the voice specified.
-        // Writing bits to KOF will cause the voice to fade out. The fade is
-        // done with subtraction of 1/256 values and takes about 8msec.
-        //
-        // It is said that you should not write to KON/KOF in succession, you
-        // have to wait a little while (a few NOPs).
-        //
-        // Key-On
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $4C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // Key-Off
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $5C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::KEY_ON, 0xff);
-        // apu.write(Sony_S_DSP::KEY_OFF, 0);
-
         // This register is written to during DSP activity.
         //
         // Each voice gets 1 bit. If the bit is set then it means the BRR
@@ -168,6 +119,7 @@ struct ChipSPC700 : Module {
         // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // apu.write(Sony_S_DSP::ENDX, 0);
+
         // Writing to this register sets the Echo Feedback. It's an 8-bit
         // signed value. Some more information on how the feedback works
         // would be nice.
@@ -177,7 +129,8 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $0D   | sign|             Echo Feedback               |
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
+        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
+
         // PMON
         //          7     6     5     4     3     2     1     0
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
@@ -189,7 +142,8 @@ struct ChipSPC700 : Module {
         // So a sine wave in the previous channel would cause some vibrato on
         // the modulated channel. Note that OUTX is before volume
         // multiplication, so you can have a silent channel for modulating.
-        apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
+        // apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
+
         // Noise enable.
         //
         // NON
@@ -203,6 +157,7 @@ struct ChipSPC700 : Module {
         // (dummy) sample to determine the length of sound (or unlimited sound
         // if the sample loops).
         apu.write(Sony_S_DSP::NOISE_ENABLE, 0xff);
+
         // Echo enable.
         //
         // EON
@@ -211,7 +166,8 @@ struct ChipSPC700 : Module {
         // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // This register enables echo effects for the specified channel(s).
-        apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
+        // apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
+
         // Source Directory Offset.
         //
         // DIR
@@ -236,7 +192,8 @@ struct ChipSPC700 : Module {
         // ...
         // This can continue for up to 256 samples. (SRCN can only reference
         // 256 samples)
-        apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
+        // apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
+
         // Echo data start address.
         //
         // ESA
@@ -246,7 +203,8 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // This register points to an area of memory to be used by the echo
         // buffer. Like DIR its value is multiplied by 100h.
-        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
+        // apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
+
         // Echo delay size.
         //
         // EDL
@@ -261,36 +219,12 @@ struct ChipSPC700 : Module {
         // required is EDL * 2KBytes (MAX $7800 bytes). The memory region used
         // will be [ESA*100h] -> [ESA*100h + EDL*800h -1]. If EDL is zero, 4
         // bytes of memory at [ESA*100h] -> [ESA*100h + 3] will still be used.
-        apu.write(Sony_S_DSP::ECHO_DELAY, 0);
+        // apu.write(Sony_S_DSP::ECHO_DELAY, 0);
 
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
-            // Volume, 8-bit signed value.
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x0   | sign|              Volume Left                |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x1   | sign|              Volume Right               |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            apu.write(mask | Sony_S_DSP::VOLUME_LEFT,  127);
-            apu.write(mask | Sony_S_DSP::VOLUME_RIGHT, 127);
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x2   |               Lower 8-bits of Pitch           |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x3   |  -  |  -  |   Higher 6-bits of Pitch          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // Pitch is a 14-bit value.
-            apu.write(mask | Sony_S_DSP::PITCH_LOW,  0xff & Sony_S_DSP::convert_pitch(262)     );
-            apu.write(mask | Sony_S_DSP::PITCH_HIGH, 0xff & Sony_S_DSP::convert_pitch(262) >> 8);
             // Source number is a reference to the "Source Directory" (see DIR).
             // The DSP will use the sample with this index from the directory.
             // I'm not sure what happens when you change the SRCN when the
@@ -435,6 +369,13 @@ struct ChipSPC700 : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP::KEY_OFF, key_off);
         // -------------------------------------------------------------------
+        // MARK: Main Volume
+        // -------------------------------------------------------------------
+        apu.write(Sony_S_DSP::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
+        apu.write(Sony_S_DSP::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
+        // apu.write(Sony_S_DSP::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
+        // apu.write(Sony_S_DSP::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
+        // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
@@ -444,7 +385,13 @@ struct ChipSPC700 : Module {
             // ---------------------------------------------------------------
             // MARK: Frequency
             // ---------------------------------------------------------------
-            // TODO
+            // calculate the frequency using standard exponential scale
+            auto frequency = dsp::FREQ_C4 * pow(2, params[PARAM_FREQ].getValue());
+            // convert the floating point frequency to a 14-bit pitch value
+            auto pitch = Sony_S_DSP::convert_pitch(frequency);
+            // set the 14-bit pitch value to the cascade of two RAM slots
+            apu.write(mask | Sony_S_DSP::PITCH_LOW,  0xff &  pitch     );
+            apu.write(mask | Sony_S_DSP::PITCH_HIGH, 0xff & (pitch >> 8));
             // ---------------------------------------------------------------
             // MARK: ADSR
             // ---------------------------------------------------------------
@@ -459,6 +406,11 @@ struct ChipSPC700 : Module {
             auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
             auto adsr2 = (sustainLevel << 5) | sustainRate;
             apu.write(mask | Sony_S_DSP::ADSR_2, adsr2);
+            // ---------------------------------------------------------------
+            // MARK: Amplifier Volume
+            // ---------------------------------------------------------------
+            apu.write(mask | Sony_S_DSP::VOLUME_LEFT,  params[PARAM_VOLUME_L + voice].getValue());
+            apu.write(mask | Sony_S_DSP::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
         }
         // -------------------------------------------------------------------
         // MARK: Stereo output

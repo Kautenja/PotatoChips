@@ -90,11 +90,11 @@ struct ChipGBS : ChipModule<NintendoGBS> {
         configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume", "%", 0, 100);
         configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
+        resetWavetable();
     }
 
-    /// @brief Respond to the user resetting the module with the "Initialize" action.
-    void onReset() final {
-        /// the default wave-table for each page of the wave-table editor
+    /// Reset the waveform table to the default state.
+    void resetWavetable() {
         static constexpr uint8_t* wavetables[NUM_WAVEFORMS] = {
             SINE,
             PW5,
@@ -104,10 +104,15 @@ struct ChipGBS : ChipModule<NintendoGBS> {
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
             memcpy(wavetable[i], wavetables[i], SAMPLES_PER_WAVETABLE);
-        ChipModule<NintendoGBS>::onReset();
     }
 
-    /// @brief Respond to the user randomizing the module with the "Randomize" action.
+    /// @brief Respond to the module being reset by the host environment.
+    void onReset() final {
+        ChipModule<NintendoGBS>::onReset();
+        resetWavetable();
+    }
+
+    /// @brief Respond to parameter randomization by the host environment.
     void onRandomize() final {
         for (unsigned table = 0; table < NUM_WAVEFORMS; table++) {
             for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
@@ -410,9 +415,7 @@ struct ChipGBSWidget : ModuleWidget {
             // get the wave-table buffer for this editor. if the module is
             // displaying in/being rendered for the library, the module will
             // be null and a dummy waveform is displayed
-            uint8_t* wavetable = module ?
-                &reinterpret_cast<ChipGBS*>(this->module)->wavetable[wave][0] :
-                &wavetables[wave][0];
+            uint8_t* wavetable = module ? &module->wavetable[wave][0] : &wavetables[wave][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer

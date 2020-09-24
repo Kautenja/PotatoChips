@@ -87,11 +87,11 @@ struct Chip106 : ChipModule<Namco106> {
             configParam(PARAM_VOLUME + osc, 0,    15,   15,   "Channel " + osc_name + " Volume",     "%",   0, 100.f / 15.f);
         }
         memset(num_oscillators, 1, sizeof num_oscillators);
+        resetWavetable();
     }
 
-    /// @brief Respond to the user resetting the module with the "Initialize" action.
-    void onReset() final {
-        /// the default wave-table for each page of the wave-table editor
+    /// Reset the waveform table to the default state.
+    void resetWavetable() {
         static constexpr uint8_t* WAVETABLE[NUM_WAVEFORMS] = {
             SINE,
             PW5,
@@ -101,10 +101,15 @@ struct Chip106 : ChipModule<Namco106> {
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
             memcpy(wavetable[i], WAVETABLE[i], SAMPLES_PER_WAVETABLE);
-        ChipModule<Namco106>::onReset();
     }
 
-    /// @brief Respond to the user randomizing the module with the "Randomize" action.
+    /// @brief Respond to the module being reset by the host environment.
+    void onReset() final {
+        ChipModule<Namco106>::onReset();
+        resetWavetable();
+    }
+
+    /// @brief Respond to parameter randomization by the host environment.
     void onRandomize() final {
         for (unsigned table = 0; table < NUM_WAVEFORMS; table++) {
             for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; sample++) {
@@ -349,9 +354,7 @@ struct Chip106Widget : ModuleWidget {
         // waveform is displayed
         for (int waveform = 0; waveform < Chip106::NUM_WAVEFORMS; waveform++) {
             // get the wave-table buffer for this editor
-            uint8_t* wavetable = module ?
-                    &reinterpret_cast<Chip106*>(this->module)->wavetable[waveform][0] :
-                    &wavetables[waveform][0];
+            uint8_t* wavetable = module ? &module->wavetable[waveform][0] : &wavetables[waveform][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer

@@ -55,12 +55,16 @@ struct ChipSPC700 : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,     Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_NOISE_FM, Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_FM,       Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_GATE,     Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_L, Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_R, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_VOCT,          Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_NOISE_FM,      Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_FM,            Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_GATE,          Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_ATTACK,        Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_DECAY,         Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
     };
@@ -80,11 +84,15 @@ struct ChipSPC700 : Module {
     ChipSPC700() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
-            auto osc_name = std::to_string(osc + 1);
-            configParam(PARAM_FREQ + osc, -4.f, 4.f, 0.f, "Voice " + osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_NOISE_FREQ + osc, 0, 32, 16, "Voice " + osc_name + " Noise Frequency");
-            configParam(PARAM_VOLUME_L + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Left)");
-            configParam(PARAM_VOLUME_R + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Right)");
+            auto osc_name = "Voice " + std::to_string(osc + 1);
+            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_NOISE_FREQ    + osc,    0,  32,  16, osc_name + " Noise Frequency");
+            configParam(PARAM_VOLUME_L      + osc, -128, 127,   0, osc_name + " Volume (Left)");
+            configParam(PARAM_VOLUME_R      + osc, -128, 127,   0, osc_name + " Volume (Right)");
+            configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
+            configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
+            configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
+            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  32,   0, osc_name + " Envelope Sustain Rate");
         }
         configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 0, "Main Volume (Left)");
         configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 0, "Main Volume (Right)");
@@ -592,40 +600,60 @@ struct ChipSPC700Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
         for (unsigned i = 0; i < Sony_S_DSP::VOICE_COUNT; i++) {
-            // frequency
+            // Frequency
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipSPC700::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipSPC700::INPUT_FM + i));
             addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipSPC700::PARAM_FREQ + i));
-            // noise frequency
+            // Noise Frequency
             addInput(createInput<PJ301MPort>(Vec(115, 40 + i * 41), module, ChipSPC700::INPUT_NOISE_FM + i));
             auto noise = createParam<Rogan2PSNES>(Vec(145, 35 + i * 41), module, ChipSPC700::PARAM_NOISE_FREQ + i);
             noise->snap = true;
             addParam(noise);
-            // gate
+            // Gate
             addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipSPC700::INPUT_GATE + i));
-            // volume left
-            auto left = createParam<Rogan2PWhite>(Vec(220, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_L + i);
+            // Volume - Left
+            addInput(createInput<PJ301MPort>(Vec(220, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_L + i));
+            auto left = createParam<Rogan2PWhite>(Vec(250, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_L + i);
             left->snap = true;
             addParam(left);
-            addInput(createInput<PJ301MPort>(Vec(260, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_L + i));
-            // volume right
-            auto right = createParam<Rogan2PRed>(Vec(300, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i);
+            // Volume - Right
+            addInput(createInput<PJ301MPort>(Vec(300, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i));
+            auto right = createParam<Rogan2PRed>(Vec(330, 35 + i * 41), module, ChipSPC700::PARAM_VOLUME_R + i);
             right->snap = true;
             addParam(right);
-            addInput(createInput<PJ301MPort>(Vec(340, 40 + i * 41), module, ChipSPC700::INPUT_VOLUME_R + i));
+            // ADSR - Attack
+            addInput(createInput<PJ301MPort>(Vec(390, 40 + i * 41), module, ChipSPC700::INPUT_ATTACK + i));
+            auto attack = createParam<Rogan2PGreen>(Vec(420, 35 + i * 41), module, ChipSPC700::PARAM_ATTACK + i);
+            attack->snap = true;
+            addParam(attack);
+            // ADSR - Decay
+            addInput(createInput<PJ301MPort>(Vec(460, 40 + i * 41), module, ChipSPC700::INPUT_DECAY + i));
+            auto decay = createParam<Rogan2PBlue>(Vec(490, 35 + i * 41), module, ChipSPC700::PARAM_DECAY + i);
+            decay->snap = true;
+            addParam(decay);
+            // ADSR - Sustain Level
+            addInput(createInput<PJ301MPort>(Vec(530, 40 + i * 41), module, ChipSPC700::INPUT_SUSTAIN_LEVEL + i));
+            auto sustainLevel = createParam<Rogan2PRed>(Vec(560, 35 + i * 41), module, ChipSPC700::PARAM_SUSTAIN_LEVEL + i);
+            sustainLevel->snap = true;
+            addParam(sustainLevel);
+            // ADSR - Sustain Rate
+            addInput(createInput<PJ301MPort>(Vec(600, 40 + i * 41), module, ChipSPC700::INPUT_SUSTAIN_RATE + i));
+            auto sustainRate = createParam<Rogan2PWhite>(Vec(630, 35 + i * 41), module, ChipSPC700::PARAM_SUSTAIN_RATE + i);
+            sustainRate->snap = true;
+            addParam(sustainRate);
         }
-        // left channel output
-        auto left = createParam<Rogan2PWhite>(Vec(390, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0);
+        // Mixer & Output - Left Channel
+        auto left = createParam<Rogan2PWhite>(Vec(690, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0);
         left->snap = true;
         addParam(left);
-        addInput(createInput<PJ301MPort>(Vec(400, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipSPC700::OUTPUT_AUDIO + 0));
-        // right channel output
-        auto right = createParam<Rogan2PRed>(Vec(440, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1);
+        addInput(createInput<PJ301MPort>(Vec(700, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(700, 325), module, ChipSPC700::OUTPUT_AUDIO + 0));
+        // Mixer & Output - Right Channel
+        auto right = createParam<Rogan2PRed>(Vec(740, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 1);
         right->snap = true;
         addParam(right);
-        addInput(createInput<PJ301MPort>(Vec(430, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(430, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
+        addInput(createInput<PJ301MPort>(Vec(730, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(730, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
     }
 };
 

@@ -483,60 +483,11 @@ struct ChipSPC700 : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // Flags
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $6C   |RESET|MUTE |~ECEN|         NOISE CLOCK         |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // RESET: Soft reset. Writing a '1' here will set all voices in a
-        //        state of "Key-On suspension" (???). MUTE is also set. A
-        //        soft-reset gets triggered upon power-on.
-        //
-        // MUTE: Mutes all channel output.
-        //
-        // ECEN: ~Echo enable. A '0' here enables echo data to be written into
-        //       external memory (the memory your program/data is in!). Be
-        //       careful when enabling it, it's quite easy to crash your
-        //       program with the echo hardware!
-        //
-        // NOISE CLOCK: Designates the frequency for the white noise.
-        // Table: Noise clock value to frequency conversion
-        // Value   Frequency
-        // 00  0 Hz
-        // 01  16 Hz
-        // 02  21 Hz
-        // 03  25 Hz
-        // 04  31 Hz
-        // 05  42 Hz
-        // 06  50 Hz
-        // 07  63 Hz
-        // 08  83 Hz
-        // 09  100 Hz
-        // 0A  125 Hz
-        // 0B  167 Hz
-        // 0C  200 Hz
-        // 0D  250 Hz
-        // 0E  333 Hz
-        // 0F  400 Hz
-        // 10  500 Hz
-        // 11  667 Hz
-        // 12  800 Hz
-        // 13  1.0 KHz
-        // 14  1.3 KHz
-        // 15  1.6 KHz
-        // 16  2.0 KHz
-        // 17  2.7 KHz
-        // 18  3.2 KHz
-        // 19  4.0 KHz
-        // 1A  5.3 KHz
-        // 1B  6.4 KHz
-        // 1C  8.0 KHz
-        // 1D  10.7 KHz
-        // 1E  16 KHz
-        // 1F  32 KHz
+        // -------------------------------------------------------------------
+        // MARK: Flags (Noise Frequency)
+        // -------------------------------------------------------------------
         auto noise = params[PARAM_NOISE_FREQ].getValue();
         apu.write(Sony_S_DSP::FLAGS, noise);
-
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
@@ -561,12 +512,32 @@ struct ChipSPC700 : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP::KEY_OFF, key_off);
         // -------------------------------------------------------------------
-        // MARK: Frequency
+        // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------
-        // for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
-        //     // shift the voice index over a nibble to get the bit mask for the
-        //     // logical OR operator
-        //     auto mask = voice << 4;
+        for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
+            // shift the voice index over a nibble to get the bit mask for the
+            // logical OR operator
+            auto mask = voice << 4;
+            // -------------------------------------------------------------------
+            // MARK: Frequency
+            // -------------------------------------------------------------------
+            // TODO
+            // -------------------------------------------------------------------
+            // MARK: ADSR
+            // -------------------------------------------------------------------
+            // the ADSR1 register is set from the attack and decay values
+            auto attack = (uint8_t) params[PARAM_ATTACK + voice].getValue();
+            auto decay = (uint8_t) params[PARAM_DECAY + voice].getValue();
+            // the high bit of the ADSR1 register is set to enable the ADSR
+            auto adsr1 = 0b10000000 | (decay << 4) | attack;
+            apu.write(mask | Sony_S_DSP::ADSR_1, adsr1);
+            // the ADSR2 register is set from the sustain level and rate
+            auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL + voice].getValue();
+            auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
+            auto adsr2 = (sustainLevel << 5) | sustainRate;
+            apu.write(mask | Sony_S_DSP::ADSR_2, adsr2);
+        }
+
 
         // }
         // -------------------------------------------------------------------

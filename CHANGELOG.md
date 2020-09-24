@@ -148,3 +148,7 @@
 
 -   fix 2612 to use less CPU resources (disable emulators of polyphonic channels
     that are not in use)
+
+## 1.7.3 (2020-09-24)
+
+-   fix issue where GBS and 106 would drop onto the rack with corrupted waveforms

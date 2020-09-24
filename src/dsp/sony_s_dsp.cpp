@@ -29,7 +29,6 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(NUM_REGISTERS == sizeof(GlobalData));
     assert(NUM_REGISTERS == sizeof(voice));
     // setup the default state of the chip
-    set_gain(1.0);
     disable_surround(false);
     // verify the byte order of the host machine
     blargg_verify_byte_order();
@@ -268,9 +267,7 @@ inline int clamp_16(int n) {
     return n;
 }
 
-#include <iostream>
-
-void Sony_S_DSP::run(long count, short* out_buf) {
+void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.
     if (g.flags & 0x80) {
@@ -286,10 +283,9 @@ void Sony_S_DSP::run(long count, short* out_buf) {
 
     int left_volume  = g.left_volume;
     int right_volume = g.right_volume;
-    if (left_volume * right_volume < surround_threshold)  // kill global surround
+    // kill global surround
+    if (left_volume * right_volume < surround_threshold)
         right_volume = -right_volume;
-    left_volume  *= emu_gain;
-    right_volume *= emu_gain;
 
     while (--count >= 0) {
         // Here we check for keys on/off.  Docs say that successive writes
@@ -490,8 +486,8 @@ void Sony_S_DSP::run(long count, short* out_buf) {
         // end of channel loop
 
         // main volume control
-        left  = (left  * left_volume) >> (7 + EMU_GAIN_BITS);
-        right = (right * right_volume) >> (7 + EMU_GAIN_BITS);
+        left  = (left  * left_volume) >> 7;
+        right = (right * right_volume) >> 7;
 
         // Echo FIR filter
 
@@ -544,11 +540,8 @@ void Sony_S_DSP::run(long count, short* out_buf) {
         }
 
         if (out_buf) {  // write final samples
-            left  = clamp_16(left );
-            right = clamp_16(right);
-
-            out_buf[0] = (short) left;
-            out_buf[1] = (short) right;
+            out_buf[0] = left  = clamp_16(left);
+            out_buf[1] = right = clamp_16(right);
             out_buf += 2;
 
             if (g.flags & 0x40) {  // muting

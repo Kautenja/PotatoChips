@@ -203,11 +203,6 @@ class Sony_S_DSP {
     int fir_offset;
 
     /// TODO
-    static constexpr int EMU_GAIN_BITS = 8;
-    /// TODO
-    int emu_gain;
-
-    /// TODO
     int keys;
 
     /// TODO
@@ -287,15 +282,6 @@ class Sony_S_DSP {
     /// @brief Clear state and silence everything.
     void reset();
 
-    /// @brief Set gain, where 1.0 is normal. When greater than 1.0, output is
-    /// clamped to the 16-bit sample range.
-    ///
-    /// @param value the value to set the gain to
-    ///
-    inline void set_gain(double value) {
-        emu_gain = static_cast<int>(value * (1 << EMU_GAIN_BITS));
-    }
-
     /// @brief If true, prevent channels and global volumes from being phase-negated.
     ///
     /// @param disable true to disable surround, false to enable surround
@@ -332,7 +318,7 @@ class Sony_S_DSP {
     ///
     /// TODO: make clock_envelope() inline so that this becomes a leaf function?
     ///
-    void run(long num_samples, short* buffer = NULL);
+    void run(int32_t num_samples, int16_t* buffer = NULL);
 };
 
 #endif  // DSP_SONY_S_DSP_HPP_

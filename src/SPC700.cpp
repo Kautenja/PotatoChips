@@ -19,6 +19,7 @@
 #include "componentlibrary.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/sony_s_dsp.hpp"
+#include "dsp/wavetable4bit.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -171,7 +172,7 @@ struct ChipSPC700 : Module {
         // noise is set in the FLG register. The white noise still requires a
         // (dummy) sample to determine the length of sound (or unlimited sound
         // if the sample loops).
-        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xff);
+        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xf0);
 
         // Echo enable.
         //
@@ -181,7 +182,7 @@ struct ChipSPC700 : Module {
         // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // This register enables echo effects for the specified channel(s).
-        // apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
+        apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
 
         // Writing to this register sets the Echo Feedback. It's an 8-bit
         // signed value. Some more information on how the feedback works
@@ -192,7 +193,7 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $0D   | sign|             Echo Feedback               |
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
+        apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
 
         // Echo data start address.
         //
@@ -203,7 +204,7 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // This register points to an area of memory to be used by the echo
         // buffer. Like DIR its value is multiplied by 100h.
-        // apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
+        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
 
         // Echo delay size.
         //
@@ -219,7 +220,7 @@ struct ChipSPC700 : Module {
         // required is EDL * 2KBytes (MAX $7800 bytes). The memory region used
         // will be [ESA*100h] -> [ESA*100h + EDL*800h -1]. If EDL is zero, 4
         // bytes of memory at [ESA*100h] -> [ESA*100h + 3] will still be used.
-        // apu.write(Sony_S_DSP::ECHO_DELAY, 0);
+        apu.write(Sony_S_DSP::ECHO_DELAY, 0);
 
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the

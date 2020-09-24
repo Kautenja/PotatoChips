@@ -86,13 +86,13 @@ struct ChipSPC700 : Module {
         for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ          + osc, -4.f, 4.f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_NOISE_FREQ    + osc,    0,  32,  16, osc_name + " Noise Frequency");
+            configParam(PARAM_NOISE_FREQ    + osc,    0,  31,  16, osc_name + " Noise Frequency");
             configParam(PARAM_VOLUME_L      + osc, -128, 127,   0, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R      + osc, -128, 127,   0, osc_name + " Volume (Right)");
             configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
-            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  32,   0, osc_name + " Envelope Sustain Rate");
+            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
         }
         configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 0, "Main Volume (Left)");
         configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 0, "Main Volume (Right)");
@@ -422,7 +422,7 @@ struct ChipSPC700 : Module {
             // get the voltage from the gate input port
             const auto gate = inputs[INPUT_GATE + voice].getVoltage();
             // process the voltage to detect key-on events
-            key_on = key_on   | (gateTriggers[voice][0].process(rescale(gate,        0.f, 2.f, 0.f, 1.f)) << voice);
+            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
             // process the inverted voltage to detect key-of events
             key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
         }

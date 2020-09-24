@@ -82,7 +82,7 @@ struct ChipSPC700 : Module {
         for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
             auto osc_name = std::to_string(osc + 1);
             configParam(PARAM_FREQ + osc, -4.f, 4.f, 0.f, "Voice " + osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_NOISE_FREQ + osc, 0, 32, 0, "Voice " + osc_name + " Noise Frequency");
+            configParam(PARAM_NOISE_FREQ + osc, 0, 32, 16, "Voice " + osc_name + " Noise Frequency");
             configParam(PARAM_VOLUME_L + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R + osc, -128, 127, 0, "Voice " + osc_name + " Volume (Right)");
         }
@@ -583,7 +583,7 @@ struct ChipSPC700Widget : ModuleWidget {
     ///
     explicit ChipSPC700Widget(ChipSPC700 *module) {
         setModule(module);
-        static constexpr auto panel = "res/SPC700.svg";
+        static constexpr auto panel = "res/S-DSP.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

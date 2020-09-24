@@ -108,6 +108,32 @@ struct ChipSPC700 : Module {
 
  protected:
     inline void processCV() {
+        // Source Directory Offset.
+        //
+        // DIR
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $5D   |                  Offset value                 |
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // This register points to the source(sample) directory in external
+        // RAM. The pointer is calculated by Offset*100h.
+        //
+        // The source directory contains sample start and loop point offsets.
+        // Its a simple array of 16-bit values.
+        //
+        // SAMPLE DIRECTORY
+        //
+        // OFFSET  SIZE    DESC
+        // dir+0   16-BIT  SAMPLE-0 START
+        // dir+2   16-BIT  SAMPLE-0 LOOP START
+        // dir+4   16-BIT  SAMPLE-1 START
+        // dir+6   16-BIT  SAMPLE-1 LOOP START
+        // dir+8   16-BIT  SAMPLE-2 START
+        // ...
+        // This can continue for up to 256 samples. (SRCN can only reference
+        // 256 samples)
+        // apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
+
         // This register is written to during DSP activity.
         //
         // Each voice gets 1 bit. If the bit is set then it means the BRR
@@ -119,17 +145,6 @@ struct ChipSPC700 : Module {
         // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // apu.write(Sony_S_DSP::ENDX, 0);
-
-        // Writing to this register sets the Echo Feedback. It's an 8-bit
-        // signed value. Some more information on how the feedback works
-        // would be nice.
-        //
-        // EFB
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $0D   | sign|             Echo Feedback               |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
 
         // PMON
         //          7     6     5     4     3     2     1     0
@@ -168,31 +183,16 @@ struct ChipSPC700 : Module {
         // This register enables echo effects for the specified channel(s).
         // apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
 
-        // Source Directory Offset.
+        // Writing to this register sets the Echo Feedback. It's an 8-bit
+        // signed value. Some more information on how the feedback works
+        // would be nice.
         //
-        // DIR
+        // EFB
         //          7     6     5     4     3     2     1     0
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $5D   |                  Offset value                 |
+        // $0D   | sign|             Echo Feedback               |
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to the source(sample) directory in external
-        // RAM. The pointer is calculated by Offset*100h.
-        //
-        // The source directory contains sample start and loop point offsets.
-        // Its a simple array of 16-bit values.
-        //
-        // SAMPLE DIRECTORY
-        //
-        // OFFSET  SIZE    DESC
-        // dir+0   16-BIT  SAMPLE-0 START
-        // dir+2   16-BIT  SAMPLE-0 LOOP START
-        // dir+4   16-BIT  SAMPLE-1 START
-        // dir+6   16-BIT  SAMPLE-1 LOOP START
-        // dir+8   16-BIT  SAMPLE-2 START
-        // ...
-        // This can continue for up to 256 samples. (SRCN can only reference
-        // 256 samples)
-        // apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
+        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
 
         // Echo data start address.
         //
@@ -343,7 +343,7 @@ struct ChipSPC700 : Module {
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------
-        auto noise = params[PARAM_NOISE_FREQ].getValue();
+        uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
         apu.write(Sony_S_DSP::FLAGS, noise);
         // -------------------------------------------------------------------
         // MARK: Gate input

@@ -294,7 +294,7 @@ class Sony_S_DSP {
     ///
     /// @param address the address of the register to read data from
     ///
-    inline int read(int address) {
+    inline uint8_t read(unsigned address) {
         if (address >= NUM_REGISTERS)  // make sure the given address is legal
             throw AddressSpaceException<uint16_t>(address, 0, NUM_REGISTERS);
         return reg[address];

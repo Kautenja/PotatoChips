@@ -411,7 +411,7 @@ struct ChipGBSWidget : ModuleWidget {
             // displaying in/being rendered for the library, the module will
             // be null and a dummy waveform is displayed
             uint8_t* wavetable = module ?
-                &reinterpret_cast<ChipGBS*>(this->module)->wavetable[wave][0] :
+                &module->wavetable[wave][0] :
                 &wavetables[wave][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(

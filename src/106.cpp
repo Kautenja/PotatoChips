@@ -350,7 +350,7 @@ struct Chip106Widget : ModuleWidget {
         for (int waveform = 0; waveform < Chip106::NUM_WAVEFORMS; waveform++) {
             // get the wave-table buffer for this editor
             uint8_t* wavetable = module ?
-                    &reinterpret_cast<Chip106*>(this->module)->wavetable[waveform][0] :
+                    &module->wavetable[waveform][0] :
                     &wavetables[waveform][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(

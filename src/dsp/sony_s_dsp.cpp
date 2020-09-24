@@ -324,7 +324,9 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         int left = 0;
         int right = 0;
         for (int vidx = 0; vidx < VOICE_COUNT; vidx++) {
+            // get the voices bit-mask shift value
             const int vbit = 1 << vidx;
+            // caches the voice and data structures
             RawVoice& raw_voice = voice[vidx];
             VoiceState& voice = voice_state[vidx];
 
@@ -350,14 +352,11 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 voice.envstate = state_attack;
             }
 
-            if (g.key_ons & vbit & ~g.key_offs) {
-                // voice doesn't come on if key off is set
+            if (g.key_ons & vbit & ~g.key_offs) {  // key-on = !key-off = true
                 g.key_ons &= ~vbit;
                 voice.on_cnt = 8;
             }
-
-            if (keys & g.key_offs & vbit) {
-                // key off
+            if (keys & g.key_offs & vbit) {  // key-off = true
                 voice.envstate = state_release;
                 voice.on_cnt = 0;
             }
@@ -379,7 +378,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                             // verified (played endless looping sample and ENDX was set)
                             voice.addr = GET_LE16(sd[raw_voice.waveform].loop);
                         } else {
-                            // first block was end block; don't play anything (verified)
+                            // first block was end block; don't play anything
                             goto sample_ended; // to do: find alternative to goto
                         }
                     }
@@ -387,9 +386,11 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                     voice.block_remain = 16;  // nibbles
                 }
 
-                // if next block has end flag set, *this* block ends *early* (verified)
-                if (voice.block_remain == 9 && (ram[voice.addr + 5] & 3) == 1 &&
-                        (voice.block_header & 3) != 3) {
+                if (
+                    voice.block_remain == 9 &&
+                    (ram[voice.addr + 5] & 3) == 1 &&
+                    (voice.block_header & 3) != 3
+                ) {  // next block has end flag set, this block ends early
             sample_ended:
                     g.wave_ended |= vbit;
                     keys &= ~vbit;
@@ -407,14 +408,14 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
 
                 int delta = ram[voice.addr];
                 if (voice.block_remain & 1) {
-                    delta <<= 4; // use lower nybble
+                    delta <<= 4;  // use lower nibble
                     voice.addr++;
                 }
 
-                // Use sign-extended upper nybble
-                delta = int8_t (delta) >> 4;
+                // Use sign-extended upper nibble
+                delta = int8_t(delta) >> 4;
 
-                // For invalid ranges (D,E,F): if the nybble is negative,
+                // For invalid ranges (D,E,F): if the nibble is negative,
                 // the result is F000.  If positive, 0000. Nothing else
                 // like previous range, etc seems to have any effect.  If
                 // range is valid, do the shift normally.  Note these are
@@ -422,8 +423,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 // the output will be shifted back again at the end.
                 int shift = voice.block_header >> 4;
                 delta = (delta << shift) >> 1;
-                if (shift > 0x0C)
-                    delta = (delta >> 14) & ~0x7FF;
+                if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
 
                 // One, two and three point IIR filters
                 int smp1 = voice.interp0;
@@ -446,7 +446,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 voice.interp3 = voice.interp2;
                 voice.interp2 = smp2;
                 voice.interp1 = smp1;
-                voice.interp0 = int16_t (clamp_16(delta) * 2); // sign-extend
+                voice.interp0 = int16_t (clamp_16(delta) * 2);  // sign-extend
             }
 
             // rate (with possible modulation)
@@ -458,24 +458,23 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             int index = voice.fraction >> 2 & 0x3FC;
             voice.fraction = (voice.fraction & 0x0FFF) + rate;
             const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
-            const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255*4 - index));
+            const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
             int s = ((table[0] * voice.interp3) >> 12) +
                     ((table[1] * voice.interp2) >> 12) +
                     ((table2[1] * voice.interp1) >> 12);
             s = (int16_t) (s * 2);
             s += (table2[0] * voice.interp0) >> 11 & ~1;
-            int output = clamp_16(s);
-            if (g.noise_enables & vbit) {
-                output = noise_amp;
-            }
 
+            // if noise is enabled for this voice use the amplified noise as
+            // the output, otherwise use the clamped sampled value
+            int output = (g.noise_enables & vbit) ? noise_amp : clamp_16(s);
             // scale output and set outx values
             output = (output * envx) >> 11 & ~1;
             int l = (voice.volume[0] * output) >> 7;
             int r = (voice.volume[1] * output) >> 7;
 
             prev_outx = output;
-            raw_voice.outx = int8_t (output >> 8);
+            raw_voice.outx = output >> 8;
             if (g.echo_ons & vbit) {
                 echol += l;
                 echor += r;
@@ -497,17 +496,18 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         echo_ptr += 4;
         if (echo_ptr >= (g.echo_delay & 15) * 0x800)
             echo_ptr = 0;
-        int fb_left  = (int16_t) GET_LE16(echo_buf    ); // sign-extend
-        int fb_right = (int16_t) GET_LE16(echo_buf + 2); // sign-extend
+        int fb_left  = (int16_t) GET_LE16(echo_buf    );  // sign-extend
+        int fb_right = (int16_t) GET_LE16(echo_buf + 2);  // sign-extend
         this->echo_ptr = echo_ptr;
 
         // put samples in history ring buffer
         const int fir_offset = this->fir_offset;
         short (*fir_pos)[2] = &fir_buf[fir_offset];
-        this->fir_offset = (fir_offset + 7) & 7; // move backwards one step
+        this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
         fir_pos[0][0] = (short) fb_left;
         fir_pos[0][1] = (short) fb_right;
-        fir_pos[8][0] = (short) fb_left; // duplicate at +8 eliminates wrap checking below
+        // duplicate at +8 eliminates wrap checking below
+        fir_pos[8][0] = (short) fb_left;
         fir_pos[8][1] = (short) fb_right;
 
         // FIR

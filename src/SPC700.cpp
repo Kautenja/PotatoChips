@@ -340,7 +340,7 @@ struct ChipSPC700 : Module {
             // apu.write(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
         }
 
-        apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 127);
+        apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x7f);
         apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
@@ -348,6 +348,15 @@ struct ChipSPC700 : Module {
         apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+
+        // apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
+        // apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
+        // apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf4);
+        // apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x24);
+        // apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
+        // apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
+        // apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xFF);
+        // apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf0);
     }
 
     /// @brief Process the CV inputs for the given channel.

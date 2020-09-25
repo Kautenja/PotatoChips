@@ -347,7 +347,7 @@ struct ChipSPC700 : Module {
         ram[1] = 1;
         ram[3] = 1;
         // set address 256 to a single sample ramp wave
-        ram[256] = 0b11000011;
+        ram[256] = 0b11000111;
         for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);
         // ram[256 + 1 * 9] = 0b11000000;
         // for (int i = 1; i < 9; i++) ram[256 + 1 * 9 + i] = 8 + i - 1;
@@ -402,12 +402,18 @@ struct ChipSPC700 : Module {
             // MARK: Frequency
             // ---------------------------------------------------------------
             // calculate the frequency using standard exponential scale
-            auto frequency = dsp::FREQ_C4 * pow(2, params[PARAM_FREQ].getValue());
+            float pitch = params[PARAM_FREQ + voice].getValue();
+            pitch += inputs[INPUT_VOCT + voice].getVoltage();
+            pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
+            float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+            frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+
+            // auto frequency = dsp::FREQ_C4 * pow(2, params[PARAM_FREQ].getValue());
             // convert the floating point frequency to a 14-bit pitch value
-            auto pitch = Sony_S_DSP::convert_pitch(frequency);
+            auto pitch16bit = Sony_S_DSP::convert_pitch(frequency);
             // set the 14-bit pitch value to the cascade of two RAM slots
-            apu.write(mask | Sony_S_DSP::PITCH_LOW,  0xff &  pitch     );
-            apu.write(mask | Sony_S_DSP::PITCH_HIGH, 0xff & (pitch >> 8));
+            apu.write(mask | Sony_S_DSP::PITCH_LOW,  0xff &  pitch16bit     );
+            apu.write(mask | Sony_S_DSP::PITCH_HIGH, 0xff & (pitch16bit >> 8));
             // ---------------------------------------------------------------
             // MARK: ADSR
             // ---------------------------------------------------------------

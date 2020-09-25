@@ -387,7 +387,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                             goto sample_ended; // to do: find alternative to goto
                         }
                     }
-std::cout << voice.addr << std::endl;
+// std::cout << voice.addr << std::endl;
                     voice.block_header = ram[voice.addr++];
                     voice.block_remain = 16;  // nibbles
                 }

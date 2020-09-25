@@ -57,13 +57,14 @@ void Sony_S_DSP::write(uint8_t address, uint8_t data) {
         throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
     // store the data in the register with given address
     reg[address] = data;
-    int high = address >> 4;
+    // get the high 4 bits for indexing the voice / FIR coefficients
+    int index = address >> 4;
     // update volume / FIR coefficients
-    switch (address & 0x0F) {
+    switch (address & FIR_COEFFICIENTS) {
         // voice volume
-        case 0:
-        case 1: {
-            short* volume = voice_state[high].volume;
+        case 0:    // left channel, fall through to next block
+        case 1: {  // right channel, process both left and right channels
+            short* volume = voice_state[index].volume;
             int left  = (int8_t) reg[address & ~1];
             int right = (int8_t) reg[address |  1];
             volume[0] = left;
@@ -77,8 +78,9 @@ void Sony_S_DSP::write(uint8_t address, uint8_t data) {
             }
             break;
         }
-        case 0x0F:  // FIR coefficients
-            fir_coeff[high] = (int8_t) data;  // sign-extend
+        case FIR_COEFFICIENTS:  // update FIR coefficients
+            // sign-extend
+            fir_coeff[index] = (int8_t) data;
             break;
     }
 }

@@ -102,6 +102,14 @@ class Sony_S_DSP {
         char loop[2];
     };
 
+    /// Bit-masks for extracting values from the flags registers.
+    enum FlagMasks {
+        FLAG_MASK_NOISE_PERIOD = 0x1F,
+        FLAG_MASK_ECHO_WRITE = 0x20,
+        FLAG_MASK_MUTE = 0x40,
+        FLAG_MASK_RESET = 0x80
+    };
+
     /// Returns the 14-bit pitch based on th given frequency.
     ///
     /// @param frequency the frequency in Hz

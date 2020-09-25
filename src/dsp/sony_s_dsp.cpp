@@ -270,7 +270,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     // TODO: Should we just fill the buffer with silence? Flags won't be
     // cleared during this run so it seems it should keep resetting every
     // sample.
-    if (g.flags & 0x80) reset();
+    if (g.flags & FLAG_MASK_RESET) reset();
     // use the global wave page address to lookup a pointer to the first entry
     // in the source directory. the wave page is multiplied by 0x100 to produce
     // the RAM address of the source directory.
@@ -304,7 +304,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         if (g.noise_enables) {  // noise enabled for at least one voice
             // update the noise period based on the index of the rate in the
             // global flags register
-            noise_count -= env_rates[g.flags & 0x1F];
+            noise_count -= env_rates[g.flags & FLAG_MASK_NOISE_PERIOD];
             if (noise_count <= 0) {  // rising edge of noise generator
                 // reset the noise period to the initial value
                 noise_count = env_rate_init;
@@ -539,7 +539,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         left  += (fb_left  * g.left_echo_volume) >> 14;
         right += (fb_right * g.right_echo_volume) >> 14;
 
-        if (!(g.flags & 0x20)) {  // echo buffer feedback
+        if (!(g.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
             echol += (fb_left  * g.echo_feedback) >> 14;
             echor += (fb_right * g.echo_feedback) >> 14;
             SET_LE16(echo_buf    , clamp_16(echol));
@@ -555,7 +555,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             out_buf[1] = right = clamp_16(right);
             out_buf += 2;
 
-            if (g.flags & 0x40) {  // muting
+            if (g.flags & FLAG_MASK_MUTE) {  // muting
                 out_buf[-2] = 0;
                 out_buf[-1] = 0;
             }

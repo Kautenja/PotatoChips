@@ -38,9 +38,9 @@ extern rack::Model *modelChipAY_3_8910;
 extern rack::Model *modelChipFME7;
 extern rack::Model *modelChipGBS;
 extern rack::Model *modelChipPOKEY;
+extern rack::Model *modelChipS_SMP;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipSN76489;
-extern rack::Model *modelChipSPC700;
 extern rack::Model *modelChipTurboGrafx16;
 extern rack::Model *modelChipVRC6;
 

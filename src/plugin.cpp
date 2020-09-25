@@ -34,9 +34,9 @@ void init(Plugin* instance) {
     instance->addModel(modelChipFME7);
     instance->addModel(modelChipGBS);
     instance->addModel(modelChipPOKEY);
+    instance->addModel(modelChipS_SMP);
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipSN76489);
-    instance->addModel(modelChipSPC700);
     instance->addModel(modelChipTurboGrafx16);
     instance->addModel(modelChipVRC6);
 }

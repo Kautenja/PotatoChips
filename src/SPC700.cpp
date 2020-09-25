@@ -307,15 +307,15 @@ struct ChipSPC700 : Module {
         // -------------------------------------------------------------------
         // TODO: design a few banks of wavetables / other ways to put data
         //       into this RAM
-        // write the first directory to the ram (points to address 256)
-        // first value is the start address, second value is the loop address
-        *reinterpret_cast<uint16_t*>(&ram[0]) = 256;
-        *reinterpret_cast<uint16_t*>(&ram[2]) = 256;
+        // write the first directory to RAM
+        auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0]);
+        dir->start16 = 256;
+        dir->loop16 = 256;
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
-        ram[256] = 0b11000011;
-        // generate the 8-byte sample as a simple ramp wave
-        for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);
+        auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[256]);
+        block->header = 0b11000011;
+        for (int i = 0; i < 8; i++) block->samples[i] = 15 + 2 * i;
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------

@@ -99,10 +99,23 @@ class Sony_S_DSP {
     /// An entry in the source directory in the 64KB RAM.
     struct SourceDirectoryEntry {
         /// the start address of the sample in the directory
-        char start[2];
+        union {
+            char start[2];
+            uint16_t start16;
+        };
         /// the loop address of the sample in the directory
-        char loop[2];
+        union {
+            char loop[2];
+            uint16_t loop16;
+        };
     };
+
+    /// A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9 compression
+    /// ration compared to 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of BRR
+    struct BitRateReductionBlock {
+        uint8_t header;
+        uint8_t samples[8];
+    } __attribute__((packed));
 
     /// Bit-masks for extracting values from the flags registers.
     enum FlagMasks {

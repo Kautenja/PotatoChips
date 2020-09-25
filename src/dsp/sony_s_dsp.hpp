@@ -113,7 +113,37 @@ class Sony_S_DSP {
     /// A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9 compression
     /// ration compared to 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of BRR
     struct BitRateReductionBlock {
-        uint8_t header;
+        union {
+            /// a structure containing the 8-bit header flag with schema:
+            // +------+------+------+------+------+------+------+------+
+            // | 7    | 6    | 5    | 4    | 3    | 2    | 1    | 0    |
+            // +------+------+------+------+------+------+------+------+
+            // | Volume (max 0xC0)         | Filter Mode | Loop | End  |
+            // +------+------+------+------+------+------+------+------+
+            struct {
+                /// the end of sample block flag
+                uint8_t is_end : 1;
+                /// the loop flag determining if this block loops
+                uint8_t is_loop : 1;
+                /// the filter mode for selecting 1 of 4 filter modes
+                uint8_t filter : 2;
+                /// the volume level in [0, 12]
+                uint8_t volume : 4;
+
+                /// Set the volume level to a new value.
+                ///
+                /// @param level the level to set the volume to
+                /// @details
+                /// set the volume to the new level in the range [0, 12]
+                ///
+                inline void set_volume(uint8_t level) {
+                    volume = std::min(level, static_cast<uint8_t>(0x0C));
+                }
+            } flags;
+            /// the encoded header byte
+            uint8_t header;
+        };
+        /// the 8-byte block of sample data
         uint8_t samples[8];
     } __attribute__((packed));
 

@@ -25,10 +25,12 @@
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP {
  public:
-    /// the number of oscillators on the chip
+    /// the number of oscillators / sample on the chip
     static constexpr unsigned VOICE_COUNT = 8;
     /// the number of RAM registers on the chip
     static constexpr unsigned NUM_REGISTERS = 128;
+    /// the number of FIR coefficients used by the chip's echo filter
+    static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 
     /// the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {

@@ -50,6 +50,7 @@ struct ChipSPC700 : Module {
         ENUMS(PARAM_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_FIR_COEFFICIENT, 8),
         PARAM_ECHO_DELAY,
         PARAM_ECHO_FEEDBACK,
         ENUMS(PARAM_VOLUME_ECHO, 2),
@@ -69,6 +70,7 @@ struct ChipSPC700 : Module {
         ENUMS(INPUT_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_FIR_COEFFICIENT, 8),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
@@ -101,6 +103,12 @@ struct ChipSPC700 : Module {
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
+        }
+        for (unsigned coeff = 0; coeff < Sony_S_DSP::FIR_COEFFICIENT_COUNT; coeff++) {
+            // the first FIR coefficient defaults to 0x7f = 127 and the other
+            // coefficients are 0 by default
+            auto defaultValue = coeff ? 0 : 127;
+            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, defaultValue, "FIR Coefficient " + std::to_string(coeff + 1));
         }
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay");
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
@@ -555,6 +563,14 @@ struct ChipSPC700Widget : ModuleWidget {
         addParam(volumeRight);
         addInput(createInput<PJ301MPort>(Vec(750, 280), module, ChipSPC700::INPUT_VOLUME_MAIN + 1));
         addOutput(createOutput<PJ301MPort>(Vec(750, 325), module, ChipSPC700::OUTPUT_AUDIO + 1));
+
+        // FIR Coefficients
+        for (unsigned i = 0; i < Sony_S_DSP::FIR_COEFFICIENT_COUNT; i++) {
+            addInput(createInput<PJ301MPort>(Vec(800, 40 + i * 41), module, ChipSPC700::INPUT_FIR_COEFFICIENT + i));
+            auto param = createParam<Rogan2PWhite>(Vec(830, 35 + i * 41), module, ChipSPC700::PARAM_FIR_COEFFICIENT + i);
+            param->snap = true;
+            addParam(param);
+        }
     }
 };
 

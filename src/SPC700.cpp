@@ -347,7 +347,7 @@ struct ChipSPC700 : Module {
         ram[1] = 1;
         ram[3] = 1;
         // set address 256 to a single sample ramp wave
-        ram[256] = 0b11000111;
+        ram[256] = 0b11000011;
         for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);
         // ram[256 + 1 * 9] = 0b11000000;
         // for (int i = 1; i < 9; i++) ram[256 + 1 * 9 + i] = 8 + i - 1;

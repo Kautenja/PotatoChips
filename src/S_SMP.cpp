@@ -220,6 +220,7 @@ struct ChipS_SMP : Module {
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
+        // TODO: move inside the main voice processing loop?
         // create bit-masks for the key-on and key-off state of each voice
         uint8_t key_on = 0;
         uint8_t key_off = 0;

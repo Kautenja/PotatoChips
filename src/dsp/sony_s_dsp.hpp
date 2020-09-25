@@ -55,12 +55,12 @@ class Sony_S_DSP {
         /// Key-off (1 bit for each voice)
         KEY_OFF =                  0x5C,
         /// Offset of source directory
-        /// (OFFSET_SOURCE_DIRECTORY * 100h = memory offset)
+        /// (`OFFSET_SOURCE_DIRECTORY * 0x100` = memory offset)
         OFFSET_SOURCE_DIRECTORY =  0x5D,
         /// DSP flags for MUTE, ECHO, RESET, NOISE CLOCK
         FLAGS =                    0x6C,
         /// Echo buffer start offset
-        /// (ECHO_BUFFER_START_OFFSET * 100h = memory offset)
+        /// (`ECHO_BUFFER_START_OFFSET * 0x100` = memory offset)
         ECHO_BUFFER_START_OFFSET = 0x6D,
         /// ENDX - 1 bit for each voice.
         ENDX =                     0x7C,
@@ -79,7 +79,7 @@ class Sony_S_DSP {
         PITCH_LOW        = 0x02,
         /// Higher 8-bits of pitch.
         PITCH_HIGH       = 0x03,
-        /// Source number (0-255). (references the source directory)
+        /// Source number (\f$\in [0, 255]\f$). (references the source directory)
         SOURCE_NUMBER    = 0x04,
         /// If bit-7 is set, ADSR is enabled. If cleared GAIN is used.
         ADSR_1           = 0x05,
@@ -110,8 +110,9 @@ class Sony_S_DSP {
         };
     };
 
-    /// A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9 compression
-    /// ration compared to 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of BRR
+    /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9
+    /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
+    /// BRR samples.
     struct BitRateReductionBlock {
         union {
             /// a structure containing the 8-bit header flag with schema:
@@ -149,19 +150,23 @@ class Sony_S_DSP {
 
     /// Bit-masks for extracting values from the flags registers.
     enum FlagMasks {
+        /// a mask for the flag register to extract the noise period parameter
         FLAG_MASK_NOISE_PERIOD = 0x1F,
+        /// a mask for the flag register to extract the echo write enabled bit
         FLAG_MASK_ECHO_WRITE = 0x20,
+        /// a mask for the flag register to extract the mute voices bit
         FLAG_MASK_MUTE = 0x40,
+        /// a mask for the flag register to extract the reset chip bit
         FLAG_MASK_RESET = 0x80
     };
 
-    /// Returns the 14-bit pitch based on th given frequency.
+    /// @brief Returns the 14-bit pitch based on th given frequency.
     ///
     /// @param frequency the frequency in Hz
     /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
     /// @details
     ///
-    /// $frequency = 32000 * (pitch / 2^12)$
+    /// \f$frequency = 32000 * \frac{pitch}{2^{12}}\f$
     ///
     static inline uint16_t convert_pitch(float frequency) {
         const auto pitch = static_cast<float>(1 << 12) * frequency / 32000.f;

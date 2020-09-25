@@ -176,6 +176,19 @@ struct ChipSPC700 : Module {
         // if the sample loops).
         apu.write(Sony_S_DSP::NOISE_ENABLE, 0xf0);
 
+        // Echo data start address.
+        //
+        // ESA
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $6D   |                  Offset value                 |
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // This register points to an area of memory to be used by the echo
+        // buffer. Like DIR its value is multiplied by 100h.
+
+        // set to RAM position 512 = 4 * 128
+        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 128);
+
         // Echo enable.
         //
         // EON
@@ -184,7 +197,7 @@ struct ChipSPC700 : Module {
         // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // This register enables echo effects for the specified channel(s).
-        apu.write(Sony_S_DSP::ECHO_ENABLE, 0);
+        apu.write(Sony_S_DSP::ECHO_ENABLE, 0xff);
 
         // Writing to this register sets the Echo Feedback. It's an 8-bit
         // signed value. Some more information on how the feedback works
@@ -195,18 +208,8 @@ struct ChipSPC700 : Module {
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
         // $0D   | sign|             Echo Feedback               |
         //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
-
-        // Echo data start address.
-        //
-        // ESA
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $6D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to an area of memory to be used by the echo
-        // buffer. Like DIR its value is multiplied by 100h.
-        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 0);
+        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
+        apu.write(Sony_S_DSP::ECHO_FEEDBACK, 100);
 
         // Echo delay size.
         //
@@ -222,7 +225,7 @@ struct ChipSPC700 : Module {
         // required is EDL * 2KBytes (MAX $7800 bytes). The memory region used
         // will be [ESA*100h] -> [ESA*100h + EDL*800h -1]. If EDL is zero, 4
         // bytes of memory at [ESA*100h] -> [ESA*100h + 3] will still be used.
-        apu.write(Sony_S_DSP::ECHO_DELAY, 0);
+        apu.write(Sony_S_DSP::ECHO_DELAY, 7);
 
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
@@ -336,6 +339,8 @@ struct ChipSPC700 : Module {
             // 7-bit unsigned value
             // apu.write(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
         }
+
+        apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 127);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -390,7 +395,9 @@ struct ChipSPC700 : Module {
         apu.write(Sony_S_DSP::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
         apu.write(Sony_S_DSP::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
         // apu.write(Sony_S_DSP::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
+        apu.write(Sony_S_DSP::ECHO_VOLUME_LEFT,  127);
         // apu.write(Sony_S_DSP::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
+        apu.write(Sony_S_DSP::ECHO_VOLUME_RIGHT, 127);
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------

@@ -494,7 +494,9 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         left  = (left  * left_volume) >> 7;
         right = (right * right_volume) >> 7;
 
-        // Echo FIR filter
+        // -------------------------------------------------------------------
+        // MARK: Echo FIR filter
+        // -------------------------------------------------------------------
 
         // read feedback from echo buffer
         int echo_ptr = this->echo_ptr;
@@ -544,6 +546,10 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             SET_LE16(echo_buf    , clamp_16(echol));
             SET_LE16(echo_buf + 2, clamp_16(echor));
         }
+
+        // -------------------------------------------------------------------
+        // MARK: output
+        // -------------------------------------------------------------------
 
         if (out_buf) {  // write final samples
             out_buf[0] = left  = clamp_16(left);

@@ -261,7 +261,7 @@ class Sony_S_DSP {
 
     /// The values of the FIR filter coefficients from the register bank. This
     /// allows the FIR coefficients to be stored as 16-bit
-    short fir_coeff[VOICE_COUNT];
+    short fir_coeff[FIR_COEFFICIENT_COUNT];
 
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.

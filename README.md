@@ -237,6 +237,27 @@ See the [Manual][POKEY] for more information about the features of this module.
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: S-SMP -->
+<!-- ------------------------------------------------------------ -->
+
+<!-- ## S-SMP _(Coming Soon!)_
+
+S-SMP is an emulation of the Sony S-SMP audio processing unit from the
+[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
+the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
+
+<p align="center">
+<img alt="S-SMP" src="manual/S_SMP/img/S_SMP-Module.svg">
+</p>
+
+### Features
+
+See the [Manual][S_SMP] for more information about the features of this module.
+
+[S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf -->
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->
 <!-- ------------------------------------------------------------ -->
 

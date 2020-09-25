@@ -44,7 +44,7 @@ void Sony_S_DSP::reset() {
     g.flags = 0xE0; // reset, mute, echo off
     g.key_ons = 0;
 
-    for (int i = 0; i < VOICE_COUNT; i++) {
+    for (unsigned i = 0; i < VOICE_COUNT; i++) {
         VoiceState& v = voice_state[i];
         v.on_cnt = 0;
         v.volume[0] = 0;
@@ -322,7 +322,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         int echor = 0;
         int left = 0;
         int right = 0;
-        for (int vidx = 0; vidx < VOICE_COUNT; vidx++) {
+        for (unsigned vidx = 0; vidx < VOICE_COUNT; vidx++) {
             // get the voices bit-mask shift value
             const int vbit = 1 << vidx;
             // caches the voice and data structures

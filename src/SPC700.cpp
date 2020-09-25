@@ -294,15 +294,20 @@ struct ChipSPC700 : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
+        // -------------------------------------------------------------------
+        // MARK: RAM (SPC700 emulation)
+        // -------------------------------------------------------------------
+        // TODO: design a few banks of wavetables / other ways to put data
+        //       into this RAM
         // write the first directory to the ram (points to address 256)
+        // first value is the start address, second value is the loop address
         *reinterpret_cast<uint16_t*>(&ram[0]) = 256;
-        // ram[1] = 1;
         *reinterpret_cast<uint16_t*>(&ram[2]) = 256;
-        // ram[3] = 1;
-        // set address 256 to a single sample ramp wave
+        // set address 256 to a single sample ramp wave sample in BRR format
+        // the header for the BRR single sample waveform
         ram[256] = 0b11000011;
+        // generate the 8-byte sample as a simple ramp wave
         for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);
-
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------
@@ -348,6 +353,7 @@ struct ChipSPC700 : Module {
         // -------------------------------------------------------------------
         // MARK: FIR Coefficients
         // -------------------------------------------------------------------
+        // TODO: control over FIR parameters?
         apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x7f);
         apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
         apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);

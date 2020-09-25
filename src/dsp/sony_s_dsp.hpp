@@ -252,7 +252,7 @@ class Sony_S_DSP {
         /// the voices on the chip
         RawVoice voice[VOICE_COUNT];
         /// the register bank on the chip
-        uint8_t reg[NUM_REGISTERS];
+        uint8_t registers[NUM_REGISTERS];
         /// global data on the chip
         GlobalData g;
     };
@@ -364,7 +364,7 @@ class Sony_S_DSP {
     inline uint8_t read(uint8_t address) {
         if (address >= NUM_REGISTERS)  // make sure the given address is valid
             throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        return reg[address];
+        return registers[address];
     }
 
     /// @brief Write data to the registers at the given address.

@@ -50,6 +50,8 @@ struct ChipSPC700 : Module {
         ENUMS(PARAM_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
+        PARAM_ECHO_DELAY,
+        PARAM_ECHO_FEEDBACK,
         ENUMS(PARAM_VOLUME_ECHO, 2),
         ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
@@ -67,6 +69,8 @@ struct ChipSPC700 : Module {
         ENUMS(INPUT_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
+        INPUT_ECHO_DELAY,
+        INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
         ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
@@ -85,6 +89,7 @@ struct ChipSPC700 : Module {
 
     /// @brief Initialize a new S-DSP Chip module.
     ChipSPC700() {
+        // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
@@ -97,17 +102,17 @@ struct ChipSPC700 : Module {
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
         }
+        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay");
+        configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
         configParam(PARAM_VOLUME_ECHO + 0, -128, 127, 127, "Echo Volume (Left)");
         configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
         configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
         configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
-
         // clear the shared RAM between the CPU and the S-DSP
         clearRAM();
         // reset the S-DSP emulator
         apu.reset();
-
-        // apu.run(1, NULL);
+        // set the initial state for registers and RAM
         processCV();
     }
 
@@ -526,16 +531,27 @@ struct ChipSPC700Widget : ModuleWidget {
             sustainRate->snap = true;
             addParam(sustainRate);
         }
+        // Echo Delay
+        auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipSPC700::PARAM_ECHO_DELAY);
+        echoDelay->snap = true;
+        addParam(echoDelay);
+        addInput(createInput<PJ301MPort>(Vec(700, 80), module, ChipSPC700::INPUT_ECHO_DELAY));
+        // Echo Feedback
+        auto echoFeedback = createParam<Rogan2PGreen>(Vec(740, 30), module, ChipSPC700::PARAM_ECHO_FEEDBACK);
+        echoFeedback->snap = true;
+        addParam(echoFeedback);
+        addInput(createInput<PJ301MPort>(Vec(750, 80), module, ChipSPC700::INPUT_ECHO_FEEDBACK));
+
         // Echo Volume - Left channel
-        auto echoLeft = createParam<Rogan2PWhite>(Vec(690, 100), module, ChipSPC700::PARAM_VOLUME_ECHO + 0);
+        auto echoLeft = createParam<Rogan2PWhite>(Vec(690, 130), module, ChipSPC700::PARAM_VOLUME_ECHO + 0);
         echoLeft->snap = true;
         addParam(echoLeft);
-        addInput(createInput<PJ301MPort>(Vec(700, 150), module, ChipSPC700::INPUT_VOLUME_ECHO + 0));
+        addInput(createInput<PJ301MPort>(Vec(700, 180), module, ChipSPC700::INPUT_VOLUME_ECHO + 0));
         // Echo Volume - Right channel
-        auto echoRight = createParam<Rogan2PRed>(Vec(740, 100), module, ChipSPC700::PARAM_VOLUME_ECHO + 1);
+        auto echoRight = createParam<Rogan2PRed>(Vec(740, 130), module, ChipSPC700::PARAM_VOLUME_ECHO + 1);
         echoRight->snap = true;
         addParam(echoRight);
-        addInput(createInput<PJ301MPort>(Vec(750, 150), module, ChipSPC700::INPUT_VOLUME_ECHO + 1));
+        addInput(createInput<PJ301MPort>(Vec(750, 180), module, ChipSPC700::INPUT_VOLUME_ECHO + 1));
 
         // Mixer & Output - Left Channel
         auto volumeLeft = createParam<Rogan2PWhite>(Vec(690, 230), module, ChipSPC700::PARAM_VOLUME_MAIN + 0);

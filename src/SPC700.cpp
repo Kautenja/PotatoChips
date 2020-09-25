@@ -113,11 +113,12 @@ struct ChipSPC700 : Module {
         // reset the S-DSP emulator
         apu.reset();
         // set the initial state for registers and RAM
-        processCV();
+        setupRegisters();
     }
 
  protected:
-    inline void processCV() {
+    /// Setup the register initial state on the chip.
+    inline void setupRegisters() {
         // Source Directory Offset.
         //
         // DIR
@@ -146,45 +147,6 @@ struct ChipSPC700 : Module {
         // set the source directory location to the first 256 bytes
         apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
 
-        // This register is written to during DSP activity.
-        //
-        // Each voice gets 1 bit. If the bit is set then it means the BRR
-        // decoder has reached the last compressed block in the sample.
-        //
-        // ENDX
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::ENDX, 0);
-
-        // PMON
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $2D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|  -  |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // Pitch modulation multiplies the current pitch of the channel by
-        // OUTX of the previous channel. (P (modulated) = P[X] * (1 + OUTX[X-1])
-        //
-        // So a sine wave in the previous channel would cause some vibrato on
-        // the modulated channel. Note that OUTX is before volume
-        // multiplication, so you can have a silent channel for modulating.
-        // apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
-
-        // Noise enable.
-        //
-        // NON
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $3D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // When the noise enable bit is specified for a certain channel, white
-        // noise is issued instead of sample data. The frequency of the white
-        // noise is set in the FLG register. The white noise still requires a
-        // (dummy) sample to determine the length of sound (or unlimited sound
-        // if the sample loops).
-        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xf0);
-
         // Echo data start address.
         //
         // ESA
@@ -198,48 +160,11 @@ struct ChipSPC700 : Module {
         // set to RAM position 512 = 4 * 128
         apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 128);
 
-        // Echo enable.
-        //
-        // EON
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register enables echo effects for the specified channel(s).
-        apu.write(Sony_S_DSP::ECHO_ENABLE, 0xff);
-
-        // Writing to this register sets the Echo Feedback. It's an 8-bit
-        // signed value. Some more information on how the feedback works
-        // would be nice.
-        //
-        // EFB
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $0D   | sign|             Echo Feedback               |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.write(Sony_S_DSP::ECHO_FEEDBACK, 0);
-        apu.write(Sony_S_DSP::ECHO_FEEDBACK, 100);
-
-        // Echo delay size.
-        //
-        // EDL
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $7D   |  -  |  -  |  -  |  -  |      Echo Delay       |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // EDL specifies the delay between the main sound and the echoed sound.
-        // The delay is calculated as EDL * 16ms.
-        //
-        // Increased amounts of delay require more memory. The amount of memory
-        // required is EDL * 2KBytes (MAX $7800 bytes). The memory region used
-        // will be [ESA*100h] -> [ESA*100h + EDL*800h -1]. If EDL is zero, 4
-        // bytes of memory at [ESA*100h] -> [ESA*100h + 3] will still be used.
-        apu.write(Sony_S_DSP::ECHO_DELAY, 7);
-
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
+
             // Source number is a reference to the "Source Directory" (see DIR).
             // The DSP will use the sample with this index from the directory.
             // I'm not sure what happens when you change the SRCN when the
@@ -250,6 +175,7 @@ struct ChipSPC700 : Module {
             // $x4   |                 Source Number                 |
             //       +-----+-----+-----+-----+-----+-----+-----+-----+
             apu.write(mask | Sony_S_DSP::SOURCE_NUMBER, 0);
+
             // GAIN can be used to implement custom envelopes in your program.
             // There are 5 modes GAIN uses.
             // DIRECT
@@ -338,6 +264,7 @@ struct ChipSPC700 : Module {
             // 1F  2ms 3.5ms   2ms 18ms
             //
             // apu.write(mask | Sony_S_DSP::GAIN, 64);
+
             // ENVX gets written to by the DSP. It contains the present ADSR/GAIN envelope value.
             // ENVX
             //          7     6     5     4     3     2     1     0
@@ -346,26 +273,20 @@ struct ChipSPC700 : Module {
             //       +-----+-----+-----+-----+-----+-----+-----+-----+
             //
             // 7-bit unsigned value
-            // apu.write(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
+            // apu.read(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
         }
 
-        apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x7f);
-        apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-        apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
-
-        // apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
-        // apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
-        // apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf4);
-        // apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x24);
-        // apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
-        // apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
-        // apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xFF);
-        // apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf0);
+        // This register is written to during DSP activity.
+        //
+        // Each voice gets 1 bit. If the bit is set then it means the BRR
+        // decoder has reached the last compressed block in the sample.
+        //
+        // ENDX
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // apu.read(Sony_S_DSP::ENDX, 0);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -409,6 +330,69 @@ struct ChipSPC700 : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP::KEY_OFF, key_off);
         // -------------------------------------------------------------------
+        // MARK: Echo Parameters
+        // -------------------------------------------------------------------
+        apu.write(Sony_S_DSP::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
+        apu.write(Sony_S_DSP::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
+        // TODO: Echo enable.
+        //
+        // EON
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // This register enables echo effects for the specified channel(s).
+        apu.write(Sony_S_DSP::ECHO_ENABLE, 0xff);
+        // -------------------------------------------------------------------
+        // MARK: FIR Coefficients
+        // -------------------------------------------------------------------
+        apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x7f);
+        apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+
+        // apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
+        // apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
+        // apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf4);
+        // apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x24);
+        // apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x17);
+        // apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0x08);
+        // apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xFF);
+        // apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0xf0);
+        // -------------------------------------------------------------------
+        // MARK: Noise Enable
+        // -------------------------------------------------------------------
+        // TODO: Noise enable (NON)
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $3D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // When the noise enable bit is specified for a certain channel, white
+        // noise is issued instead of sample data. The frequency of the white
+        // noise is set in the FLG register. The white noise still requires a
+        // (dummy) sample to determine the length of sound (or unlimited sound
+        // if the sample loops).
+        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xf0);
+        // -------------------------------------------------------------------
+        // MARK: Pitch Modulation
+        // -------------------------------------------------------------------
+        // TODO: Pitch Modulation (PMON)
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $2D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|  -  |
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // Pitch modulation multiplies the current pitch of the channel by
+        // OUTX of the previous channel. (P (modulated) = P[X] * (1 + OUTX[X-1])
+        //
+        // So a sine wave in the previous channel would cause some vibrato on
+        // the modulated channel. Note that OUTX is before volume
+        // multiplication, so you can have a silent channel for modulating.
+        apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
+        // -------------------------------------------------------------------
         // MARK: Main Volume & Echo Volume
         // -------------------------------------------------------------------
         apu.write(Sony_S_DSP::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
@@ -431,8 +415,6 @@ struct ChipSPC700 : Module {
             pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
             float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
             frequency = rack::clamp(frequency, 0.0f, 20000.0f);
-
-            // auto frequency = dsp::FREQ_C4 * pow(2, params[PARAM_FREQ].getValue());
             // convert the floating point frequency to a 14-bit pitch value
             auto pitch16bit = Sony_S_DSP::convert_pitch(frequency);
             // set the 14-bit pitch value to the cascade of two RAM slots

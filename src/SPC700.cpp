@@ -295,8 +295,10 @@ struct ChipSPC700 : Module {
     ///
     inline void process(const ProcessArgs &args) final {
         // write the first directory to the ram (points to address 256)
-        ram[1] = 1;
-        ram[3] = 1;
+        *reinterpret_cast<uint16_t*>(&ram[0]) = 256;
+        // ram[1] = 1;
+        *reinterpret_cast<uint16_t*>(&ram[2]) = 256;
+        // ram[3] = 1;
         // set address 256 to a single sample ramp wave
         ram[256] = 0b11000011;
         for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);

@@ -133,7 +133,9 @@ struct ChipSPC700 : Module {
         // ...
         // This can continue for up to 256 samples. (SRCN can only reference
         // 256 samples)
-        // apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
+
+        // set the source directory location to the first 256 bytes
+        apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
 
         // This register is written to during DSP activity.
         //
@@ -341,6 +343,19 @@ struct ChipSPC700 : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
+        // write the first directory to the ram (points to address 256)
+        ram[1] = 1;
+        ram[3] = 1;
+        // set address 256 to a single sample ramp wave
+        ram[256] = 0b11000011;
+        for (int i = 1; i < 9; i++) ram[256 + i] = 15 + 2 * (i - 1);
+        // ram[256 + 1 * 9] = 0b11000000;
+        // for (int i = 1; i < 9; i++) ram[256 + 1 * 9 + i] = 8 + i - 1;
+        // ram[256 + 2 * 9] = 0b11000000;
+        // for (int i = 1; i < 9; i++) ram[256 + 2 * 9 + i] = 16 + i - 1;
+        // ram[256 + 3 * 9] = 0b11000011;
+        // for (int i = 1; i < 9; i++) ram[256 + 3 * 9 + i] = 24 + i - 1;
+
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------

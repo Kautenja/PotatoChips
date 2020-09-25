@@ -470,7 +470,7 @@ struct ChipSPC700Widget : ModuleWidget {
     ///
     explicit ChipSPC700Widget(ChipSPC700 *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-DSP.svg";
+        static constexpr auto panel = "res/S-SMP.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

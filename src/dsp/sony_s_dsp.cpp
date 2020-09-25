@@ -266,8 +266,6 @@ inline int clamp_16(int n) {
     return n;
 }
 
-#include <iostream>
-
 void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     // Should we just fill the buffer with silence? Flags won't be cleared
     // during this run so it seems it should keep resetting every sample.
@@ -281,8 +279,6 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     };
 
     const src_dir* const sd = (src_dir*) &ram[g.wave_page * 0x100];
-// std::cout << int(g.wave_page * 0x100) << std::endl;
-// std::cout << (int) ram[0] << std::endl;
 
     int left_volume  = g.left_volume;
     int right_volume = g.right_volume;
@@ -337,7 +333,6 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 // key on
                 keys |= vbit;
                 voice.addr = GET_LE16(sd[raw_voice.waveform].start);
-// std::cout << voice.addr << std::endl;
                 voice.block_remain = 1;
                 voice.envx = 0;
                 voice.block_header = 0;
@@ -381,13 +376,11 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                         if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
                             voice.addr = GET_LE16(sd[raw_voice.waveform].loop);
-// std::cout << voice.addr << std::endl;
                         } else {
                             // first block was end block; don't play anything
                             goto sample_ended; // to do: find alternative to goto
                         }
                     }
-// std::cout << voice.addr << std::endl;
                     voice.block_header = ram[voice.addr++];
                     voice.block_remain = 16;  // nibbles
                 }

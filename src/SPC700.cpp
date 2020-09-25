@@ -341,6 +341,13 @@ struct ChipSPC700 : Module {
         }
 
         apu.write((0 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 127);
+        apu.write((1 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((2 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((3 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((4 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((5 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((6 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
+        apu.write((7 << 4) | Sony_S_DSP::FIR_COEFFICIENTS, 0);
     }
 
     /// @brief Process the CV inputs for the given channel.

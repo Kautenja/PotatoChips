@@ -267,36 +267,38 @@ inline int clamp_16(int n) {
 }
 
 void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
-    // Should we just fill the buffer with silence? Flags won't be cleared
-    // during this run so it seems it should keep resetting every sample.
-    if (g.flags & 0x80) {
-        reset();
-    }
-
-    struct src_dir {
-        char start[2];
-        char loop[2];
-    };
-
-    const src_dir* const sd = (src_dir*) &ram[g.wave_page * 0x100];
-
+    // TODO: Should we just fill the buffer with silence? Flags won't be
+    // cleared during this run so it seems it should keep resetting every
+    // sample.
+    if (g.flags & 0x80) reset();
+    // use the global wave page address to lookup a pointer to the first entry
+    // in the source directory. the wave page is multiplied by 0x100 to produce
+    // the RAM address of the source directory.
+    const SourceDirectoryEntry* const source_directory =
+        reinterpret_cast<SourceDirectoryEntry*>(&ram[g.wave_page * 0x100]);
+    // get the volume of the left channel from the global registers
     int left_volume  = g.left_volume;
     int right_volume = g.right_volume;
     // kill global surround
     if (left_volume * right_volume < surround_threshold)
         right_volume = -right_volume;
-
+    // render samples at 32kHz for the given count of samples
     while (--count >= 0) {
-        // Here we check for keys on/off.  Docs say that successive writes
-        // to KON/KOF must be separated by at least 2 Ts periods or risk
-        // being neglected.  Therefore DSP only looks at these during an
-        // update, and not at the time of the write.  Only need to do this
+        // -------------------------------------------------------------------
+        // MARK: Key Off / Key On
+        // -------------------------------------------------------------------
+        // Here we check for keys on / off. Docs say that successive writes
+        // to KON / KOF must be separated by at least 2 T_s periods or risk
+        // being neglected.  Therefore, DSP only looks at these during an
+        // update, and not at the time of the write. Only need to do this
         // once however, since the regs haven't changed over the whole
         // period we need to catch up with.
-
+        // -------------------------------------------------------------------
         // Keying on a voice resets that bit in ENDX.
         g.wave_ended &= ~g.key_ons;
-
+        // -------------------------------------------------------------------
+        // MARK: Noise
+        // -------------------------------------------------------------------
         // the `noise_enables` register is a length 8 bit-mask for enabling /
         // disabling noise for each individual voice.
         if (g.noise_enables) {  // noise enabled for at least one voice
@@ -313,15 +315,19 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 noise = (feedback & 0x4000) | (noise >> 1);
             }
         }
-
-        // What is the expected behavior when pitch modulation is enabled on
-        // voice 0? Jurassic Park 2 does this. Assume 0 for now.
+        // -------------------------------------------------------------------
+        // MARK: Voice Processing
+        // -------------------------------------------------------------------
+        // store output of the the last monophonic voice for phase modulation.
+        // TODO: What is the expected behavior when pitch modulation is enabled
+        // on voice 0? Jurassic Park 2 does this. Assume 0 for now.
         int prev_outx = 0;
-
+        // buffer the outputs of the left and right echo and main channels
         int echol = 0;
         int echor = 0;
         int left = 0;
         int right = 0;
+        // iterate over the voices on the chip
         for (unsigned vidx = 0; vidx < VOICE_COUNT; vidx++) {
             // get the voices bit-mask shift value
             const int vbit = 1 << vidx;
@@ -332,7 +338,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             if (voice.on_cnt && !--voice.on_cnt) {
                 // key on
                 keys |= vbit;
-                voice.addr = GET_LE16(sd[raw_voice.waveform].start);
+                voice.addr = GET_LE16(source_directory[raw_voice.waveform].start);
                 voice.block_remain = 1;
                 voice.envx = 0;
                 voice.block_header = 0;
@@ -375,7 +381,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                         g.wave_ended |= vbit;
                         if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
-                            voice.addr = GET_LE16(sd[raw_voice.waveform].loop);
+                            voice.addr = GET_LE16(source_directory[raw_voice.waveform].loop);
                         } else {
                             // first block was end block; don't play anything
                             goto sample_ended; // to do: find alternative to goto

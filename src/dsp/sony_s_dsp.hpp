@@ -94,6 +94,14 @@ class Sony_S_DSP {
         FIR_COEFFICIENTS = 0x0F
     };
 
+    /// An entry in the source directory in the 64KB RAM.
+    struct SourceDirectoryEntry {
+        /// the start address of the sample in the directory
+        char start[2];
+        /// the loop address of the sample in the directory
+        char loop[2];
+    };
+
     /// Returns the 14-bit pitch based on th given frequency.
     ///
     /// @param frequency the frequency in Hz

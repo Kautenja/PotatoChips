@@ -174,7 +174,7 @@ class Sony_S_DSP {
     }
 
  private:
-    /// a single synthesizer voice (channel) on the chip.
+    /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
         /// the volume of the left channel
         int8_t left_vol;
@@ -196,51 +196,51 @@ class Sony_S_DSP {
         int8_t unused[6];
     };
 
-    /// global data structure used by the chip
+    /// A structure mapping the register space to symbolic global data fields.
     struct GlobalData {
         /// padding
         int8_t unused1[12];
-        /// 0C   Main Volume Left (-.7)
+        /// 0C Main Volume Left (8-bit signed value)
         int8_t left_volume;
-        /// 0D   Echo Feedback (-.7)
+        /// 0D   Echo Feedback (8-bit signed value)
         int8_t echo_feedback;
         /// padding
         int8_t unused2[14];
-        /// 1C   Main Volume Right (-.7)
+        /// 1C   Main Volume Right (8-bit signed value)
         int8_t right_volume;
         /// padding
         int8_t unused3[15];
-        /// 2C   Echo Volume Left (-.7)
+        /// 2C   Echo Volume Left (8-bit signed value)
         int8_t left_echo_volume;
-        /// 2D   Pitch Modulation on/off for each voice
+        /// 2D   Pitch Modulation on/off for each voice (bit-mask)
         uint8_t pitch_mods;
         /// padding
         int8_t unused4[14];
-        /// 3C   Echo Volume Right (-.7)
+        /// 3C   Echo Volume Right (8-bit signed value)
         int8_t right_echo_volume;
-        /// 3D   Noise output on/off for each voice
+        /// 3D   Noise output on/off for each voice (bit-mask)
         uint8_t noise_enables;
         /// padding
         int8_t unused5[14];
-        /// 4C   Key On for each voice
+        /// 4C   Key On for each voice (bit-mask)
         uint8_t key_ons;
-        /// 4D   Echo on/off for each voice
+        /// 4D   Echo on/off for each voice (bit-mask)
         uint8_t echo_ons;
         /// padding
         int8_t unused6[14];
-        /// 5C   key off for each voice (instantiates release mode)
+        /// 5C   key off for each voice (instantiates release mode) (bit-mask)
         uint8_t key_offs;
         /// 5D   source directory (wave table offsets)
         uint8_t wave_page;
         /// padding
         int8_t unused7[14];
-        /// 6C   flags and noise freq
+        /// 6C   flags and noise freq (coded 8-bit value)
         uint8_t flags;
-        /// 6D
+        /// 6D   the page of RAM to use for the echo buffer
         uint8_t echo_page;
         /// padding
         int8_t unused8[14];
-        /// 7C
+        /// 7C   whether the sample has ended for each voice (bit-mask)
         uint8_t wave_ended;
         /// 7D   ms >> 4
         uint8_t echo_delay;
@@ -248,42 +248,51 @@ class Sony_S_DSP {
         char unused9[2];
     };
 
+    /// Combine the raw voice, registers, and global data structures into a
+    /// single piece of memory to allow easy symbolic access to register data
     union {
-        /// the voices on the chip
-        RawVoice voice[VOICE_COUNT];
         /// the register bank on the chip
         uint8_t registers[NUM_REGISTERS];
-        /// global data on the chip
-        GlobalData g;
+        /// the mapping of register data to the voices on the chip
+        RawVoice voice[VOICE_COUNT];
+        /// the mapping of register data to the global data on the chip
+        GlobalData global;
     };
 
-    /// a pointer to the shared RAM bank
+    /// The values of the FIR filter coefficients from the register bank. This
+    /// allows the FIR coefficients to be stored as 16-bit
+    short fir_coeff[VOICE_COUNT];
+
+    /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
+    /// the SPC700.
+    /// @details
+    /// this must be maintained by the caller in order to provide data to the
+    /// S-DSP. This includes input sample data, and the allocated space for the
+    /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
     uint8_t* const ram;
 
-    /// Cache of echo FIR values for faster access
-    short fir_coeff[VOICE_COUNT];
+    /// A bit-mask representation of the active voice gates
+    int keys;
+
+    /// The number of samples until the LFSR will sample a new value
+    int noise_count;
+    /// The discrete sampled LFSR register noise value
+    int noise;
+    /// The amplified LFSR register noise sample
+    int noise_amp;
+
+    /// A pointer to the head of the echo buffer in RAM
+    int echo_ptr;
 
     /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
     short fir_buf[16][2];
     /// (0 to 7)
     int fir_offset;
 
-    /// TODO
-    int keys;
-
-    /// TODO
-    int echo_ptr;
-    /// TODO
-    int noise_amp;
-    /// TODO
-    int noise;
-    /// TODO
-    int noise_count;
-
-    /// TODO
+    /// A threshold to use when disabling surround from stereo panning
     int surround_threshold;
 
-    /// TODO
+    /// The values of the Gaussian filter on the DAC of the SNES
     static int16_t const gauss[];
 
     /// The states of the ADSR envelope generator.

@@ -42,8 +42,8 @@ void Sony_S_DSP::reset() {
     keys = echo_ptr = noise_count = fir_offset = 0;
     noise = 1;
     // reset, mute, echo off
-    g.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
-    g.key_ons = 0;
+    global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
+    global.key_ons = 0;
     // reset voices
     for (unsigned i = 0; i < VOICE_COUNT; i++) {
         VoiceState& v = voice_state[i];
@@ -87,7 +87,7 @@ void Sony_S_DSP::write(uint8_t address, uint8_t data) {
     }
 }
 
-/// This table is for envelope timing.  It represents the number of counts
+/// This table is for envelope timinglobal.  It represents the number of counts
 /// that should be subtracted from the counter each sample period (32kHz).
 /// The counter starts at 30720 (0x7800). Each count divides exactly into
 /// 0x7800 without remainder.
@@ -273,15 +273,15 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     // TODO: Should we just fill the buffer with silence? Flags won't be
     // cleared during this run so it seems it should keep resetting every
     // sample.
-    if (g.flags & FLAG_MASK_RESET) reset();
+    if (global.flags & FLAG_MASK_RESET) reset();
     // use the global wave page address to lookup a pointer to the first entry
     // in the source directory. the wave page is multiplied by 0x100 to produce
     // the RAM address of the source directory.
     const SourceDirectoryEntry* const source_directory =
-        reinterpret_cast<SourceDirectoryEntry*>(&ram[g.wave_page * 0x100]);
+        reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
     // get the volume of the left channel from the global registers
-    int left_volume  = g.left_volume;
-    int right_volume = g.right_volume;
+    int left_volume  = global.left_volume;
+    int right_volume = global.right_volume;
     // kill global surround
     if (left_volume * right_volume < surround_threshold)
         right_volume = -right_volume;
@@ -298,16 +298,16 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         // period we need to catch up with.
         // -------------------------------------------------------------------
         // Keying on a voice resets that bit in ENDX.
-        g.wave_ended &= ~g.key_ons;
+        global.wave_ended &= ~global.key_ons;
         // -------------------------------------------------------------------
         // MARK: Noise
         // -------------------------------------------------------------------
         // the `noise_enables` register is a length 8 bit-mask for enabling /
         // disabling noise for each individual voice.
-        if (g.noise_enables) {  // noise enabled for at least one voice
+        if (global.noise_enables) {  // noise enabled for at least one voice
             // update the noise period based on the index of the rate in the
             // global flags register
-            noise_count -= env_rates[g.flags & FLAG_MASK_NOISE_PERIOD];
+            noise_count -= env_rates[global.flags & FLAG_MASK_NOISE_PERIOD];
             if (noise_count <= 0) {  // rising edge of noise generator
                 // reset the noise period to the initial value
                 noise_count = env_rate_init;
@@ -362,12 +362,12 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 voice.envstate = state_attack;
             }
             // key-on = !key-off = true
-            if (g.key_ons & voice_bit & ~g.key_offs) {
-                g.key_ons &= ~voice_bit;
+            if (global.key_ons & voice_bit & ~global.key_offs) {
+                global.key_ons &= ~voice_bit;
                 voice.on_cnt = 8;
             }
             // key-off = true
-            if (keys & g.key_offs & voice_bit) {
+            if (keys & global.key_offs & voice_bit) {
                 voice.envstate = state_release;
                 voice.on_cnt = 0;
             }
@@ -384,7 +384,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             for (int n = voice.fraction >> 12; --n >= 0;) {
                 if (!--voice.block_remain) {
                     if (voice.block_header & 1) {
-                        g.wave_ended |= voice_bit;
+                        global.wave_ended |= voice_bit;
                         if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
                             voice.addr = GET_LE16(source_directory[raw_voice.waveform].loop);
@@ -404,7 +404,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                     (voice.block_header & 3) != 3
                 ) {  // next block has end flag set, this block ends early
             sample_ended:
-                    g.wave_ended |= voice_bit;
+                    global.wave_ended |= voice_bit;
                     keys &= ~voice_bit;
                     raw_voice.envx = 0;
                     voice.envx = 0;
@@ -464,7 +464,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
 
             // rate (with possible modulation)
             int rate = GET_LE16(raw_voice.rate) & 0x3FFF;
-            if (g.pitch_mods & voice_bit)
+            if (global.pitch_mods & voice_bit)
                 rate = (rate * (prev_outx + 32768)) >> 15;
 
             // Gaussian interpolation using most recent 4 samples
@@ -480,7 +480,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
 
             // if noise is enabled for this voice use the amplified noise as
             // the output, otherwise use the clamped sampled value
-            int output = (g.noise_enables & voice_bit) ? noise_amp : clamp_16(s);
+            int output = (global.noise_enables & voice_bit) ? noise_amp : clamp_16(s);
             // scale output and set outx values
             output = (output * envx) >> 11 & ~1;
             int l = (voice.volume[0] * output) >> 7;
@@ -488,7 +488,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
 
             prev_outx = output;
             raw_voice.outx = output >> 8;
-            if (g.echo_ons & voice_bit) {
+            if (global.echo_ons & voice_bit) {
                 echol += l;
                 echor += r;
             }
@@ -507,9 +507,9 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
 
         // read feedback from echo buffer
         int echo_ptr = this->echo_ptr;
-        uint8_t* echo_buf = &ram[(g.echo_page * 0x100 + echo_ptr) & 0xFFFF];
+        uint8_t* echo_buf = &ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF];
         echo_ptr += 4;
-        if (echo_ptr >= (g.echo_delay & 15) * 0x800)
+        if (echo_ptr >= (global.echo_delay & 15) * 0x800)
             echo_ptr = 0;
         int fb_left  = (int16_t) GET_LE16(echo_buf    );  // sign-extend
         int fb_right = (int16_t) GET_LE16(echo_buf + 2);  // sign-extend
@@ -544,12 +544,12 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 fir_pos[6][1] * fir_coeff[1] +
                 fir_pos[7][1] * fir_coeff[0];
 
-        left  += (fb_left  * g.left_echo_volume) >> 14;
-        right += (fb_right * g.right_echo_volume) >> 14;
+        left  += (fb_left  * global.left_echo_volume) >> 14;
+        right += (fb_right * global.right_echo_volume) >> 14;
 
-        if (!(g.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
-            echol += (fb_left  * g.echo_feedback) >> 14;
-            echor += (fb_right * g.echo_feedback) >> 14;
+        if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
+            echol += (fb_left  * global.echo_feedback) >> 14;
+            echor += (fb_right * global.echo_feedback) >> 14;
             SET_LE16(echo_buf    , clamp_16(echol));
             SET_LE16(echo_buf + 2, clamp_16(echor));
         }
@@ -563,7 +563,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             out_buf[1] = right = clamp_16(right);
             out_buf += 2;
 
-            if (g.flags & FLAG_MASK_MUTE) {  // muting
+            if (global.flags & FLAG_MASK_MUTE) {  // muting
                 out_buf[-2] = 0;
                 out_buf[-1] = 0;
             }

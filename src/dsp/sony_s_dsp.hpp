@@ -100,16 +100,16 @@ class Sony_S_DSP {
 
     /// An entry in the source directory in the 64KB RAM.
     struct SourceDirectoryEntry {
-        /// the start address of the sample in the directory
-        union {
-            char start[2];
-            uint16_t start16;
-        };
-        /// the loop address of the sample in the directory
-        union {
-            char loop[2];
-            uint16_t loop16;
-        };
+        /// @brief the start address of the sample in the directory.
+        /// @details
+        /// In hardware this is represented across two bytes; in software we
+        /// will skip to the 16-bit representation of the RAM address.
+        uint16_t start;
+        /// @brief the loop address of the sample in the directory.
+        /// @details
+        /// In hardware this is represented across two bytes; in software we
+        /// will skip to the 16-bit representation of the RAM address.
+        uint16_t loop;
     };
 
     /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9

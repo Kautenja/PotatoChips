@@ -202,8 +202,8 @@ struct ChipS_SMP : Module {
         //       into this RAM
         // write the first directory to RAM
         auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0]);
-        dir->start16 = 256;
-        dir->loop16 = 256;
+        dir->start = 256;
+        dir->loop = 256;
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
         auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[256]);

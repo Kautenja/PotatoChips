@@ -44,6 +44,8 @@ struct ChipS_SMP : Module {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ,          Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP::VOICE_COUNT),
+        ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_NOISE_FREQ,    Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
@@ -51,19 +53,22 @@ struct ChipS_SMP : Module {
         ENUMS(PARAM_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
-        ENUMS(PARAM_FIR_COEFFICIENT, 8),
+        ENUMS(PARAM_ECHO_ENABLE,   Sony_S_DSP::VOICE_COUNT),
         PARAM_ECHO_DELAY,
         PARAM_ECHO_FEEDBACK,
         ENUMS(PARAM_VOLUME_ECHO, 2),
         ENUMS(PARAM_VOLUME_MAIN, 2),
+        ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT,          Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_NOISE_FM,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_FM,            Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP::VOICE_COUNT),
+        ENUMS(INPUT_NOISE_FM,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_GATE,          Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
@@ -71,11 +76,12 @@ struct ChipS_SMP : Module {
         ENUMS(INPUT_DECAY,         Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_FIR_COEFFICIENT, 8),
+        ENUMS(INPUT_ECHO_ENABLE,   Sony_S_DSP::VOICE_COUNT),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
         ENUMS(INPUT_VOLUME_MAIN, 2),
+        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
 
@@ -104,6 +110,14 @@ struct ChipS_SMP : Module {
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
+            configParam(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable");
+            configParam(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable");
+            if (osc == 0) {
+                // voice 0 does not have phase modulation in the emulator
+            } else {
+                osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
+                configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
+            }
         }
         for (unsigned coeff = 0; coeff < Sony_S_DSP::FIR_COEFFICIENT_COUNT; coeff++) {
             // the first FIR coefficient defaults to 0x7f = 127 and the other
@@ -530,6 +544,17 @@ struct ChipS_SMPWidget : ModuleWidget {
             auto sustainRate = createParam<Rogan2PWhite>(Vec(630, 35 + i * 41), module, ChipS_SMP::PARAM_SUSTAIN_RATE + i);
             sustainRate->snap = true;
             addParam(sustainRate);
+            // Phase Modulation
+            if (i > 0) {  // phase modulation is not defined for the first voice
+                addParam(createParam<CKSS>(Vec(880, 40  + i * 41), module, ChipS_SMP::PARAM_PM_ENABLE + i));
+                addInput(createInput<PJ301MPort>(Vec(900, 40 + i * 41), module, ChipS_SMP::INPUT_PM_ENABLE + i));
+            }
+            // Echo Enable
+            addParam(createParam<CKSS>(Vec(940, 40  + i * 41), module, ChipS_SMP::PARAM_ECHO_ENABLE + i));
+            addInput(createInput<PJ301MPort>(Vec(960, 40 + i * 41), module, ChipS_SMP::INPUT_ECHO_ENABLE + i));
+            // Noise Enable
+            addParam(createParam<CKSS>(Vec(1000, 40  + i * 41), module, ChipS_SMP::PARAM_NOISE_ENABLE + i));
+            addInput(createInput<PJ301MPort>(Vec(1020, 40 + i * 41), module, ChipS_SMP::INPUT_NOISE_ENABLE + i));
         }
         // Echo Delay
         auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipS_SMP::PARAM_ECHO_DELAY);

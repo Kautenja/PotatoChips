@@ -111,9 +111,7 @@ struct ChipS_SMP : Module {
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
             configParam(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable");
             configParam(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable");
-            if (osc == 0) {
-                // voice 0 does not have phase modulation in the emulator
-            } else {
+            if (osc > 0) {  // voice 0 does not have phase modulation
                 osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
                 configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
             }

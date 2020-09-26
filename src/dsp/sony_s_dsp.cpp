@@ -34,8 +34,6 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(4 == sizeof(EchoBufferSample));
     // setup the default state of the chip
     disable_surround(false);
-    // verify the byte order of the host machine
-    // blargg_verify_byte_order();
 }
 
 void Sony_S_DSP::reset() {

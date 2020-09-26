@@ -203,7 +203,6 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     return envx;
 }
 
-// TODO: replace with generic clamp function from std.
 /// Clamp an integer to a 16-bit value.
 ///
 /// @param n a 32-bit integer value to clip

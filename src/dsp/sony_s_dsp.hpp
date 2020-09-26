@@ -36,7 +36,7 @@ class Sony_S_DSP {
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 
-    /// the global registers on the S-DSP.
+    /// @brief the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {
         /// The volume for the left channel of the main output
         MAIN_VOLUME_LEFT =         0x0C,
@@ -72,8 +72,8 @@ class Sony_S_DSP {
         ECHO_DELAY =               0x7D
     };
 
-    /// the channel registers on the S-DSP. To get the register for channel
-    /// `n`, perform the logical OR of the register address with `0xn0`.
+    /// @brief the channel registers on the S-DSP. To get the register for
+    /// channel `n`, perform the logical OR of the register address with `0xn0`.
     enum ChannelRegister : uint8_t {
         /// Left channel volume (8-bit signed value).
         VOLUME_LEFT      = 0x00,
@@ -100,7 +100,7 @@ class Sony_S_DSP {
         FIR_COEFFICIENTS = 0x0F
     };
 
-    /// An entry in the source directory in the 64KB RAM.
+    /// @brief An entry in the source directory in the 64KB RAM.
     struct SourceDirectoryEntry {
         /// @brief the start address of the sample in the directory.
         /// @details
@@ -157,7 +157,7 @@ class Sony_S_DSP {
         uint8_t samples[NUM_SAMPLES];
     } __attribute__((packed));
 
-    /// Bit-masks for extracting values from the flags registers.
+    /// @brief Bit-masks for extracting values from the flags registers.
     enum FlagMasks {
         /// a mask for the flag register to extract the noise period parameter
         FLAG_MASK_NOISE_PERIOD = 0x1F,
@@ -167,6 +167,16 @@ class Sony_S_DSP {
         FLAG_MASK_MUTE = 0x40,
         /// a mask for the flag register to extract the reset chip bit
         FLAG_MASK_RESET = 0x80
+    };
+
+    /// @brief A stereo sample in the echo buffer.
+    struct EchoBufferSample {
+        /// the index of the left channel in the samples array
+        static constexpr unsigned LEFT = 0;
+        /// the index of the right channel in the samples array
+        static constexpr unsigned RIGHT = 1;
+        /// the 16-bit sample for the left [0] and right [1] channels.
+        int16_t samples[2];
     };
 
     /// @brief Returns the 14-bit pitch based on th given frequency.

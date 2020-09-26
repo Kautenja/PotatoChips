@@ -505,15 +505,18 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         // MARK: Echo FIR filter
         // -------------------------------------------------------------------
 
-        // read feedback from echo buffer
-        int echo_ptr = this->echo_ptr;
-        uint8_t* echo_buf = &ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF];
-        echo_ptr += 4;
-        if (echo_ptr >= (global.echo_delay & 15) * 0x800)
-            echo_ptr = 0;
-        int fb_left  = (int16_t) GET_LE16(echo_buf    );  // sign-extend
-        int fb_right = (int16_t) GET_LE16(echo_buf + 2);  // sign-extend
-        this->echo_ptr = echo_ptr;
+        // get the current feedback sample in the echo buffer
+        EchoBufferSample* const echo_sample =
+            reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
+        // increment the echo pointer by the size of the echo buffer sample (4)
+        echo_ptr += sizeof(EchoBufferSample);
+        // check if for the end of the ring buffer and wrap the pointer around
+        // the echo delay is clamped in [0, 15] and each delay index requires
+        // 2KB of RAM (0x800)
+        if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
+        // cache the feedback value (sign-extended to 32-bit)
+        int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
+        int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
 
         // put samples in history ring buffer
         const int fir_offset = this->fir_offset;
@@ -548,10 +551,12 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         right += (fb_right * global.right_echo_volume) >> 14;
 
         if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
+            // add feedback to the echo samples
             echol += (fb_left  * global.echo_feedback) >> 14;
             echor += (fb_right * global.echo_feedback) >> 14;
-            SET_LE16(echo_buf    , clamp_16(echol));
-            SET_LE16(echo_buf + 2, clamp_16(echor));
+            // put the echo samples into the buffer
+            echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
+            echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
         }
 
         // -------------------------------------------------------------------

@@ -20,6 +20,7 @@
 #define DSP_SONY_S_DSP_HPP_
 
 #include "exceptions.hpp"
+#include <cstring>
 #include <cassert>
 
 /// @brief Sony S-DSP chip emulator.
@@ -365,7 +366,21 @@ class Sony_S_DSP {
     explicit Sony_S_DSP(uint8_t* ram);
 
     /// @brief Clear state and silence everything.
-    void reset();
+    void reset() {
+        keys = echo_ptr = noise_count = fir_offset = 0;
+        noise = 1;
+        // reset, mute, echo off
+        global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
+        global.key_ons = 0;
+        // reset voices
+        for (unsigned i = 0; i < VOICE_COUNT; i++) {
+            VoiceState& v = voice_states[i];
+            v.on_cnt = v.volume[0] = v.volume[1] = 0;
+            v.envelope_stage = EnvelopeStage::Release;
+        }
+        // clear the echo buffer
+        memset(fir_buf, 0, sizeof fir_buf);
+    }
 
     /// @brief Read data from the register at the given address.
     ///
@@ -382,7 +397,31 @@ class Sony_S_DSP {
     /// @param address the address of the register to write data to
     /// @param data the data to write to the register
     ///
-    void write(uint8_t address, uint8_t data);
+    void write(uint8_t address, uint8_t data) {
+        if (address >= NUM_REGISTERS)  // make sure the given address is valid
+            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
+        // store the data in the register with given address
+        registers[address] = data;
+        // get the high 4 bits for indexing the voice / FIR coefficients
+        int index = address >> 4;
+        // update volume / FIR coefficients
+        switch (address & FIR_COEFFICIENTS) {
+            // voice volume
+            case 0:    // left channel, fall through to next block
+            case 1: {  // right channel, process both left and right channels
+                short* volume = voice_states[index].volume;
+                int left  = (int8_t) registers[address & ~1];
+                int right = (int8_t) registers[address |  1];
+                volume[0] = left;
+                volume[1] = right;
+                break;
+            }
+            case FIR_COEFFICIENTS:  // update FIR coefficients
+                // sign-extend
+                fir_coeff[index] = (int8_t) data;
+                break;
+        }
+    }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///

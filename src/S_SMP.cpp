@@ -207,11 +207,12 @@ struct ChipS_SMP : Module {
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
         auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[256]);
-        block->flags.set_volume(12);
+        block->flags.set_volume(Sony_S_DSP::BitRateReductionBlock::MAX_VOLUME);
         block->flags.filter = 0;
         block->flags.is_loop = 1;
         block->flags.is_end = 1;
-        for (int i = 0; i < 8; i++) block->samples[i] = 15 + 2 * i;
+        for (int i = 0; i < Sony_S_DSP::BitRateReductionBlock::NUM_SAMPLES; i++)
+            block->samples[i] = 15 + 2 * i;
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------

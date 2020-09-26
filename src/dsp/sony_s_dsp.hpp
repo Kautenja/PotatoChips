@@ -25,7 +25,9 @@
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP {
  public:
-    /// the number of oscillators / sample on the chip
+    /// the sample rate of the S-DSP in Hz
+    static constexpr int SAMPLE_RATE = 32000;
+    /// the number of sampler voices on the chip
     static constexpr unsigned VOICE_COUNT = 8;
     /// the number of RAM registers on the chip
     static constexpr unsigned NUM_REGISTERS = 128;
@@ -57,7 +59,7 @@ class Sony_S_DSP {
         /// Offset of source directory
         /// (`OFFSET_SOURCE_DIRECTORY * 0x100` = memory offset)
         OFFSET_SOURCE_DIRECTORY =  0x5D,
-        /// DSP flags for MUTE, ECHO, RESET, NOISE CLOCK
+        /// DSP flags for RESET, MUTE, ECHO, NOISE PERIOD
         FLAGS =                    0x6C,
         /// Echo buffer start offset
         /// (`ECHO_BUFFER_START_OFFSET * 0x100` = memory offset)
@@ -114,6 +116,11 @@ class Sony_S_DSP {
     /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
     /// BRR samples.
     struct BitRateReductionBlock {
+        /// the number of 1-byte samples in each block of BRR samples
+        static constexpr unsigned NUM_SAMPLES = 8;
+        /// the maximal volume level for a BRR sample block
+        static constexpr uint8_t MAX_VOLUME = 0x0C;
+
         union {
             /// a structure containing the 8-bit header flag with schema:
             // +------+------+------+------+------+------+------+------+
@@ -138,14 +145,14 @@ class Sony_S_DSP {
                 /// set the volume to the new level in the range [0, 12]
                 ///
                 inline void set_volume(uint8_t level) {
-                    volume = std::min(level, static_cast<uint8_t>(0x0C));
+                    volume = std::min(level, static_cast<uint8_t>(MAX_VOLUME));
                 }
             } flags;
             /// the encoded header byte
             uint8_t header;
         };
         /// the 8-byte block of sample data
-        uint8_t samples[8];
+        uint8_t samples[NUM_SAMPLES];
     } __attribute__((packed));
 
     /// Bit-masks for extracting values from the flags registers.
@@ -166,10 +173,12 @@ class Sony_S_DSP {
     /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
     /// @details
     ///
-    /// \f$frequency = 32000 * \frac{pitch}{2^{12}}\f$
+    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
     ///
     static inline uint16_t convert_pitch(float frequency) {
-        const auto pitch = static_cast<float>(1 << 12) * frequency / 32000.f;
+        // calculate the pitch based on the known relationship to frequency
+        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
+        // mask the 16-bit pitch to 14-bit
         return 0x3FFF & static_cast<uint16_t>(pitch);
     }
 

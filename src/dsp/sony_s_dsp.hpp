@@ -26,11 +26,13 @@
 class Sony_S_DSP {
  public:
     /// the sample rate of the S-DSP in Hz
-    static constexpr int SAMPLE_RATE = 32000;
+    static constexpr unsigned SAMPLE_RATE = 32000;
     /// the number of sampler voices on the chip
     static constexpr unsigned VOICE_COUNT = 8;
     /// the number of RAM registers on the chip
     static constexpr unsigned NUM_REGISTERS = 128;
+    /// the size of the RAM bank in bytes
+    static constexpr unsigned SIZE_OF_RAM = 1 << 16;
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 

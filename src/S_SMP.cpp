@@ -29,7 +29,7 @@
 struct ChipS_SMP : Module {
  private:
     /// the RAM for the S-DSP chip (64KB = 16-bit address space)
-    uint8_t ram[1 << 16];
+    uint8_t ram[Sony_S_DSP::SIZE_OF_RAM];
     /// the Sony S-DSP sound chip emulator
     Sony_S_DSP apu{ram};
 

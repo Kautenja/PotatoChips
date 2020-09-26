@@ -304,17 +304,8 @@ class Sony_S_DSP {
     /// The values of the Gaussian filter on the DAC of the SNES
     static int16_t const gauss[];
 
-    /// The states of the ADSR envelope generator.
-    enum EnvelopeState : short {
-        /// the attack stage of the envelope generator
-        state_attack,
-        /// the decay stage of the envelope generator
-        state_decay,
-        /// the sustain stage of the envelope generator
-        state_sustain,
-        /// the release stage of the envelope generator
-        state_release
-    };
+    /// The stages of the ADSR envelope generator.
+    enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
 
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
@@ -346,8 +337,8 @@ class Sony_S_DSP {
         short envx;
         /// TODO
         short on_cnt;
-        /// TODO
-        short envstate;  // TODO: change type to EnvelopeState
+        /// the current stage of the envelope generator
+        EnvelopeStage envstate;
     } voice_state[VOICE_COUNT];
 
     /// TODO: make inline so that `run` becomes a leaf function?

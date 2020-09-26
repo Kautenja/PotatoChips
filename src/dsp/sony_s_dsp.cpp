@@ -48,7 +48,7 @@ void Sony_S_DSP::reset() {
     for (unsigned i = 0; i < VOICE_COUNT; i++) {
         VoiceState& v = voice_state[i];
         v.on_cnt = v.volume[0] = v.volume[1] = 0;
-        v.envstate = EnvelopeStage::Release;
+        v.envelope_stage = EnvelopeStage::Release;
     }
     // clear the echo buffer
     memset(fir_buf, 0, sizeof fir_buf);
@@ -106,7 +106,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     VoiceState& voice = voice_state[voice_idx];
 
     int envx = voice.envx;
-    if (voice.envstate == EnvelopeStage::Release) {
+    if (voice.envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
         // Alright, I'm going to choose to interpret that this way:
@@ -127,7 +127,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     int cnt = voice.envcnt;
     int adsr1 = raw_voice.adsr[0];
     if (adsr1 & 0x80) {
-        switch (voice.envstate) {
+        switch (voice.envelope_stage) {
             case EnvelopeStage::Attack: {
                 // increase envelope by 1/64 each step
                 int t = adsr1 & 15;
@@ -141,7 +141,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 }
                 if (envx >= env_range) {
                     envx = env_range - 1;
-                    voice.envstate = EnvelopeStage::Decay;
+                    voice.envelope_stage = EnvelopeStage::Decay;
                 }
                 voice.envx = envx;
                 break;
@@ -161,7 +161,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 int sustain_level = raw_voice.adsr[1] >> 5;
 
                 if (envx <= (sustain_level + 1) * 0x100)
-                    voice.envstate = EnvelopeStage::Sustain;
+                    voice.envelope_stage = EnvelopeStage::Sustain;
                 break;
             }
 
@@ -204,8 +204,8 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             envx -= env_range / 64;
             if (envx < 0) {
                 envx = 0;
-                if (voice.envstate == EnvelopeStage::Attack)
-                    voice.envstate = EnvelopeStage::Decay;
+                if (voice.envelope_stage == EnvelopeStage::Attack)
+                    voice.envelope_stage = EnvelopeStage::Decay;
             }
             voice.envx = envx;
             break;
@@ -219,8 +219,8 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             envx -= ((envx - 1) >> 8) + 1;
             if (envx < 0) {
                 envx = 0;
-                if (voice.envstate == EnvelopeStage::Attack)
-                    voice.envstate = EnvelopeStage::Decay;
+                if (voice.envelope_stage == EnvelopeStage::Attack)
+                    voice.envelope_stage = EnvelopeStage::Decay;
             }
             voice.envx = envx;
             break;
@@ -359,7 +359,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 // pattern.  I doubt it will matter though, so we'll go
                 // ahead and do the full time for now.
                 voice.envcnt = env_rate_init;
-                voice.envstate = EnvelopeStage::Attack;
+                voice.envelope_stage = EnvelopeStage::Attack;
             }
             // key-on = !key-off = true
             if (global.key_ons & voice_bit & ~global.key_offs) {
@@ -368,7 +368,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             }
             // key-off = true
             if (keys & global.key_offs & voice_bit) {
-                voice.envstate = EnvelopeStage::Release;
+                voice.envelope_stage = EnvelopeStage::Release;
                 voice.on_cnt = 0;
             }
 

@@ -338,7 +338,7 @@ class Sony_S_DSP {
         /// TODO
         short on_cnt;
         /// the current stage of the envelope generator
-        EnvelopeStage envstate;
+        EnvelopeStage envelope_stage;
     } voice_state[VOICE_COUNT];
 
     /// TODO: make inline so that `run` becomes a leaf function?

@@ -462,8 +462,8 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 voice.interp0 = int16_t (clamp_16(delta) * 2);
             }
 
-            // rate (with possible modulation)
-            int rate = GET_LE16(raw_voice.rate) & 0x3FFF;
+            // get the 14-bit frequency value
+            int rate = 0x3FFF & ((raw_voice.rate[1] << 8) | raw_voice.rate[0]);
             if (global.pitch_mods & voice_bit)
                 rate = (rate * (prev_outx + 32768)) >> 15;
 

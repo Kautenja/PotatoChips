@@ -46,7 +46,7 @@ void Sony_S_DSP::reset() {
     global.key_ons = 0;
     // reset voices
     for (unsigned i = 0; i < VOICE_COUNT; i++) {
-        VoiceState& v = voice_state[i];
+        VoiceState& v = voice_states[i];
         v.on_cnt = v.volume[0] = v.volume[1] = 0;
         v.envelope_stage = EnvelopeStage::Release;
     }
@@ -66,7 +66,7 @@ void Sony_S_DSP::write(uint8_t address, uint8_t data) {
         // voice volume
         case 0:    // left channel, fall through to next block
         case 1: {  // right channel, process both left and right channels
-            short* volume = voice_state[index].volume;
+            short* volume = voice_states[index].volume;
             int left  = (int8_t) registers[address & ~1];
             int right = (int8_t) registers[address |  1];
             volume[0] = left;
@@ -103,7 +103,7 @@ const int env_range = 0x800;
 
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voice[voice_idx];
-    VoiceState& voice = voice_state[voice_idx];
+    VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
     if (voice.envelope_stage == EnvelopeStage::Release) {
@@ -336,7 +336,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             const int voice_bit = 1 << voice_idx;
             // cache the voice and data structures
             RawVoice& raw_voice = voice[voice_idx];
-            VoiceState& voice = voice_state[voice_idx];
+            VoiceState& voice = voice_states[voice_idx];
             // ---------------------------------------------------------------
             // MARK: Gate Processing
             // ---------------------------------------------------------------

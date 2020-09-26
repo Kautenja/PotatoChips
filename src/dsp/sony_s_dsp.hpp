@@ -339,7 +339,7 @@ class Sony_S_DSP {
         short on_cnt;
         /// the current stage of the envelope generator
         EnvelopeStage envelope_stage;
-    } voice_state[VOICE_COUNT];
+    } voice_states[VOICE_COUNT];
 
     /// TODO: make inline so that `run` becomes a leaf function?
     /// @brief Process the envelope for the voice with given index.

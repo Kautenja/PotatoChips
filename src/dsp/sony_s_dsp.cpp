@@ -31,6 +31,7 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(NUM_REGISTERS == sizeof(voices));
     assert(9 == sizeof(BitRateReductionBlock));
     assert(4 == sizeof(SourceDirectoryEntry));
+    assert(4 == sizeof(EchoBufferSample));
     // setup the default state of the chip
     disable_surround(false);
     // verify the byte order of the host machine

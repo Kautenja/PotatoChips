@@ -32,8 +32,6 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(9 == sizeof(BitRateReductionBlock));
     assert(4 == sizeof(SourceDirectoryEntry));
     assert(4 == sizeof(EchoBufferSample));
-    // setup the default state of the chip
-    disable_surround(false);
 }
 
 void Sony_S_DSP::reset() {
@@ -69,13 +67,6 @@ void Sony_S_DSP::write(uint8_t address, uint8_t data) {
             int right = (int8_t) registers[address |  1];
             volume[0] = left;
             volume[1] = right;
-            // kill surround only if enabled and signs of volumes differ
-            if (left * right < surround_threshold) {
-                if (left < 0)
-                    volume[0] = -left;
-                else
-                    volume[1] = -right;
-            }
             break;
         }
         case FIR_COEFFICIENTS:  // update FIR coefficients
@@ -280,9 +271,6 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
     // get the volume of the left channel from the global registers
     int left_volume  = global.left_volume;
     int right_volume = global.right_volume;
-    // kill global surround
-    if (left_volume * right_volume < surround_threshold)
-        right_volume = -right_volume;
     // render samples at 32kHz for the given count of samples
     while (--count >= 0) {
         // -------------------------------------------------------------------

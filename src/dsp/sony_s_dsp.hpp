@@ -310,9 +310,6 @@ class Sony_S_DSP {
     /// (0 to 7)
     int fir_offset;
 
-    /// A threshold to use when disabling surround from stereo panning
-    int surround_threshold;
-
     /// The values of the Gaussian filter on the DAC of the SNES
     static int16_t const gauss[];
 
@@ -369,14 +366,6 @@ class Sony_S_DSP {
 
     /// @brief Clear state and silence everything.
     void reset();
-
-    /// @brief Prevent channels and global volumes from being phase-negated.
-    ///
-    /// @param disable true to disable surround, false to enable surround
-    ///
-    inline void disable_surround(bool disable = true) {
-        surround_threshold = disable ? 0 : -0x7FFF;
-    }
 
     /// @brief Read data from the register at the given address.
     ///

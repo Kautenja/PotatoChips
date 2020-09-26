@@ -122,7 +122,7 @@ struct ChipS_SMP : Module {
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
         }
         configParam(PARAM_NOISE_FREQ,         0,  31,  16, "Noise Frequency");
-        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay");
+        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
         configParam(PARAM_VOLUME_ECHO + 0, -128, 127, 127, "Echo Volume (Left)");
         configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
@@ -425,6 +425,19 @@ struct ChipS_SMP : Module {
             //
             // 7-bit unsigned value
             // apu.read(mask | Sony_S_DSP::ENVELOPE_OUT, 0);
+            // ---------------------------------------------------------------
+            // MARK: Waveform Output
+            // ---------------------------------------------------------------
+            // OUTX is written to by the DSP. It contains the present wave height multiplied by the ADSR/GAIN envelope value. It isn't multiplied by the voice volume though.
+            //
+            // OUTX
+            //          7     6     5     4     3     2     1     0
+            //       +-----+-----+-----+-----+-----+-----+-----+-----+
+            // $x9   | sign|                 VALUE                   |
+            //       +-----+-----+-----+-----+-----+-----+-----+-----+
+            //
+            // 8-bit signed value
+            // apu.read(mask | Sony_S_DSP::WAVEFORM_OUT, 0);
             // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------

@@ -46,7 +46,7 @@ struct ChipS_SMP : Module {
         ENUMS(PARAM_FREQ,          Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP::VOICE_COUNT),
-        ENUMS(PARAM_NOISE_FREQ,    Sony_S_DSP::VOICE_COUNT),
+        PARAM_NOISE_FREQ,
         ENUMS(PARAM_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(PARAM_ATTACK,        Sony_S_DSP::VOICE_COUNT),
@@ -68,7 +68,7 @@ struct ChipS_SMP : Module {
         ENUMS(INPUT_FM,            Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP::VOICE_COUNT),
-        ENUMS(INPUT_NOISE_FM,      Sony_S_DSP::VOICE_COUNT),
+        INPUT_NOISE_FM,
         ENUMS(INPUT_GATE,          Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_L,      Sony_S_DSP::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_R,      Sony_S_DSP::VOICE_COUNT),
@@ -102,8 +102,7 @@ struct ChipS_SMP : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < Sony_S_DSP::VOICE_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_NOISE_FREQ    + osc,    0,  31,  16, osc_name + " Noise Frequency");
+            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
             configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
@@ -122,9 +121,9 @@ struct ChipS_SMP : Module {
         for (unsigned coeff = 0; coeff < Sony_S_DSP::FIR_COEFFICIENT_COUNT; coeff++) {
             // the first FIR coefficient defaults to 0x7f = 127 and the other
             // coefficients are 0 by default
-            auto defaultValue = coeff ? 0 : 127;
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, defaultValue, "FIR Coefficient " + std::to_string(coeff + 1));
+            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
         }
+        configParam(PARAM_NOISE_FREQ,         0,  31,  16, "Noise Frequency");
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay");
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
         configParam(PARAM_VOLUME_ECHO + 0, -128, 127, 127, "Echo Volume (Left)");
@@ -235,7 +234,6 @@ struct ChipS_SMP : Module {
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
-        // TODO: move inside the main voice processing loop?
         // create bit-masks for the key-on and key-off state of each voice
         uint8_t key_on = 0;
         uint8_t key_off = 0;
@@ -261,51 +259,26 @@ struct ChipS_SMP : Module {
         // -------------------------------------------------------------------
         apu.write(Sony_S_DSP::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
         apu.write(Sony_S_DSP::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
-        // TODO: Echo enable.
-        //
-        // EON
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $4D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register enables echo effects for the specified channel(s).
-        apu.write(Sony_S_DSP::ECHO_ENABLE, 0xff);
-        // -------------------------------------------------------------------
-        // MARK: FIR Coefficients
-        // -------------------------------------------------------------------
-        for (unsigned coeff = 0; coeff < Sony_S_DSP::FIR_COEFFICIENT_COUNT; coeff++) {
-            auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
-            apu.write((coeff << 4) | Sony_S_DSP::FIR_COEFFICIENTS, param);
-        }
+        // echo enable
+        uint8_t echo_enable = 0;
+        for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++)
+            echo_enable |= static_cast<uint8_t>(params[PARAM_ECHO_ENABLE + voice].getValue()) << voice;
+        apu.write(Sony_S_DSP::ECHO_ENABLE, echo_enable);
         // -------------------------------------------------------------------
         // MARK: Noise Enable
         // -------------------------------------------------------------------
-        // TODO: Noise enable (NON)
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $3D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // When the noise enable bit is specified for a certain channel, white
-        // noise is issued instead of sample data. The frequency of the white
-        // noise is set in the FLG register. The white noise still requires a
-        // (dummy) sample to determine the length of sound (or unlimited sound
-        // if the sample loops).
-        apu.write(Sony_S_DSP::NOISE_ENABLE, 0xf0);
+        uint8_t noise_enable = 0;
+        for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++)
+            noise_enable |= static_cast<uint8_t>(params[PARAM_NOISE_ENABLE + voice].getValue()) << voice;
+        apu.write(Sony_S_DSP::NOISE_ENABLE, noise_enable);
         // -------------------------------------------------------------------
         // MARK: Pitch Modulation
         // -------------------------------------------------------------------
-        // TODO: Pitch Modulation (PMON)
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $2D   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|  -  |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // Pitch modulation multiplies the current pitch of the channel by
-        // OUTX of the previous channel. (P (modulated) = P[X] * (1 + OUTX[X-1])
-        //
-        // So a sine wave in the previous channel would cause some vibrato on
-        // the modulated channel. Note that OUTX is before volume
-        // multiplication, so you can have a silent channel for modulating.
-        apu.write(Sony_S_DSP::PITCH_MODULATION,  0);
+        uint8_t pitch_modulation = 0;
+        // start from 1 because there is no pitch modulation for the first channel
+        for (unsigned voice = 1; voice < Sony_S_DSP::VOICE_COUNT; voice++)
+            pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
+        apu.write(Sony_S_DSP::PITCH_MODULATION, pitch_modulation);
         // -------------------------------------------------------------------
         // MARK: Main Volume & Echo Volume
         // -------------------------------------------------------------------
@@ -459,6 +432,13 @@ struct ChipS_SMP : Module {
             apu.write(mask | Sony_S_DSP::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
         }
         // -------------------------------------------------------------------
+        // MARK: FIR Coefficients
+        // -------------------------------------------------------------------
+        for (unsigned coeff = 0; coeff < Sony_S_DSP::FIR_COEFFICIENT_COUNT; coeff++) {
+            auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
+            apu.write((coeff << 4) | Sony_S_DSP::FIR_COEFFICIENTS, param);
+        }
+        // -------------------------------------------------------------------
         // MARK: Voice Activity Output
         // -------------------------------------------------------------------
         // TODO: This register is written to during DSP activity.
@@ -507,11 +487,6 @@ struct ChipS_SMPWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP::INPUT_FM + i));
             addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipS_SMP::PARAM_FREQ + i));
-            // Noise Frequency
-            addInput(createInput<PJ301MPort>(Vec(115, 40 + i * 41), module, ChipS_SMP::INPUT_NOISE_FM + i));
-            auto noise = createParam<Rogan2PSNES>(Vec(145, 35 + i * 41), module, ChipS_SMP::PARAM_NOISE_FREQ + i);
-            noise->snap = true;
-            addParam(noise);
             // Gate
             addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipS_SMP::INPUT_GATE + i));
             // Volume - Left
@@ -556,6 +531,13 @@ struct ChipS_SMPWidget : ModuleWidget {
             addParam(createParam<CKSS>(Vec(1000, 40  + i * 41), module, ChipS_SMP::PARAM_NOISE_ENABLE + i));
             addInput(createInput<PJ301MPort>(Vec(1020, 40 + i * 41), module, ChipS_SMP::INPUT_NOISE_ENABLE + i));
         }
+
+        // Noise Frequency
+        addInput(createInput<PJ301MPort>(Vec(115, 40), module, ChipS_SMP::INPUT_NOISE_FM));
+        auto noise = createParam<Rogan2PSNES>(Vec(145, 35), module, ChipS_SMP::PARAM_NOISE_FREQ);
+        noise->snap = true;
+        addParam(noise);
+
         // Echo Delay
         auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipS_SMP::PARAM_ECHO_DELAY);
         echoDelay->snap = true;

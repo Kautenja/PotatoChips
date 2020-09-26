@@ -29,7 +29,6 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 152,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -91,15 +90,15 @@
         },
         {
           "id": 9,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 10,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 11,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 12,
@@ -219,19 +218,19 @@
         },
         {
           "id": 41,
-          "value": 0.0
+          "value": 6.0
         },
         {
           "id": 42,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 43,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 44,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 45,
@@ -251,7 +250,7 @@
         },
         {
           "id": 49,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 50,
@@ -283,19 +282,19 @@
         },
         {
           "id": 57,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 58,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 59,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 60,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 61,
@@ -315,19 +314,19 @@
         },
         {
           "id": 65,
-          "value": 0.0
+          "value": 13.0
         },
         {
           "id": 66,
-          "value": 0.0
+          "value": 11.0
         },
         {
           "id": 67,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 68,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 69,
@@ -434,9 +433,8 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
       "pos": [
-        8,
+        9,
         1
       ]
     },

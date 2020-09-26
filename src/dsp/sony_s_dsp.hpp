@@ -263,7 +263,7 @@ class Sony_S_DSP {
         /// the register bank on the chip
         uint8_t registers[NUM_REGISTERS];
         /// the mapping of register data to the voices on the chip
-        RawVoice voice[VOICE_COUNT];
+        RawVoice voices[VOICE_COUNT];
         /// the mapping of register data to the global data on the chip
         GlobalData global;
     };

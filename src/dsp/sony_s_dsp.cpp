@@ -29,7 +29,7 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));
-    assert(NUM_REGISTERS == sizeof(voice));
+    assert(NUM_REGISTERS == sizeof(voices));
     assert(9 == sizeof(BitRateReductionBlock));
     assert(4 == sizeof(SourceDirectoryEntry));
     // setup the default state of the chip
@@ -102,7 +102,7 @@ static const short env_rates[0x20] = {
 const int env_range = 0x800;
 
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
-    RawVoice& raw_voice = this->voice[voice_idx];
+    RawVoice& raw_voice = this->voices[voice_idx];
     VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
@@ -335,7 +335,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             // get the voice's bit-mask shift value
             const int voice_bit = 1 << voice_idx;
             // cache the voice and data structures
-            RawVoice& raw_voice = voice[voice_idx];
+            RawVoice& raw_voice = voices[voice_idx];
             VoiceState& voice = voice_states[voice_idx];
             // ---------------------------------------------------------------
             // MARK: Gate Processing

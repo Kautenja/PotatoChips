@@ -19,7 +19,6 @@
 //
 
 #include "sony_s_dsp.hpp"
-#include "sony_s_dsp_endian.hpp"
 #include <algorithm>
 #include <cstring>
 #include <cstddef>
@@ -35,7 +34,7 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     // setup the default state of the chip
     disable_surround(false);
     // verify the byte order of the host machine
-    blargg_verify_byte_order();
+    // blargg_verify_byte_order();
 }
 
 void Sony_S_DSP::reset() {

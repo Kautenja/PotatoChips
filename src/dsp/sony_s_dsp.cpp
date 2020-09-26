@@ -33,10 +33,10 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     assert(4 == sizeof(EchoBufferSample));
 }
 
-/// This table is for envelope timinglobal.  It represents the number of counts
-/// that should be subtracted from the counter each sample period (32kHz).
-/// The counter starts at 30720 (0x7800). Each count divides exactly into
-/// 0x7800 without remainder.
+/// This table is for envelope timing global.  It represents the number of
+/// counts that should be subtracted from the counter each sample period
+/// (32kHz). The counter starts at 30720 (0x7800). Each count divides exactly
+/// into 0x7800 without remainder.
 const int env_rate_init = 0x7800;
 static const short env_rates[0x20] = {
     0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
@@ -45,7 +45,8 @@ static const short env_rates[0x20] = {
     0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
 };
 
-const int env_range = 0x800;
+/// the range of the envelope generator amplitude level (i.e., max value)
+const int ENVELOPE_RANGE = 0x800;
 
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voices[voice_idx];
@@ -59,7 +60,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         // When a note is keyed off, start the RELEASE state, which
         // subtracts 1/256th each sample period (32kHz).  Note there's
         // no need for a count because it always happens every update.
-        envx -= env_range / 256;
+        envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
             envx = 0;
             keys &= ~(1 << voice_idx);
@@ -78,15 +79,15 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 // increase envelope by 1/64 each step
                 int t = adsr1 & 15;
                 if (t == 15) {
-                    envx += env_range / 2;
+                    envx += ENVELOPE_RANGE / 2;
                 } else {
                     cnt -= env_rates[t * 2 + 1];
                     if (cnt > 0) break;
-                    envx += env_range / 64;
+                    envx += ENVELOPE_RANGE / 64;
                     cnt = env_rate_init;
                 }
-                if (envx >= env_range) {
-                    envx = env_range - 1;
+                if (envx >= ENVELOPE_RANGE) {
+                    envx = ENVELOPE_RANGE - 1;
                     voice.envelope_stage = EnvelopeStage::Decay;
                 }
                 voice.envx = envx;
@@ -147,7 +148,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            envx -= env_range / 64;
+            envx -= ENVELOPE_RANGE / 64;
             if (envx < 0) {
                 envx = 0;
                 if (voice.envelope_stage == EnvelopeStage::Attack)
@@ -155,7 +156,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             }
             voice.envx = envx;
             break;
-        case 5:         /* Docs: "Drecrease <sic> (exponential):
+        case 5:         /* Docs: "Decrease <sic> (exponential):
                              * Multiplication by the fixed value
                              * 1-1/256." */
             cnt -= env_rates[t & 0x1F];
@@ -176,24 +177,24 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            envx += env_range / 64;
-            if (envx >= env_range)
-                envx = env_range - 1;
+            envx += ENVELOPE_RANGE / 64;
+            if (envx >= ENVELOPE_RANGE)
+                envx = ENVELOPE_RANGE - 1;
             voice.envx = envx;
             break;
         case 7:         /* Docs: "Increase (bent line): Addition
                              * of the constant 1/64 up to .75 of the
-                             * constaint <sic> 1/256 from .75 to 1." */
+                             * constant <sic> 1/256 from .75 to 1." */
             cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            if (envx < env_range * 3 / 4)
-                envx += env_range / 64;
+            if (envx < ENVELOPE_RANGE * 3 / 4)
+                envx += ENVELOPE_RANGE / 64;
             else
-                envx += env_range / 256;
-            if (envx >= env_range)
-                envx = env_range - 1;
+                envx += ENVELOPE_RANGE / 256;
+            if (envx >= ENVELOPE_RANGE)
+                envx = ENVELOPE_RANGE - 1;
             voice.envx = envx;
             break;
         }

@@ -139,6 +139,22 @@ struct ChipS_SMP : Module {
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
+        // Echo data start address.
+        //
+        // ESA
+        //          7     6     5     4     3     2     1     0
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // $6D   |                  Offset value                 |
+        //       +-----+-----+-----+-----+-----+-----+-----+-----+
+        // This register points to an area of memory to be used by the echo
+        // buffer. Like DIR its value is multiplied by 0x100. This is because
+        // the echo buffer is stereo and contains a tuple of L+R 16-bit
+        // samples (32-bits).
+
+        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 128);
+        // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
+        const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
+
         // Source Directory Offset.
         //
         // DIR
@@ -165,23 +181,8 @@ struct ChipS_SMP : Module {
         // This can continue for up to 256 samples. (SRCN can only reference
         // 256 samples)
 
-        // set the source directory location to the first 256 bytes
-        apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, 0);
-
-        // Echo data start address.
-        //
-        // ESA
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $6D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to an area of memory to be used by the echo
-        // buffer. Like DIR its value is multiplied by 0x100. This is because
-        // the echo buffer is stereo and contains a tuple of L+R 16-bit
-        // samples (32-bits).
-
-        // set to RAM position 512 = 4 * 128
-        apu.write(Sony_S_DSP::ECHO_BUFFER_START_OFFSET, 128);
+        // put the first directory at the end of the echo buffer
+        apu.write(Sony_S_DSP::OFFSET_SOURCE_DIRECTORY, ECHO_LENGTH / 0x100);
 
         for (unsigned voice = 0; voice < Sony_S_DSP::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
@@ -211,13 +212,14 @@ struct ChipS_SMP : Module {
         // -------------------------------------------------------------------
         // TODO: design a few banks of wavetables / other ways to put data
         //       into this RAM
-        // write the first directory to RAM
-        auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0]);
-        dir->start = 256;
-        dir->loop = 256;
+        // write the first directory to RAM (at the end of the echo buffer)
+        auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0x7800]);
+        // point to a block immediately after this directory entry
+        dir->start = 0x7804;
+        dir->loop = 0x7804;
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[256]);
+        auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[0x7804]);
         block->flags.set_volume(Sony_S_DSP::BitRateReductionBlock::MAX_VOLUME);
         block->flags.filter = 0;
         block->flags.is_loop = 1;

@@ -762,19 +762,19 @@
       "color": "#0986ad"
     },
     {
-      "id": 51,
+      "id": 53,
       "outputModuleId": 159,
       "outputId": 0,
       "inputModuleId": 152,
-      "inputId": 33,
+      "inputId": 0,
       "color": "#c9b70e"
     },
     {
-      "id": 52,
+      "id": 54,
       "outputModuleId": 159,
       "outputId": 0,
       "inputModuleId": 152,
-      "inputId": 34,
+      "inputId": 1,
       "color": "#0c8e15"
     }
   ]

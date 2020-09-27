@@ -46,7 +46,7 @@ struct ChipSNES_Echo : Module {
         ENUMS(PARAM_ECHO_ENABLE,   8),  // TODO: remove
         PARAM_ECHO_DELAY,
         PARAM_ECHO_FEEDBACK,
-        ENUMS(PARAM_VOLUME_ECHO, 2),  // TODO: remove
+        ENUMS(PARAM_VOLUME_ECHO, 2),
         ENUMS(PARAM_VOLUME_MAIN, 2),  // TODO: remove
         ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS

@@ -256,9 +256,8 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 noise_count = env_rate_init;
                 // calculate the output noise signal
                 noise_amp = int16_t (noise * 2);
-                // TODO: switch to Galois configuration
-                int feedback = (noise << 13) ^ (noise << 14);
-                noise = (feedback & 0x4000) | (noise >> 1);
+                // update the linear feedback shift register from taps 0, 1
+                noise = (((noise << 13) ^ (noise << 14)) & 0x4000) | (noise >> 1);
             }
         }
         // -------------------------------------------------------------------

@@ -33,17 +33,17 @@ struct ChipSNES_Echo : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
+        ENUMS(PARAM_FREQ,          8),  // TODO: remove
+        ENUMS(PARAM_PM_ENABLE,     8),  // TODO: remove
+        ENUMS(PARAM_NOISE_ENABLE,  8),  // TODO: remove
         PARAM_NOISE_FREQ,                                          // TODO: remove
-        ENUMS(PARAM_VOLUME_L,      Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_ATTACK,        Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_DECAY,         Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_ECHO_ENABLE,   Sony_S_DSP_Echo::VOICE_COUNT),  // TODO: remove
+        ENUMS(PARAM_VOLUME_L,      8),  // TODO: remove
+        ENUMS(PARAM_VOLUME_R,      8),  // TODO: remove
+        ENUMS(PARAM_ATTACK,        8),  // TODO: remove
+        ENUMS(PARAM_DECAY,         8),  // TODO: remove
+        ENUMS(PARAM_SUSTAIN_LEVEL, 8),  // TODO: remove
+        ENUMS(PARAM_SUSTAIN_RATE,  8),  // TODO: remove
+        ENUMS(PARAM_ECHO_ENABLE,   8),  // TODO: remove
         PARAM_ECHO_DELAY,
         PARAM_ECHO_FEEDBACK,
         ENUMS(PARAM_VOLUME_ECHO, 2),  // TODO: remove
@@ -54,19 +54,19 @@ struct ChipSNES_Echo : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_FM,            Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP_Echo::VOICE_COUNT),
+        ENUMS(INPUT_VOCT,          8),
+        ENUMS(INPUT_FM,            8),
+        ENUMS(INPUT_PM_ENABLE,     8),
+        ENUMS(INPUT_NOISE_ENABLE,  8),
         INPUT_NOISE_FM,
-        ENUMS(INPUT_GATE,          Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_L,      Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_ATTACK,        Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_DECAY,         Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_Echo::VOICE_COUNT),
-        ENUMS(INPUT_ECHO_ENABLE,   Sony_S_DSP_Echo::VOICE_COUNT),
+        ENUMS(INPUT_GATE,          8),
+        ENUMS(INPUT_VOLUME_L,      8),
+        ENUMS(INPUT_VOLUME_R,      8),
+        ENUMS(INPUT_ATTACK,        8),
+        ENUMS(INPUT_DECAY,         8),
+        ENUMS(INPUT_SUSTAIN_LEVEL, 8),
+        ENUMS(INPUT_SUSTAIN_RATE,  8),
+        ENUMS(INPUT_ECHO_ENABLE,   8),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
@@ -97,8 +97,6 @@ struct ChipSNES_Echo : Module {
         }
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
-        // reset the S-DSP emulator
-        apu.reset();
     }
 
  protected:

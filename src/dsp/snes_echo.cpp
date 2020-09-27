@@ -150,10 +150,6 @@ inline int clamp_16(int n) {
 }
 
 void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
-    // buffer the inputs for applying feedback
-    int echol = left;
-    int echor = right;
-
     // get the current feedback sample in the echo buffer
     EchoBufferSample* const echo_sample =
         reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
@@ -195,18 +191,19 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
             fir_pos[5][1] * fir_coeff[2] +
             fir_pos[6][1] * fir_coeff[1] +
             fir_pos[7][1] * fir_coeff[0];
-    // add the echo to the samples for the left and right channel
-    left  += (fb_left  * global.left_echo_volume) >> 14;
-    right += (fb_right * global.right_echo_volume) >> 14;
 
     // if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
         // add feedback to the echo samples
-        echol += (fb_left  * global.echo_feedback) >> 14;
-        echor += (fb_right * global.echo_feedback) >> 14;
+        int echol = left + ((fb_left  * global.echo_feedback) >> 14);
+        int echor = right + ((fb_right * global.echo_feedback) >> 14);
         // put the echo samples into the buffer
         echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
         echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
     // }
+
+    // add the echo to the samples for the left and right channel
+    left  += (fb_left  * global.left_echo_volume) >> 14;
+    right += (fb_right * global.right_echo_volume) >> 14;
 
     // -------------------------------------------------------------------
     // MARK: Output

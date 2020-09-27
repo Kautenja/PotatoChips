@@ -17,7 +17,6 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
-#include "engine/chip_module.hpp"
 #include "dsp/sony_s_dsp.hpp"
 #include "dsp/wavetable4bit.hpp"
 

@@ -94,6 +94,15 @@
       ]
     },
     {
+      "slug": "SNES_Echo",
+      "name": "SNES Echo",
+      "description": "An emulation of the echo effect from the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SNES_Echo.pdf",
+      "tags": [
+        "Effect"
+      ]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",

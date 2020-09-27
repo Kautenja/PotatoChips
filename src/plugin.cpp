@@ -39,4 +39,6 @@ void init(Plugin* instance) {
     instance->addModel(modelChipSN76489);
     instance->addModel(modelChipTurboGrafx16);
     instance->addModel(modelChipVRC6);
+
+    instance->addModel(modelChipSNES_Echo);
 }

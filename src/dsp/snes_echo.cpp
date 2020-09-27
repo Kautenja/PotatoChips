@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <limits>
 
-Sony_S_DSP_Echo::Sony_S_DSP_Echo(uint8_t* ram_) : ram(ram_) {
+Sony_S_DSP_Echo::Sony_S_DSP_Echo() {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));

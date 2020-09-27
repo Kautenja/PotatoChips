@@ -202,13 +202,15 @@ class Sony_S_DSP_Echo {
     /// allows the FIR coefficients to be stored as 16-bit
     short fir_coeff[FIR_COEFFICIENT_COUNT];
 
+    /// the number of 16ms delay levels
+    static constexpr unsigned DELAY_LEVELS = 15;
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.
     /// @details
     /// this must be maintained by the caller in order to provide data to the
     /// S-DSP. This includes input sample data, and the allocated space for the
     /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
-    uint8_t* const ram;
+    uint8_t ram[DELAY_LEVELS * (2 * (1 << 10))];
 
     /// A pointer to the head of the echo buffer in RAM
     int echo_ptr;
@@ -223,12 +225,13 @@ class Sony_S_DSP_Echo {
     ///
     /// @param ram a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP_Echo(uint8_t* ram);
+    explicit Sony_S_DSP_Echo();
 
     /// @brief Clear state and silence everything.
     void reset() {
         echo_ptr = fir_offset = 0;
         memset(fir_buf, 0, sizeof fir_buf);
+        memset(ram, 0, sizeof ram);
     }
 
     /// @brief Read data from the register at the given address.

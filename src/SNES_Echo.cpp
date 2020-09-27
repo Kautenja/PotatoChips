@@ -27,13 +27,8 @@
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipSNES_Echo : Module {
  private:
-    /// the RAM for the S-DSP chip (64KB = 16-bit address space)
-    uint8_t ram[Sony_S_DSP_Echo::SIZE_OF_RAM];
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Echo apu{ram};
-
-    /// @brief Fill the RAM with 0's.
-    inline void clearRAM() { memset(ram, 0, sizeof ram); }
+    Sony_S_DSP_Echo apu;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -102,8 +97,6 @@ struct ChipSNES_Echo : Module {
         }
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
-        // clear the shared RAM between the CPU and the S-DSP
-        clearRAM();
         // reset the S-DSP emulator
         apu.reset();
 

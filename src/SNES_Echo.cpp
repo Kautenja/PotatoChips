@@ -300,27 +300,28 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Gate
         for (unsigned i = 0; i < Sony_S_DSP_Echo::VOICE_COUNT; i++)
-            addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipSNES_Echo::INPUT_GATE + i));
-        // Echo Delay
-        auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipSNES_Echo::PARAM_ECHO_DELAY);
-        echoDelay->snap = true;
-        addParam(echoDelay);
-        addInput(createInput<PJ301MPort>(Vec(700, 80), module, ChipSNES_Echo::INPUT_ECHO_DELAY));
-        // Echo Feedback
-        auto echoFeedback = createParam<Rogan2PGreen>(Vec(740, 30), module, ChipSNES_Echo::PARAM_ECHO_FEEDBACK);
-        echoFeedback->snap = true;
-        addParam(echoFeedback);
-        addInput(createInput<PJ301MPort>(Vec(750, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
-        // Outputs
-        addOutput(createOutput<PJ301MPort>(Vec(700, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(750, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 1));
+            addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_GATE + i));
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(800, 40 + i * 41), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan2PWhite>(Vec(830, 35 + i * 41), module, ChipSNES_Echo::PARAM_FIR_COEFFICIENT + i);
+            addInput(createInput<PJ301MPort>(Vec(60, 40 + i * 41), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));
+            auto param = createParam<Rogan2PWhite>(Vec(90, 35 + i * 41), module, ChipSNES_Echo::PARAM_FIR_COEFFICIENT + i);
             param->snap = true;
             addParam(param);
         }
+        // Echo Delay
+        auto echoDelay = createParam<Rogan2PGreen>(Vec(130, 30), module, ChipSNES_Echo::PARAM_ECHO_DELAY);
+        echoDelay->snap = true;
+        addParam(echoDelay);
+        addInput(createInput<PJ301MPort>(Vec(140, 80), module, ChipSNES_Echo::INPUT_ECHO_DELAY));
+        // Echo Feedback
+        auto echoFeedback = createParam<Rogan2PGreen>(Vec(180, 30), module, ChipSNES_Echo::PARAM_ECHO_FEEDBACK);
+        echoFeedback->snap = true;
+        addParam(echoFeedback);
+        addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
+        // Outputs
+        addOutput(createOutput<PJ301MPort>(Vec(140, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(190, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 1));
+
     }
 };
 

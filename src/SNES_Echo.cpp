@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
-#include "dsp/snes_echo.hpp"
+#include "dsp/sony_s_dsp_echo.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

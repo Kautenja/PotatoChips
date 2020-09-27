@@ -59,18 +59,10 @@ struct ChipSNES_Echo : Module {
         ENUMS(INPUT_PM_ENABLE,     8),
         ENUMS(INPUT_NOISE_ENABLE,  8),
         INPUT_NOISE_FM,
-        ENUMS(INPUT_GATE,          8),
-        ENUMS(INPUT_VOLUME_L,      8),
-        ENUMS(INPUT_VOLUME_R,      8),
-        ENUMS(INPUT_ATTACK,        8),
-        ENUMS(INPUT_DECAY,         8),
-        ENUMS(INPUT_SUSTAIN_LEVEL, 8),
-        ENUMS(INPUT_SUSTAIN_RATE,  8),
-        ENUMS(INPUT_ECHO_ENABLE,   8),
+        ENUMS(INPUT_AUDIO,          2),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
-        ENUMS(INPUT_VOLUME_MAIN, 2),
         ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
@@ -114,8 +106,8 @@ struct ChipSNES_Echo : Module {
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
             apu.setFIR(coeff, params[PARAM_FIR_COEFFICIENT + coeff].getValue());
         // Stereo input + output
-        int16_t left = std::numeric_limits<int16_t>::max() * inputs[INPUT_GATE + 0].getVoltage() / 5.f;
-        int16_t right = std::numeric_limits<int16_t>::max() * inputs[INPUT_GATE + 1].getVoltage() / 5.f;
+        int16_t left = std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 0].getVoltage() / 5.f;
+        int16_t right = std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 1].getVoltage() / 5.f;
         int16_t sample[2] = {0, 0};
         apu.run(left, right, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
@@ -144,7 +136,7 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Inputs
         for (unsigned i = 0; i < 2; i++)
-            addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_AUDIO + i));
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(60, 40 + i * 41), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));

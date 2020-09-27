@@ -754,6 +754,14 @@
       "color": "#c91847"
     },
     {
+      "id": 50,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 159,
+      "inputId": 7,
+      "color": "#0986ad"
+    },
+    {
       "id": 51,
       "outputModuleId": 159,
       "outputId": 0,
@@ -768,14 +776,6 @@
       "inputModuleId": 152,
       "inputId": 34,
       "color": "#0c8e15"
-    },
-    {
-      "id": 50,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 159,
-      "inputId": 7,
-      "color": "#0986ad"
     }
   ]
 }

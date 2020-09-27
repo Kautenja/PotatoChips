@@ -330,13 +330,6 @@ class Sony_S_DSP_Echo {
         EnvelopeStage envelope_stage;
     } voice_states[VOICE_COUNT];
 
-    /// TODO: make inline so that `run` becomes a leaf function?
-    /// @brief Process the envelope for the voice with given index.
-    ///
-    /// @param voice_index the index of the voice to clock the envelope of
-    ///
-    int clock_envelope(unsigned voice_idx);
-
  public:
     /// @brief Initialize a new Sony_S_DSP_Echo.
     ///

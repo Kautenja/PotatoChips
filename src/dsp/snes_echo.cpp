@@ -53,152 +53,86 @@ inline int Sony_S_DSP_Echo::clock_envelope(unsigned voice_idx) {
     VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
+
     if (voice.envelope_stage == EnvelopeStage::Release) {
-        // Docs: "When in the state of "key off". the "click" sound is
-        // prevented by the addition of the fixed value 1/256" WTF???
-        // Alright, I'm going to choose to interpret that this way:
-        // When a note is keyed off, start the RELEASE state, which
-        // subtracts 1/256th each sample period (32kHz).  Note there's
-        // no need for a count because it always happens every update.
-        envx -= ENVELOPE_RANGE / 256;
-        if (envx <= 0) {
-            envx = 0;
-            keys &= ~(1 << voice_idx);
-            return -1;
-        }
+        envx = 0;
         voice.envx = envx;
         raw_voice.envx = envx >> 8;
         return envx;
     }
 
     int cnt = voice.envcnt;
-    int adsr1 = raw_voice.adsr[0];
-    if (adsr1 & 0x80) {
-        switch (voice.envelope_stage) {
-            case EnvelopeStage::Attack: {
-                // increase envelope by 1/64 each step
-                int t = adsr1 & 15;
-                if (t == 15) {
-                    envx += ENVELOPE_RANGE / 2;
-                } else {
-                    cnt -= env_rates[t * 2 + 1];
-                    if (cnt > 0) break;
-                    envx += ENVELOPE_RANGE / 64;
-                    cnt = env_rate_init;
-                }
-                if (envx >= ENVELOPE_RANGE) {
-                    envx = ENVELOPE_RANGE - 1;
-                    voice.envelope_stage = EnvelopeStage::Decay;
-                }
-                voice.envx = envx;
-                break;
-            }
 
-            case EnvelopeStage::Decay: {
-                // Docs: "DR...[is multiplied] by the fixed value
-                // 1-1/256." Well, at least that makes some sense.
-                // Multiplying ENVX by 255/256 every time DECAY is
-                // updated.
-                cnt -= env_rates[((adsr1 >> 3) & 0xE) + 0x10];
-                if (cnt <= 0) {
-                    cnt = env_rate_init;
-                    envx -= ((envx - 1) >> 8) + 1;
-                    voice.envx = envx;
-                }
-                int sustain_level = raw_voice.adsr[1] >> 5;
-
-                if (envx <= (sustain_level + 1) * 0x100)
-                    voice.envelope_stage = EnvelopeStage::Sustain;
-                break;
-            }
-
-            case EnvelopeStage::Sustain:
-                // Docs: "SR[is multiplied] by the fixed value 1-1/256."
-                // Multiplying ENVX by 255/256 every time SUSTAIN is
-                // updated.
-                cnt -= env_rates[raw_voice.adsr[1] & 0x1F];
-                if (cnt <= 0) {
-                    cnt = env_rate_init;
-                    envx -= ((envx - 1) >> 8) + 1;
-                    voice.envx = envx;
-                }
-                break;
-
-            case EnvelopeStage::Release:
-                // handled above
-                break;
-        }
-    } else {  /* GAIN mode is set */
-        // Note: if the game switches between ADSR and GAIN modes
-        // partway through, should the count be reset, or should it
-        // continue from where it was? Does the DSP actually watch for
-        // that bit to change, or does it just go along with whatever
-        // it sees when it performs the update? I'm going to assume
-        // the latter and not update the count, unless I see a game
-        // that obviously wants the other behavior.  The effect would
-        // be pretty subtle, in any case.
-        int t = raw_voice.gain;
-        if (t < 0x80) {
-            envx = voice.envx = t << 4;
-        }
-        else switch (t >> 5) {
-        case 4:         /* Docs: "Decrease (linear): Subtraction
-                             * of the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
-            if (cnt > 0)
-                break;
-            cnt = env_rate_init;
-            envx -= ENVELOPE_RANGE / 64;
-            if (envx < 0) {
-                envx = 0;
-                if (voice.envelope_stage == EnvelopeStage::Attack)
-                    voice.envelope_stage = EnvelopeStage::Decay;
-            }
-            voice.envx = envx;
-            break;
-        case 5:         /* Docs: "Decrease <sic> (exponential):
-                             * Multiplication by the fixed value
-                             * 1-1/256." */
-            cnt -= env_rates[t & 0x1F];
-            if (cnt > 0)
-                break;
-            cnt = env_rate_init;
-            envx -= ((envx - 1) >> 8) + 1;
-            if (envx < 0) {
-                envx = 0;
-                if (voice.envelope_stage == EnvelopeStage::Attack)
-                    voice.envelope_stage = EnvelopeStage::Decay;
-            }
-            voice.envx = envx;
-            break;
-        case 6:         /* Docs: "Increase (linear): Addition of
-                             * the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
-            if (cnt > 0)
-                break;
-            cnt = env_rate_init;
-            envx += ENVELOPE_RANGE / 64;
-            if (envx >= ENVELOPE_RANGE)
-                envx = ENVELOPE_RANGE - 1;
-            voice.envx = envx;
-            break;
-        case 7:         /* Docs: "Increase (bent line): Addition
-                             * of the constant 1/64 up to .75 of the
-                             * constant <sic> 1/256 from .75 to 1." */
-            cnt -= env_rates[t & 0x1F];
-            if (cnt > 0)
-                break;
-            cnt = env_rate_init;
-            if (envx < ENVELOPE_RANGE * 3 / 4)
-                envx += ENVELOPE_RANGE / 64;
-            else
-                envx += ENVELOPE_RANGE / 256;
-            if (envx >= ENVELOPE_RANGE)
-                envx = ENVELOPE_RANGE - 1;
-            voice.envx = envx;
-            break;
-        }
+    // Note: if the game switches between ADSR and GAIN modes
+    // partway through, should the count be reset, or should it
+    // continue from where it was? Does the DSP actually watch for
+    // that bit to change, or does it just go along with whatever
+    // it sees when it performs the update? I'm going to assume
+    // the latter and not update the count, unless I see a game
+    // that obviously wants the other behavior.  The effect would
+    // be pretty subtle, in any case.
+    int t = raw_voice.gain;
+    if (t < 0x80) {
+        envx = voice.envx = t << 4;
     }
+    else switch (t >> 5) {
+    case 4:         /* Docs: "Decrease (linear): Subtraction
+                         * of the fixed value 1/64." */
+        cnt -= env_rates[t & 0x1F];
+        if (cnt > 0)
+            break;
+        cnt = env_rate_init;
+        envx -= ENVELOPE_RANGE / 64;
+        if (envx < 0) {
+            envx = 0;
+            if (voice.envelope_stage == EnvelopeStage::Attack)
+                voice.envelope_stage = EnvelopeStage::Decay;
+        }
+        voice.envx = envx;
+        break;
+    case 5:         /* Docs: "Decrease <sic> (exponential):
+                         * Multiplication by the fixed value
+                         * 1-1/256." */
+        cnt -= env_rates[t & 0x1F];
+        if (cnt > 0)
+            break;
+        cnt = env_rate_init;
+        envx -= ((envx - 1) >> 8) + 1;
+        if (envx < 0) {
+            envx = 0;
+            if (voice.envelope_stage == EnvelopeStage::Attack)
+                voice.envelope_stage = EnvelopeStage::Decay;
+        }
+        voice.envx = envx;
+        break;
+    case 6:         /* Docs: "Increase (linear): Addition of
+                         * the fixed value 1/64." */
+        cnt -= env_rates[t & 0x1F];
+        if (cnt > 0)
+            break;
+        cnt = env_rate_init;
+        envx += ENVELOPE_RANGE / 64;
+        if (envx >= ENVELOPE_RANGE)
+            envx = ENVELOPE_RANGE - 1;
+        voice.envx = envx;
+        break;
+    case 7:         /* Docs: "Increase (bent line): Addition
+                         * of the constant 1/64 up to .75 of the
+                         * constant <sic> 1/256 from .75 to 1." */
+        cnt -= env_rates[t & 0x1F];
+        if (cnt > 0)
+            break;
+        cnt = env_rate_init;
+        if (envx < ENVELOPE_RANGE * 3 / 4)
+            envx += ENVELOPE_RANGE / 64;
+        else
+            envx += ENVELOPE_RANGE / 256;
+        if (envx >= ENVELOPE_RANGE)
+            envx = ENVELOPE_RANGE - 1;
+        voice.envx = envx;
+        break;
+    }
+
     voice.envcnt = cnt;
     raw_voice.envx = envx >> 4;
     return envx;

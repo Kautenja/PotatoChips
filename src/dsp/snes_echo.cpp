@@ -226,8 +226,8 @@ void Sony_S_DSP_Echo::run(int32_t count, int16_t* output_buffer) {
     const SourceDirectoryEntry* const source_directory =
         reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
     // get the volume of the left channel from the global registers
-    int left_volume  = global.left_volume;
-    int right_volume = global.right_volume;
+    int left_volume  = 127;
+    int right_volume = 127;
     // render samples at 32kHz for the given count of samples
     while (--count >= 0) {
         // -------------------------------------------------------------------

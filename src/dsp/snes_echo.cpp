@@ -23,13 +23,6 @@
 #include <cstddef>
 #include <limits>
 
-Sony_S_DSP_Echo::Sony_S_DSP_Echo() {
-    // validate that the structures are of expected size
-    // TODO: move to unit testing code and remove from here
-    assert(NUM_REGISTERS == sizeof(GlobalData));
-    assert(4 == sizeof(EchoBufferSample));
-}
-
 /// Clamp an integer to a 16-bit value.
 ///
 /// @param n a 32-bit integer value to clip
@@ -50,7 +43,7 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     // check if for the end of the ring buffer and wrap the pointer around
     // the echo delay is clamped in [0, 15] and each delay index requires
     // 2KB of RAM (0x800)
-    if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
+    if (echo_ptr >= (delay & DELAY_LEVELS) * 0x800) echo_ptr = 0;
     // cache the feedback value (sign-extended to 32-bit)
     int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
     int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
@@ -86,16 +79,16 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
 
     // put the echo samples into the buffer
     echo_sample->samples[EchoBufferSample::LEFT] =
-        clamp_16(left + ((fb_left  * global.echo_feedback) >> 14));
+        clamp_16(left + ((fb_left  * feedback) >> 14));
     echo_sample->samples[EchoBufferSample::RIGHT] =
-        clamp_16(right + ((fb_right * global.echo_feedback) >> 14));
+        clamp_16(right + ((fb_right * feedback) >> 14));
 
     if (output_buffer) {  // write final samples
         // (1) add the echo to the samples for the left and right channel, (2)
         // clamp the left and right samples, and (3) place them into the buffer
         output_buffer[0] =
-            clamp_16(left + ((fb_left  * global.left_echo_volume) >> 14));
+            clamp_16(left + ((fb_left  * mixLeft) >> 14));
         output_buffer[1] =
-            clamp_16(right + ((fb_right * global.right_echo_volume) >> 14));
+            clamp_16(right + ((fb_right * mixRight) >> 14));
     }
 }

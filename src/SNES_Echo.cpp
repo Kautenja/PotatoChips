@@ -107,23 +107,17 @@ struct ChipSNES_Echo : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // -------------------------------------------------------------------
-        // MARK: Echo Parameters
-        // -------------------------------------------------------------------
-        apu.write(Sony_S_DSP_Echo::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
-        apu.write(Sony_S_DSP_Echo::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
-        apu.write(Sony_S_DSP_Echo::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
-        apu.write(Sony_S_DSP_Echo::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
-        // -------------------------------------------------------------------
-        // MARK: FIR Coefficients
-        // -------------------------------------------------------------------
+        // delay parameters
+        apu.setFeedback(params[PARAM_ECHO_FEEDBACK].getValue());
+        apu.setDelay(params[PARAM_ECHO_DELAY].getValue());
+        apu.setMixLeft(params[PARAM_VOLUME_ECHO + 0].getValue());
+        apu.setMixRight(params[PARAM_VOLUME_ECHO + 1].getValue());
+        // FIR Coefficients
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
             auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
             apu.write((coeff << 4) | Sony_S_DSP_Echo::FIR_COEFFICIENTS, param);
         }
-        // -------------------------------------------------------------------
-        // MARK: Stereo output
-        // -------------------------------------------------------------------
+        // Stereo input + output
         short sample[2] = {0, 0};
         auto left = 32000 * inputs[INPUT_GATE + 0].getVoltage() / 10.f;
         auto right = 32000 * inputs[INPUT_GATE + 1].getVoltage() / 10.f;

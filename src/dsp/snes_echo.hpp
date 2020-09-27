@@ -192,12 +192,18 @@ class Sony_S_DSP_Echo {
     /// (0 to 7)
     int fir_offset;
 
+    /// the delay level
+    uint8_t delay;
+    /// the feedback level
+    int8_t feedback;
+    /// the mix level for the left channel
+    int8_t mixLeft;
+    /// the mix level for the right channel
+    int8_t mixRight;
+
  public:
     /// @brief Initialize a new Sony_S_DSP_Echo.
-    ///
-    /// @param ram a pointer to the 64KB shared RAM
-    ///
-    explicit Sony_S_DSP_Echo();
+    Sony_S_DSP_Echo() { }
 
     /// @brief Clear state and silence everything.
     void reset() {
@@ -205,6 +211,31 @@ class Sony_S_DSP_Echo {
         memset(fir_buf, 0, sizeof fir_buf);
         memset(ram, 0, sizeof ram);
     }
+
+    /// @brief Set the delay parameter to a new value
+    ///
+    /// @param value the delay level to use. the delay in time is
+    /// \f$16 * \f$`value`\f$ ms\f$
+    ///
+    inline void setDelay(uint8_t value) { delay = value & DELAY_LEVELS; }
+
+    /// @brief Set the feedback to a new level.
+    ///
+    /// @param value the level to set the feedback to
+    ///
+    inline void setFeedback(int8_t value) { feedback = value; }
+
+    /// @brief Set the mix to new level for the left channel.
+    ///
+    /// @param value the level to set the left channel to
+    ///
+    inline void setMixLeft(int8_t value) { mixLeft = value; }
+
+    /// @brief Set the mix to new level for the right channel.
+    ///
+    /// @param value the level to set the right channel to
+    ///
+    inline void setMixRight(int8_t value) { mixRight = value; }
 
     /// @brief Read data from the register at the given address.
     ///

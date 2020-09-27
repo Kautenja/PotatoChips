@@ -173,7 +173,7 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     fir_pos[8][0] = (short) fb_left;
     fir_pos[8][1] = (short) fb_right;
 
-    // FIR
+    // FIR left channel
     fb_left =     fb_left * fir_coeff[7] +
             fir_pos[1][0] * fir_coeff[6] +
             fir_pos[2][0] * fir_coeff[5] +
@@ -182,7 +182,7 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
             fir_pos[5][0] * fir_coeff[2] +
             fir_pos[6][0] * fir_coeff[1] +
             fir_pos[7][0] * fir_coeff[0];
-
+    // FIR right channel
     fb_right =   fb_right * fir_coeff[7] +
             fir_pos[1][1] * fir_coeff[6] +
             fir_pos[2][1] * fir_coeff[5] +
@@ -192,26 +192,19 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
             fir_pos[6][1] * fir_coeff[1] +
             fir_pos[7][1] * fir_coeff[0];
 
-    // if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
-        // add feedback to the echo samples
-        int echol = left + ((fb_left  * global.echo_feedback) >> 14);
-        int echor = right + ((fb_right * global.echo_feedback) >> 14);
-        // put the echo samples into the buffer
-        echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
-        echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
-    // }
+    // put the echo samples into the buffer
+    echo_sample->samples[EchoBufferSample::LEFT] =
+        clamp_16(left + ((fb_left  * global.echo_feedback) >> 14));
+    echo_sample->samples[EchoBufferSample::RIGHT] =
+        clamp_16(right + ((fb_right * global.echo_feedback) >> 14));
 
-    // add the echo to the samples for the left and right channel
-    left  += (fb_left  * global.left_echo_volume) >> 14;
-    right += (fb_right * global.right_echo_volume) >> 14;
-
-    // -------------------------------------------------------------------
-    // MARK: Output
-    // -------------------------------------------------------------------
     if (output_buffer) {  // write final samples
-        // clamp the left and right samples and place them into the buffer
-        output_buffer[0] = left  = clamp_16(left);
-        output_buffer[1] = right = clamp_16(right);
+        // (1) add the echo to the samples for the left and right channel, (2)
+        // clamp the left and right samples, and (3) place them into the buffer
+        output_buffer[0] =
+            clamp_16(left + ((fb_left  * global.left_echo_volume) >> 14));
+        output_buffer[1] =
+            clamp_16(right + ((fb_right * global.right_echo_volume) >> 14));
     }
 }
 

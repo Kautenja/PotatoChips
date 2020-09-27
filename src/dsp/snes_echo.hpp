@@ -54,7 +54,7 @@ class Sony_S_DSP_Echo {
     unsigned buffer_head = 0;
 
     /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
-    short fir_buf[16][2];
+    int16_t fir_buf[16][2];
     /// (0 to 7)
     int fir_offset = 0;
 
@@ -64,7 +64,7 @@ class Sony_S_DSP_Echo {
 
     /// The values of the FIR filter coefficients from the register bank. This
     /// allows the FIR coefficients to be stored as 16-bit
-    short fir_coeff[FIR_COEFFICIENT_COUNT] = {127,0,0,0,0,0,0,0};
+    int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127,0,0,0,0,0,0,0};
 
     /// the delay level
     uint8_t delay = 0;

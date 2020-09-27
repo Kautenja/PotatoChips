@@ -50,13 +50,13 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
 
     // put samples in history ring buffer
     const int fir_offset = this->fir_offset;
-    short (*fir_pos)[2] = &fir_buf[fir_offset];
+    int16_t (*fir_pos)[2] = &fir_buf[fir_offset];
     this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
-    fir_pos[0][0] = (short) fb_left;
-    fir_pos[0][1] = (short) fb_right;
+    fir_pos[0][0] = fb_left;
+    fir_pos[0][1] = fb_right;
     // duplicate at +8 eliminates wrap checking below
-    fir_pos[8][0] = (short) fb_left;
-    fir_pos[8][1] = (short) fb_right;
+    fir_pos[8][0] = fb_left;
+    fir_pos[8][1] = fb_right;
 
     // FIR left channel
     fb_left =     fb_left * fir_coeff[7] +

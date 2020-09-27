@@ -403,13 +403,12 @@ class Sony_S_DSP_Echo {
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
-    /// @param num_samples the number of samples to run on the DSP
     /// @param output_buffer the output buffer to write samples to (optional)
     ///
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int32_t num_samples, int left, int right, int16_t* output_buffer = NULL);
+    void run(int left, int right, int16_t* output_buffer = NULL);
 };
 
 #endif  // DSP_SONY_S_DSP_ECHO_HPP_

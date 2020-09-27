@@ -149,76 +149,72 @@ inline int clamp_16(int n) {
     return std::max(lower, std::min(n, upper));
 }
 
-void Sony_S_DSP_Echo::run(int32_t count, int left, int right, int16_t* output_buffer) {
-    while (--count >= 0) {
-        // buffer the inputs for applying feedback
-        int echol = left;
-        int echor = right;
+void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
+    // buffer the inputs for applying feedback
+    int echol = left;
+    int echor = right;
 
-        // get the current feedback sample in the echo buffer
-        EchoBufferSample* const echo_sample =
-            reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
-        // increment the echo pointer by the size of the echo buffer sample (4)
-        echo_ptr += sizeof(EchoBufferSample);
-        // check if for the end of the ring buffer and wrap the pointer around
-        // the echo delay is clamped in [0, 15] and each delay index requires
-        // 2KB of RAM (0x800)
-        if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
-        // cache the feedback value (sign-extended to 32-bit)
-        int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
-        int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
+    // get the current feedback sample in the echo buffer
+    EchoBufferSample* const echo_sample =
+        reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
+    // increment the echo pointer by the size of the echo buffer sample (4)
+    echo_ptr += sizeof(EchoBufferSample);
+    // check if for the end of the ring buffer and wrap the pointer around
+    // the echo delay is clamped in [0, 15] and each delay index requires
+    // 2KB of RAM (0x800)
+    if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
+    // cache the feedback value (sign-extended to 32-bit)
+    int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
+    int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
 
-        // put samples in history ring buffer
-        const int fir_offset = this->fir_offset;
-        short (*fir_pos)[2] = &fir_buf[fir_offset];
-        this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
-        fir_pos[0][0] = (short) fb_left;
-        fir_pos[0][1] = (short) fb_right;
-        // duplicate at +8 eliminates wrap checking below
-        fir_pos[8][0] = (short) fb_left;
-        fir_pos[8][1] = (short) fb_right;
+    // put samples in history ring buffer
+    const int fir_offset = this->fir_offset;
+    short (*fir_pos)[2] = &fir_buf[fir_offset];
+    this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
+    fir_pos[0][0] = (short) fb_left;
+    fir_pos[0][1] = (short) fb_right;
+    // duplicate at +8 eliminates wrap checking below
+    fir_pos[8][0] = (short) fb_left;
+    fir_pos[8][1] = (short) fb_right;
 
-        // FIR
-        fb_left =     fb_left * fir_coeff[7] +
-                fir_pos[1][0] * fir_coeff[6] +
-                fir_pos[2][0] * fir_coeff[5] +
-                fir_pos[3][0] * fir_coeff[4] +
-                fir_pos[4][0] * fir_coeff[3] +
-                fir_pos[5][0] * fir_coeff[2] +
-                fir_pos[6][0] * fir_coeff[1] +
-                fir_pos[7][0] * fir_coeff[0];
+    // FIR
+    fb_left =     fb_left * fir_coeff[7] +
+            fir_pos[1][0] * fir_coeff[6] +
+            fir_pos[2][0] * fir_coeff[5] +
+            fir_pos[3][0] * fir_coeff[4] +
+            fir_pos[4][0] * fir_coeff[3] +
+            fir_pos[5][0] * fir_coeff[2] +
+            fir_pos[6][0] * fir_coeff[1] +
+            fir_pos[7][0] * fir_coeff[0];
 
-        fb_right =   fb_right * fir_coeff[7] +
-                fir_pos[1][1] * fir_coeff[6] +
-                fir_pos[2][1] * fir_coeff[5] +
-                fir_pos[3][1] * fir_coeff[4] +
-                fir_pos[4][1] * fir_coeff[3] +
-                fir_pos[5][1] * fir_coeff[2] +
-                fir_pos[6][1] * fir_coeff[1] +
-                fir_pos[7][1] * fir_coeff[0];
-        // add the echo to the samples for the left and right channel
-        left  += (fb_left  * global.left_echo_volume) >> 14;
-        right += (fb_right * global.right_echo_volume) >> 14;
+    fb_right =   fb_right * fir_coeff[7] +
+            fir_pos[1][1] * fir_coeff[6] +
+            fir_pos[2][1] * fir_coeff[5] +
+            fir_pos[3][1] * fir_coeff[4] +
+            fir_pos[4][1] * fir_coeff[3] +
+            fir_pos[5][1] * fir_coeff[2] +
+            fir_pos[6][1] * fir_coeff[1] +
+            fir_pos[7][1] * fir_coeff[0];
+    // add the echo to the samples for the left and right channel
+    left  += (fb_left  * global.left_echo_volume) >> 14;
+    right += (fb_right * global.right_echo_volume) >> 14;
 
-        // if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
-            // add feedback to the echo samples
-            echol += (fb_left  * global.echo_feedback) >> 14;
-            echor += (fb_right * global.echo_feedback) >> 14;
-            // put the echo samples into the buffer
-            echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
-            echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
-        // }
+    // if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
+        // add feedback to the echo samples
+        echol += (fb_left  * global.echo_feedback) >> 14;
+        echor += (fb_right * global.echo_feedback) >> 14;
+        // put the echo samples into the buffer
+        echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
+        echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
+    // }
 
-        // -------------------------------------------------------------------
-        // MARK: Output
-        // -------------------------------------------------------------------
-        if (output_buffer) {  // write final samples
-            // clamp the left and right samples and place them into the buffer
-            output_buffer[0] = left  = clamp_16(left);
-            output_buffer[1] = right = clamp_16(right);
-            // increment the buffer to the position of the next stereo sample
-            output_buffer += 2;
-        }
+    // -------------------------------------------------------------------
+    // MARK: Output
+    // -------------------------------------------------------------------
+    if (output_buffer) {  // write final samples
+        // clamp the left and right samples and place them into the buffer
+        output_buffer[0] = left  = clamp_16(left);
+        output_buffer[1] = right = clamp_16(right);
     }
 }
 

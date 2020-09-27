@@ -206,31 +206,31 @@ struct ChipSNES_Echo : Module {
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------
-        uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
-        apu.write(Sony_S_DSP_Echo::FLAGS, noise);
+        // uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
+        // apu.write(Sony_S_DSP_Echo::FLAGS, noise);
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
-        // create bit-masks for the key-on and key-off state of each voice
-        uint8_t key_on = 0;
-        uint8_t key_off = 0;
-        // iterate over the voices to detect key-on and key-off events
-        for (unsigned voice = 0; voice < Sony_S_DSP_Echo::VOICE_COUNT; voice++) {
-            // get the voltage from the gate input port
-            const auto gate = inputs[INPUT_GATE + voice].getVoltage();
-            // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-            // process the inverted voltage to detect key-of events
-            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-        }
-        if (key_on) {  // a key-on event occurred from the gate input
-            // write key off to enable all voices
-            apu.write(Sony_S_DSP_Echo::KEY_OFF, 0);
-            // write the key-on value to the register
-            apu.write(Sony_S_DSP_Echo::KEY_ON, key_on);
-        }
-        if (key_off)  // a key-off event occurred from the gate input
-            apu.write(Sony_S_DSP_Echo::KEY_OFF, key_off);
+        // // create bit-masks for the key-on and key-off state of each voice
+        // uint8_t key_on = 0;
+        // uint8_t key_off = 0;
+        // // iterate over the voices to detect key-on and key-off events
+        // for (unsigned voice = 0; voice < Sony_S_DSP_Echo::VOICE_COUNT; voice++) {
+        //     // get the voltage from the gate input port
+        //     const auto gate = inputs[INPUT_GATE + voice].getVoltage();
+        //     // process the voltage to detect key-on events
+        //     key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+        //     // process the inverted voltage to detect key-of events
+        //     key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+        // }
+        // if (key_on) {  // a key-on event occurred from the gate input
+        //     // write key off to enable all voices
+        //     apu.write(Sony_S_DSP_Echo::KEY_OFF, 0);
+        //     // write the key-on value to the register
+        //     apu.write(Sony_S_DSP_Echo::KEY_ON, key_on);
+        // }
+        // if (key_off)  // a key-off event occurred from the gate input
+        //     apu.write(Sony_S_DSP_Echo::KEY_OFF, key_off);
         // -------------------------------------------------------------------
         // MARK: Echo Parameters
         // -------------------------------------------------------------------
@@ -274,7 +274,9 @@ struct ChipSNES_Echo : Module {
         // MARK: Stereo output
         // -------------------------------------------------------------------
         short sample[2] = {0, 0};
-        apu.run(1, sample);
+        auto left = 32000 * inputs[INPUT_GATE + 0].getVoltage() / 10.f;
+        auto right = 32000 * inputs[INPUT_GATE + 1].getVoltage() / 10.f;
+        apu.run(1, left, right, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

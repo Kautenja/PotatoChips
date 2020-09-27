@@ -409,7 +409,7 @@ class Sony_S_DSP_Echo {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int32_t num_samples, int16_t* output_buffer = NULL);
+    void run(int32_t num_samples, int left, int right, int16_t* output_buffer = NULL);
 };
 
 #endif  // DSP_SONY_S_DSP_ECHO_HPP_

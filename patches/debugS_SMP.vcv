@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "hw:Sanskrit 6th,0",
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -29,6 +29,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
+      "rightModuleId": 152,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -54,19 +55,19 @@
       "params": [
         {
           "id": 0,
-          "value": 4.0
+          "value": 2.0
         },
         {
           "id": 1,
-          "value": 3.89600372
+          "value": 2.0
         },
         {
           "id": 2,
-          "value": 2.84000182
+          "value": 2.0
         },
         {
           "id": 3,
-          "value": 1.45999968
+          "value": 2.0
         },
         {
           "id": 4,
@@ -118,7 +119,7 @@
         },
         {
           "id": 16,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 17,
@@ -158,15 +159,15 @@
         },
         {
           "id": 26,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 27,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 28,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 29,
@@ -190,15 +191,15 @@
         },
         {
           "id": 34,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 35,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 36,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 37,
@@ -218,19 +219,19 @@
         },
         {
           "id": 41,
-          "value": 6.0
+          "value": 0.0
         },
         {
           "id": 42,
-          "value": 4.0
+          "value": 0.0
         },
         {
           "id": 43,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 44,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 45,
@@ -250,7 +251,7 @@
         },
         {
           "id": 49,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 50,
@@ -282,19 +283,19 @@
         },
         {
           "id": 57,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 58,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 59,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 60,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 61,
@@ -314,19 +315,19 @@
         },
         {
           "id": 65,
-          "value": 13.0
+          "value": 0.0
         },
         {
           "id": 66,
-          "value": 11.0
+          "value": 0.0
         },
         {
           "id": 67,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 68,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 69,
@@ -378,11 +379,11 @@
         },
         {
           "id": 81,
-          "value": 15.0
+          "value": 0.0
         },
         {
           "id": 82,
-          "value": 77.0
+          "value": 0.0
         },
         {
           "id": 83,
@@ -406,11 +407,11 @@
         },
         {
           "id": 88,
-          "value": -29.0
+          "value": 0.0
         },
         {
           "id": 89,
-          "value": 9.0
+          "value": 0.0
         },
         {
           "id": 90,
@@ -433,8 +434,9 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 5,
       "pos": [
-        9,
+        8,
         1
       ]
     },

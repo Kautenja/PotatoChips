@@ -17,7 +17,6 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
-#include "dsp/wavetable4bit.hpp"
 #include "dsp/snes_echo.hpp"
 
 // ---------------------------------------------------------------------------
@@ -27,27 +26,15 @@
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipSNES_Echo : Module {
  private:
-    /// the Sony S-DSP sound chip emulator
+    /// the Sony S-DSP echo effect emulator
     Sony_S_DSP_Echo apu;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          8),  // TODO: remove
-        ENUMS(PARAM_PM_ENABLE,     8),  // TODO: remove
-        ENUMS(PARAM_NOISE_ENABLE,  8),  // TODO: remove
-        PARAM_NOISE_FREQ,                                          // TODO: remove
-        ENUMS(PARAM_VOLUME_L,      8),  // TODO: remove
-        ENUMS(PARAM_VOLUME_R,      8),  // TODO: remove
-        ENUMS(PARAM_ATTACK,        8),  // TODO: remove
-        ENUMS(PARAM_DECAY,         8),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_LEVEL, 8),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_RATE,  8),  // TODO: remove
-        ENUMS(PARAM_ECHO_ENABLE,   8),  // TODO: remove
         PARAM_ECHO_DELAY,
         PARAM_ECHO_FEEDBACK,
-        ENUMS(PARAM_VOLUME_ECHO, 2),
-        ENUMS(PARAM_VOLUME_MAIN, 2),  // TODO: remove
+        ENUMS(PARAM_MIX_ECHO, 2),
         ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
     };
@@ -57,7 +44,7 @@ struct ChipSNES_Echo : Module {
         ENUMS(INPUT_AUDIO, 2),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
-        ENUMS(INPUT_VOLUME_ECHO, 2),
+        ENUMS(INPUT_MIX_ECHO, 2),
         ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
@@ -84,6 +71,8 @@ struct ChipSNES_Echo : Module {
         // each delay level adds 16ms to the buffer
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
+        configParam(PARAM_MIX_ECHO + 0,    -128, 127,   0, "Echo Mix (Left Channel)");
+        configParam(PARAM_MIX_ECHO + 1,    -128, 127,   0, "Echo Mix (Right Channel)");
     }
 
  protected:
@@ -95,8 +84,8 @@ struct ChipSNES_Echo : Module {
         // delay parameters
         apu.setFeedback(params[PARAM_ECHO_FEEDBACK].getValue());
         apu.setDelay(params[PARAM_ECHO_DELAY].getValue());
-        apu.setMixLeft(params[PARAM_VOLUME_ECHO + 0].getValue());
-        apu.setMixRight(params[PARAM_VOLUME_ECHO + 1].getValue());
+        apu.setMixLeft(params[PARAM_MIX_ECHO + 0].getValue());
+        apu.setMixRight(params[PARAM_MIX_ECHO + 1].getValue());
         // FIR Coefficients
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
             apu.setFIR(coeff, params[PARAM_FIR_COEFFICIENT + coeff].getValue());
@@ -149,6 +138,18 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         echoFeedback->snap = true;
         addParam(echoFeedback);
         addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
+
+        // Echo Volume - Left channel
+        auto echoLeft = createParam<Rogan2PWhite>(Vec(130, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 0);
+        echoLeft->snap = true;
+        addParam(echoLeft);
+        addInput(createInput<PJ301MPort>(Vec(140, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 0));
+        // Echo Volume - Right channel
+        auto echoRight = createParam<Rogan2PRed>(Vec(180, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 1);
+        echoRight->snap = true;
+        addParam(echoRight);
+        addInput(createInput<PJ301MPort>(Vec(190, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 1));
+
         // Outputs
         addOutput(createOutput<PJ301MPort>(Vec(140, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 0));
         addOutput(createOutput<PJ301MPort>(Vec(190, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 1));

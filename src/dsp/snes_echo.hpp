@@ -16,8 +16,8 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_SONY_S_DSP_HPP_
-#define DSP_SONY_S_DSP_HPP_
+#ifndef DSP_SONY_S_DSP_ECHO_HPP_
+#define DSP_SONY_S_DSP_ECHO_HPP_
 
 #include "exceptions.hpp"
 #include <cstring>
@@ -426,4 +426,4 @@ class Sony_S_DSP_Echo {
     void run(int32_t num_samples, int16_t* output_buffer = NULL);
 };
 
-#endif  // DSP_SONY_S_DSP_HPP_
+#endif  // DSP_SONY_S_DSP_ECHO_HPP_

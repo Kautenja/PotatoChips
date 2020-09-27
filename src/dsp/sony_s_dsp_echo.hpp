@@ -49,7 +49,7 @@ class Sony_S_DSP_Echo {
     /// the number of milliseconds per discrete delay level
     static constexpr unsigned MILLISECONDS_PER_DELAY_LEVEL = 16;
     /// the number of \f$16ms\f$ delay levels
-    static constexpr unsigned DELAY_LEVELS = 15;
+    static constexpr unsigned DELAY_LEVELS = 31;
     /// the number of bytes per delay level (2KB)
     static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
 

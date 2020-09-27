@@ -18,81 +18,25 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#include "sony_spc700.hpp"
-#include "sony_spc700_endian.hpp"
-#include <cstring>
+#include "sony_s_dsp.hpp"
+#include <algorithm>
 #include <cstddef>
+#include <limits>
 
-SonySPC700::SonySPC700(uint8_t* ram_) : ram(ram_) {
-    set_gain(1.0);
-    mute_voices(0);
-    disable_surround(false);
-
-    assert(offsetof (globals_t,unused9[2]) == REGISTER_COUNT);
-    assert(sizeof (voice) == REGISTER_COUNT);
-    blargg_verify_byte_order();
+Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
+    // validate that the structures are of expected size
+    // TODO: move to unit testing code and remove from here
+    assert(NUM_REGISTERS == sizeof(GlobalData));
+    assert(NUM_REGISTERS == sizeof(voices));
+    assert(9 == sizeof(BitRateReductionBlock));
+    assert(4 == sizeof(SourceDirectoryEntry));
+    assert(4 == sizeof(EchoBufferSample));
 }
 
-void SonySPC700::mute_voices(int mask) {
-    for (int i = 0; i < VOICE_COUNT; i++)
-        voice_state[i].enabled = (mask >> i & 1) ? 31 : 7;
-}
-
-void SonySPC700::reset() {
-    keys = 0;
-    echo_ptr = 0;
-    noise_count = 0;
-    noise = 1;
-    fir_offset = 0;
-
-    g.flags = 0xE0; // reset, mute, echo off
-    g.key_ons = 0;
-
-    for (int i = 0; i < VOICE_COUNT; i++) {
-        voice_t& v = voice_state[i];
-        v.on_cnt = 0;
-        v.volume[0] = 0;
-        v.volume[1] = 0;
-        v.envstate = state_release;
-    }
-
-    memset(fir_buf, 0, sizeof fir_buf);
-}
-
-void SonySPC700::write(int i, int data) {
-    assert((unsigned) i < REGISTER_COUNT);
-
-    reg[i] = data;
-    int high = i >> 4;
-    switch (i & 0x0F) {
-        // voice volume
-        case 0:
-        case 1: {
-            short* volume = voice_state[high].volume;
-            int left  = (int8_t) reg[i & ~1];
-            int right = (int8_t) reg[i |  1];
-            volume[0] = left;
-            volume[1] = right;
-            // kill surround only if enabled and signs of volumes differ
-            if (left * right < surround_threshold) {
-                if (left < 0)
-                    volume[0] = -left;
-                else
-                    volume[1] = -right;
-            }
-            break;
-        }
-        // fir coefficients
-        case 0x0F:
-            fir_coeff[high] = (int8_t) data; // sign-extend
-            break;
-    }
-}
-
-// This table is for envelope timing.  It represents the number of counts
-// that should be subtracted from the counter each sample period (32kHz).
-// The counter starts at 30720 (0x7800). Each count divides exactly into
-// 0x7800 without remainder.
+/// This table is for envelope timing global.  It represents the number of
+/// counts that should be subtracted from the counter each sample period
+/// (32kHz). The counter starts at 30720 (0x7800). Each count divides exactly
+/// into 0x7800 without remainder.
 const int env_rate_init = 0x7800;
 static const short env_rates[0x20] = {
     0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
@@ -101,24 +45,25 @@ static const short env_rates[0x20] = {
     0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
 };
 
-const int env_range = 0x800;
+/// the range of the envelope generator amplitude level (i.e., max value)
+const int ENVELOPE_RANGE = 0x800;
 
-inline int SonySPC700::clock_envelope(int v) {
-    raw_voice_t& raw_voice = this->voice[v];
-    voice_t& voice = voice_state[v];
+inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
+    RawVoice& raw_voice = this->voices[voice_idx];
+    VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
-    if (voice.envstate == state_release) {
+    if (voice.envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
         // Alright, I'm going to choose to interpret that this way:
         // When a note is keyed off, start the RELEASE state, which
         // subtracts 1/256th each sample period (32kHz).  Note there's
         // no need for a count because it always happens every update.
-        envx -= env_range / 256;
+        envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
             envx = 0;
-            keys &= ~(1 << v);
+            keys &= ~(1 << voice_idx);
             return -1;
         }
         voice.envx = envx;
@@ -129,27 +74,27 @@ inline int SonySPC700::clock_envelope(int v) {
     int cnt = voice.envcnt;
     int adsr1 = raw_voice.adsr[0];
     if (adsr1 & 0x80) {
-        switch (voice.envstate) {
-            case state_attack: {
+        switch (voice.envelope_stage) {
+            case EnvelopeStage::Attack: {
                 // increase envelope by 1/64 each step
                 int t = adsr1 & 15;
                 if (t == 15) {
-                    envx += env_range / 2;
+                    envx += ENVELOPE_RANGE / 2;
                 } else {
                     cnt -= env_rates[t * 2 + 1];
                     if (cnt > 0) break;
-                    envx += env_range / 64;
+                    envx += ENVELOPE_RANGE / 64;
                     cnt = env_rate_init;
                 }
-                if (envx >= env_range) {
-                    envx = env_range - 1;
-                    voice.envstate = state_decay;
+                if (envx >= ENVELOPE_RANGE) {
+                    envx = ENVELOPE_RANGE - 1;
+                    voice.envelope_stage = EnvelopeStage::Decay;
                 }
                 voice.envx = envx;
                 break;
             }
 
-            case state_decay: {
+            case EnvelopeStage::Decay: {
                 // Docs: "DR...[is multiplied] by the fixed value
                 // 1-1/256." Well, at least that makes some sense.
                 // Multiplying ENVX by 255/256 every time DECAY is
@@ -163,11 +108,11 @@ inline int SonySPC700::clock_envelope(int v) {
                 int sustain_level = raw_voice.adsr[1] >> 5;
 
                 if (envx <= (sustain_level + 1) * 0x100)
-                    voice.envstate = state_sustain;
+                    voice.envelope_stage = EnvelopeStage::Sustain;
                 break;
             }
 
-            case state_sustain:
+            case EnvelopeStage::Sustain:
                 // Docs: "SR[is multiplied] by the fixed value 1-1/256."
                 // Multiplying ENVX by 255/256 every time SUSTAIN is
                 // updated.
@@ -179,7 +124,7 @@ inline int SonySPC700::clock_envelope(int v) {
                 }
                 break;
 
-            case state_release:
+            case EnvelopeStage::Release:
                 // handled above
                 break;
         }
@@ -203,15 +148,15 @@ inline int SonySPC700::clock_envelope(int v) {
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            envx -= env_range / 64;
+            envx -= ENVELOPE_RANGE / 64;
             if (envx < 0) {
                 envx = 0;
-                if (voice.envstate == state_attack)
-                    voice.envstate = state_decay;
+                if (voice.envelope_stage == EnvelopeStage::Attack)
+                    voice.envelope_stage = EnvelopeStage::Decay;
             }
             voice.envx = envx;
             break;
-        case 5:         /* Docs: "Drecrease <sic> (exponential):
+        case 5:         /* Docs: "Decrease <sic> (exponential):
                              * Multiplication by the fixed value
                              * 1-1/256." */
             cnt -= env_rates[t & 0x1F];
@@ -221,8 +166,8 @@ inline int SonySPC700::clock_envelope(int v) {
             envx -= ((envx - 1) >> 8) + 1;
             if (envx < 0) {
                 envx = 0;
-                if (voice.envstate == state_attack)
-                    voice.envstate = state_decay;
+                if (voice.envelope_stage == EnvelopeStage::Attack)
+                    voice.envelope_stage = EnvelopeStage::Decay;
             }
             voice.envx = envx;
             break;
@@ -232,24 +177,24 @@ inline int SonySPC700::clock_envelope(int v) {
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            envx += env_range / 64;
-            if (envx >= env_range)
-                envx = env_range - 1;
+            envx += ENVELOPE_RANGE / 64;
+            if (envx >= ENVELOPE_RANGE)
+                envx = ENVELOPE_RANGE - 1;
             voice.envx = envx;
             break;
         case 7:         /* Docs: "Increase (bent line): Addition
                              * of the constant 1/64 up to .75 of the
-                             * constaint <sic> 1/256 from .75 to 1." */
+                             * constant <sic> 1/256 from .75 to 1." */
             cnt -= env_rates[t & 0x1F];
             if (cnt > 0)
                 break;
             cnt = env_rate_init;
-            if (envx < env_range * 3 / 4)
-                envx += env_range / 64;
+            if (envx < ENVELOPE_RANGE * 3 / 4)
+                envx += ENVELOPE_RANGE / 64;
             else
-                envx += env_range / 256;
-            if (envx >= env_range)
-                envx = env_range - 1;
+                envx += ENVELOPE_RANGE / 256;
+            if (envx >= ENVELOPE_RANGE)
+                envx = ENVELOPE_RANGE - 1;
             voice.envx = envx;
             break;
         }
@@ -259,73 +204,97 @@ inline int SonySPC700::clock_envelope(int v) {
     return envx;
 }
 
-// Clamp n into range -32768 <= n <= 32767
+/// Clamp an integer to a 16-bit value.
+///
+/// @param n a 32-bit integer value to clip
+/// @returns n clipped to a 16-bit value [-32768, 32767]
+///
 inline int clamp_16(int n) {
-    if ((int16_t) n != n)
-        n = int16_t (0x7FFF - (n >> 31));
-    return n;
+    const int lower = std::numeric_limits<int16_t>::min();
+    const int upper = std::numeric_limits<int16_t>::max();
+    return std::max(lower, std::min(n, upper));
 }
 
-void SonySPC700::run(long count, short* out_buf) {
-    // to do: make clock_envelope() inline so that this becomes a leaf function?
-
-    // Should we just fill the buffer with silence? Flags won't be cleared
-    // during this run so it seems it should keep resetting every sample.
-    if (g.flags & 0x80)
-        reset();
-
-    struct src_dir {
-        char start[2];
-        char loop[2];
-    };
-
-    const src_dir* const sd = (src_dir*) &ram[g.wave_page * 0x100];
-
-    int left_volume  = g.left_volume;
-    int right_volume = g.right_volume;
-    if (left_volume * right_volume < surround_threshold)
-        right_volume = -right_volume; // kill global surround
-    left_volume  *= emu_gain;
-    right_volume *= emu_gain;
-
+void Sony_S_DSP::run(int32_t count, int16_t* output_buffer) {
+    // TODO: Should we just fill the buffer with silence? Flags won't be
+    // cleared during this run so it seems it should keep resetting every
+    // sample.
+    if (global.flags & FLAG_MASK_RESET) reset();
+    // use the global wave page address to lookup a pointer to the first entry
+    // in the source directory. the wave page is multiplied by 0x100 to produce
+    // the RAM address of the source directory.
+    const SourceDirectoryEntry* const source_directory =
+        reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
+    // get the volume of the left channel from the global registers
+    int left_volume  = global.left_volume;
+    int right_volume = global.right_volume;
+    // render samples at 32kHz for the given count of samples
     while (--count >= 0) {
-        // Here we check for keys on/off.  Docs say that successive writes
-        // to KON/KOF must be separated by at least 2 Ts periods or risk
-        // being neglected.  Therefore DSP only looks at these during an
-        // update, and not at the time of the write.  Only need to do this
+        // -------------------------------------------------------------------
+        // MARK: Key Off / Key On
+        // -------------------------------------------------------------------
+        // Here we check for keys on / off. Docs say that successive writes
+        // to KON / KOF must be separated by at least 2 T_s periods or risk
+        // being neglected.  Therefore, DSP only looks at these during an
+        // update, and not at the time of the write. Only need to do this
         // once however, since the regs haven't changed over the whole
         // period we need to catch up with.
-
-        g.wave_ended &= ~g.key_ons; // Keying on a voice resets that bit in ENDX.
-
-        if (g.noise_enables) {
-            noise_count -= env_rates[g.flags & 0x1F];
-            if (noise_count <= 0) {
+        // -------------------------------------------------------------------
+        // Keying on a voice resets that bit in ENDX.
+        global.wave_ended &= ~global.key_ons;
+        // -------------------------------------------------------------------
+        // MARK: Noise
+        // -------------------------------------------------------------------
+        // the `noise_enables` register is a length 8 bit-mask for enabling /
+        // disabling noise for each individual voice.
+        if (global.noise_enables) {  // noise enabled for at least one voice
+            // update the noise period based on the index of the rate in the
+            // global flags register
+            noise_count -= env_rates[global.flags & FLAG_MASK_NOISE_PERIOD];
+            if (noise_count <= 0) {  // rising edge of noise generator
+                // reset the noise period to the initial value
                 noise_count = env_rate_init;
-                noise_amp = int16_t (noise * 2);
-                // TODO: switch to Galios style
-                int feedback = (noise << 13) ^ (noise << 14);
-                noise = (feedback & 0x4000) | (noise >> 1);
+                // the LFSR is 15-bit, shift left 1 to get the 16-bit sample
+                noise_amp = static_cast<int16_t>(noise << 1);
+                // update the linear feedback shift register from taps 0, 1.
+                noise = (((noise << 13) ^ (noise << 14)) & 0x4000) | (noise >> 1);
+                // the Galois equivalent was implemented as below, but yielded
+                // poor CPU performance relative to the Fibonacci method above
+                // and produced a frequency response that seemed incorrect,
+                // i.e., high frequency noise had a much higher low frequency
+                // response. As such, the Fibonacci implementation above is
+                // the preferred route for this LFSR implementation.
+                //     uint16_t noise = this->noise;
+                //     noise = (noise >> 1) ^ (0x6000 & -(noise & 1));
+                //     this->noise = noise;
             }
         }
-
-        // What is the expected behavior when pitch modulation is enabled on
-        // voice 0? Jurassic Park 2 does this. Assume 0 for now.
+        // -------------------------------------------------------------------
+        // MARK: Voice Processing
+        // -------------------------------------------------------------------
+        // store output of the the last monophonic voice for phase modulation.
+        // TODO: What is the expected behavior when pitch modulation is enabled
+        // on voice 0? Jurassic Park 2 does this. Assume 0 for now.
         int prev_outx = 0;
-
+        // buffer the outputs of the left and right echo and main channels
         int echol = 0;
         int echor = 0;
         int left = 0;
         int right = 0;
-        for (int vidx = 0; vidx < VOICE_COUNT; vidx++) {
-            const int vbit = 1 << vidx;
-            raw_voice_t& raw_voice = voice[vidx];
-            voice_t& voice = voice_state[vidx];
-
+        // iterate over the voices on the chip
+        for (unsigned voice_idx = 0; voice_idx < VOICE_COUNT; voice_idx++) {
+            // get the voice's bit-mask shift value
+            const int voice_bit = 1 << voice_idx;
+            // cache the voice and data structures
+            RawVoice& raw_voice = voices[voice_idx];
+            VoiceState& voice = voice_states[voice_idx];
+            // ---------------------------------------------------------------
+            // MARK: Gate Processing
+            // ---------------------------------------------------------------
             if (voice.on_cnt && !--voice.on_cnt) {
                 // key on
-                keys |= vbit;
-                voice.addr = GET_LE16(sd[raw_voice.waveform].start);
+                keys |= voice_bit;
+                voice.addr = source_directory[raw_voice.waveform].start;
                 voice.block_remain = 1;
                 voice.envx = 0;
                 voice.block_header = 0;
@@ -341,23 +310,21 @@ void SonySPC700::run(long count, short* out_buf) {
                 // pattern.  I doubt it will matter though, so we'll go
                 // ahead and do the full time for now.
                 voice.envcnt = env_rate_init;
-                voice.envstate = state_attack;
+                voice.envelope_stage = EnvelopeStage::Attack;
             }
-
-            if (g.key_ons & vbit & ~g.key_offs) {
-                // voice doesn't come on if key off is set
-                g.key_ons &= ~vbit;
+            // key-on = !key-off = true
+            if (global.key_ons & voice_bit & ~global.key_offs) {
+                global.key_ons &= ~voice_bit;
                 voice.on_cnt = 8;
             }
-
-            if (keys & g.key_offs & vbit) {
-                // key off
-                voice.envstate = state_release;
+            // key-off = true
+            if (keys & global.key_offs & voice_bit) {
+                voice.envelope_stage = EnvelopeStage::Release;
                 voice.on_cnt = 0;
             }
 
             int envx;
-            if (!(keys & vbit) || (envx = clock_envelope(vidx)) < 0) {
+            if (!(keys & voice_bit) || (envx = clock_envelope(voice_idx)) < 0) {
                 raw_voice.envx = 0;
                 raw_voice.outx = 0;
                 prev_outx = 0;
@@ -368,25 +335,26 @@ void SonySPC700::run(long count, short* out_buf) {
             for (int n = voice.fraction >> 12; --n >= 0;) {
                 if (!--voice.block_remain) {
                     if (voice.block_header & 1) {
-                        g.wave_ended |= vbit;
+                        global.wave_ended |= voice_bit;
                         if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
-                            voice.addr = GET_LE16(sd[raw_voice.waveform].loop);
-                        } else {
-                            // first block was end block; don't play anything (verified)
-                            goto sample_ended; // to do: find alternative to goto
+                            voice.addr = source_directory[raw_voice.waveform].loop;
+                        } else {  // first block was end block; don't play anything
+                            goto sample_ended;
                         }
                     }
                     voice.block_header = ram[voice.addr++];
                     voice.block_remain = 16;  // nibbles
                 }
 
-                // if next block has end flag set, *this* block ends *early* (verified)
-                if (voice.block_remain == 9 && (ram[voice.addr + 5] & 3) == 1 &&
-                        (voice.block_header & 3) != 3) {
+                if (
+                    voice.block_remain == 9 &&
+                    (ram[voice.addr + 5] & 3) == 1 &&
+                    (voice.block_header & 3) != 3
+                ) {  // next block has end flag set, this block ends early
             sample_ended:
-                    g.wave_ended |= vbit;
-                    keys &= ~vbit;
+                    global.wave_ended |= voice_bit;
+                    keys &= ~voice_bit;
                     raw_voice.envx = 0;
                     voice.envx = 0;
                     // add silence samples to interpolation buffer
@@ -401,14 +369,14 @@ void SonySPC700::run(long count, short* out_buf) {
 
                 int delta = ram[voice.addr];
                 if (voice.block_remain & 1) {
-                    delta <<= 4; // use lower nybble
+                    delta <<= 4;  // use lower nibble
                     voice.addr++;
                 }
 
-                // Use sign-extended upper nybble
-                delta = int8_t (delta) >> 4;
+                // Use sign-extended upper nibble
+                delta = int8_t(delta) >> 4;
 
-                // For invalid ranges (D,E,F): if the nybble is negative,
+                // For invalid ranges (D,E,F): if the nibble is negative,
                 // the result is F000.  If positive, 0000. Nothing else
                 // like previous range, etc seems to have any effect.  If
                 // range is valid, do the shift normally.  Note these are
@@ -416,8 +384,7 @@ void SonySPC700::run(long count, short* out_buf) {
                 // the output will be shifted back again at the end.
                 int shift = voice.block_header >> 4;
                 delta = (delta << shift) >> 1;
-                if (shift > 0x0C)
-                    delta = (delta >> 14) & ~0x7FF;
+                if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
 
                 // One, two and three point IIR filters
                 int smp1 = voice.interp0;
@@ -440,38 +407,37 @@ void SonySPC700::run(long count, short* out_buf) {
                 voice.interp3 = voice.interp2;
                 voice.interp2 = smp2;
                 voice.interp1 = smp1;
-                voice.interp0 = int16_t (clamp_16(delta) * 2); // sign-extend
+                // sign-extend
+                voice.interp0 = int16_t (clamp_16(delta) * 2);
             }
 
-            // rate (with possible modulation)
-            int rate = GET_LE16(raw_voice.rate) & 0x3FFF;
-            if (g.pitch_mods & vbit)
+            // get the 14-bit frequency value
+            int rate = 0x3FFF & ((raw_voice.rate[1] << 8) | raw_voice.rate[0]);
+            if (global.pitch_mods & voice_bit)
                 rate = (rate * (prev_outx + 32768)) >> 15;
 
             // Gaussian interpolation using most recent 4 samples
             int index = voice.fraction >> 2 & 0x3FC;
             voice.fraction = (voice.fraction & 0x0FFF) + rate;
             const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
-            const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255*4 - index));
+            const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
             int s = ((table[0] * voice.interp3) >> 12) +
                     ((table[1] * voice.interp2) >> 12) +
                     ((table2[1] * voice.interp1) >> 12);
             s = (int16_t) (s * 2);
             s += (table2[0] * voice.interp0) >> 11 & ~1;
-            int output = clamp_16(s);
-            if (g.noise_enables & vbit)
-                output = noise_amp;
 
+            // if noise is enabled for this voice use the amplified noise as
+            // the output, otherwise use the clamped sampled value
+            int output = (global.noise_enables & voice_bit) ? noise_amp : clamp_16(s);
             // scale output and set outx values
             output = (output * envx) >> 11 & ~1;
+            int l = (voice.volume[0] * output) >> 7;
+            int r = (voice.volume[1] * output) >> 7;
 
-            // output and apply muting (by setting voice.enabled to 31)
-            // if voice is externally disabled (not a SNES feature)
-            int l = (voice.volume[0] * output) >> voice.enabled;
-            int r = (voice.volume[1] * output) >> voice.enabled;
             prev_outx = output;
-            raw_voice.outx = int8_t (output >> 8);
-            if (g.echo_ons & vbit) {
+            raw_voice.outx = output >> 8;
+            if (global.echo_ons & voice_bit) {
                 echol += l;
                 echor += r;
             }
@@ -481,32 +447,38 @@ void SonySPC700::run(long count, short* out_buf) {
         // end of channel loop
 
         // main volume control
-        left  = (left  * left_volume) >> (7 + EMU_GAIN_BITS);
-        right = (right * right_volume) >> (7 + EMU_GAIN_BITS);
+        left  = (left  * left_volume) >> 7;
+        right = (right * right_volume) >> 7;
 
-        // Echo FIR filter
+        // -------------------------------------------------------------------
+        // MARK: Echo FIR filter
+        // -------------------------------------------------------------------
 
-        // read feedback from echo buffer
-        int echo_ptr = this->echo_ptr;
-        uint8_t* echo_buf = &ram[(g.echo_page * 0x100 + echo_ptr) & 0xFFFF];
-        echo_ptr += 4;
-        if (echo_ptr >= (g.echo_delay & 15) * 0x800)
-            echo_ptr = 0;
-        int fb_left  = (int16_t) GET_LE16(echo_buf    ); // sign-extend
-        int fb_right = (int16_t) GET_LE16(echo_buf + 2); // sign-extend
-        this->echo_ptr = echo_ptr;
+        // get the current feedback sample in the echo buffer
+        EchoBufferSample* const echo_sample =
+            reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
+        // increment the echo pointer by the size of the echo buffer sample (4)
+        echo_ptr += sizeof(EchoBufferSample);
+        // check if for the end of the ring buffer and wrap the pointer around
+        // the echo delay is clamped in [0, 15] and each delay index requires
+        // 2KB of RAM (0x800)
+        if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
+        // cache the feedback value (sign-extended to 32-bit)
+        int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
+        int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
 
         // put samples in history ring buffer
         const int fir_offset = this->fir_offset;
         short (*fir_pos)[2] = &fir_buf[fir_offset];
-        this->fir_offset = (fir_offset + 7) & 7; // move backwards one step
+        this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
         fir_pos[0][0] = (short) fb_left;
         fir_pos[0][1] = (short) fb_right;
-        fir_pos[8][0] = (short) fb_left; // duplicate at +8 eliminates wrap checking below
+        // duplicate at +8 eliminates wrap checking below
+        fir_pos[8][0] = (short) fb_left;
         fir_pos[8][1] = (short) fb_right;
 
         // FIR
-        fb_left =       fb_left * fir_coeff[7] +
+        fb_left =     fb_left * fir_coeff[7] +
                 fir_pos[1][0] * fir_coeff[6] +
                 fir_pos[2][0] * fir_coeff[5] +
                 fir_pos[3][0] * fir_coeff[4] +
@@ -515,7 +487,7 @@ void SonySPC700::run(long count, short* out_buf) {
                 fir_pos[6][0] * fir_coeff[1] +
                 fir_pos[7][0] * fir_coeff[0];
 
-        fb_right =     fb_right * fir_coeff[7] +
+        fb_right =   fb_right * fir_coeff[7] +
                 fir_pos[1][1] * fir_coeff[6] +
                 fir_pos[2][1] * fir_coeff[5] +
                 fir_pos[3][1] * fir_coeff[4] +
@@ -523,35 +495,30 @@ void SonySPC700::run(long count, short* out_buf) {
                 fir_pos[5][1] * fir_coeff[2] +
                 fir_pos[6][1] * fir_coeff[1] +
                 fir_pos[7][1] * fir_coeff[0];
+        // add the echo to the samples for the left and right channel
+        left  += (fb_left  * global.left_echo_volume) >> 14;
+        right += (fb_right * global.right_echo_volume) >> 14;
 
-        left  += (fb_left  * g.left_echo_volume) >> 14;
-        right += (fb_right * g.right_echo_volume) >> 14;
-
-        // echo buffer feedback
-        if (!(g.flags & 0x20)) {
-            echol += (fb_left  * g.echo_feedback) >> 14;
-            echor += (fb_right * g.echo_feedback) >> 14;
-            SET_LE16(echo_buf    , clamp_16(echol));
-            SET_LE16(echo_buf + 2, clamp_16(echor));
+        if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
+            // add feedback to the echo samples
+            echol += (fb_left  * global.echo_feedback) >> 14;
+            echor += (fb_right * global.echo_feedback) >> 14;
+            // put the echo samples into the buffer
+            echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
+            echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
         }
 
-        if (out_buf) {
-            // write final samples
-
-            left  = clamp_16(left );
-            right = clamp_16(right);
-
-            int mute = g.flags & 0x40;
-
-            out_buf[0] = (short) left;
-            out_buf[1] = (short) right;
-            out_buf += 2;
-
-            // muting
-            if (mute) {
-                out_buf[-2] = 0;
-                out_buf[-1] = 0;
-            }
+        // -------------------------------------------------------------------
+        // MARK: Output
+        // -------------------------------------------------------------------
+        if (output_buffer) {  // write final samples
+            // clamp the left and right samples and place them into the buffer
+            output_buffer[0] = left  = clamp_16(left);
+            output_buffer[1] = right = clamp_16(right);
+            // increment the buffer to the position of the next stereo sample
+            output_buffer += 2;
+            if (global.flags & FLAG_MASK_MUTE)  // muting
+                output_buffer[-2] = output_buffer[-1] = 0;
         }
     }
 }
@@ -562,7 +529,7 @@ void SonySPC700::run(long count, short* out_buf) {
 
 // Interleved gauss table (to improve cache coherency).
 // gauss[i * 2 + j] = normal_gauss[(1 - j) * 256 + i]
-const int16_t SonySPC700::gauss[512] = {
+const int16_t Sony_S_DSP::gauss[512] = {
  370,1305, 366,1305, 362,1304, 358,1304, 354,1304, 351,1304, 347,1304, 343,1303,
  339,1303, 336,1303, 332,1302, 328,1302, 325,1301, 321,1300, 318,1300, 314,1299,
  311,1298, 307,1297, 304,1297, 300,1296, 297,1295, 293,1294, 290,1293, 286,1292,

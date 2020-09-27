@@ -1,4 +1,4 @@
-// The Potato Chips VCVRack plugin.
+// The Potato Chips VCVRack plug-in.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 
-/// the global instance of the plugin
+/// the global instance of the plug-in
 Plugin* plugin_instance;
 
 /// Initialize an instance of the plug-in.
@@ -26,16 +26,19 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
-    instance->addModel(modelChip2A03);
-    instance->addModel(modelChipVRC6);
-    instance->addModel(modelChipFME7);
     instance->addModel(modelChip106);
-    instance->addModel(modelChipSN76489);
-    instance->addModel(modelChipGBS);
-    instance->addModel(modelChipTurboGrafx16);
-    instance->addModel(modelChipSCC);
-    instance->addModel(modelChipAY_3_8910);
-    instance->addModel(modelChipPOKEY);
     instance->addModel(modelChip2413);
     instance->addModel(modelChip2612);
+    instance->addModel(modelChip2A03);
+    instance->addModel(modelChipAY_3_8910);
+    instance->addModel(modelChipFME7);
+    instance->addModel(modelChipGBS);
+    instance->addModel(modelChipPOKEY);
+    instance->addModel(modelChipS_SMP);
+    instance->addModel(modelChipSCC);
+    instance->addModel(modelChipSN76489);
+    instance->addModel(modelChipTurboGrafx16);
+    instance->addModel(modelChipVRC6);
+
+    instance->addModel(modelChipSNES_Echo);
 }

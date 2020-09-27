@@ -33,7 +33,7 @@ static void gen_poly(uint32_t mask, int count, uint8_t* out) {
     do {
         int bits = 0;
         int b = 0;
-        do {  // implemented using "Galios configuration"
+        do {  // implemented using Galois configuration
             bits |= (n & 1) << b;
             n = (n >> 1) ^ (mask & -(n & 1));
         } while (b++ < 7);

@@ -87,10 +87,20 @@
       "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf",
       "tags": [
+        "Synth voice",
         "Oscillator",
+        "Noise",
         "Effect"
-      ],
-      "disabled": true
+      ]
+    },
+    {
+      "slug": "SNES_Echo",
+      "name": "SNES Echo",
+      "description": "An emulation of the echo effect from the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SNES_Echo.pdf",
+      "tags": [
+        "Effect"
+      ]
     },
     {
       "slug": "2A03",

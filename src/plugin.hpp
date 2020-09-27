@@ -27,29 +27,23 @@ static constexpr uint32_t CLOCK_RATE = 768000;
 
 /// the global instance of the plug-in
 extern rack::Plugin* plugin_instance;
-// the global instance of each the 2A03 module
-extern rack::Model *modelChip2A03;
-// the global instance of each the VRC6 module
-extern rack::Model *modelChipVRC6;
-// the global instance of each the FME7 module
-extern rack::Model *modelChipFME7;
-// the global instance of each the 106 module
+
+// pointers to each module in the plug-in
+
 extern rack::Model *modelChip106;
-// the global instance of each the SN76489 module
-extern rack::Model *modelChipSN76489;
-// the global instance of each the GBS module
-extern rack::Model *modelChipGBS;
-// the global instance of each the TurboGrafx16 module
-extern rack::Model *modelChipTurboGrafx16;
-// the global instance of each the SCC module
-extern rack::Model *modelChipSCC;
-// the global instance of each the AY-3-8910 module
-extern rack::Model *modelChipAY_3_8910;
-// the global instance of each the POKEY module
-extern rack::Model *modelChipPOKEY;
-// the global instance of each the 2413 module
 extern rack::Model *modelChip2413;
-// the global instance of each the 2612 module
 extern rack::Model *modelChip2612;
+extern rack::Model *modelChip2A03;
+extern rack::Model *modelChipAY_3_8910;
+extern rack::Model *modelChipFME7;
+extern rack::Model *modelChipGBS;
+extern rack::Model *modelChipPOKEY;
+extern rack::Model *modelChipS_SMP;
+extern rack::Model *modelChipSCC;
+extern rack::Model *modelChipSN76489;
+extern rack::Model *modelChipTurboGrafx16;
+extern rack::Model *modelChipVRC6;
+
+extern rack::Model *modelChipSNES_Echo;
 
 #endif  // PLUGIN_HPP

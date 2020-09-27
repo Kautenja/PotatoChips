@@ -256,8 +256,9 @@ struct ChipSNES_Echo : Module {
             apu.write(mask | Sony_S_DSP_Echo::PITCH_LOW,  0xff &  256     );
             apu.write(mask | Sony_S_DSP_Echo::PITCH_HIGH, 0xff & (256 >> 8));
             // adsr
-            apu.write(mask | Sony_S_DSP_Echo::ADSR_1, 0b10100010);
-            apu.write(mask | Sony_S_DSP_Echo::ADSR_2, 0b10101010);
+            apu.write(mask | Sony_S_DSP_Echo::ADSR_1, 0);
+            apu.write(mask | Sony_S_DSP_Echo::ADSR_2, 0);
+            apu.write(mask | Sony_S_DSP_Echo::GAIN, 127);
             // amp volume
             apu.write(mask | Sony_S_DSP_Echo::VOLUME_LEFT,  127);
             apu.write(mask | Sony_S_DSP_Echo::VOLUME_RIGHT, 127);

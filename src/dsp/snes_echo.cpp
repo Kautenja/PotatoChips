@@ -27,7 +27,6 @@ Sony_S_DSP_Echo::Sony_S_DSP_Echo() {
     // validate that the structures are of expected size
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));
-    assert(NUM_REGISTERS == sizeof(voices));
     assert(4 == sizeof(EchoBufferSample));
 }
 

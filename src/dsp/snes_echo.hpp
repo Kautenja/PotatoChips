@@ -113,27 +113,6 @@ class Sony_S_DSP_Echo {
     };
 
  private:
-    /// A structure mapping the register space to a single voice's data fields.
-    struct RawVoice {
-        /// the volume of the left channel
-        int8_t left_vol;
-        /// the volume of the right channel
-        int8_t right_vol;
-        /// the rate of the oscillator
-        uint8_t rate[2];
-        /// the oscillator's waveform sample
-        uint8_t waveform;
-        /// envelope rates for attack, decay, and sustain
-        uint8_t adsr[2];
-        /// envelope gain (if not using ADSR)
-        uint8_t gain;
-        /// current envelope level
-        int8_t envx;
-        /// current sample
-        int8_t outx;
-        /// filler bytes to align to 16-bytes
-        int8_t unused[6];
-    };
 
     /// A structure mapping the register space to symbolic global data fields.
     struct GlobalData {
@@ -192,8 +171,6 @@ class Sony_S_DSP_Echo {
     union {
         /// the register bank on the chip
         uint8_t registers[NUM_REGISTERS];
-        /// the mapping of register data to the voices on the chip
-        RawVoice voices[VOICE_COUNT];
         /// the mapping of register data to the global data on the chip
         GlobalData global;
     };

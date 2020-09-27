@@ -254,8 +254,8 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
             if (noise_count <= 0) {  // rising edge of noise generator
                 // reset the noise period to the initial value
                 noise_count = env_rate_init;
-                // calculate the output noise signal
-                noise_amp = int16_t (noise * 2);
+                // the LFSR is 15-bit, shift left 1 to get the 16-bit sample
+                noise_amp = static_cast<int16_t>(noise << 1);
                 // update the linear feedback shift register from taps 0, 1.
                 noise = (((noise << 13) ^ (noise << 14)) & 0x4000) | (noise >> 1);
                 // the Galois equivalent was implemented as below, but yielded

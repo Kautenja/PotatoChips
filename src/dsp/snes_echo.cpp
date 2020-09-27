@@ -49,34 +49,34 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     int fb_right = echo_sample->samples[BufferSample::RIGHT];
 
     // put samples in history ring buffer
-    auto const fir_pos = &fir_buf[fir_offset];
+    auto const fir_samples = &fir_buffer[fir_offset];
     // move backwards one step
-    fir_offset = (fir_offset + 7) & 7;
+    fir_offset = (fir_offset + FIR_MAX_INDEX) & FIR_MAX_INDEX;
     // put sample into the first sample in the buffer
-    fir_pos[0].samples[BufferSample::LEFT] = fb_left;
-    fir_pos[0].samples[BufferSample::RIGHT] = fb_right;
+    fir_samples[0].samples[BufferSample::LEFT]  = fb_left;
+    fir_samples[0].samples[BufferSample::RIGHT] = fb_right;
     // duplicate at +8 eliminates wrap checking below
-    fir_pos[8].samples[BufferSample::LEFT] = fb_left;
-    fir_pos[8].samples[BufferSample::RIGHT] = fb_right;
+    fir_samples[8].samples[BufferSample::LEFT]  = fb_left;
+    fir_samples[8].samples[BufferSample::RIGHT] = fb_right;
 
     // FIR left channel
-    fb_left =                          fb_left * fir_coeff[7] +
-        fir_pos[1].samples[BufferSample::LEFT] * fir_coeff[6] +
-        fir_pos[2].samples[BufferSample::LEFT] * fir_coeff[5] +
-        fir_pos[3].samples[BufferSample::LEFT] * fir_coeff[4] +
-        fir_pos[4].samples[BufferSample::LEFT] * fir_coeff[3] +
-        fir_pos[5].samples[BufferSample::LEFT] * fir_coeff[2] +
-        fir_pos[6].samples[BufferSample::LEFT] * fir_coeff[1] +
-        fir_pos[7].samples[BufferSample::LEFT] * fir_coeff[0];
+    fb_left =                              fb_left * fir_coeff[7] +
+        fir_samples[1].samples[BufferSample::LEFT] * fir_coeff[6] +
+        fir_samples[2].samples[BufferSample::LEFT] * fir_coeff[5] +
+        fir_samples[3].samples[BufferSample::LEFT] * fir_coeff[4] +
+        fir_samples[4].samples[BufferSample::LEFT] * fir_coeff[3] +
+        fir_samples[5].samples[BufferSample::LEFT] * fir_coeff[2] +
+        fir_samples[6].samples[BufferSample::LEFT] * fir_coeff[1] +
+        fir_samples[7].samples[BufferSample::LEFT] * fir_coeff[0];
     // FIR right channel
-    fb_right =                         fb_right * fir_coeff[7] +
-        fir_pos[1].samples[BufferSample::RIGHT] * fir_coeff[6] +
-        fir_pos[2].samples[BufferSample::RIGHT] * fir_coeff[5] +
-        fir_pos[3].samples[BufferSample::RIGHT] * fir_coeff[4] +
-        fir_pos[4].samples[BufferSample::RIGHT] * fir_coeff[3] +
-        fir_pos[5].samples[BufferSample::RIGHT] * fir_coeff[2] +
-        fir_pos[6].samples[BufferSample::RIGHT] * fir_coeff[1] +
-        fir_pos[7].samples[BufferSample::RIGHT] * fir_coeff[0];
+    fb_right =                             fb_right * fir_coeff[7] +
+        fir_samples[1].samples[BufferSample::RIGHT] * fir_coeff[6] +
+        fir_samples[2].samples[BufferSample::RIGHT] * fir_coeff[5] +
+        fir_samples[3].samples[BufferSample::RIGHT] * fir_coeff[4] +
+        fir_samples[4].samples[BufferSample::RIGHT] * fir_coeff[3] +
+        fir_samples[5].samples[BufferSample::RIGHT] * fir_coeff[2] +
+        fir_samples[6].samples[BufferSample::RIGHT] * fir_coeff[1] +
+        fir_samples[7].samples[BufferSample::RIGHT] * fir_coeff[0];
 
     // put the echo samples into the buffer
     echo_sample->samples[BufferSample::LEFT] =

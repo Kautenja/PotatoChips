@@ -26,13 +26,14 @@
 /// @brief An emulation of the echo effect from the Sony S-DSP.
 class Sony_S_DSP_Echo {
  public:
-    /// the sample rate of the S-DSP in Hz
-    static constexpr unsigned SAMPLE_RATE = 32000;
     /// the size of the RAM bank in bytes
     // static constexpr unsigned SIZE_OF_RAM = 1 << 16;
+    /// the sample rate of the S-DSP in Hz
+    static constexpr unsigned SAMPLE_RATE = 32000;
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 
+ private:
     /// @brief A stereo sample in the echo buffer.
     struct BufferSample {
         /// the index of the left channel in the samples array
@@ -43,7 +44,6 @@ class Sony_S_DSP_Echo {
         int16_t samples[2] = {0, 0};
     };
 
- private:
     /// the number of \f$16ms\f$ delay levels
     static constexpr unsigned DELAY_LEVELS = 15;
     /// the number of bytes per delay level, i.e., 2KB
@@ -53,9 +53,11 @@ class Sony_S_DSP_Echo {
     /// A pointer to the head of the echo buffer in RAM
     unsigned buffer_head = 0;
 
-    /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
-    BufferSample fir_buf[16];
-    /// (0 to 7)
+    /// fir_buffer[i + 8] == fir_buffer[i], to avoid wrap checking in FIR code
+    BufferSample fir_buffer[16];
+    /// the size of the FIR ring buffer
+    static constexpr int FIR_MAX_INDEX = 7;
+    /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
 
     // -----------------------------------------------------------------------
@@ -82,7 +84,7 @@ class Sony_S_DSP_Echo {
     /// @brief Clear state and silence everything.
     void reset() {
         buffer_head = fir_offset = delay = feedback = mixLeft = mixRight = 0;
-        memset(fir_buf, 0, sizeof fir_buf);
+        memset(fir_buffer, 0, sizeof fir_buffer);
         memset(ram, 0, sizeof ram);
     }
 

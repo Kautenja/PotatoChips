@@ -45,7 +45,7 @@ inline int clamp_16(int n) {
 void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     // get the current feedback sample in the echo buffer
     EchoBufferSample* const echo_sample =
-        reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
+        reinterpret_cast<EchoBufferSample*>(&ram[echo_ptr & 0xFFFF]);
     // increment the echo pointer by the size of the echo buffer sample (4)
     echo_ptr += sizeof(EchoBufferSample);
     // check if for the end of the ring buffer and wrap the pointer around

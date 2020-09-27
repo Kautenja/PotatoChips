@@ -380,11 +380,11 @@
         },
         {
           "id": 81,
-          "value": 12.0
+          "value": 15.0
         },
         {
           "id": 82,
-          "value": -47.0
+          "value": 102.0
         },
         {
           "id": 83,
@@ -408,31 +408,31 @@
         },
         {
           "id": 88,
-          "value": 59.0
+          "value": 0.0
         },
         {
           "id": 89,
-          "value": 8.0
+          "value": 0.0
         },
         {
           "id": 90,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 91,
-          "value": -6.0
+          "value": 0.0
         },
         {
           "id": 92,
-          "value": -0.0
+          "value": 0.0
         },
         {
           "id": 93,
-          "value": -11.0
+          "value": 0.0
         },
         {
           "id": 94,
-          "value": 7.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 5,
@@ -495,7 +495,6 @@
       "version": "1.1.31",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
-      "rightModuleId": 156,
       "data": {
         "range": 0.0,
         "range_db": 80.0,
@@ -504,7 +503,7 @@
         "window": "kaiser"
       },
       "pos": [
-        24,
+        0,
         0
       ]
     },
@@ -583,7 +582,6 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 154,
       "rightModuleId": 1,
       "pos": [
         66,
@@ -756,14 +754,6 @@
       "color": "#c91847"
     },
     {
-      "id": 50,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 159,
-      "inputId": 7,
-      "color": "#0986ad"
-    },
-    {
       "id": 51,
       "outputModuleId": 159,
       "outputId": 0,
@@ -778,6 +768,14 @@
       "inputModuleId": 152,
       "inputId": 34,
       "color": "#0c8e15"
+    },
+    {
+      "id": 50,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 159,
+      "inputId": 7,
+      "color": "#0986ad"
     }
   ]
 }

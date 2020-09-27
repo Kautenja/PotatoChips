@@ -99,12 +99,6 @@ struct ChipSNES_Echo : Module {
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
         // reset the S-DSP emulator
         apu.reset();
-
-
-
-        apu.write(Sony_S_DSP_Echo::ECHO_BUFFER_START_OFFSET, 0);
-        // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
-        const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
     }
 
  protected:

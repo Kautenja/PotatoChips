@@ -54,12 +54,7 @@ struct ChipSNES_Echo : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          8),
-        ENUMS(INPUT_FM,            8),
-        ENUMS(INPUT_PM_ENABLE,     8),
-        ENUMS(INPUT_NOISE_ENABLE,  8),
-        INPUT_NOISE_FM,
-        ENUMS(INPUT_AUDIO,          2),
+        ENUMS(INPUT_AUDIO, 2),
         INPUT_ECHO_DELAY,
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),

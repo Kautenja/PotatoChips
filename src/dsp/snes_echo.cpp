@@ -49,7 +49,7 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     int fb_right = echo_sample->samples[BufferSample::RIGHT];
 
     // put samples in history ring buffer
-    auto const fir_pos = reinterpret_cast<BufferSample*>(&fir_buf[fir_offset]);
+    auto const fir_pos = &fir_buf[fir_offset];
     // move backwards one step
     fir_offset = (fir_offset + 7) & 7;
     // put sample into the first sample in the buffer

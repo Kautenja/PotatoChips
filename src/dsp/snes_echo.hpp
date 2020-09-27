@@ -54,7 +54,7 @@ class Sony_S_DSP_Echo {
     unsigned buffer_head = 0;
 
     /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
-    int16_t fir_buf[16][2];
+    BufferSample fir_buf[16];
     /// (0 to 7)
     int fir_offset = 0;
 

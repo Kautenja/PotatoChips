@@ -103,7 +103,7 @@ class Sony_S_DSP_Echo {
     };
 
     /// @brief A stereo sample in the echo buffer.
-    struct EchoBufferSample {
+    struct BufferSample {
         /// the index of the left channel in the samples array
         static constexpr unsigned LEFT = 0;
         /// the index of the right channel in the samples array
@@ -181,11 +181,13 @@ class Sony_S_DSP_Echo {
 
     /// the number of \f$16ms\f$ delay levels
     static constexpr unsigned DELAY_LEVELS = 15;
+    /// the number of bytes per delay level, i.e., 2KB
+    static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
     /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
-    uint8_t ram[DELAY_LEVELS * (2 * (1 << 10))];
+    uint8_t ram[DELAY_LEVELS * DELAY_LEVEL_BYTES];
 
     /// A pointer to the head of the echo buffer in RAM
-    int echo_ptr;
+    unsigned buffer_head;
 
     /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
     short fir_buf[16][2];
@@ -207,7 +209,7 @@ class Sony_S_DSP_Echo {
 
     /// @brief Clear state and silence everything.
     void reset() {
-        echo_ptr = fir_offset = 0;
+        buffer_head = fir_offset = 0;
         memset(fir_buf, 0, sizeof fir_buf);
         memset(ram, 0, sizeof ram);
     }
@@ -237,36 +239,12 @@ class Sony_S_DSP_Echo {
     ///
     inline void setMixRight(int8_t value) { mixRight = value; }
 
-    /// @brief Read data from the register at the given address.
+    /// @brief Set FIR coefficient at given index to a new value.
     ///
-    /// @param address the address of the register to read data from
+    /// @param index the index of the FIR coefficient to set
+    /// @param value the value to set the FIR coefficient to
     ///
-    inline uint8_t read(uint8_t address) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        return registers[address];
-    }
-
-    /// @brief Write data to the registers at the given address.
-    ///
-    /// @param address the address of the register to write data to
-    /// @param data the data to write to the register
-    ///
-    void write(uint8_t address, uint8_t data) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        // store the data in the register with given address
-        registers[address] = data;
-        // get the high 4 bits for indexing the voice / FIR coefficients
-        int index = address >> 4;
-        // update volume / FIR coefficients
-        switch (address & FIR_COEFFICIENTS) {
-            case FIR_COEFFICIENTS:  // update FIR coefficients
-                // sign-extend
-                fir_coeff[index] = (int8_t) data;
-                break;
-        }
-    }
+    inline void setFIR(unsigned index, int8_t value) { fir_coeff[index] = value; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///

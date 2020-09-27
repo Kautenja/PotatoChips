@@ -36,17 +36,17 @@ inline int clamp_16(int n) {
 
 void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
     // get the current feedback sample in the echo buffer
-    EchoBufferSample* const echo_sample =
-        reinterpret_cast<EchoBufferSample*>(&ram[echo_ptr & 0xFFFF]);
+    auto const echo_sample = reinterpret_cast<BufferSample*>(&ram[buffer_head]);
     // increment the echo pointer by the size of the echo buffer sample (4)
-    echo_ptr += sizeof(EchoBufferSample);
+    buffer_head += sizeof(BufferSample);
     // check if for the end of the ring buffer and wrap the pointer around
     // the echo delay is clamped in [0, 15] and each delay index requires
     // 2KB of RAM (0x800)
-    if (echo_ptr >= (delay & DELAY_LEVELS) * 0x800) echo_ptr = 0;
+    if (buffer_head >= (delay & DELAY_LEVELS) * DELAY_LEVEL_BYTES)
+        buffer_head = 0;
     // cache the feedback value (sign-extended to 32-bit)
-    int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
-    int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
+    int fb_left = echo_sample->samples[BufferSample::LEFT];
+    int fb_right = echo_sample->samples[BufferSample::RIGHT];
 
     // put samples in history ring buffer
     const int fir_offset = this->fir_offset;
@@ -78,9 +78,9 @@ void Sony_S_DSP_Echo::run(int left, int right, int16_t* output_buffer) {
             fir_pos[7][1] * fir_coeff[0];
 
     // put the echo samples into the buffer
-    echo_sample->samples[EchoBufferSample::LEFT] =
+    echo_sample->samples[BufferSample::LEFT] =
         clamp_16(left + ((fb_left  * feedback) >> 14));
-    echo_sample->samples[EchoBufferSample::RIGHT] =
+    echo_sample->samples[BufferSample::RIGHT] =
         clamp_16(right + ((fb_right * feedback) >> 14));
 
     if (output_buffer) {  // write final samples

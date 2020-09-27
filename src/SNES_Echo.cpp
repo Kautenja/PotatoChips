@@ -113,14 +113,12 @@ struct ChipSNES_Echo : Module {
         apu.setMixLeft(params[PARAM_VOLUME_ECHO + 0].getValue());
         apu.setMixRight(params[PARAM_VOLUME_ECHO + 1].getValue());
         // FIR Coefficients
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
-            auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
-            apu.write((coeff << 4) | Sony_S_DSP_Echo::FIR_COEFFICIENTS, param);
-        }
+        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
+            apu.setFIR(coeff, params[PARAM_FIR_COEFFICIENT + coeff].getValue());
         // Stereo input + output
-        short sample[2] = {0, 0};
-        auto left = 32000 * inputs[INPUT_GATE + 0].getVoltage() / 10.f;
-        auto right = 32000 * inputs[INPUT_GATE + 1].getVoltage() / 10.f;
+        int16_t left = std::numeric_limits<int16_t>::max() * inputs[INPUT_GATE + 0].getVoltage() / 5.f;
+        int16_t right = std::numeric_limits<int16_t>::max() * inputs[INPUT_GATE + 1].getVoltage() / 5.f;
+        int16_t sample[2] = {0, 0};
         apu.run(left, right, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());

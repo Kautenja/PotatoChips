@@ -106,76 +106,15 @@ struct ChipSNES_Echo : Module {
         clearRAM();
         // reset the S-DSP emulator
         apu.reset();
-        // set the initial state for registers and RAM
-        setupSourceDirectory();
+
+
+
+        apu.write(Sony_S_DSP_Echo::ECHO_BUFFER_START_OFFSET, 0);
+        // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
+        const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
     }
 
  protected:
-    /// Setup the register initial state on the chip.
-    inline void setupSourceDirectory() {
-        // Echo data start address.
-        //
-        // ESA
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $6D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to an area of memory to be used by the echo
-        // buffer. Like DIR its value is multiplied by 0x100. This is because
-        // the echo buffer is stereo and contains a tuple of L+R 16-bit
-        // samples (32-bits).
-
-        apu.write(Sony_S_DSP_Echo::ECHO_BUFFER_START_OFFSET, 128);
-        // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
-        const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
-
-        // Source Directory Offset.
-        //
-        // DIR
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $5D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to the source(sample) directory in external
-        // RAM. The pointer is calculated by Offset*0x100. This is because each
-        // directory is 4-bytes (0x100).
-        //
-        // The source directory contains sample start and loop point offsets.
-        // Its a simple array of 16-bit values.
-        //
-        // SAMPLE DIRECTORY
-        //
-        // OFFSET  SIZE    DESC
-        // dir+0   16-BIT  SAMPLE-0 START
-        // dir+2   16-BIT  SAMPLE-0 LOOP START
-        // dir+4   16-BIT  SAMPLE-1 START
-        // dir+6   16-BIT  SAMPLE-1 LOOP START
-        // dir+8   16-BIT  SAMPLE-2 START
-        // ...
-        // This can continue for up to 256 samples. (SRCN can only reference
-        // 256 samples)
-
-        // put the first directory at the end of the echo buffer
-        apu.write(Sony_S_DSP_Echo::OFFSET_SOURCE_DIRECTORY, ECHO_LENGTH / 0x100);
-
-        for (unsigned voice = 0; voice < Sony_S_DSP_Echo::VOICE_COUNT; voice++) {
-            // shift the voice index over a nibble to get the bit mask for the
-            // logical OR operator
-            auto mask = voice << 4;
-
-            // Source number is a reference to the "Source Directory" (see DIR).
-            // The DSP will use the sample with this index from the directory.
-            // I'm not sure what happens when you change the SRCN when the
-            // channel is active, but it probably doesn't have any effect
-            // until KON is set.
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x4   |                 Source Number                 |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            apu.write(mask | Sony_S_DSP_Echo::SOURCE_NUMBER, 0);
-        }
-    }
-
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

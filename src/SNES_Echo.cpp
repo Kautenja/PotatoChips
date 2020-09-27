@@ -91,10 +91,10 @@ struct ChipSNES_Echo : Module {
         // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
-            // the first FIR coefficient defaults to 0x7f = 127 and the other
-            // coefficients are 0 by default
+            // the first FIR coefficient defaults to 0x7f = 127, others are 0
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
         }
+        // each delay level adds 16ms to the buffer
         configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
         configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
     }
@@ -142,7 +142,7 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Gate
+        // Inputs
         for (unsigned i = 0; i < 2; i++)
             addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_GATE + i));
         // FIR Coefficients

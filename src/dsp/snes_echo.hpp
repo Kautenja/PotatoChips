@@ -49,6 +49,10 @@ class Sony_S_DSP_Echo {
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 
  private:
+    // -----------------------------------------------------------------------
+    // MARK: Echo Internal Buffers
+    // -----------------------------------------------------------------------
+
     /// @brief A stereo sample in the echo buffer.
     struct BufferSample {
         /// the index of the left channel in the samples array
@@ -82,7 +86,6 @@ class Sony_S_DSP_Echo {
     /// The values of the FIR filter coefficients from the register bank. This
     /// allows the FIR coefficients to be stored as 16-bit
     int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127,0,0,0,0,0,0,0};
-
     /// the delay level
     uint8_t delay = 0;
     /// the feedback level

@@ -339,9 +339,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                         if (voice.block_header & 2) {
                             // verified (played endless looping sample and ENDX was set)
                             voice.addr = source_directory[raw_voice.waveform].loop;
-                        } else {
-                            // first block was end block; don't play anything
-                            // TODO: find alternative to goto
+                        } else {  // first block was end block; don't play anything
                             goto sample_ended;
                         }
                     }

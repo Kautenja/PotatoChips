@@ -215,7 +215,7 @@ inline int clamp_16(int n) {
     return std::max(lower, std::min(n, upper));
 }
 
-void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
+void Sony_S_DSP::run(int32_t count, int16_t* output_buffer) {
     // TODO: Should we just fill the buffer with silence? Flags won't be
     // cleared during this run so it seems it should keep resetting every
     // sample.
@@ -495,7 +495,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 fir_pos[5][1] * fir_coeff[2] +
                 fir_pos[6][1] * fir_coeff[1] +
                 fir_pos[7][1] * fir_coeff[0];
-
+        // add the echo to the samples for the left and right channel
         left  += (fb_left  * global.left_echo_volume) >> 14;
         right += (fb_right * global.right_echo_volume) >> 14;
 
@@ -509,18 +509,16 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
         }
 
         // -------------------------------------------------------------------
-        // MARK: output
+        // MARK: Output
         // -------------------------------------------------------------------
-
-        if (out_buf) {  // write final samples
-            out_buf[0] = left  = clamp_16(left);
-            out_buf[1] = right = clamp_16(right);
-            out_buf += 2;
-
-            if (global.flags & FLAG_MASK_MUTE) {  // muting
-                out_buf[-2] = 0;
-                out_buf[-1] = 0;
-            }
+        if (output_buffer) {  // write final samples
+            // clamp the left and right samples and place them into the buffer
+            output_buffer[0] = left  = clamp_16(left);
+            output_buffer[1] = right = clamp_16(right);
+            // increment the buffer to the position of the next stereo sample
+            output_buffer += 2;
+            if (global.flags & FLAG_MASK_MUTE)  // muting
+                output_buffer[-2] = output_buffer[-1] = 0;
         }
     }
 }

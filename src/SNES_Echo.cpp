@@ -35,9 +35,6 @@ struct ChipSNES_Echo : Module {
     /// @brief Fill the RAM with 0's.
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
-    /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_Echo::VOICE_COUNT][2];
-
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {

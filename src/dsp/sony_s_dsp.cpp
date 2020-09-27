@@ -256,8 +256,17 @@ void Sony_S_DSP::run(int32_t count, int16_t* out_buf) {
                 noise_count = env_rate_init;
                 // calculate the output noise signal
                 noise_amp = int16_t (noise * 2);
-                // update the linear feedback shift register from taps 0, 1
+                // update the linear feedback shift register from taps 0, 1.
                 noise = (((noise << 13) ^ (noise << 14)) & 0x4000) | (noise >> 1);
+                // the Galois equivalent was implemented as below, but yielded
+                // poor CPU performance relative to the Fibonacci method above
+                // and produced a frequency response that seemed incorrect,
+                // i.e., high frequency noise had a much higher low frequency
+                // response. As such, the Fibonacci implementation above is
+                // the preferred route for this LFSR implementation.
+                //     uint16_t noise = this->noise;
+                //     noise = (noise >> 1) ^ (0x6000 & -(noise & 1));
+                //     this->noise = noise;
             }
         }
         // -------------------------------------------------------------------

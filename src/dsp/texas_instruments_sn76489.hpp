@@ -332,7 +332,7 @@ class TexasInstrumentsSN76489 {
             feedback = 0x0009;
             noise_width = 16;
         }
-        // convert to "Galios configuration"
+        // convert to Galois configuration
         looped_feedback = 1 << (noise_width - 1);
         noise_feedback  = 0;
         while (noise_width--) {

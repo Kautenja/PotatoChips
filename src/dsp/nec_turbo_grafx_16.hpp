@@ -160,7 +160,7 @@ class NECTurboGrafx16 {
                             int const noise_period = (32 - (noise & 0x1F)) * 64;
                             do {
                                 int new_dac = 0x1F & -(noise_lfsr >> 1 & 1);
-                                // Implemented using "Galios configuration"
+                                // Implemented using Galois configuration
                                 // TODO: find correct LFSR algorithm
                                 noise_lfsr = (noise_lfsr >> 1) ^ (0xE008 & - (noise_lfsr & 1));
                                 // noise_lfsr = (noise_lfsr >> 1) ^ (0x6000 & - (noise_lfsr & 1));

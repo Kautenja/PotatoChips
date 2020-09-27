@@ -62,17 +62,14 @@ struct ChipSNES_Echo : Module {
 
     /// @brief Initialize a new S-DSP Chip module.
     ChipSNES_Echo() {
-        // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
-            // the first FIR coefficient defaults to 0x7f = 127, others are 0
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
+            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu.getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
         }
-        // each delay level adds 16ms to the buffer
-        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
-        configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
-        configParam(PARAM_MIX_ECHO + 0,    -128, 127,   0, "Echo Mix (Left Channel)");
-        configParam(PARAM_MIX_ECHO + 1,    -128, 127,   0, "Echo Mix (Right Channel)");
+        configParam(PARAM_ECHO_DELAY, 0, Sony_S_DSP_Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, Sony_S_DSP_Echo::MILLISECONDS_PER_DELAY_LEVEL);
+        configParam(PARAM_ECHO_FEEDBACK, -128, 127, 0, "Echo Feedback");
+        configParam(PARAM_MIX_ECHO + 0, -128, 127, 0, "Echo Mix (Left Channel)");
+        configParam(PARAM_MIX_ECHO + 1, -128, 127, 0, "Echo Mix (Right Channel)");
     }
 
  protected:
@@ -113,12 +110,12 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         setModule(module);
         static constexpr auto panel = "res/S-SMP.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
-        // panel screws
+        // Panel Screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Inputs
+        // Stereo Input Ports
         for (unsigned i = 0; i < 2; i++)
             addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_AUDIO + i));
         // FIR Coefficients
@@ -138,22 +135,19 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         echoFeedback->snap = true;
         addParam(echoFeedback);
         addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
-
-        // Echo Volume - Left channel
+        // Echo Mix - Left channel
         auto echoLeft = createParam<Rogan2PWhite>(Vec(130, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 0);
         echoLeft->snap = true;
         addParam(echoLeft);
         addInput(createInput<PJ301MPort>(Vec(140, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 0));
-        // Echo Volume - Right channel
+        // Echo Mix - Right channel
         auto echoRight = createParam<Rogan2PRed>(Vec(180, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 1);
         echoRight->snap = true;
         addParam(echoRight);
         addInput(createInput<PJ301MPort>(Vec(190, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 1));
-
-        // Outputs
+        // Stereo Output Ports
         addOutput(createOutput<PJ301MPort>(Vec(140, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 0));
         addOutput(createOutput<PJ301MPort>(Vec(190, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 1));
-
     }
 };
 

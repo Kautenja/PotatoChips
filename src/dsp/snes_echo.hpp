@@ -21,9 +21,8 @@
 #ifndef DSP_SONY_S_DSP_ECHO_HPP_
 #define DSP_SONY_S_DSP_ECHO_HPP_
 
-#include "exceptions.hpp"
 #include <algorithm>
-#include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 
@@ -47,6 +46,12 @@ class Sony_S_DSP_Echo {
     static constexpr unsigned SAMPLE_RATE = 32000;
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
+    /// the number of milliseconds per discrete delay level
+    static constexpr unsigned MILLISECONDS_PER_DELAY_LEVEL = 16;
+    /// the number of \f$16ms\f$ delay levels
+    static constexpr unsigned DELAY_LEVELS = 15;
+    /// the number of bytes per delay level (2KB)
+    static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
 
  private:
     // -----------------------------------------------------------------------
@@ -63,17 +68,14 @@ class Sony_S_DSP_Echo {
         int16_t samples[2] = {0, 0};
     };
 
-    /// the number of \f$16ms\f$ delay levels
-    static constexpr unsigned DELAY_LEVELS = 15;
-    /// the number of bytes per delay level, i.e., 2KB
-    static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
     /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
+    /// multiplied by the total number of delay levels
     uint8_t ram[DELAY_LEVELS * DELAY_LEVEL_BYTES];
     /// A pointer to the head of the echo buffer in RAM
     unsigned buffer_head = 0;
 
     /// fir_buffer[i + 8] == fir_buffer[i], to avoid wrap checking in FIR code
-    BufferSample fir_buffer[16];
+    BufferSample fir_buffer[2 * FIR_COEFFICIENT_COUNT];
     /// the size of the FIR ring buffer
     static constexpr int FIR_MAX_INDEX = 7;
     /// the head index of the FIR ring buffer (0 to 7)
@@ -85,7 +87,7 @@ class Sony_S_DSP_Echo {
 
     /// The values of the FIR filter coefficients from the register bank. This
     /// allows the FIR coefficients to be stored as 16-bit
-    int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127,0,0,0,0,0,0,0};
+    int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127, 0, 0, 0, 0, 0, 0, 0};
     /// the delay level
     uint8_t delay = 0;
     /// the feedback level
@@ -138,6 +140,12 @@ class Sony_S_DSP_Echo {
     ///
     inline void setFIR(unsigned index, int8_t value) { fir_coeff[index] = value; }
 
+    /// @brief Return the FIR coefficient at given index.
+    ///
+    /// @param index the index of the FIR coefficient to get
+    ///
+    inline uint8_t getFIR(unsigned index) const { return fir_coeff[index]; }
+
     /// @brief Run echo effect on input samples and write to the output buffer
     ///
     /// @param output_buffer the output buffer to write samples to (optional)
@@ -148,8 +156,6 @@ class Sony_S_DSP_Echo {
         // increment the echo pointer by the size of the echo buffer sample
         buffer_head += sizeof(BufferSample);
         // check if for the end of the ring buffer and wrap the pointer around
-        // the echo delay is clamped in [0, 15] and each delay index requires
-        // 2KB of RAM (0x800)
         if (buffer_head >= (delay & DELAY_LEVELS) * DELAY_LEVEL_BYTES)
             buffer_head = 0;
         // cache the feedback value (sign-extended to 32-bit)

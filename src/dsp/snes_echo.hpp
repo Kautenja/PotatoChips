@@ -102,75 +102,6 @@ class Sony_S_DSP_Echo {
         FIR_COEFFICIENTS = 0x0F
     };
 
-    /// @brief An entry in the source directory in the 64KB RAM.
-    struct SourceDirectoryEntry {
-        /// @brief the start address of the sample in the directory.
-        /// @details
-        /// In hardware this is represented across two bytes; in software we
-        /// will skip to the 16-bit representation of the RAM address.
-        uint16_t start;
-        /// @brief the loop address of the sample in the directory.
-        /// @details
-        /// In hardware this is represented across two bytes; in software we
-        /// will skip to the 16-bit representation of the RAM address.
-        uint16_t loop;
-    };
-
-    /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9
-    /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
-    /// BRR samples.
-    struct BitRateReductionBlock {
-        /// the number of 1-byte samples in each block of BRR samples
-        static constexpr unsigned NUM_SAMPLES = 8;
-        /// the maximal volume level for a BRR sample block
-        static constexpr uint8_t MAX_VOLUME = 0x0C;
-
-        union {
-            /// a structure containing the 8-bit header flag with schema:
-            // +------+------+------+------+------+------+------+------+
-            // | 7    | 6    | 5    | 4    | 3    | 2    | 1    | 0    |
-            // +------+------+------+------+------+------+------+------+
-            // | Volume (max 0xC0)         | Filter Mode | Loop | End  |
-            // +------+------+------+------+------+------+------+------+
-            struct {
-                /// the end of sample block flag
-                uint8_t is_end : 1;
-                /// the loop flag determining if this block loops
-                uint8_t is_loop : 1;
-                /// the filter mode for selecting 1 of 4 filter modes
-                uint8_t filter : 2;
-                /// the volume level in [0, 12]
-                uint8_t volume : 4;
-
-                /// Set the volume level to a new value.
-                ///
-                /// @param level the level to set the volume to
-                /// @details
-                /// set the volume to the new level in the range [0, 12]
-                ///
-                inline void set_volume(uint8_t level) {
-                    volume = std::min(level, static_cast<uint8_t>(MAX_VOLUME));
-                }
-            } flags;
-            /// the encoded header byte
-            uint8_t header;
-        };
-        /// the 8-byte block of sample data
-        uint8_t samples[NUM_SAMPLES];
-    } __attribute__((packed));
-
-    /// @brief Bit-masks for extracting values from the flags registers.
-    enum FlagMasks {
-        /// a mask for the flag register to extract the noise period parameter
-        FLAG_MASK_NOISE_PERIOD = 0x1F,
-        /// a mask for the flag register to extract the echo write enabled bit
-        FLAG_MASK_ECHO_WRITE = 0x20,
-        /// a mask for the flag register to extract the mute voices bit
-        FLAG_MASK_MUTE = 0x40,
-        /// a mask for the flag register to extract the reset chip bit
-        FLAG_MASK_RESET = 0x80
-    };
-
     /// @brief A stereo sample in the echo buffer.
     struct EchoBufferSample {
         /// the index of the left channel in the samples array
@@ -279,9 +210,6 @@ class Sony_S_DSP_Echo {
     /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
     uint8_t* const ram;
 
-    /// A bit-mask representation of the active voice gates
-    int keys;
-
     /// A pointer to the head of the echo buffer in RAM
     int echo_ptr;
 
@@ -289,46 +217,6 @@ class Sony_S_DSP_Echo {
     short fir_buf[16][2];
     /// (0 to 7)
     int fir_offset;
-
-    /// The values of the Gaussian filter on the DAC of the SNES
-    static int16_t const gauss[];
-
-    /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
-
-    /// The state of a synthesizer voice (channel) on the chip.
-    struct VoiceState {
-        /// TODO
-        short volume[2];
-        /// 12-bit fractional position
-        short fraction;
-        /// padding (placement here keeps interp's in a 64-bit line)
-        short unused0;
-        /// most recent four decoded samples
-        short interp3;
-        /// TODO
-        short interp2;
-        /// TODO
-        short interp1;
-        /// TODO
-        short interp0;
-        /// number of nibbles remaining in current block
-        short block_remain;
-        /// TODO
-        unsigned short addr;
-        /// header byte from current block
-        short block_header;
-        /// padding (placement here keeps envelope data in a 64-bit line)
-        short unused1;
-        /// TODO
-        short envcnt;
-        /// TODO
-        short envx;
-        /// TODO
-        short on_cnt;
-        /// the current stage of the envelope generator
-        EnvelopeStage envelope_stage;
-    } voice_states[VOICE_COUNT];
 
  public:
     /// @brief Initialize a new Sony_S_DSP_Echo.
@@ -339,17 +227,7 @@ class Sony_S_DSP_Echo {
 
     /// @brief Clear state and silence everything.
     void reset() {
-        keys = echo_ptr = fir_offset = 0;
-        // reset, mute, echo off
-        global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
-        global.key_ons = 0;
-        // reset voices
-        for (unsigned i = 0; i < VOICE_COUNT; i++) {
-            VoiceState& v = voice_states[i];
-            v.on_cnt = v.volume[0] = v.volume[1] = 0;
-            v.envelope_stage = EnvelopeStage::Release;
-        }
-        // clear the echo buffer
+        echo_ptr = fir_offset = 0;
         memset(fir_buf, 0, sizeof fir_buf);
     }
 
@@ -377,16 +255,6 @@ class Sony_S_DSP_Echo {
         int index = address >> 4;
         // update volume / FIR coefficients
         switch (address & FIR_COEFFICIENTS) {
-            // voice volume
-            case 0:    // left channel, fall through to next block
-            case 1: {  // right channel, process both left and right channels
-                short* volume = voice_states[index].volume;
-                int left  = (int8_t) registers[address & ~1];
-                int right = (int8_t) registers[address |  1];
-                volume[0] = left;
-                volume[1] = right;
-                break;
-            }
             case FIR_COEFFICIENTS:  // update FIR coefficients
                 // sign-extend
                 fir_coeff[index] = (int8_t) data;

@@ -185,84 +185,12 @@ struct ChipSNES_Echo : Module {
     ///
     inline void process(const ProcessArgs &args) final {
         // -------------------------------------------------------------------
-        // MARK: RAM (SPC700 emulation)
-        // -------------------------------------------------------------------
-        // TODO: design a few banks of wavetables / other ways to put data
-        //       into this RAM
-        // write the first directory to RAM (at the end of the echo buffer)
-        auto dir = reinterpret_cast<Sony_S_DSP_Echo::SourceDirectoryEntry*>(&ram[0x7800]);
-        // point to a block immediately after this directory entry
-        dir->start = 0x7804;
-        dir->loop = 0x7804;
-        // set address 256 to a single sample ramp wave sample in BRR format
-        // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP_Echo::BitRateReductionBlock*>(&ram[0x7804]);
-        block->flags.set_volume(Sony_S_DSP_Echo::BitRateReductionBlock::MAX_VOLUME);
-        block->flags.filter = 0;
-        block->flags.is_loop = 1;
-        block->flags.is_end = 1;
-        for (int i = 0; i < Sony_S_DSP_Echo::BitRateReductionBlock::NUM_SAMPLES; i++)
-            block->samples[i] = 15 + 2 * i;
-        // -------------------------------------------------------------------
-        // MARK: Flags (Noise Frequency)
-        // -------------------------------------------------------------------
-        // uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
-        // apu.write(Sony_S_DSP_Echo::FLAGS, noise);
-        // -------------------------------------------------------------------
-        // MARK: Gate input
-        // -------------------------------------------------------------------
-        // // create bit-masks for the key-on and key-off state of each voice
-        // uint8_t key_on = 0;
-        // uint8_t key_off = 0;
-        // // iterate over the voices to detect key-on and key-off events
-        // for (unsigned voice = 0; voice < Sony_S_DSP_Echo::VOICE_COUNT; voice++) {
-        //     // get the voltage from the gate input port
-        //     const auto gate = inputs[INPUT_GATE + voice].getVoltage();
-        //     // process the voltage to detect key-on events
-        //     key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-        //     // process the inverted voltage to detect key-of events
-        //     key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-        // }
-        // if (key_on) {  // a key-on event occurred from the gate input
-        //     // write key off to enable all voices
-        //     apu.write(Sony_S_DSP_Echo::KEY_OFF, 0);
-        //     // write the key-on value to the register
-        //     apu.write(Sony_S_DSP_Echo::KEY_ON, key_on);
-        // }
-        // if (key_off)  // a key-off event occurred from the gate input
-        //     apu.write(Sony_S_DSP_Echo::KEY_OFF, key_off);
-        // -------------------------------------------------------------------
         // MARK: Echo Parameters
         // -------------------------------------------------------------------
         apu.write(Sony_S_DSP_Echo::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
         apu.write(Sony_S_DSP_Echo::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
-
-        apu.write(Sony_S_DSP_Echo::ECHO_ENABLE, 0xff);
-        apu.write(Sony_S_DSP_Echo::NOISE_ENABLE, 0);
-        apu.write(Sony_S_DSP_Echo::PITCH_MODULATION, 0);
-
-        apu.write(Sony_S_DSP_Echo::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
-        apu.write(Sony_S_DSP_Echo::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
         apu.write(Sony_S_DSP_Echo::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
         apu.write(Sony_S_DSP_Echo::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
-        // -------------------------------------------------------------------
-        // MARK: Voice-wise Parameters
-        // -------------------------------------------------------------------
-        for (unsigned voice = 0; voice < Sony_S_DSP_Echo::VOICE_COUNT; voice++) {
-            // shift the voice index over a nibble to get the bit mask for the
-            // logical OR operator
-            auto mask = voice << 4;
-            // pitch
-            apu.write(mask | Sony_S_DSP_Echo::PITCH_LOW,  0xff &  256     );
-            apu.write(mask | Sony_S_DSP_Echo::PITCH_HIGH, 0xff & (256 >> 8));
-            // adsr
-            apu.write(mask | Sony_S_DSP_Echo::ADSR_1, 0);
-            apu.write(mask | Sony_S_DSP_Echo::ADSR_2, 0);
-            apu.write(mask | Sony_S_DSP_Echo::GAIN, 127);
-            // amp volume
-            apu.write(mask | Sony_S_DSP_Echo::VOLUME_LEFT,  127);
-            apu.write(mask | Sony_S_DSP_Echo::VOLUME_RIGHT, 127);
-        }
         // -------------------------------------------------------------------
         // MARK: FIR Coefficients
         // -------------------------------------------------------------------

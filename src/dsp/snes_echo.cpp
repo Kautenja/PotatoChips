@@ -28,8 +28,6 @@ Sony_S_DSP_Echo::Sony_S_DSP_Echo(uint8_t* ram_) : ram(ram_) {
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));
     assert(NUM_REGISTERS == sizeof(voices));
-    assert(9 == sizeof(BitRateReductionBlock));
-    assert(4 == sizeof(SourceDirectoryEntry));
     assert(4 == sizeof(EchoBufferSample));
 }
 

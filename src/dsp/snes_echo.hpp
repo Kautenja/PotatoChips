@@ -22,6 +22,7 @@
 #include "exceptions.hpp"
 #include <cstring>
 #include <cassert>
+#include <iostream>
 
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP_Echo {
@@ -179,21 +180,6 @@ class Sony_S_DSP_Echo {
         /// the 16-bit sample for the left [0] and right [1] channels.
         int16_t samples[2];
     };
-
-    /// @brief Returns the 14-bit pitch based on th given frequency.
-    ///
-    /// @param frequency the frequency in Hz
-    /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
-    /// @details
-    ///
-    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
-    ///
-    static inline uint16_t convert_pitch(float frequency) {
-        // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
-        // mask the 16-bit pitch to 14-bit
-        return 0x3FFF & static_cast<uint16_t>(pitch);
-    }
 
  private:
     /// A structure mapping the register space to a single voice's data fields.

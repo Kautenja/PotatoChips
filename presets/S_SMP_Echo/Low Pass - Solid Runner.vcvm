@@ -1,0 +1,55 @@
+{
+  "plugin": "KautenjaDSP-PotatoChips",
+  "version": "1.7.3",
+  "model": "S_SMP_Echo",
+  "params": [
+    {
+      "id": 0,
+      "value": 6.0
+    },
+    {
+      "id": 1,
+      "value": 40.0
+    },
+    {
+      "id": 2,
+      "value": 127.0
+    },
+    {
+      "id": 3,
+      "value": 127.0
+    },
+    {
+      "id": 4,
+      "value": 11
+    },
+    {
+      "id": 5,
+      "value": 33
+    },
+    {
+      "id": 6,
+      "value": 34
+    },
+    {
+      "id": 7,
+      "value": 37
+    },
+    {
+      "id": 8,
+      "value": 21
+    },
+    {
+      "id": 9,
+      "value": -7
+    },
+    {
+      "id": 10,
+      "value": -11
+    },
+    {
+      "id": 11,
+      "value": -12
+    }
+  ]
+}

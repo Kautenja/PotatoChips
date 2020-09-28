@@ -148,7 +148,8 @@ class Sony_S_DSP_Echo {
 
     /// @brief Run echo effect on input samples and write to the output buffer
     ///
-    /// @param TODO
+    /// @param left the sample of the left channel
+    /// @param right the sample of the right channel
     ///
     BufferSample run(int left, int right) {
         // get the current feedback sample in the echo buffer

@@ -64,9 +64,7 @@ class Sony_S_DSP_Echo {
     };
 
  private:
-    // -----------------------------------------------------------------------
-    // MARK: Echo Internal Buffers
-    // -----------------------------------------------------------------------
+    // Echo Internal Buffers
 
     /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
     /// multiplied by the total number of delay levels
@@ -81,9 +79,7 @@ class Sony_S_DSP_Echo {
     /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
 
-    // -----------------------------------------------------------------------
-    // MARK: Echo Parameters
-    // -----------------------------------------------------------------------
+    // Echo Parameters
 
     /// The values of the FIR filter coefficients from the register bank. This
     /// allows the FIR coefficients to be stored as 16-bit

@@ -4,22 +4,6 @@
   "model": "S_SMP_Echo",
   "params": [
     {
-      "id": 0,
-      "value": 6.0
-    },
-    {
-      "id": 1,
-      "value": 40.0
-    },
-    {
-      "id": 2,
-      "value": 127.0
-    },
-    {
-      "id": 3,
-      "value": 127.0
-    },
-    {
       "id": 4,
       "value": 127.0
     },

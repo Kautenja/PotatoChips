@@ -108,46 +108,57 @@ struct ChipSNES_EchoWidget : ModuleWidget {
     ///
     explicit ChipSNES_EchoWidget(ChipSNES_Echo *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP.svg";
+        static constexpr auto panel = "res/S-SMP-Echo.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // Panel Screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Stereo Input Ports
-        for (unsigned i = 0; i < 2; i++)
-            addInput(createInput<PJ301MPort>(Vec(20, 40 + i * 41), module, ChipSNES_Echo::INPUT_AUDIO + i));
+        for (unsigned i = 0; i < 2; i++) {
+            // Echo Parameter (0 = delay, 1 = Feedback)
+            auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipSNES_Echo::PARAM_ECHO_DELAY + i);
+            echoParam->snap = true;
+            addParam(echoParam);
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipSNES_Echo::INPUT_ECHO_DELAY + i));
+            // Echo Mix
+            auto echoMix = createParam<Rogan2PWhite>(Vec(20 + 44 * i, 163), module, ChipSNES_Echo::PARAM_MIX_ECHO + i);
+            echoMix->snap = true;
+            addParam(echoMix);
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipSNES_Echo::INPUT_MIX_ECHO + i));
+            // Stereo Input Ports
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipSNES_Echo::INPUT_AUDIO + i));
+            // Stereo Output Ports
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipSNES_Echo::OUTPUT_AUDIO + i));
+        }
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(60, 40 + i * 41), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan2PWhite>(Vec(90, 35 + i * 41), module, ChipSNES_Echo::PARAM_FIR_COEFFICIENT + i);
+            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));
+            auto param = createParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, ChipSNES_Echo::PARAM_FIR_COEFFICIENT + i);
             param->snap = true;
             addParam(param);
         }
-        // Echo Delay
-        auto echoDelay = createParam<Rogan2PGreen>(Vec(130, 30), module, ChipSNES_Echo::PARAM_ECHO_DELAY);
-        echoDelay->snap = true;
-        addParam(echoDelay);
-        addInput(createInput<PJ301MPort>(Vec(140, 80), module, ChipSNES_Echo::INPUT_ECHO_DELAY));
-        // Echo Feedback
-        auto echoFeedback = createParam<Rogan2PGreen>(Vec(180, 30), module, ChipSNES_Echo::PARAM_ECHO_FEEDBACK);
-        echoFeedback->snap = true;
-        addParam(echoFeedback);
-        addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
-        // Echo Mix - Left channel
-        auto echoLeft = createParam<Rogan2PWhite>(Vec(130, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 0);
-        echoLeft->snap = true;
-        addParam(echoLeft);
-        addInput(createInput<PJ301MPort>(Vec(140, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 0));
-        // Echo Mix - Right channel
-        auto echoRight = createParam<Rogan2PRed>(Vec(180, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 1);
-        echoRight->snap = true;
-        addParam(echoRight);
-        addInput(createInput<PJ301MPort>(Vec(190, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 1));
-        // Stereo Output Ports
-        addOutput(createOutput<PJ301MPort>(Vec(140, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(190, 325), module, ChipSNES_Echo::OUTPUT_AUDIO + 1));
+        // // Echo Delay
+        // auto echoDelay = createParam<Rogan2PGreen>(Vec(130, 30), module, ChipSNES_Echo::PARAM_ECHO_DELAY);
+        // echoDelay->snap = true;
+        // addParam(echoDelay);
+        // addInput(createInput<PJ301MPort>(Vec(140, 80), module, ChipSNES_Echo::INPUT_ECHO_DELAY));
+        // // Echo Feedback
+        // auto echoFeedback = createParam<Rogan2PGreen>(Vec(180, 30), module, ChipSNES_Echo::PARAM_ECHO_FEEDBACK);
+        // echoFeedback->snap = true;
+        // addParam(echoFeedback);
+        // addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
+        // // Echo Mix - Left channel
+        // auto echoLeft = createParam<Rogan2PWhite>(Vec(130, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 0);
+        // echoLeft->snap = true;
+        // addParam(echoLeft);
+        // addInput(createInput<PJ301MPort>(Vec(140, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 0));
+        // // Echo Mix - Right channel
+        // auto echoRight = createParam<Rogan2PRed>(Vec(180, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 1);
+        // echoRight->snap = true;
+        // addParam(echoRight);
+        // addInput(createInput<PJ301MPort>(Vec(190, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 1));
+        // // Stereo Output Ports
     }
 };
 

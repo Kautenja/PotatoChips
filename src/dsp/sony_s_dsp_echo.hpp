@@ -162,22 +162,22 @@ class Sony_S_DSP_Echo {
         if (buffer_head >= (delay & DELAY_LEVELS) * DELAY_LEVEL_BYTES)
             buffer_head = 0;
         // cache the feedback value (sign-extended to 32-bit)
-        int fb_left = echo->samples[BufferSample::LEFT];
-        int fb_right = echo->samples[BufferSample::RIGHT];
+        int feedback_left = echo->samples[BufferSample::LEFT];
+        int feedback_right = echo->samples[BufferSample::RIGHT];
 
         // put samples in history ring buffer
         auto const fir_samples = &fir_buffer[fir_offset];
         // move backwards one step
         fir_offset = (fir_offset + FIR_MAX_INDEX) & FIR_MAX_INDEX;
         // put sample into the first sample in the buffer
-        fir_samples[0].samples[BufferSample::LEFT]  = fb_left;
-        fir_samples[0].samples[BufferSample::RIGHT] = fb_right;
+        fir_samples[0].samples[BufferSample::LEFT]  = feedback_left;
+        fir_samples[0].samples[BufferSample::RIGHT] = feedback_right;
         // duplicate at +8 eliminates wrap checking below
-        fir_samples[8].samples[BufferSample::LEFT]  = fb_left;
-        fir_samples[8].samples[BufferSample::RIGHT] = fb_right;
+        fir_samples[8].samples[BufferSample::LEFT]  = feedback_left;
+        fir_samples[8].samples[BufferSample::RIGHT] = feedback_right;
 
         // FIR left channel
-        fb_left =                              fb_left * fir_coeff[7] +
+        feedback_left =                  feedback_left * fir_coeff[7] +
             fir_samples[1].samples[BufferSample::LEFT] * fir_coeff[6] +
             fir_samples[2].samples[BufferSample::LEFT] * fir_coeff[5] +
             fir_samples[3].samples[BufferSample::LEFT] * fir_coeff[4] +
@@ -186,7 +186,7 @@ class Sony_S_DSP_Echo {
             fir_samples[6].samples[BufferSample::LEFT] * fir_coeff[1] +
             fir_samples[7].samples[BufferSample::LEFT] * fir_coeff[0];
         // FIR right channel
-        fb_right =                             fb_right * fir_coeff[7] +
+        feedback_right =                 feedback_right * fir_coeff[7] +
             fir_samples[1].samples[BufferSample::RIGHT] * fir_coeff[6] +
             fir_samples[2].samples[BufferSample::RIGHT] * fir_coeff[5] +
             fir_samples[3].samples[BufferSample::RIGHT] * fir_coeff[4] +
@@ -197,18 +197,18 @@ class Sony_S_DSP_Echo {
 
         // put the echo samples into the buffer
         echo->samples[BufferSample::LEFT] =
-            clamp_16(left + ((fb_left  * feedback) >> 14));
+            clamp_16(left + ((feedback_left  * feedback) >> 14));
         echo->samples[BufferSample::RIGHT] =
-            clamp_16(right + ((fb_right * feedback) >> 14));
+            clamp_16(right + ((feedback_right * feedback) >> 14));
 
         // (1) add the echo to the samples for the left and right channel,
         // (2) clamp the left and right samples, and (3) place them into
         // the buffer
         Sony_S_DSP_Echo::BufferSample output_buffer;
         output_buffer.samples[BufferSample::LEFT] =
-            clamp_16(left + ((fb_left  * mixLeft) >> 14));
+            clamp_16(left + ((feedback_left  * mixLeft) >> 14));
         output_buffer.samples[BufferSample::RIGHT] =
-            clamp_16(right + ((fb_right * mixRight) >> 14));
+            clamp_16(right + ((feedback_right * mixRight) >> 14));
 
         return output_buffer;
     }

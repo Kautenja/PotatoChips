@@ -63,9 +63,8 @@ struct ChipSNES_Echo : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipSNES_Echo() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
+        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu.getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
-        }
         configParam(PARAM_ECHO_DELAY, 0, Sony_S_DSP_Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, Sony_S_DSP_Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_ECHO_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX_ECHO + 0, -128, 127, 0, "Echo Mix (Left Channel)");

@@ -125,7 +125,7 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             auto echoIdx = ChipS_SMP_Echo::PARAM_MIX_ECHO + i;
             auto echoPos = Vec(20 + 44 * i, 163);
             Knob* echoMix;
-            if (i)  // i == 2 -> right channel -> red knob
+            if (i)  // i == 1 -> right channel -> red knob
                 echoMix = createParam<Rogan2PRed>(echoPos, module, echoIdx);
             else  // i == 0 -> left channel -> white knob
                 echoMix = createParam<Rogan2PWhite>(echoPos, module, echoIdx);

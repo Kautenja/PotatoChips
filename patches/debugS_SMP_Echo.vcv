@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -52,11 +52,11 @@
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.7.3",
-      "model": "SNES_Echo",
+      "model": "S_SMP_Echo",
       "params": [
         {
           "id": 0,
-          "value": 21.0
+          "value": 6.0
         },
         {
           "id": 1,
@@ -72,35 +72,35 @@
         },
         {
           "id": 4,
-          "value": -50.0
+          "value": 127.0
         },
         {
           "id": 5,
-          "value": 121.0
+          "value": 0.0
         },
         {
           "id": 6,
-          "value": 94.0
+          "value": 0.0
         },
         {
           "id": 7,
-          "value": -49.0
+          "value": 0.0
         },
         {
           "id": 8,
-          "value": -53.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": -16.0
+          "value": 0.0
         },
         {
           "id": 10,
-          "value": -77.0
+          "value": 0.0
         },
         {
           "id": 11,
-          "value": -32.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 5,
@@ -160,7 +160,7 @@
     {
       "id": 154,
       "plugin": "Bogaudio",
-      "version": "1.1.34",
+      "version": "1.1.31",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "rightModuleId": 156,
@@ -266,11 +266,11 @@
       "params": [
         {
           "id": 0,
-          "value": -0.80249995
+          "value": 0.0
         },
         {
           "id": 1,
-          "value": -0.765000045
+          "value": 0.0
         },
         {
           "id": 2,
@@ -316,11 +316,11 @@
       "params": [
         {
           "id": 0,
-          "value": 0.5030002
+          "value": 0.473000318
         },
         {
           "id": 1,
-          "value": 0.60649997
+          "value": 0.788999617
         },
         {
           "id": 2,
@@ -328,7 +328,7 @@
         },
         {
           "id": 3,
-          "value": 0.51050061
+          "value": 0.529500067
         }
       ],
       "leftModuleId": 159,
@@ -354,15 +354,15 @@
         },
         {
           "id": 2,
-          "value": -1.15999997
+          "value": -1.26800025
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 5,
@@ -516,14 +516,6 @@
       "inputModuleId": 160,
       "inputId": 4,
       "color": "#c9b70e"
-    },
-    {
-      "id": 83,
-      "outputModuleId": 159,
-      "outputId": 3,
-      "inputModuleId": 159,
-      "inputId": 3,
-      "color": "#c91847"
     }
   ]
 }

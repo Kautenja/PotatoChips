@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
-struct ChipSNES_Echo : Module {
+struct ChipS_SMP_Echo : Module {
  private:
     /// the Sony S-DSP echo effect emulator
     Sony_S_DSP_Echo apu;
@@ -61,7 +61,7 @@ struct ChipSNES_Echo : Module {
     };
 
     /// @brief Initialize a new S-DSP Chip module.
-    ChipSNES_Echo() {
+    ChipS_SMP_Echo() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu.getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
@@ -101,12 +101,12 @@ struct ChipSNES_Echo : Module {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for SPC700.
-struct ChipSNES_EchoWidget : ModuleWidget {
+struct ChipS_SMP_EchoWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipSNES_EchoWidget(ChipSNES_Echo *module) {
+    explicit ChipS_SMP_EchoWidget(ChipS_SMP_Echo *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-Echo.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -117,12 +117,12 @@ struct ChipSNES_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < 2; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
-            auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipSNES_Echo::PARAM_ECHO_DELAY + i);
+            auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipS_SMP_Echo::PARAM_ECHO_DELAY + i);
             echoParam->snap = true;
             addParam(echoParam);
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipSNES_Echo::INPUT_ECHO_DELAY + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipS_SMP_Echo::INPUT_ECHO_DELAY + i));
             // Echo Mix
-            auto echoIdx = ChipSNES_Echo::PARAM_MIX_ECHO + i;
+            auto echoIdx = ChipS_SMP_Echo::PARAM_MIX_ECHO + i;
             auto echoPos = Vec(20 + 44 * i, 163);
             Knob* echoMix;
             if (i)  // i == 2 -> right channel -> red knob
@@ -131,16 +131,16 @@ struct ChipSNES_EchoWidget : ModuleWidget {
                 echoMix = createParam<Rogan2PWhite>(echoPos, module, echoIdx);
             echoMix->snap = true;
             addParam(echoMix);
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipSNES_Echo::INPUT_MIX_ECHO + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipS_SMP_Echo::INPUT_MIX_ECHO + i));
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipSNES_Echo::INPUT_AUDIO + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Echo::INPUT_AUDIO + i));
             // Stereo Output Ports
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipSNES_Echo::OUTPUT_AUDIO + i));
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Echo::OUTPUT_AUDIO + i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, ChipSNES_Echo::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, ChipSNES_Echo::PARAM_FIR_COEFFICIENT + i);
+            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, ChipS_SMP_Echo::INPUT_FIR_COEFFICIENT + i));
+            auto param = createParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, ChipS_SMP_Echo::PARAM_FIR_COEFFICIENT + i);
             param->snap = true;
             addParam(param);
         }
@@ -148,4 +148,4 @@ struct ChipSNES_EchoWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelChipSNES_Echo = createModel<ChipSNES_Echo, ChipSNES_EchoWidget>("SNES_Echo");
+rack::Model *modelChipS_SMP_Echo = createModel<ChipS_SMP_Echo, ChipS_SMP_EchoWidget>("S_SMP_Echo");

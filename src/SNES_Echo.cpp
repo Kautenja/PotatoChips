@@ -84,8 +84,8 @@ struct ChipSNES_Echo : Module {
         apu.setMixLeft(params[PARAM_MIX_ECHO + 0].getValue());
         apu.setMixRight(params[PARAM_MIX_ECHO + 1].getValue());
         // FIR Coefficients
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
-            apu.setFIR(coeff, params[PARAM_FIR_COEFFICIENT + coeff].getValue());
+        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
+            apu.setFIR(i, params[PARAM_FIR_COEFFICIENT + i].getValue());
         // run a stereo sample through the echo
         int16_t sample[2] = {0, 0};
         apu.run(

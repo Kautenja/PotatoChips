@@ -122,7 +122,13 @@ struct ChipSNES_EchoWidget : ModuleWidget {
             addParam(echoParam);
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipSNES_Echo::INPUT_ECHO_DELAY + i));
             // Echo Mix
-            auto echoMix = createParam<Rogan2PWhite>(Vec(20 + 44 * i, 163), module, ChipSNES_Echo::PARAM_MIX_ECHO + i);
+            auto echoIdx = ChipSNES_Echo::PARAM_MIX_ECHO + i;
+            auto echoPos = Vec(20 + 44 * i, 163);
+            Knob* echoMix;
+            if (i)  // i == 2 -> right channel -> red knob
+                echoMix = createParam<Rogan2PRed>(echoPos, module, echoIdx);
+            else  // i == 0 -> left channel -> white knob
+                echoMix = createParam<Rogan2PWhite>(echoPos, module, echoIdx);
             echoMix->snap = true;
             addParam(echoMix);
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipSNES_Echo::INPUT_MIX_ECHO + i));
@@ -138,27 +144,6 @@ struct ChipSNES_EchoWidget : ModuleWidget {
             param->snap = true;
             addParam(param);
         }
-        // // Echo Delay
-        // auto echoDelay = createParam<Rogan2PGreen>(Vec(130, 30), module, ChipSNES_Echo::PARAM_ECHO_DELAY);
-        // echoDelay->snap = true;
-        // addParam(echoDelay);
-        // addInput(createInput<PJ301MPort>(Vec(140, 80), module, ChipSNES_Echo::INPUT_ECHO_DELAY));
-        // // Echo Feedback
-        // auto echoFeedback = createParam<Rogan2PGreen>(Vec(180, 30), module, ChipSNES_Echo::PARAM_ECHO_FEEDBACK);
-        // echoFeedback->snap = true;
-        // addParam(echoFeedback);
-        // addInput(createInput<PJ301MPort>(Vec(190, 80), module, ChipSNES_Echo::INPUT_ECHO_FEEDBACK));
-        // // Echo Mix - Left channel
-        // auto echoLeft = createParam<Rogan2PWhite>(Vec(130, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 0);
-        // echoLeft->snap = true;
-        // addParam(echoLeft);
-        // addInput(createInput<PJ301MPort>(Vec(140, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 0));
-        // // Echo Mix - Right channel
-        // auto echoRight = createParam<Rogan2PRed>(Vec(180, 130), module, ChipSNES_Echo::PARAM_MIX_ECHO + 1);
-        // echoRight->snap = true;
-        // addParam(echoRight);
-        // addInput(createInput<PJ301MPort>(Vec(190, 180), module, ChipSNES_Echo::INPUT_MIX_ECHO + 1));
-        // // Stereo Output Ports
     }
 };
 

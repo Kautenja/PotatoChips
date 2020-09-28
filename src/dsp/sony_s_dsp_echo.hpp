@@ -104,8 +104,8 @@ class Sony_S_DSP_Echo {
     /// @brief Clear state and silence everything.
     void reset() {
         buffer_head = fir_offset = delay = feedback = mixLeft = mixRight = 0;
-        memset(fir_buffer, 0, sizeof fir_buffer);
         memset(ram, 0, sizeof ram);
+        memset(fir_buffer, 0, sizeof fir_buffer);
     }
 
     /// @brief Set the delay parameter to a new value

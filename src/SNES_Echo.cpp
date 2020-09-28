@@ -86,13 +86,13 @@ struct ChipSNES_Echo : Module {
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
             apu.setFIR(i, params[PARAM_FIR_COEFFICIENT + i].getValue());
         // run a stereo sample through the echo
-        auto sample = apu.run(
+        auto output = apu.run(
             std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 0].getVoltage() / 5.f,
             std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 1].getVoltage() / 5.f
         );
         // write the stereo output to the ports
-        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample.samples[Sony_S_DSP_Echo::BufferSample::LEFT] / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample.samples[Sony_S_DSP_Echo::BufferSample::RIGHT] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * output.samples[Sony_S_DSP_Echo::BufferSample::LEFT] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * output.samples[Sony_S_DSP_Echo::BufferSample::RIGHT] / std::numeric_limits<int16_t>::max());
     }
 };
 

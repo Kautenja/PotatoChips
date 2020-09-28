@@ -1,5 +1,4 @@
 {
-  "id": 152,
   "plugin": "KautenjaDSP-PotatoChips",
   "version": "1.7.3",
   "model": "S_SMP_Echo",
@@ -52,6 +51,5 @@
       "id": 11,
       "value": 0.0
     }
-  ],
-  "leftModuleId": 5
+  ]
 }

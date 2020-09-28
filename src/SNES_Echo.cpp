@@ -86,11 +86,14 @@ struct ChipSNES_Echo : Module {
         // FIR Coefficients
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
             apu.setFIR(coeff, params[PARAM_FIR_COEFFICIENT + coeff].getValue());
-        // Stereo input + output
-        int16_t left = std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 0].getVoltage() / 5.f;
-        int16_t right = std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 1].getVoltage() / 5.f;
+        // run a stereo sample through the echo
         int16_t sample[2] = {0, 0};
-        apu.run(left, right, sample);
+        apu.run(
+            std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 0].getVoltage() / 5.f,
+            std::numeric_limits<int16_t>::max() * inputs[INPUT_AUDIO + 1].getVoltage() / 5.f,
+            sample
+        );
+        // write the stereo output to the ports
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

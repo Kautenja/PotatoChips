@@ -46,6 +46,8 @@ class Sony_S_DSP_Echo {
     static constexpr unsigned SAMPLE_RATE = 32000;
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
+    /// the size of the FIR ring buffer
+    static constexpr unsigned FIR_MAX_INDEX = 7;
     /// the number of milliseconds per discrete delay level
     static constexpr unsigned MILLISECONDS_PER_DELAY_LEVEL = 16;
     /// the number of \f$16ms\f$ delay levels
@@ -74,8 +76,6 @@ class Sony_S_DSP_Echo {
 
     /// fir_buffer[i + 8] == fir_buffer[i], to avoid wrap checking in FIR code
     BufferSample fir_buffer[2 * FIR_COEFFICIENT_COUNT];
-    /// the size of the FIR ring buffer
-    static constexpr int FIR_MAX_INDEX = 7;
     /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
 

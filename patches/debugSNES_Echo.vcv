@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.476a49b",
+  "version": "1.dev.eefe794",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 1,
-          "deviceName": "default",
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -56,51 +56,51 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": 21.0
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 40.0
         },
         {
           "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
           "value": 127.0
         },
         {
+          "id": 3,
+          "value": 127.0
+        },
+        {
+          "id": 4,
+          "value": -50.0
+        },
+        {
           "id": 5,
-          "value": 0.0
+          "value": 121.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 94.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": -49.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": -53.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": -16.0
         },
         {
           "id": 10,
-          "value": 0.0
+          "value": -77.0
         },
         {
           "id": 11,
-          "value": 0.0
+          "value": -32.0
         }
       ],
       "leftModuleId": 5,
@@ -160,7 +160,7 @@
     {
       "id": 154,
       "plugin": "Bogaudio",
-      "version": "1.1.31",
+      "version": "1.1.34",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "rightModuleId": 156,
@@ -266,11 +266,11 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": -0.80249995
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": -0.765000045
         },
         {
           "id": 2,
@@ -278,7 +278,7 @@
         },
         {
           "id": 3,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 4,
@@ -316,7 +316,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.680000126
+          "value": 0.5030002
         },
         {
           "id": 1,
@@ -354,7 +354,7 @@
         },
         {
           "id": 2,
-          "value": -1.26800025
+          "value": -1.15999997
         },
         {
           "id": 3,
@@ -370,7 +370,7 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "rightModuleId": 159,
@@ -516,6 +516,14 @@
       "inputModuleId": 160,
       "inputId": 4,
       "color": "#c9b70e"
+    },
+    {
+      "id": 83,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 159,
+      "inputId": 3,
+      "color": "#c91847"
     }
   ]
 }

@@ -79,8 +79,8 @@ struct ChipSNES_Echo : Module {
     ///
     inline void process(const ProcessArgs &args) final {
         // delay parameters
-        apu.setFeedback(params[PARAM_ECHO_FEEDBACK].getValue());
         apu.setDelay(params[PARAM_ECHO_DELAY].getValue());
+        apu.setFeedback(params[PARAM_ECHO_FEEDBACK].getValue());
         apu.setMixLeft(params[PARAM_MIX_ECHO + 0].getValue());
         apu.setMixRight(params[PARAM_MIX_ECHO + 1].getValue());
         // FIR Coefficients

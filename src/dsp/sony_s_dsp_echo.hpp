@@ -53,11 +53,6 @@ class Sony_S_DSP_Echo {
     /// the number of bytes per delay level (2KB)
     static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
 
- private:
-    // -----------------------------------------------------------------------
-    // MARK: Echo Internal Buffers
-    // -----------------------------------------------------------------------
-
     /// @brief A stereo sample in the echo buffer.
     struct BufferSample {
         /// the index of the left channel in the samples array
@@ -67,6 +62,11 @@ class Sony_S_DSP_Echo {
         /// the 16-bit sample for the left [0] and right [1] channels.
         int16_t samples[2] = {0, 0};
     };
+
+ private:
+    // -----------------------------------------------------------------------
+    // MARK: Echo Internal Buffers
+    // -----------------------------------------------------------------------
 
     /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
     /// multiplied by the total number of delay levels
@@ -148,9 +148,9 @@ class Sony_S_DSP_Echo {
 
     /// @brief Run echo effect on input samples and write to the output buffer
     ///
-    /// @param output_buffer the output buffer to write samples to (optional)
+    /// @param TODO
     ///
-    void run(int left, int right, int16_t* output_buffer = NULL) {
+    BufferSample run(int left, int right) {
         // get the current feedback sample in the echo buffer
         auto const echo_sample = reinterpret_cast<BufferSample*>(&ram[buffer_head]);
         // increment the echo pointer by the size of the echo buffer sample
@@ -198,13 +198,16 @@ class Sony_S_DSP_Echo {
         echo_sample->samples[BufferSample::RIGHT] =
             clamp_16(right + ((fb_right * feedback) >> 14));
 
-        if (output_buffer) {  // write final samples
-            // (1) add the echo to the samples for the left and right channel,
-            // (2) clamp the left and right samples, and (3) place them into
-            // the buffer
-            output_buffer[0] = clamp_16(left + ((fb_left  * mixLeft) >> 14));
-            output_buffer[1] = clamp_16(right + ((fb_right * mixRight) >> 14));
-        }
+        // (1) add the echo to the samples for the left and right channel,
+        // (2) clamp the left and right samples, and (3) place them into
+        // the buffer
+        Sony_S_DSP_Echo::BufferSample output_buffer;
+        output_buffer.samples[BufferSample::LEFT] =
+            clamp_16(left + ((fb_left  * mixLeft) >> 14));
+        output_buffer.samples[BufferSample::RIGHT] =
+            clamp_16(right + ((fb_right * mixRight) >> 14));
+
+        return output_buffer;
     }
 };
 

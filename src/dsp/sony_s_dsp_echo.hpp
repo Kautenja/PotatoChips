@@ -138,7 +138,9 @@ class Sony_S_DSP_Echo {
     /// @param index the index of the FIR coefficient to set
     /// @param value the value to set the FIR coefficient to
     ///
-    inline void setFIR(unsigned index, int8_t value) { fir_coeff[index] = value; }
+    inline void setFIR(unsigned index, int8_t value) {
+        fir_coeff[index] = value;
+    }
 
     /// @brief Return the FIR coefficient at given index.
     ///
@@ -153,15 +155,15 @@ class Sony_S_DSP_Echo {
     ///
     BufferSample run(int left, int right) {
         // get the current feedback sample in the echo buffer
-        auto const echo_sample = reinterpret_cast<BufferSample*>(&ram[buffer_head]);
+        auto const echo = reinterpret_cast<BufferSample*>(&ram[buffer_head]);
         // increment the echo pointer by the size of the echo buffer sample
         buffer_head += sizeof(BufferSample);
         // check if for the end of the ring buffer and wrap the pointer around
         if (buffer_head >= (delay & DELAY_LEVELS) * DELAY_LEVEL_BYTES)
             buffer_head = 0;
         // cache the feedback value (sign-extended to 32-bit)
-        int fb_left = echo_sample->samples[BufferSample::LEFT];
-        int fb_right = echo_sample->samples[BufferSample::RIGHT];
+        int fb_left = echo->samples[BufferSample::LEFT];
+        int fb_right = echo->samples[BufferSample::RIGHT];
 
         // put samples in history ring buffer
         auto const fir_samples = &fir_buffer[fir_offset];
@@ -194,9 +196,9 @@ class Sony_S_DSP_Echo {
             fir_samples[7].samples[BufferSample::RIGHT] * fir_coeff[0];
 
         // put the echo samples into the buffer
-        echo_sample->samples[BufferSample::LEFT] =
+        echo->samples[BufferSample::LEFT] =
             clamp_16(left + ((fb_left  * feedback) >> 14));
-        echo_sample->samples[BufferSample::RIGHT] =
+        echo->samples[BufferSample::RIGHT] =
             clamp_16(right + ((fb_right * feedback) >> 14));
 
         // (1) add the echo to the samples for the left and right channel,

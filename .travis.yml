@@ -14,10 +14,6 @@ matrix:
       before_install:
         - choco install make
         - choco install zip
-        - choco install python
-        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        - C:\Python38\python3 get-pip.py
-        - C:\Python38\python3 -m pip install wheel scons
 addons:
   apt:
     packages:
@@ -60,9 +56,8 @@ install:
   - unzip Rack-SDK.zip
   - popd
 script:
-  - scons -j2 test
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
-  - make -j2 dep
-  - make -j2 dist
+  - make dep
+  - make dist
 notifications:
   email: false

@@ -119,10 +119,15 @@ class Sony_S_DSP {
     /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
     /// BRR samples.
     struct BitRateReductionBlock {
-        /// the number of 1-byte samples in each block of BRR samples
-        static constexpr unsigned NUM_SAMPLES = 8;
-        /// the maximal volume level for a BRR sample block
-        static constexpr uint8_t MAX_VOLUME = 0x0C;
+        enum : unsigned {
+            /// the number of 1-byte samples in each block of BRR samples
+            NUM_SAMPLES = 8
+        };
+
+        enum : uint8_t {
+            /// the maximal volume level for a BRR sample block
+            MAX_VOLUME = 0x0C
+        };
 
         union {
             /// a structure containing the 8-bit header flag with schema:
@@ -172,10 +177,14 @@ class Sony_S_DSP {
 
     /// @brief A stereo sample in the echo buffer.
     struct EchoBufferSample {
-        /// the index of the left channel in the samples array
-        static constexpr unsigned LEFT = 0;
-        /// the index of the right channel in the samples array
-        static constexpr unsigned RIGHT = 1;
+        enum : unsigned {
+            /// the index of the left channel in the samples array
+            LEFT = 0,
+            /// the index of the right channel in the samples array
+            RIGHT = 1,
+            /// the index of the right channel in the samples array
+            CHANNELS = 2
+        };
         /// the 16-bit sample for the left [0] and right [1] channels.
         int16_t samples[2];
     };

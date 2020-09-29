@@ -21,9 +21,13 @@
 // SOFTWARE.
 //
 
+#include "dsp/sony_s_dsp_echo.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "dsp/sony_s_dsp_echo.hpp"
+
+// ---------------------------------------------------------------------------
+// MARK: Sony_S_DSP_Echo::BufferSample
+// ---------------------------------------------------------------------------
 
 TEST_CASE("Sony_S_DSP_Echo::BufferSample should be 4 bytes") {
     REQUIRE(4 == sizeof(Sony_S_DSP_Echo::BufferSample));

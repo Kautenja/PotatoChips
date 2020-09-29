@@ -245,21 +245,21 @@ See the [Manual][POKEY] for more information about the features of this module.
 S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP
 sound chip on the
 [Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The Echo effect of the S-SMP chip has $15$ different delay levels of $16ms$
-each, a $64KB$ echo buffer, an 8-tap FIR filter for shaping the sound of the
+The Echo effect of the S-SMP chip has _15_ different delay levels of _16ms_
+each, a _64KB_ echo buffer, an 8-tap FIR filter for shaping the sound of the
 echo, parameterized feedback, and parameterized dry / wet mix level. The echo
 buffer is stereo, although the echo parameters and coefficients of the FIR
 filter are the same for both channels.
 
 S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
 namely,
--   **$32KHz$ Sample Rate:** The S-SMP was designed to run at $32kHz$, so the
-    audio inputs and outputs of the module are locked to $32kHz$.
+-   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
+    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Echo Buffer:** Echo buffer for two independent inputs in stereo
     configuration. The parameters are the same for both inputs, but the inputs
     have their own dedicated echo buffers.
 -   **Expanded Delay:** The 15 levels of delay has been upgraded to 31 levels
-    that each add an additional $16ms$ of delay (up to roughly $500ms$). 31
+    that each add an additional _16ms_ of delay (up to roughly _500ms_). 31
     levels of delay is able to fit in the RAM of the original S-SMP, but the
     instruction set does not normally support the addressing of 31 levels.
 -   **Feedback:** Additive and subtractive feedback following the original

@@ -14,8 +14,8 @@ matrix:
       before_install:
         - choco install make -y
         - choco install zip -y
-        - choco install python3 -y
-        - python -m pip install scons
+        - choco install python -y
+        - python -m pip install wheel scons
 addons:
   apt:
     packages:

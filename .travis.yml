@@ -32,6 +32,7 @@ addons:
       - libgtk2.0-dev
       - libjack-jackd2-dev
       - jq
+      - scons
   homebrew:
     packages:
       - git
@@ -42,6 +43,7 @@ addons:
       - libtool
       - jq
       - python
+      - scons
 git:
   submodules: true
 env:
@@ -54,6 +56,7 @@ install:
   - unzip Rack-SDK.zip
   - popd
 script:
+  - scons test
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
   - make dep
   - make dist

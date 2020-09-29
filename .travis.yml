@@ -60,7 +60,7 @@ install:
   - unzip Rack-SDK.zip
   - popd
 script:
-  - scons test
+  - scons -j2 test
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
   - make dep
   - make dist

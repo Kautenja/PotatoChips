@@ -16,8 +16,8 @@ matrix:
         - choco install zip
         - choco install python
         - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        - python3 get-pip.py
-        - python3 -m pip install wheel scons
+        - C:\Python38\python3 get-pip.py
+        - C:\Python38\python3 -m pip install wheel scons
 addons:
   apt:
     packages:

@@ -12,9 +12,10 @@ matrix:
       osx_image: xcode12
     - os: windows
       before_install:
-        - choco install make -y
-        - choco install zip -y
-        - choco install python -y
+        - choco install make
+        - choco install zip
+        - choco install python --version 3.8.0
+        - python -m pip install --upgrade pip
         - python -m pip install wheel scons
 addons:
   apt:

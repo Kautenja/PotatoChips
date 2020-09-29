@@ -12,7 +12,7 @@ VariantDir('build_test', 'test', duplicate=0)
 
 # the compiler and linker flags for the production C++ environment
 PROD_FLAGS = [
-    '-std=c++17',
+    '-std=c++11',
     '-pthread',
     '-O3',
     '-march=native',
@@ -30,7 +30,7 @@ INCLUDES = [
 
 # the compiler and linker flags for the testing C++ environment
 TEST_FLAGS = [
-    '-std=c++17',
+    '-std=c++11',
     '-pthread',
     '-march=native',
     '-pipe',

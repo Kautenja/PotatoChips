@@ -157,8 +157,8 @@ class Sony_S_DSP {
                 }
             } flags;
             /// the encoded header byte
-            uint8_t header;
-        };
+            uint8_t header = 0;
+        } __attribute__((packed));
         /// the 8-byte block of sample data
         uint8_t samples[NUM_SAMPLES];
     } __attribute__((packed));

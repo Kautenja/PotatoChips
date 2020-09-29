@@ -240,7 +240,7 @@ See the [Manual][POKEY] for more information about the features of this module.
 <!-- MARK: S-SMP(Echo) -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(Echo) _(Coming Soon!)_
+## S-SMP(Echo)
 
 S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP
 sound chip on the

@@ -152,3 +152,14 @@
 ## 1.7.3 (2020-09-24)
 
 -   fix issue where GBS and 106 would drop onto the rack with corrupted waveforms
+
+## 1.8.0 (TBD)
+
+-   new module: S-SMP(Echo)
+    -   echo effect from the SNES (16-bit PCM @ 32kHz)
+        -   Gaussian filter removed
+        -   BRR down-sampling removed
+    -   2 channels of echo effect
+        -   feedback and delay parameters with CV control
+        -   stereo mix control with surround effect through phasing
+    -   8-tap FIR filter with coefficient parameterization and CV control

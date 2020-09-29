@@ -57,12 +57,15 @@ class Sony_S_DSP_Echo {
 
     /// @brief A stereo sample in the echo buffer.
     struct BufferSample {
-        /// the index of the left channel in the samples array
-        static constexpr unsigned LEFT = 0;
-        /// the index of the right channel in the samples array
-        static constexpr unsigned RIGHT = 1;
-        /// the number of channels in the sample
-        static constexpr unsigned CHANNELS = 2;
+        enum : unsigned {
+            /// the index of the left channel in the samples array
+            LEFT = 0,
+            /// the index of the right channel in the samples array
+            RIGHT = 1,
+            /// the number of channels in the sample
+            CHANNELS = 2
+        };
+
         /// the 16-bit sample for the left [0] and right [1] channels.
         int16_t samples[CHANNELS] = {0, 0};
     };

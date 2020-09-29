@@ -48,4 +48,8 @@ mVRC6: build
 	make -C VRC6
 	cp VRC6/build/manual.pdf build/VRC6.pdf
 
-manual: m106 m2612 m2A03 mAY38910 mFME7 mGBS mPOKEY mSCC mSN76489 mTurboGrafx16 mVRC6
+mSSMPEcho: build
+	make -C S_SMP_Echo
+	cp S_SMP_Echo/build/manual.pdf build/S_SMP_Echo.pdf
+
+manual: m106 m2612 m2A03 mAY38910 mFME7 mGBS mPOKEY mSCC mSN76489 mTurboGrafx16 mVRC6 mSSMPEcho

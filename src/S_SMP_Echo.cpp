@@ -27,7 +27,7 @@
 struct ChipS_SMP_Echo : Module {
  private:
     /// the Sony S-DSP echo effect emulator
-    Sony_S_DSP_Echo apu;
+    Sony_S_DSP_Echo apu[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -64,7 +64,7 @@ struct ChipS_SMP_Echo : Module {
     ChipS_SMP_Echo() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu.getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
+            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
         configParam(PARAM_DELAY, 0, Sony_S_DSP_Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, Sony_S_DSP_Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
@@ -74,11 +74,12 @@ struct ChipS_SMP_Echo : Module {
  protected:
     /// @brief Return the value of the delay parameter from the panel.
     ///
+    /// @param channel the polyphonic channel to get the delay parameter for
     /// @returns the 8-bit delay parameter after applying CV modulations
     ///
-    inline uint8_t getDelay() {
+    inline uint8_t getDelay(unsigned channel) {
         const float param = params[PARAM_DELAY].getValue();
-        const float cv = inputs[INPUT_DELAY].getVoltage() / 10.f;
+        const float cv = inputs[INPUT_DELAY].getPolyVoltage(channel) / 10.f;
         const float mod = Sony_S_DSP_Echo::DELAY_LEVELS * cv;
         const float MAX = static_cast<float>(Sony_S_DSP_Echo::DELAY_LEVELS);
         return clamp(param + mod, 0.f, MAX);
@@ -86,11 +87,12 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the feedback parameter from the panel.
     ///
+    /// @param channel the feedback channel to get the delay parameter for
     /// @returns the 8-bit feedback parameter after applying CV modulations
     ///
-    inline int8_t getFeedback() {
+    inline int8_t getFeedback(unsigned channel) {
         const float param = params[PARAM_FEEDBACK].getValue();
-        const float cv = inputs[INPUT_FEEDBACK].getVoltage() / 10.f;
+        const float cv = inputs[INPUT_FEEDBACK].getPolyVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -99,12 +101,13 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the mix parameter from the panel.
     ///
+    /// @param channel the polyphonic channel to get the mix parameter for
     /// @param lane the stereo delay lane to get the mix level parameter for
     /// @returns the 8-bit mix parameter after applying CV modulations
     ///
-    inline int8_t getMix(unsigned lane) {
+    inline int8_t getMix(unsigned channel, unsigned lane) {
         const float param = params[PARAM_MIX + lane].getValue();
-        const float cv = inputs[INPUT_MIX + lane].getVoltage() / 10.f;
+        const float cv = inputs[INPUT_MIX + lane].getPolyVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -113,12 +116,13 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the FIR filter parameter from the panel.
     ///
+    /// @param channel the polyphonic channel to get the FIR coefficient for
     /// @param index the index of the FIR filter coefficient to get
     /// @returns the 8-bit FIR filter parameter for coefficient at given index
     ///
-    inline int8_t getFIRCoefficient(unsigned index) {
+    inline int8_t getFIRCoefficient(unsigned channel, unsigned index) {
         const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
-        const float cv = inputs[INPUT_FIR_COEFFICIENT + index].getVoltage() / 10.f;
+        const float cv = inputs[INPUT_FIR_COEFFICIENT + index].getPolyVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -127,12 +131,39 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the stereo input from the panel.
     ///
+    /// @param channel the polyphonic channel to get the audio input for
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline int16_t getInput(unsigned lane) {
+    inline int16_t getInput(unsigned channel, unsigned lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        return MAX * inputs[INPUT_AUDIO + lane].getVoltage() / 5.f;
+        return MAX * inputs[INPUT_AUDIO + lane].getPolyVoltage(channel) / 5.f;
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processChannel(const ProcessArgs &args, unsigned channel) {
+        // update the delay parameters
+        apu[channel].setDelay(getDelay(channel));
+        apu[channel].setFeedback(getFeedback(channel));
+        apu[channel].setMixLeft(getMix(channel, Sony_S_DSP_Echo::BufferSample::LEFT));
+        apu[channel].setMixRight(getMix(channel, Sony_S_DSP_Echo::BufferSample::RIGHT));
+        // update the FIR Coefficients
+        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
+            apu[channel].setFIR(i, getFIRCoefficient(channel, i));
+        // run a stereo sample through the echo buffer + filter
+        auto output = apu[channel].run(
+            getInput(channel, Sony_S_DSP_Echo::BufferSample::LEFT),
+            getInput(channel, Sony_S_DSP_Echo::BufferSample::RIGHT)
+        );
+        // write the stereo output to the ports
+        for (unsigned i = 0; i < Sony_S_DSP_Echo::BufferSample::CHANNELS; i++) {
+            const auto voltage = 5.f * output.samples[i] / std::numeric_limits<int16_t>::max();
+            outputs[OUTPUT_AUDIO + i].setVoltage(voltage, channel);
+        }
     }
 
     /// @brief Process the inputs and outputs to/from the module.
@@ -140,26 +171,18 @@ struct ChipS_SMP_Echo : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // update the delay parameters
-        apu.setDelay(getDelay());
-        apu.setFeedback(getFeedback());
-        apu.setMixLeft(getMix(Sony_S_DSP_Echo::BufferSample::LEFT));
-        apu.setMixRight(getMix(Sony_S_DSP_Echo::BufferSample::RIGHT));
-        // update the FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
-            apu.setFIR(i, getFIRCoefficient(i));
-        // run a stereo sample through the echo buffer + filter
-        auto output = apu.run(
-            getInput(Sony_S_DSP_Echo::BufferSample::LEFT),
-            getInput(Sony_S_DSP_Echo::BufferSample::RIGHT)
-        );
-        // write the stereo output to the ports
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::BufferSample::CHANNELS; i++) {
-            // get the 16-bit sample as a floating point number in [0, 1]
-            const auto sample = output.samples[i] / std::numeric_limits<int16_t>::max();
-            // scale the [0.f, 1.f] 16-bit representation to a [0, 5]V signal
-            outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample);
-        }
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+        // process audio samples on the chip engine.
+        for (unsigned channel = 0; channel < channels; channel++)
+            processChannel(args, channel);
     }
 };
 

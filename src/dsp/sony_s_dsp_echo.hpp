@@ -51,7 +51,7 @@ class Sony_S_DSP_Echo {
     /// the number of milliseconds per discrete delay level
     static constexpr unsigned MILLISECONDS_PER_DELAY_LEVEL = 16;
     /// the number of \f$16ms\f$ delay levels
-    static constexpr unsigned DELAY_LEVELS = 31;
+    static constexpr uint8_t DELAY_LEVELS = 31;
     /// the number of bytes per delay level (2KB)
     static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
 
@@ -61,8 +61,10 @@ class Sony_S_DSP_Echo {
         static constexpr unsigned LEFT = 0;
         /// the index of the right channel in the samples array
         static constexpr unsigned RIGHT = 1;
+        /// the number of channels in the sample
+        static constexpr unsigned CHANNELS = 2;
         /// the 16-bit sample for the left [0] and right [1] channels.
-        int16_t samples[2] = {0, 0};
+        int16_t samples[CHANNELS] = {0, 0};
     };
 
  private:

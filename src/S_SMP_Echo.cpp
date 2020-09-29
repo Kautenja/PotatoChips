@@ -99,12 +99,12 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the mix parameter from the panel.
     ///
-    /// @param channel the channel to get the mix level parameter for
+    /// @param lane the stereo delay lane to get the mix level parameter for
     /// @returns the 8-bit mix parameter after applying CV modulations
     ///
-    inline int8_t getMix(unsigned channel) {
-        const float param = params[PARAM_MIX + channel].getValue();
-        const float cv = inputs[INPUT_MIX + channel].getVoltage() / 10.f;
+    inline int8_t getMix(unsigned lane) {
+        const float param = params[PARAM_MIX + lane].getValue();
+        const float cv = inputs[INPUT_MIX + lane].getVoltage() / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -127,15 +127,15 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the stereo input from the panel.
     ///
-    /// @param channel the channel to get the input voltage for
-    /// @returns the 8-bit stereo input for the given channel
+    /// @param lane the stereo delay lane to get the input voltage for
+    /// @returns the 8-bit stereo input for the given lane
     ///
-    inline int16_t getInput(unsigned channel) {
+    inline int16_t getInput(unsigned lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        return MAX * inputs[INPUT_AUDIO + channel].getVoltage() / 5.f;
+        return MAX * inputs[INPUT_AUDIO + lane].getVoltage() / 5.f;
     }
 
-    /// @brief Process the CV inputs for the given channel.
+    /// @brief Process the inputs and outputs to/from the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
@@ -192,9 +192,9 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             auto echoIdx = ChipS_SMP_Echo::PARAM_MIX + i;
             auto echoPos = Vec(20 + 44 * i, 163);
             Knob* echoMix;
-            if (i)  // i == 1 -> right channel -> red knob
+            if (i)  // i == 1 -> right lane -> red knob
                 echoMix = createParam<Rogan2PRed>(echoPos, module, echoIdx);
-            else  // i == 0 -> left channel -> white knob
+            else  // i == 0 -> left lane -> white knob
                 echoMix = createParam<Rogan2PWhite>(echoPos, module, echoIdx);
             echoMix->snap = true;
             addParam(echoMix);

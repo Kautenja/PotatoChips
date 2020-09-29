@@ -284,9 +284,9 @@ namely,
 
 ### Features
 
-See the [Manual][S_SMP] for more information about the features of this module.
+See the [Manual][S_SMP_Echo] for more information about the features of this module.
 
-[S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
+[S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->

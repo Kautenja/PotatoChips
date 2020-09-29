@@ -14,6 +14,10 @@ matrix:
       before_install:
         - choco install make
         - choco install zip
+      script:
+        - export RACK_DIR="${HOME}"/Rack/Rack-SDK
+        - make dep
+        - make dist
 addons:
   apt:
     packages:
@@ -56,6 +60,7 @@ install:
   - unzip Rack-SDK.zip
   - popd
 script:
+  - scons test
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
   - make dep
   - make dist

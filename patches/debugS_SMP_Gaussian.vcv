@@ -29,6 +29,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
+      "leftModuleId": 158,
       "rightModuleId": 152,
       "data": {
         "channels": 1,
@@ -43,7 +44,7 @@
         }
       },
       "pos": [
-        0,
+        10,
         1
       ]
     },
@@ -383,7 +384,7 @@
         },
         {
           "id": 82,
-          "value": 100.0
+          "value": 39.0
         },
         {
           "id": 83,
@@ -436,7 +437,7 @@
       ],
       "leftModuleId": 5,
       "pos": [
-        8,
+        18,
         1
       ]
     },
@@ -588,6 +589,44 @@
         42,
         0
       ]
+    },
+    {
+      "id": 158,
+      "plugin": "Bogaudio",
+      "version": "1.1.34",
+      "model": "Bogaudio-LFO",
+      "params": [
+        {
+          "id": 0,
+          "value": -2.03136253
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 5,
+      "data": {},
+      "pos": [
+        0,
+        1
+      ]
     }
   ],
   "cables": [
@@ -656,68 +695,20 @@
       "color": "#c91847"
     },
     {
-      "id": 46,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 51,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 53,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 3,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 47,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 33,
-      "color": "#0986ad"
-    },
-    {
       "id": 50,
-      "outputModuleId": 5,
-      "outputId": 1,
+      "outputModuleId": 158,
+      "outputId": 2,
       "inputModuleId": 152,
       "inputId": 34,
       "color": "#c91847"
     },
     {
-      "id": 52,
-      "outputModuleId": 5,
-      "outputId": 1,
+      "id": 47,
+      "outputModuleId": 158,
+      "outputId": 2,
       "inputModuleId": 152,
-      "inputId": 35,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 49,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 36,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 45,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 0,
-      "color": "#c9b70e"
+      "inputId": 33,
+      "color": "#0986ad"
     }
   ]
 }

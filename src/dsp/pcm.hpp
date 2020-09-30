@@ -161,6 +161,7 @@ template<int8_t> bool operator==(uint64_t const&, int24_t const&);
 // MARK: Numeric Limits
 // ---------------------------------------------------------------------------
 
+/// A numeric limits specialization for the int24_t class.
 template<> class std::numeric_limits<int24_t> {
  public:
     static constexpr bool is_specialized = true;

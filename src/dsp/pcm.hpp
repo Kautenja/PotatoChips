@@ -22,10 +22,7 @@
 #include <cstdint>
 #include <limits>
 
-/// Functions for working with Pulse Code Modulation (PCM) data.
-namespace PCM {
-
-/// A 24-bit signed integer.
+/// A 24-bit signed integer data-type.
 using int24_t = struct _int24_t {
     /// internal data for the 24-bit integer
     int32_t data : 24;
@@ -33,28 +30,28 @@ using int24_t = struct _int24_t {
     // Constructors (intentionally not explicit to allow implied cast)
 
     /// Create a new 24-bit integer from an 8-bit signed value.
-    _int24_t(int8_t integer) : data(integer) { }
+    constexpr _int24_t(int8_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 8-bit unsigned value.
-    _int24_t(uint8_t integer) : data(integer) { }
+    constexpr _int24_t(uint8_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 16-bit signed value.
-    _int24_t(int16_t integer) : data(integer) { }
+    constexpr _int24_t(int16_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 16-bit unsigned value.
-    _int24_t(uint16_t integer) : data(integer) { }
+    constexpr _int24_t(uint16_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 32-bit signed value.
-    explicit _int24_t(int32_t integer) : data(integer) { }
+    constexpr explicit _int24_t(int32_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 32-bit unsigned value.
-    explicit _int24_t(uint32_t integer) : data(integer) { }
+    constexpr explicit _int24_t(uint32_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 64-bit signed value.
-    explicit _int24_t(uint64_t integer) : data(integer) { }
+    constexpr explicit _int24_t(uint64_t integer) : data(integer) { }
 
     /// Create a new 24-bit integer from an 64-bit unsigned value.
-    explicit _int24_t(int64_t integer) : data(integer) { }
+    constexpr explicit _int24_t(int64_t integer) : data(integer) { }
 
     // Operators - Assignment
 
@@ -100,15 +97,27 @@ using int24_t = struct _int24_t {
     operator int64_t() const { return data; }
     explicit operator uint64_t() { return data; }
     explicit operator uint64_t() const { return data; }
-};
+} __attribute__((packed));
 
-// Operators - Comparison
+// ---------------------------------------------------------------------------
+// MARK: Operators - Comparison
+// ---------------------------------------------------------------------------
 
-/// Return true if this 24-bit value is equal to the given 8-bit signed value.
+/// Return true if this 24-bit value is equal to the other 24-bit value.
+///
+/// @param l the int24_t on the left-hand side of the operation
+/// @param r the other integer to compare the 24-bit value against
+/// @returns True if this 24-bit value is equal to the given value
+///
+inline bool operator==(int24_t const& l, int24_t const& r) {
+    return l.data == r.data;
+}
+
+/// Return true if this 24-bit value is equal to the given value.
 ///
 /// @tparam T the type of the value to compare against
 /// @param l the int24_t on the left-hand side of the operation
-/// @param l the other integer to compare the 24-bit value against
+/// @param r the other integer to compare the 24-bit value against
 /// @returns True if this 24-bit value is equal to the given value
 ///
 template<typename T>
@@ -126,11 +135,11 @@ template<int8_t> bool operator==(int24_t const&, uint32_t const&);
 template<int8_t> bool operator==(int24_t const&,  int64_t const&);
 template<int8_t> bool operator==(int24_t const&, uint64_t const&);
 
-/// Return true if this 24-bit value is equal to the given 8-bit signed value.
+/// Return true if this 24-bit value is equal to the given value.
 ///
 /// @tparam T the type of the value to compare against
 /// @param l the int24_t on the left-hand side of the operation
-/// @param l the other integer to compare the 24-bit value against
+/// @param r the other integer to compare the 24-bit value against
 /// @returns True if this 24-bit value is equal to the given value
 ///
 template<typename T>
@@ -147,6 +156,56 @@ template<int8_t> bool operator==(uint32_t const&, int24_t const&);
 // 64-bit
 template<int8_t> bool operator==( int64_t const&, int24_t const&);
 template<int8_t> bool operator==(uint64_t const&, int24_t const&);
+
+// ---------------------------------------------------------------------------
+// MARK: Numeric Limits
+// ---------------------------------------------------------------------------
+
+template<> class std::numeric_limits<int24_t> {
+ public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr int24_t max() noexcept { return int24_t(0x7fffff); }
+    static constexpr int24_t min() noexcept { return int24_t(0xffffff); }
+    static constexpr int24_t lowest() noexcept { return int24_t(0xffffff); }
+
+    static constexpr int digits = 1;
+    static constexpr int digits10 = 0;
+    static constexpr int max_digits10 = 0;
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+    static constexpr bool is_exact = true;
+    static constexpr int radix = 2;
+    static constexpr bool epsilon() noexcept { return 0; }
+    static constexpr bool round_error() noexcept { return 0; }
+
+    static constexpr int min_exponent = 0;
+    static constexpr int min_exponent10 = 0;
+    static constexpr int max_exponent = 0;
+    static constexpr int max_exponent10 = 0;
+
+    static constexpr bool has_infinity = false;
+    static constexpr bool has_quiet_NaN = false;
+    static constexpr bool has_signaling_NaN = false;
+    static constexpr float_denorm_style has_denorm = denorm_absent;
+    static constexpr bool has_denorm_loss = false;
+    static constexpr bool infinity() noexcept { return 0; }
+    static constexpr bool quiet_NaN() noexcept { return 0; }
+    static constexpr bool signaling_NaN() noexcept { return 0; }
+    static constexpr bool denorm_min() noexcept { return 0; }
+
+    static constexpr bool is_iec559 = false;
+    static constexpr bool is_bounded = true;
+    static constexpr bool is_modulo = false;
+
+    static constexpr bool traps = false;
+    static constexpr bool tinyness_before = false;
+    static constexpr float_round_style round_style = round_toward_zero;
+};
+
+/// Functions for working with Pulse Code Modulation (PCM) data.
+namespace PCM {
 
 // ---------------------------------------------------------------------------
 // MARK: PCM to floating point

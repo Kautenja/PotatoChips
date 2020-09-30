@@ -52,6 +52,10 @@ using namespace PCM;
 //     }
 // }
 
+TEST_CASE("sizeof should be correct") {
+    REQUIRE(3 == sizeof(int24_t));
+}
+
 TEST_CASE("Should create 24-bit signed value from 8-bit signed value") {
     int8_t int8 = 0;
     int24_t int24(int8);
@@ -59,4 +63,10 @@ TEST_CASE("Should create 24-bit signed value from 8-bit signed value") {
     REQUIRE(int24 == int8);
     // 24-bit on right-hand side of operation
     REQUIRE(int8 == int24);
+}
+
+TEST_CASE("numeric limits should be correct") {
+    REQUIRE(std::numeric_limits<int24_t>::max() == int24_t(0x7fffff));
+    REQUIRE(std::numeric_limits<int24_t>::min() == int24_t(0xffffff));
+    REQUIRE(std::numeric_limits<int24_t>::lowest() == int24_t(0xffffff));
 }

@@ -22,12 +22,18 @@
 #include <cstdint>
 #include <limits>
 
+// TODO: constructors from float and double?
+// TODO: casters to float and double?
 /// A 24-bit signed integer data-type.
 using int24_t = struct _int24_t {
     /// internal data for the 24-bit integer
     int32_t data : 24;
 
-    // Constructors (intentionally not explicit to allow implied cast)
+    // -----------------------------------------------------------------------
+    // MARK: Constructors (intentionally not explicit to allow implied cast)
+    // -----------------------------------------------------------------------
+
+    // TODO: templates?
 
     /// Create a new 24-bit integer from an 8-bit signed value.
     constexpr _int24_t(int8_t integer) : data(integer) { }
@@ -41,6 +47,12 @@ using int24_t = struct _int24_t {
     /// Create a new 24-bit integer from an 16-bit unsigned value.
     constexpr _int24_t(uint16_t integer) : data(integer) { }
 
+    // -----------------------------------------------------------------------
+    // MARK: Constructors (explicit to require explicit cast from larger type)
+    // -----------------------------------------------------------------------
+
+    // TODO: templates?
+
     /// Create a new 24-bit integer from an 32-bit signed value.
     constexpr explicit _int24_t(int32_t integer) : data(integer) { }
 
@@ -53,7 +65,11 @@ using int24_t = struct _int24_t {
     /// Create a new 24-bit integer from an 64-bit unsigned value.
     constexpr explicit _int24_t(int64_t integer) : data(integer) { }
 
-    // Operators - Assignment
+    // -----------------------------------------------------------------------
+    // MARK: Operators - Assignment
+    // -----------------------------------------------------------------------
+
+    // TODO: templates?
 
     /// Assign an 8-bit signed value to this 24-bit container.
     _int24_t& operator=(int8_t const& integer) {
@@ -79,7 +95,11 @@ using int24_t = struct _int24_t {
         return *this;
     }
 
-    // Operators - Casting
+    // -----------------------------------------------------------------------
+    // MARK: Operators - Type Casting
+    // -----------------------------------------------------------------------
+
+    // TODO: templates?
 
     explicit operator int8_t() { return data; }
     explicit operator int8_t() const { return data; }
@@ -97,10 +117,10 @@ using int24_t = struct _int24_t {
     operator int64_t() const { return data; }
     explicit operator uint64_t() { return data; }
     explicit operator uint64_t() const { return data; }
-} __attribute__((packed));
+} __attribute__((packed));  // packed to consume 3 bytes instead of 4
 
 // ---------------------------------------------------------------------------
-// MARK: Operators - Comparison
+// MARK: Operators - Equality Comparison (==)
 // ---------------------------------------------------------------------------
 
 /// Return true if this 24-bit value is equal to the other 24-bit value.
@@ -156,6 +176,66 @@ template<int8_t> bool operator==(uint32_t const&, int24_t const&);
 // 64-bit
 template<int8_t> bool operator==( int64_t const&, int24_t const&);
 template<int8_t> bool operator==(uint64_t const&, int24_t const&);
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Not Equality Comparison (!=)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Greater than Equality Comparison (>=)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Greater than Comparison (>)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Less than Equality Comparison (<=)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Less Comparison (<)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Equality Comparison (==)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Addition (+)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Subtraction (-)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Multiplication (*)
+// ---------------------------------------------------------------------------
+
+// TODO:
+
+// ---------------------------------------------------------------------------
+// MARK: Operators - Division (/)
+// ---------------------------------------------------------------------------
+
+// TODO:
 
 // ---------------------------------------------------------------------------
 // MARK: Numeric Limits
@@ -237,8 +317,8 @@ inline float pcm16_to_float(int16_t sample) {
 // /// @param sample the PCM sample to convert to floating point
 // /// @returns the PCM sample as a floating point value \f$\in [-1, 1]\f$
 // ///
-// inline float pcm24_to_float(int32_t sample) {
-//     return sample / std::numeric_limits<int32_t>::max();
+// inline float pcm24_to_float(int24_t sample) {
+//     return sample / std::numeric_limits<int24_t>::max();
 // }
 
 // ---------------------------------------------------------------------------
@@ -270,8 +350,8 @@ inline int16_t float_to_pcm16(float sample) {
 // /// @param sample the floating point PCM sample \f$\in [-1, 1]\f$
 // /// @returns the PCM sample scaled into a 24-bit integer data-type
 // ///
-// inline int32_t float_to_pcm24(float sample) {
-//     return std::numeric_limits<int32_t>::max() * sample;
+// inline int24_t float_to_pcm24(float sample) {
+//     return std::numeric_limits<int24_t>::max() * sample;
 // }
 
 }  // namespace PCM

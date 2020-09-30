@@ -679,22 +679,6 @@
       "color": "#c91847"
     },
     {
-      "id": 14,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 15,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
       "id": 50,
       "outputModuleId": 158,
       "outputId": 2,
@@ -709,6 +693,22 @@
       "inputModuleId": 152,
       "inputId": 33,
       "color": "#0986ad"
+    },
+    {
+      "id": 14,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 15,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

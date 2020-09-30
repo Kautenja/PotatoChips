@@ -1,4 +1,4 @@
-// Sony S-DSP emulator.
+// An emulation of the Gaussian filter from the Sony S-DSP.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -16,14 +16,14 @@
 // derived from: Game_Music_Emu 0.5.2
 //
 
-#ifndef DSP_SONY_S_DSP_ECHO_HPP_
-#define DSP_SONY_S_DSP_ECHO_HPP_
+#ifndef DSP_SONY_S_DSP_GAUSSIAN_HPP_
+#define DSP_SONY_S_DSP_GAUSSIAN_HPP_
 
 #include "exceptions.hpp"
 #include <cstring>
 #include <cassert>
 
-/// @brief Sony S-DSP chip emulator.
+/// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 class Sony_S_DSP_Gaussian {
  public:
     /// the sample rate of the S-DSP in Hz
@@ -426,4 +426,4 @@ class Sony_S_DSP_Gaussian {
     void run(int32_t num_samples, int16_t* output_buffer = NULL);
 };
 
-#endif  // DSP_SONY_S_DSP_ECHO_HPP_
+#endif  // DSP_SONY_S_DSP_GAUSSIAN_HPP_

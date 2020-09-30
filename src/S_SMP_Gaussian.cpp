@@ -1,4 +1,4 @@
-// A Sony SPC700 chip (from Nintendo SNES) emulator module.
+// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Sony S-DSP chip (from Nintendo SNES) emulator module.
+/// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
 struct ChipS_SMP_Gaussian : Module {
  private:
     /// the RAM for the S-DSP chip (64KB = 16-bit address space)

@@ -1,4 +1,4 @@
-// Sony SPC700 emulator.
+// An emulation of the Gaussian filter from the Sony S-DSP.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2002 Brad Martin

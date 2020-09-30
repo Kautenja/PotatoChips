@@ -1329,7 +1329,8 @@ void YamahaYM2612::reset() {
     }
 
     // DAC mode clear
-    is_DAC_enabled = out_DAC = 0;
+    is_DAC_enabled = 0;
+    out_DAC = 0;
     for (int c = 0; c < 6; c++) setST(c, 3);
 }
 

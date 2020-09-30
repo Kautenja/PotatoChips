@@ -18,7 +18,7 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#include "s_smp_gaussian.hpp"
+#include "sony_s_dsp_gaussian.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <limits>

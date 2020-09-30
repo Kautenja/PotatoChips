@@ -17,7 +17,7 @@
 
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
-#include "dsp/s_smp_gaussian.hpp"
+#include "dsp/sony_s_dsp_gaussian.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

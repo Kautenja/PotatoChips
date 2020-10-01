@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -497,8 +497,9 @@
       "params": [],
       "rightModuleId": 156,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "high",
         "window": "kaiser"
@@ -687,12 +688,12 @@
       "color": "#c91847"
     },
     {
-      "id": 47,
-      "outputModuleId": 158,
+      "id": 15,
+      "outputModuleId": 156,
       "outputId": 2,
-      "inputModuleId": 152,
-      "inputId": 33,
-      "color": "#0986ad"
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     },
     {
       "id": 14,
@@ -703,12 +704,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 15,
-      "outputModuleId": 156,
+      "id": 47,
+      "outputModuleId": 158,
       "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
+      "inputModuleId": 152,
+      "inputId": 33,
+      "color": "#0986ad"
     }
   ]
 }

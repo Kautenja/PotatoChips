@@ -241,8 +241,10 @@ template<int8_t> bool operator==(uint64_t const&, int24_t const&);
 // MARK: Numeric Limits
 // ---------------------------------------------------------------------------
 
+namespace std {
+
 /// A numeric limits specialization for the int24_t class.
-template<> class std::numeric_limits<int24_t> {
+template<> class numeric_limits<int24_t> {
  public:
     static constexpr bool is_specialized = true;
 
@@ -284,6 +286,8 @@ template<> class std::numeric_limits<int24_t> {
     static constexpr bool tinyness_before = false;
     static constexpr float_round_style round_style = round_toward_zero;
 };
+
+}  // namespace std
 
 /// Functions for working with Pulse Code Modulation (PCM) data.
 namespace PCM {

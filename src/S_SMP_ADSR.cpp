@@ -96,33 +96,13 @@ struct ChipS_SMP_ADSR : Module {
         // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < Sony_S_DSP_ADSR::VOICE_COUNT; osc++) {
-            auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_AMPLITUDE      + osc, -128, 127, 127, osc_name + " Volume (Left)");
-            configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
-            configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
-            configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
-            configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
-            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
-            configParam(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable");
-            configParam(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable");
-            if (osc > 0) {  // voice 0 does not have phase modulation
-                osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
-                configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
-            }
+            auto osc_name = "Voice " + std::to_string(osc + 1) + " ";
+            configParam(PARAM_AMPLITUDE     + osc, -128, 127, 127, osc_name + "Amplitude");
+            configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + "Attack");
+            configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + "Decay");
+            configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + "Sustain Level");
+            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + "Sustain Rate");
         }
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; coeff++) {
-            // the first FIR coefficient defaults to 0x7f = 127 and the other
-            // coefficients are 0 by default
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
-        }
-        configParam(PARAM_NOISE_FREQ,         0,  31,  16, "Noise Frequency");
-        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
-        configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
-        configParam(PARAM_VOLUME_ECHO + 0, -128, 127, 127, "Echo Volume (Left)");
-        configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
-        configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
-        configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
         // TODO: remove. clear the shared RAM between the CPU and the S-DSP
         memset(ram, 0, sizeof ram);
         // reset the S-DSP emulator

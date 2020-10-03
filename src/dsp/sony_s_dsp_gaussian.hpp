@@ -68,7 +68,7 @@ class Sony_S_DSP_Gaussian {
     /// @param filter the new mode for the filter
     ///
     inline void setFilter(uint8_t filter) {
-        voice_state.filter = filter & 0b11;
+        voice_state.filter = filter & 0x3;
     }
 
     /// Set the volume level of the low-pass gate to a new value.

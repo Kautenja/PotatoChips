@@ -61,7 +61,6 @@ struct ChipS_SMP_Gaussian : Module {
     ChipS_SMP_Gaussian() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FILTER, 0, 3, 2, "Filter Coefficients");
-        // configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2");
         configParam(PARAM_GAIN + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)", " dB", -10, 40);
         configParam(PARAM_GAIN + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel) ", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");

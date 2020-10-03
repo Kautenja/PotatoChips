@@ -75,15 +75,15 @@ struct ChipS_SMP_Gaussian : Module {
         // set the number of polyphony channels for output ports
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
-
-
         // process audio samples on the chip engine.
         for (unsigned i = 0; i < 2; i++) {  // iterate over the stereo pair
             for (unsigned channel = 0; channel < channels; channel++) {
+                // set filter parameters
                 apu[i][channel].setFilter1(params[PARAM_FILTER + 0].getValue());
                 apu[i][channel].setFilter2(params[PARAM_FILTER + 1].getValue());
-                auto sample = apu[i][channel].run((1 << 8) * inputs[INPUT_AUDIO + i].getVoltage(channel) / 10.f);
-                outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max(), channel);
+                // pass signal through the filter to get the output voltage
+                float sample = apu[i][channel].run((1 << 8) * inputs[INPUT_AUDIO + i].getVoltage(channel) / 10.f);
+                outputs[OUTPUT_AUDIO + i].setVoltage(10.f * sample / std::numeric_limits<int16_t>::max(), channel);
             }
         }
     }

@@ -24,31 +24,29 @@
 // ---------------------------------------------------------------------------
 
 /// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
-struct ChipS_SMP_Gaussian : Module {
- private:
-    /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu[2][PORT_MAX_CHANNELS];
+struct ChipS_SMP_Gauss : Module {
+    /// the number of processing lanes on the module
+    static constexpr unsigned LANES = 2;
 
- public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         PARAM_FILTER,
-        ENUMS(PARAM_GAIN, 2),
-        ENUMS(PARAM_VOLUME, 2),
+        ENUMS(PARAM_GAIN, LANES),
+        ENUMS(PARAM_VOLUME, LANES),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
         INPUT_FILTER,
-        ENUMS(INPUT_VOLUME, 2),
-        ENUMS(INPUT_AUDIO, 2),
+        ENUMS(INPUT_VOLUME, LANES),
+        ENUMS(INPUT_AUDIO, LANES),
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, 2),
+        ENUMS(OUTPUT_AUDIO, LANES),
         NUM_OUTPUTS
     };
 
@@ -57,17 +55,20 @@ struct ChipS_SMP_Gaussian : Module {
         NUM_LIGHTS
     };
 
-    /// @brief Initialize a new S-DSP Chip module.
-    ChipS_SMP_Gaussian() {
+    /// @brief Initialize a new S-SMP(Gauss) Chip module.
+    ChipS_SMP_Gauss() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FILTER, 0, 3, 2, "Filter Coefficients");
-        configParam(PARAM_GAIN + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel) ", " dB", -10, 40);
-        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");
-        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
+        configParam(PARAM_FILTER,        0,           3,           2, "Filter Coefficients"                 );
+        configParam(PARAM_GAIN   + 0,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)",  " dB", -10, 40);
+        configParam(PARAM_GAIN   + 1,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
+        configParam(PARAM_VOLUME + 0, -128,         127,          60, "Volume (Left Channel)"               );
+        configParam(PARAM_VOLUME + 1, -128,         127,          60, "Volume (Right Channel)"              );
     }
 
  protected:
+    /// the Sony S-DSP sound chip emulator
+    Sony_S_DSP_Gaussian apu[LANES][PORT_MAX_CHANNELS];
+
     /// @brief Get the filter parameter for the index and polyphony channel.
     ///
     /// @param channel the polyphony channel to get the filter parameter of
@@ -117,7 +118,7 @@ struct ChipS_SMP_Gaussian : Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process audio samples on the chip engine.
-        for (unsigned lane = 0; lane < 2; lane++) {
+        for (unsigned lane = 0; lane < LANES; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
                 apu[lane][channel].setFilter(getFilter(channel));
                 apu[lane][channel].setVolume(getVolume(lane, channel));
@@ -133,13 +134,13 @@ struct ChipS_SMP_Gaussian : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// @brief The panel widget for S-SMP-Gaussian.
-struct ChipS_SMP_GaussianWidget : ModuleWidget {
+/// @brief The panel widget for S-SMP-Gauss.
+struct ChipS_SMP_GaussWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipS_SMP_GaussianWidget(ChipS_SMP_Gaussian *module) {
+    explicit ChipS_SMP_GaussWidget(ChipS_SMP_Gauss *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-Gauss.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -147,16 +148,16 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Filter Mode
-        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, ChipS_SMP_Gaussian::PARAM_FILTER);
+        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, ChipS_SMP_Gauss::PARAM_FILTER);
         filter->snap = true;
         addParam(filter);
-        for (unsigned i = 0; i < 2; i++) {
+        for (unsigned i = 0; i < ChipS_SMP_Gauss::LANES; i++) {
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, ChipS_SMP_Gaussian::INPUT_AUDIO + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, ChipS_SMP_Gauss::INPUT_AUDIO + i));
             // Gain
-            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, ChipS_SMP_Gaussian::PARAM_GAIN + i));
-            // Volume (Knob)
-            auto volumeIdx = ChipS_SMP_Gaussian::PARAM_VOLUME + i;
+            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, ChipS_SMP_Gauss::PARAM_GAIN + i));
+            // Volume
+            auto volumeIdx = ChipS_SMP_Gauss::PARAM_VOLUME + i;
             auto echoPos = Vec(20 + 44 * i, 221);
             Knob* volume;
             if (i)  // i == 1 -> right lane -> red knob
@@ -165,13 +166,12 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
                 volume = createParam<Rogan2PWhite>(echoPos, module, volumeIdx);
             volume->snap = true;
             addParam(volume);
-            // Volume (Port)
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, ChipS_SMP_Gaussian::INPUT_VOLUME + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, ChipS_SMP_Gauss::INPUT_VOLUME + i));
             // Stereo Output Ports
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + i));
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Gauss::OUTPUT_AUDIO + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelChipS_SMP_Gaussian = createModel<ChipS_SMP_Gaussian, ChipS_SMP_GaussianWidget>("S_SMP_Gauss");
+rack::Model *modelChipS_SMP_Gauss = createModel<ChipS_SMP_Gauss, ChipS_SMP_GaussWidget>("S_SMP_Gauss");

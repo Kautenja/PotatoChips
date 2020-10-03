@@ -97,9 +97,6 @@ struct ChipS_SMP_ADSR : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // -------------------------------------------------------------------
-        // MARK: Gate input
-        // -------------------------------------------------------------------
         // get the voltage from the gate input port
         const auto gate = inputs[INPUT_GATE].getVoltage();
         // process the voltage to detect key-on events
@@ -114,9 +111,9 @@ struct ChipS_SMP_ADSR : Module {
         }
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
-        // -------------------------------------------------------------------
-        // MARK: ADSR Parameters
-        // -------------------------------------------------------------------
+
+
+
         // the ADSR1 register is set from the attack and decay values
         auto attack = (uint8_t) params[PARAM_ATTACK].getValue();
         auto decay = (uint8_t) params[PARAM_DECAY].getValue();
@@ -128,15 +125,23 @@ struct ChipS_SMP_ADSR : Module {
         auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE].getValue();
         auto adsr2 = (sustainLevel << 5) | sustainRate;
         apu.write(Sony_S_DSP_ADSR::ADSR_2, adsr2);
+
+
+
+        // ADSR parameters
+        apu.setAttack(params[PARAM_ATTACK].getValue());
+        apu.setDecay(params[PARAM_DECAY].getValue());
+        apu.setSustainRate(params[PARAM_SUSTAIN_RATE].getValue());
+        apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL].getValue());
+        apu.setAmplitude(params[PARAM_AMPLITUDE].getValue());
+
+
+
+        // sample the envelope generator
+        apu.run();
         // ADSR output: 7-bit unsigned value (max 0x7F)
         float envelope = apu.read(Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
         outputs[OUTPUT_ENVELOPE].setVoltage(10.f * envelope);
-        // TODO: ADSR amplitude (Volume)
-        // apu.write(Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE].getValue());
-        // -------------------------------------------------------------------
-        // MARK: Sample
-        // -------------------------------------------------------------------
-        apu.run();
     }
 };
 

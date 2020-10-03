@@ -71,8 +71,6 @@ class Sony_S_DSP_ADSR {
     /// the total amplitude level of the envelope generator (8-bit)
     int8_t amplitude;
 
-
-
     // TODO: remove
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
@@ -230,17 +228,17 @@ class Sony_S_DSP_ADSR {
     ///
     inline void setDecay(uint8_t value) { decay = value; }
 
-    /// @brief Set the sustain level parameter to a new value.
-    ///
-    /// @param value the sustain level to use.
-    ///
-    inline void setSustainLevel(uint8_t value) { sustain_level = value; }
-
     /// @brief Set the sustain rate parameter to a new value.
     ///
     /// @param value the sustain rate to use.
     ///
     inline void setSustainRate(uint8_t value) { sustain_rate = value; }
+
+    /// @brief Set the sustain level parameter to a new value.
+    ///
+    /// @param value the sustain level to use.
+    ///
+    inline void setSustainLevel(uint8_t value) { sustain_level = value; }
 
     /// @brief Set the amplitude parameter to a new value.
     ///

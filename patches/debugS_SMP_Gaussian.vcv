@@ -36,12 +36,28 @@
         {
           "id": 1,
           "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.707106769
+        },
+        {
+          "id": 3,
+          "value": 0.707106769
+        },
+        {
+          "id": 4,
+          "value": 60.0
+        },
+        {
+          "id": 5,
+          "value": 60.0
         }
       ],
-      "leftModuleId": 164,
+      "leftModuleId": 159,
       "rightModuleId": 153,
       "pos": [
-        29,
+        26,
         1
       ]
     },
@@ -90,7 +106,7 @@
         "external": 0
       },
       "pos": [
-        43,
+        40,
         1
       ]
     },
@@ -183,7 +199,7 @@
         }
       ],
       "leftModuleId": 163,
-      "rightModuleId": 164,
+      "rightModuleId": 152,
       "pos": [
         16,
         1
@@ -229,7 +245,7 @@
         },
         {
           "id": 2,
-          "value": 0.5
+          "value": 1.0
         },
         {
           "id": 3,
@@ -240,28 +256,6 @@
       "rightModuleId": 159,
       "pos": [
         8,
-        1
-      ]
-    },
-    {
-      "id": 164,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "VCA-1",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 159,
-      "rightModuleId": 152,
-      "pos": [
-        26,
         1
       ]
     }
@@ -340,36 +334,36 @@
       "color": "#c91847"
     },
     {
+      "id": 79,
+      "outputModuleId": 163,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 3,
+      "color": "#0986ad"
+    },
+    {
       "id": 76,
       "outputModuleId": 163,
       "outputId": 0,
-      "inputModuleId": 164,
+      "inputModuleId": 152,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 81,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 152,
       "inputId": 0,
       "color": "#0986ad"
     },
     {
-      "id": 74,
-      "outputModuleId": 164,
-      "outputId": 0,
+      "id": 80,
+      "outputModuleId": 159,
+      "outputId": 3,
       "inputModuleId": 152,
       "inputId": 1,
       "color": "#c91847"
-    },
-    {
-      "id": 77,
-      "outputModuleId": 164,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 78,
-      "outputModuleId": 159,
-      "outputId": 3,
-      "inputModuleId": 164,
-      "inputId": 1,
-      "color": "#c9b70e"
     }
   ]
 }

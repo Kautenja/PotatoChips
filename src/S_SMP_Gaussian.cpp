@@ -33,12 +33,15 @@ struct ChipS_SMP_Gaussian : Module {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FILTER, 2),
+        ENUMS(PARAM_GAIN, 2),
+        ENUMS(PARAM_VOLUME, 2),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_AUDIO, 2),
+        ENUMS(INPUT_VOLUME, 2),
         NUM_INPUTS
     };
 
@@ -56,11 +59,50 @@ struct ChipS_SMP_Gaussian : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_Gaussian() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FILTER + 0, 0, 1, 0, "Filter Mode 1", "");
-        configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2", "");
+        configParam(PARAM_FILTER + 0, 0, 1, 1, "Filter Mode 1");
+        configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2");
+        configParam(PARAM_GAIN + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel) ", " dB", -10, 40);
+        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");
+        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
     }
 
  protected:
+    /// @brief Get the filter parameter for the index and polyphony channel.
+    ///
+    /// @param index the index of the filter parameter to get
+    /// @param channel the polyphony channel to get the filter parameter of
+    /// @returns the filter parameter at given index for given channel
+    ///
+    inline int8_t getFilter(unsigned index, unsigned channel) {
+        return params[PARAM_FILTER + index].getValue();
+    }
+
+    /// @brief Get the volume level for the given lane and polyphony channel.
+    ///
+    /// @param lane the processing lane to get the volume level of
+    /// @param channel the polyphony channel to get the volume of
+    /// @returns the volume of the gate for given lane and channel
+    ///
+    inline int8_t getVolume(unsigned lane, unsigned channel) {
+        auto param = params[PARAM_VOLUME + lane].getValue();
+        auto cv = inputs[INPUT_VOLUME + lane].isConnected() ?
+            inputs[INPUT_VOLUME + lane].getVoltage(channel) / 10.f : 1.f;
+        return math::clamp(cv * param, -128.f, 127.f);
+    }
+
+    /// @brief Get the input signal for the given lane and polyphony channel.
+    ///
+    /// @param lane the processing lane to get the input signal of
+    /// @param channel the polyphony channel to get the input signal of
+    /// @returns the input signal for the given lane and polyphony channel
+    ///
+    inline int16_t getInput(unsigned lane, unsigned channel) {
+        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const auto cv = inputs[INPUT_AUDIO + lane].getVoltage(channel);
+        return std::numeric_limits<uint8_t>::max() * gain * cv / 10.f;
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -78,12 +120,13 @@ struct ChipS_SMP_Gaussian : Module {
         // process audio samples on the chip engine.
         for (unsigned i = 0; i < 2; i++) {  // iterate over the stereo pair
             for (unsigned channel = 0; channel < channels; channel++) {
-                // set filter parameters
-                apu[i][channel].setFilter1(params[PARAM_FILTER + 0].getValue());
-                apu[i][channel].setFilter2(params[PARAM_FILTER + 1].getValue());
+                apu[i][channel].setFilter1(getFilter(0, channel));
+                apu[i][channel].setFilter2(getFilter(1, channel));
+                apu[i][channel].setVolume(getVolume(i, channel));
                 // pass signal through the filter to get the output voltage
-                float sample = apu[i][channel].run((1 << 8) * inputs[INPUT_AUDIO + i].getVoltage(channel) / 10.f);
-                outputs[OUTPUT_AUDIO + i].setVoltage(10.f * sample / std::numeric_limits<int16_t>::max(), channel);
+                float sample = apu[i][channel].run(getInput(i, channel));
+                float sample16 = sample / std::numeric_limits<int16_t>::max();
+                outputs[OUTPUT_AUDIO + i].setVoltage(10.f * sample16, channel);
             }
         }
     }
@@ -111,13 +154,26 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         // Switches
         addParam(createParam<CKSS>(Vec(50, 30), module, ChipS_SMP_Gaussian::PARAM_FILTER + 0));
         addParam(createParam<CKSS>(Vec(50, 60), module, ChipS_SMP_Gaussian::PARAM_FILTER + 1));
-
-        // Inputs
-        addInput(createInput<PJ301MPort>(Vec(55, 290), module, ChipS_SMP_Gaussian::INPUT_AUDIO + 0));
-        addInput(createInput<PJ301MPort>(Vec(105, 290), module, ChipS_SMP_Gaussian::INPUT_AUDIO + 1));
-        // Outputs
-        addOutput(createOutput<PJ301MPort>(Vec(55, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(105, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 1));
+        for (unsigned i = 0; i < 2; i++) {
+            // Stereo Input Ports
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipS_SMP_Gaussian::INPUT_AUDIO + i));
+            // Gain
+            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 140), module, ChipS_SMP_Gaussian::PARAM_GAIN + i));
+            // Volume (Knob)
+            auto volumeIdx = ChipS_SMP_Gaussian::PARAM_VOLUME + i;
+            auto echoPos = Vec(20 + 44 * i, 206);
+            Knob* volume;
+            if (i)  // i == 1 -> right lane -> red knob
+                volume = createParam<Rogan2PRed>(echoPos, module, volumeIdx);
+            else  // i == 0 -> left lane -> white knob
+                volume = createParam<Rogan2PWhite>(echoPos, module, volumeIdx);
+            volume->snap = true;
+            addParam(volume);
+            // Volume (Port)
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Gaussian::INPUT_VOLUME + i));
+            // Stereo Output Ports
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + i));
+        }
     }
 };
 

@@ -51,6 +51,8 @@ class Sony_S_DSP_Gaussian {
         int16_t samples[4];
         /// 12-bit fractional position in the Gaussian table
         int16_t fraction = 0x3FFF;
+        /// the volume level after the Gaussian filter
+        int16_t volume = 0;
         /// TODO:
         bool filter1 = true;
         /// TODO:
@@ -65,13 +67,25 @@ class Sony_S_DSP_Gaussian {
     ///
     /// @param is_enabled TODO:
     ///
-    void setFilter1(bool is_enabled) { voice_state.filter1 = is_enabled; }
+    inline void setFilter1(bool is_enabled) {
+        voice_state.filter1 = is_enabled;
+    }
 
     /// TODO:
     ///
     /// @param is_enabled TODO:
     ///
-    void setFilter2(bool is_enabled) { voice_state.filter2 = is_enabled; }
+    inline void setFilter2(bool is_enabled) {
+        voice_state.filter2 = is_enabled;
+    }
+
+    /// Set the volume level of the low-pass gate to a new value.
+    ///
+    /// @param volume the volume level after the Gaussian low-pass filter
+    ///
+    inline void setVolume(int8_t volume) {
+        voice_state.volume = volume;
+    }
 
     /// @brief Run the Gaussian filter for the given input sample.
     ///
@@ -119,6 +133,9 @@ class Sony_S_DSP_Gaussian {
                      ((table2[1] * voice_state.samples[1]) >> 12);
         sample = (int16_t) (sample * 2);
         sample += (table2[0] * voice_state.samples[0]) >> 11 & ~1;
+        // apply the volume level to the sample
+        sample  = (sample  * voice_state.volume) >> 7;
+
         return clamp_16(sample);
     }
 };

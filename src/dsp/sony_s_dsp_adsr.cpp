@@ -203,36 +203,36 @@ void Sony_S_DSP_ADSR::run() {
     // once however, since the regs haven't changed over the whole
     // period we need to catch up with.
     // -------------------------------------------------------------------
-    for (unsigned voice_idx = 0; voice_idx < VOICE_COUNT; voice_idx++) {
-        // get the voice's bit-mask shift value
-        const int voice_bit = 1 << voice_idx;
-        // cache the voice and data structures
-        VoiceState& voice = voice_states[voice_idx];
-        // key-on
-        if (voice.on_cnt && !--voice.on_cnt) {
-            keys |= voice_bit;
-            voice.envx = 0;
-            // NOTE: Real SNES does *not* appear to initialize the
-            // envelope counter to anything in particular. The first
-            // cycle always seems to come at a random time sooner than
-            // expected; as yet, I have been unable to find any
-            // pattern.  I doubt it will matter though, so we'll go
-            // ahead and do the full time for now.
-            voice.envcnt = ENVELOPE_RATE_INITIAL;
-            voice.envelope_stage = EnvelopeStage::Attack;
-        }
-        // key-on = !key-off = true
-        if (global.key_ons & voice_bit & ~global.key_offs) {
-            global.key_ons &= ~voice_bit;
-            voice.on_cnt = 8;
-        }
-        // key-off = true
-        if (keys & global.key_offs & voice_bit) {
-            voice.envelope_stage = EnvelopeStage::Release;
-            voice.on_cnt = 0;
-        }
-        // clock envelope
-        if (!(keys & voice_bit) || clock_envelope(voice_idx) < 0)
-            voices[voice_idx].envx = 0;
+    unsigned voice_idx = 0;
+
+    // get the voice's bit-mask shift value
+    const int voice_bit = 1 << voice_idx;
+    // cache the voice and data structures
+    VoiceState& voice = voice_states[voice_idx];
+    // key-on
+    if (voice.on_cnt && !--voice.on_cnt) {
+        keys |= voice_bit;
+        voice.envx = 0;
+        // NOTE: Real SNES does *not* appear to initialize the
+        // envelope counter to anything in particular. The first
+        // cycle always seems to come at a random time sooner than
+        // expected; as yet, I have been unable to find any
+        // pattern.  I doubt it will matter though, so we'll go
+        // ahead and do the full time for now.
+        voice.envcnt = ENVELOPE_RATE_INITIAL;
+        voice.envelope_stage = EnvelopeStage::Attack;
     }
+    // key-on = !key-off = true
+    if (global.key_ons & voice_bit & ~global.key_offs) {
+        global.key_ons &= ~voice_bit;
+        voice.on_cnt = 8;
+    }
+    // key-off = true
+    if (keys & global.key_offs & voice_bit) {
+        voice.envelope_stage = EnvelopeStage::Release;
+        voice.on_cnt = 0;
+    }
+    // clock envelope
+    if (!(keys & voice_bit) || clock_envelope(voice_idx) < 0)
+        voices[voice_idx].envx = 0;
 }

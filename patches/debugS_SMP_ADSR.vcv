@@ -8,7 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 156,
-      "rightModuleId": 153,
+      "rightModuleId": 166,
       "data": {
         "audio": {
           "driver": 5,
@@ -20,75 +20,7 @@
         }
       },
       "pos": [
-        52,
-        0
-      ]
-    },
-    {
-      "id": 153,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "Oscilloscope",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 14.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 1,
-      "data": {
-        "lissajous": 0,
-        "external": 0
-      },
-      "pos": [
-        62,
-        0
-      ]
-    },
-    {
-      "id": 154,
-      "plugin": "Bogaudio",
-      "version": "1.1.34",
-      "model": "Bogaudio-AnalyzerXL",
-      "params": [],
-      "rightModuleId": 156,
-      "data": {
-        "range": 0.0,
-        "range_db": 80.0,
-        "smooth": 0.25,
-        "quality": "high",
-        "window": "kaiser"
-      },
-      "pos": [
-        0,
+        24,
         0
       ]
     },
@@ -119,10 +51,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 154,
+      "leftModuleId": 165,
       "rightModuleId": 1,
       "pos": [
-        42,
+        14,
         0
       ]
     },
@@ -322,7 +254,7 @@
         },
         {
           "id": 41,
-          "value": 4.0
+          "value": 5.0
         },
         {
           "id": 42,
@@ -354,7 +286,7 @@
         },
         {
           "id": 49,
-          "value": 3.0
+          "value": 0.0
         },
         {
           "id": 50,
@@ -418,7 +350,7 @@
         },
         {
           "id": 65,
-          "value": 16.0
+          "value": 14.0
         },
         {
           "id": 66,
@@ -542,63 +474,109 @@
         8,
         1
       ]
+    },
+    {
+      "id": 165,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "VRC6",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 4.0
+        },
+        {
+          "id": 4,
+          "value": 4.0
+        },
+        {
+          "id": 5,
+          "value": 0.800000012
+        },
+        {
+          "id": 6,
+          "value": 0.800000012
+        },
+        {
+          "id": 7,
+          "value": 0.574999869
+        }
+      ],
+      "rightModuleId": 156,
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 166,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.42500067
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 1,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        34,
+        0
+      ]
     }
   ],
   "cables": [
-    {
-      "id": 56,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 153,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 61,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 154,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 14,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
     {
       "id": 69,
       "outputModuleId": 156,
       "outputId": 2,
       "inputModuleId": 1,
       "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 68,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 154,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 84,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 153,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 87,
-      "outputModuleId": 162,
-      "outputId": 0,
-      "inputModuleId": 164,
-      "inputId": 0,
       "color": "#c91847"
     },
     {
@@ -610,20 +588,52 @@
       "color": "#c9b70e"
     },
     {
-      "id": 88,
-      "outputModuleId": 164,
-      "outputId": 0,
+      "id": 14,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 93,
+      "outputModuleId": 165,
+      "outputId": 2,
       "inputModuleId": 156,
       "inputId": 1,
       "color": "#0986ad"
     },
     {
-      "id": 89,
-      "outputModuleId": 164,
-      "outputId": 1,
+      "id": 94,
+      "outputModuleId": 165,
+      "outputId": 2,
       "inputModuleId": 156,
       "inputId": 2,
       "color": "#c91847"
+    },
+    {
+      "id": 97,
+      "outputModuleId": 162,
+      "outputId": 0,
+      "inputModuleId": 165,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 98,
+      "outputModuleId": 164,
+      "outputId": 2,
+      "inputModuleId": 166,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 95,
+      "outputModuleId": 164,
+      "outputId": 2,
+      "inputModuleId": 165,
+      "inputId": 10,
+      "color": "#0986ad"
     }
   ]
 }

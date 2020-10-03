@@ -44,17 +44,17 @@ struct ChipS_SMP_ADSR : Module {
         ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         PARAM_NOISE_FREQ,  // TODO: remove
-        ENUMS(PARAM_VOLUME_L,      Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(PARAM_AMPLITUDE,      Sony_S_DSP_ADSR::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
+        ENUMS(PARAM_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(PARAM_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),
         ENUMS(PARAM_ECHO_ENABLE,   Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         PARAM_ECHO_DELAY,  // TODO: remove
         PARAM_ECHO_FEEDBACK,  // TODO: remove
         ENUMS(PARAM_VOLUME_ECHO, 2),  // TODO: remove
-        ENUMS(PARAM_VOLUME_MAIN, 2),
+        ENUMS(PARAM_VOLUME_MAIN, 2),  // TODO: remove
         ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT),  // TODO: remove
         NUM_PARAMS
     };
@@ -66,25 +66,26 @@ struct ChipS_SMP_ADSR : Module {
         ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         INPUT_NOISE_FM,  // TODO: remove
-        ENUMS(INPUT_GATE,          Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_VOLUME_L,      Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_GATE,          Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_AMPLITUDE,      Sony_S_DSP_ADSR::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
+        ENUMS(INPUT_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),
         ENUMS(INPUT_ECHO_ENABLE,   Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
         INPUT_ECHO_DELAY,  // TODO: remove
         INPUT_ECHO_FEEDBACK,  // TODO: remove
         ENUMS(INPUT_VOLUME_ECHO, 2),  // TODO: remove
-        ENUMS(INPUT_VOLUME_MAIN, 2),
-        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT),
+        ENUMS(INPUT_VOLUME_MAIN, 2),  // TODO: remove
+        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT),  // TODO: remove
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, 2),
+        ENUMS(OUTPUT_AUDIO, 2), // TODO: remove
+        ENUMS(OUTPUT_ENVELOPE, Sony_S_DSP_ADSR::VOICE_COUNT),
         NUM_OUTPUTS
     };
 
@@ -100,7 +101,7 @@ struct ChipS_SMP_ADSR : Module {
         for (unsigned osc = 0; osc < Sony_S_DSP_ADSR::VOICE_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
+            configParam(PARAM_AMPLITUDE      + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
             configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
@@ -187,10 +188,10 @@ struct ChipS_SMP_ADSR : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
 
-
-        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
-        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
-
+        // -------------------------------------------------------------------
+        // TODO: remove
+        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_LEFT,  127);
+        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_RIGHT, 127);
         apu.write(Sony_S_DSP_ADSR::FLAGS,             0);
         apu.write(Sony_S_DSP_ADSR::ECHO_FEEDBACK,     0);
         apu.write(Sony_S_DSP_ADSR::ECHO_DELAY,        0);
@@ -201,12 +202,14 @@ struct ChipS_SMP_ADSR : Module {
         apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_RIGHT, 0);
         for (unsigned coeff = 0; coeff < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; coeff++)
             apu.write((coeff << 4) | Sony_S_DSP_ADSR::FIR_COEFFICIENTS, 0);
+        // -------------------------------------------------------------------
 
         for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
 
+            // TODO: remove
             auto pitch = Sony_S_DSP_ADSR::convert_pitch(2100);
             apu.write(mask | Sony_S_DSP_ADSR::PITCH_LOW,  0xff &  pitch     );
             apu.write(mask | Sony_S_DSP_ADSR::PITCH_HIGH, 0xff & (pitch >> 8));
@@ -316,43 +319,16 @@ struct ChipS_SMP_ADSR : Module {
             auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
             auto adsr2 = (sustainLevel << 5) | sustainRate;
             apu.write(mask | Sony_S_DSP_ADSR::ADSR_2, adsr2);
-            // ---------------------------------------------------------------
-            // MARK: ADSR Output
-            // ---------------------------------------------------------------
-            // TODO: ENVX gets written to by the DSP. It contains the present
-            // ADSR/GAIN envelope value.
-            // ENVX
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x8   |  0  |                 VALUE                   |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // 7-bit unsigned value
-            // apu.read(mask | Sony_S_DSP_ADSR::ENVELOPE_OUT, 0);
-            // ---------------------------------------------------------------
-            // MARK: Waveform Output
-            // ---------------------------------------------------------------
-            // OUTX is written to by the DSP. It contains the present wave height multiplied by the ADSR/GAIN envelope value. It isn't multiplied by the voice volume though.
-            //
-            // OUTX
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x9   | sign|                 VALUE                   |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // 8-bit signed value
-            // apu.read(mask | Sony_S_DSP_ADSR::WAVEFORM_OUT, 0);
-            // ---------------------------------------------------------------
-            // MARK: Amplifier Volume
-            // ---------------------------------------------------------------
-            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_VOLUME_L + voice].getValue());
-            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
-        }
+            // ADSR output: 7-bit unsigned value
+            float envelope = apu.read(mask | Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
+            outputs[OUTPUT_ENVELOPE + voice].setVoltage(10.f * envelope);
+            // ADSR amplitude
+            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
 
-        short sample[2] = {0, 0};
-        apu.run(sample);
-        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
+            // TODO: remove
+            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_RIGHT, 127);
+        }
+        apu.run(nullptr);
     }
 };
 
@@ -378,22 +354,13 @@ struct ChipS_SMP_ADSRWidget : ModuleWidget {
 
         // individual oscillator controls
         for (unsigned i = 0; i < Sony_S_DSP_ADSR::VOICE_COUNT; i++) {
-            // Frequency
-            addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_VOCT + i));
-            addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_FM + i));
-            addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_FREQ + i));
             // Gate
             addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_GATE + i));
-            // Volume - Left
-            addInput(createInput<PJ301MPort>(Vec(220, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_VOLUME_L + i));
-            auto left = createParam<Rogan2PWhite>(Vec(250, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_VOLUME_L + i);
-            left->snap = true;
-            addParam(left);
-            // Volume - Right
-            addInput(createInput<PJ301MPort>(Vec(300, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_VOLUME_R + i));
-            auto right = createParam<Rogan2PRed>(Vec(330, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_VOLUME_R + i);
-            right->snap = true;
-            addParam(right);
+            // Amplitude
+            addInput(createInput<PJ301MPort>(Vec(220, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_AMPLITUDE + i));
+            auto amplitude = createParam<Rogan2PWhite>(Vec(250, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_AMPLITUDE + i);
+            amplitude->snap = true;
+            addParam(amplitude);
             // ADSR - Attack
             addInput(createInput<PJ301MPort>(Vec(390, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_ATTACK + i));
             auto attack = createParam<Rogan2PGreen>(Vec(420, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_ATTACK + i);
@@ -414,66 +381,8 @@ struct ChipS_SMP_ADSRWidget : ModuleWidget {
             auto sustainRate = createParam<Rogan2PWhite>(Vec(630, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_RATE + i);
             sustainRate->snap = true;
             addParam(sustainRate);
-            // Phase Modulation
-            if (i > 0) {  // phase modulation is not defined for the first voice
-                addParam(createParam<CKSS>(Vec(880, 40  + i * 41), module, ChipS_SMP_ADSR::PARAM_PM_ENABLE + i));
-                addInput(createInput<PJ301MPort>(Vec(900, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_PM_ENABLE + i));
-            }
-            // Echo Enable
-            addParam(createParam<CKSS>(Vec(940, 40  + i * 41), module, ChipS_SMP_ADSR::PARAM_ECHO_ENABLE + i));
-            addInput(createInput<PJ301MPort>(Vec(960, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_ECHO_ENABLE + i));
-            // Noise Enable
-            addParam(createParam<CKSS>(Vec(1000, 40  + i * 41), module, ChipS_SMP_ADSR::PARAM_NOISE_ENABLE + i));
-            addInput(createInput<PJ301MPort>(Vec(1020, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_NOISE_ENABLE + i));
-        }
-
-        // Noise Frequency
-        addInput(createInput<PJ301MPort>(Vec(115, 40), module, ChipS_SMP_ADSR::INPUT_NOISE_FM));
-        auto noise = createParam<Rogan2PSNES>(Vec(145, 35), module, ChipS_SMP_ADSR::PARAM_NOISE_FREQ);
-        noise->snap = true;
-        addParam(noise);
-
-        // Echo Delay
-        auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipS_SMP_ADSR::PARAM_ECHO_DELAY);
-        echoDelay->snap = true;
-        addParam(echoDelay);
-        addInput(createInput<PJ301MPort>(Vec(700, 80), module, ChipS_SMP_ADSR::INPUT_ECHO_DELAY));
-        // Echo Feedback
-        auto echoFeedback = createParam<Rogan2PGreen>(Vec(740, 30), module, ChipS_SMP_ADSR::PARAM_ECHO_FEEDBACK);
-        echoFeedback->snap = true;
-        addParam(echoFeedback);
-        addInput(createInput<PJ301MPort>(Vec(750, 80), module, ChipS_SMP_ADSR::INPUT_ECHO_FEEDBACK));
-
-        // Echo Volume - Left channel
-        auto echoLeft = createParam<Rogan2PWhite>(Vec(690, 130), module, ChipS_SMP_ADSR::PARAM_VOLUME_ECHO + 0);
-        echoLeft->snap = true;
-        addParam(echoLeft);
-        addInput(createInput<PJ301MPort>(Vec(700, 180), module, ChipS_SMP_ADSR::INPUT_VOLUME_ECHO + 0));
-        // Echo Volume - Right channel
-        auto echoRight = createParam<Rogan2PRed>(Vec(740, 130), module, ChipS_SMP_ADSR::PARAM_VOLUME_ECHO + 1);
-        echoRight->snap = true;
-        addParam(echoRight);
-        addInput(createInput<PJ301MPort>(Vec(750, 180), module, ChipS_SMP_ADSR::INPUT_VOLUME_ECHO + 1));
-
-        // Mixer & Output - Left Channel
-        auto volumeLeft = createParam<Rogan2PWhite>(Vec(690, 230), module, ChipS_SMP_ADSR::PARAM_VOLUME_MAIN + 0);
-        volumeLeft->snap = true;
-        addParam(volumeLeft);
-        addInput(createInput<PJ301MPort>(Vec(700, 280), module, ChipS_SMP_ADSR::INPUT_VOLUME_MAIN + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(700, 325), module, ChipS_SMP_ADSR::OUTPUT_AUDIO + 0));
-        // Mixer & Output - Right Channel
-        auto volumeRight = createParam<Rogan2PRed>(Vec(740, 230), module, ChipS_SMP_ADSR::PARAM_VOLUME_MAIN + 1);
-        volumeRight->snap = true;
-        addParam(volumeRight);
-        addInput(createInput<PJ301MPort>(Vec(750, 280), module, ChipS_SMP_ADSR::INPUT_VOLUME_MAIN + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(750, 325), module, ChipS_SMP_ADSR::OUTPUT_AUDIO + 1));
-
-        // FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(800, 40 + i * 41), module, ChipS_SMP_ADSR::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan2PWhite>(Vec(830, 35 + i * 41), module, ChipS_SMP_ADSR::PARAM_FIR_COEFFICIENT + i);
-            param->snap = true;
-            addParam(param);
+            // ADSR - Output
+            addOutput(createOutput<PJ301MPort>(Vec(700, 40 + i * 41), module, ChipS_SMP_ADSR::OUTPUT_ENVELOPE + i));
         }
     }
 };

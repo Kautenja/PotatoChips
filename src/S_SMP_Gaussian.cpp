@@ -144,24 +144,24 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_GaussianWidget(ChipS_SMP_Gaussian *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Gaussian.svg";
+        static constexpr auto panel = "res/S-SMP-Gauss.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Switches
         addParam(createParam<CKSS>(Vec(50, 30), module, ChipS_SMP_Gaussian::PARAM_FILTER + 0));
         addParam(createParam<CKSS>(Vec(50, 60), module, ChipS_SMP_Gaussian::PARAM_FILTER + 1));
         for (unsigned i = 0; i < 2; i++) {
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipS_SMP_Gaussian::INPUT_AUDIO + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, ChipS_SMP_Gaussian::INPUT_AUDIO + i));
             // Gain
-            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 140), module, ChipS_SMP_Gaussian::PARAM_GAIN + i));
+            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, ChipS_SMP_Gaussian::PARAM_GAIN + i));
             // Volume (Knob)
             auto volumeIdx = ChipS_SMP_Gaussian::PARAM_VOLUME + i;
-            auto echoPos = Vec(20 + 44 * i, 206);
+            auto echoPos = Vec(20 + 44 * i, 221);
             Knob* volume;
             if (i)  // i == 1 -> right lane -> red knob
                 volume = createParam<Rogan2PRed>(echoPos, module, volumeIdx);
@@ -170,7 +170,7 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
             volume->snap = true;
             addParam(volume);
             // Volume (Port)
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Gaussian::INPUT_VOLUME + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, ChipS_SMP_Gaussian::INPUT_VOLUME + i));
             // Stereo Output Ports
             addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + i));
         }

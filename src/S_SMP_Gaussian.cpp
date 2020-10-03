@@ -27,50 +27,18 @@
 struct ChipS_SMP_Gaussian : Module {
  private:
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu[2];
+    Sony_S_DSP_Gaussian apu[2][PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          8),  // TODO: remove
-        ENUMS(PARAM_PM_ENABLE,     8),  // TODO: remove
-        ENUMS(PARAM_NOISE_ENABLE,  8),  // TODO: remove
-        PARAM_NOISE_FREQ,  // TODO: remove
-        ENUMS(PARAM_VOLUME_L,      8),
-        ENUMS(PARAM_VOLUME_R,      8),
-        ENUMS(PARAM_ATTACK,        8),  // TODO: remove
-        ENUMS(PARAM_DECAY,         8),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_LEVEL, 8),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_RATE,  8),  // TODO: remove
-        ENUMS(PARAM_ECHO_ENABLE,   8),  // TODO: remove
-        PARAM_ECHO_DELAY,  // TODO: remove
-        PARAM_ECHO_FEEDBACK,  // TODO: remove
-        ENUMS(PARAM_VOLUME_ECHO, 2),  // TODO: remove
-        ENUMS(PARAM_VOLUME_MAIN, 2),
-        ENUMS(PARAM_FIR_COEFFICIENT, 8),  // TODO: remove
+        ENUMS(PARAM_FILTER, 2),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          8),  // TODO: remove
-        ENUMS(INPUT_FM,            8),  // TODO: remove
-        ENUMS(INPUT_PM_ENABLE,     8),  // TODO: remove
-        ENUMS(INPUT_NOISE_ENABLE,  8),  // TODO: remove
-        INPUT_NOISE_FM,  // TODO: remove
-        ENUMS(INPUT_GATE,          8),  // TODO: remove
-        ENUMS(INPUT_VOLUME_L,      8),
-        ENUMS(INPUT_VOLUME_R,      8),
-        ENUMS(INPUT_ATTACK,        8),  // TODO: remove
-        ENUMS(INPUT_DECAY,         8),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_LEVEL, 8),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_RATE,  8),  // TODO: remove
-        ENUMS(INPUT_ECHO_ENABLE,   8),  // TODO: remove
-        INPUT_ECHO_DELAY,  // TODO: remove
-        INPUT_ECHO_FEEDBACK,  // TODO: remove
-        ENUMS(INPUT_VOLUME_ECHO, 2),  // TODO: remove
-        ENUMS(INPUT_VOLUME_MAIN, 2),
-        ENUMS(INPUT_FIR_COEFFICIENT, 8),
+        ENUMS(INPUT_AUDIO, 2),
         NUM_INPUTS
     };
 
@@ -87,36 +55,9 @@ struct ChipS_SMP_Gaussian : Module {
 
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_Gaussian() {
-        // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned osc = 0; osc < 8; osc++) {
-            auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
-            configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
-            configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + " Envelope Attack");
-            configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
-            configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
-            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
-            configParam(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable");
-            configParam(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable");
-            if (osc > 0) {  // voice 0 does not have phase modulation
-                osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
-                configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
-            }
-        }
-        for (unsigned coeff = 0; coeff < 8; coeff++) {
-            // the first FIR coefficient defaults to 0x7f = 127 and the other
-            // coefficients are 0 by default
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
-        }
-        configParam(PARAM_NOISE_FREQ,         0,  31,  16, "Noise Frequency");
-        configParam(PARAM_ECHO_DELAY,         0,  15,   0, "Echo Delay", "ms", 0, 16);
-        configParam(PARAM_ECHO_FEEDBACK,   -128, 127,   0, "Echo Feedback");
-        configParam(PARAM_VOLUME_ECHO + 0, -128, 127, 127, "Echo Volume (Left)");
-        configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
-        configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
-        configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
+        configParam(PARAM_FILTER + 0, 0, 1, 0, "Filter Mode 1", "");
+        configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2", "");
     }
 
  protected:
@@ -125,10 +66,25 @@ struct ChipS_SMP_Gaussian : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        for (unsigned i = 0; i < 2; i++) {
-            auto audioInput = (1 << 8) * inputs[INPUT_GATE + i].getVoltage() / 10.f;
-            auto sample = apu[i].run(audioInput);
-            outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+
+
+        // process audio samples on the chip engine.
+        for (unsigned i = 0; i < 2; i++) {  // iterate over the stereo pair
+            for (unsigned channel = 0; channel < channels; channel++) {
+                apu[i][channel].setFilter1(params[PARAM_FILTER + 0].getValue());
+                apu[i][channel].setFilter2(params[PARAM_FILTER + 1].getValue());
+                auto sample = apu[i][channel].run((1 << 8) * inputs[INPUT_AUDIO + i].getVoltage(channel) / 10.f);
+                outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max(), channel);
+            }
         }
     }
 };
@@ -137,7 +93,7 @@ struct ChipS_SMP_Gaussian : Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for SPC700.
+/// @brief The panel widget for S-SMP-Gaussian.
 struct ChipS_SMP_GaussianWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
@@ -152,10 +108,14 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // inputs
-        addInput(createInput<PJ301MPort>(Vec(55, 290), module, ChipS_SMP_Gaussian::INPUT_GATE + 0));
-        addInput(createInput<PJ301MPort>(Vec(105, 290), module, ChipS_SMP_Gaussian::INPUT_GATE + 1));
-        // outputs
+        // Switches
+        addParam(createParam<CKSS>(Vec(50, 30), module, ChipS_SMP_Gaussian::PARAM_FILTER + 0));
+        addParam(createParam<CKSS>(Vec(50, 60), module, ChipS_SMP_Gaussian::PARAM_FILTER + 1));
+
+        // Inputs
+        addInput(createInput<PJ301MPort>(Vec(55, 290), module, ChipS_SMP_Gaussian::INPUT_AUDIO + 0));
+        addInput(createInput<PJ301MPort>(Vec(105, 290), module, ChipS_SMP_Gaussian::INPUT_AUDIO + 1));
+        // Outputs
         addOutput(createOutput<PJ301MPort>(Vec(55, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 0));
         addOutput(createOutput<PJ301MPort>(Vec(105, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 1));
     }

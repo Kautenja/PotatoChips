@@ -61,6 +61,18 @@ class Sony_S_DSP_Gaussian {
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
     Sony_S_DSP_Gaussian() : voice_state() { }
 
+    /// TODO:
+    ///
+    /// @param is_enabled TODO:
+    ///
+    void setFilter1(bool is_enabled) { voice_state.filter1 = is_enabled; }
+
+    /// TODO:
+    ///
+    /// @param is_enabled TODO:
+    ///
+    void setFilter2(bool is_enabled) { voice_state.filter2 = is_enabled; }
+
     /// @brief Run the Gaussian filter for the given input sample.
     ///
     /// @param input the 16-bit PCM sample to pass through the Gaussian filter

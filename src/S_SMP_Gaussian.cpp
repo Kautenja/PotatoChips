@@ -119,15 +119,14 @@ struct ChipS_SMP_Gaussian : Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process audio samples on the chip engine.
-        for (unsigned i = 0; i < 2; i++) {  // iterate over the stereo pair
+        for (unsigned lane = 0; lane < 2; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                apu[i][channel].setFilter1(getFilter(0, channel));
-                apu[i][channel].setFilter2(getFilter(1, channel));
-                apu[i][channel].setVolume(getVolume(i, channel));
-                // pass signal through the filter to get the output voltage
-                float sample = apu[i][channel].run(getInput(i, channel));
-                float sample16 = sample / std::numeric_limits<int16_t>::max();
-                outputs[OUTPUT_AUDIO + i].setVoltage(10.f * sample16, channel);
+                apu[lane][channel].setFilter1(getFilter(0, channel));
+                apu[lane][channel].setFilter2(getFilter(1, channel));
+                apu[lane][channel].setVolume(getVolume(lane, channel));
+                float sample = apu[lane][channel].run(getInput(lane, channel));
+                sample = sample / std::numeric_limits<int16_t>::max();
+                outputs[OUTPUT_AUDIO + lane].setVoltage(10.f * sample, channel);
             }
         }
     }

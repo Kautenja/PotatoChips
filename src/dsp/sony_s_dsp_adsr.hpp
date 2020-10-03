@@ -53,6 +53,26 @@ class Sony_S_DSP_ADSR {
     };
 
  private:
+    // Byte 1
+    /// the attack rate (4-bits)
+    uint8_t attack : 4;
+    /// the decay rate (3-bits)
+    uint8_t decay : 3;
+    /// a dummy bit for byte alignment
+    const uint8_t unused_spacer_for_byte_alignment : 1;
+
+    // Byte 2
+    /// the sustain rate (5-bits)
+    uint8_t sustain_rate : 5;
+    /// the sustain level (3-bits)
+    uint8_t sustain_level : 3;
+
+    // Byte 3
+    /// the total amplitude level of the envelope generator (8-bit)
+    int8_t amplitude;
+
+
+
     // TODO: remove
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
@@ -190,7 +210,43 @@ class Sony_S_DSP_ADSR {
 
  public:
     /// @brief Initialize a new Sony_S_DSP_ADSR.
-    Sony_S_DSP_ADSR() { }
+    Sony_S_DSP_ADSR() : unused_spacer_for_byte_alignment(1) {
+        attack = 0;
+        decay = 0;
+        sustain_rate = 0;
+        sustain_level = 0;
+        amplitude = 0;
+    }
+
+    /// @brief Set the attack parameter to a new value.
+    ///
+    /// @param value the attack rate to use.
+    ///
+    inline void setAttack(uint8_t value) { attack = value; }
+
+    /// @brief Set the decay parameter to a new value.
+    ///
+    /// @param value the decay rate to use.
+    ///
+    inline void setDecay(uint8_t value) { decay = value; }
+
+    /// @brief Set the sustain level parameter to a new value.
+    ///
+    /// @param value the sustain level to use.
+    ///
+    inline void setSustainLevel(uint8_t value) { sustain_level = value; }
+
+    /// @brief Set the sustain rate parameter to a new value.
+    ///
+    /// @param value the sustain rate to use.
+    ///
+    inline void setSustainRate(uint8_t value) { sustain_rate = value; }
+
+    /// @brief Set the amplitude parameter to a new value.
+    ///
+    /// @param value the amplitude level to use.
+    ///
+    inline void setAmplitude(int8_t value) { amplitude = value; }
 
     /// @brief Read data from the register at the given address.
     ///

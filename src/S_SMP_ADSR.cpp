@@ -73,22 +73,16 @@ struct ChipS_SMP_ADSR : Module {
     };
 
     /// the indexes of lights on the module
-    enum LightIds {
-        NUM_LIGHTS
-    };
+    enum LightIds { NUM_LIGHTS };
 
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_ADSR() {
-        // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned osc = 0; osc < Sony_S_DSP_ADSR::VOICE_COUNT; osc++) {
-            auto osc_name = "Voice " + std::to_string(osc + 1) + " ";
-            configParam(PARAM_AMPLITUDE     + osc, -128, 127, 127, osc_name + "Amplitude");
-            configParam(PARAM_ATTACK        + osc,    0,  15,   0, osc_name + "Attack");
-            configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + "Decay");
-            configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + "Sustain Level");
-            configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + "Sustain Rate");
-        }
+        configParam(PARAM_AMPLITUDE,     -128, 127, 127, "Amplitude");
+        configParam(PARAM_ATTACK,           0,  15,   0, "Attack");
+        configParam(PARAM_DECAY,            0,   7,   0, "Decay");
+        configParam(PARAM_SUSTAIN_LEVEL,    0,   7,   0, "Sustain Level");
+        configParam(PARAM_SUSTAIN_RATE,     0,  31,   0, "Sustain Rate");
     }
 
  protected:

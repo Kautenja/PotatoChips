@@ -39,8 +39,8 @@ int16_t Sony_S_DSP_Gaussian::run(int16_t input) {
     // cast the input to 32-bit to do maths
     int delta = input;
     // One, two and three point IIR filters
-    int smp1 = voice_state.interp0;
-    int smp2 = voice_state.interp1;
+    int smp1 = voice_state.samples[0];
+    int smp2 = voice_state.samples[1];
     if (voice_state.filter1) {
         delta += smp1;
         delta -= smp2 >> 1;
@@ -56,10 +56,10 @@ int16_t Sony_S_DSP_Gaussian::run(int16_t input) {
         delta += (-smp1) >> 5;
     }
     // update sample history
-    voice_state.interp3 = voice_state.interp2;
-    voice_state.interp2 = smp2;
-    voice_state.interp1 = smp1;
-    voice_state.interp0 = 2 * clamp_16(delta);
+    voice_state.samples[3] = voice_state.samples[2];
+    voice_state.samples[2] = smp2;
+    voice_state.samples[1] = smp1;
+    voice_state.samples[0] = 2 * clamp_16(delta);
 
     // get the 14-bit frequency value
     // TODO:
@@ -71,11 +71,11 @@ int16_t Sony_S_DSP_Gaussian::run(int16_t input) {
     voice_state.fraction = (voice_state.fraction & 0x0FFF) + rate;
     const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
     const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
-    int sample = ((table[0] * voice_state.interp3) >> 12) +
-                 ((table[1] * voice_state.interp2) >> 12) +
-                 ((table2[1] * voice_state.interp1) >> 12);
+    int sample = ((table[0] * voice_state.samples[3]) >> 12) +
+                 ((table[1] * voice_state.samples[2]) >> 12) +
+                 ((table2[1] * voice_state.samples[1]) >> 12);
     sample = (int16_t) (sample * 2);
-    sample += (table2[0] * voice_state.interp0) >> 11 & ~1;
+    sample += (table2[0] * voice_state.samples[0]) >> 11 & ~1;
     return clamp_16(sample);
 }
 

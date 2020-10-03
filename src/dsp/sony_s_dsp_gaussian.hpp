@@ -34,25 +34,19 @@ class Sony_S_DSP_Gaussian {
 
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
-        /// 4th most recent samples
-        int16_t interp3 = 0;
-        /// 3rd most recent samples
-        int16_t interp2 = 0;
-        /// 2nd most recent samples
-        int16_t interp1 = 0;
-        /// 1st most recent samples
-        int16_t interp0 = 0;
-        /// 12-bit fractional position
+        /// a history of the four most recent samples
+        int16_t samples[4];
+        /// 12-bit fractional position in the Gaussian table
         int16_t fraction = 0x3FFF;
         /// TODO:
         bool filter1 = true;
         /// TODO:
-        bool filter2 = true;
+        bool filter2 = false;
     } voice_state;
 
  public:
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
-    Sony_S_DSP_Gaussian() { }
+    Sony_S_DSP_Gaussian() : voice_state() { }
 
     /// @brief Run the Gaussian filter for the given input sample.
     ///

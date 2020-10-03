@@ -37,7 +37,7 @@ inline int clamp_16(int n) {
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 class Sony_S_DSP_Gaussian {
  private:
-    /// The values of the Gaussian filter on the DAC of the SNES
+    /// The values of the Gaussian interpolation filter table
     static int16_t const gauss[];
 
     /// a history of the four most recent samples

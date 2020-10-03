@@ -100,20 +100,6 @@ class Sony_S_DSP_ADSR {
         FIR_COEFFICIENTS = 0x0F
     };
 
-    /// @brief An entry in the source directory in the 64KB RAM.
-    struct SourceDirectoryEntry {
-        /// @brief the start address of the sample in the directory.
-        /// @details
-        /// In hardware this is represented across two bytes; in software we
-        /// will skip to the 16-bit representation of the RAM address.
-        uint16_t start;
-        /// @brief the loop address of the sample in the directory.
-        /// @details
-        /// In hardware this is represented across two bytes; in software we
-        /// will skip to the 16-bit representation of the RAM address.
-        uint16_t loop;
-    };
-
  private:
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
@@ -164,7 +150,7 @@ class Sony_S_DSP_ADSR {
         /// padding
         int8_t unused5[14];
         /// 4C   Key On for each voice (bit-mask)
-        uint8_t key_ons;
+        uint8_t key_ons = 0;
         /// 4D   Echo on/off for each voice (bit-mask)
         uint8_t echo_ons;
         /// padding
@@ -200,16 +186,8 @@ class Sony_S_DSP_ADSR {
         GlobalData global;
     };
 
-    /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
-    /// the SPC700.
-    /// @details
-    /// this must be maintained by the caller in order to provide data to the
-    /// S-DSP. This includes input sample data, and the allocated space for the
-    /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
-    uint8_t* const ram;
-
     /// A bit-mask representation of the active voice gates
-    int keys;
+    int keys = 0;
 
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
@@ -217,7 +195,7 @@ class Sony_S_DSP_ADSR {
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
         /// TODO
-        short volume[2];
+        short volume[2] = {0, 0};
         /// 12-bit fractional position
         short fraction;
         /// padding (placement here keeps interp's in a 64-bit line)
@@ -239,16 +217,15 @@ class Sony_S_DSP_ADSR {
         /// padding (placement here keeps envelope data in a 64-bit line)
         short unused1;
         /// TODO
-        short envcnt;
+        short envcnt = 0;
         /// TODO
-        short envx;
+        short envx = 0;
         /// TODO
-        short on_cnt;
+        short on_cnt = 0;
         /// the current stage of the envelope generator
-        EnvelopeStage envelope_stage;
+        EnvelopeStage envelope_stage = EnvelopeStage::Release;
     } voice_states[VOICE_COUNT];
 
-    /// TODO: make inline so that `run` becomes a leaf function?
     /// @brief Process the envelope for the voice with given index.
     ///
     /// @param voice_index the index of the voice to clock the envelope of
@@ -257,22 +234,7 @@ class Sony_S_DSP_ADSR {
 
  public:
     /// @brief Initialize a new Sony_S_DSP_ADSR.
-    ///
-    /// @param ram a pointer to the 64KB shared RAM
-    ///
-    explicit Sony_S_DSP_ADSR(uint8_t* ram_) : ram(ram_) { reset(); }
-
-    /// @brief Clear state and silence everything.
-    void reset() {
-        keys = 0;
-        global.key_ons = 0;
-        // reset voices
-        for (unsigned i = 0; i < VOICE_COUNT; i++) {
-            VoiceState& v = voice_states[i];
-            v.on_cnt = v.volume[0] = v.volume[1] = 0;
-            v.envelope_stage = EnvelopeStage::Release;
-        }
-    }
+    Sony_S_DSP_ADSR() { }
 
     /// @brief Read data from the register at the given address.
     ///
@@ -294,14 +256,12 @@ class Sony_S_DSP_ADSR {
             throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
         // store the data in the register with given address
         registers[address] = data;
-        // get the high 4 bits for indexing the voice / FIR coefficients
-        int index = address >> 4;
         // update volume / FIR coefficients
         switch (address & FIR_COEFFICIENTS) {
             // voice volume
             case 0:    // left channel, fall through to next block
             case 1: {  // right channel, process both left and right channels
-                short* volume = voice_states[index].volume;
+                short* volume = voice_states[address >> 4].volume;
                 int left  = (int8_t) registers[address & ~1];
                 int right = (int8_t) registers[address |  1];
                 volume[0] = left;

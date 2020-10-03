@@ -32,7 +32,7 @@ struct ChipS_SMP_Gaussian : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FILTER, 2),
+        ENUMS(PARAM_FILTER, 2),  // not stereo, there are two filter parameters
         ENUMS(PARAM_GAIN, 2),
         ENUMS(PARAM_VOLUME, 2),
         NUM_PARAMS
@@ -40,8 +40,9 @@ struct ChipS_SMP_Gaussian : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_AUDIO, 2),
+        ENUMS(INPUT_FILTER, 2),  // not stereo, there are two filter parameters
         ENUMS(INPUT_VOLUME, 2),
+        ENUMS(INPUT_AUDIO, 2),
         NUM_INPUTS
     };
 

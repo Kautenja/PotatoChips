@@ -27,53 +27,53 @@
 struct ChipS_SMP_Gaussian : Module {
  private:
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu{nullptr};
+    Sony_S_DSP_Gaussian apu;
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_Gaussian::VOICE_COUNT][2];
+    rack::dsp::BooleanTrigger gateTriggers[8][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
+        ENUMS(PARAM_FREQ,          8),  // TODO: remove
+        ENUMS(PARAM_PM_ENABLE,     8),  // TODO: remove
+        ENUMS(PARAM_NOISE_ENABLE,  8),  // TODO: remove
         PARAM_NOISE_FREQ,  // TODO: remove
-        ENUMS(PARAM_VOLUME_L,      Sony_S_DSP_Gaussian::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_Gaussian::VOICE_COUNT),
-        ENUMS(PARAM_ATTACK,        Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_DECAY,         Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_ECHO_ENABLE,   Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
+        ENUMS(PARAM_VOLUME_L,      8),
+        ENUMS(PARAM_VOLUME_R,      8),
+        ENUMS(PARAM_ATTACK,        8),  // TODO: remove
+        ENUMS(PARAM_DECAY,         8),  // TODO: remove
+        ENUMS(PARAM_SUSTAIN_LEVEL, 8),  // TODO: remove
+        ENUMS(PARAM_SUSTAIN_RATE,  8),  // TODO: remove
+        ENUMS(PARAM_ECHO_ENABLE,   8),  // TODO: remove
         PARAM_ECHO_DELAY,  // TODO: remove
         PARAM_ECHO_FEEDBACK,  // TODO: remove
         ENUMS(PARAM_VOLUME_ECHO, 2),  // TODO: remove
         ENUMS(PARAM_VOLUME_MAIN, 2),
-        ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Gaussian::FIR_COEFFICIENT_COUNT),  // TODO: remove
+        ENUMS(PARAM_FIR_COEFFICIENT, 8),  // TODO: remove
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_FM,            Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
+        ENUMS(INPUT_VOCT,          8),  // TODO: remove
+        ENUMS(INPUT_FM,            8),  // TODO: remove
+        ENUMS(INPUT_PM_ENABLE,     8),  // TODO: remove
+        ENUMS(INPUT_NOISE_ENABLE,  8),  // TODO: remove
         INPUT_NOISE_FM,  // TODO: remove
-        ENUMS(INPUT_GATE,          Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_VOLUME_L,      Sony_S_DSP_Gaussian::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_Gaussian::VOICE_COUNT),
-        ENUMS(INPUT_ATTACK,        Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_DECAY,         Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_ECHO_ENABLE,   Sony_S_DSP_Gaussian::VOICE_COUNT),  // TODO: remove
+        ENUMS(INPUT_GATE,          8),  // TODO: remove
+        ENUMS(INPUT_VOLUME_L,      8),
+        ENUMS(INPUT_VOLUME_R,      8),
+        ENUMS(INPUT_ATTACK,        8),  // TODO: remove
+        ENUMS(INPUT_DECAY,         8),  // TODO: remove
+        ENUMS(INPUT_SUSTAIN_LEVEL, 8),  // TODO: remove
+        ENUMS(INPUT_SUSTAIN_RATE,  8),  // TODO: remove
+        ENUMS(INPUT_ECHO_ENABLE,   8),  // TODO: remove
         INPUT_ECHO_DELAY,  // TODO: remove
         INPUT_ECHO_FEEDBACK,  // TODO: remove
         ENUMS(INPUT_VOLUME_ECHO, 2),  // TODO: remove
         ENUMS(INPUT_VOLUME_MAIN, 2),
-        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_Gaussian::FIR_COEFFICIENT_COUNT),
+        ENUMS(INPUT_FIR_COEFFICIENT, 8),
         NUM_INPUTS
     };
 
@@ -92,7 +92,7 @@ struct ChipS_SMP_Gaussian : Module {
     ChipS_SMP_Gaussian() {
         // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned osc = 0; osc < Sony_S_DSP_Gaussian::VOICE_COUNT; osc++) {
+        for (unsigned osc = 0; osc < 8; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
@@ -108,7 +108,7 @@ struct ChipS_SMP_Gaussian : Module {
                 configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
             }
         }
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Gaussian::FIR_COEFFICIENT_COUNT; coeff++) {
+        for (unsigned coeff = 0; coeff < 8; coeff++) {
             // the first FIR coefficient defaults to 0x7f = 127 and the other
             // coefficients are 0 by default
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));
@@ -156,7 +156,7 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
-        for (unsigned i = 0; i < Sony_S_DSP_Gaussian::VOICE_COUNT; i++)
+        for (unsigned i = 0; i < 8; i++)
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_Gaussian::INPUT_GATE + i));
         // Mixer & Output - Left Channel
         auto volumeLeft = createParam<Rogan2PWhite>(Vec(45, 230), module, ChipS_SMP_Gaussian::PARAM_VOLUME_MAIN + 0);

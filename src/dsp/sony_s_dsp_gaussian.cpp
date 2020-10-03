@@ -23,16 +23,6 @@
 #include <cstddef>
 #include <limits>
 
-Sony_S_DSP_Gaussian::Sony_S_DSP_Gaussian(uint8_t* ram_) : ram(ram_) {
-    // validate that the structures are of expected size
-    // TODO: move to unit testing code and remove from here
-    assert(NUM_REGISTERS == sizeof(GlobalData));
-    assert(NUM_REGISTERS == sizeof(voices));
-    assert(9 == sizeof(BitRateReductionBlock));
-    assert(4 == sizeof(SourceDirectoryEntry));
-    assert(4 == sizeof(EchoBufferSample));
-}
-
 /// Clamp an integer to a 16-bit value.
 ///
 /// @param n a 32-bit integer value to clip

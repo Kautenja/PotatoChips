@@ -19,24 +19,23 @@
 //
 
 #include "sony_s_dsp_adsr.hpp"
-#include <algorithm>
-#include <cstddef>
-#include <limits>
+
+/// The initial value of the envelope.
+const int ENVELOPE_RATE_INITIAL = 0x7800;
+
+/// the range of the envelope generator amplitude level (i.e., max value)
+const int ENVELOPE_RANGE = 0x800;
 
 /// This table is for envelope timing global.  It represents the number of
 /// counts that should be subtracted from the counter each sample period
 /// (32kHz). The counter starts at 30720 (0x7800). Each count divides exactly
 /// into 0x7800 without remainder.
-const int env_rate_init = 0x7800;
-static const short env_rates[0x20] = {
+static const uint16_t ENVELOPE_RATES[0x20] = {
     0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
     0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
     0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
     0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
 };
-
-/// the range of the envelope generator amplitude level (i.e., max value)
-const int ENVELOPE_RANGE = 0x800;
 
 inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voices[voice_idx];
@@ -52,7 +51,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
         // no need for a count because it always happens every update.
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
-            envx = 0;
             keys &= ~(1 << voice_idx);
             return -1;
         }
@@ -71,10 +69,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
                 if (t == 15) {
                     envx += ENVELOPE_RANGE / 2;
                 } else {
-                    cnt -= env_rates[t * 2 + 1];
+                    cnt -= ENVELOPE_RATES[t * 2 + 1];
                     if (cnt > 0) break;
                     envx += ENVELOPE_RANGE / 64;
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                 }
                 if (envx >= ENVELOPE_RANGE) {
                     envx = ENVELOPE_RANGE - 1;
@@ -89,9 +87,9 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
                 // 1-1/256." Well, at least that makes some sense.
                 // Multiplying ENVX by 255/256 every time DECAY is
                 // updated.
-                cnt -= env_rates[((adsr1 >> 3) & 0xE) + 0x10];
+                cnt -= ENVELOPE_RATES[((adsr1 >> 3) & 0xE) + 0x10];
                 if (cnt <= 0) {
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
                 }
@@ -106,9 +104,9 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
                 // Docs: "SR[is multiplied] by the fixed value 1-1/256."
                 // Multiplying ENVX by 255/256 every time SUSTAIN is
                 // updated.
-                cnt -= env_rates[raw_voice.adsr[1] & 0x1F];
+                cnt -= ENVELOPE_RATES[raw_voice.adsr[1] & 0x1F];
                 if (cnt <= 0) {
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
                 }
@@ -134,10 +132,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
         else switch (t >> 5) {
         case 4:         /* Docs: "Decrease (linear): Subtraction
                              * of the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= ENVELOPE_RATES[t & 0x1F];
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx -= ENVELOPE_RANGE / 64;
             if (envx < 0) {
                 envx = 0;
@@ -149,10 +147,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
         case 5:         /* Docs: "Decrease <sic> (exponential):
                              * Multiplication by the fixed value
                              * 1-1/256." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= ENVELOPE_RATES[t & 0x1F];
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx -= ((envx - 1) >> 8) + 1;
             if (envx < 0) {
                 envx = 0;
@@ -163,10 +161,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
             break;
         case 6:         /* Docs: "Increase (linear): Addition of
                              * the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= ENVELOPE_RATES[t & 0x1F];
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx += ENVELOPE_RANGE / 64;
             if (envx >= ENVELOPE_RANGE)
                 envx = ENVELOPE_RANGE - 1;
@@ -175,10 +173,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
         case 7:         /* Docs: "Increase (bent line): Addition
                              * of the constant 1/64 up to .75 of the
                              * constant <sic> 1/256 from .75 to 1." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= ENVELOPE_RATES[t & 0x1F];
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             if (envx < ENVELOPE_RANGE * 3 / 4)
                 envx += ENVELOPE_RANGE / 64;
             else
@@ -192,17 +190,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
     voice.envcnt = cnt;
     raw_voice.envx = envx >> 4;
     return envx;
-}
-
-/// Clamp an integer to a 16-bit value.
-///
-/// @param n a 32-bit integer value to clip
-/// @returns n clipped to a 16-bit value [-32768, 32767]
-///
-inline int clamp_16(int n) {
-    const int lower = std::numeric_limits<int16_t>::min();
-    const int upper = std::numeric_limits<int16_t>::max();
-    return std::max(lower, std::min(n, upper));
 }
 
 void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
@@ -223,19 +210,11 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
     // period we need to catch up with.
     // -------------------------------------------------------------------
     // Keying on a voice resets that bit in ENDX.
-    global.wave_ended &= ~global.key_ons;
+    // global.wave_ended &= ~global.key_ons;
     // -------------------------------------------------------------------
     // MARK: Voice Processing
     // -------------------------------------------------------------------
-    // store output of the the last monophonic voice for phase modulation.
-    // TODO: What is the expected behavior when pitch modulation is enabled
-    // on voice 0? Jurassic Park 2 does this. Assume 0 for now.
-    int prev_outx = 0;
     // buffer the outputs of the left and right echo and main channels
-    int echol = 0;
-    int echor = 0;
-    int left = 0;
-    int right = 0;
     // iterate over the voices on the chip
     for (unsigned voice_idx = 0; voice_idx < VOICE_COUNT; voice_idx++) {
         // get the voice's bit-mask shift value
@@ -264,7 +243,7 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
             // expected; as yet, I have been unable to find any
             // pattern.  I doubt it will matter though, so we'll go
             // ahead and do the full time for now.
-            voice.envcnt = env_rate_init;
+            voice.envcnt = ENVELOPE_RATE_INITIAL;
             voice.envelope_stage = EnvelopeStage::Attack;
         }
         // key-on = !key-off = true
@@ -282,7 +261,6 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
         if (!(keys & voice_bit) || (envx = clock_envelope(voice_idx)) < 0) {
             raw_voice.envx = 0;
             raw_voice.outx = 0;
-            prev_outx = 0;
             continue;
         }
 
@@ -322,19 +300,5 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
                 break;
             }
         }
-
-        // int output = SAMPLE;
-        // scale output and set outx values
-        // output = (output * envx) >> 11 & ~1;
-        // int l = (voice.volume[0] * output) >> 7;
-        // int r = (voice.volume[1] * output) >> 7;
     }
-    // end of channel loop
-
-    // // get the volume of the left channel from the global registers
-    // int left_volume  = 127;
-    // int right_volume = 127;
-    // // main volume control
-    // left  = (left  * left_volume) >> 7;
-    // right = (right * right_volume) >> 7;
 }

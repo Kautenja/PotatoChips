@@ -20,7 +20,6 @@
 #define DSP_SONY_S_DSP_ADSR_HPP_
 
 #include "exceptions.hpp"
-#include <cstring>
 #include <cassert>
 
 /// @brief Sony S-DSP chip emulator.

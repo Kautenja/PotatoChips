@@ -34,33 +34,33 @@ inline int clamp_16(int n) {
     return std::max(lower, std::min(n, upper));
 }
 
-void Sony_S_DSP_Gaussian::run(int delta, int16_t* output_buffer) {
-    VoiceState& voice = voice_states[0];
-
-    // int delta = input;
+void Sony_S_DSP_Gaussian::run(int16_t input, int16_t* output_buffer) {
+    // VoiceState& voice = voice_state;
+    // cast the input to 32-bit to do maths
+    int delta = input;
     // One, two and three point IIR filters
-    int smp1 = voice.interp0;
-    int smp2 = voice.interp1;
-    // if (voice.block_header & 8) {
+    int smp1 = voice_state.interp0;
+    int smp2 = voice_state.interp1;
+    // if (voice_state.block_header & 8) {
         delta += smp1;
         delta -= smp2 >> 1;
-        if (!(voice.block_header & 4)) {
-            delta += (-smp1 - (smp1 >> 1)) >> 5;
-            delta += smp2 >> 5;
-        } else {
+        // if (!(voice_state.block_header & 4)) {
+            // delta += (-smp1 - (smp1 >> 1)) >> 5;
+            // delta += smp2 >> 5;
+        // } else {
             delta += (-smp1 * 13) >> 7;
             delta += (smp2 + (smp2 >> 1)) >> 4;
-        }
-    // } else if (voice.block_header & 4) {
+        // }
+    // } else if (voice_state.block_header & 4) {
         // delta += smp1 >> 1;
         // delta += (-smp1) >> 5;
     // }
 
-    voice.interp3 = voice.interp2;
-    voice.interp2 = smp2;
-    voice.interp1 = smp1;
+    voice_state.interp3 = voice_state.interp2;
+    voice_state.interp2 = smp2;
+    voice_state.interp1 = smp1;
     // sign-extend
-    voice.interp0 = int16_t (clamp_16(delta) * 2);
+    voice_state.interp0 = int16_t (clamp_16(delta) * 2);
 
     // get the 14-bit frequency value
     // TODO:
@@ -68,17 +68,16 @@ void Sony_S_DSP_Gaussian::run(int delta, int16_t* output_buffer) {
     int rate = 0;
 
     // Gaussian interpolation using most recent 4 samples
-    int index = voice.fraction >> 2 & 0x3FC;
-    voice.fraction = (voice.fraction & 0x0FFF) + rate;
+    int index = voice_state.fraction >> 2 & 0x3FC;
+    voice_state.fraction = (voice_state.fraction & 0x0FFF) + rate;
     const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
     const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
-    int s = ((table[0] * voice.interp3) >> 12) +
-            ((table[1] * voice.interp2) >> 12) +
-            ((table2[1] * voice.interp1) >> 12);
-    s = (int16_t) (s * 2);
-    s += (table2[0] * voice.interp0) >> 11 & ~1;
-    int output = clamp_16(s);
-    // scale output and set outx values
+    int sample = ((table[0] * voice_state.interp3) >> 12) +
+                 ((table[1] * voice_state.interp2) >> 12) +
+                 ((table2[1] * voice_state.interp1) >> 12);
+    sample = (int16_t) (sample * 2);
+    sample += (table2[0] * voice_state.interp0) >> 11 & ~1;
+    int output = clamp_16(sample);
 
     if (output_buffer) {  // write final samples
         // clamp the left and right samples and place them into the buffer

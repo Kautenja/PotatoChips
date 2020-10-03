@@ -1,6 +1,6 @@
 \documentclass[12pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage[moduleName=S-SMP(Echo)]{KautenjaDSP}
+\usepackage[moduleName=S-SMP(Gauss)]{KautenjaDSP}
 % import a debugging package to show the margin boxes
 % \usepackage{showframe}
 % set the graphics path to the img directory
@@ -11,7 +11,7 @@
 % \SetKwInOut{Weights}{$\CKvector{w}$}
 
 \begin{document}
-\titlePage{S-SMP-Echo-Logo}{S-SMP-Echo-Module}{KautenjaDSP}
+\titlePage{S-SMP-Gauss-Logo}{S-SMP-Gauss-Module}{KautenjaDSP}
 
 % -------------------
 % MARK: Overview
@@ -27,19 +27,14 @@
 
 \clearpage
 
-S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP sound chip on the Super Nintendo Entertainment System (SNES). The Echo effect of the S-SMP chip has $15$ different delay levels of $16ms$ each, a $64KB$ echo buffer, an 8-tap FIR filter for shaping the sound of the echo, parameterized feedback, and parameterized dry / wet mix level. The echo buffer is stereo, although the echo parameters and coefficients of the FIR filter are the same for both channels.
+S-SMP(Gauss) is a Eurorack module that emulates the Gaussian filter effect from the S-SMP sound chip on the Super Nintendo Entertainment System (SNES). The Gaussian filter of the S-SMP chip was applied to BRR samples to remove unpleasant high-frequency content from the audio signal.
 
-S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
+S-SMP(Gauss) provides the key features of the Gaussian filter of the S-SMP chip,
 namely,
 \begin{itemize}
   \item \textbf{$32KHz$ Sample Rate:} The S-SMP was designed to run at $32kHz$, so the audio inputs and outputs of the module are locked to $32kHz$.
-  \item \textbf{Stereo Echo Buffer:} Echo buffer for two independent inputs in stereo configuration. The parameters are the same for both inputs, but the inputs have their own dedicated echo buffers.
-  \item \textbf{Expanded Delay:} The 15 levels of delay has been upgraded to 31 levels that each add an additional $16ms$ of delay (up to roughly $500ms$). 31 levels of delay is able to fit in the RAM of the original S-SMP, but the instruction set does not normally support the addressing of 31 levels.
-  \item \textbf{Feedback:} Additive and subtractive feedback following the original implementation
-  \item \textbf{Surround Effect:} Stereo mixer with the ability to invert the phase of either channel resulting in odd Haas effects.
-  \item \textbf{8-tap FIR Filter:} Fully parameterized 8-tap FIR filter for shaping the sound of the echo. The filter can be parameterized as low-pass, high-pass, band-pass, band-stop, etc. and includes presets with filter parameters from popular SNES games.
-  \item \textbf{16-bit Inputs:} The BRR decoder has been remove in this emulation. Instead, input audio is sampled directly as 16-bit PCM. A separate module S-SMP(BRR) can be cascaded into S-SMP(Echo) to introduce authentic BRR down-sampling effects to the signal path.
-  \item \textbf{Gaussian Low-Pass Filter Override:} The Gaussian low-pass filter has been removed in this emulation. A separate module, S-SMP(Gaussian), can be used in cascade with S-SMP(Echo) to produce a more authentic SNES sound.
+  \item \textbf{Stereo Processing:} Two lanes of processing for stereo effects or other creative applications
+  \item \textbf{Four Filter Modes:} Four filter modes that act as different combinations of the two coefficients for the reconstruction filter.
 \end{itemize}
 
 % -------------------
@@ -51,7 +46,7 @@ namely,
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{S-SMP-Echo-Manual}
+\includegraphics{S-SMP-Gauss-Manual}
 \end{figure}
 
 \clearpage

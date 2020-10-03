@@ -198,7 +198,10 @@ struct ChipS_SMP_Gaussian : Module {
         // TODO: remove
         for (unsigned voice = 0; voice < Sony_S_DSP_Gaussian::VOICE_COUNT; voice++) {
             auto mask = voice << 4;
-            auto pitch = Sony_S_DSP_Gaussian::convert_pitch(2100);
+            float thing = params[PARAM_VOLUME_MAIN].getValue();
+            thing += 128.f;
+            thing /= 255.f;
+            auto pitch = Sony_S_DSP_Gaussian::convert_pitch(thing * 4000);
             apu.write(mask | Sony_S_DSP_Gaussian::PITCH_LOW,  0xff &  pitch     );
             apu.write(mask | Sony_S_DSP_Gaussian::PITCH_HIGH, 0xff & (pitch >> 8));
             apu.write(mask | Sony_S_DSP_Gaussian::GAIN, 0x7f & 127);
@@ -207,7 +210,8 @@ struct ChipS_SMP_Gaussian : Module {
         }
 
         short sample[2] = {0, 0};
-        apu.run(1, sample);
+        auto audioInput = (1 << 8) * inputs[INPUT_GATE].getVoltage() / 10.f;
+        apu.run(1, audioInput, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

@@ -23,6 +23,8 @@
 #include <cstring>
 #include <cassert>
 
+#include <iostream>
+
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 class Sony_S_DSP_Gaussian {
  public:
@@ -315,7 +317,7 @@ class Sony_S_DSP_Gaussian {
         /// TODO
         short volume[2];
         /// 12-bit fractional position
-        short fraction;
+        short fraction = 0x3FFF;
         /// padding (placement here keeps interp's in a 64-bit line)
         short unused0;
         /// most recent four decoded samples
@@ -423,7 +425,7 @@ class Sony_S_DSP_Gaussian {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int32_t num_samples, int16_t* output_buffer = NULL);
+    void run(int32_t num_samples, int input, int16_t* output_buffer = NULL);
 };
 
 #endif  // DSP_SONY_S_DSP_GAUSSIAN_HPP_

@@ -206,10 +206,6 @@ inline int clamp_16(int n) {
 }
 
 void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
-    // TODO: Should we just fill the buffer with silence? Flags won't be
-    // cleared during this run so it seems it should keep resetting every
-    // sample.
-    if (global.flags & FLAG_MASK_RESET) reset();
     // use the global wave page address to lookup a pointer to the first entry
     // in the source directory. the wave page is multiplied by 0x100 to produce
     // the RAM address of the source directory.

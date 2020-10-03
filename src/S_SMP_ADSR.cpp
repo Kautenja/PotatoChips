@@ -139,8 +139,6 @@ struct ChipS_SMP_ADSR : Module {
         apu.write(Sony_S_DSP_ADSR::PITCH_MODULATION,  0);
         apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_LEFT,  0);
         apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_RIGHT, 0);
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; coeff++)
-            apu.write((coeff << 4) | Sony_S_DSP_ADSR::FIR_COEFFICIENTS, 0);
         // -------------------------------------------------------------------
 
         for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++) {

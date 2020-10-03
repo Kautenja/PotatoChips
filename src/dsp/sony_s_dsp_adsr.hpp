@@ -115,18 +115,6 @@ class Sony_S_DSP_ADSR {
         uint16_t loop;
     };
 
-    /// @brief Bit-masks for extracting values from the flags registers.
-    enum FlagMasks {
-        /// a mask for the flag register to extract the noise period parameter
-        FLAG_MASK_NOISE_PERIOD = 0x1F,
-        /// a mask for the flag register to extract the echo write enabled bit
-        FLAG_MASK_ECHO_WRITE = 0x20,
-        /// a mask for the flag register to extract the mute voices bit
-        FLAG_MASK_MUTE = 0x40,
-        /// a mask for the flag register to extract the reset chip bit
-        FLAG_MASK_RESET = 0x80
-    };
-
  private:
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
@@ -273,13 +261,11 @@ class Sony_S_DSP_ADSR {
     ///
     /// @param ram a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP_ADSR(uint8_t* ram_) : ram(ram_) { }
+    explicit Sony_S_DSP_ADSR(uint8_t* ram_) : ram(ram_) { reset(); }
 
     /// @brief Clear state and silence everything.
     void reset() {
         keys = 0;
-        // reset, mute, echo off
-        global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
         global.key_ons = 0;
         // reset voices
         for (unsigned i = 0; i < VOICE_COUNT; i++) {

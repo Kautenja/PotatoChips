@@ -32,7 +32,7 @@ struct ChipS_SMP_Gaussian : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FILTER, 2),  // not stereo, there are two filter parameters
+        PARAM_FILTER,
         ENUMS(PARAM_GAIN, 2),
         ENUMS(PARAM_VOLUME, 2),
         NUM_PARAMS
@@ -40,7 +40,7 @@ struct ChipS_SMP_Gaussian : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_FILTER, 2),  // not stereo, there are two filter parameters
+        INPUT_FILTER,
         ENUMS(INPUT_VOLUME, 2),
         ENUMS(INPUT_AUDIO, 2),
         NUM_INPUTS
@@ -60,8 +60,8 @@ struct ChipS_SMP_Gaussian : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_Gaussian() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FILTER + 0, 0, 1, 1, "Filter Mode 1");
-        configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2");
+        configParam(PARAM_FILTER, 0, 3, 2, "Filter Coefficients");
+        // configParam(PARAM_FILTER + 1, 0, 1, 0, "Filter Mode 2");
         configParam(PARAM_GAIN + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)", " dB", -10, 40);
         configParam(PARAM_GAIN + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel) ", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");
@@ -75,8 +75,9 @@ struct ChipS_SMP_Gaussian : Module {
     /// @param channel the polyphony channel to get the filter parameter of
     /// @returns the filter parameter at given index for given channel
     ///
-    inline int8_t getFilter(unsigned index, unsigned channel) {
-        return params[PARAM_FILTER + index].getValue();
+    inline int8_t getFilter(bool index, unsigned channel) {
+        const int8_t param = params[PARAM_FILTER].getValue();
+        return 0x1 & (param >> (1 - index));
     }
 
     /// @brief Get the volume level for the given lane and polyphony channel.
@@ -86,8 +87,8 @@ struct ChipS_SMP_Gaussian : Module {
     /// @returns the volume of the gate for given lane and channel
     ///
     inline int8_t getVolume(unsigned lane, unsigned channel) {
-        auto param = params[PARAM_VOLUME + lane].getValue();
-        auto cv = inputs[INPUT_VOLUME + lane].isConnected() ?
+        const auto param = params[PARAM_VOLUME + lane].getValue();
+        const auto cv = inputs[INPUT_VOLUME + lane].isConnected() ?
             inputs[INPUT_VOLUME + lane].getVoltage(channel) / 10.f : 1.f;
         return math::clamp(cv * param, -128.f, 127.f);
     }
@@ -149,9 +150,10 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Switches
-        addParam(createParam<CKSS>(Vec(50, 30), module, ChipS_SMP_Gaussian::PARAM_FILTER + 0));
-        addParam(createParam<CKSS>(Vec(50, 60), module, ChipS_SMP_Gaussian::PARAM_FILTER + 1));
+        // Filter Mode
+        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, ChipS_SMP_Gaussian::PARAM_FILTER);
+        filter->snap = true;
+        addParam(filter);
         for (unsigned i = 0; i < 2; i++) {
             // Stereo Input Ports
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, ChipS_SMP_Gaussian::INPUT_AUDIO + i));

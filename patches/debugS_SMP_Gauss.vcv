@@ -31,26 +31,22 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 2.0
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 0.830143571
         },
         {
           "id": 2,
-          "value": 0.707106769
+          "value": 0.923481405
         },
         {
           "id": 3,
-          "value": 0.707106769
-        },
-        {
-          "id": 4,
           "value": 60.0
         },
         {
-          "id": 5,
+          "id": 4,
           "value": 60.0
         }
       ],
@@ -334,43 +330,43 @@
       "color": "#c91847"
     },
     {
-      "id": 76,
-      "outputModuleId": 163,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 81,
-      "outputModuleId": 159,
-      "outputId": 3,
-      "inputModuleId": 152,
-      "inputId": 4,
-      "color": "#0986ad"
-    },
-    {
-      "id": 82,
-      "outputModuleId": 159,
-      "outputId": 3,
-      "inputModuleId": 152,
-      "inputId": 5,
-      "color": "#c91847"
-    },
-    {
-      "id": 83,
-      "outputModuleId": 163,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 3,
-      "color": "#c91847"
-    },
-    {
       "id": 84,
       "outputModuleId": 156,
       "outputId": 2,
       "inputModuleId": 153,
       "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 76,
+      "outputModuleId": 163,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 85,
+      "outputModuleId": 163,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 86,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 152,
+      "inputId": 3,
+      "color": "#0986ad"
+    },
+    {
+      "id": 87,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 152,
+      "inputId": 4,
       "color": "#c91847"
     }
   ]

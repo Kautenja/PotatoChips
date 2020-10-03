@@ -26,6 +26,7 @@
       "description": "An emulation of the Atari POKEY chip.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf",
       "tags": [
+        "Noise",
         "Oscillator",
         "Polyphonic"
       ]
@@ -76,8 +77,8 @@
       "description": "An emulation of the Nintendo Gameboy Sound System chip.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf",
       "tags": [
-        "Oscillator",
         "Noise",
+        "Oscillator",
         "Polyphonic"
       ]
     },
@@ -87,11 +88,11 @@
       "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf",
       "tags": [
-        "Synth voice",
-        "Oscillator",
-        "Noise",
         "Effect",
-        "Polyphonic"
+        "Noise",
+        "Oscillator",
+        "Polyphonic",
+        "Synth voice"
       ]
     },
     {
@@ -100,18 +101,28 @@
       "description": "An emulation of the echo effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf",
       "tags": [
+        "Delay",
+        "Dual",
         "Effect",
-        "Polyphonic"
+        "Filter",
+        "Panning",
+        "Polyphonic",
+        "Reverb"
       ]
     },
     {
-      "slug": "S_SMP_Gaussian",
+      "slug": "S_SMP_Gauss",
       "name": "S-SMP(Gauss)",
       "description": "An emulation of the Gaussian low-pass filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf",
       "tags": [
+        "Dual",
         "Effect",
-        "Polyphonic"
+        "Filter",
+        "Low-pass gate",
+        "Panning",
+        "Polyphonic",
+        "Voltage-controlled amplifier"
       ]
     },
     {
@@ -120,8 +131,8 @@
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf",
       "tags": [
-        "Oscillator",
         "Noise",
+        "Oscillator",
         "Polyphonic"
       ]
     },
@@ -141,8 +152,8 @@
       "description": "An emulation of the Texas Instruments SN76489 chip from the Sega Master System and Sega Mega Drive.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf",
       "tags": [
-        "Oscillator",
         "Noise",
+        "Oscillator",
         "Polyphonic"
       ]
     },
@@ -152,8 +163,8 @@
       "description": "An emulation of the Yamaha YM2413 FM synthesis chip from the Sega Mark III.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf",
       "tags": [
-        "Oscillator",
-        "Noise"
+        "Noise",
+        "Oscillator"
       ],
       "disabled": true
     },
@@ -163,10 +174,10 @@
       "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Master System and Sega Mega Drive.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2612.pdf",
       "tags": [
-        "Synth voice",
-        "Oscillator",
         "Noise",
-        "Polyphonic"
+        "Oscillator",
+        "Polyphonic",
+        "Synth voice"
       ]
     }
   ]

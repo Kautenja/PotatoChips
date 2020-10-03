@@ -122,6 +122,8 @@ struct ChipS_SMP_Gauss : Module {
             for (unsigned channel = 0; channel < channels; channel++) {
                 apu[lane][channel].setFilter(getFilter(channel));
                 apu[lane][channel].setVolume(getVolume(lane, channel));
+                // TODO: frequency control
+                // apu[lane][channel].setFrequency(262);
                 float sample = apu[lane][channel].run(getInput(lane, channel));
                 sample = sample / std::numeric_limits<int16_t>::max();
                 outputs[OUTPUT_AUDIO + lane].setVoltage(10.f * sample, channel);

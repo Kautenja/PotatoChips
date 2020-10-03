@@ -211,7 +211,7 @@ struct ChipS_SMP_Gaussian : Module {
 
         short sample[2] = {0, 0};
         auto audioInput = (1 << 8) * inputs[INPUT_GATE].getVoltage() / 10.f;
-        apu.run(1, audioInput, sample);
+        apu.run(audioInput, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

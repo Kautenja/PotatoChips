@@ -30,7 +30,7 @@ struct ChipS_SMP_ADSR : Module {
     Sony_S_DSP_ADSR apu;
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_ADSR::VOICE_COUNT][2];
+    rack::dsp::BooleanTrigger gateTriggers[2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -97,21 +97,15 @@ struct ChipS_SMP_ADSR : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        unsigned voice = 0;
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
-        // create bit-masks for the key-on and key-off state of each voice
-        uint8_t key_on = 0;
-        uint8_t key_off = 0;
-
         // get the voltage from the gate input port
-        const auto gate = inputs[INPUT_GATE + voice].getVoltage();
+        const auto gate = inputs[INPUT_GATE].getVoltage();
         // process the voltage to detect key-on events
-        key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+        const bool key_on = gateTriggers[0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
         // process the inverted voltage to detect key-of events
-        key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-
+        const bool key_off = gateTriggers[1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f));
         if (key_on) {  // a key-on event occurred from the gate input
             // write key off to enable all voices
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, 0);
@@ -120,28 +114,28 @@ struct ChipS_SMP_ADSR : Module {
         }
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
-
-        // TODO: remove mask
-        // shift the voice index over a nibble to get the bit mask for the
-        // logical OR operator
-        auto mask = voice << 4;
+        // -------------------------------------------------------------------
+        // MARK: ADSR Parameters
+        // -------------------------------------------------------------------
         // the ADSR1 register is set from the attack and decay values
-        auto attack = (uint8_t) params[PARAM_ATTACK + voice].getValue();
-        auto decay = (uint8_t) params[PARAM_DECAY + voice].getValue();
+        auto attack = (uint8_t) params[PARAM_ATTACK].getValue();
+        auto decay = (uint8_t) params[PARAM_DECAY].getValue();
         // the high bit of the ADSR1 register is set to enable the ADSR
         auto adsr1 = 0x80 | (decay << 4) | attack;
-        apu.write(mask | Sony_S_DSP_ADSR::ADSR_1, adsr1);
+        apu.write(Sony_S_DSP_ADSR::ADSR_1, adsr1);
         // the ADSR2 register is set from the sustain level and rate
-        auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL + voice].getValue();
-        auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
+        auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL].getValue();
+        auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE].getValue();
         auto adsr2 = (sustainLevel << 5) | sustainRate;
-        apu.write(mask | Sony_S_DSP_ADSR::ADSR_2, adsr2);
+        apu.write(Sony_S_DSP_ADSR::ADSR_2, adsr2);
         // ADSR output: 7-bit unsigned value (max 0x7F)
-        float envelope = apu.read(mask | Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
-        outputs[OUTPUT_ENVELOPE + voice].setVoltage(10.f * envelope);
+        float envelope = apu.read(Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
+        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * envelope);
         // TODO: ADSR amplitude (Volume)
-        // apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
-
+        // apu.write(Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE].getValue());
+        // -------------------------------------------------------------------
+        // MARK: Sample
+        // -------------------------------------------------------------------
         apu.run();
     }
 };

@@ -19,23 +19,19 @@
 #ifndef DSP_SONY_S_DSP_ADSR_HPP_
 #define DSP_SONY_S_DSP_ADSR_HPP_
 
-#include "exceptions.hpp"
-#include <cassert>
+#include <cstdint>
 
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP_ADSR {
  public:
     /// the sample rate of the S-DSP in Hz
     static constexpr unsigned SAMPLE_RATE = 32000;
-    /// the number of sampler voices on the chip
+    /// the number of sampler voices on the chip TODO: remove
     static constexpr unsigned VOICE_COUNT = 8;
-    /// the number of registers on the chip
+    /// the number of registers on the chip TODO: remove
     static constexpr unsigned NUM_REGISTERS = 128;
-    /// the size of the RAM bank in bytes
-    static constexpr unsigned SIZE_OF_RAM = 1 << 16;
-    /// the number of FIR coefficients used by the chip's echo filter
-    static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
 
+    // TODO: remove
     /// @brief the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {
         /// The volume for the left channel of the main output
@@ -72,6 +68,7 @@ class Sony_S_DSP_ADSR {
         ECHO_DELAY =               0x7D
     };
 
+    // TODO: remove
     /// @brief the channel registers on the S-DSP. To get the register for
     /// channel `n`, perform the logical OR of the register address with `0xn0`.
     enum ChannelRegister : uint8_t {
@@ -101,6 +98,7 @@ class Sony_S_DSP_ADSR {
     };
 
  private:
+    // TODO: remove
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
         /// the volume of the left channel
@@ -123,6 +121,7 @@ class Sony_S_DSP_ADSR {
         int8_t unused[6];
     };
 
+    // TODO: remove
     /// A structure mapping the register space to symbolic global data fields.
     struct GlobalData {
         /// padding
@@ -175,6 +174,7 @@ class Sony_S_DSP_ADSR {
         char unused9[2];
     };
 
+    // TODO: remove
     /// Combine the raw voice, registers, and global data structures into a
     /// single piece of memory to allow easy symbolic access to register data
     union {
@@ -192,6 +192,7 @@ class Sony_S_DSP_ADSR {
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
 
+    // TODO: remove
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
         /// TODO
@@ -240,36 +241,14 @@ class Sony_S_DSP_ADSR {
     ///
     /// @param address the address of the register to read data from
     ///
-    inline uint8_t read(uint8_t address) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        return registers[address];
-    }
+    inline uint8_t read(uint8_t address) { return registers[address]; }
 
     /// @brief Write data to the registers at the given address.
     ///
     /// @param address the address of the register to write data to
     /// @param data the data to write to the register
     ///
-    void write(uint8_t address, uint8_t data) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        // store the data in the register with given address
-        registers[address] = data;
-        // update volume / FIR coefficients
-        switch (address & FIR_COEFFICIENTS) {
-            // voice volume
-            case 0:    // left channel, fall through to next block
-            case 1: {  // right channel, process both left and right channels
-                short* volume = voice_states[address >> 4].volume;
-                int left  = (int8_t) registers[address & ~1];
-                int right = (int8_t) registers[address |  1];
-                volume[0] = left;
-                volume[1] = right;
-                break;
-            }
-        }
-    }
+    inline void write(uint8_t address, uint8_t data) { registers[address] = data; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
@@ -278,7 +257,7 @@ class Sony_S_DSP_ADSR {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int16_t* output_buffer = NULL);
+    void run(int16_t* output_buffer = nullptr);
 };
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

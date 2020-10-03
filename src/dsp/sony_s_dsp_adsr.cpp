@@ -215,7 +215,7 @@ inline int clamp_16(int n) {
     return std::max(lower, std::min(n, upper));
 }
 
-void Sony_S_DSP_ADSR::run(int32_t count, int16_t* output_buffer) {
+void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
     // TODO: Should we just fill the buffer with silence? Flags won't be
     // cleared during this run so it seems it should keep resetting every
     // sample.
@@ -229,7 +229,6 @@ void Sony_S_DSP_ADSR::run(int32_t count, int16_t* output_buffer) {
     int left_volume  = 127;
     int right_volume = 127;
     // render samples at 32kHz for the given count of samples
-    while (--count >= 0) {
         // -------------------------------------------------------------------
         // MARK: Key Off / Key On
         // -------------------------------------------------------------------
@@ -485,12 +484,7 @@ void Sony_S_DSP_ADSR::run(int32_t count, int16_t* output_buffer) {
             // clamp the left and right samples and place them into the buffer
             output_buffer[0] = left  = clamp_16(left);
             output_buffer[1] = right = clamp_16(right);
-            // increment the buffer to the position of the next stereo sample
-            output_buffer += 2;
-            if (global.flags & FLAG_MASK_MUTE)  // muting
-                output_buffer[-2] = output_buffer[-1] = 0;
         }
-    }
 }
 
 // Base normal_gauss table is almost exactly (with an error of 0 or -1 for each entry):

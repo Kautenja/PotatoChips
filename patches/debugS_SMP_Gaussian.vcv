@@ -19,33 +19,8 @@
         }
       },
       "pos": [
-        94,
-        0
-      ]
-    },
-    {
-      "id": 5,
-      "plugin": "Core",
-      "version": "1.1.6",
-      "model": "MIDIToCVInterface",
-      "params": [],
-      "leftModuleId": 160,
-      "rightModuleId": 152,
-      "data": {
-        "channels": 1,
-        "polyMode": 0,
-        "clockDivision": 24,
-        "lastPitch": 8192,
-        "lastMod": 0,
-        "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
-          "channel": -1
-        }
-      },
-      "pos": [
         52,
-        1
+        0
       ]
     },
     {
@@ -435,10 +410,10 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 159,
       "rightModuleId": 153,
       "pos": [
-        60,
+        18,
         1
       ]
     },
@@ -487,7 +462,7 @@
         "external": 0
       },
       "pos": [
-        74,
+        32,
         1
       ]
     },
@@ -497,7 +472,6 @@
       "version": "1.1.34",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
-      "leftModuleId": 161,
       "rightModuleId": 156,
       "data": {
         "range": 0.0,
@@ -507,7 +481,7 @@
         "window": "kaiser"
       },
       "pos": [
-        42,
+        0,
         0
       ]
     },
@@ -527,7 +501,7 @@
         },
         {
           "id": 2,
-          "value": 0.711500525
+          "value": 1.0
         },
         {
           "id": 3,
@@ -541,46 +515,8 @@
       "leftModuleId": 154,
       "rightModuleId": 1,
       "pos": [
-        84,
+        42,
         0
-      ]
-    },
-    {
-      "id": 158,
-      "plugin": "Bogaudio",
-      "version": "1.1.34",
-      "model": "Bogaudio-LFO",
-      "params": [
-        {
-          "id": 0,
-          "value": 5.21150112
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 1.0
-        },
-        {
-          "id": 5,
-          "value": 1.0
-        }
-      ],
-      "rightModuleId": 162,
-      "data": {},
-      "pos": [
-        20,
-        1
       ]
     },
     {
@@ -618,51 +554,11 @@
           "value": 0.0
         }
       ],
-      "rightModuleId": 160,
+      "leftModuleId": 162,
+      "rightModuleId": 152,
       "pos": [
-        39,
+        8,
         1
-      ]
-    },
-    {
-      "id": 160,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "VCA-1",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 159,
-      "rightModuleId": 5,
-      "pos": [
-        49,
-        1
-      ]
-    },
-    {
-      "id": 161,
-      "plugin": "Bogaudio",
-      "version": "1.1.34",
-      "model": "Bogaudio-AnalyzerXL",
-      "params": [],
-      "rightModuleId": 154,
-      "data": {
-        "range": 0.0,
-        "range_db": 80.0,
-        "smooth": 0.25,
-        "quality": "high",
-        "window": "kaiser"
-      },
-      "pos": [
-        0,
-        0
       ]
     },
     {
@@ -671,7 +567,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "leftModuleId": 158,
+      "rightModuleId": 159,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -685,20 +581,12 @@
         }
       },
       "pos": [
-        30,
+        0,
         1
       ]
     }
   ],
   "cables": [
-    {
-      "id": 47,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 33,
-      "color": "#0986ad"
-    },
     {
       "id": 56,
       "outputModuleId": 156,
@@ -706,22 +594,6 @@
       "inputModuleId": 153,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 53,
-      "outputModuleId": 159,
-      "outputId": 3,
-      "inputModuleId": 160,
-      "inputId": 1,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 58,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 153,
-      "inputId": 1,
-      "color": "#c91847"
     },
     {
       "id": 61,
@@ -732,12 +604,20 @@
       "color": "#0986ad"
     },
     {
-      "id": 60,
+      "id": 14,
       "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 161,
+      "outputId": 1,
+      "inputModuleId": 1,
       "inputId": 0,
-      "color": "#c91847"
+      "color": "#0986ad"
+    },
+    {
+      "id": 64,
+      "outputModuleId": 162,
+      "outputId": 0,
+      "inputModuleId": 159,
+      "inputId": 0,
+      "color": "#c9b70e"
     },
     {
       "id": 12,
@@ -748,36 +628,44 @@
       "color": "#0986ad"
     },
     {
-      "id": 59,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 6,
+      "id": 69,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
       "color": "#c91847"
     },
     {
-      "id": 14,
+      "id": 68,
       "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 63,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
+      "outputId": 2,
+      "inputModuleId": 154,
       "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 72,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 156,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 73,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 152,
+      "inputId": 33,
       "color": "#0986ad"
     },
     {
-      "id": 64,
-      "outputModuleId": 162,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 0,
-      "color": "#c9b70e"
+      "id": 74,
+      "outputModuleId": 159,
+      "outputId": 3,
+      "inputModuleId": 152,
+      "inputId": 34,
+      "color": "#c91847"
     }
   ]
 }

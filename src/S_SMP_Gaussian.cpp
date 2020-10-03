@@ -27,10 +27,7 @@
 struct ChipS_SMP_Gaussian : Module {
  private:
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu;
-
-    /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[8][2];
+    Sony_S_DSP_Gaussian apu[2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -128,10 +125,11 @@ struct ChipS_SMP_Gaussian : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        auto audioInput = (1 << 8) * inputs[INPUT_GATE].getVoltage() / 10.f;
-        auto sample = apu.run(audioInput);
-        outputs[OUTPUT_AUDIO].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
-        // outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
+        for (unsigned i = 0; i < 2; i++) {
+            auto audioInput = (1 << 8) * inputs[INPUT_GATE + i].getVoltage() / 10.f;
+            auto sample = apu[i].run(audioInput);
+            outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
+        }
     }
 };
 
@@ -154,20 +152,11 @@ struct ChipS_SMP_GaussianWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // individual oscillator controls
-        for (unsigned i = 0; i < 8; i++)
-            addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_Gaussian::INPUT_GATE + i));
-        // Mixer & Output - Left Channel
-        auto volumeLeft = createParam<Rogan2PWhite>(Vec(45, 230), module, ChipS_SMP_Gaussian::PARAM_VOLUME_MAIN + 0);
-        volumeLeft->snap = true;
-        addParam(volumeLeft);
-        addInput(createInput<PJ301MPort>(Vec(55, 280), module, ChipS_SMP_Gaussian::INPUT_VOLUME_MAIN + 0));
+        // inputs
+        addInput(createInput<PJ301MPort>(Vec(55, 290), module, ChipS_SMP_Gaussian::INPUT_GATE + 0));
+        addInput(createInput<PJ301MPort>(Vec(105, 290), module, ChipS_SMP_Gaussian::INPUT_GATE + 1));
+        // outputs
         addOutput(createOutput<PJ301MPort>(Vec(55, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 0));
-        // Mixer & Output - Right Channel
-        auto volumeRight = createParam<Rogan2PRed>(Vec(95, 230), module, ChipS_SMP_Gaussian::PARAM_VOLUME_MAIN + 1);
-        volumeRight->snap = true;
-        addParam(volumeRight);
-        addInput(createInput<PJ301MPort>(Vec(105, 280), module, ChipS_SMP_Gaussian::INPUT_VOLUME_MAIN + 1));
         addOutput(createOutput<PJ301MPort>(Vec(105, 325), module, ChipS_SMP_Gaussian::OUTPUT_AUDIO + 1));
     }
 };

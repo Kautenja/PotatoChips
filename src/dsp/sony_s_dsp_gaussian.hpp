@@ -58,19 +58,19 @@ class Sony_S_DSP_Gaussian {
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
     Sony_S_DSP_Gaussian() { }
 
-    /// Set the filter coefficients to a discrete mode.
+    /// @brief Set the filter coefficients to a discrete mode.
     ///
     /// @param filter the new mode for the filter
     ///
     inline void setFilter(uint8_t filter) { this->filter = filter & 0x3; }
 
-    /// Set the volume level of the low-pass gate to a new value.
+    /// @brief Set the volume level of the low-pass gate to a new value.
     ///
     /// @param volume the volume level after the Gaussian low-pass filter
     ///
     inline void setVolume(int8_t volume) { this->volume = volume; }
 
-    /// Set the frequency of the low-pass gate to a new value.
+    /// @brief Set the frequency of the low-pass gate to a new value.
     ///
     /// @param freq the frequency to set the low-pass gate to
     ///
@@ -132,7 +132,8 @@ class Sony_S_DSP_Gaussian {
                      ((table2[1] * samples[1]) >> 12);
         sample = static_cast<int16_t>(2 * sample);
         sample +=    ((table2[0] * samples[0]) >> 11) & ~1;
-        sample  = (sample  * volume) >> 7;
+        // apply the volume/amplitude level
+        sample = (sample  * volume) >> 7;
         // return the sample clipped to 16-bit PCM
         return clamp_16(sample);
     }

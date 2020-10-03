@@ -115,7 +115,7 @@
       "id": 165,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.0",
-      "model": "S_SMP_Gaussian",
+      "model": "S_SMP_Gauss",
       "params": [
         {
           "id": 0,

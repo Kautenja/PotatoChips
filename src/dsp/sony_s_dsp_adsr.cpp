@@ -30,7 +30,7 @@ const int ENVELOPE_RANGE = 0x800;
 /// counts that should be subtracted from the counter each sample period
 /// (32kHz). The counter starts at 30720 (0x7800). Each count divides exactly
 /// into 0x7800 without remainder.
-static const uint16_t ENVELOPE_RATES[0x20] = {
+static const short ENVELOPE_RATES[0x20] = {
     0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
     0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
     0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
@@ -193,12 +193,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
 }
 
 void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
-    // use the global wave page address to lookup a pointer to the first entry
-    // in the source directory. the wave page is multiplied by 0x100 to produce
-    // the RAM address of the source directory.
-    const SourceDirectoryEntry* const source_directory =
-        reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
-
     // -------------------------------------------------------------------
     // MARK: Key Off / Key On
     // -------------------------------------------------------------------
@@ -209,34 +203,15 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
     // once however, since the regs haven't changed over the whole
     // period we need to catch up with.
     // -------------------------------------------------------------------
-    // Keying on a voice resets that bit in ENDX.
-    // global.wave_ended &= ~global.key_ons;
-    // -------------------------------------------------------------------
-    // MARK: Voice Processing
-    // -------------------------------------------------------------------
-    // buffer the outputs of the left and right echo and main channels
-    // iterate over the voices on the chip
     for (unsigned voice_idx = 0; voice_idx < VOICE_COUNT; voice_idx++) {
         // get the voice's bit-mask shift value
         const int voice_bit = 1 << voice_idx;
         // cache the voice and data structures
-        RawVoice& raw_voice = voices[voice_idx];
         VoiceState& voice = voice_states[voice_idx];
-        // ---------------------------------------------------------------
-        // MARK: Gate Processing
-        // ---------------------------------------------------------------
+        // key-on
         if (voice.on_cnt && !--voice.on_cnt) {
-            // key on
             keys |= voice_bit;
-            voice.addr = source_directory[raw_voice.waveform].start;
-            voice.block_remain = 1;
             voice.envx = 0;
-            voice.block_header = 0;
-            // decode three samples immediately
-            voice.fraction = 0x3FFF;
-            // BRR decoder filter uses previous two samples
-            voice.interp0 = 0;
-            voice.interp1 = 0;
             // NOTE: Real SNES does *not* appear to initialize the
             // envelope counter to anything in particular. The first
             // cycle always seems to come at a random time sooner than
@@ -256,49 +231,8 @@ void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
             voice.envelope_stage = EnvelopeStage::Release;
             voice.on_cnt = 0;
         }
-
-        int envx;
-        if (!(keys & voice_bit) || (envx = clock_envelope(voice_idx)) < 0) {
-            raw_voice.envx = 0;
-            raw_voice.outx = 0;
-            continue;
-        }
-
-        // Decode samples when fraction >= 1.0 (0x1000)
-        for (int n = voice.fraction >> 12; --n >= 0;) {
-            if (!--voice.block_remain) {
-                if (voice.block_header & 1) {
-                    global.wave_ended |= voice_bit;
-                    if (voice.block_header & 2) {
-                        // verified (played endless looping sample and ENDX was set)
-                        voice.addr = source_directory[raw_voice.waveform].loop;
-                    } else {  // first block was end block; don't play anything
-                        goto sample_ended;
-                    }
-                }
-                voice.block_header = ram[voice.addr++];
-                voice.block_remain = 16;  // nibbles
-            }
-
-            if (
-                voice.block_remain == 9 &&
-                (ram[voice.addr + 5] & 3) == 1 &&
-                (voice.block_header & 3) != 3
-            ) {  // next block has end flag set, this block ends early
-        sample_ended:
-                global.wave_ended |= voice_bit;
-                keys &= ~voice_bit;
-                raw_voice.envx = 0;
-                voice.envx = 0;
-                // add silence samples to interpolation buffer
-                do {
-                    voice.interp3 = voice.interp2;
-                    voice.interp2 = voice.interp1;
-                    voice.interp1 = voice.interp0;
-                    voice.interp0 = 0;
-                } while (--n >= 0);
-                break;
-            }
-        }
+        // clock envelope
+        if (!(keys & voice_bit) || clock_envelope(voice_idx) < 0)
+            voices[voice_idx].envx = 0;
     }
 }

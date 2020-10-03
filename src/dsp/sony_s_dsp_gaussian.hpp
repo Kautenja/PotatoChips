@@ -19,9 +19,8 @@
 #ifndef DSP_SONY_S_DSP_GAUSSIAN_HPP_
 #define DSP_SONY_S_DSP_GAUSSIAN_HPP_
 
-#include "exceptions.hpp"
 #include <algorithm>
-#include <cstring>
+#include <cstdint>
 #include <limits>
 
 /// Clamp an integer to a 16-bit value.
@@ -67,25 +66,21 @@ class Sony_S_DSP_Gaussian {
     ///
     /// @param filter the new mode for the filter
     ///
-    inline void setFilter(uint8_t filter) {
-        voice_state.filter = filter & 0x3;
-    }
+    inline void setFilter(uint8_t filter) { voice_state.filter = filter & 0x3; }
 
     /// Set the volume level of the low-pass gate to a new value.
     ///
     /// @param volume the volume level after the Gaussian low-pass filter
     ///
-    inline void setVolume(int8_t volume) {
-        voice_state.volume = volume;
-    }
+    inline void setVolume(int8_t volume) { voice_state.volume = volume; }
 
     /// Set the frequency of the low-pass gate to a new value.
     ///
-    /// @param frequency the frequency to set the low-pass gate to
+    /// @param freq the frequency to set the low-pass gate to
     ///
-    inline void setFrequency(float frequency) {
+    inline void setFrequency(float freq) {
         // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
+        const auto pitch = static_cast<float>(1 << 12) * freq / SAMPLE_RATE;
         voice_state.rate = 0x3FFF & static_cast<uint16_t>(pitch);
     }
 

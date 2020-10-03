@@ -31,9 +31,6 @@ struct ChipS_SMP_ADSR : Module {
     /// the Sony S-DSP sound chip emulator
     Sony_S_DSP_ADSR apu{ram};
 
-    /// @brief Fill the RAM with 0's.
-    inline void clearRAM() { memset(ram, 0, sizeof ram); }
-
     /// triggers for handling gate inputs for the voices
     rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_ADSR::VOICE_COUNT][2];
 
@@ -126,16 +123,10 @@ struct ChipS_SMP_ADSR : Module {
         configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
         configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
         configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
-        // clear the shared RAM between the CPU and the S-DSP
-        clearRAM();
+        // TODO: remove. clear the shared RAM between the CPU and the S-DSP
+        memset(ram, 0, sizeof ram);
         // reset the S-DSP emulator
         apu.reset();
-        // TODO: remove
-        apu.write(Sony_S_DSP_ADSR::OFFSET_SOURCE_DIRECTORY, 0);
-        for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++) {
-            auto mask = voice << 4;
-            apu.write(mask | Sony_S_DSP_ADSR::SOURCE_NUMBER, 0);
-        }
     }
 
  protected:
@@ -144,26 +135,6 @@ struct ChipS_SMP_ADSR : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // -------------------------------------------------------------------
-        // MARK: RAM (SPC700 emulation)
-        // -------------------------------------------------------------------
-        // TODO: design a few banks of wavetables / other ways to put data
-        //       into this RAM
-        // write the first directory to RAM (at the end of the echo buffer)
-        auto dir = reinterpret_cast<Sony_S_DSP_ADSR::SourceDirectoryEntry*>(&ram[0]);
-        // point to a block immediately after this directory entry
-        dir->start = 4;
-        dir->loop = 4;
-        // set address 256 to a single sample ramp wave sample in BRR format
-        // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP_ADSR::BitRateReductionBlock*>(&ram[4]);
-        block->flags.set_volume(Sony_S_DSP_ADSR::BitRateReductionBlock::MAX_VOLUME);
-        block->flags.filter = 0;
-        block->flags.is_loop = 1;
-        block->flags.is_end = 1;
-        for (int i = 0; i < Sony_S_DSP_ADSR::BitRateReductionBlock::NUM_SAMPLES; i++)
-            block->samples[i] = 15 + 2 * i;
-
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------

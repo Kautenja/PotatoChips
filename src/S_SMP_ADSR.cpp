@@ -148,11 +148,6 @@ struct ChipS_SMP_ADSR : Module {
             // logical OR operator
             auto mask = voice << 4;
 
-            // TODO: remove
-            auto pitch = Sony_S_DSP_ADSR::convert_pitch(2100);
-            apu.write(mask | Sony_S_DSP_ADSR::PITCH_LOW,  0xff &  pitch     );
-            apu.write(mask | Sony_S_DSP_ADSR::PITCH_HIGH, 0xff & (pitch >> 8));
-
             // ---------------------------------------------------------------
             // MARK: Gain (Custom ADSR override)
             // ---------------------------------------------------------------
@@ -258,14 +253,11 @@ struct ChipS_SMP_ADSR : Module {
             auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
             auto adsr2 = (sustainLevel << 5) | sustainRate;
             apu.write(mask | Sony_S_DSP_ADSR::ADSR_2, adsr2);
-            // ADSR output: 7-bit unsigned value
+            // ADSR output: 7-bit unsigned value (max 0x7F)
             float envelope = apu.read(mask | Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
             outputs[OUTPUT_ENVELOPE + voice].setVoltage(10.f * envelope);
             // ADSR amplitude
             apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
-
-            // TODO: remove
-            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_RIGHT, 127);
         }
         apu.run(nullptr);
     }

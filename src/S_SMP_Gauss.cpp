@@ -70,13 +70,11 @@ struct ChipS_SMP_Gaussian : Module {
  protected:
     /// @brief Get the filter parameter for the index and polyphony channel.
     ///
-    /// @param index the index of the filter parameter to get
     /// @param channel the polyphony channel to get the filter parameter of
     /// @returns the filter parameter at given index for given channel
     ///
-    inline int8_t getFilter(bool index, unsigned channel) {
-        const int8_t param = params[PARAM_FILTER].getValue();
-        return 0x1 & (param >> (1 - index));
+    inline uint8_t getFilter(unsigned channel) {
+        return params[PARAM_FILTER].getValue();
     }
 
     /// @brief Get the volume level for the given lane and polyphony channel.
@@ -108,7 +106,7 @@ struct ChipS_SMP_Gaussian : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    void process(const ProcessArgs &args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -121,8 +119,7 @@ struct ChipS_SMP_Gaussian : Module {
         // process audio samples on the chip engine.
         for (unsigned lane = 0; lane < 2; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                apu[lane][channel].setFilter1(getFilter(0, channel));
-                apu[lane][channel].setFilter2(getFilter(1, channel));
+                apu[lane][channel].setFilter(getFilter(channel));
                 apu[lane][channel].setVolume(getVolume(lane, channel));
                 float sample = apu[lane][channel].run(getInput(lane, channel));
                 sample = sample / std::numeric_limits<int16_t>::max();

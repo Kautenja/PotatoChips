@@ -53,32 +53,22 @@ class Sony_S_DSP_Gaussian {
         int16_t fraction = 0x3FFF;
         /// the volume level after the Gaussian filter
         int16_t volume = 0;
-        /// TODO:
-        bool filter1 = true;
-        /// TODO:
-        bool filter2 = false;
         /// the 14-bit frequency value
         uint16_t rate = 0;
+        /// the discrete filter mode (i.e., the set of coefficients to use)
+        uint8_t filter = 0;
     } voice_state;
 
  public:
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
     Sony_S_DSP_Gaussian() : voice_state() { }
 
-    /// TODO:
+    /// Set the filter coefficients to a discrete mode.
     ///
-    /// @param is_enabled TODO:
+    /// @param filter the new mode for the filter
     ///
-    inline void setFilter1(bool is_enabled) {
-        voice_state.filter1 = is_enabled;
-    }
-
-    /// TODO:
-    ///
-    /// @param is_enabled TODO:
-    ///
-    inline void setFilter2(bool is_enabled) {
-        voice_state.filter2 = is_enabled;
+    inline void setFilter(uint8_t filter) {
+        voice_state.filter = filter & 0b11;
     }
 
     /// Set the volume level of the low-pass gate to a new value.
@@ -103,30 +93,14 @@ class Sony_S_DSP_Gaussian {
     ///
     /// @param input the 16-bit PCM sample to pass through the Gaussian filter
     ///
-    inline int16_t run(int16_t input) {
+    int16_t run(int16_t input) {
         // VoiceState& voice = voice_state;
         // cast the input to 32-bit to do maths
         int delta = input;
         // One, two and three point IIR filters
         int smp1 = voice_state.samples[0];
         int smp2 = voice_state.samples[1];
-        // if (voice_state.filter1) {
-        //     delta += smp1;
-        //     delta -= smp2 >> 1;
-        //     if (!voice_state.filter2) {
-        //         delta += (-smp1 - (smp1 >> 1)) >> 5;
-        //         delta += smp2 >> 5;
-        //     } else {
-        //         delta += (-smp1 * 13) >> 7;
-        //         delta += (smp2 + (smp2 >> 1)) >> 4;
-        //     }
-        // } else if (voice_state.filter2) {
-        //     delta += smp1 >> 1;
-        //     delta += (-smp1) >> 5;
-        // }
-
-        auto filter = (voice_state.filter1 << 1) | voice_state.filter2;
-        switch (filter) {
+        switch (voice_state.filter) {
         case 0:  // !filter1 !filter2
             break;
         case 1:  // !filter1 filter2
@@ -146,7 +120,6 @@ class Sony_S_DSP_Gaussian {
             delta += (smp2 + (smp2 >> 1)) >> 4;
             break;
         }
-
         // update sample history
         voice_state.samples[3] = voice_state.samples[2];
         voice_state.samples[2] = smp2;
@@ -154,17 +127,22 @@ class Sony_S_DSP_Gaussian {
         voice_state.samples[0] = 2 * clamp_16(delta);
         // Gaussian interpolation using most recent 4 samples. update the
         // fractional increment based on the 14-bit frequency rate of the voice
-        int index = voice_state.fraction >> 2 & 0x3FC;
+        const int index = voice_state.fraction >> 2 & 0x3FC;
         voice_state.fraction = (voice_state.fraction & 0x0FFF) + voice_state.rate;
-        const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
-        const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
-        int sample = ((table[0] * voice_state.samples[3]) >> 12) +
-                     ((table[1] * voice_state.samples[2]) >> 12) +
+        // get a pointer to the Gaussian interpolation table as bytes
+        const auto gauss8 = reinterpret_cast<uint8_t const*>(gauss);
+        // lookup the interpolation values in the table based on the index and
+        // inverted index value
+        const auto table1 = reinterpret_cast<int16_t const*>(gauss8 + index);
+        const auto table2 = reinterpret_cast<int16_t const*>(gauss8 + (255 * 4 - index));
+        // apply the Gaussian interpolation to the incoming sample
+        int sample = ((table1[0] * voice_state.samples[3]) >> 12) +
+                     ((table1[1] * voice_state.samples[2]) >> 12) +
                      ((table2[1] * voice_state.samples[1]) >> 12);
-        sample = (int16_t) (sample * 2);
-        sample += (table2[0] * voice_state.samples[0]) >> 11 & ~1;
+        sample = static_cast<int16_t>(2 * sample);
+        sample +=    ((table2[0] * voice_state.samples[0]) >> 11) & ~1;
         sample  = (sample  * voice_state.volume) >> 7;
-
+        // return the sample clipped to 16-bit PCM
         return clamp_16(sample);
     }
 };

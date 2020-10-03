@@ -163,3 +163,7 @@
         -   feedback and delay parameters with CV control
         -   stereo mix control with surround effect through phasing
     -   8-tap FIR filter with coefficient parameterization and CV control
+-   new module: S-SMP(Gauss)
+    -   Gaussian filter from the SNES
+    -   low-pass filter locked to 16kHz with parameterized coefficients
+    -   designed to act as a low-pass gate / VCA without a VCF

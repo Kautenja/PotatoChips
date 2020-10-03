@@ -162,11 +162,7 @@ struct ChipS_SMP_ADSR : Module {
         block->flags.is_end = 1;
         for (int i = 0; i < Sony_S_DSP_ADSR::BitRateReductionBlock::NUM_SAMPLES; i++)
             block->samples[i] = 15 + 2 * i;
-        // -------------------------------------------------------------------
-        // MARK: Flags (Noise Frequency)
-        // -------------------------------------------------------------------
-        uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
-        apu.write(Sony_S_DSP_ADSR::FLAGS, noise);
+
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
@@ -190,59 +186,31 @@ struct ChipS_SMP_ADSR : Module {
         }
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
-        // -------------------------------------------------------------------
-        // MARK: Echo Parameters
-        // -------------------------------------------------------------------
-        apu.write(Sony_S_DSP_ADSR::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
-        apu.write(Sony_S_DSP_ADSR::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
-        // echo enable
-        uint8_t echo_enable = 0;
-        for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++)
-            echo_enable |= static_cast<uint8_t>(params[PARAM_ECHO_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_ADSR::ECHO_ENABLE, echo_enable);
-        // -------------------------------------------------------------------
-        // MARK: Noise Enable
-        // -------------------------------------------------------------------
-        uint8_t noise_enable = 0;
-        for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++)
-            noise_enable |= static_cast<uint8_t>(params[PARAM_NOISE_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_ADSR::NOISE_ENABLE, noise_enable);
-        // -------------------------------------------------------------------
-        // MARK: Pitch Modulation
-        // -------------------------------------------------------------------
-        uint8_t pitch_modulation = 0;
-        // start from 1 because there is no pitch modulation for the first channel
-        for (unsigned voice = 1; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++)
-            pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_ADSR::PITCH_MODULATION, pitch_modulation);
-        // -------------------------------------------------------------------
-        // MARK: Main Volume & Echo Volume
-        // -------------------------------------------------------------------
+
+
         apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
         apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
-        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
-        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
-        // -------------------------------------------------------------------
-        // MARK: Voice-wise Parameters
-        // -------------------------------------------------------------------
+
+        apu.write(Sony_S_DSP_ADSR::FLAGS,             0);
+        apu.write(Sony_S_DSP_ADSR::ECHO_FEEDBACK,     0);
+        apu.write(Sony_S_DSP_ADSR::ECHO_DELAY,        0);
+        apu.write(Sony_S_DSP_ADSR::ECHO_ENABLE,       0);
+        apu.write(Sony_S_DSP_ADSR::NOISE_ENABLE,      0);
+        apu.write(Sony_S_DSP_ADSR::PITCH_MODULATION,  0);
+        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_LEFT,  0);
+        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_RIGHT, 0);
+        for (unsigned coeff = 0; coeff < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; coeff++)
+            apu.write((coeff << 4) | Sony_S_DSP_ADSR::FIR_COEFFICIENTS, 0);
+
         for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
-            // ---------------------------------------------------------------
-            // MARK: Frequency
-            // ---------------------------------------------------------------
-            // calculate the frequency using standard exponential scale
-            float pitch = params[PARAM_FREQ + voice].getValue();
-            pitch += inputs[INPUT_VOCT + voice].getVoltage();
-            pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
-            float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-            frequency = rack::clamp(frequency, 0.0f, 20000.0f);
-            // convert the floating point frequency to a 14-bit pitch value
-            auto pitch16bit = Sony_S_DSP_ADSR::convert_pitch(frequency);
-            // set the 14-bit pitch value to the cascade of two RAM slots
-            apu.write(mask | Sony_S_DSP_ADSR::PITCH_LOW,  0xff &  pitch16bit     );
-            apu.write(mask | Sony_S_DSP_ADSR::PITCH_HIGH, 0xff & (pitch16bit >> 8));
+
+            auto pitch = Sony_S_DSP_ADSR::convert_pitch(2100);
+            apu.write(mask | Sony_S_DSP_ADSR::PITCH_LOW,  0xff &  pitch     );
+            apu.write(mask | Sony_S_DSP_ADSR::PITCH_HIGH, 0xff & (pitch >> 8));
+
             // ---------------------------------------------------------------
             // MARK: Gain (Custom ADSR override)
             // ---------------------------------------------------------------
@@ -380,30 +348,7 @@ struct ChipS_SMP_ADSR : Module {
             apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_VOLUME_L + voice].getValue());
             apu.write(mask | Sony_S_DSP_ADSR::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
         }
-        // -------------------------------------------------------------------
-        // MARK: FIR Coefficients
-        // -------------------------------------------------------------------
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_ADSR::FIR_COEFFICIENT_COUNT; coeff++) {
-            auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
-            apu.write((coeff << 4) | Sony_S_DSP_ADSR::FIR_COEFFICIENTS, param);
-        }
-        // -------------------------------------------------------------------
-        // MARK: Voice Activity Output
-        // -------------------------------------------------------------------
-        // TODO: This register is written to during DSP activity.
-        //
-        // Each voice gets 1 bit. If the bit is set then it means the BRR
-        // decoder has reached the last compressed block in the sample.
-        //
-        // ENDX
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.read(Sony_S_DSP_ADSR::ENDX, 0);
-        // -------------------------------------------------------------------
-        // MARK: Stereo output
-        // -------------------------------------------------------------------
+
         short sample[2] = {0, 0};
         apu.run(sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());

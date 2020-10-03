@@ -96,6 +96,16 @@
       ]
     },
     {
+      "slug": "S_SMP_ADSR",
+      "name": "S-SMP(ADSR)",
+      "description": "An emulation of the ADSR envelope from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf",
+      "tags": [
+        "Envelope",
+        "Polyphonic"
+      ]
+    },
+    {
       "slug": "S_SMP_Echo",
       "name": "S-SMP(Echo)",
       "description": "An emulation of the echo effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",

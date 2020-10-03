@@ -35,6 +35,7 @@ void init(Plugin* instance) {
     instance->addModel(modelChipGBS);
     instance->addModel(modelChipPOKEY);
     instance->addModel(modelChipS_SMP);
+    instance->addModel(modelChipS_SMP_ADSR);
     instance->addModel(modelChipS_SMP_Echo);
     instance->addModel(modelChipS_SMP_Gauss);
     instance->addModel(modelChipSCC);

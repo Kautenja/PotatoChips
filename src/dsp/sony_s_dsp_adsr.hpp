@@ -186,7 +186,7 @@ class Sony_S_DSP_ADSR {
     ///
     /// @param voice_index the index of the voice to clock the envelope of
     ///
-    int clock_envelope(unsigned voice_idx);
+    int clock_envelope();
 
  public:
     /// @brief Initialize a new Sony_S_DSP_ADSR.

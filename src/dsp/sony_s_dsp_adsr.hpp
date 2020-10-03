@@ -34,67 +34,22 @@ class Sony_S_DSP_ADSR {
     // TODO: remove
     /// @brief the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {
-        /// The volume for the left channel of the main output
-        MAIN_VOLUME_LEFT =         0x0C,
-        /// Echo Feedback
-        ECHO_FEEDBACK =            0x0D,
-        /// The volume for the right channel of the main output
-        MAIN_VOLUME_RIGHT =        0x1C,
-        /// The volume for the left channel of the echo effect
-        ECHO_VOLUME_LEFT =         0x2C,
-        /// pitch modulation
-        PITCH_MODULATION =         0x2D,
-        /// The volume for the right channel of the echo effect
-        ECHO_VOLUME_RIGHT =        0x3C,
-        /// Noise enable
-        NOISE_ENABLE =             0x3D,
         /// Key-on (1 bit for each voice)
-        KEY_ON =                   0x4C,
-        /// Echo enable
-        ECHO_ENABLE =              0x4D,
+        KEY_ON =  0x4C,
         /// Key-off (1 bit for each voice)
-        KEY_OFF =                  0x5C,
-        /// Offset of source directory
-        /// (`OFFSET_SOURCE_DIRECTORY * 0x100` = memory offset)
-        OFFSET_SOURCE_DIRECTORY =  0x5D,
-        /// DSP flags for RESET, MUTE, ECHO, NOISE PERIOD
-        FLAGS =                    0x6C,
-        /// Echo buffer start offset
-        /// (`ECHO_BUFFER_START_OFFSET * 0x100` = memory offset)
-        ECHO_BUFFER_START_OFFSET = 0x6D,
-        /// ENDX - 1 bit for each voice.
-        ENDX =                     0x7C,
-        /// Echo delay, 4-bits, higher values require more memory.
-        ECHO_DELAY =               0x7D
+        KEY_OFF = 0x5C,
     };
 
     // TODO: remove
     /// @brief the channel registers on the S-DSP. To get the register for
     /// channel `n`, perform the logical OR of the register address with `0xn0`.
     enum ChannelRegister : uint8_t {
-        /// Left channel volume (8-bit signed value).
-        VOLUME_LEFT      = 0x00,
-        /// Right channel volume (8-bit signed value).
-        VOLUME_RIGHT     = 0x01,
-        /// Lower 8 bits of pitch.
-        PITCH_LOW        = 0x02,
-        /// Higher 8-bits of pitch.
-        PITCH_HIGH       = 0x03,
-        /// Source number (\f$\in [0, 255]\f$). (references the source directory)
-        SOURCE_NUMBER    = 0x04,
         /// If bit-7 is set, ADSR is enabled. If cleared GAIN is used.
-        ADSR_1           = 0x05,
+        ADSR_1       = 0x05,
         /// These two registers control the ADSR envelope.
-        ADSR_2           = 0x06,
-        /// This register provides function for software envelopes.
-        GAIN             = 0x07,
+        ADSR_2       = 0x06,
         /// The DSP writes the current value of the envelope to this register.
-        ENVELOPE_OUT     = 0x08,
-        /// The DSP writes the current waveform value after envelope
-        /// multiplication and before volume multiplication.
-        WAVEFORM_OUT     = 0x09,
-        /// 8-tap FIR Filter coefficients
-        FIR_COEFFICIENTS = 0x0F
+        ENVELOPE_OUT = 0x08,
     };
 
  private:

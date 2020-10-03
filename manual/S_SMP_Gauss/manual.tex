@@ -1,0 +1,67 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[moduleName=S-SMP(Gauss)]{KautenjaDSP}
+% import a debugging package to show the margin boxes
+% \usepackage{showframe}
+% set the graphics path to the img directory
+\graphicspath{{img/}}
+
+% algorithm2e stuff
+% \SetKwInOut{Objects}{$\CKmatrix{O}$}
+% \SetKwInOut{Weights}{$\CKvector{w}$}
+
+\begin{document}
+\titlePage{S-SMP-Gauss-Logo}{S-SMP-Gauss-Module}{KautenjaDSP}
+
+% -------------------
+% MARK: Overview
+% -------------------
+
+\section{Overview}
+
+\begin{figure}[!htp]
+\centering
+\includegraphics[width=0.5\textwidth]{S-SMP-Chip}
+\caption{The S-SMP module from the SNES. The S-SMP included two discrete microprocessors: the SPC700, and the S-DSP. The SPC700 performed primary computation, while the S-DSP performed DSP specific computations, like BRR decoding, sample playback, applying the echo effect, mixing levels, etc. The SPC700 and S-DSP shared $64KB$ of total RAM that was used for BRR sample data and the echo buffer. The digital audio is decoded back to an analog signal by a 16-bit DAC and amplified using an Op-Amp. Before digital-to-analog conversion, the output audio is low-pass filtered by a Gaussian filter that gives the S-SMP chip a distinctive sound.}
+\end{figure}
+
+\clearpage
+
+S-SMP(Gauss) is a Eurorack module that emulates the Gaussian filter effect from the S-SMP sound chip on the Super Nintendo Entertainment System (SNES). The Gaussian filter of the S-SMP chip was applied to BRR samples to remove unpleasant high-frequency content from the audio signal.
+
+S-SMP(Gauss) provides the key features of the Gaussian filter of the S-SMP chip,
+namely,
+\begin{itemize}
+  \item \textbf{$32KHz$ Sample Rate:} The S-SMP was designed to run at $32kHz$, so the audio inputs and outputs of the module are locked to $32kHz$.
+  \item \textbf{Stereo Processing:} Two lanes of processing for stereo effects or other creative applications
+  \item \textbf{Four Filter Modes:} Four filter modes that act as different combinations of the two coefficients for the reconstruction filter.
+\end{itemize}
+
+% -------------------
+% MARK: Panel Layout
+% -------------------
+
+\clearpage
+\section{Panel Layout}
+
+\begin{figure}[!htp]
+\centering
+\includegraphics{S-SMP-Gauss-Manual}
+\end{figure}
+
+\clearpage
+\begin{enumerate}
+  \item TODO
+\end{enumerate}
+
+% -------------------
+% MARK: References
+% -------------------
+
+\clearpage
+\renewcommand\refname{References \& Acknowledgments}
+\nocite{*}
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}

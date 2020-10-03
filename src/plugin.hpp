@@ -45,4 +45,6 @@ extern rack::Model *modelChipSN76489;
 extern rack::Model *modelChipTurboGrafx16;
 extern rack::Model *modelChipVRC6;
 
+extern rack::Model *modelChipS_SMP_Gaussian;
+
 #endif  // PLUGIN_HPP

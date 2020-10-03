@@ -105,6 +105,16 @@
       ]
     },
     {
+      "slug": "S_SMP_Gaussian",
+      "name": "S-SMP(Gaussian)",
+      "description": "An emulation of the Gaussian low-pass filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gaussian.pdf",
+      "tags": [
+        "Effect",
+        "Polyphonic"
+      ]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",

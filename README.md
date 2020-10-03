@@ -289,6 +289,28 @@ See the [Manual][S_SMP_Echo] for more information about the features of this mod
 [S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: S-SMP-Gauss -->
+<!-- ------------------------------------------------------------ -->
+
+## S-SMP-Gauss
+
+S-SMP-Gauss is an emulation of the Gaussian filter from the Sony S-SMP audio
+processing unit in the
+[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+The Gaussian filter of the S-SMP was applied to output audio and removed
+high-frequency content from the signal.
+
+<p align="center">
+<img alt="S-SMP-Gauss" src="manual/S_SMP_Gauss/img/S-SMP-Gauss-Module.svg">
+</p>
+
+### Features
+
+See the [Manual][S_SMP_Gauss] for more information about the features of this module.
+
+[S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
 

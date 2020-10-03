@@ -115,49 +115,6 @@ class Sony_S_DSP_ADSR {
         uint16_t loop;
     };
 
-    /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9
-    /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
-    /// BRR samples.
-    struct BitRateReductionBlock {
-        /// the number of 1-byte samples in each block of BRR samples
-        static constexpr unsigned NUM_SAMPLES = 8;
-        /// the maximal volume level for a BRR sample block
-        static constexpr uint8_t MAX_VOLUME = 0x0C;
-
-        union {
-            /// a structure containing the 8-bit header flag with schema:
-            // +------+------+------+------+------+------+------+------+
-            // | 7    | 6    | 5    | 4    | 3    | 2    | 1    | 0    |
-            // +------+------+------+------+------+------+------+------+
-            // | Volume (max 0xC0)         | Filter Mode | Loop | End  |
-            // +------+------+------+------+------+------+------+------+
-            struct {
-                /// the end of sample block flag
-                uint8_t is_end : 1;
-                /// the loop flag determining if this block loops
-                uint8_t is_loop : 1;
-                /// the filter mode for selecting 1 of 4 filter modes
-                uint8_t filter : 2;
-                /// the volume level in [0, 12]
-                uint8_t volume : 4;
-
-                /// Set the volume level to a new value.
-                ///
-                /// @param level the level to set the volume to
-                /// @details
-                /// set the volume to the new level in the range [0, 12]
-                ///
-                inline void set_volume(uint8_t level) {
-                    volume = std::min(level, static_cast<uint8_t>(MAX_VOLUME));
-                }
-            } flags;
-            /// the encoded header byte
-            uint8_t header;
-        };
-        /// the 8-byte block of sample data
-        uint8_t samples[NUM_SAMPLES];
-    } __attribute__((packed));
-
     /// @brief Bit-masks for extracting values from the flags registers.
     enum FlagMasks {
         /// a mask for the flag register to extract the noise period parameter
@@ -169,31 +126,6 @@ class Sony_S_DSP_ADSR {
         /// a mask for the flag register to extract the reset chip bit
         FLAG_MASK_RESET = 0x80
     };
-
-    /// @brief A stereo sample in the echo buffer.
-    struct EchoBufferSample {
-        /// the index of the left channel in the samples array
-        static constexpr unsigned LEFT = 0;
-        /// the index of the right channel in the samples array
-        static constexpr unsigned RIGHT = 1;
-        /// the 16-bit sample for the left [0] and right [1] channels.
-        int16_t samples[2];
-    };
-
-    /// @brief Returns the 14-bit pitch based on th given frequency.
-    ///
-    /// @param frequency the frequency in Hz
-    /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
-    /// @details
-    ///
-    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
-    ///
-    static inline uint16_t convert_pitch(float frequency) {
-        // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
-        // mask the 16-bit pitch to 14-bit
-        return 0x3FFF & static_cast<uint16_t>(pitch);
-    }
 
  private:
     /// A structure mapping the register space to a single voice's data fields.
@@ -281,10 +213,6 @@ class Sony_S_DSP_ADSR {
         GlobalData global;
     };
 
-    /// The values of the FIR filter coefficients from the register bank. This
-    /// allows the FIR coefficients to be stored as 16-bit
-    short fir_coeff[FIR_COEFFICIENT_COUNT];
-
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.
     /// @details
@@ -295,17 +223,6 @@ class Sony_S_DSP_ADSR {
 
     /// A bit-mask representation of the active voice gates
     int keys;
-
-    /// A pointer to the head of the echo buffer in RAM
-    int echo_ptr;
-
-    /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
-    short fir_buf[16][2];
-    /// (0 to 7)
-    int fir_offset;
-
-    /// The values of the Gaussian filter on the DAC of the SNES
-    static int16_t const gauss[];
 
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
@@ -356,11 +273,11 @@ class Sony_S_DSP_ADSR {
     ///
     /// @param ram a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP_ADSR(uint8_t* ram);
+    explicit Sony_S_DSP_ADSR(uint8_t* ram_) : ram(ram_) { }
 
     /// @brief Clear state and silence everything.
     void reset() {
-        keys = echo_ptr = fir_offset = 0;
+        keys = 0;
         // reset, mute, echo off
         global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
         global.key_ons = 0;
@@ -370,8 +287,6 @@ class Sony_S_DSP_ADSR {
             v.on_cnt = v.volume[0] = v.volume[1] = 0;
             v.envelope_stage = EnvelopeStage::Release;
         }
-        // clear the echo buffer
-        memset(fir_buf, 0, sizeof fir_buf);
     }
 
     /// @brief Read data from the register at the given address.
@@ -408,10 +323,6 @@ class Sony_S_DSP_ADSR {
                 volume[1] = right;
                 break;
             }
-            case FIR_COEFFICIENTS:  // update FIR coefficients
-                // sign-extend
-                fir_coeff[index] = (int8_t) data;
-                break;
         }
     }
 

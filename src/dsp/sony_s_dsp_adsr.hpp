@@ -206,13 +206,7 @@ class Sony_S_DSP_ADSR {
     inline void write(uint8_t address, uint8_t data) { registers[address] = data; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
-    ///
-    /// @param output_buffer the output buffer to write samples to (optional)
-    ///
-    /// @details
-    /// the sample rate of the system is locked to 32kHz just like the SNES
-    ///
-    void run(int16_t* output_buffer = nullptr);
+    void run();
 };
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

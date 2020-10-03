@@ -192,7 +192,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope(unsigned voice_idx) {
     return envx;
 }
 
-void Sony_S_DSP_ADSR::run(int16_t* output_buffer) {
+void Sony_S_DSP_ADSR::run() {
     // -------------------------------------------------------------------
     // MARK: Key Off / Key On
     // -------------------------------------------------------------------

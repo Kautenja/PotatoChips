@@ -142,7 +142,7 @@ struct ChipS_SMP_ADSR : Module {
             // TODO: ADSR amplitude (Volume)
             // apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
         }
-        apu.run(nullptr);
+        apu.run();
     }
 };
 

@@ -26,13 +26,8 @@
 /// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
 struct ChipS_SMP_Gaussian : Module {
  private:
-    /// the RAM for the S-DSP chip (64KB = 16-bit address space)
-    uint8_t ram[Sony_S_DSP_Gaussian::SIZE_OF_RAM];
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu{ram};
-
-    /// @brief Fill the RAM with 0's.
-    inline void clearRAM() { memset(ram, 0, sizeof ram); }
+    Sony_S_DSP_Gaussian apu{nullptr};
 
     /// triggers for handling gate inputs for the voices
     rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_Gaussian::VOICE_COUNT][2];
@@ -125,16 +120,6 @@ struct ChipS_SMP_Gaussian : Module {
         configParam(PARAM_VOLUME_ECHO + 1, -128, 127, 127, "Echo Volume (Right)");
         configParam(PARAM_VOLUME_MAIN + 0, -128, 127, 127, "Main Volume (Left)");
         configParam(PARAM_VOLUME_MAIN + 1, -128, 127, 127, "Main Volume (Right)");
-        // clear the shared RAM between the CPU and the S-DSP
-        clearRAM();
-        // reset the S-DSP emulator
-        apu.reset();
-        // TODO: remove
-        apu.write(Sony_S_DSP_Gaussian::OFFSET_SOURCE_DIRECTORY, 0);
-        for (unsigned voice = 0; voice < Sony_S_DSP_Gaussian::VOICE_COUNT; voice++) {
-            auto mask = voice << 4;
-            apu.write(mask | Sony_S_DSP_Gaussian::SOURCE_NUMBER, 0);
-        }
     }
 
  protected:
@@ -143,72 +128,6 @@ struct ChipS_SMP_Gaussian : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // TODO: remove
-        // write the first directory to RAM (at the end of the echo buffer)
-        auto dir = reinterpret_cast<Sony_S_DSP_Gaussian::SourceDirectoryEntry*>(&ram[0]);
-        // point to a block immediately after this directory entry
-        dir->start = 4;
-        dir->loop = 4;
-        // set address 256 to a single sample ramp wave sample in BRR format
-        // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP_Gaussian::BitRateReductionBlock*>(&ram[4]);
-        block->flags.set_volume(Sony_S_DSP_Gaussian::BitRateReductionBlock::MAX_VOLUME);
-        block->flags.filter = 0;
-        block->flags.is_loop = 1;
-        block->flags.is_end = 1;
-        for (unsigned i = 0; i < Sony_S_DSP_Gaussian::BitRateReductionBlock::NUM_SAMPLES; i++)
-            block->samples[i] = 15 + 2 * i;
-
-        // TODO: remove
-        // create bit-masks for the key-on and key-off state of each voice
-        uint8_t key_on = 0;
-        uint8_t key_off = 0;
-        // iterate over the voices to detect key-on and key-off events
-        for (unsigned voice = 0; voice < Sony_S_DSP_Gaussian::VOICE_COUNT; voice++) {
-            // get the voltage from the gate input port
-            const auto gate = inputs[INPUT_GATE + voice].getVoltage();
-            // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-            // process the inverted voltage to detect key-of events
-            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-        }
-        if (key_on) {  // a key-on event occurred from the gate input
-            // write key off to enable all voices
-            apu.write(Sony_S_DSP_Gaussian::KEY_OFF, 0);
-            // write the key-on value to the register
-            apu.write(Sony_S_DSP_Gaussian::KEY_ON, key_on);
-        }
-        if (key_off)  // a key-off event occurred from the gate input
-            apu.write(Sony_S_DSP_Gaussian::KEY_OFF, key_off);
-
-        // TODO: remove
-        apu.write(Sony_S_DSP_Gaussian::FLAGS,             0);
-        apu.write(Sony_S_DSP_Gaussian::ECHO_FEEDBACK,     0);
-        apu.write(Sony_S_DSP_Gaussian::ECHO_DELAY,        0);
-        apu.write(Sony_S_DSP_Gaussian::ECHO_ENABLE,       0);
-        apu.write(Sony_S_DSP_Gaussian::NOISE_ENABLE,      0);
-        apu.write(Sony_S_DSP_Gaussian::PITCH_MODULATION,  0);
-        apu.write(Sony_S_DSP_Gaussian::MAIN_VOLUME_LEFT,  127);
-        apu.write(Sony_S_DSP_Gaussian::MAIN_VOLUME_RIGHT, 127);
-        apu.write(Sony_S_DSP_Gaussian::ECHO_VOLUME_LEFT,  0);
-        apu.write(Sony_S_DSP_Gaussian::ECHO_VOLUME_RIGHT, 0);
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Gaussian::FIR_COEFFICIENT_COUNT; coeff++)
-            apu.write((coeff << 4) | Sony_S_DSP_Gaussian::FIR_COEFFICIENTS, 0);
-
-        // TODO: remove
-        for (unsigned voice = 0; voice < Sony_S_DSP_Gaussian::VOICE_COUNT; voice++) {
-            auto mask = voice << 4;
-            float thing = params[PARAM_VOLUME_MAIN].getValue();
-            thing += 128.f;
-            thing /= 255.f;
-            auto pitch = Sony_S_DSP_Gaussian::convert_pitch(thing * 4000);
-            apu.write(mask | Sony_S_DSP_Gaussian::PITCH_LOW,  0xff &  pitch     );
-            apu.write(mask | Sony_S_DSP_Gaussian::PITCH_HIGH, 0xff & (pitch >> 8));
-            apu.write(mask | Sony_S_DSP_Gaussian::GAIN, 0x7f & 127);
-            apu.write(mask | Sony_S_DSP_Gaussian::VOLUME_LEFT,  127);
-            apu.write(mask | Sony_S_DSP_Gaussian::VOLUME_RIGHT, 127);
-        }
-
         short sample[2] = {0, 0};
         auto audioInput = (1 << 8) * inputs[INPUT_GATE].getVoltage() / 10.f;
         apu.run(audioInput, sample);

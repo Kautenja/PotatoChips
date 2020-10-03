@@ -346,13 +346,6 @@ class Sony_S_DSP_Gaussian {
         EnvelopeStage envelope_stage;
     } voice_states[VOICE_COUNT];
 
-    /// TODO: make inline so that `run` becomes a leaf function?
-    /// @brief Process the envelope for the voice with given index.
-    ///
-    /// @param voice_index the index of the voice to clock the envelope of
-    ///
-    int clock_envelope(unsigned voice_idx);
-
  public:
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
     ///
@@ -374,47 +367,6 @@ class Sony_S_DSP_Gaussian {
         }
         // clear the echo buffer
         memset(fir_buf, 0, sizeof fir_buf);
-    }
-
-    /// @brief Read data from the register at the given address.
-    ///
-    /// @param address the address of the register to read data from
-    ///
-    inline uint8_t read(uint8_t address) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        return registers[address];
-    }
-
-    /// @brief Write data to the registers at the given address.
-    ///
-    /// @param address the address of the register to write data to
-    /// @param data the data to write to the register
-    ///
-    void write(uint8_t address, uint8_t data) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        // store the data in the register with given address
-        registers[address] = data;
-        // get the high 4 bits for indexing the voice / FIR coefficients
-        int index = address >> 4;
-        // update volume / FIR coefficients
-        switch (address & FIR_COEFFICIENTS) {
-            // voice volume
-            case 0:    // left channel, fall through to next block
-            case 1: {  // right channel, process both left and right channels
-                short* volume = voice_states[index].volume;
-                int left  = (int8_t) registers[address & ~1];
-                int right = (int8_t) registers[address |  1];
-                volume[0] = left;
-                volume[1] = right;
-                break;
-            }
-            case FIR_COEFFICIENTS:  // update FIR coefficients
-                // sign-extend
-                fir_coeff[index] = (int8_t) data;
-                break;
-        }
     }
 
     /// @brief Run DSP for some samples and write them to the given buffer.

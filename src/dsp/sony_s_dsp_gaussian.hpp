@@ -35,32 +35,30 @@ class Sony_S_DSP_Gaussian {
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
         /// 4th most recent samples
-        short interp3 = 0;
+        int16_t interp3 = 0;
         /// 3rd most recent samples
-        short interp2 = 0;
+        int16_t interp2 = 0;
         /// 2nd most recent samples
-        short interp1 = 0;
+        int16_t interp1 = 0;
         /// 1st most recent samples
-        short interp0 = 0;
+        int16_t interp0 = 0;
         /// 12-bit fractional position
-        short fraction = 0x3FFF;
+        int16_t fraction = 0x3FFF;
+        /// TODO:
+        bool filter1 = true;
+        /// TODO:
+        bool filter2 = true;
     } voice_state;
 
  public:
     /// @brief Initialize a new Sony_S_DSP_Gaussian.
-    ///
-    /// @param ram a pointer to the 64KB shared RAM
-    ///
     Sony_S_DSP_Gaussian() { }
 
-    /// @brief Run DSP for some samples and write them to the given buffer.
+    /// @brief Run the Gaussian filter for the given input sample.
     ///
-    /// @param output_buffer the output buffer to write samples to (optional)
+    /// @param input the 16-bit PCM sample to pass through the Gaussian filter
     ///
-    /// @details
-    /// the sample rate of the system is locked to 32kHz just like the SNES
-    ///
-    void run(int16_t input, int16_t* output_buffer = NULL);
+    int16_t run(int16_t input);
 };
 
 #endif  // DSP_SONY_S_DSP_GAUSSIAN_HPP_

@@ -34,33 +34,32 @@ inline int clamp_16(int n) {
     return std::max(lower, std::min(n, upper));
 }
 
-void Sony_S_DSP_Gaussian::run(int16_t input, int16_t* output_buffer) {
+int16_t Sony_S_DSP_Gaussian::run(int16_t input) {
     // VoiceState& voice = voice_state;
     // cast the input to 32-bit to do maths
     int delta = input;
     // One, two and three point IIR filters
     int smp1 = voice_state.interp0;
     int smp2 = voice_state.interp1;
-    // if (voice_state.block_header & 8) {
+    if (voice_state.filter1) {
         delta += smp1;
         delta -= smp2 >> 1;
-        // if (!(voice_state.block_header & 4)) {
-            // delta += (-smp1 - (smp1 >> 1)) >> 5;
-            // delta += smp2 >> 5;
-        // } else {
+        if (!voice_state.filter2) {
+            delta += (-smp1 - (smp1 >> 1)) >> 5;
+            delta += smp2 >> 5;
+        } else {
             delta += (-smp1 * 13) >> 7;
             delta += (smp2 + (smp2 >> 1)) >> 4;
-        // }
-    // } else if (voice_state.block_header & 4) {
-        // delta += smp1 >> 1;
-        // delta += (-smp1) >> 5;
-    // }
-
+        }
+    } else if (voice_state.filter2) {
+        delta += smp1 >> 1;
+        delta += (-smp1) >> 5;
+    }
+    // update sample history
     voice_state.interp3 = voice_state.interp2;
     voice_state.interp2 = smp2;
     voice_state.interp1 = smp1;
-    // sign-extend
-    voice_state.interp0 = int16_t (clamp_16(delta) * 2);
+    voice_state.interp0 = 2 * clamp_16(delta);
 
     // get the 14-bit frequency value
     // TODO:
@@ -77,13 +76,7 @@ void Sony_S_DSP_Gaussian::run(int16_t input, int16_t* output_buffer) {
                  ((table2[1] * voice_state.interp1) >> 12);
     sample = (int16_t) (sample * 2);
     sample += (table2[0] * voice_state.interp0) >> 11 & ~1;
-    int output = clamp_16(sample);
-
-    if (output_buffer) {  // write final samples
-        // clamp the left and right samples and place them into the buffer
-        output_buffer[0] = clamp_16(output);
-        output_buffer[1] = clamp_16(output);
-    }
+    return clamp_16(sample);
 }
 
 // Base normal_gauss table is almost exactly (with an error of 0 or -1 for each entry):

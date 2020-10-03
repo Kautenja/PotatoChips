@@ -128,11 +128,10 @@ struct ChipS_SMP_Gaussian : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        short sample[2] = {0, 0};
         auto audioInput = (1 << 8) * inputs[INPUT_GATE].getVoltage() / 10.f;
-        apu.run(audioInput, sample);
-        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
+        auto sample = apu.run(audioInput);
+        outputs[OUTPUT_AUDIO].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
+        // outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max());
     }
 };
 

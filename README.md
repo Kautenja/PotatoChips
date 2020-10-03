@@ -292,7 +292,7 @@ See the [Manual][S_SMP_Echo] for more information about the features of this mod
 <!-- MARK: S-SMP-Gauss -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP-Gauss _(Coming Soon!)_
+## S-SMP-Gauss
 
 S-SMP-Gauss is an emulation of the Gaussian filter from the Sony S-SMP audio
 processing unit in the

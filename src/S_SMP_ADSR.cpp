@@ -121,124 +121,15 @@ struct ChipS_SMP_ADSR : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
 
-        // -------------------------------------------------------------------
-        // TODO: remove
-        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_LEFT,  127);
-        apu.write(Sony_S_DSP_ADSR::MAIN_VOLUME_RIGHT, 127);
-        apu.write(Sony_S_DSP_ADSR::FLAGS,             0);
-        apu.write(Sony_S_DSP_ADSR::ECHO_FEEDBACK,     0);
-        apu.write(Sony_S_DSP_ADSR::ECHO_DELAY,        0);
-        apu.write(Sony_S_DSP_ADSR::ECHO_ENABLE,       0);
-        apu.write(Sony_S_DSP_ADSR::NOISE_ENABLE,      0);
-        apu.write(Sony_S_DSP_ADSR::PITCH_MODULATION,  0);
-        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_LEFT,  0);
-        apu.write(Sony_S_DSP_ADSR::ECHO_VOLUME_RIGHT, 0);
-        // -------------------------------------------------------------------
-
         for (unsigned voice = 0; voice < Sony_S_DSP_ADSR::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the
             // logical OR operator
             auto mask = voice << 4;
-
-            // ---------------------------------------------------------------
-            // MARK: Gain (Custom ADSR override)
-            // ---------------------------------------------------------------
-            // TODO: GAIN can be used to implement custom envelopes in your
-            // program. There are 5 modes GAIN uses.
-            // DIRECT
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  0  |               PARAMETER                 |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // INCREASE (LINEAR)
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  1  |  0  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // INCREASE (BENT LINE)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  1  |  1  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // DECREASE (LINEAR)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  0  |  0  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // DECREASE (EXPONENTIAL)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  0  |  1  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // Direct: The value of GAIN is set to PARAMETER.
-            //
-            // Increase (Linear):
-            //     GAIN slides to 1 with additions of 1/64.
-            //
-            // Increase (Bent Line):
-            //     GAIN slides up with additions of 1/64 until it reaches 3/4,
-            //     then it slides up to 1 with additions of 1/256.
-            //
-            // Decrease (Linear):
-            //     GAIN slides down to 0 with subtractions of 1/64.
-            //
-            // Decrease (Exponential):
-            //     GAIN slides down exponentially by getting multiplied by
-            //     255/256.
-            //
-            // Table 2.3 Gain Parameters (Increate 0 -> 1 / Decrease 1 -> 0):
-            // Parameter Value Increase Linear Increase Bentline   Decrease Linear Decrease Exponential
-            // 00  INFINITE    INFINITE    INFINITE    INFINITE
-            // 01  4.1s    7.2s    4.1s    38s
-            // 02  3.1s    5.4s    3.1s    28s
-            // 03  2.6s    4.6s    2.6s    24s
-            // 04  2.0s    3.5s    2.0s    19s
-            // 05  1.5s    2.6s    1.5s    14s
-            // 06  1.3s    2.3s    1.3s    12s
-            // 07  1.0s    1.8s    1.0s    9.4s
-            // 08  770ms   1.3s    770ms   7.1s
-            // 09  640ms   1.1s    640ms   5.9s
-            // 0A  510ms   900ms   510ms   4.7s
-            // 0B  380ms   670ms   380ms   3.5s
-            // 0C  320ms   560ms   320ms   2.9s
-            // 0D  260ms   450ms   260ms   2.4s
-            // 0E  190ms   340ms   190ms   1.8s
-            // 0F  160ms   280ms   160ms   1.5s
-            // 10  130ms   220ms   130ms   1.2s
-            // 11  96ms    170ms   96ms    880ms
-            // 12  80ms    140ms   80ms    740ms
-            // 13  64ms    110ms   64ms    590ms
-            // 14  48ms    84ms    48ms    440ms
-            // 15  40ms    70ms    40ms    370ms
-            // 16  32ms    56ms    32ms    290ms
-            // 17  24ms    42ms    24ms    220ms
-            // 18  20ms    35ms    20ms    180ms
-            // 19  16ms    28ms    16ms    150ms
-            // 1A  12ms    21ms    12ms    110ms
-            // 1B  10ms    18ms    10ms    92ms
-            // 1C  8ms 14ms    8ms 74ms
-            // 1D  6ms 11ms    6ms 55ms
-            // 1E  4ms 7ms 4ms 37ms
-            // 1F  2ms 3.5ms   2ms 18ms
-            //
-            // apu.write(mask | Sony_S_DSP_ADSR::GAIN, 64);
-            // ---------------------------------------------------------------
-            // MARK: ADSR
-            // ---------------------------------------------------------------
             // the ADSR1 register is set from the attack and decay values
             auto attack = (uint8_t) params[PARAM_ATTACK + voice].getValue();
             auto decay = (uint8_t) params[PARAM_DECAY + voice].getValue();
             // the high bit of the ADSR1 register is set to enable the ADSR
-            auto adsr1 = 0b10000000 | (decay << 4) | attack;
+            auto adsr1 = 0x80 | (decay << 4) | attack;
             apu.write(mask | Sony_S_DSP_ADSR::ADSR_1, adsr1);
             // the ADSR2 register is set from the sustain level and rate
             auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL + voice].getValue();
@@ -248,8 +139,8 @@ struct ChipS_SMP_ADSR : Module {
             // ADSR output: 7-bit unsigned value (max 0x7F)
             float envelope = apu.read(mask | Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
             outputs[OUTPUT_ENVELOPE + voice].setVoltage(10.f * envelope);
-            // ADSR amplitude
-            apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
+            // TODO: ADSR amplitude (Volume)
+            // apu.write(mask | Sony_S_DSP_ADSR::VOLUME_LEFT,  params[PARAM_AMPLITUDE + voice].getValue());
         }
         apu.run(nullptr);
     }

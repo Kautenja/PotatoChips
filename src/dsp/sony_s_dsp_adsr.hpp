@@ -218,12 +218,6 @@ class Sony_S_DSP_ADSR {
     ///
     inline void setAmplitude(int8_t value) { amplitude = value; }
 
-    /// @brief Read data from the register at the given address.
-    ///
-    /// @param address the address of the register to read data from
-    ///
-    inline uint8_t read(uint8_t address) { return registers[address]; }
-
     /// @brief Write data to the registers at the given address.
     ///
     /// @param address the address of the register to write data to

@@ -68,14 +68,16 @@ class Sony_S_DSP_ADSR {
     /// the output value from the envelope generator
     int8_t envelope_output = 0;
 
-
-
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : uint8_t { Attack, Decay, Sustain, Release };
     /// the current stage of the envelope generator
     EnvelopeStage envelope_stage = EnvelopeStage::Release;
     /// the current value of the envelope generator
     uint16_t envelope_value = 0;
+    /// TODO
+    short envcnt = 0;
+    /// TODO
+    short on_cnt = 0;
 
     // TODO: remove
     /// A structure mapping the register space to symbolic global data fields.

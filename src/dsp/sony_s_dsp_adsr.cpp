@@ -56,7 +56,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         return envx;
     }
 
-    int cnt = voice.envcnt;
+    int cnt = envcnt;
     switch (envelope_stage) {
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
@@ -111,7 +111,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             break;
     }
 
-    voice.envcnt = cnt;
+    envcnt = cnt;
     envelope_output = envx >> 4;
     return envx;
 }
@@ -130,7 +130,7 @@ int16_t Sony_S_DSP_ADSR::run() {
     // get the voice's bit-mask shift value
     const int voice_bit = 1;
     // key-on
-    if (voice.on_cnt && !--voice.on_cnt) {
+    if (on_cnt && !--on_cnt) {
         keys |= voice_bit;
         envelope_value = 0;
         // NOTE: Real SNES does *not* appear to initialize the
@@ -139,18 +139,18 @@ int16_t Sony_S_DSP_ADSR::run() {
         // expected; as yet, I have been unable to find any
         // pattern.  I doubt it will matter though, so we'll go
         // ahead and do the full time for now.
-        voice.envcnt = ENVELOPE_RATE_INITIAL;
+        envcnt = ENVELOPE_RATE_INITIAL;
         envelope_stage = EnvelopeStage::Attack;
     }
     // key-on = !key-off = true
     if (global.key_ons & voice_bit & ~global.key_offs) {
         global.key_ons &= ~voice_bit;
-        voice.on_cnt = 8;
+        on_cnt = 8;
     }
     // key-off = true
     if (keys & global.key_offs & voice_bit) {
         envelope_stage = EnvelopeStage::Release;
-        voice.on_cnt = 0;
+        on_cnt = 0;
     }
     // clock envelope
     if (!(keys & voice_bit) || clock_envelope() < 0)

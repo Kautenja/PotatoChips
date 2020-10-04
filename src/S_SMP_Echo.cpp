@@ -175,10 +175,10 @@ struct ChipS_SMP_Echo : Module {
         // also set the channels on the output ports based on the number of
         // channels
         unsigned channels = 1;
-        for (unsigned port = 0; port < inputs.size(); port++)
+        for (unsigned port = 0; port < NUM_INPUTS; port++)
             channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
         // set the number of polyphony channels for output ports
-        for (unsigned port = 0; port < outputs.size(); port++)
+        for (unsigned port = 0; port < NUM_OUTPUTS; port++)
             outputs[port].setChannels(channels);
         // process audio samples on the chip engine.
         for (unsigned channel = 0; channel < channels; channel++)

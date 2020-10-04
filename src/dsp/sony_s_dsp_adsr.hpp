@@ -1,4 +1,4 @@
-// Sony S-DSP emulator.
+// Sony S-DSP ADSR envelope generator emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -21,9 +21,10 @@
 
 #include <cstdint>
 
-/// @brief Sony S-DSP chip emulator.
-class __attribute__((aligned)) Sony_S_DSP_ADSR {
+/// @brief Sony S-DSP ADSR envelope generator emulator.
+class Sony_S_DSP_ADSR {
  private:
+    // The following fields are in a particular order for byte-alignment
     // -----------------------------------------------------------------------
     // Byte 1
     // -----------------------------------------------------------------------
@@ -48,8 +49,10 @@ class __attribute__((aligned)) Sony_S_DSP_ADSR {
     // -----------------------------------------------------------------------
     // Byte 4
     // -----------------------------------------------------------------------
-    /// the output value from the envelope generator
-    int8_t envelope_output = 0;
+    /// The stages of the ADSR envelope generator.
+    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
+    /// the current stage of the envelope generator
+    EnvelopeStage envelope_stage = EnvelopeStage::Off;
     // -----------------------------------------------------------------------
     // Byte 5, 6, 7, 8
     // -----------------------------------------------------------------------
@@ -57,22 +60,12 @@ class __attribute__((aligned)) Sony_S_DSP_ADSR {
     uint16_t envelope_value = 0;
     /// the sample (time) counter for the envelope
     uint16_t envelope_counter = 0;
-    // -----------------------------------------------------------------------
-    // Byte 9
-    // -----------------------------------------------------------------------
-    /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
-    /// the current stage of the envelope generator
-    EnvelopeStage envelope_stage = EnvelopeStage::Off;
-    // -----------------------------------------------------------------------
-    // Byte 10,11,12,13,14,15,16 -- auto aligned by __attribute__((aligned))
-    // -----------------------------------------------------------------------
 
     /// @brief Process the envelope for the voice with given index.
     ///
-    /// @returns TODO
+    /// @returns the output value from the envelope generator
     ///
-    int clock_envelope();
+    int8_t clock_envelope();
 
  public:
     /// the sample rate of the S-DSP in Hz

@@ -37,7 +37,7 @@ static const uint16_t ENVELOPE_RATES[0x20] = {
     0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
 };
 
-inline int Sony_S_DSP_ADSR::clock_envelope() {
+inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
     int envx = envelope_value;
     if (envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
@@ -49,11 +49,10 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
             envelope_stage = EnvelopeStage::Off;
-            return -1;
+            return 0;
         }
         envelope_value = envx;
-        envelope_output = envx >> 8;
-        return envx;
+        return envx >> 8;
     }
 
     int cnt = envelope_counter;
@@ -110,26 +109,27 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     }
 
     envelope_counter = cnt;
-    envelope_output = envx >> 4;
-    return envx;
+    return envx >> 4;
 }
 
 int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {
-    if (trigger) {
+    if (trigger) {  // trigger the envelope generator
+        // reset the envelope value to 0 and the stage to attack
         envelope_value = 0;
+        envelope_stage = EnvelopeStage::Attack;
         // NOTE: Real SNES does *not* appear to initialize the envelope
         // counter to anything in particular. The first cycle always seems to
         // come at a random time sooner than expected; as yet, I have been
         // unable to find any pattern.  I doubt it will matter though, so
         // we'll go ahead and do the full time for now.
         envelope_counter = ENVELOPE_RATE_INITIAL;
-        envelope_stage = EnvelopeStage::Attack;
     }
-    // if the gate signal goes low, the envelope stage jumps to release
-    if (!gate_on) envelope_stage = EnvelopeStage::Release;
-    // clock the envelope generator
-    if (envelope_stage == EnvelopeStage::Off || clock_envelope() < 0)
-        envelope_output = 0;
 
-    return envelope_output;
+    if (envelope_stage == EnvelopeStage::Off)  // envelope off, return 0
+        return 0;
+    else if (!gate_on)  // gate went low, move to release stage
+        envelope_stage = EnvelopeStage::Release;
+
+    // clock the envelope generator
+    return clock_envelope();
 }

@@ -73,34 +73,12 @@ class Sony_S_DSP_ADSR {
     // Byte 3
     // -----------------------------------------------------------------------
     /// the total amplitude level of the envelope generator (8-bit)
-    int8_t amplitude;
+    int8_t amplitude = 0;
     // -----------------------------------------------------------------------
-    // TODO:
+    // Byte 4
     // -----------------------------------------------------------------------
-
-
-    // TODO: remove
-    /// A structure mapping the register space to a single voice's data fields.
-    struct RawVoice {
-        /// the volume of the left channel
-        int8_t left_vol;
-        /// the volume of the right channel
-        int8_t right_vol;
-        /// the rate of the oscillator
-        uint8_t rate[2];
-        /// the oscillator's waveform sample
-        uint8_t waveform;
-        /// envelope rates for attack, decay, and sustain
-        uint8_t adsr[2];
-        /// envelope gain (if not using ADSR)
-        uint8_t gain;
-        /// current envelope level
-        int8_t envx;
-        /// current sample
-        int8_t outx;
-        /// filler bytes to align to 16-bytes
-        int8_t unused[6];
-    };
+    /// the output value from the envelope generator
+    int8_t envelope_output = 0;
 
     // TODO: remove
     /// A structure mapping the register space to symbolic global data fields.
@@ -161,8 +139,6 @@ class Sony_S_DSP_ADSR {
     union {
         /// the register bank on the chip
         uint8_t registers[NUM_REGISTERS];
-        /// the mapping of register data to the voices on the chip
-        RawVoice voices[VOICE_COUNT];
         /// the mapping of register data to the global data on the chip
         GlobalData global;
     };
@@ -268,7 +244,7 @@ class Sony_S_DSP_ADSR {
     inline void write(uint8_t address, uint8_t data) { registers[address] = data; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
-    void run();
+    int16_t run();
 };
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

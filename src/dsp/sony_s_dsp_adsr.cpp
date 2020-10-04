@@ -39,7 +39,6 @@ static const short ENVELOPE_RATES[0x20] = {
 
 inline int Sony_S_DSP_ADSR::clock_envelope() {
     unsigned voice_idx = 0;
-    RawVoice& raw_voice = this->voices[voice_idx];
     VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
@@ -56,7 +55,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             return -1;
         }
         voice.envx = envx;
-        raw_voice.envx = envx >> 8;
+        envelope_output = envx >> 8;
         return envx;
     }
 
@@ -116,11 +115,11 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     }
 
     voice.envcnt = cnt;
-    raw_voice.envx = envx >> 4;
+    envelope_output = envx >> 4;
     return envx;
 }
 
-void Sony_S_DSP_ADSR::run() {
+int16_t Sony_S_DSP_ADSR::run() {
     // -------------------------------------------------------------------
     // MARK: Key Off / Key On
     // -------------------------------------------------------------------
@@ -162,5 +161,7 @@ void Sony_S_DSP_ADSR::run() {
     }
     // clock envelope
     if (!(keys & voice_bit) || clock_envelope() < 0)
-        voices[0].envx = 0;
+        envelope_output = 0;
+
+    return envelope_output;
 }

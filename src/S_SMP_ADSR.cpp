@@ -100,36 +100,14 @@ struct ChipS_SMP_ADSR : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
 
-
-
-        // the ADSR1 register is set from the attack and decay values
-        auto attack = (uint8_t) params[PARAM_ATTACK].getValue();
-        auto decay = (uint8_t) params[PARAM_DECAY].getValue();
-        // the high bit of the ADSR1 register is set to enable the ADSR
-        auto adsr1 = 0x80 | (decay << 4) | attack;
-        apu.write(Sony_S_DSP_ADSR::ADSR_1, adsr1);
-        // the ADSR2 register is set from the sustain level and rate
-        auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL].getValue();
-        auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE].getValue();
-        auto adsr2 = (sustainLevel << 5) | sustainRate;
-        apu.write(Sony_S_DSP_ADSR::ADSR_2, adsr2);
-
-
-
         // ADSR parameters
         apu.setAttack(params[PARAM_ATTACK].getValue());
         apu.setDecay(params[PARAM_DECAY].getValue());
         apu.setSustainRate(params[PARAM_SUSTAIN_RATE].getValue());
         apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL].getValue());
         apu.setAmplitude(params[PARAM_AMPLITUDE].getValue());
-
-
-
-        // sample the envelope generator
-        apu.run();
-        // ADSR output: 7-bit unsigned value (max 0x7F)
-        float envelope = apu.read(Sony_S_DSP_ADSR::ENVELOPE_OUT) / 127.f;
-        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * envelope);
+        // Enveloper generator output
+        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * apu.run() / 128.f);
     }
 };
 

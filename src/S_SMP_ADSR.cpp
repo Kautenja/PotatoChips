@@ -93,12 +93,12 @@ struct ChipS_SMP_ADSR : Module {
         const bool key_off = gateTriggers[1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f));
         if (key_on) {  // a key-on event occurred from the gate input
             // write key off to enable all voices
-            apu.write(Sony_S_DSP_ADSR::KEY_OFF, 0);
+            apu.keyOff(false);
             // write the key-on value to the register
-            apu.write(Sony_S_DSP_ADSR::KEY_ON, key_on);
+            apu.keyOn(true);
         }
         if (key_off)  // a key-off event occurred from the gate input
-            apu.write(Sony_S_DSP_ADSR::KEY_OFF, key_off);
+            apu.keyOff(true);
 
         // ADSR parameters
         apu.setAttack(params[PARAM_ATTACK].getValue());

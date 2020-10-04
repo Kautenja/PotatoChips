@@ -143,12 +143,12 @@ int16_t Sony_S_DSP_ADSR::run() {
         envelope_stage = EnvelopeStage::Attack;
     }
     // key-on = !key-off = true
-    if (global.key_ons & voice_bit & ~global.key_offs) {
-        global.key_ons &= ~voice_bit;
+    if (key_ons & voice_bit & ~key_offs) {
+        key_ons &= ~voice_bit;
         on_cnt = 8;
     }
     // key-off = true
-    if (keys & global.key_offs & voice_bit) {
+    if (keys & key_offs & voice_bit) {
         envelope_stage = EnvelopeStage::Release;
         on_cnt = 0;
     }

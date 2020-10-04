@@ -31,15 +31,6 @@ class Sony_S_DSP_ADSR {
     /// the number of registers on the chip TODO: remove
     static constexpr unsigned NUM_REGISTERS = 128;
 
-    // TODO: remove
-    /// @brief the global registers on the S-DSP.
-    enum GlobalRegister : uint8_t {
-        /// Key-on (1 bit for each voice)
-        KEY_ON =  0x4C,
-        /// Key-off (1 bit for each voice)
-        KEY_OFF = 0x5C,
-    };
-
  private:
     // -----------------------------------------------------------------------
     // Byte 1
@@ -68,11 +59,6 @@ class Sony_S_DSP_ADSR {
     /// the output value from the envelope generator
     int8_t envelope_output = 0;
 
-    /// Key On for each voice (bit-mask)
-    // uint8_t key_ons = 0;
-    /// key off for each voice (instantiates release mode) (bit-mask)
-    // uint8_t key_offs = 0;
-
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : uint8_t { Attack, Decay, Sustain, Release };
     /// the current stage of the envelope generator
@@ -83,72 +69,6 @@ class Sony_S_DSP_ADSR {
     short envcnt = 0;
     /// TODO
     short on_cnt = 0;
-
-    // TODO: remove
-    /// A structure mapping the register space to symbolic global data fields.
-    struct GlobalData {
-        /// padding
-        int8_t unused1[12];
-        /// 0C Main Volume Left (8-bit signed value)
-        int8_t left_volume;
-        /// 0D   Echo Feedback (8-bit signed value)
-        int8_t echo_feedback;
-        /// padding
-        int8_t unused2[14];
-        /// 1C   Main Volume Right (8-bit signed value)
-        int8_t right_volume;
-        /// padding
-        int8_t unused3[15];
-        /// 2C   Echo Volume Left (8-bit signed value)
-        int8_t left_echo_volume;
-        /// 2D   Pitch Modulation on/off for each voice (bit-mask)
-        uint8_t pitch_mods;
-        /// padding
-        int8_t unused4[14];
-        /// 3C   Echo Volume Right (8-bit signed value)
-        int8_t right_echo_volume;
-        /// 3D   Noise output on/off for each voice (bit-mask)
-        uint8_t noise_enables;
-        /// padding
-        int8_t unused5[14];
-        /// 4C   Key On for each voice (bit-mask)
-        uint8_t key_ons = 0;
-        /// 4D   Echo on/off for each voice (bit-mask)
-        uint8_t echo_ons;
-        /// padding
-        int8_t unused6[14];
-        /// 5C   key off for each voice (instantiates release mode) (bit-mask)
-        uint8_t key_offs;
-        /// 5D   source directory (wave table offsets)
-        uint8_t wave_page;
-        /// padding
-        int8_t unused7[14];
-        /// 6C   flags and noise freq (coded 8-bit value)
-        uint8_t flags;
-        /// 6D   the page of RAM to use for the echo buffer
-        uint8_t echo_page;
-        /// padding
-        int8_t unused8[14];
-        /// 7C   whether the sample has ended for each voice (bit-mask)
-        uint8_t wave_ended;
-        /// 7D   ms >> 4
-        uint8_t echo_delay;
-        /// padding
-        char unused9[2];
-    };
-
-    // TODO: remove
-    /// Combine the raw voice, registers, and global data structures into a
-    /// single piece of memory to allow easy symbolic access to register data
-    union {
-        /// the register bank on the chip
-        uint8_t registers[NUM_REGISTERS];
-        /// the mapping of register data to the global data on the chip
-        GlobalData global;
-    };
-
-    /// A bit-mask representation of the active voice gates
-    int keys = 0;
 
     /// @brief Process the envelope for the voice with given index.
     ///
@@ -165,6 +85,16 @@ class Sony_S_DSP_ADSR {
         sustain_level = 0;
         amplitude = 0;
     }
+
+    /// A bit-mask representation of the active voice gates
+    int keys = 0;
+    /// Key On for each voice (bit-mask)
+    uint8_t key_ons = 0;
+    /// key off for each voice (instantiates release mode) (bit-mask)
+    uint8_t key_offs = 0;
+
+    void keyOn(bool value) { key_ons = value; }
+    void keyOff(bool value) { key_offs = value; }
 
     /// @brief Set the attack parameter to a new value.
     ///
@@ -195,13 +125,6 @@ class Sony_S_DSP_ADSR {
     /// @param value the amplitude level to use.
     ///
     inline void setAmplitude(int8_t value) { amplitude = value; }
-
-    /// @brief Write data to the registers at the given address.
-    ///
-    /// @param address the address of the register to write data to
-    /// @param data the data to write to the register
-    ///
-    inline void write(uint8_t address, uint8_t data) { registers[address] = data; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     int16_t run();

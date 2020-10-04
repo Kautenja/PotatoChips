@@ -31,7 +31,7 @@ struct ChipS_SMP_ADSR : Module {
  private:
     /// the Sony S-DSP ADSR enveloper generator emulator
     Sony_S_DSP_ADSR apu;
-    /// a trigger for handling input gate signals
+    /// triggers for handling input trigger and gate signals
     rack::dsp::BooleanTrigger trigger[2];
 
  public:

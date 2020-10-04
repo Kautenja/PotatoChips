@@ -88,7 +88,7 @@
       "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf",
       "tags": [
-        "Effect",
+        "Multiple",
         "Noise",
         "Oscillator",
         "Polyphonic",

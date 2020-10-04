@@ -85,21 +85,15 @@ struct ChipS_SMP_ADSR : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // get the voltage from the gate input port
+        // Gate input
         const auto gate = inputs[INPUT_GATE].getVoltage();
-        // process the voltage to detect key-on events
-        const bool key_on = gateTriggers[0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-        // process the inverted voltage to detect key-of events
-        const bool key_off = gateTriggers[1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f));
-        if (key_on) {  // a key-on event occurred from the gate input
-            // write key off to enable all voices
+        if (gateTriggers[0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f))) {
             apu.keyOff(false);
-            // write the key-on value to the register
             apu.keyOn(true);
         }
-        if (key_off)  // a key-off event occurred from the gate input
+        if (gateTriggers[1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f))) {
             apu.keyOff(true);
-
+        }
         // ADSR parameters
         apu.setAttack(params[PARAM_ATTACK].getValue());
         apu.setDecay(params[PARAM_DECAY].getValue());

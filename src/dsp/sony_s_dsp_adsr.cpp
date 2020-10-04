@@ -38,7 +38,7 @@ static const uint16_t ENVELOPE_RATES[0x20] = {
 };
 
 inline int Sony_S_DSP_ADSR::clock_envelope() {
-    int envx = voice.envx;
+    int envx = envelope_value;
     if (envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
@@ -51,7 +51,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             keys &= ~1;
             return -1;
         }
-        voice.envx = envx;
+        envelope_value = envx;
         envelope_output = envx >> 8;
         return envx;
     }
@@ -72,7 +72,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
                 envx = ENVELOPE_RANGE - 1;
                 envelope_stage = EnvelopeStage::Decay;
             }
-            voice.envx = envx;
+            envelope_value = envx;
             break;
         }
 
@@ -86,7 +86,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             if (cnt <= 0) {
                 cnt = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;
-                voice.envx = envx;
+                envelope_value = envx;
             }
 
             if (envx <= (sustain_level + 1) * 0x100)
@@ -102,7 +102,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             if (cnt <= 0) {
                 cnt = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;
-                voice.envx = envx;
+                envelope_value = envx;
             }
             break;
 
@@ -132,7 +132,7 @@ int16_t Sony_S_DSP_ADSR::run() {
     // key-on
     if (voice.on_cnt && !--voice.on_cnt) {
         keys |= voice_bit;
-        voice.envx = 0;
+        envelope_value = 0;
         // NOTE: Real SNES does *not* appear to initialize the
         // envelope counter to anything in particular. The first
         // cycle always seems to come at a random time sooner than

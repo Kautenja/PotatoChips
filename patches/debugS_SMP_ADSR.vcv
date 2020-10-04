@@ -65,7 +65,7 @@
       "params": [],
       "rightModuleId": 164,
       "data": {
-        "channels": 1,
+        "channels": 8,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,

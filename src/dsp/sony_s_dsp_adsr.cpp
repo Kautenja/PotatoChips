@@ -38,7 +38,6 @@ static const uint16_t ENVELOPE_RATES[0x20] = {
 };
 
 inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
-    int envx = envelope_value;
     if (envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
@@ -46,13 +45,12 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
         // When a note is keyed off, start the RELEASE state, which
         // subtracts 1/256th each sample period (32kHz).  Note there's
         // no need for a count because it always happens every update.
-        envx -= ENVELOPE_RANGE / 256;
-        if (envx <= 0) {
+        envelope_value -= ENVELOPE_RANGE / 256;
+        if (envelope_value <= 0) {
             envelope_stage = EnvelopeStage::Off;
             return 0;
         }
-        envelope_value = envx;
-        return envx >> 8;
+        return envelope_value >> 8;
     }
 
     switch (envelope_stage) {
@@ -61,18 +59,17 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
             if (attack == 15) {
-                envx += ENVELOPE_RANGE / 2;
+                envelope_value += ENVELOPE_RANGE / 2;
             } else {
                 envelope_counter -= ENVELOPE_RATES[2 * attack + 1];
                 if (envelope_counter > 0) break;
-                envx += ENVELOPE_RANGE / 64;
+                envelope_value += ENVELOPE_RANGE / 64;
                 envelope_counter = ENVELOPE_RATE_INITIAL;
             }
-            if (envx >= ENVELOPE_RANGE) {
-                envx = ENVELOPE_RANGE - 1;
+            if (envelope_value >= ENVELOPE_RANGE) {
+                envelope_value = ENVELOPE_RANGE - 1;
                 envelope_stage = EnvelopeStage::Decay;
             }
-            envelope_value = envx;
             break;
         }
         case EnvelopeStage::Decay: {
@@ -84,11 +81,10 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
 
             if (envelope_counter <= 0) {
                 envelope_counter = ENVELOPE_RATE_INITIAL;
-                envx -= ((envx - 1) >> 8) + 1;
-                envelope_value = envx;
+                envelope_value -= ((envelope_value - 1) >> 8) + 1;
             }
 
-            if (envx <= (sustain_level + 1) * 0x100)
+            if (envelope_value <= (sustain_level + 1) * 0x100)
                 envelope_stage = EnvelopeStage::Sustain;
             break;
         }
@@ -99,15 +95,14 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             envelope_counter -= ENVELOPE_RATES[sustain_rate];
             if (envelope_counter <= 0) {
                 envelope_counter = ENVELOPE_RATE_INITIAL;
-                envx -= ((envx - 1) >> 8) + 1;
-                envelope_value = envx;
+                envelope_value -= ((envelope_value - 1) >> 8) + 1;
             }
             break;
         case EnvelopeStage::Release:  // handled above
             break;
     }
 
-    return envx >> 4;
+    return envelope_value >> 4;
 }
 
 int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {

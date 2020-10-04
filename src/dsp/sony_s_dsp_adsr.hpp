@@ -57,7 +57,7 @@ class Sony_S_DSP_ADSR {
     // Byte 5, 6, 7, 8
     // -----------------------------------------------------------------------
     /// the current value of the envelope generator
-    uint16_t envelope_value = 0;
+    int16_t envelope_value = 0;
     /// the sample (time) counter for the envelope
     int16_t envelope_counter = 0;
 

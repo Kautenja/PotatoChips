@@ -40,18 +40,6 @@ class Sony_S_DSP_ADSR {
         KEY_OFF = 0x5C,
     };
 
-    // TODO: remove
-    /// @brief the channel registers on the S-DSP. To get the register for
-    /// channel `n`, perform the logical OR of the register address with `0xn0`.
-    enum ChannelRegister : uint8_t {
-        /// If bit-7 is set, ADSR is enabled. If cleared GAIN is used.
-        ADSR_1       = 0x05,
-        /// These two registers control the ADSR envelope.
-        ADSR_2       = 0x06,
-        /// The DSP writes the current value of the envelope to this register.
-        ENVELOPE_OUT = 0x08,
-    };
-
  private:
     // -----------------------------------------------------------------------
     // Byte 1

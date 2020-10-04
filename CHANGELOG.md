@@ -167,3 +167,6 @@
     -   Gaussian filter from the SNES
     -   low-pass filter locked to 16kHz with parameterized coefficients
     -   designed to act as a low-pass gate / VCA without a VCF
+-   new module: S-SMP(ADSR)
+    -   Envelope generator from the SNES
+    -   Attack, Decay, Sustain, and Release stages

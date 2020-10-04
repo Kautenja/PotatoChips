@@ -42,7 +42,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     VoiceState& voice = voice_states[voice_idx];
 
     int envx = voice.envx;
-    if (voice.envelope_stage == EnvelopeStage::Release) {
+    if (envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
         // Alright, I'm going to choose to interpret that this way:
@@ -60,7 +60,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     }
 
     int cnt = voice.envcnt;
-    switch (voice.envelope_stage) {
+    switch (envelope_stage) {
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
             if (attack == 15) {
@@ -73,7 +73,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             }
             if (envx >= ENVELOPE_RANGE) {
                 envx = ENVELOPE_RANGE - 1;
-                voice.envelope_stage = EnvelopeStage::Decay;
+                envelope_stage = EnvelopeStage::Decay;
             }
             voice.envx = envx;
             break;
@@ -93,7 +93,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             }
 
             if (envx <= (sustain_level + 1) * 0x100)
-                voice.envelope_stage = EnvelopeStage::Sustain;
+                envelope_stage = EnvelopeStage::Sustain;
             break;
         }
 
@@ -147,7 +147,7 @@ int16_t Sony_S_DSP_ADSR::run() {
         // pattern.  I doubt it will matter though, so we'll go
         // ahead and do the full time for now.
         voice.envcnt = ENVELOPE_RATE_INITIAL;
-        voice.envelope_stage = EnvelopeStage::Attack;
+        envelope_stage = EnvelopeStage::Attack;
     }
     // key-on = !key-off = true
     if (global.key_ons & voice_bit & ~global.key_offs) {
@@ -156,7 +156,7 @@ int16_t Sony_S_DSP_ADSR::run() {
     }
     // key-off = true
     if (keys & global.key_offs & voice_bit) {
-        voice.envelope_stage = EnvelopeStage::Release;
+        envelope_stage = EnvelopeStage::Release;
         voice.on_cnt = 0;
     }
     // clock envelope

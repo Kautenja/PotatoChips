@@ -70,8 +70,8 @@ class Sony_S_DSP_ADSR {
     uint16_t envelope_value = 0;
     /// the sample (time) counter for the envelope
     short envelope_counter = 0;
-    /// TODO
-    short on_cnt = 0;
+    /// true if the envelope generator is running (clocking an envelope)
+    bool keys = 0;
 
     /// @brief Process the envelope for the voice with given index.
     ///
@@ -88,16 +88,6 @@ class Sony_S_DSP_ADSR {
         sustain_level = 0;
         amplitude = 0;
     }
-
-    /// A bit-mask representation of the active voice gates
-    bool keys = 0;
-    /// Key On for each voice (bit-mask)
-    bool key_ons = 0;
-    /// key off for each voice (instantiates release mode) (bit-mask)
-    bool key_offs = 0;
-
-    void keyOn(bool value) { key_ons = value; }
-    void keyOff(bool value) { key_offs = value; }
 
     /// @brief Set the attack parameter to a new value.
     ///
@@ -130,7 +120,7 @@ class Sony_S_DSP_ADSR {
     inline void setAmplitude(int8_t value) { amplitude = value; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
-    int16_t run();
+    int16_t run(bool trigger, bool gate_on);
 };
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

@@ -31,10 +31,8 @@ struct ChipS_SMP_ADSR : Module {
  private:
     /// the Sony S-DSP ADSR enveloper generator emulator
     Sony_S_DSP_ADSR apu;
-
-    /// triggers for handling gate inputs for the voices. index=0 is for
-    /// detecting key-on and index=1 is for detecting key-off
-    rack::dsp::BooleanTrigger gateTriggers[2];
+    /// a trigger for handling input gate signals
+    rack::dsp::BooleanTrigger trigger;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -85,23 +83,18 @@ struct ChipS_SMP_ADSR : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // Gate input
-        const auto gate = inputs[INPUT_GATE].getVoltage();
-        if (gateTriggers[0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f))) {
-            apu.keyOff(false);
-            apu.keyOn(true);
-        }
-        if (gateTriggers[1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f))) {
-            apu.keyOff(true);
-        }
         // ADSR parameters
         apu.setAttack(params[PARAM_ATTACK].getValue());
         apu.setDecay(params[PARAM_DECAY].getValue());
         apu.setSustainRate(params[PARAM_SUSTAIN_RATE].getValue());
         apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL].getValue());
         apu.setAmplitude(params[PARAM_AMPLITUDE].getValue());
+        // Gate input
+        const auto gate = inputs[INPUT_GATE].getVoltage();
+        const bool keyOn = trigger.process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
         // Enveloper generator output
-        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * apu.run() / 128.f);
+        auto sample = apu.run(keyOn, trigger.state);
+        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * sample / 128.f);
     }
 };
 

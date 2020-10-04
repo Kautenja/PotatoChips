@@ -116,45 +116,22 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     return envx;
 }
 
-int16_t Sony_S_DSP_ADSR::run() {
-    // -------------------------------------------------------------------
-    // MARK: Key Off / Key On
-    // -------------------------------------------------------------------
-    // Here we check for keys on / off. Docs say that successive writes
-    // to KON / KOF must be separated by at least 2 T_s periods or risk
-    // being neglected.  Therefore, DSP only looks at these during an
-    // update, and not at the time of the write. Only need to do this
-    // once however, since the regs haven't changed over the whole
-    // period we need to catch up with.
-    // -------------------------------------------------------------------
-    // get the voice's bit-mask shift value
-    const int voice_bit = 1;
-    // key-on
-    if (on_cnt && !--on_cnt) {
+int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {
+    if (trigger) {
         keys = 1;
         envelope_value = 0;
-        // NOTE: Real SNES does *not* appear to initialize the
-        // envelope counter to anything in particular. The first
-        // cycle always seems to come at a random time sooner than
-        // expected; as yet, I have been unable to find any
-        // pattern.  I doubt it will matter though, so we'll go
-        // ahead and do the full time for now.
+        // NOTE: Real SNES does *not* appear to initialize the envelope
+        // counter to anything in particular. The first cycle always seems to
+        // come at a random time sooner than expected; as yet, I have been
+        // unable to find any pattern.  I doubt it will matter though, so
+        // we'll go ahead and do the full time for now.
         envelope_counter = ENVELOPE_RATE_INITIAL;
         envelope_stage = EnvelopeStage::Attack;
     }
-    // key-on = !key-off = true
-    if (key_ons & voice_bit & ~key_offs) {
-        key_ons &= ~voice_bit;
-        on_cnt = 1;
-    }
-    // key-off = true
-    if (keys & key_offs & voice_bit) {
-        envelope_stage = EnvelopeStage::Release;
-        on_cnt = 0;
-    }
-    // clock envelope
-    if (!(keys & voice_bit) || clock_envelope() < 0)
-        envelope_output = 0;
+    // if the gate signal goes low, the envelope stage jumps to release
+    if (!gate_on) envelope_stage = EnvelopeStage::Release;
+    // clock the envelope generator
+    if (!keys || clock_envelope() < 0) envelope_output = 0;
 
     return envelope_output;
 }

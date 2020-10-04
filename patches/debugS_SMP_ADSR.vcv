@@ -89,7 +89,7 @@
       "params": [
         {
           "id": 0,
-          "value": 127.0
+          "value": 121.0
         },
         {
           "id": 1,
@@ -97,11 +97,11 @@
         },
         {
           "id": 2,
-          "value": 10.0
+          "value": 2.0
         },
         {
           "id": 3,
-          "value": 15.0
+          "value": 1.0
         },
         {
           "id": 4,
@@ -109,7 +109,7 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 6,
@@ -117,7 +117,7 @@
         },
         {
           "id": 7,
-          "value": 7.0
+          "value": 1.0
         },
         {
           "id": 8,
@@ -125,7 +125,7 @@
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 20.0
         }
       ],
       "leftModuleId": 162,
@@ -272,14 +272,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 101,
-      "outputModuleId": 162,
-      "outputId": 1,
-      "inputModuleId": 164,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
       "id": 146,
       "outputModuleId": 162,
       "outputId": 6,
@@ -296,14 +288,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 148,
-      "outputModuleId": 156,
-      "outputId": 0,
-      "inputModuleId": 166,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
       "id": 98,
       "outputModuleId": 164,
       "outputId": 0,
@@ -312,11 +296,43 @@
       "color": "#c9b70e"
     },
     {
+      "id": 151,
+      "outputModuleId": 164,
+      "outputId": 1,
+      "inputModuleId": 166,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
       "id": 149,
       "outputModuleId": 164,
-      "outputId": 0,
+      "outputId": 1,
       "inputModuleId": 156,
       "inputId": 6,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 152,
+      "outputModuleId": 162,
+      "outputId": 1,
+      "inputModuleId": 164,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 153,
+      "outputModuleId": 162,
+      "outputId": 6,
+      "inputModuleId": 164,
+      "inputId": 3,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 101,
+      "outputModuleId": 162,
+      "outputId": 1,
+      "inputModuleId": 164,
+      "inputId": 0,
       "color": "#c9b70e"
     }
   ]

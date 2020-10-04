@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <limits>
 #include "plugin.hpp"
 #include "componentlibrary.hpp"
 #include "dsp/sony_s_dsp_adsr.hpp"
@@ -30,10 +31,10 @@ struct ChipS_SMP_ADSR : Module {
 
  private:
     /// the Sony S-DSP ADSR enveloper generator emulator
-    Sony_S_DSP_ADSR apu;
+    Sony_S_DSP_ADSR apus[LANES];
     /// triggers for handling input trigger and gate signals
-    rack::dsp::BooleanTrigger gateTrigger;
-    rack::dsp::BooleanTrigger retrigTrigger;
+    rack::dsp::BooleanTrigger gateTrigger[LANES];
+    rack::dsp::BooleanTrigger retrigTrigger[LANES];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -80,25 +81,120 @@ struct ChipS_SMP_ADSR : Module {
     }
 
  protected:
+    /// @brief Return the value of the attack parameter from the panel.
+    ///
+    /// @param channel the polyphonic channel to get the attack parameter for
+    /// @param lane the stereo delay lane to get the attack rate parameter for
+    /// @returns the 8-bit attack parameter after applying CV modulations
+    ///
+    inline uint8_t getAttack(unsigned channel, unsigned lane) {
+        const float param = params[PARAM_ATTACK + lane].getValue();
+        const float cv = inputs[INPUT_ATTACK + lane].getPolyVoltage(channel);
+        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        return clamp(param + mod, 0.f, 15.f);
+    }
+
+    /// @brief Return the value of the decay parameter from the panel.
+    ///
+    /// @param channel the polyphonic channel to get the decay parameter for
+    /// @param lane the stereo delay lane to get the decay rate parameter for
+    /// @returns the 8-bit decay parameter after applying CV modulations
+    ///
+    inline uint8_t getDecay(unsigned channel, unsigned lane) {
+        const float param = params[PARAM_DECAY + lane].getValue();
+        const float cv = inputs[INPUT_DECAY + lane].getPolyVoltage(channel);
+        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        return clamp(param + mod, 0.f, 7.f);
+    }
+
+    /// @brief Return the value of the sustain rate parameter from the panel.
+    ///
+    /// @param channel the polyphonic channel to get the sustain rate parameter for
+    /// @param lane the stereo delay lane to get the sustain rate parameter for
+    /// @returns the 8-bit sustain rate parameter after applying CV modulations
+    ///
+    inline uint8_t getSustainRate(unsigned channel, unsigned lane) {
+        const float param = params[PARAM_SUSTAIN_RATE + lane].getValue();
+        const float cv = inputs[INPUT_SUSTAIN_RATE + lane].getPolyVoltage(channel);
+        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        return clamp(param + mod, 0.f, 31.f);
+    }
+
+    /// @brief Return the value of the sustain level parameter from the panel.
+    ///
+    /// @param channel the polyphonic channel to get the sustain level parameter for
+    /// @param lane the stereo delay lane to get the sustain level parameter for
+    /// @returns the 8-bit sustain level parameter after applying CV modulations
+    ///
+    inline uint8_t getSustainLevel(unsigned channel, unsigned lane) {
+        const float param = params[PARAM_SUSTAIN_LEVEL + lane].getValue();
+        const float cv = inputs[INPUT_SUSTAIN_LEVEL + lane].getPolyVoltage(channel);
+        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        return clamp(param + mod, 0.f, 7.f);
+    }
+
+    /// @brief Return the value of the amplitude parameter from the panel.
+    ///
+    /// @param channel the polyphonic channel to get the amplitude parameter for
+    /// @param lane the stereo delay lane to get the amplitude parameter for
+    /// @returns the 8-bit amplitude parameter after applying CV modulations
+    ///
+    inline int8_t getAmplitude(unsigned channel, unsigned lane) {
+        const float param = params[PARAM_AMPLITUDE + lane].getValue();
+        const float cv = inputs[INPUT_AMPLITUDE + lane].getPolyVoltage(channel);
+        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        static constexpr float MIN = std::numeric_limits<int8_t>::min();
+        static constexpr float MAX = std::numeric_limits<int8_t>::max();
+        return clamp(param + mod, MIN, MAX);
+    }
+
+    inline bool getTrigger(unsigned channel, unsigned lane) {
+        const auto gateCV = rescale(inputs[INPUT_GATE + lane].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const bool gate = gateTrigger[lane].process(gateCV);
+        const auto retrigCV = rescale(inputs[INPUT_RETRIG + lane].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const bool retrig = retrigTrigger[lane].process(retrigCV);
+        return gate || retrig;
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param channel the polyphonic channel to process the CV inputs to
+    /// @param lane the processing lane on the module to process
+    ///
+    inline void processChannel(unsigned channel, unsigned lane) {
+        // cache the APU for this lane and channel
+        Sony_S_DSP_ADSR& apu = apus[lane];
+        // set the ADSR parameters for this APU
+        apu.setAttack(getAttack(channel, lane));
+        apu.setDecay(getDecay(channel, lane));
+        apu.setSustainRate(getSustainRate(channel, lane));
+        apu.setSustainLevel(getSustainLevel(channel, lane));
+        apu.setAmplitude(getAmplitude(channel, lane));
+        // trigger this APU and process the output
+        auto trigger = getTrigger(channel, lane);
+        auto sample = apu.run(trigger, gateTrigger[lane].state);
+        outputs[OUTPUT_ENVELOPE + lane].setVoltage(10.f * sample / 128.f, channel);
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
     inline void process(const ProcessArgs &args) final {
-        // ADSR parameters
-        apu.setAttack(params[PARAM_ATTACK].getValue());
-        apu.setDecay(params[PARAM_DECAY].getValue());
-        apu.setSustainRate(params[PARAM_SUSTAIN_RATE].getValue());
-        apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL].getValue());
-        apu.setAmplitude(params[PARAM_AMPLITUDE].getValue());
-        // Gate + Retrig input
-        const bool gate = gateTrigger.process(
-            rescale(inputs[INPUT_GATE].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-        const bool retrig = retrigTrigger.process(
-            rescale(inputs[INPUT_RETRIG].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-        // Enveloper generator output
-        auto sample = apu.run(gate || retrig, gateTrigger.state);
-        outputs[OUTPUT_ENVELOPE].setVoltage(10.f * sample / 128.f);
+        // get the number of polyphonic channels (defaults to 1 for monophonic).
+        // also set the channels on the output ports based on the number of
+        // channels
+        unsigned channels = 1;
+        for (unsigned port = 0; port < inputs.size(); port++)
+            channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        // set the number of polyphony channels for output ports
+        for (unsigned port = 0; port < outputs.size(); port++)
+            outputs[port].setChannels(channels);
+        // process audio samples on the chip engine.
+        for (unsigned lane = 0; lane < LANES; lane++) {
+            for (unsigned channel = 0; channel < channels; channel++)
+                processChannel(channel, lane);
+        }
     }
 };
 

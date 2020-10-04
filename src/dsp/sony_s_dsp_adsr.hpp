@@ -72,12 +72,11 @@ class Sony_S_DSP_ADSR {
     static constexpr unsigned SAMPLE_RATE = 32000;
 
     /// @brief Initialize a new Sony_S_DSP_ADSR.
-    Sony_S_DSP_ADSR() : unused_spacer_for_byte_alignment(1) {
+    Sony_S_DSP_ADSR() : unused_spacer_for_byte_alignment(0) {
         attack = 0;
         decay = 0;
         sustain_rate = 0;
         sustain_level = 0;
-        amplitude = 0;
     }
 
     /// @brief Set the attack parameter to a new value.

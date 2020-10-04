@@ -1,4 +1,4 @@
-// Sony SPC700 emulator.
+// Sony S-DSP ADSR envelope generator emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2002 Brad Martin
@@ -123,13 +123,12 @@ int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {
         // unable to find any pattern.  I doubt it will matter though, so
         // we'll go ahead and do the full time for now.
         envelope_counter = ENVELOPE_RATE_INITIAL;
-    }
-
-    if (envelope_stage == EnvelopeStage::Off)  // envelope off, return 0
+    } else if (envelope_stage == EnvelopeStage::Off) {
         return 0;
-    else if (!gate_on)  // gate went low, move to release stage
+    } else if (!gate_on) {  // gate went low, move to release stage
         envelope_stage = EnvelopeStage::Release;
-
-    // clock the envelope generator
-    return clock_envelope();
+    }
+    // clock the envelope generator and apply the global amplitude level
+    const int output = clock_envelope();
+    return (output * amplitude) >> 7;
 }

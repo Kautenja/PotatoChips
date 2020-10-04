@@ -73,10 +73,10 @@ struct ChipS_SMP_ADSR : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned lane = 0; lane < LANES; lane++) {
             configParam(PARAM_AMPLITUDE     + lane, -128, 127, 127, "Amplitude");
-            configParam(PARAM_ATTACK        + lane,    0,  15,   0, "Attack");
-            configParam(PARAM_DECAY         + lane,    0,   7,   0, "Decay");
-            configParam(PARAM_SUSTAIN_LEVEL + lane,    0,   7,   0, "Sustain Level");
-            configParam(PARAM_SUSTAIN_RATE  + lane,    0,  31,   0, "Sustain Rate");
+            configParam(PARAM_ATTACK        + lane,    0,  15,  10, "Attack");
+            configParam(PARAM_DECAY         + lane,    0,   7,   7, "Decay");
+            configParam(PARAM_SUSTAIN_LEVEL + lane,    0,   7,   5, "Sustain Level", "%", 0, 100.f / 7.f);
+            configParam(PARAM_SUSTAIN_RATE  + lane,    0,  31,  20, "Sustain Rate");
         }
     }
 
@@ -91,7 +91,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_ATTACK + lane].getValue();
         const float cv = inputs[INPUT_ATTACK + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        return clamp(param + mod, 0.f, 15.f);
+        return 15 - clamp(param + mod, 0.f, 15.f);
     }
 
     /// @brief Return the value of the decay parameter from the panel.
@@ -104,7 +104,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_DECAY + lane].getValue();
         const float cv = inputs[INPUT_DECAY + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        return clamp(param + mod, 0.f, 7.f);
+        return 7 - clamp(param + mod, 0.f, 7.f);
     }
 
     /// @brief Return the value of the sustain rate parameter from the panel.
@@ -117,7 +117,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_SUSTAIN_RATE + lane].getValue();
         const float cv = inputs[INPUT_SUSTAIN_RATE + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        return clamp(param + mod, 0.f, 31.f);
+        return 31 - clamp(param + mod, 0.f, 31.f);
     }
 
     /// @brief Return the value of the sustain level parameter from the panel.

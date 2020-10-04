@@ -48,7 +48,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         // no need for a count because it always happens every update.
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
-            keys = 0;
+            envelope_stage = EnvelopeStage::Off;
             return -1;
         }
         envelope_value = envx;
@@ -58,6 +58,8 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
 
     int cnt = envelope_counter;
     switch (envelope_stage) {
+        case EnvelopeStage::Off:  // do nothing
+            break;
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
             if (attack == 15) {
@@ -75,7 +77,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             envelope_value = envx;
             break;
         }
-
         case EnvelopeStage::Decay: {
             // Docs: "DR...[is multiplied] by the fixed value
             // 1-1/256." Well, at least that makes some sense.
@@ -93,7 +94,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
                 envelope_stage = EnvelopeStage::Sustain;
             break;
         }
-
         case EnvelopeStage::Sustain:
             // Docs: "SR[is multiplied] by the fixed value 1-1/256."
             // Multiplying ENVX by 255/256 every time SUSTAIN is
@@ -105,9 +105,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
                 envelope_value = envx;
             }
             break;
-
-        case EnvelopeStage::Release:
-            // handled above
+        case EnvelopeStage::Release:  // handled above
             break;
     }
 
@@ -118,7 +116,6 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
 
 int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {
     if (trigger) {
-        keys = 1;
         envelope_value = 0;
         // NOTE: Real SNES does *not* appear to initialize the envelope
         // counter to anything in particular. The first cycle always seems to
@@ -131,7 +128,8 @@ int16_t Sony_S_DSP_ADSR::run(bool trigger, bool gate_on) {
     // if the gate signal goes low, the envelope stage jumps to release
     if (!gate_on) envelope_stage = EnvelopeStage::Release;
     // clock the envelope generator
-    if (!keys || clock_envelope() < 0) envelope_output = 0;
+    if (envelope_stage == EnvelopeStage::Off || clock_envelope() < 0)
+        envelope_output = 0;
 
     return envelope_output;
 }

@@ -48,7 +48,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         // no need for a count because it always happens every update.
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
-            keys &= ~1;
+            keys = 0;
             return -1;
         }
         envelope_value = envx;

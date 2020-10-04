@@ -25,50 +25,42 @@
 
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipS_SMP_ADSR : Module {
+    /// the number of processing lanes on the module
+    static constexpr unsigned LANES = 2;
+
  private:
-    /// the Sony S-DSP sound chip emulator
+    /// the Sony S-DSP ADSR enveloper generator emulator
     Sony_S_DSP_ADSR apu;
 
-    /// triggers for handling gate inputs for the voices
+    /// triggers for handling gate inputs for the voices. index=0 is for
+    /// detecting key-on and index=1 is for detecting key-off
     rack::dsp::BooleanTrigger gateTriggers[2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        PARAM_NOISE_FREQ,  // TODO: remove
-        ENUMS(PARAM_AMPLITUDE,     Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(PARAM_AMPLITUDE,     LANES),
+        ENUMS(PARAM_ATTACK,        LANES),
+        ENUMS(PARAM_DECAY,         LANES),
+        ENUMS(PARAM_SUSTAIN_LEVEL, LANES),
+        ENUMS(PARAM_SUSTAIN_RATE,  LANES),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_FM,            Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP_ADSR::VOICE_COUNT),  // TODO: remove
-        INPUT_NOISE_FM,  // TODO: remove
-        ENUMS(INPUT_GATE,          Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_AMPLITUDE,     Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_ATTACK,        Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_DECAY,         Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_ADSR::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(INPUT_GATE,          LANES),
+        ENUMS(INPUT_AMPLITUDE,     LANES),
+        ENUMS(INPUT_ATTACK,        LANES),
+        ENUMS(INPUT_DECAY,         LANES),
+        ENUMS(INPUT_SUSTAIN_LEVEL, LANES),
+        ENUMS(INPUT_SUSTAIN_RATE,  LANES),
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, 2), // TODO: remove
-        ENUMS(OUTPUT_ENVELOPE, Sony_S_DSP_ADSR::VOICE_COUNT),
+        ENUMS(OUTPUT_ENVELOPE, LANES),
         NUM_OUTPUTS
     };
 
@@ -78,11 +70,13 @@ struct ChipS_SMP_ADSR : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_ADSR() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_AMPLITUDE,     -128, 127, 127, "Amplitude");
-        configParam(PARAM_ATTACK,           0,  15,   0, "Attack");
-        configParam(PARAM_DECAY,            0,   7,   0, "Decay");
-        configParam(PARAM_SUSTAIN_LEVEL,    0,   7,   0, "Sustain Level");
-        configParam(PARAM_SUSTAIN_RATE,     0,  31,   0, "Sustain Rate");
+        for (unsigned lane = 0; lane < LANES; lane++) {
+            configParam(PARAM_AMPLITUDE     + lane, -128, 127, 127, "Amplitude");
+            configParam(PARAM_ATTACK        + lane,    0,  15,   0, "Attack");
+            configParam(PARAM_DECAY         + lane,    0,   7,   0, "Decay");
+            configParam(PARAM_SUSTAIN_LEVEL + lane,    0,   7,   0, "Sustain Level");
+            configParam(PARAM_SUSTAIN_RATE  + lane,    0,  31,   0, "Sustain Rate");
+        }
     }
 
  protected:

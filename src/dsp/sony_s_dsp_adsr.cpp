@@ -93,9 +93,8 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
         envelope_value -= ENVELOPE_RANGE / 256;
         if (envelope_value <= 0) {
             envelope_stage = EnvelopeStage::Off;
-            return 0;
+            envelope_value = 0;
         }
-        return envelope_value >> 8;
     }
 
     return envelope_value >> 4;

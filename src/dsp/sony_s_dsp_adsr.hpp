@@ -176,7 +176,7 @@ class Sony_S_DSP_ADSR {
         short on_cnt = 0;
         /// the current stage of the envelope generator
         EnvelopeStage envelope_stage = EnvelopeStage::Release;
-    } voice_states[VOICE_COUNT];
+    } voice;
 
     /// @brief Process the envelope for the voice with given index.
     ///

@@ -38,9 +38,6 @@ static const short ENVELOPE_RATES[0x20] = {
 };
 
 inline int Sony_S_DSP_ADSR::clock_envelope() {
-    unsigned voice_idx = 0;
-    VoiceState& voice = voice_states[voice_idx];
-
     int envx = voice.envx;
     if (envelope_stage == EnvelopeStage::Release) {
         // Docs: "When in the state of "key off". the "click" sound is
@@ -51,7 +48,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         // no need for a count because it always happens every update.
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
-            keys &= ~(1 << voice_idx);
+            keys &= ~1;
             return -1;
         }
         voice.envx = envx;
@@ -130,12 +127,8 @@ int16_t Sony_S_DSP_ADSR::run() {
     // once however, since the regs haven't changed over the whole
     // period we need to catch up with.
     // -------------------------------------------------------------------
-    // unsigned voice_idx = 0;
-
     // get the voice's bit-mask shift value
     const int voice_bit = 1;
-    // cache the voice and data structures
-    VoiceState& voice = voice_states[0];
     // key-on
     if (voice.on_cnt && !--voice.on_cnt) {
         keys |= voice_bit;

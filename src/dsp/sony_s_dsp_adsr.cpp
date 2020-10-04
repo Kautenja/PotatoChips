@@ -55,7 +55,6 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
         return envx >> 8;
     }
 
-    int cnt = envelope_counter;
     switch (envelope_stage) {
         case EnvelopeStage::Off:  // do nothing
             break;
@@ -64,10 +63,10 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             if (attack == 15) {
                 envx += ENVELOPE_RANGE / 2;
             } else {
-                cnt -= ENVELOPE_RATES[2 * attack + 1];
-                if (cnt > 0) break;
+                envelope_counter -= ENVELOPE_RATES[2 * attack + 1];
+                if (envelope_counter > 0) break;
                 envx += ENVELOPE_RANGE / 64;
-                cnt = ENVELOPE_RATE_INITIAL;
+                envelope_counter = ENVELOPE_RATE_INITIAL;
             }
             if (envx >= ENVELOPE_RANGE) {
                 envx = ENVELOPE_RANGE - 1;
@@ -81,10 +80,10 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             // 1-1/256." Well, at least that makes some sense.
             // Multiplying ENVX by 255/256 every time DECAY is
             // updated.
-            cnt -= ENVELOPE_RATES[(decay << 1) + 0x10];
+            envelope_counter -= ENVELOPE_RATES[(decay << 1) + 0x10];
 
-            if (cnt <= 0) {
-                cnt = ENVELOPE_RATE_INITIAL;
+            if (envelope_counter <= 0) {
+                envelope_counter = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;
                 envelope_value = envx;
             }
@@ -97,9 +96,9 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             // Docs: "SR[is multiplied] by the fixed value 1-1/256."
             // Multiplying ENVX by 255/256 every time SUSTAIN is
             // updated.
-            cnt -= ENVELOPE_RATES[sustain_rate];
-            if (cnt <= 0) {
-                cnt = ENVELOPE_RATE_INITIAL;
+            envelope_counter -= ENVELOPE_RATES[sustain_rate];
+            if (envelope_counter <= 0) {
+                envelope_counter = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;
                 envelope_value = envx;
             }
@@ -108,7 +107,6 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             break;
     }
 
-    envelope_counter = cnt;
     return envx >> 4;
 }
 

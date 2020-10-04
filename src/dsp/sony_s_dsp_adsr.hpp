@@ -75,7 +75,7 @@ class Sony_S_DSP_ADSR {
     /// the current stage of the envelope generator
     EnvelopeStage envelope_stage = EnvelopeStage::Release;
     /// the current value of the envelope generator
-    int envelope_value = 0;
+    uint16_t envelope_value = 0;
 
     // TODO: remove
     /// A structure mapping the register space to symbolic global data fields.

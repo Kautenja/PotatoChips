@@ -68,6 +68,11 @@ class Sony_S_DSP_ADSR {
     /// the output value from the envelope generator
     int8_t envelope_output = 0;
 
+    /// Key On for each voice (bit-mask)
+    // uint8_t key_ons = 0;
+    /// key off for each voice (instantiates release mode) (bit-mask)
+    // uint8_t key_offs = 0;
+
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : uint8_t { Attack, Decay, Sustain, Release };
     /// the current stage of the envelope generator

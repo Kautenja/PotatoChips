@@ -53,23 +53,31 @@ class Sony_S_DSP_ADSR {
     };
 
  private:
+    // -----------------------------------------------------------------------
     // Byte 1
+    // -----------------------------------------------------------------------
     /// the attack rate (4-bits)
     uint8_t attack : 4;
     /// the decay rate (3-bits)
     uint8_t decay : 3;
     /// a dummy bit for byte alignment
     const uint8_t unused_spacer_for_byte_alignment : 1;
-
+    // -----------------------------------------------------------------------
     // Byte 2
+    // -----------------------------------------------------------------------
     /// the sustain rate (5-bits)
     uint8_t sustain_rate : 5;
     /// the sustain level (3-bits)
     uint8_t sustain_level : 3;
-
+    // -----------------------------------------------------------------------
     // Byte 3
+    // -----------------------------------------------------------------------
     /// the total amplitude level of the envelope generator (8-bit)
     int8_t amplitude;
+    // -----------------------------------------------------------------------
+    // TODO:
+    // -----------------------------------------------------------------------
+
 
     // TODO: remove
     /// A structure mapping the register space to a single voice's data fields.

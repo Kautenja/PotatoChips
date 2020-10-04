@@ -61,15 +61,13 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
     }
 
     int cnt = voice.envcnt;
-    int adsr1 = raw_voice.adsr[0];
     switch (voice.envelope_stage) {
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
-            int t = adsr1 & 15;
-            if (t == 15) {
+            if (attack == 15) {
                 envx += ENVELOPE_RANGE / 2;
             } else {
-                cnt -= ENVELOPE_RATES[t * 2 + 1];
+                cnt -= ENVELOPE_RATES[2 * attack + 1];
                 if (cnt > 0) break;
                 envx += ENVELOPE_RANGE / 64;
                 cnt = ENVELOPE_RATE_INITIAL;
@@ -87,13 +85,13 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             // 1-1/256." Well, at least that makes some sense.
             // Multiplying ENVX by 255/256 every time DECAY is
             // updated.
-            cnt -= ENVELOPE_RATES[((adsr1 >> 3) & 0xE) + 0x10];
+            cnt -= ENVELOPE_RATES[(decay << 1) + 0x10];
+
             if (cnt <= 0) {
                 cnt = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;
                 voice.envx = envx;
             }
-            int sustain_level = raw_voice.adsr[1] >> 5;
 
             if (envx <= (sustain_level + 1) * 0x100)
                 voice.envelope_stage = EnvelopeStage::Sustain;
@@ -104,7 +102,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             // Docs: "SR[is multiplied] by the fixed value 1-1/256."
             // Multiplying ENVX by 255/256 every time SUSTAIN is
             // updated.
-            cnt -= ENVELOPE_RATES[raw_voice.adsr[1] & 0x1F];
+            cnt -= ENVELOPE_RATES[sustain_rate];
             if (cnt <= 0) {
                 cnt = ENVELOPE_RATE_INITIAL;
                 envx -= ((envx - 1) >> 8) + 1;

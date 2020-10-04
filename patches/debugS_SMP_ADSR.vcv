@@ -1,0 +1,339 @@
+{
+  "version": "1.dev.eefe794",
+  "modules": [
+    {
+      "id": 1,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 156,
+      "data": {
+        "audio": {
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 256
+        }
+      },
+      "pos": [
+        48,
+        1
+      ]
+    },
+    {
+      "id": 156,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "VCMixer",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 165,
+      "rightModuleId": 1,
+      "pos": [
+        38,
+        1
+      ]
+    },
+    {
+      "id": 162,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "MIDIToCVInterface",
+      "params": [],
+      "rightModuleId": 164,
+      "data": {
+        "channels": 8,
+        "polyMode": 0,
+        "clockDivision": 24,
+        "lastPitch": 8192,
+        "lastMod": 0,
+        "midi": {
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
+          "channel": -1
+        }
+      },
+      "pos": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": 164,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 127.0
+        },
+        {
+          "id": 1,
+          "value": 127.0
+        },
+        {
+          "id": 2,
+          "value": 10.0
+        },
+        {
+          "id": 3,
+          "value": 10.0
+        },
+        {
+          "id": 4,
+          "value": 7.0
+        },
+        {
+          "id": 5,
+          "value": 7.0
+        },
+        {
+          "id": 6,
+          "value": 5.0
+        },
+        {
+          "id": 7,
+          "value": 5.0
+        },
+        {
+          "id": 8,
+          "value": 20.0
+        },
+        {
+          "id": 9,
+          "value": 20.0
+        }
+      ],
+      "leftModuleId": 162,
+      "rightModuleId": 165,
+      "pos": [
+        8,
+        1
+      ]
+    },
+    {
+      "id": 165,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "VRC6",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 4.0
+        },
+        {
+          "id": 4,
+          "value": 4.0
+        },
+        {
+          "id": 5,
+          "value": 0.800000012
+        },
+        {
+          "id": 6,
+          "value": 0.800000012
+        },
+        {
+          "id": 7,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 164,
+      "rightModuleId": 156,
+      "pos": [
+        24,
+        1
+      ]
+    },
+    {
+      "id": 166,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.42500067
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 69,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 14,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 93,
+      "outputModuleId": 165,
+      "outputId": 2,
+      "inputModuleId": 156,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 94,
+      "outputModuleId": 165,
+      "outputId": 2,
+      "inputModuleId": 156,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 100,
+      "outputModuleId": 164,
+      "outputId": 0,
+      "inputModuleId": 166,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 146,
+      "outputModuleId": 162,
+      "outputId": 6,
+      "inputModuleId": 164,
+      "inputId": 2,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 147,
+      "outputModuleId": 162,
+      "outputId": 0,
+      "inputModuleId": 165,
+      "inputId": 2,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 98,
+      "outputModuleId": 164,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 5,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 151,
+      "outputModuleId": 164,
+      "outputId": 1,
+      "inputModuleId": 166,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 152,
+      "outputModuleId": 162,
+      "outputId": 1,
+      "inputModuleId": 164,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 153,
+      "outputModuleId": 162,
+      "outputId": 6,
+      "inputModuleId": 164,
+      "inputId": 3,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 101,
+      "outputModuleId": 162,
+      "outputId": 1,
+      "inputModuleId": 164,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 154,
+      "outputModuleId": 164,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 6,
+      "color": "#c9b70e"
+    }
+  ]
+}

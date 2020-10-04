@@ -32,7 +32,8 @@ struct ChipS_SMP_ADSR : Module {
     /// the Sony S-DSP ADSR enveloper generator emulator
     Sony_S_DSP_ADSR apu;
     /// triggers for handling input trigger and gate signals
-    rack::dsp::BooleanTrigger trigger[2];
+    rack::dsp::BooleanTrigger gateTrigger;
+    rack::dsp::BooleanTrigger retrigTrigger;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -91,10 +92,12 @@ struct ChipS_SMP_ADSR : Module {
         apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL].getValue());
         apu.setAmplitude(params[PARAM_AMPLITUDE].getValue());
         // Gate + Retrig input
-        const bool keyOn = trigger[0].process(rescale(inputs[INPUT_GATE].getVoltage(), 0.f, 2.f, 0.f, 1.f));
-        const bool retrig = trigger[1].process(rescale(inputs[INPUT_RETRIG].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+        const bool gate = gateTrigger.process(
+            rescale(inputs[INPUT_GATE].getVoltage(), 0.f, 2.f, 0.f, 1.f));
+        const bool retrig = retrigTrigger.process(
+            rescale(inputs[INPUT_RETRIG].getVoltage(), 0.f, 2.f, 0.f, 1.f));
         // Enveloper generator output
-        auto sample = apu.run(keyOn || retrig, trigger[0].state);
+        auto sample = apu.run(gate || retrig, gateTrigger.state);
         outputs[OUTPUT_ENVELOPE].setVoltage(10.f * sample / 128.f);
     }
 };

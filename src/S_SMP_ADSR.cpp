@@ -48,6 +48,7 @@ struct ChipS_SMP_ADSR : Module {
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_GATE,          LANES),
+        ENUMS(INPUT_RETRIG,        LANES),
         ENUMS(INPUT_AMPLITUDE,     LANES),
         ENUMS(INPUT_ATTACK,        LANES),
         ENUMS(INPUT_DECAY,         LANES),
@@ -110,42 +111,44 @@ struct ChipS_SMP_ADSRWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_ADSRWidget(ChipS_SMP_ADSR *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP.svg";
+        static constexpr auto panel = "res/S-SMP-ADSR.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Gate
-        addInput(createInput<PJ301MPort>(Vec(185, 40), module, ChipS_SMP_ADSR::INPUT_GATE));
-        // Amplitude
-        addInput(createInput<PJ301MPort>(Vec(220, 40), module, ChipS_SMP_ADSR::INPUT_AMPLITUDE));
-        auto amplitude = createParam<Rogan2PWhite>(Vec(250, 35), module, ChipS_SMP_ADSR::PARAM_AMPLITUDE);
-        amplitude->snap = true;
-        addParam(amplitude);
-        // Attack
-        addInput(createInput<PJ301MPort>(Vec(390, 40), module, ChipS_SMP_ADSR::INPUT_ATTACK));
-        auto attack = createParam<Rogan2PGreen>(Vec(420, 35), module, ChipS_SMP_ADSR::PARAM_ATTACK);
-        attack->snap = true;
-        addParam(attack);
-        // Decay
-        addInput(createInput<PJ301MPort>(Vec(460, 40), module, ChipS_SMP_ADSR::INPUT_DECAY));
-        auto decay = createParam<Rogan2PBlue>(Vec(490, 35), module, ChipS_SMP_ADSR::PARAM_DECAY);
-        decay->snap = true;
-        addParam(decay);
-        // Sustain Level
-        addInput(createInput<PJ301MPort>(Vec(530, 40), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_LEVEL));
-        auto sustainLevel = createParam<Rogan2PRed>(Vec(560, 35), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_LEVEL);
-        sustainLevel->snap = true;
-        addParam(sustainLevel);
-        // Sustain Rate
-        addInput(createInput<PJ301MPort>(Vec(600, 40), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_RATE));
-        auto sustainRate = createParam<Rogan2PWhite>(Vec(630, 35), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_RATE);
-        sustainRate->snap = true;
-        addParam(sustainRate);
-        // Output
-        addOutput(createOutput<PJ301MPort>(Vec(700, 40), module, ChipS_SMP_ADSR::OUTPUT_ENVELOPE));
+        for (unsigned i = 0; i < ChipS_SMP_ADSR::LANES; i++) {
+            // Gate, Retrig, Output
+            addInput(createInput<PJ301MPort>(Vec(20, 45 + 169 * i), module, ChipS_SMP_ADSR::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(20, 100 + 169 * i), module, ChipS_SMP_ADSR::INPUT_RETRIG + i));
+            addOutput(createOutput<PJ301MPort>(Vec(20, 156 + 169 * i), module, ChipS_SMP_ADSR::OUTPUT_ENVELOPE + i));
+            // Amplitude
+            auto amplitude = createParam<BefacoSlidePot>(Vec(66, 22 + 169 * i), module, ChipS_SMP_ADSR::PARAM_AMPLITUDE + i);
+            amplitude->snap = true;
+            addParam(amplitude);
+            addInput(createInput<PJ301MPort>(Vec(61, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_AMPLITUDE + i));
+            // Attack
+            auto attack = createParam<BefacoSlidePot>(Vec(100, 22 + 169 * i), module, ChipS_SMP_ADSR::PARAM_ATTACK + i);
+            attack->snap = true;
+            addParam(attack);
+            addInput(createInput<PJ301MPort>(Vec(95, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_ATTACK + i));
+            // Decay
+            auto decay = createParam<BefacoSlidePot>(Vec(134, 22 + 169 * i), module, ChipS_SMP_ADSR::PARAM_DECAY + i);
+            decay->snap = true;
+            addParam(decay);
+            addInput(createInput<PJ301MPort>(Vec(129, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_DECAY + i));
+            // Sustain Level
+            auto sustainLevel = createParam<BefacoSlidePot>(Vec(168, 22 + 169 * i), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_LEVEL + i);
+            sustainLevel->snap = true;
+            addParam(sustainLevel);
+            addInput(createInput<PJ301MPort>(Vec(163, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_LEVEL + i));
+            // Sustain Rate
+            auto sustainRate = createParam<BefacoSlidePot>(Vec(202, 22 + 169 * i), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_RATE + i);
+            sustainRate->snap = true;
+            addParam(sustainRate);
+            addInput(createInput<PJ301MPort>(Vec(197, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_RATE + i));
+        }
     }
 };
 

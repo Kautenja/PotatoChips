@@ -90,11 +90,11 @@ class Sony_S_DSP_ADSR {
     }
 
     /// A bit-mask representation of the active voice gates
-    int keys = 0;
+    bool keys = 0;
     /// Key On for each voice (bit-mask)
-    uint8_t key_ons = 0;
+    bool key_ons = 0;
     /// key off for each voice (instantiates release mode) (bit-mask)
-    uint8_t key_offs = 0;
+    bool key_offs = 0;
 
     void keyOn(bool value) { key_ons = value; }
     void keyOff(bool value) { key_offs = value; }

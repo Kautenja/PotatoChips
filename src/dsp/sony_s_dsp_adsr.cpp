@@ -131,7 +131,7 @@ int16_t Sony_S_DSP_ADSR::run() {
     const int voice_bit = 1;
     // key-on
     if (on_cnt && !--on_cnt) {
-        keys |= voice_bit;
+        keys = 1;
         envelope_value = 0;
         // NOTE: Real SNES does *not* appear to initialize the
         // envelope counter to anything in particular. The first

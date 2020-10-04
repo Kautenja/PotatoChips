@@ -145,41 +145,6 @@ class Sony_S_DSP_ADSR {
     /// A bit-mask representation of the active voice gates
     int keys = 0;
 
-    // TODO: remove
-    /// The state of a synthesizer voice (channel) on the chip.
-    struct VoiceState {
-        /// TODO
-        short volume[2] = {0, 0};
-        /// 12-bit fractional position
-        short fraction;
-        /// padding (placement here keeps interp's in a 64-bit line)
-        short unused0;
-        /// most recent four decoded samples
-        short interp3;
-        /// TODO
-        short interp2;
-        /// TODO
-        short interp1;
-        /// TODO
-        short interp0;
-        /// number of nibbles remaining in current block
-        short block_remain;
-        /// TODO
-        unsigned short addr;
-        /// header byte from current block
-        short block_header;
-        /// padding (placement here keeps envelope data in a 64-bit line)
-        short unused1;
-        /// TODO
-        short envcnt = 0;
-        /// TODO
-        short envx = 0;
-        /// TODO
-        short on_cnt = 0;
-        /// the current stage of the envelope generator
-        EnvelopeStage envelope_stage = EnvelopeStage::Release;
-    } voice;
-
     /// @brief Process the envelope for the voice with given index.
     ///
     /// @param voice_index the index of the voice to clock the envelope of

@@ -38,7 +38,52 @@ static const uint16_t ENVELOPE_RATES[0x20] = {
 };
 
 inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
-    if (envelope_stage == EnvelopeStage::Release) {
+    switch (envelope_stage) {
+    case EnvelopeStage::Off:
+        return 0;
+    case EnvelopeStage::Attack: {
+        // increase envelope by 1/64 each step
+        if (attack == 15) {
+            envelope_value += ENVELOPE_RANGE / 2;
+        } else {
+            envelope_counter -= ENVELOPE_RATES[2 * attack + 1];
+            if (envelope_counter > 0) break;
+            envelope_value += ENVELOPE_RANGE / 64;
+            envelope_counter = ENVELOPE_RATE_INITIAL;
+        }
+        if (envelope_value >= ENVELOPE_RANGE) {
+            envelope_value = ENVELOPE_RANGE - 1;
+            envelope_stage = EnvelopeStage::Decay;
+        }
+        break;
+    }
+    case EnvelopeStage::Decay: {
+        // Docs: "DR...[is multiplied] by the fixed value
+        // 1-1/256." Well, at least that makes some sense.
+        // Multiplying ENVX by 255/256 every time DECAY is
+        // updated.
+        envelope_counter -= ENVELOPE_RATES[(decay << 1) + 0x10];
+
+        if (envelope_counter <= 0) {
+            envelope_counter = ENVELOPE_RATE_INITIAL;
+            envelope_value -= ((envelope_value - 1) >> 8) + 1;
+        }
+
+        if (envelope_value <= (sustain_level + 1) * 0x100)
+            envelope_stage = EnvelopeStage::Sustain;
+        break;
+    }
+    case EnvelopeStage::Sustain:
+        // Docs: "SR[is multiplied] by the fixed value 1-1/256."
+        // Multiplying ENVX by 255/256 every time SUSTAIN is
+        // updated.
+        envelope_counter -= ENVELOPE_RATES[sustain_rate];
+        if (envelope_counter <= 0) {
+            envelope_counter = ENVELOPE_RATE_INITIAL;
+            envelope_value -= ((envelope_value - 1) >> 8) + 1;
+        }
+        break;
+    case EnvelopeStage::Release:
         // Docs: "When in the state of "key off". the "click" sound is
         // prevented by the addition of the fixed value 1/256" WTF???
         // Alright, I'm going to choose to interpret that this way:
@@ -51,55 +96,6 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             return 0;
         }
         return envelope_value >> 8;
-    }
-
-    switch (envelope_stage) {
-        case EnvelopeStage::Off:  // do nothing
-            break;
-        case EnvelopeStage::Attack: {
-            // increase envelope by 1/64 each step
-            if (attack == 15) {
-                envelope_value += ENVELOPE_RANGE / 2;
-            } else {
-                envelope_counter -= ENVELOPE_RATES[2 * attack + 1];
-                if (envelope_counter > 0) break;
-                envelope_value += ENVELOPE_RANGE / 64;
-                envelope_counter = ENVELOPE_RATE_INITIAL;
-            }
-            if (envelope_value >= ENVELOPE_RANGE) {
-                envelope_value = ENVELOPE_RANGE - 1;
-                envelope_stage = EnvelopeStage::Decay;
-            }
-            break;
-        }
-        case EnvelopeStage::Decay: {
-            // Docs: "DR...[is multiplied] by the fixed value
-            // 1-1/256." Well, at least that makes some sense.
-            // Multiplying ENVX by 255/256 every time DECAY is
-            // updated.
-            envelope_counter -= ENVELOPE_RATES[(decay << 1) + 0x10];
-
-            if (envelope_counter <= 0) {
-                envelope_counter = ENVELOPE_RATE_INITIAL;
-                envelope_value -= ((envelope_value - 1) >> 8) + 1;
-            }
-
-            if (envelope_value <= (sustain_level + 1) * 0x100)
-                envelope_stage = EnvelopeStage::Sustain;
-            break;
-        }
-        case EnvelopeStage::Sustain:
-            // Docs: "SR[is multiplied] by the fixed value 1-1/256."
-            // Multiplying ENVX by 255/256 every time SUSTAIN is
-            // updated.
-            envelope_counter -= ENVELOPE_RATES[sustain_rate];
-            if (envelope_counter <= 0) {
-                envelope_counter = ENVELOPE_RATE_INITIAL;
-                envelope_value -= ((envelope_value - 1) >> 8) + 1;
-            }
-            break;
-        case EnvelopeStage::Release:  // handled above
-            break;
     }
 
     return envelope_value >> 4;

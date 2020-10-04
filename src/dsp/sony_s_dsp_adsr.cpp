@@ -56,7 +56,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
         return envx;
     }
 
-    int cnt = envcnt;
+    int cnt = envelope_counter;
     switch (envelope_stage) {
         case EnvelopeStage::Attack: {
             // increase envelope by 1/64 each step
@@ -111,7 +111,7 @@ inline int Sony_S_DSP_ADSR::clock_envelope() {
             break;
     }
 
-    envcnt = cnt;
+    envelope_counter = cnt;
     envelope_output = envx >> 4;
     return envx;
 }
@@ -139,13 +139,13 @@ int16_t Sony_S_DSP_ADSR::run() {
         // expected; as yet, I have been unable to find any
         // pattern.  I doubt it will matter though, so we'll go
         // ahead and do the full time for now.
-        envcnt = ENVELOPE_RATE_INITIAL;
+        envelope_counter = ENVELOPE_RATE_INITIAL;
         envelope_stage = EnvelopeStage::Attack;
     }
     // key-on = !key-off = true
     if (key_ons & voice_bit & ~key_offs) {
         key_ons &= ~voice_bit;
-        on_cnt = 8;
+        on_cnt = 1;
     }
     // key-off = true
     if (keys & key_offs & voice_bit) {

@@ -21,6 +21,9 @@
 
 #include <cstdint>
 
+
+#include <iostream>
+
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP_ADSR {
  public:
@@ -65,8 +68,8 @@ class Sony_S_DSP_ADSR {
     EnvelopeStage envelope_stage = EnvelopeStage::Release;
     /// the current value of the envelope generator
     uint16_t envelope_value = 0;
-    /// TODO
-    short envcnt = 0;
+    /// the sample (time) counter for the envelope
+    short envelope_counter = 0;
     /// TODO
     short on_cnt = 0;
 

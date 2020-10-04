@@ -24,7 +24,7 @@
 const int ENVELOPE_RATE_INITIAL = 0x7800;
 
 /// the range of the envelope generator amplitude level (i.e., max value)
-const int ENVELOPE_RANGE = 0x800;
+const int ENVELOPE_RANGE = 0x0800;
 
 /// This table is for envelope timing global.  It represents the number of
 /// counts that should be subtracted from the counter each sample period

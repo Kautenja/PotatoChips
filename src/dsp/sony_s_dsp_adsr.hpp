@@ -94,7 +94,7 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     ///
     /// @returns the output value from the envelope generator
     ///
-    inline int8_t clock_envelope() {
+    inline int8_t clockEnvelope() {
         switch (envelope_stage) {
         case EnvelopeStage::Off:
             break;
@@ -219,7 +219,7 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
             envelope_stage = EnvelopeStage::Release;
         }
         // clock the envelope generator and apply the global amplitude level
-        return (static_cast<int16_t>(clock_envelope()) * amplitude) >> 7;
+        return (static_cast<int16_t>(clockEnvelope()) * amplitude) >> 7;
     }
 };
 

@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        65,
+        43,
         1
       ]
     },
@@ -50,10 +50,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 166,
+      "leftModuleId": 177,
       "rightModuleId": 1,
       "pos": [
-        55,
+        33,
         1
       ]
     },
@@ -63,7 +63,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 176,
+      "rightModuleId": 172,
       "data": {
         "channels": 8,
         "polyMode": 0,
@@ -89,7 +89,7 @@
       "params": [
         {
           "id": 0,
-          "value": 2.0
+          "value": 3.0
         },
         {
           "id": 1,
@@ -108,11 +108,11 @@
           "value": 127.0
         }
       ],
-      "leftModuleId": 177,
+      "leftModuleId": 179,
       "rightModuleId": 166,
       "pos": [
-        33,
-        1
+        53,
+        0
       ]
     },
     {
@@ -123,58 +123,57 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 2.0
         },
         {
           "id": 1,
-          "value": 58.0
+          "value": 64.0
         },
         {
           "id": 2,
-          "value": 50.0
-        },
-        {
-          "id": 3,
-          "value": 50.0
-        },
-        {
-          "id": 4,
           "value": 127.0
         },
         {
+          "id": 3,
+          "value": 127.0
+        },
+        {
+          "id": 4,
+          "value": 88.0
+        },
+        {
           "id": 5,
-          "value": -38.0
+          "value": -65.0
         },
         {
           "id": 6,
-          "value": 46.0
+          "value": -37.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": -32.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": -2.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 10,
-          "value": 28.0
+          "value": 44.0
         },
         {
           "id": 11,
-          "value": -39.0
+          "value": 44.0
         }
       ],
       "leftModuleId": 165,
-      "rightModuleId": 2,
       "pos": [
-        41,
-        1
+        61,
+        0
       ]
     },
     {
@@ -189,15 +188,15 @@
         },
         {
           "id": 1,
-          "value": 127.0
+          "value": -128.0
         },
         {
           "id": 2,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 3,
-          "value": 5.0
+          "value": 15.0
         },
         {
           "id": 4,
@@ -217,208 +216,15 @@
         },
         {
           "id": 8,
-          "value": 15.0
+          "value": 31.0
         },
         {
           "id": 9,
           "value": 20.0
         }
       ],
-      "leftModuleId": 176,
-      "pos": [
-        71,
-        0
-      ]
-    },
-    {
-      "id": 176,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
-      "model": "2612",
-      "params": [
-        {
-          "id": 0,
-          "value": 4.24900007
-        },
-        {
-          "id": 1,
-          "value": 4.54650068
-        },
-        {
-          "id": 2,
-          "value": 4.24694157
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 6.93174171
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        },
-        {
-          "id": 8,
-          "value": 7.0
-        },
-        {
-          "id": 9,
-          "value": 17.0
-        },
-        {
-          "id": 10,
-          "value": 10.0
-        },
-        {
-          "id": 11,
-          "value": 13.0
-        },
-        {
-          "id": 12,
-          "value": 10.0
-        },
-        {
-          "id": 13,
-          "value": 8.0
-        },
-        {
-          "id": 14,
-          "value": 11.0
-        },
-        {
-          "id": 15,
-          "value": 16.0
-        },
-        {
-          "id": 16,
-          "value": 12.0
-        },
-        {
-          "id": 17,
-          "value": 13.0
-        },
-        {
-          "id": 18,
-          "value": 14.0
-        },
-        {
-          "id": 19,
-          "value": 5.0
-        },
-        {
-          "id": 20,
-          "value": 1.0
-        },
-        {
-          "id": 21,
-          "value": 16.0
-        },
-        {
-          "id": 22,
-          "value": 14.0
-        },
-        {
-          "id": 23,
-          "value": 29.0
-        },
-        {
-          "id": 24,
-          "value": 0.0
-        },
-        {
-          "id": 25,
-          "value": 10.0
-        },
-        {
-          "id": 26,
-          "value": 7.0
-        },
-        {
-          "id": 27,
-          "value": 10.0
-        },
-        {
-          "id": 28,
-          "value": 6.0
-        },
-        {
-          "id": 29,
-          "value": 0.0
-        },
-        {
-          "id": 30,
-          "value": 0.0
-        },
-        {
-          "id": 31,
-          "value": 0.0
-        },
-        {
-          "id": 32,
-          "value": 0.0
-        },
-        {
-          "id": 33,
-          "value": 0.0
-        },
-        {
-          "id": 34,
-          "value": 4.0
-        },
-        {
-          "id": 35,
-          "value": 7.0
-        },
-        {
-          "id": 36,
-          "value": 4.0
-        },
-        {
-          "id": 37,
-          "value": 3.0
-        },
-        {
-          "id": 38,
-          "value": 0.0
-        },
-        {
-          "id": 39,
-          "value": 0.0
-        },
-        {
-          "id": 40,
-          "value": 2.0
-        },
-        {
-          "id": 41,
-          "value": 1.0
-        },
-        {
-          "id": 42,
-          "value": 1.0
-        },
-        {
-          "id": 43,
-          "value": 1.0
-        },
-        {
-          "id": 44,
-          "value": 1.0
-        }
-      ],
       "leftModuleId": 5,
-      "rightModuleId": 172,
+      "rightModuleId": 179,
       "pos": [
         8,
         0
@@ -456,7 +262,7 @@
         }
       ],
       "leftModuleId": 178,
-      "rightModuleId": 165,
+      "rightModuleId": 2,
       "data": {
         "range_db": 80.0
       },
@@ -513,6 +319,272 @@
         0,
         1
       ]
+    },
+    {
+      "id": 179,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "106",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 15.0
+        },
+        {
+          "id": 11,
+          "value": 15.0
+        },
+        {
+          "id": 12,
+          "value": 15.0
+        },
+        {
+          "id": 13,
+          "value": 15.0
+        },
+        {
+          "id": 14,
+          "value": 15.0
+        },
+        {
+          "id": 15,
+          "value": 3.75
+        },
+        {
+          "id": 16,
+          "value": 1.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 2.0
+        },
+        {
+          "id": 19,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 172,
+      "rightModuleId": 165,
+      "data": {
+        "wavetable0": [
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          14,
+          15,
+          15,
+          15,
+          14,
+          14,
+          13,
+          12,
+          10,
+          9,
+          8,
+          6,
+          5,
+          3,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "wavetable1": [
+          15,
+          15,
+          15,
+          15,
+          5,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          0,
+          0,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wavetable2": [
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
+          7,
+          7,
+          8,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          12,
+          12,
+          13,
+          13,
+          14,
+          14,
+          15
+        ],
+        "wavetable3": [
+          8,
+          6,
+          9,
+          8,
+          11,
+          10,
+          13,
+          12,
+          15,
+          12,
+          13,
+          10,
+          11,
+          8,
+          9,
+          6,
+          8,
+          5,
+          6,
+          3,
+          4,
+          1,
+          2,
+          0,
+          0,
+          0,
+          2,
+          1,
+          4,
+          3,
+          6,
+          5
+        ],
+        "wavetable4": [
+          15,
+          15,
+          14,
+          14,
+          13,
+          13,
+          12,
+          12,
+          11,
+          11,
+          10,
+          10,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      "pos": [
+        24,
+        0
+      ]
     }
   ],
   "cables": [
@@ -538,22 +610,6 @@
       "outputId": 2,
       "inputModuleId": 1,
       "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 86,
-      "outputModuleId": 166,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 93,
-      "outputModuleId": 166,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
       "color": "#c91847"
     },
     {
@@ -645,35 +701,83 @@
       "color": "#c91847"
     },
     {
-      "id": 175,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 176,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 177,
-      "outputModuleId": 176,
-      "outputId": 1,
+      "id": 180,
+      "outputModuleId": 179,
+      "outputId": 7,
       "inputModuleId": 165,
       "inputId": 4,
       "color": "#c91847"
     },
     {
-      "id": 176,
-      "outputModuleId": 176,
-      "outputId": 0,
+      "id": 181,
+      "outputModuleId": 179,
+      "outputId": 7,
       "inputModuleId": 165,
       "inputId": 3,
       "color": "#0986ad"
     },
     {
-      "id": 178,
+      "id": 179,
       "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 179,
+      "inputId": 7,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 182,
+      "outputModuleId": 172,
       "outputId": 1,
-      "inputModuleId": 176,
-      "inputId": 9,
+      "inputModuleId": 172,
+      "inputId": 6,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 183,
+      "outputModuleId": 172,
+      "outputId": 1,
+      "inputModuleId": 172,
+      "inputId": 8,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 184,
+      "outputModuleId": 172,
+      "outputId": 1,
+      "inputModuleId": 172,
+      "inputId": 12,
+      "color": "#c91847"
+    },
+    {
+      "id": 188,
+      "outputModuleId": 172,
+      "outputId": 1,
+      "inputModuleId": 166,
+      "inputId": 4,
+      "color": "#0986ad"
+    },
+    {
+      "id": 189,
+      "outputModuleId": 172,
+      "outputId": 1,
+      "inputModuleId": 166,
+      "inputId": 5,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 86,
+      "outputModuleId": 166,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 211,
+      "outputModuleId": 166,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 2,
       "color": "#c91847"
     }
   ]

@@ -56,7 +56,7 @@ class Sony_S_DSP_Echo {
     static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
 
     /// @brief A stereo sample in the echo buffer.
-    struct BufferSample {
+    struct __attribute__((packed, aligned(4))) BufferSample {
         enum : unsigned {
             /// the index of the left channel in the samples array
             LEFT = 0,
@@ -71,24 +71,19 @@ class Sony_S_DSP_Echo {
     };
 
  private:
-    // Echo Internal Buffers
-
-    /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
-    /// multiplied by the total number of delay levels
-    uint8_t ram[DELAY_LEVELS * DELAY_LEVEL_BYTES];
-    /// A pointer to the head of the echo buffer in RAM
-    unsigned buffer_head = 0;
-
+    // -----------------------------------------------------------------------
+    // MARK: FIR Filter
+    // -----------------------------------------------------------------------
+    /// The values of the FIR filter coefficients from the register bank. This
+    /// allows the FIR coefficients to be stored as 16-bit
+    int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127, 0, 0, 0, 0, 0, 0, 0};
     /// fir_buffer[i + 8] == fir_buffer[i], to avoid wrap checking in FIR code
     BufferSample fir_buffer[2 * FIR_COEFFICIENT_COUNT];
     /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
-
-    // Echo Parameters
-
-    /// The values of the FIR filter coefficients from the register bank. This
-    /// allows the FIR coefficients to be stored as 16-bit
-    int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127, 0, 0, 0, 0, 0, 0, 0};
+    // -----------------------------------------------------------------------
+    // MARK: Effect Parameters. TODO: change to bit-wise
+    // -----------------------------------------------------------------------
     /// the delay level
     uint8_t delay = 0;
     /// the feedback level
@@ -97,6 +92,14 @@ class Sony_S_DSP_Echo {
     int8_t mixLeft = 0;
     /// the mix level for the right channel
     int8_t mixRight = 0;
+    // -----------------------------------------------------------------------
+    // MARK: Echo Buffer
+    // -----------------------------------------------------------------------
+    /// A pointer to the head of the echo buffer in RAM
+    unsigned buffer_head = 0;
+    /// the RAM for the echo buffer. `2KB` for each \f$16ms\f$ delay level
+    /// multiplied by the total number of delay levels
+    uint8_t ram[DELAY_LEVELS * DELAY_LEVEL_BYTES];
 
  public:
     /// @brief Initialize a new Sony_S_DSP_Echo.

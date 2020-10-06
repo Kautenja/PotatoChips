@@ -1,6 +1,7 @@
 // Sony S-DSP emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
+// Copyright 2002 Brad Martin
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // derived from: Game_Music_Emu 0.5.2
+// Based on Brad Martin's OpenSPC DSP emulator
 //
 
 #ifndef DSP_SONY_S_DSP_HPP_

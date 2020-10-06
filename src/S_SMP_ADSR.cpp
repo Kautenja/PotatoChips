@@ -34,6 +34,7 @@ struct ChipS_SMP_ADSR : Module {
     Sony_S_DSP_ADSR apus[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input trigger and gate signals
     rack::dsp::BooleanTrigger gateTrigger[LANES][PORT_MAX_CHANNELS];
+    /// triggers for handling input re-trigger signals
     rack::dsp::BooleanTrigger retrigTrigger[LANES][PORT_MAX_CHANNELS];
 
  public:
@@ -91,6 +92,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_ATTACK + lane].getValue();
         const float cv = inputs[INPUT_ATTACK + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        // invert attack so it increases in time as it increase in value
         return 15 - clamp(param + mod, 0.f, 15.f);
     }
 
@@ -104,6 +106,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_DECAY + lane].getValue();
         const float cv = inputs[INPUT_DECAY + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        // invert decay so it increases in time as it increase in value
         return 7 - clamp(param + mod, 0.f, 7.f);
     }
 
@@ -117,6 +120,7 @@ struct ChipS_SMP_ADSR : Module {
         const float param = params[PARAM_SUSTAIN_RATE + lane].getValue();
         const float cv = inputs[INPUT_SUSTAIN_RATE + lane].getPolyVoltage(channel);
         const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
+        // invert sustain rate so it increases in time as it increase in value
         return 31 - clamp(param + mod, 0.f, 31.f);
     }
 

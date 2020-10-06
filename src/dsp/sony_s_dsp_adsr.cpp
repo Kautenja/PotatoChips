@@ -40,8 +40,9 @@ static const uint16_t ENVELOPE_RATES[0x20] = {
 inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
     switch (envelope_stage) {
     case EnvelopeStage::Off:
-        return 0;
-    case EnvelopeStage::Attack: {
+        // return 0;
+        break;
+    case EnvelopeStage::Attack:
         // increase envelope by 1/64 each step
         if (attack == 15) {
             envelope_value += ENVELOPE_RANGE / 2;
@@ -56,23 +57,19 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             envelope_stage = EnvelopeStage::Decay;
         }
         break;
-    }
-    case EnvelopeStage::Decay: {
+    case EnvelopeStage::Decay:
         // Docs: "DR...[is multiplied] by the fixed value
         // 1-1/256." Well, at least that makes some sense.
         // Multiplying ENVX by 255/256 every time DECAY is
         // updated.
         envelope_counter -= ENVELOPE_RATES[(decay << 1) + 0x10];
-
         if (envelope_counter <= 0) {
             envelope_counter = ENVELOPE_RATE_INITIAL;
             envelope_value -= ((envelope_value - 1) >> 8) + 1;
         }
-
         if (envelope_value <= (sustain_level + 1) * 0x100)
             envelope_stage = EnvelopeStage::Sustain;
         break;
-    }
     case EnvelopeStage::Sustain:
         // Docs: "SR[is multiplied] by the fixed value 1-1/256."
         // Multiplying ENVX by 255/256 every time SUSTAIN is
@@ -95,6 +92,7 @@ inline int8_t Sony_S_DSP_ADSR::clock_envelope() {
             envelope_stage = EnvelopeStage::Off;
             envelope_value = 0;
         }
+        break;
     }
 
     return envelope_value >> 4;

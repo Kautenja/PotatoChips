@@ -201,10 +201,10 @@ class Sony_S_DSP_ADSR {
             envelope_value = 0;
             envelope_stage = EnvelopeStage::Attack;
             // NOTE: Real SNES does *not* appear to initialize the envelope
-            // counter to anything in particular. The first cycle always seems to
-            // come at a random time sooner than expected; as yet, I have been
-            // unable to find any pattern.  I doubt it will matter though, so
-            // we'll go ahead and do the full time for now.
+            // counter to anything in particular. The first cycle always seems
+            // to come at a random time sooner than expected; as yet, I have
+            // been unable to find any pattern.  I doubt it will matter though,
+            // so we'll go ahead and do the full time for now.
             envelope_counter = ENVELOPE_RATE_INITIAL;
         } else if (envelope_stage == EnvelopeStage::Off) {
             return 0;

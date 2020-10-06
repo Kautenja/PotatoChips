@@ -24,7 +24,7 @@
 #include <cstdint>
 
 /// @brief Sony S-DSP ADSR envelope generator emulator.
-class Sony_S_DSP_ADSR {
+class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
  private:
     // The following fields are in a particular order for byte-alignment
     // -----------------------------------------------------------------------

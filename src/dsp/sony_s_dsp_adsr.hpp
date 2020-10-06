@@ -197,7 +197,12 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     inline void setAmplitude(int8_t value) { amplitude = value; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
-    int16_t run(bool trigger, bool gate_on) {
+    ///
+    /// @param trigger a boolean trigger, True to activate, False otherwise
+    /// @param gate_on a boolean trigger, True if activated, False otherwise
+    /// @returns a 16-bit control sample from the ADSR
+    ///
+    int8_t run(bool trigger, bool gate_on) {
         if (trigger) {  // trigger the envelope generator
             // reset the envelope value to 0 and the stage to attack
             envelope_value = 0;
@@ -214,8 +219,7 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
             envelope_stage = EnvelopeStage::Release;
         }
         // clock the envelope generator and apply the global amplitude level
-        const int output = clock_envelope();
-        return (output * amplitude) >> 7;
+        return (static_cast<int16_t>(clock_envelope()) * amplitude) >> 7;
     }
 };
 

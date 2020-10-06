@@ -76,7 +76,7 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     /// @param index the index of the envelope rate to return in the table
     /// @returns the envelope rate at given index in the table
     ///
-    static inline uint16_t getEnvelopeRate(int index) {
+    static inline uint16_t getEnvelopeRate(unsigned index) {
         // This table is for envelope timing.  It represents the number of
         // counts that should be subtracted from the counter each sample
         // period (32kHz). The counter starts at 30720 (0x7800). Each count

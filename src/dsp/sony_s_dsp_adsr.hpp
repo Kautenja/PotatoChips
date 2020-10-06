@@ -63,6 +63,12 @@ class Sony_S_DSP_ADSR {
     /// the sample (time) counter for the envelope
     int16_t envelope_counter = 0;
 
+    /// The initial value of the envelope.
+    static constexpr int ENVELOPE_RATE_INITIAL = 0x7800;
+
+    /// the range of the envelope generator amplitude level (i.e., max value)
+    static constexpr int ENVELOPE_RANGE = 0x0800;
+
     /// Return the envelope rate for the given index in the table.
     ///
     /// @param index the index of the envelope rate to return in the table

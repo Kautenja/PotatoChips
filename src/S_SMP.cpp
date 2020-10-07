@@ -290,8 +290,9 @@ struct ChipS_SMP : Module {
         block->flags.filter = 0;
         block->flags.is_loop = 1;
         block->flags.is_end = 1;
+        static const uint8_t samples[8] = {0x12, 0x34, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
         for (unsigned i = 0; i < Sony_S_DSP::BitRateReductionBlock::NUM_SAMPLES; i++)
-            block->samples[i] = 15 + 2 * i;
+            block->samples[i] = samples[i];
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)
         // -------------------------------------------------------------------

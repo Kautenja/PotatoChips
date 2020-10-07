@@ -24,6 +24,8 @@
 #include "sony_s_dsp_common.hpp"
 
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
+/// @details
+/// The emulator consumes 16 bytes of RAM and is aligned to 16-byte addresses.
 class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
  private:
     // -----------------------------------------------------------------------

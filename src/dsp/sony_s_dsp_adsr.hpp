@@ -25,7 +25,7 @@
 
 /// @brief An emulation of the ADSR envelope generator from the Sony S-DSP.
 /// @details
-/// The emulator consumes 8-bytes of RAM and is aligned to 8-byte RAM addresses.
+/// The emulator consumes 8 bytes of RAM and is aligned to 8-byte addresses.
 class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
  private:
     // The following fields are in a particular order for byte-alignment

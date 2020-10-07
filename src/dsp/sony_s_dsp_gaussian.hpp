@@ -21,20 +21,7 @@
 #ifndef DSP_SONY_S_DSP_GAUSSIAN_HPP_
 #define DSP_SONY_S_DSP_GAUSSIAN_HPP_
 
-#include <algorithm>
-#include <cstdint>
-#include <limits>
-
-/// Clamp an integer to a 16-bit value.
-///
-/// @param n a 32-bit integer value to clip
-/// @returns n clipped to a 16-bit value [-32768, 32767]
-///
-inline int clamp_16(int n) {
-    const int lower = std::numeric_limits<int16_t>::min();
-    const int upper = std::numeric_limits<int16_t>::max();
-    return std::max(lower, std::min(n, upper));
-}
+#include "sony_s_dsp_common.hpp"
 
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {

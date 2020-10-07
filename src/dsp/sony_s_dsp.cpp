@@ -19,9 +19,7 @@
 //
 
 #include "sony_s_dsp.hpp"
-#include <algorithm>
-#include <cstddef>
-#include <limits>
+#include "sony_s_dsp_common.hpp"
 
 Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     // validate that the structures are of expected size
@@ -202,17 +200,6 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     voice.envcnt = cnt;
     raw_voice.envx = envx >> 4;
     return envx;
-}
-
-/// Clamp an integer to a 16-bit value.
-///
-/// @param n a 32-bit integer value to clip
-/// @returns n clipped to a 16-bit value [-32768, 32767]
-///
-inline int clamp_16(int n) {
-    const int lower = std::numeric_limits<int16_t>::min();
-    const int upper = std::numeric_limits<int16_t>::max();
-    return std::max(lower, std::min(n, upper));
 }
 
 void Sony_S_DSP::run(int32_t count, int16_t* output_buffer) {

@@ -213,8 +213,8 @@ struct ChipS_SMP : Module {
         // write the first directory to RAM (at the end of the echo buffer)
         auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0x7800]);
         // point to a block immediately after this directory entry
-        dir->start = 0x7804;
-        dir->loop = 0x7804 + 64 * 9;
+        dir->start = 0x7804 + 82 * 9;
+        dir->loop = 0x7804 + 82 * 9;
 
 static const unsigned LENGTH = 2 * 352;
 static const uint16_t synth_voice[LENGTH] = {

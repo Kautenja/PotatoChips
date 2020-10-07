@@ -60,7 +60,7 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         // no need for a count because it always happens every update.
         envx -= ENVELOPE_RANGE / 256;
         if (envx <= 0) {
-            envx = 0;
+            voice.envx = 0;
             keys &= ~(1 << voice_idx);
             return -1;
         }

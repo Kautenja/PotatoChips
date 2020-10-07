@@ -181,17 +181,18 @@ class Sony_S_DSP {
     };
 
     /// @brief A stereo sample in the echo buffer.
-    struct EchoBufferSample {
+    struct __attribute__((packed, aligned(4))) EchoBufferSample {
         enum : unsigned {
             /// the index of the left channel in the samples array
             LEFT = 0,
             /// the index of the right channel in the samples array
             RIGHT = 1,
-            /// the index of the right channel in the samples array
+            /// the number of channels in the sample
             CHANNELS = 2
         };
+
         /// the 16-bit sample for the left [0] and right [1] channels.
-        int16_t samples[2];
+        int16_t samples[CHANNELS] = {0, 0};
     };
 
     /// @brief Returns the 14-bit pitch based on th given frequency.

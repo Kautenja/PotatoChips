@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "hw:Sanskrit 6th,0",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -55,7 +55,7 @@
       "params": [
         {
           "id": 0,
-          "value": 2.0
+          "value": 4.0
         },
         {
           "id": 1,
@@ -155,7 +155,7 @@
         },
         {
           "id": 25,
-          "value": 100.0
+          "value": 50.0
         },
         {
           "id": 26,
@@ -187,7 +187,7 @@
         },
         {
           "id": 33,
-          "value": 100.0
+          "value": 50.0
         },
         {
           "id": 34,
@@ -219,7 +219,7 @@
         },
         {
           "id": 41,
-          "value": 6.0
+          "value": 15.0
         },
         {
           "id": 42,
@@ -251,7 +251,7 @@
         },
         {
           "id": 49,
-          "value": 3.0
+          "value": 7.0
         },
         {
           "id": 50,
@@ -283,7 +283,7 @@
         },
         {
           "id": 57,
-          "value": 1.0
+          "value": 7.0
         },
         {
           "id": 58,
@@ -315,7 +315,7 @@
         },
         {
           "id": 65,
-          "value": 24.0
+          "value": 11.0
         },
         {
           "id": 66,
@@ -379,11 +379,11 @@
         },
         {
           "id": 81,
-          "value": 15.0
+          "value": 6.0
         },
         {
           "id": 82,
-          "value": 56.0
+          "value": 103.0
         },
         {
           "id": 83,
@@ -464,7 +464,7 @@
         },
         {
           "id": 4,
-          "value": 14.0
+          "value": 6.0
         },
         {
           "id": 5,
@@ -496,8 +496,9 @@
       "params": [],
       "rightModuleId": 156,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "high",
         "window": "kaiser"

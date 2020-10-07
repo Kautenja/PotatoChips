@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.476a49b",
+  "version": "1.dev.eefe794",
   "modules": [
     {
       "id": 1,
@@ -10,12 +10,12 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 1,
-          "deviceName": "default",
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 256
+          "blockSize": 512
         }
       },
       "pos": [
@@ -50,7 +50,7 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.7.3",
+      "version": "1.8.0",
       "model": "S_SMP",
       "params": [
         {
@@ -155,7 +155,7 @@
         },
         {
           "id": 25,
-          "value": 127.0
+          "value": 100.0
         },
         {
           "id": 26,
@@ -187,7 +187,7 @@
         },
         {
           "id": 33,
-          "value": 127.0
+          "value": 100.0
         },
         {
           "id": 34,
@@ -219,7 +219,7 @@
         },
         {
           "id": 41,
-          "value": 0.0
+          "value": 6.0
         },
         {
           "id": 42,
@@ -251,7 +251,7 @@
         },
         {
           "id": 49,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 50,
@@ -283,7 +283,7 @@
         },
         {
           "id": 57,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 58,
@@ -315,7 +315,7 @@
         },
         {
           "id": 65,
-          "value": 0.0
+          "value": 24.0
         },
         {
           "id": 66,
@@ -379,11 +379,11 @@
         },
         {
           "id": 81,
-          "value": 5.0
+          "value": 15.0
         },
         {
           "id": 82,
-          "value": 100.0
+          "value": 56.0
         },
         {
           "id": 83,
@@ -491,7 +491,7 @@
     {
       "id": 154,
       "plugin": "Bogaudio",
-      "version": "1.1.31",
+      "version": "1.1.34",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "rightModuleId": 156,
@@ -680,44 +680,20 @@
       "color": "#0c8e15"
     },
     {
-      "id": 47,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 33,
-      "color": "#0986ad"
-    },
-    {
-      "id": 50,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 34,
-      "color": "#c91847"
-    },
-    {
-      "id": 52,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 35,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 49,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 36,
-      "color": "#0c8e15"
-    },
-    {
       "id": 45,
       "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 152,
       "inputId": 0,
       "color": "#c9b70e"
+    },
+    {
+      "id": 212,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 33,
+      "color": "#c91847"
     }
   ]
 }

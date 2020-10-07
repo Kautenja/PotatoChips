@@ -69,7 +69,7 @@ class Sony_S_DSP_Echo {
     /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
     // -----------------------------------------------------------------------
-    // MARK: Effect Parameters. TODO: change to bit-wise
+    // MARK: Effect Parameters.
     // -----------------------------------------------------------------------
     /// the delay level
     uint8_t delay = 0;

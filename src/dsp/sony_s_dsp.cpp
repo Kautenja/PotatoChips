@@ -26,25 +26,7 @@ Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
     // TODO: move to unit testing code and remove from here
     assert(NUM_REGISTERS == sizeof(GlobalData));
     assert(NUM_REGISTERS == sizeof(voices));
-    assert(9 == sizeof(BitRateReductionBlock));
-    assert(4 == sizeof(SourceDirectoryEntry));
-    assert(4 == sizeof(EchoBufferSample));
 }
-
-/// This table is for envelope timing global.  It represents the number of
-/// counts that should be subtracted from the counter each sample period
-/// (32kHz). The counter starts at 30720 (0x7800). Each count divides exactly
-/// into 0x7800 without remainder.
-const int env_rate_init = 0x7800;
-static const short env_rates[0x20] = {
-    0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
-    0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
-    0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
-    0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
-};
-
-/// the range of the envelope generator amplitude level (i.e., max value)
-const int ENVELOPE_RANGE = 0x800;
 
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voices[voice_idx];
@@ -79,10 +61,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 if (t == 15) {
                     envx += ENVELOPE_RANGE / 2;
                 } else {
-                    cnt -= env_rates[t * 2 + 1];
+                    cnt -= getEnvelopeRate(t * 2 + 1);
                     if (cnt > 0) break;
                     envx += ENVELOPE_RANGE / 64;
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                 }
                 if (envx >= ENVELOPE_RANGE) {
                     envx = ENVELOPE_RANGE - 1;
@@ -97,9 +79,9 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 // 1-1/256." Well, at least that makes some sense.
                 // Multiplying ENVX by 255/256 every time DECAY is
                 // updated.
-                cnt -= env_rates[((adsr1 >> 3) & 0xE) + 0x10];
+                cnt -= getEnvelopeRate(((adsr1 >> 3) & 0xE) + 0x10);
                 if (cnt <= 0) {
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
                 }
@@ -114,9 +96,9 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 // Docs: "SR[is multiplied] by the fixed value 1-1/256."
                 // Multiplying ENVX by 255/256 every time SUSTAIN is
                 // updated.
-                cnt -= env_rates[raw_voice.adsr[1] & 0x1F];
+                cnt -= getEnvelopeRate(raw_voice.adsr[1] & 0x1F);
                 if (cnt <= 0) {
-                    cnt = env_rate_init;
+                    cnt = ENVELOPE_RATE_INITIAL;
                     envx -= ((envx - 1) >> 8) + 1;
                     voice.envx = envx;
                 }
@@ -142,10 +124,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         else switch (t >> 5) {
         case 4:         /* Docs: "Decrease (linear): Subtraction
                              * of the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx -= ENVELOPE_RANGE / 64;
             if (envx < 0) {
                 envx = 0;
@@ -157,10 +139,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         case 5:         /* Docs: "Decrease <sic> (exponential):
                              * Multiplication by the fixed value
                              * 1-1/256." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx -= ((envx - 1) >> 8) + 1;
             if (envx < 0) {
                 envx = 0;
@@ -171,10 +153,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             break;
         case 6:         /* Docs: "Increase (linear): Addition of
                              * the fixed value 1/64." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             envx += ENVELOPE_RANGE / 64;
             if (envx >= ENVELOPE_RANGE)
                 envx = ENVELOPE_RANGE - 1;
@@ -183,10 +165,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         case 7:         /* Docs: "Increase (bent line): Addition
                              * of the constant 1/64 up to .75 of the
                              * constant <sic> 1/256 from .75 to 1." */
-            cnt -= env_rates[t & 0x1F];
+            cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
-            cnt = env_rate_init;
+            cnt = ENVELOPE_RATE_INITIAL;
             if (envx < ENVELOPE_RANGE * 3 / 4)
                 envx += ENVELOPE_RANGE / 64;
             else
@@ -237,10 +219,10 @@ void Sony_S_DSP::run(int32_t count, int16_t* output_buffer) {
         if (global.noise_enables) {  // noise enabled for at least one voice
             // update the noise period based on the index of the rate in the
             // global flags register
-            noise_count -= env_rates[global.flags & FLAG_MASK_NOISE_PERIOD];
+            noise_count -= getEnvelopeRate(global.flags & FLAG_MASK_NOISE_PERIOD);
             if (noise_count <= 0) {  // rising edge of noise generator
                 // reset the noise period to the initial value
-                noise_count = env_rate_init;
+                noise_count = ENVELOPE_RATE_INITIAL;
                 // the LFSR is 15-bit, shift left 1 to get the 16-bit sample
                 noise_amp = static_cast<int16_t>(noise << 1);
                 // update the linear feedback shift register from taps 0, 1.
@@ -296,7 +278,7 @@ void Sony_S_DSP::run(int32_t count, int16_t* output_buffer) {
                 // expected; as yet, I have been unable to find any
                 // pattern.  I doubt it will matter though, so we'll go
                 // ahead and do the full time for now.
-                voice.envcnt = env_rate_init;
+                voice.envcnt = ENVELOPE_RATE_INITIAL;
                 voice.envelope_stage = EnvelopeStage::Attack;
             }
             // key-on = !key-off = true

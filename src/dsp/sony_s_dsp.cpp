@@ -21,8 +21,6 @@
 #include "sony_s_dsp.hpp"
 #include "sony_s_dsp_common.hpp"
 
-Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) { }
-
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voices[voice_idx];
     VoiceState& voice = voice_states[voice_idx];
@@ -50,61 +48,58 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     int adsr1 = raw_voice.adsr[0];
     if (adsr1 & 0x80) {
         switch (voice.envelope_stage) {
-            case EnvelopeStage::Attack: {
-                // increase envelope by 1/64 each step
-                int t = adsr1 & 15;
-                if (t == 15) {
-                    envx += ENVELOPE_RANGE / 2;
-                } else {
-                    cnt -= getEnvelopeRate(t * 2 + 1);
-                    if (cnt > 0) break;
-                    envx += ENVELOPE_RANGE / 64;
-                    cnt = ENVELOPE_RATE_INITIAL;
-                }
-                if (envx >= ENVELOPE_RANGE) {
-                    envx = ENVELOPE_RANGE - 1;
-                    voice.envelope_stage = EnvelopeStage::Decay;
-                }
-                voice.envx = envx;
-                break;
+        case EnvelopeStage::Attack: {
+            // increase envelope by 1/64 each step
+            int t = adsr1 & 15;
+            if (t == 15) {
+                envx += ENVELOPE_RANGE / 2;
+            } else {
+                cnt -= getEnvelopeRate(t * 2 + 1);
+                if (cnt > 0) break;
+                envx += ENVELOPE_RANGE / 64;
+                cnt = ENVELOPE_RATE_INITIAL;
             }
-
-            case EnvelopeStage::Decay: {
-                // Docs: "DR...[is multiplied] by the fixed value
-                // 1-1/256." Well, at least that makes some sense.
-                // Multiplying ENVX by 255/256 every time DECAY is
-                // updated.
-                cnt -= getEnvelopeRate(((adsr1 >> 3) & 0xE) + 0x10);
-                if (cnt <= 0) {
-                    cnt = ENVELOPE_RATE_INITIAL;
-                    envx -= ((envx - 1) >> 8) + 1;
-                    voice.envx = envx;
-                }
-                int sustain_level = raw_voice.adsr[1] >> 5;
-
-                if (envx <= (sustain_level + 1) * 0x100)
-                    voice.envelope_stage = EnvelopeStage::Sustain;
-                break;
+            if (envx >= ENVELOPE_RANGE) {
+                envx = ENVELOPE_RANGE - 1;
+                voice.envelope_stage = EnvelopeStage::Decay;
             }
-
-            case EnvelopeStage::Sustain:
-                // Docs: "SR[is multiplied] by the fixed value 1-1/256."
-                // Multiplying ENVX by 255/256 every time SUSTAIN is
-                // updated.
-                cnt -= getEnvelopeRate(raw_voice.adsr[1] & 0x1F);
-                if (cnt <= 0) {
-                    cnt = ENVELOPE_RATE_INITIAL;
-                    envx -= ((envx - 1) >> 8) + 1;
-                    voice.envx = envx;
-                }
-                break;
-
-            case EnvelopeStage::Release:
-                // handled above
-                break;
+            voice.envx = envx;
+            break;
         }
-    } else {  /* GAIN mode is set */
-        // Note: if the game switches between ADSR and GAIN modes
+        case EnvelopeStage::Decay: {
+            // Docs: "DR...[is multiplied] by the fixed value
+            // 1-1/256." Well, at least that makes some sense.
+            // Multiplying ENVX by 255/256 every time DECAY is
+            // updated.
+            cnt -= getEnvelopeRate(((adsr1 >> 3) & 0xE) + 0x10);
+            if (cnt <= 0) {
+                cnt = ENVELOPE_RATE_INITIAL;
+                envx -= ((envx - 1) >> 8) + 1;
+                voice.envx = envx;
+            }
+            int sustain_level = raw_voice.adsr[1] >> 5;
+
+            if (envx <= (sustain_level + 1) * 0x100)
+                voice.envelope_stage = EnvelopeStage::Sustain;
+            break;
+        }
+        case EnvelopeStage::Sustain:
+            // Docs: "SR[is multiplied] by the fixed value 1-1/256."
+            // Multiplying ENVX by 255/256 every time SUSTAIN is
+            // updated.
+            cnt -= getEnvelopeRate(raw_voice.adsr[1] & 0x1F);
+            if (cnt <= 0) {
+                cnt = ENVELOPE_RATE_INITIAL;
+                envx -= ((envx - 1) >> 8) + 1;
+                voice.envx = envx;
+            }
+            break;
+        case EnvelopeStage::Release:
+            // handled above
+            break;
+        }
+    } else {  // GAIN mode is set
+        // TODO: if the game switches between ADSR and GAIN modes
         // partway through, should the count be reset, or should it
         // continue from where it was? Does the DSP actually watch for
         // that bit to change, or does it just go along with whatever
@@ -113,12 +108,11 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
         // that obviously wants the other behavior.  The effect would
         // be pretty subtle, in any case.
         int t = raw_voice.gain;
-        if (t < 0x80) {
+        if (t < 0x80)  // direct GAIN mode
             envx = voice.envx = t << 4;
-        }
         else switch (t >> 5) {
-        case 4:         /* Docs: "Decrease (linear): Subtraction
-                             * of the fixed value 1/64." */
+        case 4:  // Decrease (linear)
+            // Subtraction of the fixed value 1 / 64.
             cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
@@ -131,9 +125,8 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             }
             voice.envx = envx;
             break;
-        case 5:         /* Docs: "Decrease <sic> (exponential):
-                             * Multiplication by the fixed value
-                             * 1-1/256." */
+        case 5:  // Decrease (exponential)
+            // Multiplication by the fixed value 1 - 1/256.
             cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
@@ -146,8 +139,8 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             }
             voice.envx = envx;
             break;
-        case 6:         /* Docs: "Increase (linear): Addition of
-                             * the fixed value 1/64." */
+        case 6:  // Increase (linear)
+            // Addition of the fixed value 1/64.
             cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
@@ -157,9 +150,9 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
                 envx = ENVELOPE_RANGE - 1;
             voice.envx = envx;
             break;
-        case 7:         /* Docs: "Increase (bent line): Addition
-                             * of the constant 1/64 up to .75 of the
-                             * constant <sic> 1/256 from .75 to 1." */
+        case 7:  // Increase (bent line)
+            // Addition of the constant 1/64 up to .75 of the constant 1/256
+            // from .75 to 1.
             cnt -= getEnvelopeRate(t & 0x1F);
             if (cnt > 0)
                 break;
@@ -174,8 +167,10 @@ inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
             break;
         }
     }
+    // update the envelope counter and envelope output for the voice
     voice.envcnt = cnt;
     raw_voice.envx = envx >> 4;
+
     return envx;
 }
 

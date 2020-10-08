@@ -169,18 +169,6 @@ class Sony_S_DSP {
         uint8_t samples[NUM_SAMPLES];
     } __attribute__((packed));
 
-    /// @brief Bit-masks for extracting values from the flags registers.
-    enum FlagMasks {
-        /// a mask for the flag register to extract the noise period parameter
-        FLAG_MASK_NOISE_PERIOD = 0x1F,
-        /// a mask for the flag register to extract the echo write enabled bit
-        FLAG_MASK_ECHO_WRITE = 0x20,
-        /// a mask for the flag register to extract the mute voices bit
-        FLAG_MASK_MUTE = 0x40,
-        /// a mask for the flag register to extract the reset chip bit
-        FLAG_MASK_RESET = 0x80
-    };
-
     /// @brief A stereo sample in the echo buffer.
     struct __attribute__((packed, aligned(4))) EchoBufferSample {
         enum : unsigned {
@@ -194,6 +182,18 @@ class Sony_S_DSP {
 
         /// the 16-bit sample for the left [0] and right [1] channels.
         int16_t samples[CHANNELS] = {0, 0};
+    };
+
+    /// @brief Bit-masks for extracting values from the flags registers.
+    enum FlagMasks : uint8_t {
+        /// a mask for the flag register to extract the noise period parameter
+        FLAG_MASK_NOISE_PERIOD = 0x1F,
+        /// a mask for the flag register to extract the echo write enabled bit
+        FLAG_MASK_ECHO_WRITE = 0x20,
+        /// a mask for the flag register to extract the mute voices bit
+        FLAG_MASK_MUTE = 0x40,
+        /// a mask for the flag register to extract the reset chip bit
+        FLAG_MASK_RESET = 0x80
     };
 
     /// A structure mapping the register space to a single voice's data fields.
@@ -395,9 +395,9 @@ class Sony_S_DSP {
  public:
     /// @brief Initialize a new Sony_S_DSP.
     ///
-    /// @param ram a pointer to the 64KB shared RAM
+    /// @param ram_ a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP(uint8_t* ram);
+    explicit Sony_S_DSP(uint8_t* ram_) : ram(ram_) { }
 
     /// @brief Clear state and silence everything.
     void reset() {

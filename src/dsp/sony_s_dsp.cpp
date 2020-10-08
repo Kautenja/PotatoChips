@@ -240,8 +240,9 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
     // MARK: Voice Processing
     // -------------------------------------------------------------------
     // store output of the the last monophonic voice for phase modulation.
-    // TODO: What is the expected behavior when pitch modulation is enabled
-    // on voice 0? Jurassic Park 2 does this. Assume 0 for now.
+    // the output for phase modulation on voice 0 is always 0. The switch can
+    // be set, but has no effect. Games like Jurassic Park set the flag, but
+    // it is not known why.
     int prev_outx = 0;
     // buffer the outputs of the left and right echo and main channels
     int echol = 0;

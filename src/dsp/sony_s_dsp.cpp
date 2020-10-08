@@ -268,8 +268,8 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
             // decode three samples immediately
             voice.fraction = 0x3FFF;
             // BRR decoder filter uses previous two samples
-            voice.interp0 = 0;
-            voice.interp1 = 0;
+            voice.interp[0] = 0;
+            voice.interp[1] = 0;
             // NOTE: Real SNES does *not* appear to initialize the
             // envelope counter to anything in particular. The first
             // cycle always seems to come at a random time sooner than
@@ -326,10 +326,10 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
                 voice.envx = 0;
                 // add silence samples to interpolation buffer
                 do {
-                    voice.interp3 = voice.interp2;
-                    voice.interp2 = voice.interp1;
-                    voice.interp1 = voice.interp0;
-                    voice.interp0 = 0;
+                    voice.interp[3] = voice.interp[2];
+                    voice.interp[2] = voice.interp[1];
+                    voice.interp[1] = voice.interp[0];
+                    voice.interp[0] = 0;
                 } while (--n >= 0);
                 break;
             }
@@ -354,8 +354,8 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
             if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
 
             // One, two and three point IIR filters
-            int smp1 = voice.interp0;
-            int smp2 = voice.interp1;
+            int smp1 = voice.interp[0];
+            int smp2 = voice.interp[1];
             if (voice.block_header & 8) {
                 delta += smp1;
                 delta -= smp2 >> 1;
@@ -371,10 +371,10 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
                 delta += (-smp1) >> 5;
             }
 
-            voice.interp3 = voice.interp2;
-            voice.interp2 = smp2;
-            voice.interp1 = smp1;
-            voice.interp0 = 2 * clamp_16(delta);
+            voice.interp[3] = voice.interp[2];
+            voice.interp[2] = smp2;
+            voice.interp[1] = smp1;
+            voice.interp[0] = 2 * clamp_16(delta);
         }
 
         // get the 14-bit frequency value
@@ -387,11 +387,11 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
         voice.fraction = (voice.fraction & 0x0FFF) + rate;
         const int16_t* table1 = (int16_t const*) ((char const*) gauss + index);
         const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
-        int sample = ((table1[0] * voice.interp3) >> 12) +
-                     ((table1[1] * voice.interp2) >> 12) +
-                     ((table2[1] * voice.interp1) >> 12);
+        int sample = ((table1[0] * voice.interp[3]) >> 12) +
+                     ((table1[1] * voice.interp[2]) >> 12) +
+                     ((table2[1] * voice.interp[1]) >> 12);
         sample = static_cast<int16_t>(2 * sample);
-        sample +=     (table2[0] * voice.interp0) >> 11 & ~1;
+        sample +=     (table2[0] * voice.interp[0]) >> 11 & ~1;
 
         // if noise is enabled for this voice use the amplified noise as
         // the output, otherwise use the clamped sampled value

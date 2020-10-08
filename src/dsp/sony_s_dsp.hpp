@@ -359,20 +359,14 @@ class Sony_S_DSP {
 
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
-        /// TODO
+        /// the volume level of the voice
         short volume[2];
         /// 12-bit fractional position
         short fraction;
         /// padding (placement here keeps interp's in a 64-bit line)
         short unused0;
-        /// most recent four decoded samples
-        short interp3;
-        /// TODO
-        short interp2;
-        /// TODO
-        short interp1;
-        /// TODO
-        short interp0;
+        /// most recent four decoded samples for the Gaussian filter
+        int16_t interp[4];
         /// number of nibbles remaining in current block
         short block_remain;
         /// TODO
@@ -381,11 +375,11 @@ class Sony_S_DSP {
         short block_header;
         /// padding (placement here keeps envelope data in a 64-bit line)
         short unused1;
-        /// TODO
+        /// the envelope generator sample counter
         short envcnt;
-        /// TODO
+        /// the output value from the envelope generator
         short envx;
-        /// TODO
+        /// the number of samples delay until the voice turns on (after key-on)
         short on_cnt;
         /// the current stage of the envelope generator
         EnvelopeStage envelope_stage;

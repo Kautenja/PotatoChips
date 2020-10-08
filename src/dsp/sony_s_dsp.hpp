@@ -369,7 +369,7 @@ class Sony_S_DSP {
         int16_t interp[4];
         /// number of nibbles remaining in current block
         short block_remain;
-        /// TODO
+        /// the current address of the sample being played by the voice
         unsigned short addr;
         /// header byte from current block
         short block_header;

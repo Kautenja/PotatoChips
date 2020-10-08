@@ -26,6 +26,24 @@
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
+// MARK: Sony_S_DSP::GlobalData
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Sony_S_DSP::GlobalData should be the size of NUM_REGISTERS") {
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS == sizeof(Sony_S_DSP::GlobalData));
+}
+
+// ---------------------------------------------------------------------------
+// MARK: Sony_S_DSP::RawVoice
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Sony_S_DSP::RawVoice should be NUM_REGISTERS / VOICE_COUNT bytes") {
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS / Sony_S_DSP::VOICE_COUNT == sizeof(Sony_S_DSP::RawVoice));
+    Sony_S_DSP::RawVoice voices[Sony_S_DSP::VOICE_COUNT];
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS == sizeof(voices));
+}
+
+// ---------------------------------------------------------------------------
 // MARK: Sony_S_DSP::SourceDirectoryEntry
 // ---------------------------------------------------------------------------
 

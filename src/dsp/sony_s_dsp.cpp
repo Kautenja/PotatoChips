@@ -21,12 +21,7 @@
 #include "sony_s_dsp.hpp"
 #include "sony_s_dsp_common.hpp"
 
-Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) {
-    // validate that the structures are of expected size
-    // TODO: move to unit testing code and remove from here
-    assert(NUM_REGISTERS == sizeof(GlobalData));
-    assert(NUM_REGISTERS == sizeof(voices));
-}
+Sony_S_DSP::Sony_S_DSP(uint8_t* ram_) : ram(ram_) { }
 
 inline int Sony_S_DSP::clock_envelope(unsigned voice_idx) {
     RawVoice& raw_voice = this->voices[voice_idx];

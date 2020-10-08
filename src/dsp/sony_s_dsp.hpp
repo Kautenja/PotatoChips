@@ -23,21 +23,22 @@
 
 #include "exceptions.hpp"
 #include <cstring>
-#include <cassert>
 
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP {
  public:
-    /// the sample rate of the S-DSP in Hz
-    static constexpr unsigned SAMPLE_RATE = 32000;
-    /// the number of sampler voices on the chip
-    static constexpr unsigned VOICE_COUNT = 8;
-    /// the number of registers on the chip
-    static constexpr unsigned NUM_REGISTERS = 128;
-    /// the size of the RAM bank in bytes
-    static constexpr unsigned SIZE_OF_RAM = 1 << 16;
-    /// the number of FIR coefficients used by the chip's echo filter
-    static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
+    enum : unsigned {
+        /// the number of sampler voices on the chip
+        VOICE_COUNT = 8,
+        /// the number of FIR coefficients used by the chip's echo filter
+        FIR_COEFFICIENT_COUNT = 8,
+        /// the number of registers on the chip
+        NUM_REGISTERS = 128,
+        /// the sample rate of the S-DSP in Hz
+        SAMPLE_RATE = 32000,
+        /// the size of the RAM bank in bytes
+        SIZE_OF_RAM = 1 << 16
+    };
 
     /// @brief the global registers on the S-DSP.
     enum GlobalRegister : uint8_t {
@@ -195,47 +196,6 @@ class Sony_S_DSP {
         int16_t samples[CHANNELS] = {0, 0};
     };
 
-    /// @brief Returns the 14-bit pitch based on th given frequency.
-    ///
-    /// @param frequency the frequency in Hz
-    /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
-    /// @details
-    ///
-    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
-    ///
-    static inline uint16_t convert_pitch(float frequency) {
-        // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
-        // mask the 16-bit pitch to 14-bit
-        return 0x3FFF & static_cast<uint16_t>(pitch);
-    }
-
- private:
-    /// The initial value of the envelope.
-    static constexpr int ENVELOPE_RATE_INITIAL = 0x7800;
-
-    /// the range of the envelope generator amplitude level (i.e., max value)
-    static constexpr int ENVELOPE_RANGE = 0x0800;
-
-    /// Return the envelope rate for the given index in the table.
-    ///
-    /// @param index the index of the envelope rate to return in the table
-    /// @returns the envelope rate at given index in the table
-    ///
-    static inline uint16_t getEnvelopeRate(unsigned index) {
-        // This table is for envelope timing.  It represents the number of
-        // counts that should be subtracted from the counter each sample
-        // period (32kHz). The counter starts at 30720 (0x7800). Each count
-        // divides exactly into 0x7800 without remainder.
-        static const uint16_t ENVELOPE_RATES[0x20] = {
-            0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
-            0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
-            0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
-            0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
-        };
-        return ENVELOPE_RATES[index];
-    }
-
     /// A structure mapping the register space to a single voice's data fields.
     struct RawVoice {
         /// the volume of the left channel
@@ -309,6 +269,47 @@ class Sony_S_DSP {
         /// padding
         char unused9[2];
     };
+
+    /// @brief Returns the 14-bit pitch based on th given frequency.
+    ///
+    /// @param frequency the frequency in Hz
+    /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
+    /// @details
+    ///
+    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
+    ///
+    static inline uint16_t convert_pitch(float frequency) {
+        // calculate the pitch based on the known relationship to frequency
+        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
+        // mask the 16-bit pitch to 14-bit
+        return 0x3FFF & static_cast<uint16_t>(pitch);
+    }
+
+ private:
+    /// The initial value of the envelope.
+    static constexpr int ENVELOPE_RATE_INITIAL = 0x7800;
+
+    /// the range of the envelope generator amplitude level (i.e., max value)
+    static constexpr int ENVELOPE_RANGE = 0x0800;
+
+    /// Return the envelope rate for the given index in the table.
+    ///
+    /// @param index the index of the envelope rate to return in the table
+    /// @returns the envelope rate at given index in the table
+    ///
+    static inline uint16_t getEnvelopeRate(unsigned index) {
+        // This table is for envelope timing.  It represents the number of
+        // counts that should be subtracted from the counter each sample
+        // period (32kHz). The counter starts at 30720 (0x7800). Each count
+        // divides exactly into 0x7800 without remainder.
+        static const uint16_t ENVELOPE_RATES[0x20] = {
+            0x0000, 0x000F, 0x0014, 0x0018, 0x001E, 0x0028, 0x0030, 0x003C,
+            0x0050, 0x0060, 0x0078, 0x00A0, 0x00C0, 0x00F0, 0x0140, 0x0180,
+            0x01E0, 0x0280, 0x0300, 0x03C0, 0x0500, 0x0600, 0x0780, 0x0A00,
+            0x0C00, 0x0F00, 0x1400, 0x1800, 0x1E00, 0x2800, 0x3C00, 0x7800
+        };
+        return ENVELOPE_RATES[index];
+    }
 
     /// Combine the raw voice, registers, and global data structures into a
     /// single piece of memory to allow easy symbolic access to register data

@@ -104,7 +104,7 @@ class Sony_S_DSP {
     };
 
     /// @brief An entry in the source directory in the 64KB RAM.
-    struct SourceDirectoryEntry {
+    struct __attribute__((packed, aligned(4))) SourceDirectoryEntry {
         /// @brief the start address of the sample in the directory.
         /// @details
         /// In hardware this is represented across two bytes; in software we

@@ -374,8 +374,7 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
             voice.interp3 = voice.interp2;
             voice.interp2 = smp2;
             voice.interp1 = smp1;
-            // sign-extend
-            voice.interp0 = int16_t (clamp_16(delta) * 2);
+            voice.interp0 = 2 * clamp_16(delta);
         }
 
         // get the 14-bit frequency value
@@ -386,17 +385,18 @@ void Sony_S_DSP::run(int16_t* output_buffer) {
         // Gaussian interpolation using most recent 4 samples
         int index = voice.fraction >> 2 & 0x3FC;
         voice.fraction = (voice.fraction & 0x0FFF) + rate;
-        const int16_t* table  = (int16_t const*) ((char const*) gauss + index);
+        const int16_t* table1 = (int16_t const*) ((char const*) gauss + index);
         const int16_t* table2 = (int16_t const*) ((char const*) gauss + (255 * 4 - index));
-        int s = ((table[0] * voice.interp3) >> 12) +
-                ((table[1] * voice.interp2) >> 12) +
-                ((table2[1] * voice.interp1) >> 12);
-        s = (int16_t) (s * 2);
-        s += (table2[0] * voice.interp0) >> 11 & ~1;
+        int sample = ((table1[0] * voice.interp3) >> 12) +
+                     ((table1[1] * voice.interp2) >> 12) +
+                     ((table2[1] * voice.interp1) >> 12);
+        sample = static_cast<int16_t>(2 * sample);
+        sample +=     (table2[0] * voice.interp0) >> 11 & ~1;
 
         // if noise is enabled for this voice use the amplified noise as
         // the output, otherwise use the clamped sampled value
-        int output = (global.noise_enables & voice_bit) ? noise_amp : clamp_16(s);
+        int output = (global.noise_enables & voice_bit) ?
+            noise_amp : clamp_16(sample);
         // scale output and set outx values
         output = (output * envx) >> 11 & ~1;
         int l = (voice.volume[0] * output) >> 7;

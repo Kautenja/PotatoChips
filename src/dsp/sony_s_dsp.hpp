@@ -292,7 +292,7 @@ class Sony_S_DSP {
     /// the range of the envelope generator amplitude level (i.e., max value)
     static constexpr int ENVELOPE_RANGE = 0x0800;
 
-    /// Return the envelope rate for the given index in the table.
+    /// @brief Return the envelope rate for the given index in the table.
     ///
     /// @param index the index of the envelope rate to return in the table
     /// @returns the envelope rate at given index in the table
@@ -311,7 +311,7 @@ class Sony_S_DSP {
         return ENVELOPE_RATES[index];
     }
 
-    /// Return the Gaussian interpolation table value for the given index.
+    /// @brief Return the Gaussian interpolation table value for the given index.
     ///
     /// @param index the index of the Gaussian interpolation to return
     /// @returns the Gaussian interpolation table value at given index

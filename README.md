@@ -237,6 +237,26 @@ See the [Manual][POKEY] for more information about the features of this module.
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: S-SMP-ADSR -->
+<!-- ------------------------------------------------------------ -->
+
+## S-SMP-ADSR
+
+S-SMP-ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
+unit in the
+[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+
+<p align="center">
+<img alt="S-SMP-ADSR" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">
+</p>
+
+### Features
+
+See the [Manual][S_SMP_ADSR] for more information about the features of this module.
+
+[S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(Echo) -->
 <!-- ------------------------------------------------------------ -->
 

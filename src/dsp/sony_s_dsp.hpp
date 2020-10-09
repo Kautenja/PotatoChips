@@ -122,7 +122,7 @@ class Sony_S_DSP {
     /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9
     /// compression ratio over 16-bit PCM, i.e., 32 bytes of PCM = 9 bytes of
     /// BRR samples.
-    struct BitRateReductionBlock {
+    struct __attribute__((packed)) BitRateReductionBlock {
         enum : unsigned {
             /// the number of 1-byte samples in each block of BRR samples
             NUM_SAMPLES = 8
@@ -160,15 +160,15 @@ class Sony_S_DSP {
             }
         };
 
-        union {
+        union __attribute__((packed)) {
             /// the bit-wise flag representation of the header
             Flags flags;
             /// the encoded header byte
             uint8_t header = 0;
-        } __attribute__((packed));
+        };
         /// the 8-byte block of sample data
         uint8_t samples[NUM_SAMPLES];
-    } __attribute__((packed));
+    };
 
     /// @brief A stereo sample in the echo buffer.
     struct __attribute__((packed, aligned(4))) EchoBufferSample {

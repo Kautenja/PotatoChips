@@ -27,18 +27,20 @@
 /// @brief An emulation of the echo effect from the Sony S-DSP.
 class Sony_S_DSP_Echo {
  public:
-    /// the number of FIR coefficients used by the chip's echo filter
-    static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
-    /// the size of the FIR ring buffer
-    static constexpr unsigned FIR_MAX_INDEX = 7;
-    /// the number of milliseconds per discrete delay level
-    static constexpr unsigned MILLISECONDS_PER_DELAY_LEVEL = 16;
-    /// the number of \f$16ms\f$ delay levels
-    static constexpr uint8_t DELAY_LEVELS = 31;
-    /// the number of bytes per delay level (2KB)
-    static constexpr unsigned DELAY_LEVEL_BYTES = 2 * (1 << 10);
-    /// the size of the RAM bank in bytes
-    static constexpr unsigned SIZE_OF_RAM = DELAY_LEVELS * DELAY_LEVEL_BYTES;
+    enum : unsigned {
+        /// the number of FIR coefficients used by the chip's echo filter
+        FIR_COEFFICIENT_COUNT = 8,
+        /// the size of the FIR ring buffer
+        FIR_MAX_INDEX = 7,
+        /// the number of milliseconds per discrete delay level
+        MILLISECONDS_PER_DELAY_LEVEL = 16,
+        /// the number of bytes per delay level (2KB)
+        DELAY_LEVEL_BYTES = 2 * (1 << 10),
+        /// the number of \f$16ms\f$ delay levels
+        DELAY_LEVELS = 31,
+        /// the size of the RAM bank in bytes
+        SIZE_OF_RAM = DELAY_LEVELS * DELAY_LEVEL_BYTES
+    };
 
     /// @brief A stereo sample in the echo buffer.
     struct __attribute__((packed, aligned(4))) BufferSample {

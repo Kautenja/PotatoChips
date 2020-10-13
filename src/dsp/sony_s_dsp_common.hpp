@@ -20,6 +20,11 @@
 #include <cstdint>
 #include <limits>
 
+enum : unsigned {
+    /// the sample rate of the S-DSP in Hz
+    SAMPLE_RATE = 32000
+};
+
 /// Clamp an integer to a 16-bit value.
 ///
 /// @param n a 32-bit integer value to clip
@@ -29,6 +34,21 @@ inline int16_t clamp_16(int n) {
     const int lower = std::numeric_limits<int16_t>::min();
     const int upper = std::numeric_limits<int16_t>::max();
     return std::max(lower, std::min(n, upper));
+}
+
+/// @brief Returns the 14-bit pitch calculated from the given frequency.
+///
+/// @param frequency the frequency in Hz
+/// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
+/// @details
+///
+/// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
+///
+static inline uint16_t get_pitch(float frequency) {
+    // calculate the pitch based on the known relationship to frequency
+    const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
+    // mask the 16-bit pitch to 14-bit
+    return 0x3FFF & static_cast<uint16_t>(pitch);
 }
 
 #endif  // DSP_SONY_S_DSP_COMMON_HPP_

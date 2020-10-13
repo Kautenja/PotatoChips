@@ -302,7 +302,7 @@ struct ChipS_SMP : Module {
             float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
             frequency = rack::clamp(frequency, 0.0f, 20000.0f);
             // convert the floating point frequency to a 14-bit pitch value
-            auto pitch16bit = Sony_S_DSP::convert_pitch(frequency);
+            auto pitch16bit = get_pitch(frequency);
             // set the 14-bit pitch value to the cascade of two RAM slots
             apu.write(mask | Sony_S_DSP::PITCH_LOW,  0xff &  pitch16bit     );
             apu.write(mask | Sony_S_DSP::PITCH_HIGH, 0xff & (pitch16bit >> 8));

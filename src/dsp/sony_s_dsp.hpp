@@ -35,8 +35,6 @@ class Sony_S_DSP {
         FIR_COEFFICIENT_COUNT = 8,
         /// the number of registers on the chip
         NUM_REGISTERS = 128,
-        /// the sample rate of the S-DSP in Hz
-        SAMPLE_RATE = 32000,
         /// the size of the RAM bank in bytes
         SIZE_OF_RAM = 1 << 16
     };
@@ -270,21 +268,6 @@ class Sony_S_DSP {
         /// padding
         char unused9[2];
     };
-
-    /// @brief Returns the 14-bit pitch based on th given frequency.
-    ///
-    /// @param frequency the frequency in Hz
-    /// @returns the 14-bit pitch corresponding to the S-DSP 32kHz sample rate
-    /// @details
-    ///
-    /// \f$frequency = \f$SAMPLE_RATE\f$ * \frac{pitch}{2^{12}}\f$
-    ///
-    static inline uint16_t convert_pitch(float frequency) {
-        // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * frequency / SAMPLE_RATE;
-        // mask the 16-bit pitch to 14-bit
-        return 0x3FFF & static_cast<uint16_t>(pitch);
-    }
 
  private:
     /// The initial value of the envelope.

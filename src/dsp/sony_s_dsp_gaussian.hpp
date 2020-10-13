@@ -132,11 +132,7 @@ class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
     ///
     /// @param freq the frequency to set the low-pass gate to
     ///
-    inline void setFrequency(float freq) {
-        // calculate the pitch based on the known relationship to frequency
-        const auto pitch = static_cast<float>(1 << 12) * freq / SAMPLE_RATE;
-        rate = 0x3FFF & static_cast<uint16_t>(pitch);
-    }
+    inline void setFrequency(float freq) { rate = get_pitch(freq); }
 
     /// @brief Run the Gaussian filter for the given input sample.
     ///

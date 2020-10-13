@@ -155,9 +155,6 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     }
 
  public:
-    /// the sample rate of the S-DSP in Hz
-    static constexpr unsigned SAMPLE_RATE = 32000;
-
     /// @brief Initialize a new Sony_S_DSP_ADSR.
     Sony_S_DSP_ADSR() :
         attack(0),

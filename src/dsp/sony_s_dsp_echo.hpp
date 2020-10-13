@@ -27,8 +27,6 @@
 /// @brief An emulation of the echo effect from the Sony S-DSP.
 class Sony_S_DSP_Echo {
  public:
-    /// the sample rate of the S-DSP in Hz
-    static constexpr unsigned SAMPLE_RATE = 32000;
     /// the number of FIR coefficients used by the chip's echo filter
     static constexpr unsigned FIR_COEFFICIENT_COUNT = 8;
     /// the size of the FIR ring buffer

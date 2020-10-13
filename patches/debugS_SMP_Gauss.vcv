@@ -145,7 +145,7 @@
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": 0.830293894
         },
         {
           "id": 4,
@@ -209,7 +209,7 @@
       "params": [],
       "rightModuleId": 163,
       "data": {
-        "channels": 4,
+        "channels": 8,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -274,28 +274,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 14,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 64,
       "outputModuleId": 162,
       "outputId": 0,
       "inputModuleId": 159,
       "inputId": 0,
       "color": "#c9b70e"
-    },
-    {
-      "id": 69,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
     },
     {
       "id": 68,
@@ -367,6 +351,22 @@
       "outputId": 3,
       "inputModuleId": 152,
       "inputId": 4,
+      "color": "#c91847"
+    },
+    {
+      "id": 14,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 69,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
       "color": "#c91847"
     }
   ]

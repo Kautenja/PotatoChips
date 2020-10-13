@@ -257,9 +257,9 @@ S-SMP chip, namely,
 -   **Dual Envelope Generator:** Two envelope generators on one module for
     stereo modulation, cross modulation, or both!
 -   **Total Level Control:** Control over the overall level of the envelope
-    generator, including inversion for ducking effects
+    generator, including inversion for ducking effects.
 -   **Stage Length Control:** Control over stage timings using sliders and
-    control voltages
+    control voltages.
 
 <p align="center">
 <img alt="S-SMP-ADSR" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">
@@ -329,11 +329,24 @@ See the [Manual][S_SMP_Echo] for more information about the features of this mod
 
 ## S-SMP-Gauss
 
-S-SMP-Gauss is an emulation of the Gaussian filter from the Sony S-SMP audio
-processing unit in the
+S-SMP-Gauss is an emulation of the BRR filter & Gaussian filter from the Sony
+S-SMP audio processing unit in the
 [Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The Gaussian filter of the S-SMP was applied to output audio and removed
-high-frequency content from the signal.
+The four BRR filter modes were applied to BRR sample blocks on the SNES and the
+Gaussian filter was applied to output audio and removed high-frequency content
+from the signal.
+
+S-SMP(Gauss) provides the key features of the BRR filter and Gaussian filter
+of the S-SMP chip, namely,
+-   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
+    audio inputs and outputs of the module are locked to _32kHz_.
+-   **Stereo Processing:** Dual processing channels for stereo effects or other
+    create multi-tracking applications.
+-   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine
+    that act as low-pass filters.
+-   **Gaussian Interpolation Filter:** A filter that removes high-frequency
+    content and adds subtle distortion. This filter provides the muffling
+    character that fans of SNES audio will find familiar.
 
 <p align="center">
 <img alt="S-SMP-Gauss" src="manual/S_SMP_Gauss/img/S-SMP-Gauss-Module.svg">

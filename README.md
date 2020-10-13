@@ -245,6 +245,21 @@ See the [Manual][POKEY] for more information about the features of this module.
 S-SMP-ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
 unit in the
 [Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+The envelope generator has three stages, (1) an attack stage that ramps up
+linearly to the total level, (2) a decay stage that ramps down exponentially
+to a sustain level, and (3) a sustain/release stage that ramps down
+exponentially from the sustain level to zero.
+
+S-SMP(ADSR) provides the key features of the ADSR envelope generator of the
+S-SMP chip, namely,
+-   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
+    audio inputs and outputs of the module are locked to _32kHz_.
+-   **Dual Envelope Generator:** Two envelope generators on one module for
+    stereo modulation, cross modulation, or both!
+-   **Total Level Control:** Control over the overall level of the envelope
+    generator, including inversion for ducking effects
+-   **Stage Length Control:** Control over stage timings using sliders and
+    control voltages
 
 <p align="center">
 <img alt="S-SMP-ADSR" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">

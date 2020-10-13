@@ -240,7 +240,7 @@ See the [Manual][POKEY] for more information about the features of this module.
 <!-- MARK: S-SMP-ADSR -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP-ADSR
+## S-SMP(ADSR)
 
 S-SMP-ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
 unit in the
@@ -320,7 +320,7 @@ See the [Manual][S_SMP_Echo] for more information about the features of this mod
 <!-- MARK: S-SMP-Gauss -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP-Gauss
+## S-SMP(Gauss)
 
 S-SMP-Gauss is an emulation of the BRR filter & Gaussian filter from the Sony
 S-SMP audio processing unit in the

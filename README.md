@@ -254,7 +254,7 @@ S-SMP(ADSR) provides the key features of the ADSR envelope generator of the
 S-SMP chip, namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
--   **Dual Envelope Generator:** Two envelope generators on one module for
+-   **Stereo Processing:** Two envelope generators on one module for
     stereo modulation, cross modulation, or both!
 -   **Total Level Control:** Control over the overall level of the envelope
     generator, including inversion for ducking effects.
@@ -290,7 +290,7 @@ S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
 namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
--   **Stereo Echo Buffer:** Echo buffer for two independent inputs in stereo
+-   **Stereo Processing:** Echo buffer for two independent inputs in stereo
     configuration. The parameters are the same for both inputs, but the inputs
     have their own dedicated echo buffers.
 -   **Expanded Delay:** The 15 levels of delay has been upgraded to 31 levels
@@ -305,13 +305,6 @@ namely,
     sound of the echo. The filter can be parameterized as low-pass, high-pass,
     band-pass, band-stop, etc. and includes presets with filter parameters from
     popular SNES games.
--   **16-bit Inputs:** The BRR decoder has been remove in this emulation.
-    Instead, input audio is sampled directly as 16-bit PCM. A separate module
-    S-SMP(BRR) can be cascaded into S-SMP(Echo) to introduce authentic BRR
-    down-sampling effects to the signal path.
--   **Gaussian Low-Pass Filter Override:** The Gaussian low-pass filter has
-    been removed in this emulation. A separate module, S-SMP(Gaussian), can be
-    used in cascade with S-SMP(Echo) to produce a more authentic SNES sound.
 
 <p align="center">
 <img alt="S-SMP(Echo)" src="manual/S_SMP_Echo/img/S-SMP-Echo-Module.svg">

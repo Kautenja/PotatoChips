@@ -81,10 +81,8 @@ struct ChipS_SMP_BRR : Module {
             configParam(PARAM_FREQ          + osc, -6.f, 6.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
-            if (osc > 0) {  // voice 0 does not have phase modulation
-                osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
-                configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
-            }
+            osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
+            configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
         }
         // clear the shared RAM between the CPU and the S-DSP
         clearRAM();

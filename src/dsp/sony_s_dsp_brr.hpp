@@ -356,10 +356,6 @@ class Sony_S_DSP_BRR {
         GlobalData global;
     };
 
-    /// The values of the FIR filter coefficients from the register bank. This
-    /// allows the FIR coefficients to be stored as 16-bit
-    short fir_coeff[FIR_COEFFICIENT_COUNT];
-
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.
     /// @details
@@ -370,21 +366,6 @@ class Sony_S_DSP_BRR {
 
     /// A bit-mask representation of the active voice gates
     int keys;
-
-    /// The number of samples until the LFSR will sample a new value
-    int noise_count;
-    /// The discrete sampled LFSR register noise value
-    int noise;
-    /// The amplified LFSR register noise sample
-    int noise_amp;
-
-    /// A pointer to the head of the echo buffer in RAM
-    int echo_ptr;
-
-    /// fir_buf[i + 8] == fir_buf[i], to avoid wrap checking in FIR code
-    short fir_buf[16][2];
-    /// (0 to 7)
-    int fir_offset;
 
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
@@ -459,64 +440,7 @@ class Sony_S_DSP_BRR {
         // that obviously wants the other behavior.  The effect would
         // be pretty subtle, in any case.
         int t = raw_voice.gain;
-        if (t < 0x80)  // direct GAIN mode
-            envx = voice.envx = t << 4;
-        else switch (t >> 5) {
-        case 4:  // Decrease (linear)
-            // Subtraction of the fixed value 1 / 64.
-            cnt -= getEnvelopeRate(t & 0x1F);
-            if (cnt > 0)
-                break;
-            cnt = ENVELOPE_RATE_INITIAL;
-            envx -= ENVELOPE_RANGE / 64;
-            if (envx < 0) {
-                envx = 0;
-                if (voice.envelope_stage == EnvelopeStage::Attack)
-                    voice.envelope_stage = EnvelopeStage::Decay;
-            }
-            voice.envx = envx;
-            break;
-        case 5:  // Decrease (exponential)
-            // Multiplication by the fixed value 1 - 1/256.
-            cnt -= getEnvelopeRate(t & 0x1F);
-            if (cnt > 0)
-                break;
-            cnt = ENVELOPE_RATE_INITIAL;
-            envx -= ((envx - 1) >> 8) + 1;
-            if (envx < 0) {
-                envx = 0;
-                if (voice.envelope_stage == EnvelopeStage::Attack)
-                    voice.envelope_stage = EnvelopeStage::Decay;
-            }
-            voice.envx = envx;
-            break;
-        case 6:  // Increase (linear)
-            // Addition of the fixed value 1/64.
-            cnt -= getEnvelopeRate(t & 0x1F);
-            if (cnt > 0)
-                break;
-            cnt = ENVELOPE_RATE_INITIAL;
-            envx += ENVELOPE_RANGE / 64;
-            if (envx >= ENVELOPE_RANGE)
-                envx = ENVELOPE_RANGE - 1;
-            voice.envx = envx;
-            break;
-        case 7:  // Increase (bent line)
-            // Addition of the constant 1/64 up to .75 of the constant 1/256
-            // from .75 to 1.
-            cnt -= getEnvelopeRate(t & 0x1F);
-            if (cnt > 0)
-                break;
-            cnt = ENVELOPE_RATE_INITIAL;
-            if (envx < ENVELOPE_RANGE * 3 / 4)
-                envx += ENVELOPE_RANGE / 64;
-            else
-                envx += ENVELOPE_RANGE / 256;
-            if (envx >= ENVELOPE_RANGE)
-                envx = ENVELOPE_RANGE - 1;
-            voice.envx = envx;
-            break;
-        }
+        envx = voice.envx = t << 4;
 
         // update the envelope counter and envelope output for the voice
         voice.envcnt = cnt;
@@ -534,10 +458,7 @@ class Sony_S_DSP_BRR {
 
     /// @brief Clear state and silence everything.
     void reset() {
-        keys = echo_ptr = noise_count = fir_offset = 0;
-        noise = 1;
-        // reset, mute, echo off
-        global.flags = FLAG_MASK_RESET | FLAG_MASK_MUTE | FLAG_MASK_ECHO_WRITE;
+        keys = 0;
         global.key_ons = 0;
         // reset voices
         for (unsigned i = 0; i < VOICE_COUNT; i++) {
@@ -545,8 +466,6 @@ class Sony_S_DSP_BRR {
             v.on_cnt = v.volume[0] = v.volume[1] = 0;
             v.envelope_stage = EnvelopeStage::Release;
         }
-        // clear the echo buffer
-        memset(fir_buf, 0, sizeof fir_buf);
     }
 
     /// @brief Read data from the register at the given address.

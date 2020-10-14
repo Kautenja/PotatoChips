@@ -109,7 +109,7 @@
     {
       "slug": "S_SMP_BRR",
       "name": "S-SMP(BRR)",
-      "description": "An emulation of the BRR sampler from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf",
       "tags": [
         "Dual",

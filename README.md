@@ -237,12 +237,12 @@ See the [Manual][POKEY] for more information about the features of this module.
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP-ADSR -->
+<!-- MARK: S-SMP(ADSR) -->
 <!-- ------------------------------------------------------------ -->
 
 ## S-SMP(ADSR)
 
-S-SMP-ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
+S-SMP(ADSR) is an emulation of the ADSR from the Sony S-SMP audio processing
 unit in the
 [Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
 The envelope generator has three stages, (1) an attack stage that ramps up
@@ -262,7 +262,7 @@ S-SMP chip, namely,
     control voltages.
 
 <p align="center">
-<img alt="S-SMP-ADSR" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">
+<img alt="S-SMP(ADSR)" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">
 </p>
 
 ### Features
@@ -270,6 +270,38 @@ S-SMP chip, namely,
 See the [Manual][S_SMP_ADSR] for more information about the features of this module.
 
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: S-SMP(BRR) -->
+<!-- ------------------------------------------------------------ -->
+
+## S-SMP(BRR)
+
+S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
+engine from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+The sample playback engine has a compression ratio of _32:9_ over standard
+16-bit PCM, and includes a reconstruction filter.
+
+S-SMP(BRR) provides the key features of the BRR sample playback engine of the
+S-SMP chip, namely,
+-   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
+    audio inputs and outputs of the module are locked to _32kHz_.
+-   **Multi-channel Processing:** 8 different mono sample playback channels
+-   **Stereo Panning:** Split mono samples into the stereo field and introduce
+    surround sound effect
+-   **Reconstruction Filter:** Four-mode reconstruction filter including a
+    bypass mode and three low-pass filter modes
+
+<p align="center">
+<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/S-SMP-BRR-Module.svg">
+</p>
+
+### Features
+
+See the [Manual][S_SMP_BRR] for more information about the features of this module.
+
+[S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(Echo) -->
@@ -322,7 +354,7 @@ See the [Manual][S_SMP_Echo] for more information about the features of this mod
 
 ## S-SMP(Gauss)
 
-S-SMP-Gauss is an emulation of the BRR filter & Gaussian filter from the Sony
+S-SMP(Gauss) is an emulation of the BRR filter & Gaussian filter from the Sony
 S-SMP audio processing unit in the
 [Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
 The four BRR filter modes were applied to BRR sample blocks on the SNES and the
@@ -342,7 +374,7 @@ of the S-SMP chip, namely,
     character that fans of SNES audio will find familiar.
 
 <p align="center">
-<img alt="S-SMP-Gauss" src="manual/S_SMP_Gauss/img/S-SMP-Gauss-Module.svg">
+<img alt="S-SMP(Gauss)" src="manual/S_SMP_Gauss/img/S-SMP-Gauss-Module.svg">
 </p>
 
 ### Features

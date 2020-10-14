@@ -226,11 +226,6 @@ struct ChipS_SMP_BRR : Module {
         for (unsigned i = 0; i < Sony_S_DSP_BRR::BitRateReductionBlock::NUM_SAMPLES; i++)
             block->samples[i] = samples[i];
         // -------------------------------------------------------------------
-        // MARK: Flags (Noise Frequency)
-        // -------------------------------------------------------------------
-        uint8_t noise = params[PARAM_NOISE_FREQ].getValue();
-        apu.write(Sony_S_DSP_BRR::FLAGS, noise);
-        // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
         // create bit-masks for the key-on and key-off state of each voice
@@ -254,23 +249,6 @@ struct ChipS_SMP_BRR : Module {
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_BRR::KEY_OFF, key_off);
         // -------------------------------------------------------------------
-        // MARK: Echo Parameters
-        // -------------------------------------------------------------------
-        apu.write(Sony_S_DSP_BRR::ECHO_FEEDBACK, params[PARAM_ECHO_FEEDBACK].getValue());
-        apu.write(Sony_S_DSP_BRR::ECHO_DELAY, params[PARAM_ECHO_DELAY].getValue());
-        // echo enable
-        uint8_t echo_enable = 0;
-        for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
-            echo_enable |= static_cast<uint8_t>(params[PARAM_ECHO_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_BRR::ECHO_ENABLE, echo_enable);
-        // -------------------------------------------------------------------
-        // MARK: Noise Enable
-        // -------------------------------------------------------------------
-        uint8_t noise_enable = 0;
-        for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
-            noise_enable |= static_cast<uint8_t>(params[PARAM_NOISE_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_BRR::NOISE_ENABLE, noise_enable);
-        // -------------------------------------------------------------------
         // MARK: Pitch Modulation
         // -------------------------------------------------------------------
         uint8_t pitch_modulation = 0;
@@ -278,13 +256,6 @@ struct ChipS_SMP_BRR : Module {
         for (unsigned voice = 1; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
             pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
         apu.write(Sony_S_DSP_BRR::PITCH_MODULATION, pitch_modulation);
-        // -------------------------------------------------------------------
-        // MARK: Main Volume & Echo Volume
-        // -------------------------------------------------------------------
-        apu.write(Sony_S_DSP_BRR::MAIN_VOLUME_LEFT,  params[PARAM_VOLUME_MAIN + 0].getValue());
-        apu.write(Sony_S_DSP_BRR::MAIN_VOLUME_RIGHT, params[PARAM_VOLUME_MAIN + 1].getValue());
-        apu.write(Sony_S_DSP_BRR::ECHO_VOLUME_LEFT,  params[PARAM_VOLUME_ECHO + 0].getValue());
-        apu.write(Sony_S_DSP_BRR::ECHO_VOLUME_RIGHT, params[PARAM_VOLUME_ECHO + 1].getValue());
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------
@@ -307,97 +278,6 @@ struct ChipS_SMP_BRR : Module {
             apu.write(mask | Sony_S_DSP_BRR::PITCH_LOW,  0xff &  pitch16bit     );
             apu.write(mask | Sony_S_DSP_BRR::PITCH_HIGH, 0xff & (pitch16bit >> 8));
             // ---------------------------------------------------------------
-            // MARK: Gain (Custom ADSR override)
-            // ---------------------------------------------------------------
-            // TODO: GAIN can be used to implement custom envelopes in your
-            // program. There are 5 modes GAIN uses.
-            // DIRECT
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  0  |               PARAMETER                 |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // INCREASE (LINEAR)
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  1  |  0  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // INCREASE (BENT LINE)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  1  |  1  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // DECREASE (LINEAR)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  0  |  0  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // DECREASE (EXPONENTIAL)
-            //
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x7   |  1  |  0  |  1  |          PARAMETER          |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // Direct: The value of GAIN is set to PARAMETER.
-            //
-            // Increase (Linear):
-            //     GAIN slides to 1 with additions of 1/64.
-            //
-            // Increase (Bent Line):
-            //     GAIN slides up with additions of 1/64 until it reaches 3/4,
-            //     then it slides up to 1 with additions of 1/256.
-            //
-            // Decrease (Linear):
-            //     GAIN slides down to 0 with subtractions of 1/64.
-            //
-            // Decrease (Exponential):
-            //     GAIN slides down exponentially by getting multiplied by
-            //     255/256.
-            //
-            // Table 2.3 Gain Parameters (Increate 0 -> 1 / Decrease 1 -> 0):
-            // Parameter Value Increase Linear Increase Bentline   Decrease Linear Decrease Exponential
-            // 00  INFINITE    INFINITE    INFINITE    INFINITE
-            // 01  4.1s    7.2s    4.1s    38s
-            // 02  3.1s    5.4s    3.1s    28s
-            // 03  2.6s    4.6s    2.6s    24s
-            // 04  2.0s    3.5s    2.0s    19s
-            // 05  1.5s    2.6s    1.5s    14s
-            // 06  1.3s    2.3s    1.3s    12s
-            // 07  1.0s    1.8s    1.0s    9.4s
-            // 08  770ms   1.3s    770ms   7.1s
-            // 09  640ms   1.1s    640ms   5.9s
-            // 0A  510ms   900ms   510ms   4.7s
-            // 0B  380ms   670ms   380ms   3.5s
-            // 0C  320ms   560ms   320ms   2.9s
-            // 0D  260ms   450ms   260ms   2.4s
-            // 0E  190ms   340ms   190ms   1.8s
-            // 0F  160ms   280ms   160ms   1.5s
-            // 10  130ms   220ms   130ms   1.2s
-            // 11  96ms    170ms   96ms    880ms
-            // 12  80ms    140ms   80ms    740ms
-            // 13  64ms    110ms   64ms    590ms
-            // 14  48ms    84ms    48ms    440ms
-            // 15  40ms    70ms    40ms    370ms
-            // 16  32ms    56ms    32ms    290ms
-            // 17  24ms    42ms    24ms    220ms
-            // 18  20ms    35ms    20ms    180ms
-            // 19  16ms    28ms    16ms    150ms
-            // 1A  12ms    21ms    12ms    110ms
-            // 1B  10ms    18ms    10ms    92ms
-            // 1C  8ms 14ms    8ms 74ms
-            // 1D  6ms 11ms    6ms 55ms
-            // 1E  4ms 7ms 4ms 37ms
-            // 1F  2ms 3.5ms   2ms 18ms
-            //
-            // apu.write(mask | Sony_S_DSP_BRR::GAIN, 64);
-            // ---------------------------------------------------------------
             // MARK: ADSR
             // ---------------------------------------------------------------
             // the ADSR1 register is set from the attack and decay values
@@ -412,58 +292,11 @@ struct ChipS_SMP_BRR : Module {
             auto adsr2 = (sustainLevel << 5) | sustainRate;
             apu.write(mask | Sony_S_DSP_BRR::ADSR_2, adsr2);
             // ---------------------------------------------------------------
-            // MARK: ADSR Output
-            // ---------------------------------------------------------------
-            // TODO: ENVX gets written to by the DSP. It contains the present
-            // ADSR/GAIN envelope value.
-            // ENVX
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x8   |  0  |                 VALUE                   |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // 7-bit unsigned value
-            // apu.read(mask | Sony_S_DSP_BRR::ENVELOPE_OUT, 0);
-            // ---------------------------------------------------------------
-            // MARK: Waveform Output
-            // ---------------------------------------------------------------
-            // OUTX is written to by the DSP. It contains the present wave height multiplied by the ADSR/GAIN envelope value. It isn't multiplied by the voice volume though.
-            //
-            // OUTX
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x9   | sign|                 VALUE                   |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            //
-            // 8-bit signed value
-            // apu.read(mask | Sony_S_DSP_BRR::WAVEFORM_OUT, 0);
-            // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------
             apu.write(mask | Sony_S_DSP_BRR::VOLUME_LEFT,  params[PARAM_VOLUME_L + voice].getValue());
             apu.write(mask | Sony_S_DSP_BRR::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
         }
-        // -------------------------------------------------------------------
-        // MARK: FIR Coefficients
-        // -------------------------------------------------------------------
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_BRR::FIR_COEFFICIENT_COUNT; coeff++) {
-            auto param = params[PARAM_FIR_COEFFICIENT + coeff].getValue();
-            apu.write((coeff << 4) | Sony_S_DSP_BRR::FIR_COEFFICIENTS, param);
-        }
-        // -------------------------------------------------------------------
-        // MARK: Voice Activity Output
-        // -------------------------------------------------------------------
-        // TODO: This register is written to during DSP activity.
-        //
-        // Each voice gets 1 bit. If the bit is set then it means the BRR
-        // decoder has reached the last compressed block in the sample.
-        //
-        // ENDX
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $7C   |VOIC7|VOIC6|VOIC5|VOIC4|VOIC3|VOIC2|VOIC1|VOIC0|
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // apu.read(Sony_S_DSP_BRR::ENDX, 0);
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------

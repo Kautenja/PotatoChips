@@ -31,8 +31,6 @@ class Sony_S_DSP_BRR {
     enum : unsigned {
         /// the number of sampler voices on the chip
         VOICE_COUNT = 8,
-        /// the number of FIR coefficients used by the chip's echo filter
-        FIR_COEFFICIENT_COUNT = 8,
         /// the number of registers on the chip
         NUM_REGISTERS = 128,
         /// the size of the RAM bank in bytes
@@ -166,33 +164,6 @@ class Sony_S_DSP_BRR {
         };
         /// the 8-byte block of sample data
         uint8_t samples[NUM_SAMPLES];
-    };
-
-    /// @brief A stereo sample in the echo buffer.
-    struct __attribute__((packed, aligned(4))) EchoBufferSample {
-        enum : unsigned {
-            /// the index of the left channel in the samples array
-            LEFT = 0,
-            /// the index of the right channel in the samples array
-            RIGHT = 1,
-            /// the number of channels in the sample
-            CHANNELS = 2
-        };
-
-        /// the 16-bit sample for the left [0] and right [1] channels.
-        int16_t samples[CHANNELS] = {0, 0};
-    };
-
-    /// @brief Bit-masks for extracting values from the flags registers.
-    enum FlagMasks : uint8_t {
-        /// a mask for the flag register to extract the noise period parameter
-        FLAG_MASK_NOISE_PERIOD = 0x1F,
-        /// a mask for the flag register to extract the echo write enabled bit
-        FLAG_MASK_ECHO_WRITE = 0x20,
-        /// a mask for the flag register to extract the mute voices bit
-        FLAG_MASK_MUTE = 0x40,
-        /// a mask for the flag register to extract the reset chip bit
-        FLAG_MASK_RESET = 0x80
     };
 
     /// A structure mapping the register space to a single voice's data fields.

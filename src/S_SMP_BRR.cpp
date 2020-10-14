@@ -56,7 +56,7 @@ struct ChipS_SMP_BRR : Module {
         PARAM_ECHO_FEEDBACK,
         ENUMS(PARAM_VOLUME_ECHO, 2),
         ENUMS(PARAM_VOLUME_MAIN, 2),
-        ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_BRR::FIR_COEFFICIENT_COUNT),
+        ENUMS(PARAM_FIR_COEFFICIENT, 8),
         NUM_PARAMS
     };
 
@@ -79,7 +79,7 @@ struct ChipS_SMP_BRR : Module {
         INPUT_ECHO_FEEDBACK,
         ENUMS(INPUT_VOLUME_ECHO, 2),
         ENUMS(INPUT_VOLUME_MAIN, 2),
-        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_BRR::FIR_COEFFICIENT_COUNT),
+        ENUMS(INPUT_FIR_COEFFICIENT, 8),
         NUM_INPUTS
     };
 
@@ -114,7 +114,7 @@ struct ChipS_SMP_BRR : Module {
                 configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
             }
         }
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_BRR::FIR_COEFFICIENT_COUNT; coeff++) {
+        for (unsigned coeff = 0; coeff < 8; coeff++) {
             // the first FIR coefficient defaults to 0x7f = 127 and the other
             // coefficients are 0 by default
             configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, (coeff ? 0 : 127), "FIR Coefficient " + std::to_string(coeff + 1));

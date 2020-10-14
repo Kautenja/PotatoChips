@@ -280,9 +280,7 @@ struct ChipS_SMP_BRR : Module {
             // ---------------------------------------------------------------
             // MARK: ADSR
             // ---------------------------------------------------------------
-            apu.write(mask | Sony_S_DSP_BRR::GAIN, 127 * inputs[INPUT_GATE + voice].getVoltage() / 10.f);
-            apu.write(mask | Sony_S_DSP_BRR::ADSR_1, 0);
-            apu.write(mask | Sony_S_DSP_BRR::ADSR_2, 0);
+            apu.write(mask | Sony_S_DSP_BRR::GAIN, 127);
             // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------

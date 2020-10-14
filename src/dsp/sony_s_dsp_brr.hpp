@@ -661,8 +661,8 @@ class Sony_S_DSP_BRR {
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
         // get the volume of the left channel from the global registers
-        int left_volume  = global.left_volume;
-        int right_volume = global.right_volume;
+        int left_volume  = 127;
+        int right_volume = 127;
         // -------------------------------------------------------------------
         // MARK: Key Off / Key On
         // -------------------------------------------------------------------
@@ -675,33 +675,6 @@ class Sony_S_DSP_BRR {
         // -------------------------------------------------------------------
         // Keying on a voice resets that bit in ENDX.
         global.wave_ended &= ~global.key_ons;
-        // -------------------------------------------------------------------
-        // MARK: Noise
-        // -------------------------------------------------------------------
-        // the `noise_enables` register is a length 8 bit-mask for enabling /
-        // disabling noise for each individual voice.
-        if (global.noise_enables) {  // noise enabled for at least one voice
-            // update the noise period based on the index of the rate in the
-            // global flags register
-            noise_count -= getEnvelopeRate(global.flags & FLAG_MASK_NOISE_PERIOD);
-            if (noise_count <= 0) {  // rising edge of noise generator
-                // reset the noise period to the initial value
-                noise_count = ENVELOPE_RATE_INITIAL;
-                // the LFSR is 15-bit, shift left 1 to get the 16-bit sample
-                noise_amp = static_cast<int16_t>(noise << 1);
-                // update the linear feedback shift register from taps 0, 1.
-                noise = (((noise << 13) ^ (noise << 14)) & 0x4000) | (noise >> 1);
-                // the Galois equivalent was implemented as below, but yielded
-                // poor CPU performance relative to the Fibonacci method above
-                // and produced a frequency response that seemed incorrect,
-                // i.e., high frequency noise had a much higher low frequency
-                // response. As such, the Fibonacci implementation above is
-                // the preferred route for this LFSR implementation.
-                //     uint16_t noise = this->noise;
-                //     noise = (noise >> 1) ^ (0x6000 & -(noise & 1));
-                //     this->noise = noise;
-            }
-        }
         // -------------------------------------------------------------------
         // MARK: Voice Processing
         // -------------------------------------------------------------------

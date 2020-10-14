@@ -636,10 +636,6 @@ class Sony_S_DSP_BRR {
                 volume[1] = right;
                 break;
             }
-            case FIR_COEFFICIENTS:  // update FIR coefficients
-                // sign-extend
-                fir_coeff[index] = (int8_t) data;
-                break;
         }
     }
 
@@ -651,18 +647,11 @@ class Sony_S_DSP_BRR {
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
     void run(int16_t* output_buffer = nullptr) {
-        // TODO: Should we just fill the buffer with silence? Flags won't be
-        // cleared during this run so it seems it should keep resetting every
-        // sample.
-        if (global.flags & FLAG_MASK_RESET) reset();
         // use the global wave page address to lookup a pointer to the first entry
         // in the source directory. the wave page is multiplied by 0x100 to produce
         // the RAM address of the source directory.
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
-        // get the volume of the left channel from the global registers
-        int left_volume  = 127;
-        int right_volume = 127;
         // -------------------------------------------------------------------
         // MARK: Key Off / Key On
         // -------------------------------------------------------------------
@@ -684,8 +673,6 @@ class Sony_S_DSP_BRR {
         // it is not known why.
         int prev_outx = 0;
         // buffer the outputs of the left and right echo and main channels
-        int echol = 0;
-        int echor = 0;
         int left = 0;
         int right = 0;
         // iterate over the voices on the chip
@@ -737,8 +724,10 @@ class Sony_S_DSP_BRR {
                 prev_outx = 0;
                 continue;
             }
-
+            // ---------------------------------------------------------------
+            // MARK: BRR Sample Decoder
             // Decode samples when fraction >= 1.0 (0x1000)
+            // ---------------------------------------------------------------
             for (int n = voice.fraction >> 12; --n >= 0;) {
                 if (!--voice.block_remain) {
                     if (voice.block_header & 1) {
@@ -773,16 +762,14 @@ class Sony_S_DSP_BRR {
                     } while (--n >= 0);
                     break;
                 }
-
+                // get the next sample from RAM
                 int delta = ram[voice.addr];
-                if (voice.block_remain & 1) {
-                    delta <<= 4;  // use lower nibble
+                if (voice.block_remain & 1) {  // use lower nibble
+                    delta <<= 4;
                     voice.addr++;
                 }
-
                 // Use sign-extended upper nibble
                 delta = int8_t(delta) >> 4;
-
                 // For invalid ranges (D,E,F): if the nibble is negative,
                 // the result is F000.  If positive, 0000. Nothing else
                 // like previous range, etc seems to have any effect.  If
@@ -792,8 +779,9 @@ class Sony_S_DSP_BRR {
                 int shift = voice.block_header >> 4;
                 delta = (delta << shift) >> 1;
                 if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
-
-                // One, two and three point IIR filters
+                // -----------------------------------------------------------
+                // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
+                // -----------------------------------------------------------
                 int smp1 = voice.interp[0];
                 int smp2 = voice.interp[1];
                 if (voice.block_header & 8) {
@@ -810,18 +798,18 @@ class Sony_S_DSP_BRR {
                     delta += smp1 >> 1;
                     delta += (-smp1) >> 5;
                 }
-
                 voice.interp[3] = voice.interp[2];
                 voice.interp[2] = smp2;
                 voice.interp[1] = smp1;
                 voice.interp[0] = 2 * clamp_16(delta);
             }
-
+            // ---------------------------------------------------------------
+            // MARK: Gaussian Interpolation Filter
+            // ---------------------------------------------------------------
             // get the 14-bit frequency value
             int rate = 0x3FFF & ((raw_voice.rate[1] << 8) | raw_voice.rate[0]);
             if (global.pitch_mods & voice_bit)
                 rate = (rate * (prev_outx + 32768)) >> 15;
-
             // Gaussian interpolation using most recent 4 samples
             int index = voice.fraction >> 2 & 0x3FC;
             voice.fraction = (voice.fraction & 0x0FFF) + rate;
@@ -832,99 +820,22 @@ class Sony_S_DSP_BRR {
                          ((table2[1] * voice.interp[1]) >> 12);
             sample = static_cast<int16_t>(2 * sample);
             sample +=     (table2[0] * voice.interp[0]) >> 11 & ~1;
-
-            // if noise is enabled for this voice use the amplified noise as
-            // the output, otherwise use the clamped sampled value
-            int output = (global.noise_enables & voice_bit) ?
-                noise_amp : clamp_16(sample);
-            // scale output and set outx values
+            // scale output from this voice
+            int output = clamp_16(sample);
             output = (output * envx) >> 11 & ~1;
-            int l = (voice.volume[0] * output) >> 7;
-            int r = (voice.volume[1] * output) >> 7;
-
+            // store this output for phase modulating the next voice
             prev_outx = output;
-            raw_voice.outx = output >> 8;
-            if (global.echo_ons & voice_bit) {
-                echol += l;
-                echor += r;
-            }
-            left  += l;
-            right += r;
+            // add the left and right channels to the mix
+            left += (voice.volume[0] * output) >> 7;
+            right += (voice.volume[1] * output) >> 7;
         }
-        // end of channel loop
-
-        // main volume control
-        left  = (left  * left_volume) >> 7;
-        right = (right * right_volume) >> 7;
-
-        // -------------------------------------------------------------------
-        // MARK: Echo FIR filter
-        // -------------------------------------------------------------------
-
-        // get the current feedback sample in the echo buffer
-        EchoBufferSample* const echo_sample =
-            reinterpret_cast<EchoBufferSample*>(&ram[(global.echo_page * 0x100 + echo_ptr) & 0xFFFF]);
-        // increment the echo pointer by the size of the echo buffer sample (4)
-        echo_ptr += sizeof(EchoBufferSample);
-        // check if for the end of the ring buffer and wrap the pointer around
-        // the echo delay is clamped in [0, 15] and each delay index requires
-        // 2KB of RAM (0x800)
-        if (echo_ptr >= (global.echo_delay & 15) * 0x800) echo_ptr = 0;
-        // cache the feedback value (sign-extended to 32-bit)
-        int fb_left = echo_sample->samples[EchoBufferSample::LEFT];
-        int fb_right = echo_sample->samples[EchoBufferSample::RIGHT];
-
-        // put samples in history ring buffer
-        const int fir_offset = this->fir_offset;
-        short (*fir_pos)[2] = &fir_buf[fir_offset];
-        this->fir_offset = (fir_offset + 7) & 7;  // move backwards one step
-        fir_pos[0][0] = (short) fb_left;
-        fir_pos[0][1] = (short) fb_right;
-        // duplicate at +8 eliminates wrap checking below
-        fir_pos[8][0] = (short) fb_left;
-        fir_pos[8][1] = (short) fb_right;
-
-        // FIR
-        fb_left =     fb_left * fir_coeff[7] +
-                fir_pos[1][0] * fir_coeff[6] +
-                fir_pos[2][0] * fir_coeff[5] +
-                fir_pos[3][0] * fir_coeff[4] +
-                fir_pos[4][0] * fir_coeff[3] +
-                fir_pos[5][0] * fir_coeff[2] +
-                fir_pos[6][0] * fir_coeff[1] +
-                fir_pos[7][0] * fir_coeff[0];
-
-        fb_right =   fb_right * fir_coeff[7] +
-                fir_pos[1][1] * fir_coeff[6] +
-                fir_pos[2][1] * fir_coeff[5] +
-                fir_pos[3][1] * fir_coeff[4] +
-                fir_pos[4][1] * fir_coeff[3] +
-                fir_pos[5][1] * fir_coeff[2] +
-                fir_pos[6][1] * fir_coeff[1] +
-                fir_pos[7][1] * fir_coeff[0];
-        // add the echo to the samples for the left and right channel
-        left  += (fb_left  * global.left_echo_volume) >> 14;
-        right += (fb_right * global.right_echo_volume) >> 14;
-
-        if (!(global.flags & FLAG_MASK_ECHO_WRITE)) {  // echo buffer feedback
-            // add feedback to the echo samples
-            echol += (fb_left  * global.echo_feedback) >> 14;
-            echor += (fb_right * global.echo_feedback) >> 14;
-            // put the echo samples into the buffer
-            echo_sample->samples[EchoBufferSample::LEFT] = clamp_16(echol);
-            echo_sample->samples[EchoBufferSample::RIGHT] = clamp_16(echor);
-        }
-
         // -------------------------------------------------------------------
         // MARK: Output
         // -------------------------------------------------------------------
         if (output_buffer) {  // write final samples
             // clamp the left and right samples and place them into the buffer
-            output_buffer[0] = left  = clamp_16(left);
-            output_buffer[1] = right = clamp_16(right);
-            // increment the buffer to the position of the next stereo sample
-            if (global.flags & FLAG_MASK_MUTE)  // muting
-                output_buffer[0] = output_buffer[1] = 0;
+            output_buffer[0] = clamp_16(left);
+            output_buffer[1] = clamp_16(right);
         }
     }
 };

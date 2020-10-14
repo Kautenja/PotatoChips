@@ -385,7 +385,7 @@ class Sony_S_DSP_BRR {
         // the latter and not update the count, unless I see a game
         // that obviously wants the other behavior.  The effect would
         // be pretty subtle, in any case.
-        int t = raw_voice.gain;
+        int t = 127;
         envx = voice.envx = t << 4;
 
         // update the envelope counter and envelope output for the voice

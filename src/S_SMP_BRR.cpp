@@ -78,7 +78,7 @@ struct ChipS_SMP_BRR : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < Sony_S_DSP_BRR::VOICE_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ          + osc, -4.f, 4.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FREQ          + osc, -6.f, 6.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L      + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R      + osc, -128, 127, 127, osc_name + " Volume (Right)");
             if (osc > 0) {  // voice 0 does not have phase modulation
@@ -237,10 +237,6 @@ struct ChipS_SMP_BRR : Module {
             // set the 14-bit pitch value to the cascade of two RAM slots
             apu.write(mask | Sony_S_DSP_BRR::PITCH_LOW,  0xff &  pitch16bit     );
             apu.write(mask | Sony_S_DSP_BRR::PITCH_HIGH, 0xff & (pitch16bit >> 8));
-            // ---------------------------------------------------------------
-            // MARK: ADSR
-            // ---------------------------------------------------------------
-            apu.write(mask | Sony_S_DSP_BRR::GAIN, 127);
             // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------

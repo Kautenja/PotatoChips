@@ -336,20 +336,19 @@ class Sony_S_DSP_BRR {
         /// the output value from the envelope generator
         short envx;
         /// the number of samples delay until the voice turns on (after key-on)
-        short on_cnt;
+        short on_cnt = 0;
         /// the current stage of the envelope generator
         EnvelopeStage envelope_stage;
     } voice_states[VOICE_COUNT];
 
     /// @brief Process the envelope for the voice with given index.
     ///
-    /// @param voice_index the index of the voice to clock the envelope of
     /// returns the envelope counter value for given index in the table
     ///
-    inline int clock_envelope(unsigned voice_idx) {
+    inline int clock_envelope() {
         // cache the voice data structures
-        RawVoice& raw_voice = this->voices[voice_idx];
-        VoiceState& voice = voice_states[voice_idx];
+        RawVoice& raw_voice = this->voices[0];
+        VoiceState& voice = voice_states[0];
         // cache the current envelope value
         int envx = voice.envx;
 
@@ -364,7 +363,7 @@ class Sony_S_DSP_BRR {
             envx -= 0x0800 / 256;
             if (envx <= 0) {
                 voice.envx = 0;
-                keys &= ~(1 << voice_idx);
+                keys &= ~1;
                 return -1;
             }
             voice.envx = envx;
@@ -380,6 +379,12 @@ class Sony_S_DSP_BRR {
         return envx;
     }
 
+    /// the previous four samples for Gaussian interpolation
+    int16_t samples[4] = {0, 0, 0, 0};
+
+
+    /// the 14-bit frequency value
+    uint16_t rate = 0;
     /// the volume for the left channel output
     int8_t volumeLeft = 0;
     /// the volume for the right channel output
@@ -399,10 +404,15 @@ class Sony_S_DSP_BRR {
         // reset voices
         for (unsigned i = 0; i < VOICE_COUNT; i++) {
             VoiceState& v = voice_states[i];
-            v.on_cnt = v.volume[0] = v.volume[1] = 0;
             v.envelope_stage = EnvelopeStage::Release;
         }
     }
+
+    /// @brief Set the frequency of the low-pass gate to a new value.
+    ///
+    /// @param freq the frequency to set the low-pass gate to
+    ///
+    inline void setFrequency(float freq) { rate = get_pitch(freq); }
 
     /// @brief Set the volume to new level for the left channel.
     ///
@@ -446,11 +456,12 @@ class Sony_S_DSP_BRR {
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
     /// @param output_buffer the output buffer to write samples to (optional)
+    /// @param phase_modulation the phase modulation to apply to the voice
     ///
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int16_t* output_buffer = nullptr) {
+    void run(int16_t* output_buffer = nullptr, int phase_modulation = 0) {
         // use the global wave page address to lookup a pointer to the first entry
         // in the source directory. the wave page is multiplied by 0x100 to produce
         // the RAM address of the source directory.
@@ -471,167 +482,157 @@ class Sony_S_DSP_BRR {
         // -------------------------------------------------------------------
         // MARK: Voice Processing
         // -------------------------------------------------------------------
-        // store output of the the last monophonic voice for phase modulation.
-        // the output for phase modulation on voice 0 is always 0. The switch can
-        // be set, but has no effect. Games like Jurassic Park set the flag, but
-        // it is not known why.
-        int prev_outx = 0;
         // buffer the outputs of the left and right echo and main channels
         int left = 0;
         int right = 0;
-        // iterate over the voices on the chip
-        for (unsigned voice_idx = 0; voice_idx < VOICE_COUNT; voice_idx++) {
-            // get the voice's bit-mask shift value
-            const int voice_bit = 1 << voice_idx;
-            // cache the voice and data structures
-            RawVoice& raw_voice = voices[voice_idx];
-            VoiceState& voice = voice_states[voice_idx];
-            // ---------------------------------------------------------------
-            // MARK: Gate Processing
-            // ---------------------------------------------------------------
-            if (voice.on_cnt && !--voice.on_cnt) {
-                // key on
-                keys |= voice_bit;
-                voice.addr = source_directory[raw_voice.waveform].start;
-                voice.block_remain = 1;
-                voice.envx = 0;
-                voice.block_header = 0;
-                // decode three samples immediately
-                voice.fraction = 0x3FFF;
-                // BRR decoder filter uses previous two samples
-                voice.samples[0] = 0;
-                voice.samples[1] = 0;
-                // NOTE: Real SNES does *not* appear to initialize the
-                // envelope counter to anything in particular. The first
-                // cycle always seems to come at a random time sooner than
-                // expected; as yet, I have been unable to find any
-                // pattern.  I doubt it will matter though, so we'll go
-                // ahead and do the full time for now.
-                voice.envelope_stage = EnvelopeStage::Attack;
-            }
-            // key-on = !key-off = true
-            if (global.key_ons & voice_bit & ~global.key_offs) {
-                global.key_ons &= ~voice_bit;
-                voice.on_cnt = 8;
-            }
-            // key-off = true
-            if (keys & global.key_offs & voice_bit) {
-                voice.envelope_stage = EnvelopeStage::Release;
-                voice.on_cnt = 0;
-            }
-
-            int envx;
-            if (!(keys & voice_bit) || (envx = clock_envelope(voice_idx)) < 0) {
-                raw_voice.envx = 0;
-                raw_voice.outx = 0;
-                prev_outx = 0;
-                continue;
-            }
-            // ---------------------------------------------------------------
-            // MARK: BRR Sample Decoder
-            // Decode samples when fraction >= 1.0 (0x1000)
-            // ---------------------------------------------------------------
-            for (int n = voice.fraction >> 12; --n >= 0;) {
-                if (!--voice.block_remain) {
-                    if (voice.block_header & 1) {
-                        global.wave_ended |= voice_bit;
-                        if (voice.block_header & 2) {
-                            // verified (played endless looping sample and ENDX was set)
-                            voice.addr = source_directory[raw_voice.waveform].loop;
-                        } else {  // first block was end block; don't play anything
-                            goto sample_ended;
-                        }
-                    }
-                    voice.block_header = ram[voice.addr++];
-                    voice.block_remain = 16;  // nibbles
-                }
-
-                if (
-                    voice.block_remain == 9 &&
-                    (ram[voice.addr + 5] & 3) == 1 &&
-                    (voice.block_header & 3) != 3
-                ) {  // next block has end flag set, this block ends early
-            sample_ended:
-                    global.wave_ended |= voice_bit;
-                    keys &= ~voice_bit;
-                    raw_voice.envx = 0;
-                    voice.envx = 0;
-                    // add silence samples to interpolation buffer
-                    do {
-                        voice.samples[3] = voice.samples[2];
-                        voice.samples[2] = voice.samples[1];
-                        voice.samples[1] = voice.samples[0];
-                        voice.samples[0] = 0;
-                    } while (--n >= 0);
-                    break;
-                }
-                // get the next sample from RAM
-                int delta = ram[voice.addr];
-                if (voice.block_remain & 1) {  // use lower nibble
-                    delta <<= 4;
-                    voice.addr++;
-                }
-                // Use sign-extended upper nibble
-                delta = int8_t(delta) >> 4;
-                // For invalid ranges (D,E,F): if the nibble is negative,
-                // the result is F000.  If positive, 0000. Nothing else
-                // like previous range, etc seems to have any effect.  If
-                // range is valid, do the shift normally.  Note these are
-                // both shifted right once to do the filters properly, but
-                // the output will be shifted back again at the end.
-                int shift = voice.block_header >> 4;
-                delta = (delta << shift) >> 1;
-                if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
-                // -----------------------------------------------------------
-                // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
-                // -----------------------------------------------------------
-                int smp1 = voice.samples[0];
-                int smp2 = voice.samples[1];
-                if (voice.block_header & 8) {
-                    delta += smp1;
-                    delta -= smp2 >> 1;
-                    if (!(voice.block_header & 4)) {
-                        delta += (-smp1 - (smp1 >> 1)) >> 5;
-                        delta += smp2 >> 5;
-                    } else {
-                        delta += (-smp1 * 13) >> 7;
-                        delta += (smp2 + (smp2 >> 1)) >> 4;
-                    }
-                } else if (voice.block_header & 4) {
-                    delta += smp1 >> 1;
-                    delta += (-smp1) >> 5;
-                }
-                voice.samples[3] = voice.samples[2];
-                voice.samples[2] = smp2;
-                voice.samples[1] = smp1;
-                voice.samples[0] = 2 * clamp_16(delta);
-            }
-            // ---------------------------------------------------------------
-            // MARK: Gaussian Interpolation Filter
-            // ---------------------------------------------------------------
-            // get the 14-bit frequency value
-            int rate = 0x3FFF & ((raw_voice.rate[1] << 8) | raw_voice.rate[0]);
-            if (global.pitch_mods & voice_bit)
-                rate = (rate * (prev_outx + 32768)) >> 15;
-            // Gaussian interpolation using most recent 4 samples
-            int index = voice.fraction >> 2 & 0x3FC;
-            voice.fraction = (voice.fraction & 0x0FFF) + rate;
-            auto table1 = getGaussian(index);
-            auto table2 = getGaussian(255 * 4 - index);
-            int sample = ((table1[0] * voice.samples[3]) >> 12) +
-                         ((table1[1] * voice.samples[2]) >> 12) +
-                         ((table2[1] * voice.samples[1]) >> 12);
-            sample = static_cast<int16_t>(2 * sample);
-            sample +=     (table2[0] * voice.samples[0]) >> 11 & ~1;
-            // scale output from this voice
-            int output = clamp_16(sample);
-            output = (output * envx) >> 11 & ~1;
-            // store this output for phase modulating the next voice
-            prev_outx = output;
-            // add the left and right channels to the mix
-            left += (voice.volume[0] * output) >> 7;
-            right += (voice.volume[1] * output) >> 7;
+        // get the voice's bit-mask shift value
+        const int voice_bit = 1;
+        // cache the voice and data structures
+        RawVoice& raw_voice = voices[0];
+        VoiceState& voice = voice_states[0];
+        // ---------------------------------------------------------------
+        // MARK: Gate Processing
+        // ---------------------------------------------------------------
+        if (voice.on_cnt && !--voice.on_cnt) {
+            // key on
+            keys |= voice_bit;
+            voice.addr = source_directory[raw_voice.waveform].start;
+            voice.block_remain = 1;
+            voice.envx = 0;
+            voice.block_header = 0;
+            // decode three samples immediately
+            voice.fraction = 0x3FFF;
+            // BRR decoder filter uses previous two samples
+            samples[0] = 0;
+            samples[1] = 0;
+            // NOTE: Real SNES does *not* appear to initialize the
+            // envelope counter to anything in particular. The first
+            // cycle always seems to come at a random time sooner than
+            // expected; as yet, I have been unable to find any
+            // pattern.  I doubt it will matter though, so we'll go
+            // ahead and do the full time for now.
+            voice.envelope_stage = EnvelopeStage::Attack;
         }
+        // key-on = !key-off = true
+        if (global.key_ons & voice_bit & ~global.key_offs) {
+            global.key_ons &= ~voice_bit;
+            voice.on_cnt = 8;
+        }
+        // key-off = true
+        if (keys & global.key_offs & voice_bit) {
+            voice.envelope_stage = EnvelopeStage::Release;
+            voice.on_cnt = 0;
+        }
+
+        int envx;
+        if (!(keys & voice_bit) || (envx = clock_envelope()) < 0) {
+            raw_voice.envx = 0;
+            raw_voice.outx = 0;
+            // TODO: return empty samples
+            return;
+        }
+        // ---------------------------------------------------------------
+        // MARK: BRR Sample Decoder
+        // Decode samples when fraction >= 1.0 (0x1000)
+        // ---------------------------------------------------------------
+        for (int n = voice.fraction >> 12; --n >= 0;) {
+            if (!--voice.block_remain) {
+                if (voice.block_header & 1) {
+                    global.wave_ended |= voice_bit;
+                    if (voice.block_header & 2) {
+                        // verified (played endless looping sample and ENDX was set)
+                        voice.addr = source_directory[raw_voice.waveform].loop;
+                    } else {  // first block was end block; don't play anything
+                        goto sample_ended;
+                    }
+                }
+                voice.block_header = ram[voice.addr++];
+                voice.block_remain = 16;  // nibbles
+            }
+
+            if (
+                voice.block_remain == 9 &&
+                (ram[voice.addr + 5] & 3) == 1 &&
+                (voice.block_header & 3) != 3
+            ) {  // next block has end flag set, this block ends early
+        sample_ended:
+                global.wave_ended |= voice_bit;
+                keys &= ~voice_bit;
+                raw_voice.envx = 0;
+                voice.envx = 0;
+                // add silence samples to interpolation buffer
+                do {
+                    samples[3] = samples[2];
+                    samples[2] = samples[1];
+                    samples[1] = samples[0];
+                    samples[0] = 0;
+                } while (--n >= 0);
+                break;
+            }
+            // get the next sample from RAM
+            int delta = ram[voice.addr];
+            if (voice.block_remain & 1) {  // use lower nibble
+                delta <<= 4;
+                voice.addr++;
+            }
+            // Use sign-extended upper nibble
+            delta = int8_t(delta) >> 4;
+            // For invalid ranges (D,E,F): if the nibble is negative,
+            // the result is F000.  If positive, 0000. Nothing else
+            // like previous range, etc seems to have any effect.  If
+            // range is valid, do the shift normally.  Note these are
+            // both shifted right once to do the filters properly, but
+            // the output will be shifted back again at the end.
+            int shift = voice.block_header >> 4;
+            delta = (delta << shift) >> 1;
+            if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
+            // -----------------------------------------------------------
+            // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
+            // -----------------------------------------------------------
+            int smp1 = samples[0];
+            int smp2 = samples[1];
+            if (voice.block_header & 8) {
+                delta += smp1;
+                delta -= smp2 >> 1;
+                if (!(voice.block_header & 4)) {
+                    delta += (-smp1 - (smp1 >> 1)) >> 5;
+                    delta += smp2 >> 5;
+                } else {
+                    delta += (-smp1 * 13) >> 7;
+                    delta += (smp2 + (smp2 >> 1)) >> 4;
+                }
+            } else if (voice.block_header & 4) {
+                delta += smp1 >> 1;
+                delta += (-smp1) >> 5;
+            }
+            samples[3] = samples[2];
+            samples[2] = smp2;
+            samples[1] = smp1;
+            samples[0] = 2 * clamp_16(delta);
+        }
+        // ---------------------------------------------------------------
+        // MARK: Gaussian Interpolation Filter
+        // ---------------------------------------------------------------
+        // get the 14-bit frequency value
+        int phase = 0x3FFF & rate;
+        // apply phase modulation
+        phase = (phase * (phase_modulation + 32768)) >> 15;
+        // Gaussian interpolation using most recent 4 samples
+        const int index = voice.fraction >> 2 & 0x3FC;
+        voice.fraction = (voice.fraction & 0x0FFF) + phase;
+        const auto table1 = getGaussian(index);
+        const auto table2 = getGaussian(255 * 4 - index);
+        int sample = ((table1[0] * samples[3]) >> 12) +
+                     ((table1[1] * samples[2]) >> 12) +
+                     ((table2[1] * samples[1]) >> 12);
+        sample = static_cast<int16_t>(2 * sample);
+        sample +=     (table2[0] * samples[0]) >> 11 & ~1;
+        // scale output from this voice
+        int output = clamp_16(sample);
+        output = (output * envx) >> 11 & ~1;
+        // add the left and right channels to the mix
+        left += (volumeLeft * output) >> 7;
+        right += (volumeRight * output) >> 7;
         // -------------------------------------------------------------------
         // MARK: Output
         // -------------------------------------------------------------------

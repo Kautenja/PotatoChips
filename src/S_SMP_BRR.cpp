@@ -209,18 +209,18 @@ struct ChipS_SMP_BRR : Module {
         // -------------------------------------------------------------------
         // MARK: Pitch Modulation
         // -------------------------------------------------------------------
-        uint8_t pitch_modulation = 0;
-        // start from 1 because there is no pitch modulation for the first channel
-        for (unsigned voice = 1; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
-            pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
-        apu.write(Sony_S_DSP_BRR::PITCH_MODULATION, pitch_modulation);
+        // uint8_t pitch_modulation = 0;
+        // // start from 1 because there is no pitch modulation for the first channel
+        // for (unsigned voice = 1; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
+        //     pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
+        // apu.write(Sony_S_DSP_BRR::PITCH_MODULATION, pitch_modulation);
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------
-        for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
-            // shift the voice index over a nibble to get the bit mask for the
-            // logical OR operator
-            auto mask = voice << 4;
+        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        //
+        // }
+            unsigned voice = 0;
             // ---------------------------------------------------------------
             // MARK: Frequency
             // ---------------------------------------------------------------
@@ -230,17 +230,12 @@ struct ChipS_SMP_BRR : Module {
             pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
             float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
             frequency = rack::clamp(frequency, 0.0f, 20000.0f);
-            // convert the floating point frequency to a 14-bit pitch value
-            auto pitch16bit = get_pitch(frequency);
-            // set the 14-bit pitch value to the cascade of two RAM slots
-            apu.write(mask | Sony_S_DSP_BRR::PITCH_LOW,  0xff &  pitch16bit     );
-            apu.write(mask | Sony_S_DSP_BRR::PITCH_HIGH, 0xff & (pitch16bit >> 8));
+            apu.setFrequency(frequency);
             // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------
-            apu.write(mask | Sony_S_DSP_BRR::VOLUME_LEFT,  params[PARAM_VOLUME_L + voice].getValue());
-            apu.write(mask | Sony_S_DSP_BRR::VOLUME_RIGHT, params[PARAM_VOLUME_R + voice].getValue());
-        }
+            apu.setVolumeLeft(params[PARAM_VOLUME_L + voice].getValue());
+            apu.setVolumeRight(params[PARAM_VOLUME_R + voice].getValue());
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------

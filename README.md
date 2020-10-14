@@ -287,11 +287,11 @@ S-SMP(BRR) provides the key features of the BRR sample playback engine of the
 S-SMP chip, namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
--   **Multi-channel Processing:** 8 different mono sample playback channels
+-   **Multi-channel Processing:** 8 different mono sample playback channels.
 -   **Stereo Panning:** Split mono samples into the stereo field and introduce
-    surround sound effect
+    surround sound effects.
 -   **Reconstruction Filter:** Four-mode reconstruction filter including a
-    bypass mode and three low-pass filter modes
+    bypass mode and three low-pass filter modes.
 
 <p align="center">
 <img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/S-SMP-BRR-Module.svg">

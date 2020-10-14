@@ -280,17 +280,9 @@ struct ChipS_SMP_BRR : Module {
             // ---------------------------------------------------------------
             // MARK: ADSR
             // ---------------------------------------------------------------
-            // the ADSR1 register is set from the attack and decay values
-            auto attack = (uint8_t) params[PARAM_ATTACK + voice].getValue();
-            auto decay = (uint8_t) params[PARAM_DECAY + voice].getValue();
-            // the high bit of the ADSR1 register is set to enable the ADSR
-            auto adsr1 = 0b10000000 | (decay << 4) | attack;
-            apu.write(mask | Sony_S_DSP_BRR::ADSR_1, adsr1);
-            // the ADSR2 register is set from the sustain level and rate
-            auto sustainLevel = (uint8_t) params[PARAM_SUSTAIN_LEVEL + voice].getValue();
-            auto sustainRate = (uint8_t) params[PARAM_SUSTAIN_RATE + voice].getValue();
-            auto adsr2 = (sustainLevel << 5) | sustainRate;
-            apu.write(mask | Sony_S_DSP_BRR::ADSR_2, adsr2);
+            apu.write(mask | Sony_S_DSP_BRR::GAIN, 127 * inputs[INPUT_GATE + voice].getVoltage() / 10.f);
+            apu.write(mask | Sony_S_DSP_BRR::ADSR_1, 0);
+            apu.write(mask | Sony_S_DSP_BRR::ADSR_2, 0);
             // ---------------------------------------------------------------
             // MARK: Amplifier Volume
             // ---------------------------------------------------------------

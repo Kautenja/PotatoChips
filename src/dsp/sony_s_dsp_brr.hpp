@@ -372,23 +372,18 @@ class Sony_S_DSP_BRR {
             return envx;
         }
 
-
-        // TODO: if the game switches between ADSR and GAIN modes
-        // partway through, should the count be reset, or should it
-        // continue from where it was? Does the DSP actually watch for
-        // that bit to change, or does it just go along with whatever
-        // it sees when it performs the update? I'm going to assume
-        // the latter and not update the count, unless I see a game
-        // that obviously wants the other behavior.  The effect would
-        // be pretty subtle, in any case.
         int t = 127;
         envx = voice.envx = t << 4;
-
         // update the envelope counter and envelope output for the voice
         raw_voice.envx = envx >> 4;
 
         return envx;
     }
+
+    /// the volume for the left channel output
+    int8_t volumeLeft = 0;
+    /// the volume for the right channel output
+    int8_t volumeRight = 0;
 
  public:
     /// @brief Initialize a new Sony_S_DSP_BRR.
@@ -409,15 +404,17 @@ class Sony_S_DSP_BRR {
         }
     }
 
-    /// @brief Read data from the register at the given address.
+    /// @brief Set the volume to new level for the left channel.
     ///
-    /// @param address the address of the register to read data from
+    /// @param value the level to set the left channel to
     ///
-    inline uint8_t read(uint8_t address) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        return registers[address];
-    }
+    inline void setVolumeLeft(int8_t value) { volumeLeft = value; }
+
+    /// @brief Set the volume to new level for the right channel.
+    ///
+    /// @param value the level to set the right channel to
+    ///
+    inline void setVolumeRight(int8_t value) { volumeRight = value; }
 
     /// @brief Write data to the registers at the given address.
     ///

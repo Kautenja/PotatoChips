@@ -40,6 +40,7 @@ extern rack::Model *modelChipGBS;
 extern rack::Model *modelChipPOKEY;
 extern rack::Model *modelChipS_SMP;
 extern rack::Model *modelChipS_SMP_ADSR;
+extern rack::Model *modelChipS_SMP_BRR;
 extern rack::Model *modelChipS_SMP_Echo;
 extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;

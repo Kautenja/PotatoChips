@@ -486,13 +486,13 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_BRRWidget(ChipS_SMP_BRR *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP.svg";
+        static constexpr auto panel = "res/S-SMP-BRR.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
         for (unsigned i = 0; i < Sony_S_DSP_BRR::VOICE_COUNT; i++) {
             // Frequency
@@ -500,98 +500,35 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FM + i));
             addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_FREQ + i));
             // Gate
-            addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(120, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_GATE + i));
             // Volume - Left
-            addInput(createInput<PJ301MPort>(Vec(220, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_L + i));
-            auto left = createParam<Rogan2PWhite>(Vec(250, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_L + i);
+            addInput(createInput<PJ301MPort>(Vec(155, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_L + i));
+            auto left = createParam<Rogan2PWhite>(Vec(190, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_L + i);
             left->snap = true;
             addParam(left);
             // Volume - Right
-            addInput(createInput<PJ301MPort>(Vec(300, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_R + i));
-            auto right = createParam<Rogan2PRed>(Vec(330, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_R + i);
+            addInput(createInput<PJ301MPort>(Vec(240, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_R + i));
+            auto right = createParam<Rogan2PRed>(Vec(275, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_R + i);
             right->snap = true;
             addParam(right);
-            // ADSR - Attack
-            addInput(createInput<PJ301MPort>(Vec(390, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_ATTACK + i));
-            auto attack = createParam<Rogan2PGreen>(Vec(420, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_ATTACK + i);
-            attack->snap = true;
-            addParam(attack);
-            // ADSR - Decay
-            addInput(createInput<PJ301MPort>(Vec(460, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_DECAY + i));
-            auto decay = createParam<Rogan2PBlue>(Vec(490, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_DECAY + i);
-            decay->snap = true;
-            addParam(decay);
-            // ADSR - Sustain Level
-            addInput(createInput<PJ301MPort>(Vec(530, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_SUSTAIN_LEVEL + i));
-            auto sustainLevel = createParam<Rogan2PRed>(Vec(560, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_SUSTAIN_LEVEL + i);
-            sustainLevel->snap = true;
-            addParam(sustainLevel);
-            // ADSR - Sustain Rate
-            addInput(createInput<PJ301MPort>(Vec(600, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_SUSTAIN_RATE + i));
-            auto sustainRate = createParam<Rogan2PWhite>(Vec(630, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_SUSTAIN_RATE + i);
-            sustainRate->snap = true;
-            addParam(sustainRate);
             // Phase Modulation
             if (i > 0) {  // phase modulation is not defined for the first voice
-                addParam(createParam<CKSS>(Vec(880, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_PM_ENABLE + i));
-                addInput(createInput<PJ301MPort>(Vec(900, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_PM_ENABLE + i));
+                addParam(createParam<CKSS>(Vec(330, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_PM_ENABLE + i));
+                addInput(createInput<PJ301MPort>(Vec(350, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_PM_ENABLE + i));
             }
-            // Echo Enable
-            addParam(createParam<CKSS>(Vec(940, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_ECHO_ENABLE + i));
-            addInput(createInput<PJ301MPort>(Vec(960, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_ECHO_ENABLE + i));
-            // Noise Enable
-            addParam(createParam<CKSS>(Vec(1000, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_NOISE_ENABLE + i));
-            addInput(createInput<PJ301MPort>(Vec(1020, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_NOISE_ENABLE + i));
         }
-
-        // Noise Frequency
-        addInput(createInput<PJ301MPort>(Vec(115, 40), module, ChipS_SMP_BRR::INPUT_NOISE_FM));
-        auto noise = createParam<Rogan2PSNES>(Vec(145, 35), module, ChipS_SMP_BRR::PARAM_NOISE_FREQ);
-        noise->snap = true;
-        addParam(noise);
-
-        // Echo Delay
-        auto echoDelay = createParam<Rogan2PGreen>(Vec(690, 30), module, ChipS_SMP_BRR::PARAM_ECHO_DELAY);
-        echoDelay->snap = true;
-        addParam(echoDelay);
-        addInput(createInput<PJ301MPort>(Vec(700, 80), module, ChipS_SMP_BRR::INPUT_ECHO_DELAY));
-        // Echo Feedback
-        auto echoFeedback = createParam<Rogan2PGreen>(Vec(740, 30), module, ChipS_SMP_BRR::PARAM_ECHO_FEEDBACK);
-        echoFeedback->snap = true;
-        addParam(echoFeedback);
-        addInput(createInput<PJ301MPort>(Vec(750, 80), module, ChipS_SMP_BRR::INPUT_ECHO_FEEDBACK));
-
-        // Echo Volume - Left channel
-        auto echoLeft = createParam<Rogan2PWhite>(Vec(690, 130), module, ChipS_SMP_BRR::PARAM_VOLUME_ECHO + 0);
-        echoLeft->snap = true;
-        addParam(echoLeft);
-        addInput(createInput<PJ301MPort>(Vec(700, 180), module, ChipS_SMP_BRR::INPUT_VOLUME_ECHO + 0));
-        // Echo Volume - Right channel
-        auto echoRight = createParam<Rogan2PRed>(Vec(740, 130), module, ChipS_SMP_BRR::PARAM_VOLUME_ECHO + 1);
-        echoRight->snap = true;
-        addParam(echoRight);
-        addInput(createInput<PJ301MPort>(Vec(750, 180), module, ChipS_SMP_BRR::INPUT_VOLUME_ECHO + 1));
-
         // Mixer & Output - Left Channel
-        auto volumeLeft = createParam<Rogan2PWhite>(Vec(690, 230), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 0);
+        auto volumeLeft = createParam<Rogan2PWhite>(Vec(390, 80), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 0);
         volumeLeft->snap = true;
         addParam(volumeLeft);
-        addInput(createInput<PJ301MPort>(Vec(700, 280), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(700, 325), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 0));
+        addInput(createInput<PJ301MPort>(Vec(400, 130), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(400, 175), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 0));
         // Mixer & Output - Right Channel
-        auto volumeRight = createParam<Rogan2PRed>(Vec(740, 230), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 1);
+        auto volumeRight = createParam<Rogan2PRed>(Vec(390, 230), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 1);
         volumeRight->snap = true;
         addParam(volumeRight);
-        addInput(createInput<PJ301MPort>(Vec(750, 280), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(750, 325), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 1));
-
-        // FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_BRR::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(800, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan2PWhite>(Vec(830, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_FIR_COEFFICIENT + i);
-            param->snap = true;
-            addParam(param);
-        }
+        addInput(createInput<PJ301MPort>(Vec(400, 280), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 1));
     }
 };
 

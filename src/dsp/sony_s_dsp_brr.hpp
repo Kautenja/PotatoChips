@@ -193,31 +193,31 @@ class Sony_S_DSP_BRR {
         /// padding
         int8_t unused1[12];
         /// 0C Main Volume Left (8-bit signed value)
-        int8_t left_volume;
+        int8_t unused18;
         /// 0D   Echo Feedback (8-bit signed value)
-        int8_t echo_feedback;
+        int8_t unused17;
         /// padding
         int8_t unused2[14];
         /// 1C   Main Volume Right (8-bit signed value)
-        int8_t right_volume;
+        int8_t unused16;
         /// padding
         int8_t unused3[15];
         /// 2C   Echo Volume Left (8-bit signed value)
-        int8_t left_echo_volume;
+        int8_t unused15;
         /// 2D   Pitch Modulation on/off for each voice (bit-mask)
         uint8_t pitch_mods;
         /// padding
         int8_t unused4[14];
         /// 3C   Echo Volume Right (8-bit signed value)
-        int8_t right_echo_volume;
+        int8_t unused14;
         /// 3D   Noise output on/off for each voice (bit-mask)
-        uint8_t noise_enables;
+        uint8_t unused13;
         /// padding
         int8_t unused5[14];
         /// 4C   Key On for each voice (bit-mask)
         uint8_t key_ons;
         /// 4D   Echo on/off for each voice (bit-mask)
-        uint8_t echo_ons;
+        uint8_t unused12;
         /// padding
         int8_t unused6[14];
         /// 5C   key off for each voice (instantiates release mode) (bit-mask)
@@ -227,15 +227,15 @@ class Sony_S_DSP_BRR {
         /// padding
         int8_t unused7[14];
         /// 6C   flags and noise freq (coded 8-bit value)
-        uint8_t flags;
+        uint8_t unused19;
         /// 6D   the page of RAM to use for the echo buffer
-        uint8_t echo_page;
+        uint8_t unused10;
         /// padding
         int8_t unused8[14];
         /// 7C   whether the sample has ended for each voice (bit-mask)
         uint8_t wave_ended;
         /// 7D   ms >> 4
-        uint8_t echo_delay;
+        uint8_t unused11;
         /// padding
         char unused9[2];
     };
@@ -322,20 +322,17 @@ class Sony_S_DSP_BRR {
         short volume[2];
         /// 12-bit fractional position
         short fraction;
-        /// padding (placement here keeps interp's in a 64-bit line)
         short unused0;
         /// most recent four decoded samples for the Gaussian filter
-        int16_t interp[4];
+        int16_t samples[4];
         /// number of nibbles remaining in current block
         short block_remain;
         /// the current address of the sample being played by the voice
         unsigned short addr;
         /// header byte from current block
         short block_header;
-        /// padding (placement here keeps envelope data in a 64-bit line)
         short unused1;
-        /// the envelope generator sample counter
-        short envcnt;
+        short unused2;
         /// the output value from the envelope generator
         short envx;
         /// the number of samples delay until the voice turns on (after key-on)
@@ -375,7 +372,6 @@ class Sony_S_DSP_BRR {
             return envx;
         }
 
-        int cnt = voice.envcnt;
 
         // TODO: if the game switches between ADSR and GAIN modes
         // partway through, should the count be reset, or should it
@@ -389,7 +385,6 @@ class Sony_S_DSP_BRR {
         envx = voice.envx = t << 4;
 
         // update the envelope counter and envelope output for the voice
-        voice.envcnt = cnt;
         raw_voice.envx = envx >> 4;
 
         return envx;
@@ -507,15 +502,14 @@ class Sony_S_DSP_BRR {
                 // decode three samples immediately
                 voice.fraction = 0x3FFF;
                 // BRR decoder filter uses previous two samples
-                voice.interp[0] = 0;
-                voice.interp[1] = 0;
+                voice.samples[0] = 0;
+                voice.samples[1] = 0;
                 // NOTE: Real SNES does *not* appear to initialize the
                 // envelope counter to anything in particular. The first
                 // cycle always seems to come at a random time sooner than
                 // expected; as yet, I have been unable to find any
                 // pattern.  I doubt it will matter though, so we'll go
                 // ahead and do the full time for now.
-                voice.envcnt = 0x7800;
                 voice.envelope_stage = EnvelopeStage::Attack;
             }
             // key-on = !key-off = true
@@ -567,10 +561,10 @@ class Sony_S_DSP_BRR {
                     voice.envx = 0;
                     // add silence samples to interpolation buffer
                     do {
-                        voice.interp[3] = voice.interp[2];
-                        voice.interp[2] = voice.interp[1];
-                        voice.interp[1] = voice.interp[0];
-                        voice.interp[0] = 0;
+                        voice.samples[3] = voice.samples[2];
+                        voice.samples[2] = voice.samples[1];
+                        voice.samples[1] = voice.samples[0];
+                        voice.samples[0] = 0;
                     } while (--n >= 0);
                     break;
                 }
@@ -594,8 +588,8 @@ class Sony_S_DSP_BRR {
                 // -----------------------------------------------------------
                 // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
                 // -----------------------------------------------------------
-                int smp1 = voice.interp[0];
-                int smp2 = voice.interp[1];
+                int smp1 = voice.samples[0];
+                int smp2 = voice.samples[1];
                 if (voice.block_header & 8) {
                     delta += smp1;
                     delta -= smp2 >> 1;
@@ -610,10 +604,10 @@ class Sony_S_DSP_BRR {
                     delta += smp1 >> 1;
                     delta += (-smp1) >> 5;
                 }
-                voice.interp[3] = voice.interp[2];
-                voice.interp[2] = smp2;
-                voice.interp[1] = smp1;
-                voice.interp[0] = 2 * clamp_16(delta);
+                voice.samples[3] = voice.samples[2];
+                voice.samples[2] = smp2;
+                voice.samples[1] = smp1;
+                voice.samples[0] = 2 * clamp_16(delta);
             }
             // ---------------------------------------------------------------
             // MARK: Gaussian Interpolation Filter
@@ -627,11 +621,11 @@ class Sony_S_DSP_BRR {
             voice.fraction = (voice.fraction & 0x0FFF) + rate;
             auto table1 = getGaussian(index);
             auto table2 = getGaussian(255 * 4 - index);
-            int sample = ((table1[0] * voice.interp[3]) >> 12) +
-                         ((table1[1] * voice.interp[2]) >> 12) +
-                         ((table2[1] * voice.interp[1]) >> 12);
+            int sample = ((table1[0] * voice.samples[3]) >> 12) +
+                         ((table1[1] * voice.samples[2]) >> 12) +
+                         ((table2[1] * voice.samples[1]) >> 12);
             sample = static_cast<int16_t>(2 * sample);
-            sample +=     (table2[0] * voice.interp[0]) >> 11 & ~1;
+            sample +=     (table2[0] * voice.samples[0]) >> 11 & ~1;
             // scale output from this voice
             int output = clamp_16(sample);
             output = (output * envx) >> 11 & ~1;

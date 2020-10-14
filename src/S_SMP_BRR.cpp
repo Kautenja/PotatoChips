@@ -43,20 +43,9 @@ struct ChipS_SMP_BRR : Module {
     enum ParamIds {
         ENUMS(PARAM_FREQ,          Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_NOISE_ENABLE,  Sony_S_DSP_BRR::VOICE_COUNT),
-        PARAM_NOISE_FREQ,
         ENUMS(PARAM_VOLUME_L,      Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_ATTACK,        Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_DECAY,         Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_SUSTAIN_LEVEL, Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_SUSTAIN_RATE,  Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_ECHO_ENABLE,   Sony_S_DSP_BRR::VOICE_COUNT),
-        PARAM_ECHO_DELAY,
-        PARAM_ECHO_FEEDBACK,
-        ENUMS(PARAM_VOLUME_ECHO, 2),
         ENUMS(PARAM_VOLUME_MAIN, 2),
-        ENUMS(PARAM_FIR_COEFFICIENT, 8),
         NUM_PARAMS
     };
 
@@ -65,21 +54,10 @@ struct ChipS_SMP_BRR : Module {
         ENUMS(INPUT_VOCT,          Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(INPUT_FM,            Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_NOISE_ENABLE,  Sony_S_DSP_BRR::VOICE_COUNT),
-        INPUT_NOISE_FM,
         ENUMS(INPUT_GATE,          Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_L,      Sony_S_DSP_BRR::VOICE_COUNT),
         ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_ATTACK,        Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_DECAY,         Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_LEVEL, Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_SUSTAIN_RATE,  Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_ECHO_ENABLE,   Sony_S_DSP_BRR::VOICE_COUNT),
-        INPUT_ECHO_DELAY,
-        INPUT_ECHO_FEEDBACK,
-        ENUMS(INPUT_VOLUME_ECHO, 2),
         ENUMS(INPUT_VOLUME_MAIN, 2),
-        ENUMS(INPUT_FIR_COEFFICIENT, 8),
         NUM_INPUTS
     };
 
@@ -322,18 +300,9 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(Vec(350, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_PM_ENABLE + i));
             }
         }
-        // Mixer & Output - Left Channel
-        auto volumeLeft = createParam<Rogan2PWhite>(Vec(390, 80), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 0);
-        volumeLeft->snap = true;
-        addParam(volumeLeft);
-        addInput(createInput<PJ301MPort>(Vec(400, 130), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(400, 175), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 0));
-        // Mixer & Output - Right Channel
-        auto volumeRight = createParam<Rogan2PRed>(Vec(390, 230), module, ChipS_SMP_BRR::PARAM_VOLUME_MAIN + 1);
-        volumeRight->snap = true;
-        addParam(volumeRight);
-        addInput(createInput<PJ301MPort>(Vec(400, 280), module, ChipS_SMP_BRR::INPUT_VOLUME_MAIN + 1));
-        addOutput(createOutput<PJ301MPort>(Vec(400, 325), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 1));
+        // Output
+        addOutput(createOutput<PJ301MPort>(Vec(320, 40), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(355, 40), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 1));
     }
 };
 

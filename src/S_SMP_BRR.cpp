@@ -166,8 +166,6 @@ struct ChipS_SMP_BRR : Module {
         // -------------------------------------------------------------------
         // MARK: RAM (SPC700 emulation)
         // -------------------------------------------------------------------
-        // TODO: design a few banks of wavetables / other ways to put data
-        //       into this RAM
         // write the first directory to RAM (at the end of the echo buffer)
         auto dir = reinterpret_cast<Sony_S_DSP_BRR::SourceDirectoryEntry*>(&ram[0x7800]);
         // point to a block immediately after this directory entry
@@ -206,14 +204,7 @@ struct ChipS_SMP_BRR : Module {
         }
         if (key_off)  // a key-off event occurred from the gate input
             apu.write(Sony_S_DSP_BRR::KEY_OFF, key_off);
-        // -------------------------------------------------------------------
-        // MARK: Pitch Modulation
-        // -------------------------------------------------------------------
-        // uint8_t pitch_modulation = 0;
-        // // start from 1 because there is no pitch modulation for the first channel
-        // for (unsigned voice = 1; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++)
-        //     pitch_modulation |= static_cast<uint8_t>(params[PARAM_PM_ENABLE + voice].getValue()) << voice;
-        // apu.write(Sony_S_DSP_BRR::PITCH_MODULATION, pitch_modulation);
+
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------

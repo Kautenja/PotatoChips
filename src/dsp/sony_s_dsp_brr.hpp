@@ -367,14 +367,11 @@ class Sony_S_DSP_BRR {
                 return -1;
             }
             envelope_value = envelope;
-            raw_voice.envx = envelope >> 8;
             return envelope;
         }
 
         int t = 127;
         envelope = envelope_value = t << 4;
-        // update the envelope counter and envelope output for the voice
-        raw_voice.envx = envelope >> 4;
 
         return envelope;
     }
@@ -497,8 +494,6 @@ class Sony_S_DSP_BRR {
 
         int envelope;
         if (!(keys & voice_bit) || (envelope = clock_envelope()) < 0) {
-            raw_voice.envx = 0;
-            raw_voice.outx = 0;
             // TODO: return empty samples
             return;
         }
@@ -529,7 +524,6 @@ class Sony_S_DSP_BRR {
         sample_ended:
                 global.wave_ended |= voice_bit;
                 keys &= ~voice_bit;
-                raw_voice.envx = 0;
                 envelope_value = 0;
                 // add silence samples to interpolation buffer
                 do {

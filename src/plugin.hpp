@@ -43,6 +43,7 @@ extern rack::Model *modelChipS_SMP_ADSR;
 extern rack::Model *modelChipS_SMP_BRR;
 extern rack::Model *modelChipS_SMP_Echo;
 extern rack::Model *modelChipS_SMP_Gauss;
+extern rack::Model *modelChipS_SMP_Blank;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipSN76489;
 extern rack::Model *modelChipTurboGrafx16;

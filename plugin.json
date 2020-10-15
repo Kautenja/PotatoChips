@@ -150,6 +150,14 @@
       ]
     },
     {
+      "slug": "S_SMP_Blank1",
+      "name": "S-SMP(Blank)",
+      "description": "A blank panel with an S-SMP illustration.",
+      "tags": [
+        "Blank"
+      ]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",

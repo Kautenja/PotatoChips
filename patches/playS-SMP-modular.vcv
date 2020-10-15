@@ -7,8 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 2,
-      "rightModuleId": 180,
+      "leftModuleId": 177,
       "data": {
         "audio": {
           "driver": 5,
@@ -20,7 +19,7 @@
         }
       },
       "pos": [
-        43,
+        70,
         1
       ]
     },
@@ -51,11 +50,11 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 177,
-      "rightModuleId": 1,
+      "leftModuleId": 183,
+      "rightModuleId": 180,
       "pos": [
-        33,
-        1
+        66,
+        0
       ]
     },
     {
@@ -64,7 +63,8 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 172,
+      "leftModuleId": 179,
+      "rightModuleId": 178,
       "data": {
         "channels": 4,
         "polyMode": 0,
@@ -78,8 +78,8 @@
         }
       },
       "pos": [
-        0,
-        0
+        29,
+        1
       ]
     },
     {
@@ -109,10 +109,10 @@
           "value": 127.0
         }
       ],
-      "leftModuleId": 179,
+      "leftModuleId": 172,
       "rightModuleId": 166,
       "pos": [
-        53,
+        16,
         0
       ]
     },
@@ -172,8 +172,9 @@
         }
       ],
       "leftModuleId": 165,
+      "rightModuleId": 183,
       "pos": [
-        61,
+        24,
         0
       ]
     },
@@ -224,10 +225,9 @@
           "value": 20.0
         }
       ],
-      "leftModuleId": 5,
-      "rightModuleId": 179,
+      "rightModuleId": 165,
       "pos": [
-        8,
+        0,
         0
       ]
     },
@@ -263,12 +263,12 @@
         }
       ],
       "leftModuleId": 178,
-      "rightModuleId": 2,
+      "rightModuleId": 1,
       "data": {
         "range_db": 80.0
       },
       "pos": [
-        13,
+        50,
         1
       ]
     },
@@ -311,13 +311,14 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 5,
       "rightModuleId": 177,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        0,
+        37,
         1
       ]
     },
@@ -408,8 +409,7 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 172,
-      "rightModuleId": 165,
+      "rightModuleId": 5,
       "data": {
         "wavetable0": [
           8,
@@ -583,8 +583,8 @@
         ]
       },
       "pos": [
-        24,
-        0
+        0,
+        1
       ]
     },
     {
@@ -602,7 +602,7 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 1,
+      "leftModuleId": 2,
       "data": {
         "format": "h264",
         "path": "/Users/jameskauten/Desktop/magic.mp4",
@@ -613,8 +613,21 @@
         "videoBitRate": 2048000
       },
       "pos": [
-        53,
-        1
+        76,
+        0
+      ]
+    },
+    {
+      "id": 183,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_Blank1",
+      "params": [],
+      "leftModuleId": 166,
+      "rightModuleId": 2,
+      "pos": [
+        38,
+        0
       ]
     }
   ],

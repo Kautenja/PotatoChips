@@ -21,9 +21,7 @@
 #ifndef DSP_SONY_S_DSP_HPP_
 #define DSP_SONY_S_DSP_HPP_
 
-#include "exceptions.hpp"
 #include "sony_s_dsp_common.hpp"
-#include <cstring>
 
 /// @brief Sony S-DSP chip emulator.
 class Sony_S_DSP_BRR {
@@ -35,70 +33,6 @@ class Sony_S_DSP_BRR {
         NUM_REGISTERS = 128,
         /// the size of the RAM bank in bytes
         SIZE_OF_RAM = 1 << 16
-    };
-
-    /// @brief the global registers on the S-DSP.
-    enum GlobalRegister : uint8_t {
-        /// The volume for the left channel of the main output
-        MAIN_VOLUME_LEFT =         0x0C,
-        /// Echo Feedback
-        ECHO_FEEDBACK =            0x0D,
-        /// The volume for the right channel of the main output
-        MAIN_VOLUME_RIGHT =        0x1C,
-        /// The volume for the left channel of the echo effect
-        ECHO_VOLUME_LEFT =         0x2C,
-        /// pitch modulation
-        PITCH_MODULATION =         0x2D,
-        /// The volume for the right channel of the echo effect
-        ECHO_VOLUME_RIGHT =        0x3C,
-        /// Noise enable
-        NOISE_ENABLE =             0x3D,
-        /// Key-on (1 bit for each voice)
-        KEY_ON =                   0x4C,
-        /// Echo enable
-        ECHO_ENABLE =              0x4D,
-        /// Key-off (1 bit for each voice)
-        KEY_OFF =                  0x5C,
-        /// Offset of source directory
-        /// (`OFFSET_SOURCE_DIRECTORY * 0x100` = memory offset)
-        OFFSET_SOURCE_DIRECTORY =  0x5D,
-        /// DSP flags for RESET, MUTE, ECHO, NOISE PERIOD
-        FLAGS =                    0x6C,
-        /// Echo buffer start offset
-        /// (`ECHO_BUFFER_START_OFFSET * 0x100` = memory offset)
-        ECHO_BUFFER_START_OFFSET = 0x6D,
-        /// ENDX - 1 bit for each voice.
-        ENDX =                     0x7C,
-        /// Echo delay, 4-bits, higher values require more memory.
-        ECHO_DELAY =               0x7D
-    };
-
-    /// @brief the channel registers on the S-DSP. To get the register for
-    /// channel `n`, perform the logical OR of the register address with `0xn0`.
-    enum ChannelRegister : uint8_t {
-        /// Left channel volume (8-bit signed value).
-        VOLUME_LEFT      = 0x00,
-        /// Right channel volume (8-bit signed value).
-        VOLUME_RIGHT     = 0x01,
-        /// Lower 8 bits of pitch.
-        PITCH_LOW        = 0x02,
-        /// Higher 8-bits of pitch.
-        PITCH_HIGH       = 0x03,
-        /// Source number (\f$\in [0, 255]\f$). (references the source directory)
-        SOURCE_NUMBER    = 0x04,
-        /// If bit-7 is set, ADSR is enabled. If cleared GAIN is used.
-        ADSR_1           = 0x05,
-        /// These two registers control the ADSR envelope.
-        ADSR_2           = 0x06,
-        /// This register provides function for software envelopes.
-        GAIN             = 0x07,
-        /// The DSP writes the current value of the envelope to this register.
-        ENVELOPE_OUT     = 0x08,
-        /// The DSP writes the current waveform value after envelope
-        /// multiplication and before volume multiplication.
-        WAVEFORM_OUT     = 0x09,
-        /// 8-tap FIR Filter coefficients
-        FIR_COEFFICIENTS = 0x0F
     };
 
     /// @brief An entry in the source directory in the 64KB RAM.
@@ -166,28 +100,6 @@ class Sony_S_DSP_BRR {
         uint8_t samples[NUM_SAMPLES];
     };
 
-    /// A structure mapping the register space to a single voice's data fields.
-    struct RawVoice {
-        /// the volume of the left channel
-        int8_t left_vol;
-        /// the volume of the right channel
-        int8_t right_vol;
-        /// the rate of the oscillator
-        uint8_t rate[2];
-        /// the oscillator's waveform sample
-        uint8_t waveform;
-        /// envelope rates for attack, decay, and sustain
-        uint8_t adsr[2];
-        /// envelope gain (if not using ADSR)
-        uint8_t gain;
-        /// current envelope level
-        int8_t envx;
-        /// current sample
-        int8_t outx;
-        /// filler bytes to align to 16-bytes
-        int8_t unused[6];
-    };
-
  private:
     /// @brief Return the Gaussian interpolation table value for the given index.
     ///
@@ -239,15 +151,6 @@ class Sony_S_DSP_BRR {
         return reinterpret_cast<int16_t const*>(reinterpret_cast<int8_t const*>(gauss) + index);
     }
 
-    /// Combine the raw voice, registers, and global data structures into a
-    /// single piece of memory to allow easy symbolic access to register data
-    union {
-        /// the register bank on the chip
-        uint8_t registers[NUM_REGISTERS];
-        /// the mapping of register data to the voices on the chip
-        RawVoice voices[VOICE_COUNT];
-    };
-
     // -----------------------------------------------------------------------
     // MARK: Global S-SMP Chip State
     // -----------------------------------------------------------------------
@@ -263,9 +166,6 @@ class Sony_S_DSP_BRR {
     /// source directory (wave table offsets)
     uint8_t wave_page = 0;
 
-    /// the oscillator's waveform sample
-    uint8_t waveform = 0;
-
     // -----------------------------------------------------------------------
     // MARK: Internal Voice State
     // -----------------------------------------------------------------------
@@ -278,6 +178,8 @@ class Sony_S_DSP_BRR {
     EnvelopeStage envelope_stage = EnvelopeStage::Off;
     /// the output value from the envelope generator
     short envelope_value = 0;
+    /// the index of the starting sample of the waveform
+    uint8_t wave_index = 0;
     /// the current address of the sample being played by the voice
     unsigned short addr = 0;
     /// header byte from current block
@@ -337,9 +239,53 @@ class Sony_S_DSP_BRR {
 
     /// @brief Set the page of samples in RAM to read samples from.
     ///
-    /// @param freq the frequency to set the low-pass gate to
+    /// @param address the address in RAM to start the wave page from
+    ///
+    /// @details
+    /// Source Directory Offset.
+    ///
+    /// DIR
+    ///          7     6     5     4     3     2     1     0
+    ///       +-----+-----+-----+-----+-----+-----+-----+-----+
+    /// $5D   |                  Offset value                 |
+    ///       +-----+-----+-----+-----+-----+-----+-----+-----+
+    /// This register points to the source(sample) directory in external
+    /// RAM. The pointer is calculated by Offset*0x100. This is because each
+    /// directory is 4-bytes (0x100).
+    ///
+    /// The source directory contains sample start and loop point offsets.
+    /// Its a simple array of 16-bit values.
+    ///
+    /// SAMPLE DIRECTORY
+    ///
+    /// OFFSET  SIZE    DESC
+    /// dir+0   16-BIT  SAMPLE-0 START
+    /// dir+2   16-BIT  SAMPLE-0 LOOP START
+    /// dir+4   16-BIT  SAMPLE-1 START
+    /// dir+6   16-BIT  SAMPLE-1 LOOP START
+    /// dir+8   16-BIT  SAMPLE-2 START
+    /// ...
+    /// This can continue for up to 256 samples. (SRCN can only reference
+    /// 256 samples)
     ///
     inline void setWavePage(uint8_t address) { wave_page = address; }
+
+    /// @brief Set the index of the sample in the source directory to play.
+    ///
+    /// @param index the offset of the sample from the wave page
+    ///
+    /// @details
+    /// Source number is a reference to the "Source Directory" (see DIR).
+    /// The DSP will use the sample with this index from the directory.
+    /// I'm not sure what happens when you change the SRCN when the
+    /// channel is active, but it probably doesn't have any effect
+    /// until KON is set.
+    ///          7     6     5     4     3     2     1     0
+    ///       +-----+-----+-----+-----+-----+-----+-----+-----+
+    /// $x4   |                 Source Number                 |
+    ///       +-----+-----+-----+-----+-----+-----+-----+-----+
+    ///
+    inline void setWaveIndex(uint8_t index) { wave_index = index; }
 
     /// @brief Set the frequency of the low-pass gate to a new value.
     ///
@@ -359,18 +305,6 @@ class Sony_S_DSP_BRR {
     ///
     inline void setVolumeRight(int8_t value) { volumeRight = value; }
 
-    /// @brief Write data to the registers at the given address.
-    ///
-    /// @param address the address of the register to write data to
-    /// @param data the data to write to the register
-    ///
-    void write(uint8_t address, uint8_t data) {
-        if (address >= NUM_REGISTERS)  // make sure the given address is valid
-            throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
-        // store the data in the register with given address
-        registers[address] = data;
-    }
-
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
     /// @param output_buffer the output buffer to write samples to (optional)
@@ -386,11 +320,8 @@ class Sony_S_DSP_BRR {
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[wave_page * 0x100]);
 
-        // cache the voice and data structures
-        RawVoice& raw_voice = voices[0];
-
         if (on_count && !--on_count) {
-            addr = source_directory[raw_voice.waveform].start;
+            addr = source_directory[wave_index].start;
             block_remain = 1;
             envelope_value = 0;
             block_header = 0;
@@ -429,7 +360,7 @@ class Sony_S_DSP_BRR {
                 if (block_header & 1) {
                     if (block_header & 2) {
                         // verified (played endless looping sample and ENDX was set)
-                        addr = source_directory[raw_voice.waveform].loop;
+                        addr = source_directory[wave_index].loop;
                     } else {  // first block was end block; don't play anything
                         goto sample_ended;
                     }

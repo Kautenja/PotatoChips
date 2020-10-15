@@ -95,52 +95,11 @@ struct ChipS_SMP_BRR : Module {
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
-        // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
-        const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
-
-        // Source Directory Offset.
+        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
         //
-        // DIR
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $5D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to the source(sample) directory in external
-        // RAM. The pointer is calculated by Offset*0x100. This is because each
-        // directory is 4-bytes (0x100).
-        //
-        // The source directory contains sample start and loop point offsets.
-        // Its a simple array of 16-bit values.
-        //
-        // SAMPLE DIRECTORY
-        //
-        // OFFSET  SIZE    DESC
-        // dir+0   16-BIT  SAMPLE-0 START
-        // dir+2   16-BIT  SAMPLE-0 LOOP START
-        // dir+4   16-BIT  SAMPLE-1 START
-        // dir+6   16-BIT  SAMPLE-1 LOOP START
-        // dir+8   16-BIT  SAMPLE-2 START
-        // ...
-        // This can continue for up to 256 samples. (SRCN can only reference
-        // 256 samples)
-        apu.setWavePage(ECHO_LENGTH / 0x100);
-
-        for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
-            // shift the voice index over a nibble to get the bit mask for the
-            // logical OR operator
-            auto mask = voice << 4;
-
-            // Source number is a reference to the "Source Directory" (see DIR).
-            // The DSP will use the sample with this index from the directory.
-            // I'm not sure what happens when you change the SRCN when the
-            // channel is active, but it probably doesn't have any effect
-            // until KON is set.
-            //          7     6     5     4     3     2     1     0
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            // $x4   |                 Source Number                 |
-            //       +-----+-----+-----+-----+-----+-----+-----+-----+
-            apu.write(mask | Sony_S_DSP_BRR::SOURCE_NUMBER, 0);
-        }
+        // }
+        apu.setWavePage(0);
+        apu.setWaveIndex(0);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -152,13 +111,13 @@ struct ChipS_SMP_BRR : Module {
         // MARK: RAM (SPC700 emulation)
         // -------------------------------------------------------------------
         // write the first directory to RAM (at the end of the echo buffer)
-        auto dir = reinterpret_cast<Sony_S_DSP_BRR::SourceDirectoryEntry*>(&ram[0x7800]);
+        auto dir = reinterpret_cast<Sony_S_DSP_BRR::SourceDirectoryEntry*>(&ram[0]);
         // point to a block immediately after this directory entry
-        dir->start = 0x7804;
-        dir->loop = 0x7804;
+        dir->start = 4;
+        dir->loop = 4;
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP_BRR::BitRateReductionBlock*>(&ram[0x7804]);
+        auto block = reinterpret_cast<Sony_S_DSP_BRR::BitRateReductionBlock*>(&ram[4]);
         block->flags.set_volume(Sony_S_DSP_BRR::BitRateReductionBlock::MAX_VOLUME);
         block->flags.filter = 0;
         block->flags.is_loop = 1;

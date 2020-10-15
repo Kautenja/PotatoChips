@@ -1,4 +1,4 @@
-// Sony S-DSP emulator.
+// An emulation of the BRR sample playback engine from the Sony S-DSP.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2002 Brad Martin
@@ -23,7 +23,7 @@
 
 #include "sony_s_dsp_common.hpp"
 
-/// @brief Sony S-DSP chip emulator.
+/// @brief An emulation of the BRR sample playback engine from the Sony S-DSP.
 class Sony_S_DSP_BRR {
  public:
     enum : unsigned {

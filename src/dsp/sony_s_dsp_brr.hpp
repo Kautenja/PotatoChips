@@ -296,6 +296,7 @@ class Sony_S_DSP_BRR {
         sample_ended:
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
+                // TODO: just zero out the buffer and break instead of looping?
                 // add silence samples to interpolation buffer
                 do {
                     samples[3] = samples[2];

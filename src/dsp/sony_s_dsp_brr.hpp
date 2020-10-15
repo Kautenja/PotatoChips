@@ -383,8 +383,8 @@ class Sony_S_DSP_BRR {
         // Gaussian interpolation using most recent 4 samples
         const int index = fraction >> 2 & 0x3FC;
         fraction = (fraction & 0x0FFF) + phase;
-        const auto table1 = getGaussian(index);
-        const auto table2 = getGaussian(255 * 4 - index);
+        const auto table1 = get_gaussian(index);
+        const auto table2 = get_gaussian(255 * 4 - index);
         int sample = ((table1[0] * samples[3]) >> 12) +
                      ((table1[1] * samples[2]) >> 12) +
                      ((table2[1] * samples[1]) >> 12);

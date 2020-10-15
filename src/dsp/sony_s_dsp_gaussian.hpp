@@ -133,8 +133,8 @@ class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
         fraction = (fraction & 0x0FFF) + rate;
         // lookup the interpolation values in the table based on the index and
         // inverted index value
-        const auto table1 = getGaussian(index);
-        const auto table2 = getGaussian(255 * 4 - index);
+        const auto table1 = get_gaussian(index);
+        const auto table2 = get_gaussian(255 * 4 - index);
         // apply the Gaussian interpolation to the incoming sample
         int sample = ((table1[0] * samples[3]) >> 12) +
                      ((table1[1] * samples[2]) >> 12) +

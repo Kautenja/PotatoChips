@@ -56,7 +56,7 @@ static inline uint16_t get_pitch(float frequency) {
 /// @param index the index of the Gaussian interpolation to return
 /// @returns the Gaussian interpolation table value at given index
 ///
-static inline const int16_t* getGaussian(unsigned index) {
+static inline const int16_t* get_gaussian(unsigned index) {
     // Base normal_gauss table is almost exactly (with an error of 0 or -1 for each entry):
     // int normal_gauss[512];
     // normal_gauss[i] = exp((i-511)*(i-511)*-9.975e-6)*pow(sin(0.00307096*i),1.7358)*1304.45

@@ -139,7 +139,7 @@ class Sony_S_DSP_BRR {
 
     /// @brief Process the envelope for the voice with given index.
     ///
-    /// returns the envelope counter value for given index in the table
+    /// @returns the envelope counter value for given index in the table
     ///
     inline int clock_envelope() {
         // the initial value of the envelope

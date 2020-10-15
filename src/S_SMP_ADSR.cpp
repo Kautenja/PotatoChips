@@ -224,13 +224,13 @@ struct ChipS_SMP_ADSRWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_ADSRWidget(ChipS_SMP_ADSR *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-ADSR.svg";
+        static constexpr auto panel = "res/S-SMP-ADSR-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < ChipS_SMP_ADSR::LANES; i++) {
             // Gate, Retrig, Output
             addInput(createInput<PJ301MPort>(Vec(20, 45 + 169 * i), module, ChipS_SMP_ADSR::INPUT_GATE + i));

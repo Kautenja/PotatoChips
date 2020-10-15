@@ -144,11 +144,11 @@ struct ChipS_SMP_GaussWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_GaussWidget(ChipS_SMP_Gauss *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Gauss.svg";
+        static constexpr auto panel = "res/S-SMP-Gauss-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Filter Mode
         Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, ChipS_SMP_Gauss::PARAM_FILTER);
         filter->snap = true;

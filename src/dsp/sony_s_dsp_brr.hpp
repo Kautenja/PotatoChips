@@ -18,8 +18,8 @@
 // Based on Brad Martin's OpenSPC DSP emulator
 //
 
-#ifndef DSP_SONY_S_DSP_HPP_
-#define DSP_SONY_S_DSP_HPP_
+#ifndef DSP_SONY_S_DSP_BRR_HPP_
+#define DSP_SONY_S_DSP_BRR_HPP_
 
 #include "sony_s_dsp_common.hpp"
 
@@ -458,4 +458,4 @@ class Sony_S_DSP_BRR {
     }
 };
 
-#endif  // DSP_SONY_S_DSP_HPP_
+#endif  // DSP_SONY_S_DSP_BRR_HPP_

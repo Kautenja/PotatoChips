@@ -33,9 +33,6 @@ struct ChipS_SMP_BRR : Module {
     /// the Sony S-DSP sound chip emulator
     Sony_S_DSP_BRR apu{ram};
 
-    /// @brief Fill the RAM with 0's.
-    inline void clearRAM() { memset(ram, 0, sizeof ram); }
-
     /// triggers for handling gate inputs for the voices
     rack::dsp::BooleanTrigger gateTriggers[8];
 
@@ -75,7 +72,6 @@ struct ChipS_SMP_BRR : Module {
 
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_BRR() {
-        // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < 8; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
@@ -85,15 +81,13 @@ struct ChipS_SMP_BRR : Module {
             osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
             configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
         }
-        // clear the shared RAM between the CPU and the S-DSP
-        clearRAM();
-        // set the initial state for registers and RAM
         setupSourceDirectory();
     }
 
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
+        memset(ram, 0, sizeof ram);
         // -------------------------------------------------------------------
         // MARK: Source Directory (Sample RAM)
         // -------------------------------------------------------------------

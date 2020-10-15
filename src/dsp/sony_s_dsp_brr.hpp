@@ -188,58 +188,6 @@ class Sony_S_DSP_BRR {
         int8_t unused[6];
     };
 
-    /// A structure mapping the register space to symbolic global data fields.
-    struct GlobalData {
-        /// padding
-        int8_t unused1[12];
-        /// 0C Main Volume Left (8-bit signed value)
-        int8_t unused18;
-        /// 0D   Echo Feedback (8-bit signed value)
-        int8_t unused17;
-        /// padding
-        int8_t unused2[14];
-        /// 1C   Main Volume Right (8-bit signed value)
-        int8_t unused16;
-        /// padding
-        int8_t unused3[15];
-        /// 2C   Echo Volume Left (8-bit signed value)
-        int8_t unused15;
-        /// 2D   Pitch Modulation on/off for each voice (bit-mask)
-        uint8_t pitch_mods;
-        /// padding
-        int8_t unused4[14];
-        /// 3C   Echo Volume Right (8-bit signed value)
-        int8_t unused14;
-        /// 3D   Noise output on/off for each voice (bit-mask)
-        uint8_t unused13;
-        /// padding
-        int8_t unused5[14];
-        /// 4C   Key On for each voice (bit-mask)
-        uint8_t key_ons;
-        /// 4D   Echo on/off for each voice (bit-mask)
-        uint8_t unused12;
-        /// padding
-        int8_t unused6[14];
-        /// 5C   key off for each voice (instantiates release mode) (bit-mask)
-        uint8_t key_offs;
-        /// 5D   source directory (wave table offsets)
-        uint8_t wave_page;
-        /// padding
-        int8_t unused7[14];
-        /// 6C   flags and noise freq (coded 8-bit value)
-        uint8_t unused19;
-        /// 6D   the page of RAM to use for the echo buffer
-        uint8_t unused10;
-        /// padding
-        int8_t unused8[14];
-        /// 7C   whether the sample has ended for each voice (bit-mask)
-        uint8_t wave_ended;
-        /// 7D   ms >> 4
-        uint8_t unused11;
-        /// padding
-        char unused9[2];
-    };
-
  private:
     /// @brief Return the Gaussian interpolation table value for the given index.
     ///
@@ -298,8 +246,6 @@ class Sony_S_DSP_BRR {
         uint8_t registers[NUM_REGISTERS];
         /// the mapping of register data to the voices on the chip
         RawVoice voices[VOICE_COUNT];
-        /// the mapping of register data to the global data on the chip
-        GlobalData global;
     };
 
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
@@ -309,9 +255,6 @@ class Sony_S_DSP_BRR {
     /// S-DSP. This includes input sample data, and the allocated space for the
     /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
     uint8_t* const ram;
-
-    /// A bit-mask representation of the active voice gates
-    int keys = 0;
 
     // -----------------------------------------------------------------------
     // MARK: Internal Voice State
@@ -361,7 +304,6 @@ class Sony_S_DSP_BRR {
             if (envelope_value <= 0) {
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
-                keys &= ~1;
                 return -1;
             }
             return envelope_value;
@@ -380,10 +322,19 @@ class Sony_S_DSP_BRR {
 
     /// @brief Clear state and silence everything.
     void reset() {
-        keys = 0;
-        global.key_ons = 0;
-        envelope_stage = EnvelopeStage::Release;
+        // TODO:
     }
+
+    /// source directory (wave table offsets)
+    uint8_t wave_page;
+    /// the oscillator's waveform sample
+    uint8_t waveform;
+
+    /// @brief Set the page of samples in RAM to read samples from.
+    ///
+    /// @param freq the frequency to set the low-pass gate to
+    ///
+    inline void setWavePage(uint8_t address) { wave_page = address; }
 
     /// @brief Set the frequency of the low-pass gate to a new value.
     ///
@@ -428,7 +379,7 @@ class Sony_S_DSP_BRR {
         // in the source directory. the wave page is multiplied by 0x100 to produce
         // the RAM address of the source directory.
         const SourceDirectoryEntry* const source_directory =
-            reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
+            reinterpret_cast<SourceDirectoryEntry*>(&ram[wave_page * 0x100]);
 
         // cache the voice and data structures
         RawVoice& raw_voice = voices[0];

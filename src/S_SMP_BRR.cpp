@@ -138,7 +138,7 @@ struct ChipS_SMP_BRR : Module {
         // 256 samples)
 
         // put the first directory at the end of the echo buffer
-        apu.write(Sony_S_DSP_BRR::OFFSET_SOURCE_DIRECTORY, ECHO_LENGTH / 0x100);
+        apu.setWavePage(ECHO_LENGTH / 0x100);
 
         for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
             // shift the voice index over a nibble to get the bit mask for the

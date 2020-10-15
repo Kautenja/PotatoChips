@@ -172,11 +172,6 @@ class Sony_S_DSP_BRR {
     ///
     explicit Sony_S_DSP_BRR(uint8_t* ram_) : ram(ram_) { }
 
-    /// @brief Clear state and silence everything.
-    void reset() {
-        // TODO:
-    }
-
     /// @brief Set the page of samples in RAM to read samples from.
     ///
     /// @param address the address in RAM to start the wave page from

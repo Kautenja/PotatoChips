@@ -86,8 +86,6 @@ struct ChipS_SMP_BRR : Module {
         }
         // clear the shared RAM between the CPU and the S-DSP
         clearRAM();
-        // reset the S-DSP emulator
-        apu.reset();
         // set the initial state for registers and RAM
         setupSourceDirectory();
     }

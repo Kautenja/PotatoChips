@@ -108,8 +108,6 @@ class Sony_S_DSP_BRR {
     /// source directory (wave table offsets)
     uint8_t wave_page = 0;
 
-    /// the number of samples delay until the voice turns on (after key-on)
-    short on_count = 0;
     /// the current stage of the envelope generator
     enum class EnvelopeStage : uint8_t {
         Off = 0,
@@ -255,30 +253,21 @@ class Sony_S_DSP_BRR {
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[wave_page * 0x100]);
 
-        if (on_count && !--on_count) {
+        if (trigger) {  // trigger the voice
             addr = source_directory[wave_index].start;
             block_remain = 1;
-            envelope_value = 0;
             block_header = 0;
             // decode three samples immediately
             fraction = 0x3FFF;
+            // TODO: safe to remove this? 0ing will cause pops I think.
+            // TODO: 0 out sample buffer in "Off" stage
             // BRR decoder filter uses previous two samples
-            samples[0] = 0;
-            samples[1] = 0;
-            // NOTE: Real SNES does *not* appear to initialize the
-            // envelope counter to anything in particular. The first
-            // cycle always seems to come at a random time sooner than
-            // expected; as yet, I have been unable to find any
-            // pattern.  I doubt it will matter though, so we'll go
-            // ahead and do the full time for now.
+            // samples[0] = 0;
+            // samples[1] = 0;
             envelope_stage = EnvelopeStage::On;
         }
-
-        if (trigger)  // trigger the voice (8 sample delay until voice on)
-            on_count = 8;
         if (!gate_on) {  // enter the release stage
             envelope_stage = EnvelopeStage::Release;
-            on_count = 0;
         }
 
         // trigger the envelope generator

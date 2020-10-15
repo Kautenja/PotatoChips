@@ -119,7 +119,7 @@ class Sony_S_DSP_BRR {
     /// the number of samples delay until the voice turns on (after key-on)
     short on_count = 0;
     /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage { On, Release, Off };
+    enum class EnvelopeStage { Off, On, Release };
     /// the current stage of the envelope generator
     EnvelopeStage envelope_stage = EnvelopeStage::Off;
     /// the output value from the envelope generator

@@ -347,11 +347,6 @@ class Sony_S_DSP_BRR {
     /// returns the envelope counter value for given index in the table
     ///
     inline int clock_envelope() {
-        // cache the voice data structures
-        RawVoice& raw_voice = this->voices[0];
-        // cache the current envelope value
-        int envelope = envelope_value;
-
         // process the release stage
         if (envelope_stage == EnvelopeStage::Release) {
             // Docs: "When in the state of "key off". the "click" sound is
@@ -360,20 +355,18 @@ class Sony_S_DSP_BRR {
             // When a note is keyed off, start the RELEASE state, which
             // subtracts 1/256th each sample period (32kHz).  Note there's
             // no need for a count because it always happens every update.
-            envelope -= 0x0800 / 256;
-            if (envelope <= 0) {
+            envelope_value -= 0x0800 / 256;
+            if (envelope_value <= 0) {
                 envelope_value = 0;
                 keys &= ~1;
                 return -1;
             }
-            envelope_value = envelope;
-            return envelope;
+            return envelope_value;
+        } else {
+            // process the on stage
+            envelope_value = 127 << 4;
+            return envelope_value;
         }
-
-        int t = 127;
-        envelope = envelope_value = t << 4;
-
-        return envelope;
     }
 
  public:

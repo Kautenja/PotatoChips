@@ -27,10 +27,6 @@
 class Sony_S_DSP_BRR {
  public:
     enum : unsigned {
-        /// the number of sampler voices on the chip
-        VOICE_COUNT = 8,
-        /// the number of registers on the chip
-        NUM_REGISTERS = 128,
         /// the size of the RAM bank in bytes
         SIZE_OF_RAM = 1 << 16
     };

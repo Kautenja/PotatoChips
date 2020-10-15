@@ -36,27 +36,27 @@ struct ChipS_SMP_BRR : Module {
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_BRR::VOICE_COUNT];
+    rack::dsp::BooleanTrigger gateTriggers[8];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,          Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_PM_ENABLE,     Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_L,      Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(PARAM_VOLUME_R,      Sony_S_DSP_BRR::VOICE_COUNT),
+        ENUMS(PARAM_FREQ,        8),
+        ENUMS(PARAM_PM_ENABLE,   8),
+        ENUMS(PARAM_VOLUME_L,    8),
+        ENUMS(PARAM_VOLUME_R,    8),
         ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,          Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_FM,            Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_PM_ENABLE,     Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_GATE,          Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_L,      Sony_S_DSP_BRR::VOICE_COUNT),
-        ENUMS(INPUT_VOLUME_R,      Sony_S_DSP_BRR::VOICE_COUNT),
+        ENUMS(INPUT_VOCT,        8),
+        ENUMS(INPUT_FM,          8),
+        ENUMS(INPUT_PM_ENABLE,   8),
+        ENUMS(INPUT_GATE,        8),
+        ENUMS(INPUT_VOLUME_L,    8),
+        ENUMS(INPUT_VOLUME_R,    8),
         ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
     };
@@ -76,7 +76,7 @@ struct ChipS_SMP_BRR : Module {
     ChipS_SMP_BRR() {
         // setup parameters
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned osc = 0; osc < Sony_S_DSP_BRR::VOICE_COUNT; osc++) {
+        for (unsigned osc = 0; osc < 8; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ     + osc, -6.f, 6.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L + osc, -128, 127, 127, osc_name + " Volume (Left)");
@@ -95,7 +95,7 @@ struct ChipS_SMP_BRR : Module {
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
-        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        // for (unsigned voice = 0; voice < 8; voice++) {
         //
         // }
         apu.setWavePage(0);
@@ -129,7 +129,7 @@ struct ChipS_SMP_BRR : Module {
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
         // -------------------------------------------------------------------
-        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        // for (unsigned voice = 0; voice < 8; voice++) {
         //
         // }
             unsigned voice = 0;
@@ -155,7 +155,7 @@ struct ChipS_SMP_BRR : Module {
         // create bit-masks for the key-on and key-off state of each voice
         uint8_t key_on = 0;
         // iterate over the voices to detect key-on and key-off events
-        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        // for (unsigned voice = 0; voice < 8; voice++) {
         //
         // }
             // get the voltage from the gate input port
@@ -193,7 +193,7 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
-        for (unsigned i = 0; i < Sony_S_DSP_BRR::VOICE_COUNT; i++) {
+        for (unsigned i = 0; i < 8; i++) {
             // Frequency
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FM + i));

@@ -1,4 +1,4 @@
-// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
+// Blank panels.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -21,10 +21,13 @@
 struct BlankModule : Module { };
 
 /// @brief the different configurations for placing screws on a panel
-enum ScrewStyle { All, TopLeft, TopRight };
+enum ScrewStyle { None, All, TopLeft, TopRight };
 
 /// @brief A panel blank that shows a graphic.
-template<typename Screw, ScrewStyle screwStyle>
+/// @tparam panelPath the path to the SVG file for the panel graphic
+/// @tparam style the style for rendering screws on the panel
+/// @tparam Screw the type for the screw SVG to render
+template<const char* panelPath, ScrewStyle style, typename Screw = ScrewSilver>
 struct BlankWidget : ModuleWidget {
     /// @brief Initialize a new blank panel widget.
     ///
@@ -32,20 +35,22 @@ struct BlankWidget : ModuleWidget {
     ///
     explicit BlankWidget(BlankModule *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Chip.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
-        switch (screwStyle) {  // panel screws
-        case ScrewStyle::All:
+        const std::string fileName(panelPath);
+        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, fileName)));
+        switch (style) {  // panel screws
+        case ScrewStyle::None:  // no screws
+            break;
+        case ScrewStyle::All:  // all screws
             addChild(createWidget<Screw>(Vec(RACK_GRID_WIDTH, 0)));
             addChild(createWidget<Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
             addChild(createWidget<Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             addChild(createWidget<Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             break;
-        case ScrewStyle::TopLeft:
+        case ScrewStyle::TopLeft:  // top left + bottom right
             addChild(createWidget<Screw>(Vec(RACK_GRID_WIDTH, 0)));
             addChild(createWidget<Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             break;
-        case ScrewStyle::TopRight:
+        case ScrewStyle::TopRight:  // top right + bottom left
             addChild(createWidget<Screw>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
             addChild(createWidget<Screw>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
             break;
@@ -54,5 +59,7 @@ struct BlankWidget : ModuleWidget {
 };
 
 extern constexpr char const blank1[] = "res/S-SMP-Chip.svg";
-rack::Model *modelChipS_SMP_Blank =
-    createModel<BlankModule, BlankWidget<ScrewSilver, ScrewStyle::All>>("S_SMP_Blank1");
+rack::Model *modelChipS_SMP_Blank = createModel<
+    BlankModule,
+    BlankWidget<blank1, ScrewStyle::All, ScrewSilver>
+>("S_SMP_Blank1");

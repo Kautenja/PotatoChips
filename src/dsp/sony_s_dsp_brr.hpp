@@ -313,31 +313,30 @@ class Sony_S_DSP_BRR {
     /// A bit-mask representation of the active voice gates
     int keys = 0;
 
+    // -----------------------------------------------------------------------
+    // MARK: Internal Voice State
+    // -----------------------------------------------------------------------
+
+    /// the number of samples delay until the voice turns on (after key-on)
+    short on_count = 0;
     /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
-
-    /// The state of a synthesizer voice (channel) on the chip.
-    struct VoiceState {
-        /// the output value from the envelope generator
-        short envx = 0;
-    } voice_states[VOICE_COUNT];
-
-    /// 12-bit fractional position
-    short fraction = 0;
-    /// the previous four samples for Gaussian interpolation
-    int16_t samples[4] = {0, 0, 0, 0};
-    /// number of nibbles remaining in current block
-    short block_remain = 0;
+    enum class EnvelopeStage { On, Release };
+    /// the current stage of the envelope generator
+    EnvelopeStage envelope_stage = EnvelopeStage::Release;
+    /// the output value from the envelope generator
+    short envelope_value = 0;
     /// the current address of the sample being played by the voice
     unsigned short addr = 0;
     /// header byte from current block
     short block_header = 0;
+    /// number of nibbles remaining in current block
+    short block_remain = 0;
+    /// the previous four samples for Gaussian interpolation
+    int16_t samples[4] = {0, 0, 0, 0};
     /// the 14-bit frequency value
     uint16_t rate = 0;
-    /// the number of samples delay until the voice turns on (after key-on)
-    short on_count = 0;
-    /// the current stage of the envelope generator
-    EnvelopeStage envelope_stage = EnvelopeStage::Release;
+    /// 12-bit fractional position
+    short fraction = 0;
     /// the volume for the left channel output
     int8_t volumeLeft = 0;
     /// the volume for the right channel output
@@ -350,9 +349,8 @@ class Sony_S_DSP_BRR {
     inline int clock_envelope() {
         // cache the voice data structures
         RawVoice& raw_voice = this->voices[0];
-        VoiceState& voice = voice_states[0];
         // cache the current envelope value
-        int envx = voice.envx;
+        int envelope = envelope_value;
 
         // process the release stage
         if (envelope_stage == EnvelopeStage::Release) {
@@ -362,23 +360,23 @@ class Sony_S_DSP_BRR {
             // When a note is keyed off, start the RELEASE state, which
             // subtracts 1/256th each sample period (32kHz).  Note there's
             // no need for a count because it always happens every update.
-            envx -= 0x0800 / 256;
-            if (envx <= 0) {
-                voice.envx = 0;
+            envelope -= 0x0800 / 256;
+            if (envelope <= 0) {
+                envelope_value = 0;
                 keys &= ~1;
                 return -1;
             }
-            voice.envx = envx;
-            raw_voice.envx = envx >> 8;
-            return envx;
+            envelope_value = envelope;
+            raw_voice.envx = envelope >> 8;
+            return envelope;
         }
 
         int t = 127;
-        envx = voice.envx = t << 4;
+        envelope = envelope_value = t << 4;
         // update the envelope counter and envelope output for the voice
-        raw_voice.envx = envx >> 4;
+        raw_voice.envx = envelope >> 4;
 
-        return envx;
+        return envelope;
     }
 
  public:
@@ -463,7 +461,6 @@ class Sony_S_DSP_BRR {
         const int voice_bit = 1;
         // cache the voice and data structures
         RawVoice& raw_voice = voices[0];
-        VoiceState& voice = voice_states[0];
         // ---------------------------------------------------------------
         // MARK: Gate Processing
         // ---------------------------------------------------------------
@@ -472,7 +469,7 @@ class Sony_S_DSP_BRR {
             keys |= voice_bit;
             addr = source_directory[raw_voice.waveform].start;
             block_remain = 1;
-            voice.envx = 0;
+            envelope_value = 0;
             block_header = 0;
             // decode three samples immediately
             fraction = 0x3FFF;
@@ -485,7 +482,7 @@ class Sony_S_DSP_BRR {
             // expected; as yet, I have been unable to find any
             // pattern.  I doubt it will matter though, so we'll go
             // ahead and do the full time for now.
-            envelope_stage = EnvelopeStage::Attack;
+            envelope_stage = EnvelopeStage::On;
         }
         // key-on = !key-off = true
         if (global.key_ons & voice_bit & ~global.key_offs) {
@@ -498,8 +495,8 @@ class Sony_S_DSP_BRR {
             on_count = 0;
         }
 
-        int envx;
-        if (!(keys & voice_bit) || (envx = clock_envelope()) < 0) {
+        int envelope;
+        if (!(keys & voice_bit) || (envelope = clock_envelope()) < 0) {
             raw_voice.envx = 0;
             raw_voice.outx = 0;
             // TODO: return empty samples
@@ -533,7 +530,7 @@ class Sony_S_DSP_BRR {
                 global.wave_ended |= voice_bit;
                 keys &= ~voice_bit;
                 raw_voice.envx = 0;
-                voice.envx = 0;
+                envelope_value = 0;
                 // add silence samples to interpolation buffer
                 do {
                     samples[3] = samples[2];
@@ -603,7 +600,7 @@ class Sony_S_DSP_BRR {
         sample +=     (table2[0] * samples[0]) >> 11 & ~1;
         // scale output from this voice
         int output = clamp_16(sample);
-        output = (output * envx) >> 11 & ~1;
+        output = (output * envelope) >> 11 & ~1;
         // add the left and right channels to the mix
         left += (volumeLeft * output) >> 7;
         right += (volumeRight * output) >> 7;

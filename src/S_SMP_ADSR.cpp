@@ -1,4 +1,4 @@
-// A Sony SPC700 chip (from Nintendo SNES) emulator module.
+// An envelope generator module based on the S-SMP chip from Nintendo SNES.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)
@@ -24,7 +24,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Sony S-DSP chip (from Nintendo SNES) emulator module.
+/// An envelope generator module based on the S-SMP chip from Nintendo SNES.
 struct ChipS_SMP_ADSR : Module {
     /// the number of processing lanes on the module
     static constexpr unsigned LANES = 2;

@@ -36,7 +36,7 @@ struct ChipS_SMP_BRR : Module {
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_BRR::VOICE_COUNT][2];
+    rack::dsp::BooleanTrigger gateTriggers[Sony_S_DSP_BRR::VOICE_COUNT];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -186,24 +186,13 @@ struct ChipS_SMP_BRR : Module {
         // -------------------------------------------------------------------
         // create bit-masks for the key-on and key-off state of each voice
         uint8_t key_on = 0;
-        uint8_t key_off = 0;
         // iterate over the voices to detect key-on and key-off events
         for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
             // get the voltage from the gate input port
             const auto gate = inputs[INPUT_GATE + voice].getVoltage();
             // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-            // process the inverted voltage to detect key-of events
-            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+            key_on = key_on | (gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
         }
-        if (key_on) {  // a key-on event occurred from the gate input
-            // write key off to enable all voices
-            apu.write(Sony_S_DSP_BRR::KEY_OFF, 0);
-            // write the key-on value to the register
-            apu.write(Sony_S_DSP_BRR::KEY_ON, key_on);
-        }
-        if (key_off)  // a key-off event occurred from the gate input
-            apu.write(Sony_S_DSP_BRR::KEY_OFF, key_off);
 
         // -------------------------------------------------------------------
         // MARK: Voice-wise Parameters
@@ -231,7 +220,7 @@ struct ChipS_SMP_BRR : Module {
         // MARK: Stereo output
         // -------------------------------------------------------------------
         short sample[2] = {0, 0};
-        apu.run(key_on, gateTriggers[voice][0].state, sample);
+        apu.run(key_on, gateTriggers[voice].state, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

@@ -311,35 +311,37 @@ class Sony_S_DSP_BRR {
     uint8_t* const ram;
 
     /// A bit-mask representation of the active voice gates
-    int keys;
+    int keys = 0;
 
     /// The stages of the ADSR envelope generator.
     enum class EnvelopeStage : short { Attack, Decay, Sustain, Release };
 
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
-        /// the volume level of the voice
-        short unused34[2];
-        /// 12-bit fractional position
-        short fraction = 0;
-        short unused0;
-        /// most recent four decoded samples for the Gaussian filter
-        int16_t unused3[4];
-        /// number of nibbles remaining in current block
-        short block_remain = 0;
-        /// the current address of the sample being played by the voice
-        unsigned short addr = 0;
-        /// header byte from current block
-        short block_header = 0;
-        short unused1;
-        short unused2;
         /// the output value from the envelope generator
         short envx = 0;
-        /// the number of samples delay until the voice turns on (after key-on)
-        short on_cnt = 0;
-        /// the current stage of the envelope generator
-        EnvelopeStage envelope_stage = EnvelopeStage::Release;
     } voice_states[VOICE_COUNT];
+
+    /// 12-bit fractional position
+    short fraction = 0;
+    /// the previous four samples for Gaussian interpolation
+    int16_t samples[4] = {0, 0, 0, 0};
+    /// number of nibbles remaining in current block
+    short block_remain = 0;
+    /// the current address of the sample being played by the voice
+    unsigned short addr = 0;
+    /// header byte from current block
+    short block_header = 0;
+    /// the 14-bit frequency value
+    uint16_t rate = 0;
+    /// the number of samples delay until the voice turns on (after key-on)
+    short on_count = 0;
+    /// the current stage of the envelope generator
+    EnvelopeStage envelope_stage = EnvelopeStage::Release;
+    /// the volume for the left channel output
+    int8_t volumeLeft = 0;
+    /// the volume for the right channel output
+    int8_t volumeRight = 0;
 
     /// @brief Process the envelope for the voice with given index.
     ///
@@ -353,7 +355,7 @@ class Sony_S_DSP_BRR {
         int envx = voice.envx;
 
         // process the release stage
-        if (voice.envelope_stage == EnvelopeStage::Release) {
+        if (envelope_stage == EnvelopeStage::Release) {
             // Docs: "When in the state of "key off". the "click" sound is
             // prevented by the addition of the fixed value 1/256" WTF???
             // Alright, I'm going to choose to interpret that this way:
@@ -379,17 +381,6 @@ class Sony_S_DSP_BRR {
         return envx;
     }
 
-    /// the previous four samples for Gaussian interpolation
-    int16_t samples[4] = {0, 0, 0, 0};
-
-
-    /// the 14-bit frequency value
-    uint16_t rate = 0;
-    /// the volume for the left channel output
-    int8_t volumeLeft = 0;
-    /// the volume for the right channel output
-    int8_t volumeRight = 0;
-
  public:
     /// @brief Initialize a new Sony_S_DSP_BRR.
     ///
@@ -401,11 +392,7 @@ class Sony_S_DSP_BRR {
     void reset() {
         keys = 0;
         global.key_ons = 0;
-        // reset voices
-        for (unsigned i = 0; i < VOICE_COUNT; i++) {
-            VoiceState& v = voice_states[i];
-            v.envelope_stage = EnvelopeStage::Release;
-        }
+        envelope_stage = EnvelopeStage::Release;
     }
 
     /// @brief Set the frequency of the low-pass gate to a new value.
@@ -480,15 +467,15 @@ class Sony_S_DSP_BRR {
         // ---------------------------------------------------------------
         // MARK: Gate Processing
         // ---------------------------------------------------------------
-        if (voice.on_cnt && !--voice.on_cnt) {
+        if (on_count && !--on_count) {
             // key on
             keys |= voice_bit;
-            voice.addr = source_directory[raw_voice.waveform].start;
-            voice.block_remain = 1;
+            addr = source_directory[raw_voice.waveform].start;
+            block_remain = 1;
             voice.envx = 0;
-            voice.block_header = 0;
+            block_header = 0;
             // decode three samples immediately
-            voice.fraction = 0x3FFF;
+            fraction = 0x3FFF;
             // BRR decoder filter uses previous two samples
             samples[0] = 0;
             samples[1] = 0;
@@ -498,17 +485,17 @@ class Sony_S_DSP_BRR {
             // expected; as yet, I have been unable to find any
             // pattern.  I doubt it will matter though, so we'll go
             // ahead and do the full time for now.
-            voice.envelope_stage = EnvelopeStage::Attack;
+            envelope_stage = EnvelopeStage::Attack;
         }
         // key-on = !key-off = true
         if (global.key_ons & voice_bit & ~global.key_offs) {
             global.key_ons &= ~voice_bit;
-            voice.on_cnt = 8;
+            on_count = 8;
         }
         // key-off = true
         if (keys & global.key_offs & voice_bit) {
-            voice.envelope_stage = EnvelopeStage::Release;
-            voice.on_cnt = 0;
+            envelope_stage = EnvelopeStage::Release;
+            on_count = 0;
         }
 
         int envx;
@@ -522,25 +509,25 @@ class Sony_S_DSP_BRR {
         // MARK: BRR Sample Decoder
         // Decode samples when fraction >= 1.0 (0x1000)
         // ---------------------------------------------------------------
-        for (int n = voice.fraction >> 12; --n >= 0;) {
-            if (!--voice.block_remain) {
-                if (voice.block_header & 1) {
+        for (int n = fraction >> 12; --n >= 0;) {
+            if (!--block_remain) {
+                if (block_header & 1) {
                     global.wave_ended |= voice_bit;
-                    if (voice.block_header & 2) {
+                    if (block_header & 2) {
                         // verified (played endless looping sample and ENDX was set)
-                        voice.addr = source_directory[raw_voice.waveform].loop;
+                        addr = source_directory[raw_voice.waveform].loop;
                     } else {  // first block was end block; don't play anything
                         goto sample_ended;
                     }
                 }
-                voice.block_header = ram[voice.addr++];
-                voice.block_remain = 16;  // nibbles
+                block_header = ram[addr++];
+                block_remain = 16;  // nibbles
             }
 
             if (
-                voice.block_remain == 9 &&
-                (ram[voice.addr + 5] & 3) == 1 &&
-                (voice.block_header & 3) != 3
+                block_remain == 9 &&
+                (ram[addr + 5] & 3) == 1 &&
+                (block_header & 3) != 3
             ) {  // next block has end flag set, this block ends early
         sample_ended:
                 global.wave_ended |= voice_bit;
@@ -557,10 +544,10 @@ class Sony_S_DSP_BRR {
                 break;
             }
             // get the next sample from RAM
-            int delta = ram[voice.addr];
-            if (voice.block_remain & 1) {  // use lower nibble
+            int delta = ram[addr];
+            if (block_remain & 1) {  // use lower nibble
                 delta <<= 4;
-                voice.addr++;
+                addr++;
             }
             // Use sign-extended upper nibble
             delta = int8_t(delta) >> 4;
@@ -570,7 +557,7 @@ class Sony_S_DSP_BRR {
             // range is valid, do the shift normally.  Note these are
             // both shifted right once to do the filters properly, but
             // the output will be shifted back again at the end.
-            int shift = voice.block_header >> 4;
+            int shift = block_header >> 4;
             delta = (delta << shift) >> 1;
             if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
             // -----------------------------------------------------------
@@ -578,17 +565,17 @@ class Sony_S_DSP_BRR {
             // -----------------------------------------------------------
             int smp1 = samples[0];
             int smp2 = samples[1];
-            if (voice.block_header & 8) {
+            if (block_header & 8) {
                 delta += smp1;
                 delta -= smp2 >> 1;
-                if (!(voice.block_header & 4)) {
+                if (!(block_header & 4)) {
                     delta += (-smp1 - (smp1 >> 1)) >> 5;
                     delta += smp2 >> 5;
                 } else {
                     delta += (-smp1 * 13) >> 7;
                     delta += (smp2 + (smp2 >> 1)) >> 4;
                 }
-            } else if (voice.block_header & 4) {
+            } else if (block_header & 4) {
                 delta += smp1 >> 1;
                 delta += (-smp1) >> 5;
             }
@@ -605,8 +592,8 @@ class Sony_S_DSP_BRR {
         // apply phase modulation
         phase = (phase * (phase_modulation + 32768)) >> 15;
         // Gaussian interpolation using most recent 4 samples
-        const int index = voice.fraction >> 2 & 0x3FC;
-        voice.fraction = (voice.fraction & 0x0FFF) + phase;
+        const int index = fraction >> 2 & 0x3FC;
+        fraction = (fraction & 0x0FFF) + phase;
         const auto table1 = getGaussian(index);
         const auto table2 = getGaussian(255 * 4 - index);
         int sample = ((table1[0] * samples[3]) >> 12) +

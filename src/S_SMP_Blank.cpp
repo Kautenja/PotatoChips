@@ -53,5 +53,6 @@ struct BlankWidget : ModuleWidget {
     }
 };
 
+extern constexpr char const blank1[] = "res/S-SMP-Chip.svg";
 rack::Model *modelChipS_SMP_Blank =
-    createModel<BlankModule, BlankWidget<ScrewBlack, ScrewStyle::All>>("S_SMP_Blank1");
+    createModel<BlankModule, BlankWidget<ScrewSilver, ScrewStyle::All>>("S_SMP_Blank1");

@@ -258,10 +258,13 @@ class Sony_S_DSP_BRR {
     /// this must be maintained by the caller in order to provide data to the
     /// S-DSP. This includes input sample data, and the allocated space for the
     /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
-    uint8_t* const ram;
+    uint8_t* const ram = nullptr;
 
     /// source directory (wave table offsets)
-    uint8_t wave_page;
+    uint8_t wave_page = 0;
+
+    /// the oscillator's waveform sample
+    uint8_t waveform = 0;
 
     // -----------------------------------------------------------------------
     // MARK: Internal Voice State
@@ -331,9 +334,6 @@ class Sony_S_DSP_BRR {
     void reset() {
         // TODO:
     }
-
-    /// the oscillator's waveform sample
-    // uint8_t waveform;
 
     /// @brief Set the page of samples in RAM to read samples from.
     ///

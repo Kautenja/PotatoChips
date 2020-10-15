@@ -19,6 +19,7 @@
 #include "componentlibrary.hpp"
 #include "dsp/sony_s_dsp_brr.hpp"
 #include "dsp/wavetable4bit.hpp"
+#include <cstring>
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -93,20 +94,8 @@ struct ChipS_SMP_BRR : Module {
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
-        // for (unsigned voice = 0; voice < 8; voice++) {
-        //
-        // }
-        apu.setWavePage(0);
-        apu.setWaveIndex(0);
-    }
-
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    ///
-    inline void process(const ProcessArgs &args) final {
         // -------------------------------------------------------------------
-        // MARK: RAM (SPC700 emulation)
+        // MARK: Source Directory (Sample RAM)
         // -------------------------------------------------------------------
         // write the first directory to RAM (at the end of the echo buffer)
         auto dir = reinterpret_cast<Sony_S_DSP_BRR::SourceDirectoryEntry*>(&ram[0]);
@@ -123,49 +112,58 @@ struct ChipS_SMP_BRR : Module {
         static const uint8_t samples[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
         for (unsigned i = 0; i < Sony_S_DSP_BRR::BitRateReductionBlock::NUM_SAMPLES; i++)
             block->samples[i] = samples[i];
-
         // -------------------------------------------------------------------
-        // MARK: Voice-wise Parameters
+        // MARK: Source Directory Paging and Indexing
         // -------------------------------------------------------------------
         // for (unsigned voice = 0; voice < 8; voice++) {
         //
         // }
-            unsigned voice = 0;
-            // ---------------------------------------------------------------
-            // MARK: Frequency
-            // ---------------------------------------------------------------
-            // calculate the frequency using standard exponential scale
-            float pitch = params[PARAM_FREQ + voice].getValue();
-            pitch += inputs[INPUT_VOCT + voice].getVoltage();
-            pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
-            float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-            frequency = rack::clamp(frequency, 0.0f, 20000.0f);
-            apu.setFrequency(frequency);
-            // ---------------------------------------------------------------
-            // MARK: Amplifier Volume
-            // ---------------------------------------------------------------
-            apu.setVolumeLeft(params[PARAM_VOLUME_L + voice].getValue());
-            apu.setVolumeRight(params[PARAM_VOLUME_R + voice].getValue());
+        apu.setWavePage(0);
+        apu.setWaveIndex(0);
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    ///
+    inline void process(const ProcessArgs &args) final {
+        // for (unsigned voice = 0; voice < 8; voice++) {
+        //
+        // }
+        unsigned voice = 0;
+        // ---------------------------------------------------------------
+        // MARK: Frequency
+        // ---------------------------------------------------------------
+        // calculate the frequency using standard exponential scale
+        float pitch = params[PARAM_FREQ + voice].getValue();
+        pitch += inputs[INPUT_VOCT + voice].getVoltage();
+        pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
+        float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+        apu.setFrequency(frequency);
+        // ---------------------------------------------------------------
+        // MARK: Amplifier Volume
+        // ---------------------------------------------------------------
+        apu.setVolumeLeft(params[PARAM_VOLUME_L + voice].getValue());
+        apu.setVolumeRight(params[PARAM_VOLUME_R + voice].getValue());
 
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
-        // create bit-masks for the key-on and key-off state of each voice
-        uint8_t key_on = 0;
         // iterate over the voices to detect key-on and key-off events
         // for (unsigned voice = 0; voice < 8; voice++) {
         //
         // }
-            // get the voltage from the gate input port
-            const auto gate = inputs[INPUT_GATE + voice].getVoltage();
-            // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+        // get the voltage from the gate input port
+        const auto gate = inputs[INPUT_GATE + voice].getVoltage();
+        // process the voltage to detect key-on events
+        bool trigger = (gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
 
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------
         short sample[2] = {0, 0};
-        apu.run(key_on, gateTriggers[voice].state, sample);
+        apu.run(trigger, gateTriggers[voice].state, sample);
         outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * sample[0] / std::numeric_limits<int16_t>::max());
         outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * sample[1] / std::numeric_limits<int16_t>::max());
     }

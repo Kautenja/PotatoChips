@@ -259,11 +259,6 @@ class Sony_S_DSP_BRR {
             block_header = 0;
             // decode three samples immediately
             fraction = 0x3FFF;
-            // TODO: safe to remove this? 0ing will cause pops I think.
-            // TODO: 0 out sample buffer in "Off" stage
-            // BRR decoder filter uses previous two samples
-            // samples[0] = 0;
-            // samples[1] = 0;
             envelope_stage = EnvelopeStage::On;
         }
         if (!gate_on) {  // enter the release stage
@@ -330,25 +325,24 @@ class Sony_S_DSP_BRR {
             // -----------------------------------------------------------
             // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
             // -----------------------------------------------------------
-            int smp1 = samples[0];
-            int smp2 = samples[1];
             if (block_header & 8) {
-                delta += smp1;
-                delta -= smp2 >> 1;
+                delta += samples[0];
+                delta -= samples[1] >> 1;
                 if (!(block_header & 4)) {
-                    delta += (-smp1 - (smp1 >> 1)) >> 5;
-                    delta += smp2 >> 5;
+                    delta += (-samples[0] - (samples[0] >> 1)) >> 5;
+                    delta += samples[1] >> 5;
                 } else {
-                    delta += (-smp1 * 13) >> 7;
-                    delta += (smp2 + (smp2 >> 1)) >> 4;
+                    delta += (-samples[0] * 13) >> 7;
+                    delta += (samples[1] + (samples[1] >> 1)) >> 4;
                 }
             } else if (block_header & 4) {
-                delta += smp1 >> 1;
-                delta += (-smp1) >> 5;
+                delta += samples[0] >> 1;
+                delta += (-samples[0]) >> 5;
             }
+            // cycle sample history and set delta to latest sample
             samples[3] = samples[2];
-            samples[2] = smp2;
-            samples[1] = smp1;
+            samples[2] = samples[1];
+            samples[1] = samples[0];
             samples[0] = 2 * clamp_16(delta);
         }
         // ---------------------------------------------------------------

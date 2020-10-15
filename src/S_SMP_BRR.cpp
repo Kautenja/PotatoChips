@@ -211,12 +211,13 @@ struct ChipS_SMP_BRR : Module {
         // create bit-masks for the key-on and key-off state of each voice
         uint8_t key_on = 0;
         // iterate over the voices to detect key-on and key-off events
-        for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        // for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {
+        //
+        // }
             // get the voltage from the gate input port
             const auto gate = inputs[INPUT_GATE + voice].getVoltage();
             // process the voltage to detect key-on events
             key_on = key_on | (gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
-        }
 
         // -------------------------------------------------------------------
         // MARK: Stereo output

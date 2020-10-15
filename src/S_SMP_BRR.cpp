@@ -175,7 +175,7 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_BRRWidget(ChipS_SMP_BRR *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-BRR.svg";
+        static constexpr auto panel = "res/S-SMP-BRR-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));

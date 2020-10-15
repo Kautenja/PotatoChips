@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        43,
+        51,
         1
       ]
     },
@@ -54,7 +54,7 @@
       "leftModuleId": 177,
       "rightModuleId": 1,
       "pos": [
-        33,
+        41,
         1
       ]
     },
@@ -64,7 +64,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 181,
+      "rightModuleId": 178,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -79,7 +79,7 @@
       },
       "pos": [
         0,
-        0
+        1
       ]
     },
     {
@@ -138,8 +138,9 @@
         }
       ],
       "leftModuleId": 172,
+      "rightModuleId": 182,
       "pos": [
-        53,
+        45,
         0
       ]
     },
@@ -193,7 +194,7 @@
       "leftModuleId": 181,
       "rightModuleId": 166,
       "pos": [
-        37,
+        29,
         0
       ]
     },
@@ -234,7 +235,7 @@
         "range_db": 80.0
       },
       "pos": [
-        13,
+        21,
         1
       ]
     },
@@ -277,13 +278,14 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 5,
       "rightModuleId": 177,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        0,
+        8,
         1
       ]
     },
@@ -313,7 +315,7 @@
         "videoBitRate": 2048000
       },
       "pos": [
-        53,
+        61,
         1
       ]
     },
@@ -325,7 +327,7 @@
       "params": [
         {
           "id": 0,
-          "value": 5.38800144
+          "value": 2.0
         },
         {
           "id": 1,
@@ -460,10 +462,21 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
       "rightModuleId": 172,
       "pos": [
-        8,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 182,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_Blank1",
+      "params": [],
+      "leftModuleId": 166,
+      "pos": [
+        59,
         0
       ]
     }

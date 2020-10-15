@@ -107,6 +107,20 @@
       ]
     },
     {
+      "slug": "S_SMP_BRR",
+      "name": "S-SMP(BRR)",
+      "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf",
+      "tags": [
+        "Multiple",
+        "Effect",
+        "Filter",
+        "Panning",
+        "Polyphonic",
+        "Sampler"
+      ]
+    },
+    {
       "slug": "S_SMP_Echo",
       "name": "S-SMP(Echo)",
       "description": "An emulation of the echo effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
@@ -133,6 +147,14 @@
         "Panning",
         "Polyphonic",
         "Voltage-controlled amplifier"
+      ]
+    },
+    {
+      "slug": "S_SMP_Blank1",
+      "name": "S-SMP(Blank)",
+      "description": "A blank panel with an S-SMP illustration.",
+      "tags": [
+        "Blank"
       ]
     },
     {

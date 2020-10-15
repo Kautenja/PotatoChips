@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -219,7 +219,7 @@
         },
         {
           "id": 41,
-          "value": 7.0
+          "value": 11.0
         },
         {
           "id": 42,
@@ -251,7 +251,7 @@
         },
         {
           "id": 49,
-          "value": 6.0
+          "value": 7.0
         },
         {
           "id": 50,
@@ -283,7 +283,7 @@
         },
         {
           "id": 57,
-          "value": 5.0
+          "value": 7.0
         },
         {
           "id": 58,
@@ -379,11 +379,11 @@
         },
         {
           "id": 81,
-          "value": 8.0
+          "value": 0.0
         },
         {
           "id": 82,
-          "value": 40.0
+          "value": 0.0
         },
         {
           "id": 83,
@@ -496,8 +496,9 @@
       "params": [],
       "rightModuleId": 156,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "high",
         "window": "kaiser"

@@ -198,13 +198,13 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
     ///
     explicit ChipS_SMP_EchoWidget(ChipS_SMP_Echo *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Echo.svg";
+        static constexpr auto panel = "res/S-SMP-Echo-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // Panel Screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Sony_S_DSP_Echo::BufferSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
             auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipS_SMP_Echo::PARAM_DELAY + i);

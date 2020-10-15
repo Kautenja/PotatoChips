@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
 

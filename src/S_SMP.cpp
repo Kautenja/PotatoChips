@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "dsp/sony_s_dsp.hpp"
 #include "dsp/wavetable4bit.hpp"
 
@@ -498,7 +497,7 @@ struct ChipS_SMPWidget : ModuleWidget {
             // Frequency
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP::INPUT_FM + i));
-            addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipS_SMP::PARAM_FREQ + i));
+            addParam(createParam<Rogan2PWhite>(Vec(75, 35 + i * 41), module, ChipS_SMP::PARAM_FREQ + i));
             // Gate
             addInput(createInput<PJ301MPort>(Vec(185, 40 + i * 41), module, ChipS_SMP::INPUT_GATE + i));
             // Volume - Left
@@ -546,7 +545,7 @@ struct ChipS_SMPWidget : ModuleWidget {
 
         // Noise Frequency
         addInput(createInput<PJ301MPort>(Vec(115, 40), module, ChipS_SMP::INPUT_NOISE_FM));
-        auto noise = createParam<Rogan2PSNES>(Vec(145, 35), module, ChipS_SMP::PARAM_NOISE_FREQ);
+        auto noise = createParam<Rogan2PWhite>(Vec(145, 35), module, ChipS_SMP::PARAM_NOISE_FREQ);
         noise->snap = true;
         addParam(noise);
 

@@ -17,7 +17,6 @@
 
 #include <limits>
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "dsp/sony_s_dsp_adsr.hpp"
 
 // ---------------------------------------------------------------------------

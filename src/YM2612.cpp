@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "dsp/yamaha_ym2612.hpp"
 #include "widget/indexed_frame_display.hpp"
 #include <functional>

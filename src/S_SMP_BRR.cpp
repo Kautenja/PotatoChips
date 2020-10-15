@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "dsp/sony_s_dsp_brr.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include <cstring>
@@ -203,7 +202,7 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
             // Frequency
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FM + i));
-            addParam(createParam<Rogan2PSNES>(Vec(75, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_FREQ + i));
+            addParam(createParam<Rogan2PWhite>(Vec(75, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_FREQ + i));
             // Gate
             addInput(createInput<PJ301MPort>(Vec(120, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_GATE + i));
             // Volume - Left

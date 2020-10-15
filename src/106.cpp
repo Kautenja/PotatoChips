@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/namco_106.hpp"
 #include "dsp/wavetable4bit.hpp"

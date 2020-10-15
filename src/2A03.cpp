@@ -16,7 +16,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/ricoh_2a03.hpp"
 

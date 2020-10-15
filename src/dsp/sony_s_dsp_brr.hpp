@@ -364,11 +364,10 @@ class Sony_S_DSP_BRR {
                 return -1;
             }
             return envelope_value;
-        } else {
-            // process the on stage
-            envelope_value = ENVELOPE_INITIAL;
-            return envelope_value;
         }
+        // process the on stage
+        envelope_value = ENVELOPE_INITIAL;
+        return envelope_value;
     }
 
  public:
@@ -413,8 +412,6 @@ class Sony_S_DSP_BRR {
             throw AddressSpaceException<uint8_t>(address, 0, NUM_REGISTERS);
         // store the data in the register with given address
         registers[address] = data;
-        // get the high 4 bits for indexing the voice / FIR coefficients
-        int index = address >> 4;
     }
 
     /// @brief Run DSP for some samples and write them to the given buffer.

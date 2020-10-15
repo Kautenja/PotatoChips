@@ -97,10 +97,6 @@ class Sony_S_DSP_BRR {
     };
 
  private:
-    // -----------------------------------------------------------------------
-    // MARK: Global S-SMP Chip State
-    // -----------------------------------------------------------------------
-
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.
     /// @details
@@ -111,10 +107,6 @@ class Sony_S_DSP_BRR {
 
     /// source directory (wave table offsets)
     uint8_t wave_page = 0;
-
-    // -----------------------------------------------------------------------
-    // MARK: Internal Voice State
-    // -----------------------------------------------------------------------
 
     /// the number of samples delay until the voice turns on (after key-on)
     short on_count = 0;

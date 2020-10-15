@@ -95,19 +95,6 @@ struct ChipS_SMP_BRR : Module {
  protected:
     /// Setup the register initial state on the chip.
     inline void setupSourceDirectory() {
-        // Echo data start address.
-        //
-        // ESA
-        //          7     6     5     4     3     2     1     0
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // $6D   |                  Offset value                 |
-        //       +-----+-----+-----+-----+-----+-----+-----+-----+
-        // This register points to an area of memory to be used by the echo
-        // buffer. Like DIR its value is multiplied by 0x100. This is because
-        // the echo buffer is stereo and contains a tuple of L+R 16-bit
-        // samples (32-bits).
-
-        apu.write(Sony_S_DSP_BRR::ECHO_BUFFER_START_OFFSET, 128);
         // The amount of memory required is EDL * 2KBytes (MAX $7800 bytes).
         const auto ECHO_LENGTH = 15 * (2 * (1 << 10));
 
@@ -136,8 +123,6 @@ struct ChipS_SMP_BRR : Module {
         // ...
         // This can continue for up to 256 samples. (SRCN can only reference
         // 256 samples)
-
-        // put the first directory at the end of the echo buffer
         apu.setWavePage(ECHO_LENGTH / 0x100);
 
         for (unsigned voice = 0; voice < Sony_S_DSP_BRR::VOICE_COUNT; voice++) {

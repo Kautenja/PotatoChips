@@ -248,6 +248,10 @@ class Sony_S_DSP_BRR {
         RawVoice voices[VOICE_COUNT];
     };
 
+    // -----------------------------------------------------------------------
+    // MARK: Global S-SMP Chip State
+    // -----------------------------------------------------------------------
+
     /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
     /// the SPC700.
     /// @details
@@ -255,6 +259,9 @@ class Sony_S_DSP_BRR {
     /// S-DSP. This includes input sample data, and the allocated space for the
     /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
     uint8_t* const ram;
+
+    /// source directory (wave table offsets)
+    uint8_t wave_page;
 
     // -----------------------------------------------------------------------
     // MARK: Internal Voice State
@@ -325,10 +332,8 @@ class Sony_S_DSP_BRR {
         // TODO:
     }
 
-    /// source directory (wave table offsets)
-    uint8_t wave_page;
     /// the oscillator's waveform sample
-    uint8_t waveform;
+    // uint8_t waveform;
 
     /// @brief Set the page of samples in RAM to read samples from.
     ///

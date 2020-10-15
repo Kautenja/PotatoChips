@@ -319,26 +319,26 @@ class Sony_S_DSP_BRR {
     /// The state of a synthesizer voice (channel) on the chip.
     struct VoiceState {
         /// the volume level of the voice
-        short volume[2];
+        short unused34[2];
         /// 12-bit fractional position
-        short fraction;
+        short fraction = 0;
         short unused0;
         /// most recent four decoded samples for the Gaussian filter
-        int16_t samples[4];
+        int16_t unused3[4];
         /// number of nibbles remaining in current block
-        short block_remain;
+        short block_remain = 0;
         /// the current address of the sample being played by the voice
-        unsigned short addr;
+        unsigned short addr = 0;
         /// header byte from current block
-        short block_header;
+        short block_header = 0;
         short unused1;
         short unused2;
         /// the output value from the envelope generator
-        short envx;
+        short envx = 0;
         /// the number of samples delay until the voice turns on (after key-on)
         short on_cnt = 0;
         /// the current stage of the envelope generator
-        EnvelopeStage envelope_stage;
+        EnvelopeStage envelope_stage = EnvelopeStage::Release;
     } voice_states[VOICE_COUNT];
 
     /// @brief Process the envelope for the voice with given index.
@@ -438,19 +438,6 @@ class Sony_S_DSP_BRR {
         registers[address] = data;
         // get the high 4 bits for indexing the voice / FIR coefficients
         int index = address >> 4;
-        // update volume / FIR coefficients
-        switch (address & FIR_COEFFICIENTS) {
-            // voice volume
-            case 0:    // left channel, fall through to next block
-            case 1: {  // right channel, process both left and right channels
-                short* volume = voice_states[index].volume;
-                int left  = (int8_t) registers[address & ~1];
-                int right = (int8_t) registers[address |  1];
-                volume[0] = left;
-                volume[1] = right;
-                break;
-            }
-        }
     }
 
     /// @brief Run DSP for some samples and write them to the given buffer.

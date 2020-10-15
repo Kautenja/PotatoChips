@@ -320,9 +320,9 @@ class Sony_S_DSP_BRR {
     /// the number of samples delay until the voice turns on (after key-on)
     short on_count = 0;
     /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage { On, Release };
+    enum class EnvelopeStage { On, Release, Off };
     /// the current stage of the envelope generator
-    EnvelopeStage envelope_stage = EnvelopeStage::Release;
+    EnvelopeStage envelope_stage = EnvelopeStage::Off;
     /// the output value from the envelope generator
     short envelope_value = 0;
     /// the current address of the sample being played by the voice
@@ -359,6 +359,7 @@ class Sony_S_DSP_BRR {
             // no need for a count because it always happens every update.
             envelope_value -= ENVELOPE_INITIAL / 256;
             if (envelope_value <= 0) {
+                envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
                 keys &= ~1;
                 return -1;
@@ -422,40 +423,17 @@ class Sony_S_DSP_BRR {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(int16_t* output_buffer = nullptr, int phase_modulation = 0) {
+    void run(bool trigger, bool gate_on, int16_t* output_buffer = nullptr, int phase_modulation = 0) {
         // use the global wave page address to lookup a pointer to the first entry
         // in the source directory. the wave page is multiplied by 0x100 to produce
         // the RAM address of the source directory.
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[global.wave_page * 0x100]);
-        // -------------------------------------------------------------------
-        // MARK: Key Off / Key On
-        // -------------------------------------------------------------------
-        // Here we check for keys on / off. Docs say that successive writes
-        // to KON / KOF must be separated by at least 2 T_s periods or risk
-        // being neglected.  Therefore, DSP only looks at these during an
-        // update, and not at the time of the write. Only need to do this
-        // once however, since the regs haven't changed over the whole
-        // period we need to catch up with.
-        // -------------------------------------------------------------------
-        // Keying on a voice resets that bit in ENDX.
-        global.wave_ended &= ~global.key_ons;
-        // -------------------------------------------------------------------
-        // MARK: Voice Processing
-        // -------------------------------------------------------------------
-        // buffer the outputs of the left and right echo and main channels
-        int left = 0;
-        int right = 0;
-        // get the voice's bit-mask shift value
-        const int voice_bit = 1;
+
         // cache the voice and data structures
         RawVoice& raw_voice = voices[0];
-        // ---------------------------------------------------------------
-        // MARK: Gate Processing
-        // ---------------------------------------------------------------
+
         if (on_count && !--on_count) {
-            // key on
-            keys |= voice_bit;
             addr = source_directory[raw_voice.waveform].start;
             block_remain = 1;
             envelope_value = 0;
@@ -473,22 +451,19 @@ class Sony_S_DSP_BRR {
             // ahead and do the full time for now.
             envelope_stage = EnvelopeStage::On;
         }
-        // key-on = !key-off = true
-        if (global.key_ons & voice_bit & ~global.key_offs) {
-            global.key_ons &= ~voice_bit;
+
+        if (trigger)  // trigger the voice (8 sample delay until voice on)
             on_count = 8;
-        }
-        // key-off = true
-        if (keys & global.key_offs & voice_bit) {
+        if (!gate_on) {  // enter the release stage
             envelope_stage = EnvelopeStage::Release;
             on_count = 0;
         }
 
-        int envelope;
-        if (!(keys & voice_bit) || (envelope = clock_envelope()) < 0) {
-            // TODO: return empty samples
-            return;
-        }
+        // trigger the envelope generator
+        if (envelope_stage == EnvelopeStage::Off) return;
+        int envelope = clock_envelope();
+        if (envelope < 0) return;
+
         // ---------------------------------------------------------------
         // MARK: BRR Sample Decoder
         // Decode samples when fraction >= 1.0 (0x1000)
@@ -496,7 +471,6 @@ class Sony_S_DSP_BRR {
         for (int n = fraction >> 12; --n >= 0;) {
             if (!--block_remain) {
                 if (block_header & 1) {
-                    global.wave_ended |= voice_bit;
                     if (block_header & 2) {
                         // verified (played endless looping sample and ENDX was set)
                         addr = source_directory[raw_voice.waveform].loop;
@@ -514,8 +488,7 @@ class Sony_S_DSP_BRR {
                 (block_header & 3) != 3
             ) {  // next block has end flag set, this block ends early
         sample_ended:
-                global.wave_ended |= voice_bit;
-                keys &= ~voice_bit;
+                envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
                 // add silence samples to interpolation buffer
                 do {
@@ -587,16 +560,13 @@ class Sony_S_DSP_BRR {
         // scale output from this voice
         int output = clamp_16(sample);
         output = (output * envelope) >> 11 & ~1;
-        // add the left and right channels to the mix
-        left += (volumeLeft * output) >> 7;
-        right += (volumeRight * output) >> 7;
         // -------------------------------------------------------------------
         // MARK: Output
         // -------------------------------------------------------------------
         if (output_buffer) {  // write final samples
             // clamp the left and right samples and place them into the buffer
-            output_buffer[0] = clamp_16(left);
-            output_buffer[1] = clamp_16(right);
+            output_buffer[0] = clamp_16((volumeLeft * output) >> 7);
+            output_buffer[1] = clamp_16((volumeRight * output) >> 7);
         }
     }
 };

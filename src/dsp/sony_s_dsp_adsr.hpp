@@ -201,8 +201,6 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     ///
     int8_t run(bool trigger, bool gate_on) {
         if (trigger) {  // trigger the envelope generator
-            // reset the envelope value to 0 and the stage to attack
-            envelope_value = 0;
             envelope_stage = EnvelopeStage::Attack;
             // NOTE: Real SNES does *not* appear to initialize the envelope
             // counter to anything in particular. The first cycle always seems

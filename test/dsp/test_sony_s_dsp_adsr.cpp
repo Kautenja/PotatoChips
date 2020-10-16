@@ -29,6 +29,6 @@
 // MARK: sizeof Sony_S_DSP_ADSR
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_Echo::BufferSample should be 4 bytes") {
+TEST_CASE("Sony_S_DSP_ADSR should be 8 bytes") {
     REQUIRE(8 == sizeof(Sony_S_DSP_ADSR));
 }

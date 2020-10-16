@@ -26,7 +26,7 @@
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_ADSR
+// MARK: sizeof Sony_S_DSP_Gaussian
 // ---------------------------------------------------------------------------
 
 TEST_CASE("Sony_S_DSP_Gaussian should be 16 bytes") {

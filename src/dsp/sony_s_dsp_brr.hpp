@@ -240,13 +240,18 @@ class Sony_S_DSP_BRR {
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
+    /// @param trigger a boolean signal for triggering the sample player
+    /// @param gate_on a boolean signal for enabling the sample playback
     /// @param output_buffer the output buffer to write samples to (optional)
     /// @param phase_modulation the phase modulation to apply to the voice
     ///
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    void run(bool trigger, bool gate_on, int16_t* output_buffer = nullptr, int phase_modulation = 0) {
+    void run(bool trigger, bool gate_on,
+        int16_t* output_buffer = nullptr,
+        int phase_modulation = 0
+    ) {
         // use the global wave page address to lookup a pointer to the first entry
         // in the source directory. the wave page is multiplied by 0x100 to produce
         // the RAM address of the source directory.

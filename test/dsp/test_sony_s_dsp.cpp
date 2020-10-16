@@ -101,17 +101,3 @@ TEST_CASE("BitRateReductionBlock should set is_end") {
     block.flags.is_end = 1;
     REQUIRE(0x01 == block.header);
 }
-
-// ---------------------------------------------------------------------------
-// MARK: Sony_S_DSP::EchoBufferSample
-// ---------------------------------------------------------------------------
-
-TEST_CASE("Sony_S_DSP::EchoBufferSample should be 4 bytes") {
-    REQUIRE(4 == sizeof(Sony_S_DSP::EchoBufferSample));
-}
-
-TEST_CASE("Sony_S_DSP::EchoBufferSample should have correct constants") {
-    REQUIRE(0 == Sony_S_DSP::EchoBufferSample::LEFT);
-    REQUIRE(1 == Sony_S_DSP::EchoBufferSample::RIGHT);
-    REQUIRE(2 == Sony_S_DSP::EchoBufferSample::CHANNELS);
-}

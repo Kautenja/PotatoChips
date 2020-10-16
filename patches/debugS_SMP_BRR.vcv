@@ -59,7 +59,7 @@
         },
         {
           "id": 1,
-          "value": 2.0
+          "value": 4.35799885
         },
         {
           "id": 2,
@@ -276,11 +276,11 @@
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": 1.41421354
         },
         {
           "id": 4,
-          "value": 1.0
+          "value": 1.41421354
         }
       ],
       "leftModuleId": 154,
@@ -327,14 +327,6 @@
       "inputModuleId": 152,
       "inputId": 0,
       "color": "#c9b70e"
-    },
-    {
-      "id": 218,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
     },
     {
       "id": 221,
@@ -489,14 +481,6 @@
       "color": "#0c8e15"
     },
     {
-      "id": 219,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
       "id": 231,
       "outputModuleId": 152,
       "outputId": 8,
@@ -511,6 +495,62 @@
       "inputModuleId": 156,
       "inputId": 1,
       "color": "#0986ad"
+    },
+    {
+      "id": 246,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 156,
+      "inputId": 3,
+      "color": "#0986ad"
+    },
+    {
+      "id": 247,
+      "outputModuleId": 152,
+      "outputId": 9,
+      "inputModuleId": 156,
+      "inputId": 4,
+      "color": "#c91847"
+    },
+    {
+      "id": 248,
+      "outputModuleId": 157,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 7,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 249,
+      "outputModuleId": 157,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 8,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 219,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 7,
+      "color": "#c91847"
+    },
+    {
+      "id": 218,
+      "outputModuleId": 156,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 251,
+      "outputModuleId": 156,
+      "outputId": 4,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

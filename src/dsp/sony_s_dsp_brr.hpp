@@ -112,11 +112,12 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
 
  public:
     /// @brief Initialize a new Sony_S_DSP_BRR.
-    ///
-    /// @param ram_ a pointer to the 64KB shared RAM
-    ///
     Sony_S_DSP_BRR() { }
 
+    /// @brief Set the RAM pointer to a new value.
+    ///
+    /// @param ram_ a pointer to the new 8-bit RAM to use
+    ///
     inline void set_ram(uint8_t* ram_) { ram = ram_; }
 
     /// @brief Set the page of samples in RAM to read samples from.
@@ -197,9 +198,9 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
     StereoSample run(bool trigger, bool gate_on, int phase_modulation = 0) {
-        // use the global wave page address to lookup a pointer to the first entry
-        // in the source directory. the wave page is multiplied by 0x100 to produce
-        // the RAM address of the source directory.
+        // use the global wave page address to lookup a pointer to the first
+        // entry in the source directory. the wave page is multiplied by 0x100
+        // to produce the RAM address of the source directory.
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[wave_page * 0x100]);
 
@@ -215,7 +216,6 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
             envelope_stage = EnvelopeStage::Release;
         }
 
-        // trigger the envelope generator
         if (envelope_stage == EnvelopeStage::Off) return {};
         int envelope = clock_envelope();
         if (envelope < 0) return {};

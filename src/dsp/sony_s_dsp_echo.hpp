@@ -41,7 +41,7 @@ class Sony_S_DSP_Echo {
     static const unsigned SIZE_OF_RAM = DELAY_LEVELS * DELAY_LEVEL_BYTES;
 
     /// @brief A stereo sample in the echo buffer.
-    struct __attribute__((packed, aligned(4))) BufferSample {
+    struct __attribute__((packed, aligned(4))) StereoSample {
         enum : unsigned {
             /// the index of the left channel in the samples array
             LEFT = 0,
@@ -63,7 +63,7 @@ class Sony_S_DSP_Echo {
     /// allows the FIR coefficients to be stored as 16-bit
     int16_t fir_coeff[FIR_COEFFICIENT_COUNT] = {127, 0, 0, 0, 0, 0, 0, 0};
     /// fir_buffer[i + 8] == fir_buffer[i], to avoid wrap checking in FIR code
-    BufferSample fir_buffer[2 * FIR_COEFFICIENT_COUNT];
+    StereoSample fir_buffer[2 * FIR_COEFFICIENT_COUNT];
     /// the head index of the FIR ring buffer (0 to 7)
     int fir_offset = 0;
     // -----------------------------------------------------------------------
@@ -142,61 +142,61 @@ class Sony_S_DSP_Echo {
     /// @param left the sample of the left channel
     /// @param right the sample of the right channel
     ///
-    BufferSample run(int left, int right) {
+    StereoSample run(int left, int right) {
         // get the current feedback sample in the echo buffer
-        auto const echo = reinterpret_cast<BufferSample*>(&ram[buffer_head]);
+        auto const echo = reinterpret_cast<StereoSample*>(&ram[buffer_head]);
         // increment the echo pointer by the size of the echo buffer sample
-        buffer_head += sizeof(BufferSample);
+        buffer_head += sizeof(StereoSample);
         // check if for the end of the ring buffer and wrap the pointer around
         if (buffer_head >= (delay & DELAY_LEVELS) * DELAY_LEVEL_BYTES)
             buffer_head = 0;
         // cache the feedback value (sign-extended to 32-bit)
-        int feedback_left = echo->samples[BufferSample::LEFT];
-        int feedback_right = echo->samples[BufferSample::RIGHT];
+        int feedback_left = echo->samples[StereoSample::LEFT];
+        int feedback_right = echo->samples[StereoSample::RIGHT];
 
         // put samples in history ring buffer
         auto const fir_samples = &fir_buffer[fir_offset];
         // move backwards one step
         fir_offset = (fir_offset + FIR_MAX_INDEX) & FIR_MAX_INDEX;
         // put sample into the first sample in the buffer
-        fir_samples[0].samples[BufferSample::LEFT]  = feedback_left;
-        fir_samples[0].samples[BufferSample::RIGHT] = feedback_right;
+        fir_samples[0].samples[StereoSample::LEFT]  = feedback_left;
+        fir_samples[0].samples[StereoSample::RIGHT] = feedback_right;
         // duplicate at +8 eliminates wrap checking below
-        fir_samples[8].samples[BufferSample::LEFT]  = feedback_left;
-        fir_samples[8].samples[BufferSample::RIGHT] = feedback_right;
+        fir_samples[8].samples[StereoSample::LEFT]  = feedback_left;
+        fir_samples[8].samples[StereoSample::RIGHT] = feedback_right;
 
         // FIR left channel
         feedback_left =                  feedback_left * fir_coeff[7] +
-            fir_samples[1].samples[BufferSample::LEFT] * fir_coeff[6] +
-            fir_samples[2].samples[BufferSample::LEFT] * fir_coeff[5] +
-            fir_samples[3].samples[BufferSample::LEFT] * fir_coeff[4] +
-            fir_samples[4].samples[BufferSample::LEFT] * fir_coeff[3] +
-            fir_samples[5].samples[BufferSample::LEFT] * fir_coeff[2] +
-            fir_samples[6].samples[BufferSample::LEFT] * fir_coeff[1] +
-            fir_samples[7].samples[BufferSample::LEFT] * fir_coeff[0];
+            fir_samples[1].samples[StereoSample::LEFT] * fir_coeff[6] +
+            fir_samples[2].samples[StereoSample::LEFT] * fir_coeff[5] +
+            fir_samples[3].samples[StereoSample::LEFT] * fir_coeff[4] +
+            fir_samples[4].samples[StereoSample::LEFT] * fir_coeff[3] +
+            fir_samples[5].samples[StereoSample::LEFT] * fir_coeff[2] +
+            fir_samples[6].samples[StereoSample::LEFT] * fir_coeff[1] +
+            fir_samples[7].samples[StereoSample::LEFT] * fir_coeff[0];
         // FIR right channel
         feedback_right =                 feedback_right * fir_coeff[7] +
-            fir_samples[1].samples[BufferSample::RIGHT] * fir_coeff[6] +
-            fir_samples[2].samples[BufferSample::RIGHT] * fir_coeff[5] +
-            fir_samples[3].samples[BufferSample::RIGHT] * fir_coeff[4] +
-            fir_samples[4].samples[BufferSample::RIGHT] * fir_coeff[3] +
-            fir_samples[5].samples[BufferSample::RIGHT] * fir_coeff[2] +
-            fir_samples[6].samples[BufferSample::RIGHT] * fir_coeff[1] +
-            fir_samples[7].samples[BufferSample::RIGHT] * fir_coeff[0];
+            fir_samples[1].samples[StereoSample::RIGHT] * fir_coeff[6] +
+            fir_samples[2].samples[StereoSample::RIGHT] * fir_coeff[5] +
+            fir_samples[3].samples[StereoSample::RIGHT] * fir_coeff[4] +
+            fir_samples[4].samples[StereoSample::RIGHT] * fir_coeff[3] +
+            fir_samples[5].samples[StereoSample::RIGHT] * fir_coeff[2] +
+            fir_samples[6].samples[StereoSample::RIGHT] * fir_coeff[1] +
+            fir_samples[7].samples[StereoSample::RIGHT] * fir_coeff[0];
 
         // put the echo samples into the buffer
-        echo->samples[BufferSample::LEFT] =
+        echo->samples[StereoSample::LEFT] =
             clamp_16(left + ((feedback_left  * feedback) >> 14));
-        echo->samples[BufferSample::RIGHT] =
+        echo->samples[StereoSample::RIGHT] =
             clamp_16(right + ((feedback_right * feedback) >> 14));
 
         // (1) add the echo to the samples for the left and right channel,
         // (2) clamp the left and right samples, and (3) place them into
         // the buffer
-        Sony_S_DSP_Echo::BufferSample output_buffer;
-        output_buffer.samples[BufferSample::LEFT] =
+        Sony_S_DSP_Echo::StereoSample output_buffer;
+        output_buffer.samples[StereoSample::LEFT] =
             clamp_16(left + ((feedback_left  * mixLeft) >> 14));
-        output_buffer.samples[BufferSample::RIGHT] =
+        output_buffer.samples[StereoSample::RIGHT] =
             clamp_16(right + ((feedback_right * mixRight) >> 14));
 
         return output_buffer;

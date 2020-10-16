@@ -217,10 +217,10 @@ struct ChipS_SMP : Module {
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
         auto block = reinterpret_cast<BitRateReductionBlock*>(&ram[0x7804]);
-        block->flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
-        block->flags.filter = 0;
-        block->flags.is_loop = 1;
-        block->flags.is_end = 1;
+        block->header.flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
+        block->header.flags.filter = 0;
+        block->header.flags.is_loop = 1;
+        block->header.flags.is_end = 1;
         static const uint8_t samples[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
         for (unsigned i = 0; i < BitRateReductionBlock::NUM_SAMPLES; i++)
             block->samples[i] = samples[i];

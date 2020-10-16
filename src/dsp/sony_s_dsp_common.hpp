@@ -181,12 +181,14 @@ struct __attribute__((packed)) BitRateReductionBlock {
         }
     };
 
-    union __attribute__((packed)) {
+    /// the header byte for the block
+    union __attribute__((packed)) Header {
         /// the bit-wise flag representation of the header
         Flags flags;
         /// the encoded header byte
-        uint8_t header = 0;
-    };
+        uint8_t byte = 0;
+    } header;
+
     /// the 8-byte block of sample data
     uint8_t samples[NUM_SAMPLES];
 };

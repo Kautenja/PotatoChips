@@ -50,21 +50,21 @@ class Sony_S_DSP_BRR {
         Release
     } envelope_stage = EnvelopeStage::Off;
     /// the output value from the envelope generator
-    short envelope_value = 0;
+    int16_t envelope_value = 0;
     /// the index of the starting sample of the waveform
     uint8_t wave_index = 0;
     /// the current address of the sample being played by the voice
-    unsigned short addr = 0;
+    uint16_t addr = 0;
     /// header byte from current block
-    short block_header = 0;
+    BitRateReductionBlock::Header block_header;
     /// number of nibbles remaining in current block
-    short block_remain = 0;
+    uint8_t block_remain = 0;
     /// the previous four samples for Gaussian interpolation
     int16_t samples[4] = {0, 0, 0, 0};
     /// the 14-bit frequency value
     uint16_t rate = 0;
     /// 12-bit fractional position
-    short fraction = 0;
+    uint16_t fraction = 0;
     /// the volume for the left channel output
     int8_t volumeLeft = 0;
     /// the volume for the right channel output
@@ -103,7 +103,7 @@ class Sony_S_DSP_BRR {
     ///
     /// @param ram_ a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP_BRR() { }
+    Sony_S_DSP_BRR() { }
 
     inline void set_ram(uint8_t* ram_) { ram = ram_; }
 
@@ -194,7 +194,7 @@ class Sony_S_DSP_BRR {
         if (trigger) {  // trigger the voice
             addr = source_directory[wave_index].start;
             block_remain = 1;
-            block_header = 0;
+            block_header.byte = 0;
             // decode three samples immediately
             fraction = 0x3FFF;
             envelope_stage = EnvelopeStage::On;
@@ -214,9 +214,8 @@ class Sony_S_DSP_BRR {
         // ---------------------------------------------------------------
         for (int n = fraction >> 12; --n >= 0;) {
             if (!--block_remain) {
-                if (block_header & 1) {
-                    if (block_header & 2) {
-                        // verified (played endless looping sample and ENDX was set)
+                if (block_header.flags.is_end) {
+                    if (block_header.flags.is_loop) {
                         addr = source_directory[wave_index].loop;
                     } else {  // first block was end block; don't play anything
                         envelope_stage = EnvelopeStage::Off;
@@ -225,14 +224,14 @@ class Sony_S_DSP_BRR {
                         break;
                     }
                 }
-                block_header = ram[addr++];
+                block_header.byte = ram[addr++];
                 block_remain = 16;  // nibbles
             }
 
             if (
                 block_remain == 9 &&
                 (ram[addr + 5] & 3) == 1 &&
-                (block_header & 3) != 3
+                !(block_header.flags.is_end && block_header.flags.is_loop)
             ) {  // next block has end flag set, this block ends early
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
@@ -253,25 +252,31 @@ class Sony_S_DSP_BRR {
             // range is valid, do the shift normally.  Note these are
             // both shifted right once to do the filters properly, but
             // the output will be shifted back again at the end.
-            int shift = block_header >> 4;
+            int shift = block_header.flags.volume;
             delta = (delta << shift) >> 1;
             if (shift > 0x0C) delta = (delta >> 14) & ~0x7FF;
             // -----------------------------------------------------------
             // MARK: BRR Reconstruction Filter (1,2,3 point IIR)
             // -----------------------------------------------------------
-            if (block_header & 8) {
-                delta += samples[0];
-                delta -= samples[1] >> 1;
-                if (!(block_header & 4)) {
-                    delta += (-samples[0] - (samples[0] >> 1)) >> 5;
-                    delta += samples[1] >> 5;
-                } else {
-                    delta += (-samples[0] * 13) >> 7;
-                    delta += (samples[1] + (samples[1] >> 1)) >> 4;
-                }
-            } else if (block_header & 4) {
+            switch (block_header.flags.filter) {
+            case 0:  // !filter1 !filter2
+                break;
+            case 1:  // !filter1 filter2
                 delta += samples[0] >> 1;
                 delta += (-samples[0]) >> 5;
+                break;
+            case 2:  // filter1 !filter2
+                delta += samples[0];
+                delta -= samples[1] >> 1;
+                delta += (-samples[0] - (samples[0] >> 1)) >> 5;
+                delta += samples[1] >> 5;
+                break;
+            case 3:  // filter1 filter2
+                delta += samples[0];
+                delta -= samples[1] >> 1;
+                delta += (-samples[0] * 13) >> 7;
+                delta += (samples[1] + (samples[1] >> 1)) >> 4;
+                break;
             }
             // cycle sample history and set delta to latest sample
             samples[3] = samples[2];
@@ -287,7 +292,7 @@ class Sony_S_DSP_BRR {
         // apply phase modulation
         phase = (phase * (phase_modulation + 32768)) >> 15;
         // Gaussian interpolation using most recent 4 samples
-        const int index = fraction >> 2 & 0x3FC;
+        const uint16_t index = fraction >> 2 & 0x3FC;
         fraction = (fraction & 0x0FFF) + phase;
         const auto table1 = get_gaussian(index);
         const auto table2 = get_gaussian(255 * 4 - index);
@@ -302,12 +307,10 @@ class Sony_S_DSP_BRR {
         // -------------------------------------------------------------------
         // MARK: Output
         // -------------------------------------------------------------------
-        StereoSample output_buffer;
-        output_buffer.samples[StereoSample::LEFT] =
-            clamp_16((volumeLeft * output) >> 7);
-        output_buffer.samples[StereoSample::RIGHT] =
-            clamp_16((volumeRight * output) >> 7);
-        return output_buffer;
+        StereoSample out;
+        out.samples[StereoSample::LEFT] = clamp_16((volumeLeft * output) >> 7);
+        out.samples[StereoSample::RIGHT] = clamp_16((volumeRight * output) >> 7);
+        return out;
     }
 };
 

@@ -101,10 +101,10 @@ struct ChipS_SMP_BRR : Module {
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
         // auto block = reinterpret_cast<BitRateReductionBlock*>(&ram[4]);
-        // block->flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
-        // block->flags.filter = 0;
-        // block->flags.is_loop = 1;
-        // block->flags.is_end = 1;
+        // block->header.flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
+        // block->header.flags.filter = 0;
+        // block->header.flags.is_loop = 1;
+        // block->header.flags.is_end = 1;
         // static const uint8_t samples[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
         // for (unsigned i = 0; i < BitRateReductionBlock::NUM_SAMPLES; i++)
         //     block->samples[i] = samples[i];
@@ -113,10 +113,10 @@ struct ChipS_SMP_BRR : Module {
         int sample = 0;
         do {
             auto block = reinterpret_cast<BitRateReductionBlock*>(&ram[4 + 9 * sample]);
-            block->flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
-            block->flags.filter = 0;
-            block->flags.is_loop = 0;
-            block->flags.is_end = sample + 1 >= 13083 / 16;
+            block->header.flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
+            block->header.flags.filter = 0;
+            block->header.flags.is_loop = 0;
+            block->header.flags.is_end = sample + 1 >= 13083 / 16;
             for (unsigned i = 0; i < 2 * BitRateReductionBlock::NUM_SAMPLES; i+=2) {
                 auto hi = hyaw[i + 16 * sample];
                 auto lo =  hyaw[i + 16 * sample + 1] << 4;

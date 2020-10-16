@@ -180,14 +180,6 @@
         {
           "id": 31,
           "value": 127.0
-        },
-        {
-          "id": 32,
-          "value": 0.0
-        },
-        {
-          "id": 33,
-          "value": 0.0
         }
       ],
       "leftModuleId": 5,
@@ -465,14 +457,6 @@
       "color": "#0c8e15"
     },
     {
-      "id": 230,
-      "outputModuleId": 152,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 242,
       "outputModuleId": 5,
       "outputId": 1,
@@ -515,10 +499,18 @@
     {
       "id": 231,
       "outputModuleId": 152,
-      "outputId": 1,
+      "outputId": 8,
       "inputModuleId": 156,
       "inputId": 2,
       "color": "#c91847"
+    },
+    {
+      "id": 230,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

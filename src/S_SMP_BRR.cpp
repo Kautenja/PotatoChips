@@ -41,7 +41,6 @@ struct ChipS_SMP_BRR : Module {
         ENUMS(PARAM_PM_ENABLE,   NUM_VOICES),
         ENUMS(PARAM_VOLUME_L,    NUM_VOICES),
         ENUMS(PARAM_VOLUME_R,    NUM_VOICES),
-        ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
     };
 
@@ -53,13 +52,13 @@ struct ChipS_SMP_BRR : Module {
         ENUMS(INPUT_GATE,        NUM_VOICES),
         ENUMS(INPUT_VOLUME_L,    NUM_VOICES),
         ENUMS(INPUT_VOLUME_R,    NUM_VOICES),
-        ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, 2),
+        ENUMS(OUTPUT_AUDIO_L, NUM_VOICES),
+        ENUMS(OUTPUT_AUDIO_R, NUM_VOICES),
         NUM_OUTPUTS
     };
 
@@ -170,8 +169,8 @@ struct ChipS_SMP_BRR : Module {
         // MARK: Stereo output
         // -------------------------------------------------------------------
         auto output = apu.run(trigger, gateTriggers[voice].state);
-        outputs[OUTPUT_AUDIO + 0].setVoltage(5.f * output.samples[0] / std::numeric_limits<int16_t>::max());
-        outputs[OUTPUT_AUDIO + 1].setVoltage(5.f * output.samples[1] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_AUDIO_L + 0].setVoltage(5.f * output.samples[0] / std::numeric_limits<int16_t>::max());
+        outputs[OUTPUT_AUDIO_R + 0].setVoltage(5.f * output.samples[1] / std::numeric_limits<int16_t>::max());
     }
 };
 
@@ -217,10 +216,10 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
                 addParam(createParam<CKSS>(Vec(330, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_PM_ENABLE + i));
                 addInput(createInput<PJ301MPort>(Vec(350, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_PM_ENABLE + i));
             }
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(380, 40 + i * 41), module, ChipS_SMP_BRR::OUTPUT_AUDIO_L + i));
+            addOutput(createOutput<PJ301MPort>(Vec(410, 40 + i * 41), module, ChipS_SMP_BRR::OUTPUT_AUDIO_R + i));
         }
-        // Output
-        addOutput(createOutput<PJ301MPort>(Vec(320, 40), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(355, 40), module, ChipS_SMP_BRR::OUTPUT_AUDIO + 1));
     }
 };
 

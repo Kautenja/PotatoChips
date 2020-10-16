@@ -40,21 +40,6 @@ class Sony_S_DSP_Echo {
     /// the size of the RAM bank in bytes
     static const unsigned SIZE_OF_RAM = DELAY_LEVELS * DELAY_LEVEL_BYTES;
 
-    /// @brief A stereo sample in the echo buffer.
-    struct __attribute__((packed, aligned(4))) StereoSample {
-        enum : unsigned {
-            /// the index of the left channel in the samples array
-            LEFT = 0,
-            /// the index of the right channel in the samples array
-            RIGHT = 1,
-            /// the number of channels in the sample
-            CHANNELS = 2
-        };
-
-        /// the 16-bit sample for the left [0] and right [1] channels.
-        int16_t samples[CHANNELS] = {0, 0};
-    };
-
  private:
     // -----------------------------------------------------------------------
     // MARK: FIR Filter
@@ -193,7 +178,7 @@ class Sony_S_DSP_Echo {
         // (1) add the echo to the samples for the left and right channel,
         // (2) clamp the left and right samples, and (3) place them into
         // the buffer
-        Sony_S_DSP_Echo::StereoSample output_buffer;
+        StereoSample output_buffer;
         output_buffer.samples[StereoSample::LEFT] =
             clamp_16(left + ((feedback_left  * mixLeft) >> 14));
         output_buffer.samples[StereoSample::RIGHT] =

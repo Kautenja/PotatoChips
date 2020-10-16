@@ -33,24 +33,24 @@ struct ChipS_SMP_Echo : Module {
     enum ParamIds {
         PARAM_DELAY,
         PARAM_FEEDBACK,
-        ENUMS(PARAM_MIX, Sony_S_DSP_Echo::StereoSample::CHANNELS),
+        ENUMS(PARAM_MIX, StereoSample::CHANNELS),
         ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_AUDIO, Sony_S_DSP_Echo::StereoSample::CHANNELS),
+        ENUMS(INPUT_AUDIO, StereoSample::CHANNELS),
         INPUT_DELAY,
         INPUT_FEEDBACK,
-        ENUMS(INPUT_MIX, Sony_S_DSP_Echo::StereoSample::CHANNELS),
+        ENUMS(INPUT_MIX, StereoSample::CHANNELS),
         ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, Sony_S_DSP_Echo::StereoSample::CHANNELS),
+        ENUMS(OUTPUT_AUDIO, StereoSample::CHANNELS),
         NUM_OUTPUTS
     };
 
@@ -148,18 +148,18 @@ struct ChipS_SMP_Echo : Module {
         // update the delay parameters
         apu[channel].setDelay(getDelay(channel));
         apu[channel].setFeedback(getFeedback(channel));
-        apu[channel].setMixLeft(getMix(channel, Sony_S_DSP_Echo::StereoSample::LEFT));
-        apu[channel].setMixRight(getMix(channel, Sony_S_DSP_Echo::StereoSample::RIGHT));
+        apu[channel].setMixLeft(getMix(channel, StereoSample::LEFT));
+        apu[channel].setMixRight(getMix(channel, StereoSample::RIGHT));
         // update the FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // run a stereo sample through the echo buffer + filter
         auto output = apu[channel].run(
-            getInput(channel, Sony_S_DSP_Echo::StereoSample::LEFT),
-            getInput(channel, Sony_S_DSP_Echo::StereoSample::RIGHT)
+            getInput(channel, StereoSample::LEFT),
+            getInput(channel, StereoSample::RIGHT)
         );
         // write the stereo output to the ports
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::StereoSample::CHANNELS; i++) {
+        for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
             const auto voltage = 5.f * output.samples[i] / std::numeric_limits<int16_t>::max();
             outputs[OUTPUT_AUDIO + i].setVoltage(voltage, channel);
         }
@@ -204,7 +204,7 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::StereoSample::CHANNELS; i++) {
+        for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
             auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipS_SMP_Echo::PARAM_DELAY + i);
             echoParam->snap = true;

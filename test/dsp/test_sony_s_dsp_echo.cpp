@@ -26,15 +26,15 @@
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: Sony_S_DSP_Echo::StereoSample
+// MARK: StereoSample
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_Echo::StereoSample should be 4 bytes") {
-    REQUIRE(4 == sizeof(Sony_S_DSP_Echo::StereoSample));
+TEST_CASE("StereoSample should be 4 bytes") {
+    REQUIRE(4 == sizeof(StereoSample));
 }
 
-TEST_CASE("Sony_S_DSP_Echo::StereoSample should have correct constants") {
-    REQUIRE(0 == Sony_S_DSP_Echo::StereoSample::LEFT);
-    REQUIRE(1 == Sony_S_DSP_Echo::StereoSample::RIGHT);
-    REQUIRE(2 == Sony_S_DSP_Echo::StereoSample::CHANNELS);
+TEST_CASE("StereoSample should have correct constants") {
+    REQUIRE(0 == StereoSample::LEFT);
+    REQUIRE(1 == StereoSample::RIGHT);
+    REQUIRE(2 == StereoSample::CHANNELS);
 }

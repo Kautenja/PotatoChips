@@ -166,4 +166,19 @@ struct __attribute__((packed)) BitRateReductionBlock {
     uint8_t samples[NUM_SAMPLES];
 };
 
+/// @brief A stereo sample of 16-bit PCM data.
+struct __attribute__((packed, aligned(4))) StereoSample {
+    enum : unsigned {
+        /// the index of the left channel in the samples array
+        LEFT = 0,
+        /// the index of the right channel in the samples array
+        RIGHT = 1,
+        /// the number of channels in the sample
+        CHANNELS = 2
+    };
+
+    /// the 16-bit sample for the left [0] and right [1] channels.
+    int16_t samples[CHANNELS] = {0, 0};
+};
+
 #endif  // DSP_SONY_S_DSP_COMMON_HPP_

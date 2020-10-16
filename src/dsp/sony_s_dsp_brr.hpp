@@ -203,7 +203,9 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         // to produce the RAM address of the source directory.
         const SourceDirectoryEntry* const source_directory =
             reinterpret_cast<SourceDirectoryEntry*>(&ram[wave_page * 0x100]);
-
+        // ---------------------------------------------------------------
+        // MARK: Gate / Envelope generator
+        // ---------------------------------------------------------------
         if (trigger) {  // trigger the voice
             addr = source_directory[wave_index].start;
             block_remain = 1;
@@ -215,11 +217,12 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         if (!gate_on) {  // enter the release stage
             envelope_stage = EnvelopeStage::Release;
         }
-
-        if (envelope_stage == EnvelopeStage::Off) return {};
-        int envelope = clock_envelope();
-        if (envelope < 0) return {};
-
+        if (envelope_stage == EnvelopeStage::Off)  // voice is off
+            return {};
+        // process the gate using the envelope generator to prevent pops
+        auto envelope = clock_envelope();
+        if (envelope < 0)  // voice is off
+            return {};
         // ---------------------------------------------------------------
         // MARK: BRR Sample Decoder
         // Decode samples when fraction >= 1.0 (0x1000)

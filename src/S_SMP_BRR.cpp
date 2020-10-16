@@ -27,33 +27,35 @@
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipS_SMP_BRR : Module {
  private:
+    static constexpr unsigned NUM_VOICES = 8;
+
     /// the RAM for the S-DSP chip (64KB = 16-bit address space)
     uint8_t ram[Sony_S_DSP_BRR::SIZE_OF_RAM];
     /// the Sony S-DSP sound chip emulator
     Sony_S_DSP_BRR apu{ram};
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[8];
+    rack::dsp::BooleanTrigger gateTriggers[NUM_VOICES];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,        8),
-        ENUMS(PARAM_PM_ENABLE,   8),
-        ENUMS(PARAM_VOLUME_L,    8),
-        ENUMS(PARAM_VOLUME_R,    8),
+        ENUMS(PARAM_FREQ,        NUM_VOICES),
+        ENUMS(PARAM_PM_ENABLE,   NUM_VOICES),
+        ENUMS(PARAM_VOLUME_L,    NUM_VOICES),
+        ENUMS(PARAM_VOLUME_R,    NUM_VOICES),
         ENUMS(PARAM_VOLUME_MAIN, 2),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,        8),
-        ENUMS(INPUT_FM,          8),
-        ENUMS(INPUT_PM_ENABLE,   8),
-        ENUMS(INPUT_GATE,        8),
-        ENUMS(INPUT_VOLUME_L,    8),
-        ENUMS(INPUT_VOLUME_R,    8),
+        ENUMS(INPUT_VOCT,        NUM_VOICES),
+        ENUMS(INPUT_FM,          NUM_VOICES),
+        ENUMS(INPUT_PM_ENABLE,   NUM_VOICES),
+        ENUMS(INPUT_GATE,        NUM_VOICES),
+        ENUMS(INPUT_VOLUME_L,    NUM_VOICES),
+        ENUMS(INPUT_VOLUME_R,    NUM_VOICES),
         ENUMS(INPUT_VOLUME_MAIN, 2),
         NUM_INPUTS
     };
@@ -72,7 +74,8 @@ struct ChipS_SMP_BRR : Module {
     /// @brief Initialize a new S-DSP Chip module.
     ChipS_SMP_BRR() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned osc = 0; osc < 8; osc++) {
+        for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
+            // apu[osc] = Sony_S_DSP_BRR();
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ     + osc, -6.f, 6.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L + osc, -128, 127, 127, osc_name + " Volume (Left)");

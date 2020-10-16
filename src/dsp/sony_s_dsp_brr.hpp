@@ -22,7 +22,6 @@
 #define DSP_SONY_S_DSP_BRR_HPP_
 
 #include "sony_s_dsp_common.hpp"
-#include <cstring>
 
 /// @brief An emulation of the BRR sample playback engine from the Sony S-DSP.
 class Sony_S_DSP_BRR {
@@ -32,10 +31,15 @@ class Sony_S_DSP_BRR {
         SIZE_OF_RAM = 1 << 16
     };
 
-    /// the RAM for the S-DSP chip (64KB = 16-bit address space)
-    uint8_t ram[Sony_S_DSP_BRR::SIZE_OF_RAM];
-
  private:
+    /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
+    /// the SPC700.
+    /// @details
+    /// this must be maintained by the caller in order to provide data to the
+    /// S-DSP. This includes input sample data, and the allocated space for the
+    /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
+    uint8_t* ram = nullptr;
+
     /// source directory (wave table offsets)
     uint8_t wave_page = 0;
 
@@ -99,7 +103,9 @@ class Sony_S_DSP_BRR {
     ///
     /// @param ram_ a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP_BRR() { memset(ram, 0, sizeof ram); }
+    explicit Sony_S_DSP_BRR() { }
+
+    inline void set_ram(uint8_t* ram_) { ram = ram_; }
 
     /// @brief Set the page of samples in RAM to read samples from.
     ///

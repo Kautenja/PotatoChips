@@ -165,7 +165,8 @@ struct ChipS_SMP_BRR : Module {
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------
-        auto output = apu[voice][channel].run(trigger, gateTriggers[voice][channel].state);
+        StereoSample output;
+        apu[voice][channel].run(output, trigger, gateTriggers[voice][channel].state);
         outputs[OUTPUT_AUDIO_L + voice].setVoltage(5.f * output.samples[0] / std::numeric_limits<int16_t>::max(), channel);
         outputs[OUTPUT_AUDIO_R + voice].setVoltage(5.f * output.samples[1] / std::numeric_limits<int16_t>::max(), channel);
     }

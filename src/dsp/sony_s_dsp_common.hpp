@@ -132,12 +132,12 @@ struct __attribute__((packed, aligned(4))) SourceDirectoryEntry {
     /// @details
     /// In hardware this is represented across two bytes; in software we
     /// will skip to the 16-bit representation of the RAM address.
-    uint16_t start;
+    uint16_t start = 0;
     /// @brief the loop address of the sample in the directory.
     /// @details
     /// In hardware this is represented across two bytes; in software we
     /// will skip to the 16-bit representation of the RAM address.
-    uint16_t loop;
+    uint16_t loop = 0;
 };
 
 /// @brief A 9-byte bit-rate reduction (BRR) block. BRR has a 32:9
@@ -190,7 +190,7 @@ struct __attribute__((packed)) BitRateReductionBlock {
     } header;
 
     /// the 8-byte block of sample data
-    uint8_t samples[NUM_SAMPLES];
+    uint8_t samples[NUM_SAMPLES] = {0, 0, 0, 0, 0, 0, 0, 0};
 };
 
 /// @brief A stereo sample of 16-bit PCM data.

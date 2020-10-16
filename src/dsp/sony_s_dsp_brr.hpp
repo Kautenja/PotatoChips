@@ -190,6 +190,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
+    /// @param out the output buffer to write the samples to
     /// @param trigger a boolean signal for triggering the sample player
     /// @param gate_on a boolean signal for enabling the sample playback
     /// @param phase_modulation the phase modulation to apply to the voice
@@ -197,7 +198,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     /// @details
     /// the sample rate of the system is locked to 32kHz just like the SNES
     ///
-    StereoSample run(bool trigger, bool gate_on, int phase_modulation = 0) {
+    void run(StereoSample& out, bool trigger, bool gate_on, int phase_modulation = 0) {
         // use the global wave page address to lookup a pointer to the first
         // entry in the source directory. the wave page is multiplied by 0x100
         // to produce the RAM address of the source directory.
@@ -217,12 +218,12 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         if (!gate_on) {  // enter the release stage
             envelope_stage = EnvelopeStage::Release;
         }
-        if (envelope_stage == EnvelopeStage::Off)  // voice is off
-            return {};
+        // return if the envelope generator is in the off stage
+        if (envelope_stage == EnvelopeStage::Off) return;
         // process the gate using the envelope generator to prevent pops
         auto envelope = clock_envelope();
-        if (envelope < 0)  // voice is off
-            return {};
+        // envelope is negative if entering the off stage
+        if (envelope < 0) return;
         // ---------------------------------------------------------------
         // MARK: BRR Sample Decoder
         // Decode samples when fraction >= 1.0 (0x1000)
@@ -322,10 +323,8 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         // -------------------------------------------------------------------
         // MARK: Output
         // -------------------------------------------------------------------
-        StereoSample out;
         out.samples[StereoSample::LEFT] = clamp_16((volumeLeft * output) >> 7);
         out.samples[StereoSample::RIGHT] = clamp_16((volumeRight * output) >> 7);
-        return out;
     }
 };
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -59,7 +59,7 @@
         },
         {
           "id": 1,
-          "value": 3.51938701
+          "value": 2.0
         },
         {
           "id": 2,
@@ -183,7 +183,6 @@
         }
       ],
       "leftModuleId": 5,
-      "rightModuleId": 158,
       "pos": [
         8,
         1
@@ -245,8 +244,9 @@
       "params": [],
       "rightModuleId": 156,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "high",
         "window": "kaiser"
@@ -313,22 +313,8 @@
           "value": 0.5
         }
       ],
-      "leftModuleId": 158,
       "pos": [
-        65,
-        1
-      ]
-    },
-    {
-      "id": 158,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
-      "model": "S_SMP_Blank1",
-      "params": [],
-      "leftModuleId": 152,
-      "rightModuleId": 157,
-      "pos": [
-        37,
+        39,
         1
       ]
     }
@@ -495,38 +481,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 246,
-      "outputModuleId": 152,
-      "outputId": 1,
-      "inputModuleId": 156,
-      "inputId": 3,
-      "color": "#0986ad"
-    },
-    {
-      "id": 247,
-      "outputModuleId": 152,
-      "outputId": 9,
-      "inputModuleId": 156,
-      "inputId": 4,
-      "color": "#c91847"
-    },
-    {
-      "id": 248,
-      "outputModuleId": 157,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 7,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 249,
-      "outputModuleId": 157,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 8,
-      "color": "#0c8e15"
-    },
-    {
       "id": 218,
       "outputModuleId": 156,
       "outputId": 1,
@@ -551,7 +505,7 @@
       "color": "#0c8e15"
     },
     {
-      "id": 219,
+      "id": 252,
       "outputModuleId": 156,
       "outputId": 2,
       "inputModuleId": 1,

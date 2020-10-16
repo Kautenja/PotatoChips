@@ -44,59 +44,59 @@ TEST_CASE("Sony_S_DSP::RawVoice should be NUM_REGISTERS / VOICE_COUNT bytes") {
 }
 
 // ---------------------------------------------------------------------------
-// MARK: Sony_S_DSP::SourceDirectoryEntry
+// MARK: SourceDirectoryEntry
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP::SourceDirectoryEntry should be 4 bytes") {
-    REQUIRE(4 == sizeof(Sony_S_DSP::SourceDirectoryEntry));
+TEST_CASE("SourceDirectoryEntry should be 4 bytes") {
+    REQUIRE(4 == sizeof(SourceDirectoryEntry));
 }
 
 // ---------------------------------------------------------------------------
-// MARK: Sony_S_DSP::BitRateReductionBlock
+// MARK: BitRateReductionBlock
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should be 9 bytes") {
-    REQUIRE(9 == sizeof(Sony_S_DSP::BitRateReductionBlock));
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should be 9 bytes") {
+    REQUIRE(9 == sizeof(BitRateReductionBlock));
+    BitRateReductionBlock block;
     REQUIRE(1 == sizeof(block.header));
     REQUIRE(8 == sizeof(block.samples));
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should have correct constants") {
-    REQUIRE(8 == Sony_S_DSP::BitRateReductionBlock::NUM_SAMPLES);
-    REQUIRE(12 == Sony_S_DSP::BitRateReductionBlock::MAX_VOLUME);
+TEST_CASE("BitRateReductionBlock should have correct constants") {
+    REQUIRE(8 == BitRateReductionBlock::NUM_SAMPLES);
+    REQUIRE(12 == BitRateReductionBlock::MAX_VOLUME);
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should set volume") {
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should set volume") {
+    BitRateReductionBlock block;
     REQUIRE(0x0 == block.header);
     block.flags.volume = 0xC;
     REQUIRE(0xC0 == block.header);
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should clip volume") {
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should clip volume") {
+    BitRateReductionBlock block;
     REQUIRE(0x0 == block.header);
     block.flags.set_volume(0xF);
     REQUIRE(0xC0 == block.header);
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should set filter mode") {
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should set filter mode") {
+    BitRateReductionBlock block;
     REQUIRE(0x0 == block.header);
     block.flags.filter = 3;
     REQUIRE(0x0C == block.header);
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should set is_loop") {
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should set is_loop") {
+    BitRateReductionBlock block;
     REQUIRE(0x0 == block.header);
     block.flags.is_loop = 1;
     REQUIRE(0x02 == block.header);
 }
 
-TEST_CASE("Sony_S_DSP::BitRateReductionBlock should set is_end") {
-    Sony_S_DSP::BitRateReductionBlock block;
+TEST_CASE("BitRateReductionBlock should set is_end") {
+    BitRateReductionBlock block;
     REQUIRE(0x0 == block.header);
     block.flags.is_end = 1;
     REQUIRE(0x01 == block.header);

@@ -210,19 +210,19 @@ struct ChipS_SMP : Module {
         // TODO: design a few banks of wavetables / other ways to put data
         //       into this RAM
         // write the first directory to RAM (at the end of the echo buffer)
-        auto dir = reinterpret_cast<Sony_S_DSP::SourceDirectoryEntry*>(&ram[0x7800]);
+        auto dir = reinterpret_cast<SourceDirectoryEntry*>(&ram[0x7800]);
         // point to a block immediately after this directory entry
         dir->start = 0x7804;
         dir->loop = 0x7804;
         // set address 256 to a single sample ramp wave sample in BRR format
         // the header for the BRR single sample waveform
-        auto block = reinterpret_cast<Sony_S_DSP::BitRateReductionBlock*>(&ram[0x7804]);
-        block->flags.set_volume(Sony_S_DSP::BitRateReductionBlock::MAX_VOLUME);
+        auto block = reinterpret_cast<BitRateReductionBlock*>(&ram[0x7804]);
+        block->flags.set_volume(BitRateReductionBlock::MAX_VOLUME);
         block->flags.filter = 0;
         block->flags.is_loop = 1;
         block->flags.is_end = 1;
         static const uint8_t samples[8] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-        for (unsigned i = 0; i < Sony_S_DSP::BitRateReductionBlock::NUM_SAMPLES; i++)
+        for (unsigned i = 0; i < BitRateReductionBlock::NUM_SAMPLES; i++)
             block->samples[i] = samples[i];
         // -------------------------------------------------------------------
         // MARK: Flags (Noise Frequency)

@@ -281,7 +281,10 @@ class Sony_S_DSP_BRR {
                         // verified (played endless looping sample and ENDX was set)
                         addr = source_directory[wave_index].loop;
                     } else {  // first block was end block; don't play anything
-                        goto sample_ended;
+                        envelope_stage = EnvelopeStage::Off;
+                        envelope_value = 0;
+                        samples[0] = samples[1] = samples[2] = samples[3] = 0;
+                        break;
                     }
                 }
                 block_header = ram[addr++];
@@ -293,17 +296,9 @@ class Sony_S_DSP_BRR {
                 (ram[addr + 5] & 3) == 1 &&
                 (block_header & 3) != 3
             ) {  // next block has end flag set, this block ends early
-        sample_ended:
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
-                // TODO: just zero out the buffer and break instead of looping?
-                // add silence samples to interpolation buffer
-                do {
-                    samples[3] = samples[2];
-                    samples[2] = samples[1];
-                    samples[1] = samples[0];
-                    samples[0] = 0;
-                } while (--n >= 0);
+                samples[0] = samples[1] = samples[2] = samples[3] = 0;
                 break;
             }
             // get the next sample from RAM

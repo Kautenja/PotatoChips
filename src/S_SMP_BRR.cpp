@@ -136,9 +136,8 @@ struct ChipS_SMP_BRR : Module {
     ///
     inline void processChannel(unsigned voice, unsigned channel) {
         // ---------------------------------------------------------------
-        // MARK: Frequency
+        // MARK: Frequency (1V/Octave -- exponential scale)
         // ---------------------------------------------------------------
-        // calculate the frequency using standard exponential scale
         float pitch = params[PARAM_FREQ + voice].getValue();
         pitch += inputs[INPUT_VOCT + voice].getVoltage(channel);
         pitch += inputs[INPUT_FM + voice].getVoltage(channel) / 5.f;
@@ -148,15 +147,19 @@ struct ChipS_SMP_BRR : Module {
         // ---------------------------------------------------------------
         // MARK: Amplifier Volume
         // ---------------------------------------------------------------
-        apu[voice].setVolumeLeft(params[PARAM_VOLUME_L + voice].getValue());
-        apu[voice].setVolumeRight(params[PARAM_VOLUME_R + voice].getValue());
+        const auto leftVolumeParam = params[PARAM_VOLUME_L + voice].getValue();
+        const auto leftVolumeCV = inputs[INPUT_VOLUME_L + voice].getVoltage(channel);
+        const auto leftVolume = math::clamp(leftVolumeParam + leftVolumeCV, -128.f, 127.f);
+        apu[voice].setVolumeLeft(leftVolume);
+        const auto rightVolumeParam = params[PARAM_VOLUME_R + voice].getValue();
+        const auto rightVolumeCV = inputs[INPUT_VOLUME_R + voice].getVoltage(channel);
+        const auto rightVolume = math::clamp(rightVolumeParam + rightVolumeCV, -128.f, 127.f);
+        apu[voice].setVolumeRight(rightVolume);
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
-        // get the voltage from the gate input port
         const auto gate = inputs[INPUT_GATE + voice].getVoltage(channel);
-        // process the voltage to detect key-on events
-        bool trigger = (gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+        bool trigger = gateTriggers[voice].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------

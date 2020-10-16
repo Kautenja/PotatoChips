@@ -29,6 +29,6 @@
 // MARK: sizeof Sony_S_DSP_BRR
 // ---------------------------------------------------------------------------
 
-// TEST_CASE("Sony_S_DSP_BRR should be 4 bytes") {
-//     REQUIRE(8 == sizeof(Sony_S_DSP_BRR));
-// }
+TEST_CASE("Sony_S_DSP_BRR should be 4 bytes") {
+    REQUIRE(32 == sizeof(Sony_S_DSP_BRR));
+}

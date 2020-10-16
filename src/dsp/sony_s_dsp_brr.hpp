@@ -24,7 +24,7 @@
 #include "sony_s_dsp_common.hpp"
 
 /// @brief An emulation of the BRR sample playback engine from the Sony S-DSP.
-class Sony_S_DSP_BRR {
+class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
  public:
     enum : unsigned {
         /// the size of the RAM bank in bytes
@@ -32,43 +32,55 @@ class Sony_S_DSP_BRR {
     };
 
  private:
-    /// @brief A pointer to the shared 64KB RAM bank between the S-DSP and
-    /// the SPC700.
-    /// @details
-    /// this must be maintained by the caller in order to provide data to the
-    /// S-DSP. This includes input sample data, and the allocated space for the
-    /// echo buffer according to the global ECHO_BUFFER_START_OFFSET register
+    // -----------------------------------------------------------------------
+    // MARK: Word 1,2
+    // -----------------------------------------------------------------------
+    /// A pointer to the shared 64KB RAM bank between the S-DSP and the SPC700.
+    /// This must be maintained by the caller in order to provide sample data
     uint8_t* ram = nullptr;
-
+    // -----------------------------------------------------------------------
+    // MARK: Word 3
+    // -----------------------------------------------------------------------
     /// source directory (wave table offsets)
     uint8_t wave_page = 0;
-
+    /// the index of the starting sample of the waveform
+    uint8_t wave_index = 0;
+    /// the current address of the sample being played by the voice
+    uint16_t addr = 0;
+    // -----------------------------------------------------------------------
+    // MARK: Word 4
+    // -----------------------------------------------------------------------
     /// the current stage of the envelope generator
-    enum class EnvelopeStage : uint8_t {
+    enum class EnvelopeStage : uint16_t {
         Off = 0,
         On,
         Release
     } envelope_stage = EnvelopeStage::Off;
     /// the output value from the envelope generator
     int16_t envelope_value = 0;
-    /// the index of the starting sample of the waveform
-    uint8_t wave_index = 0;
-    /// the current address of the sample being played by the voice
-    uint16_t addr = 0;
+    // -----------------------------------------------------------------------
+    // MARK: Word 5
+    // -----------------------------------------------------------------------
     /// header byte from current block
     BitRateReductionBlock::Header block_header;
     /// number of nibbles remaining in current block
     uint8_t block_remain = 0;
-    /// the previous four samples for Gaussian interpolation
-    int16_t samples[4] = {0, 0, 0, 0};
-    /// the 14-bit frequency value
-    uint16_t rate = 0;
-    /// 12-bit fractional position
-    uint16_t fraction = 0;
     /// the volume for the left channel output
     int8_t volumeLeft = 0;
     /// the volume for the right channel output
     int8_t volumeRight = 0;
+    // -----------------------------------------------------------------------
+    // MARK: Word 6,7
+    // -----------------------------------------------------------------------
+    /// the previous four samples for Gaussian interpolation
+    int16_t samples[4] = {0, 0, 0, 0};
+    // -----------------------------------------------------------------------
+    // MARK: Word 8
+    // -----------------------------------------------------------------------
+    /// the 14-bit frequency value
+    uint16_t rate = 0;
+    /// 12-bit fractional position
+    uint16_t fraction = 0;
 
     /// @brief Process the envelope for the voice with given index.
     ///

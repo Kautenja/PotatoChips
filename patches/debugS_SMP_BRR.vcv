@@ -55,7 +55,7 @@
       "params": [
         {
           "id": 0,
-          "value": 3.51938701
+          "value": 3.25635242
         },
         {
           "id": 1,
@@ -183,6 +183,7 @@
         }
       ],
       "leftModuleId": 5,
+      "rightModuleId": 158,
       "pos": [
         8,
         1
@@ -312,8 +313,22 @@
           "value": 0.5
         }
       ],
+      "leftModuleId": 158,
       "pos": [
-        39,
+        65,
+        1
+      ]
+    },
+    {
+      "id": 158,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_Blank1",
+      "params": [],
+      "leftModuleId": 152,
+      "rightModuleId": 157,
+      "pos": [
+        37,
         1
       ]
     }
@@ -512,28 +527,12 @@
       "color": "#0c8e15"
     },
     {
-      "id": 219,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 7,
-      "color": "#c91847"
-    },
-    {
       "id": 218,
       "outputModuleId": 156,
       "outputId": 1,
       "inputModuleId": 1,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 251,
-      "outputModuleId": 156,
-      "outputId": 4,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
     },
     {
       "id": 237,
@@ -550,6 +549,14 @@
       "inputModuleId": 152,
       "inputId": 24,
       "color": "#0c8e15"
+    },
+    {
+      "id": 219,
+      "outputModuleId": 156,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

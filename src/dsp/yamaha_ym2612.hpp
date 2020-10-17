@@ -357,9 +357,11 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
 static int32_t lfo_pm_table[128 * 8 * 32];
 
 /// Initialize generic tables.
-/// TODO: update to only set timetables once per execution context. It currently
-//        happens anytime an emulator is constructed
-static void init_tables() {
+/// @details
+/// This function is not meant to be called directly. It is marked with the
+/// constructor attribute to ensure the function is executed automatically and
+/// precisely once before control enters the scope of the `main` function
+static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
     for (int x = 0; x < TL_RES_LEN; x++) {
         double m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);

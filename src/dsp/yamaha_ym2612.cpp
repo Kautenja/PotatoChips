@@ -741,8 +741,6 @@ static void OPNSetPres(FM_OPN *OPN) {
 // ---------------------------------------------------------------------------
 
 YamahaYM2612::YamahaYM2612(double clock_rate, double sample_rate) {
-    // allocate total level table (128kb space)
-    init_tables();
     OPN.P_CH = CH;
     OPN.type = TYPE_YM2612;
     OPN.ST.clock = clock_rate;

@@ -256,12 +256,6 @@ class YamahaYM2612 {
     ///
     inline void setLFO(uint8_t value) {
         engine.lfo_timer_overflow = lfo_samples_per_step[value & 7] << LFO_SH;
-        // the LFO waveform can be held using the following segment:
-        // engine.lfo_timer_overflow = 0;
-        // engine.lfo_timer = 0;
-        // engine.lfo_cnt = 0;
-        // engine.lfo_PM_step = 0;
-        // engine.lfo_AM_step = 126;
     }
 
     // -----------------------------------------------------------------------

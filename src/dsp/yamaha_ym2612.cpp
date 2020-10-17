@@ -267,8 +267,7 @@ static inline void advance_lfo(FM_OPN *OPN) {
 
 static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
     // four operators per channel
-    unsigned int i = 4;
-    do {  // reset SSG-EG swap flag
+    for (unsigned i = 4; i > 0; i--) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
         switch(SLOT->state) {
         case EG_ATT:  // attack phase
@@ -352,8 +351,7 @@ static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
         SLOT->ssgn ^= swap_flag;
         // increment the slot and decrement the iterator
         SLOT++;
-        i--;
-    } while (i);
+    }
 }
 
 static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH) {
@@ -504,8 +502,7 @@ static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
 /// This is actually executed before each samples
 static void update_ssg_eg_channel(FM_SLOT *SLOT) {
     // four operators per channel
-    unsigned int i = 4;
-    do {
+    for (unsigned i = 4; i > 0; i--) {
         // detect SSG-EG transition. this is not required during release phase
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
@@ -542,8 +539,7 @@ static void update_ssg_eg_channel(FM_SLOT *SLOT) {
         }
         // next slot
         SLOT++;
-        i--;
-    } while (i);
+    }
 }
 
 /// write a OPN mode register 0x20-0x2f

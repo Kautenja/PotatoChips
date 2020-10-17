@@ -504,7 +504,11 @@ struct GlobalOperatorState {
     int32_t dt_tab[8][32];
 };
 
-/// OPN Mode Register Write
+/// @brief Set the OPN Mode Register.
+///
+/// @param state the global state of the operators
+/// @param value the value to write to the OPN mode
+///
 static inline void set_timers(GlobalOperatorState* state, int value) {
     // b7 = CSM MODE
     // b6 = 3 slot mode
@@ -671,7 +675,7 @@ struct Voice {
     uint8_t LR_AMS_FMS = 0;
 };
 
-/// Set the key-on flag for the given voice and slot.
+/// @brief Set the key-on flag for the given voice and slot.
 ///
 /// @param voice the voice to set the key-on flag for
 /// @param slot the slot to set the key-on flag for
@@ -687,7 +691,7 @@ static inline void set_keyon(Voice* voice, unsigned slot) {
     }
 }
 
-/// Set the key-off flag for the given voice and slot.
+/// @brief Set the key-off flag for the given voice and slot.
 ///
 /// @param voice the voice to set the key-off flag for
 /// @param slot the slot to set the key-off flag for
@@ -701,7 +705,12 @@ static inline void set_keyoff(Voice* voice, unsigned slot) {
     }
 }
 
-/// set detune & multiplier.
+/// @brief set detune & multiplier.
+///
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the set detune (DT) & multiplier (MUL)
+///
 static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operator* oprtr, int value) {
     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
     oprtr->DT = state->dt_tab[(value >> 4) & 7];
@@ -710,15 +719,20 @@ static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operato
 
 /// @brief Set the 7-bit total level.
 ///
-/// @param CH a pointer to the channel
-/// @param Operator a pointer to the operator
-/// @param value the value for the TL register
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the total level (TL)
 ///
 static inline void set_tl(Voice* voice, Operator* oprtr, int value) {
     oprtr->tl = (value & 0x7f) << (ENV_BITS - 7);
 }
 
-/// set attack rate & key scale
+/// @brief Set attack rate & key scale
+///
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the attack rate (AR) and key-scale rate (KSR)
+///
 static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
     uint8_t old_KSR = oprtr->KSR;
     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
@@ -734,21 +748,36 @@ static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
     }
 }
 
-/// set decay rate
+/// @brief Set the decay 1 rate, i.e., decay rate.
+///
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the decay 1 rate (D1R)
+///
 static inline void set_dr(Operator* oprtr, int value) {
     oprtr->d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
     oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
     oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
 }
 
-/// set sustain rate
+/// @brief Set the decay 2 rate, i.e., sustain rate.
+///
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the decay 2 rate (D2R)
+///
 static inline void set_sr(Operator* oprtr, int value) {
     oprtr->d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
     oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
     oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
 }
 
-/// set release rate
+/// @brief Set the release rate.
+///
+/// @param voice a pointer to the channel
+/// @param oprtr a pointer to the operator
+/// @param value the value for the release rate (RR)
+///
 static inline void set_sl_rr(Operator* oprtr, int value) {
     oprtr->sl = sl_table[value >> 4];
     oprtr->rr = 34 + ((value & 0x0f) << 2);
@@ -785,9 +814,13 @@ static void reset_voices(GlobalOperatorState* state, Voice* voices, int num) {
     }
 }
 
-/// SSG-EG update process
-/// The behavior is based upon Nemesis tests on real hardware
-/// This is actually executed before each samples
+/// @brief SSG-EG update process.
+///
+/// @param oprtr the operator to update the SSG envelope generator of
+///
+/// @details
+/// The behavior is based upon Nemesis tests on real hardware. This is actually
+/// executed before each sample.
 static void update_ssg_eg_channel(Operator* oprtr) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {
@@ -834,14 +867,14 @@ static void update_ssg_eg_channel(Operator* oprtr) {
 // MARK: OPN unit
 // ---------------------------------------------------------------------------
 
-/// OPN/A/B common state
+/// @brief OPN/A/B common state.
 struct EngineState {
     /// chip type
     uint8_t type = 0;
     /// general state
     GlobalOperatorState state;
-    /// 3 slot mode state (special mode where each operator on channel 3 can
-    /// have a different root frequency)
+    /// @brief 3 slot mode state (special mode where each operator on channel
+    /// 3 can have a different root frequency)
     struct SpecialModeState {
         /// fnum3,blk3: calculated
         uint32_t fc[3] = {0, 0, 0};

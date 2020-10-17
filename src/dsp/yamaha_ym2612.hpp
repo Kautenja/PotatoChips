@@ -393,7 +393,7 @@ class YamahaYM2612 {
         if (parameters[voice].AL == algorithm) return;
         parameters[voice].AL = algorithm;
         voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (algorithm & 7);
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice) | (VOICE_PART(voice) * 0x100), voices[voice].FB_ALG);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -405,7 +405,7 @@ class YamahaYM2612 {
         if (parameters[voice].FB == feedback) return;
         parameters[voice].FB = feedback;
         voices[voice].FB_ALG = (voices[voice].FB_ALG & 7)| ((feedback & 7) << 3);
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice) | (VOICE_PART(voice) * 0x100), voices[voice].FB_ALG);
     }
 
     /// @brief Set the state (ST) register for the given voice.

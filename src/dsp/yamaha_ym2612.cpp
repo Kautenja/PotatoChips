@@ -242,27 +242,24 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
     return tl_tab[p];
 }
 
-/* advance LFO to next sample */
+/// advance LFO to next sample.
 static inline void advance_lfo(FM_OPN *OPN) {
-    if (OPN->lfo_timer_overflow) {  /* LFO enabled ? */
-        /* increment LFO timer */
+    if (OPN->lfo_timer_overflow) {  // LFO enabled ?
+        // increment LFO timer
         OPN->lfo_timer +=  OPN->lfo_timer_add;
-
-        /* when LFO is enabled, one level will last for 108, 77, 71, 67, 62, 44, 8 or 5 samples */
+        // when LFO is enabled, one level will last for
+        // 108, 77, 71, 67, 62, 44, 8 or 5 samples
         while (OPN->lfo_timer >= OPN->lfo_timer_overflow) {
             OPN->lfo_timer -= OPN->lfo_timer_overflow;
-
-            /* There are 128 LFO steps */
+            // There are 128 LFO steps
             OPN->lfo_cnt = ( OPN->lfo_cnt + 1 ) & 127;
-
-            /* triangle (inverted) */
-            /* AM: from 126 to 0 step -2, 0 to 126 step +2 */
+            // triangle (inverted)
+            // AM: from 126 to 0 step -2, 0 to 126 step +2
             if (OPN->lfo_cnt<64)
                 OPN->LFO_AM = (OPN->lfo_cnt ^ 63) << 1;
             else
                 OPN->LFO_AM = (OPN->lfo_cnt & 63) << 1;
-
-            /* PM works with 4 times slower clock */
+            // PM works with 4 times slower clock
             OPN->LFO_PM = OPN->lfo_cnt >> 2;
         }
     }

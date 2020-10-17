@@ -366,11 +366,12 @@ class YamahaYM2612 {
         frequency = frequency / 1.458;
         // cast the shifted frequency to a 16-bit container
         const uint16_t freq16bit = frequency;
-        // write the low and high portions of the frequency to the register
+        // write the high bits of the frequency to the register
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        setREG(getVoicePart(channel), getVoiceOffset(0xA4, channel), freqHigh);
+        write_register(&engine, getVoiceOffset(0xA4, channel) | getVoicePart(channel) * 0x100, freqHigh);
+        // write the low bits of the frequency to the register
         const auto freqLow = freq16bit & 0xff;
-        setREG(getVoicePart(channel), getVoiceOffset(0xA0, channel), freqLow);
+        write_register(&engine, getVoiceOffset(0xA0, channel) | getVoicePart(channel) * 0x100, freqLow);
     }
 
     /// @brief Set the gate for the given channel.

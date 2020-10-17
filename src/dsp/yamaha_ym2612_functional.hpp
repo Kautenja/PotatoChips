@@ -480,7 +480,7 @@ static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
 static inline void set_lfo(EngineState* state, uint8_t lfo_mode) {
     if (lfo_mode & 8) {  // LFO enabled?
         state->lfo_timer_overflow = lfo_samples_per_step[lfo_mode & 7] << LFO_SH;
-    } else { // hold LFO waveform in reset state
+    } else {  // hold LFO waveform in reset state
         state->lfo_timer_overflow = 0;
         state->lfo_timer = 0;
         state->lfo_cnt = 0;

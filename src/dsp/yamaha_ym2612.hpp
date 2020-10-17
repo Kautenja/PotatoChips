@@ -33,8 +33,6 @@
 /// Yamaha YM2612 chip emulator
 class YamahaYM2612 {
  private:
-    /// registers
-    uint8_t registers[512];
     /// OPN engine state
     EngineState engine;
     /// channel state
@@ -111,8 +109,6 @@ class YamahaYM2612 {
 
     /// @brief Reset the emulator to its initial state
     void reset() {
-        // clear instance variables
-        memset(registers, 0, sizeof registers);
         LFO = stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
@@ -260,7 +256,6 @@ class YamahaYM2612 {
             if (addr_A1 != 0) break;
             // get the address from the latch and write the data
             address = engine.state.address;
-            registers[address] = data;
             if ((address & 0xf0) == 0x20)  // 0x20-0x2f Mode
                 write_mode(&engine, address, data);
             else
@@ -275,7 +270,6 @@ class YamahaYM2612 {
             if (addr_A1 != 1) break;
             // get the address from the latch and right to the given register
             address = engine.state.address;
-            registers[address | 0x100] = data;
             write_register(&engine, address | 0x100, data);
             break;
         }

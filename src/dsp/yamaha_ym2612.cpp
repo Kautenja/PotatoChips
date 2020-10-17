@@ -618,21 +618,14 @@ static void OPNWriteMode(FM_OPN *OPN, int r, int v) {
 
 /// write a OPN register (0x30-0xff)
 static void OPNWriteReg(FM_OPN *OPN, int r, int v) {
-    FM_CH *CH;
-    FM_SLOT *SLOT;
-
     uint8_t c = OPN_CHAN(r);
-
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
-
     if (r >= 0x100) c+=3;
-
-    CH = OPN->P_CH;
-    CH = &CH[c];
-
-    SLOT = &(CH->SLOT[OPN_SLOT(r)]);
-
+    // get the channel
+    FM_CH* const CH = &OPN->P_CH[c];
+    // get the operator
+    FM_SLOT* const SLOT = &(CH->SLOT[OPN_SLOT(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
         set_det_mul(&OPN->ST, CH, SLOT, v);
@@ -770,7 +763,7 @@ static void OPNSetPres(FM_OPN *OPN) {
     OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
     OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
     // LFO timer increment (updates every 16 samples)
-    OPN->lfo_timer_add  = (1 << LFO_SH) * OPN->ST.freqbase / 16;
+    OPN->lfo_timer_add = (1 << LFO_SH) * OPN->ST.freqbase / 16;
     // make time tables
     init_timetables(OPN, OPN->ST.freqbase);
 }
@@ -805,7 +798,7 @@ static void init_tables() {
         //            table output is 13 bits, any value above 13 (included)
         //            would be discarded.
         for (int i = 1; i < 13; i++) {
-            tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN] =  tl_tab[x * 2 + 0]>>i;
+            tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN] =  tl_tab[x * 2 + 0] >> i;
             tl_tab[x * 2 + 1 + i * 2 * TL_RES_LEN] = -tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN];
         }
     }
@@ -986,8 +979,8 @@ void YamahaYM2612::step() {
     else if (OPN.out_fm[5] < -8192)
         OPN.out_fm[5] = -8192;
     // 6-channels mixing
-    lt = ((OPN.out_fm[0] >> 0) & OPN.pan[0]);
-    rt = ((OPN.out_fm[0] >> 0) & OPN.pan[1]);
+    lt  = ((OPN.out_fm[0] >> 0) & OPN.pan[0]);
+    rt  = ((OPN.out_fm[0] >> 0) & OPN.pan[1]);
     lt += ((OPN.out_fm[1] >> 0) & OPN.pan[2]);
     rt += ((OPN.out_fm[1] >> 0) & OPN.pan[3]);
     lt += ((OPN.out_fm[2] >> 0) & OPN.pan[4]);
@@ -1018,11 +1011,10 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
         OPN.ST.address = v;
         addr_A1 = 0;
         break;
-
     case 1:  // data port 0
         // verified on real YM2608
         if (addr_A1 != 0) break;
-
+        // get the address from the latch and write the data
         addr = OPN.ST.address;
         registers[addr] = v;
         switch (addr & 0xf0) {
@@ -1042,12 +1034,10 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
             OPNWriteReg(&OPN, addr, v);
         }
         break;
-
     case 2:  // address port 1
         OPN.ST.address = v;
         addr_A1 = 1;
         break;
-
     case 3:  // data port 1
         // verified on real YM2608
         if (addr_A1 != 1) break;

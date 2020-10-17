@@ -454,8 +454,8 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 #define YM_CH_PART(ch) (ch/3)
 #define YM_CH_OFFSET(reg, ch) (reg + (ch % 3))
 
-/// A single FM operator (SLOT)
-struct FM_SLOT {
+/// @brief A single FM operator (SLOT)
+struct Operator {
     /// detune :dt_tab[DT]
     int32_t *DT = 0;
     /// key scale rate :3-KSR
@@ -527,10 +527,46 @@ struct FM_SLOT {
     uint8_t dr = 0;
 };
 
-/// A single FM voice (4-operator)
-struct FM_CH {
+/// @brief The state of an FM operator.
+struct OperatorState {
+    /// master clock (Hz)
+    int clock = 0;
+    /// sampling rate (Hz)
+    int rate = 0;
+    /// frequency base
+    double freqbase = 0;
+    /// timer prescaler
+    int timer_prescaler = 0;
+    /// address register
+    uint8_t address = 0;
+    /// interrupt level
+    uint8_t irq = 0;
+    /// IRQ mask
+    uint8_t irqmask = 0;
+    /// status flag
+    uint8_t status = 0;
+    /// mode  CSM / 3SLOT
+    uint32_t mode = 0;
+    /// pre-scaler selector
+    uint8_t prescaler_sel = 0;
+    /// freq latch
+    uint8_t fn_h = 0;
+    /// timer A
+    int32_t TA = 0;
+    /// timer A counter
+    int32_t TAC = 0;
+    /// timer B
+    uint8_t TB = 0;
+    /// timer B counter
+    int32_t TBC = 0;
+    /// DETune table
+    int32_t dt_tab[8][32];
+};
+
+/// @brief A single 4-operator FM voice.
+struct Voice {
     /// four SLOTs (operators)
-    FM_SLOT SLOT[4];
+    Operator SLOT[4];
 
     /// algorithm
     uint8_t ALGO = 0;
@@ -572,44 +608,8 @@ struct FM_CH {
     uint8_t LR_AMS_FMS = 0;
 };
 
-/// The state of an FM synthesis operator.
-struct FM_ST {
-    /// master clock (Hz)
-    int clock = 0;
-    /// sampling rate (Hz)
-    int rate = 0;
-    /// frequency base
-    double freqbase = 0;
-    /// timer prescaler
-    int timer_prescaler = 0;
-    /// address register
-    uint8_t address = 0;
-    /// interrupt level
-    uint8_t irq = 0;
-    /// IRQ mask
-    uint8_t irqmask = 0;
-    /// status flag
-    uint8_t status = 0;
-    /// mode  CSM / 3SLOT
-    uint32_t mode = 0;
-    /// pre-scaler selector
-    uint8_t prescaler_sel = 0;
-    /// freq latch
-    uint8_t fn_h = 0;
-    /// timer A
-    int32_t TA = 0;
-    /// timer A counter
-    int32_t TAC = 0;
-    /// timer B
-    uint8_t TB = 0;
-    /// timer B counter
-    int32_t TBC = 0;
-    /// DETune table
-    int32_t dt_tab[8][32];
-};
-
 /// OPN Mode Register Write
-static inline void set_timers(FM_ST *ST, int v) {
+static inline void set_timers(OperatorState *ST, int v) {
     // b7 = CSM MODE
     // b6 = 3 slot mode
     // b5 = reset b
@@ -633,14 +633,29 @@ static inline void set_timers(FM_ST *ST, int v) {
     }
 }
 
-/// Timer A Overflow, clear or reload the counter
-static inline void TimerAOver(FM_ST *ST) { ST->TAC = (1024 - ST->TA); }
+/// @brief Timer A Overflow, clear or reload the counter.
+///
+/// @param state the operator state for which timer A is over
+///
+static inline void timer_A_over(OperatorState *state) {
+    state->TAC = (1024 - state->TA);
+}
 
-/// Timer B Overflow, clear or reload the counter
-static inline void TimerBOver(FM_ST *ST) { ST->TBC = (256 - ST->TB) << 4; }
+/// @brief Timer B Overflow, clear or reload the counter.
+///
+/// @param state the operator state for which timer B is over
+///
+static inline void timer_B_over(OperatorState *state) {
+    state->TBC = (256 - state->TB) << 4;
+}
 
-static inline void FM_KEYON(FM_CH *CH, int s) {
-    FM_SLOT *SLOT = &CH->SLOT[s];
+/// Set the key-on flag for the given voice and slot.
+///
+/// @param voice the voice to set the key-on flag for
+/// @param slot the slot to set the key-on flag for
+///
+static inline void set_keyon(Voice *voice, unsigned slot) {
+    Operator *SLOT = &voice->SLOT[slot];
     if (!SLOT->key) {
         SLOT->key = 1;
         // restart Phase Generator
@@ -650,8 +665,13 @@ static inline void FM_KEYON(FM_CH *CH, int s) {
     }
 }
 
-static inline void FM_KEYOFF(FM_CH *CH, int s) {
-    FM_SLOT *SLOT = &CH->SLOT[s];
+/// Set the key-off flag for the given voice and slot.
+///
+/// @param voice the voice to set the key-off flag for
+/// @param slot the slot to set the key-off flag for
+///
+static inline void set_keyoff(Voice *voice, unsigned slot) {
+    Operator *SLOT = &voice->SLOT[slot];
     if ( SLOT->key ) {
         SLOT->key = 0;
         if (SLOT->state>EG_REL)  // phase -> Release
@@ -660,7 +680,7 @@ static inline void FM_KEYOFF(FM_CH *CH, int s) {
 }
 
 /// set detune & multiplier.
-static inline void set_det_mul(FM_ST *ST, FM_CH *CH, FM_SLOT *SLOT, int v) {
+static inline void set_det_mul(OperatorState *ST, Voice *CH, Operator *SLOT, int v) {
     SLOT->mul = (v & 0x0f) ? (v & 0x0f) * 2 : 1;
     SLOT->DT = ST->dt_tab[(v >> 4) & 7];
     CH->SLOT[SLOT1].Incr = -1;
@@ -669,15 +689,15 @@ static inline void set_det_mul(FM_ST *ST, FM_CH *CH, FM_SLOT *SLOT, int v) {
 /// @brief Set the 7-bit total level.
 ///
 /// @param CH a pointer to the channel
-/// @param FM_SLOT a pointer to the operator
+/// @param Operator a pointer to the operator
 /// @param v the value for the TL register
 ///
-static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
+static inline void set_tl(Voice *CH, Operator *SLOT, int v) {
     SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
 }
 
 /// set attack rate & key scale
-static inline void set_ar_ksr(FM_CH *CH, FM_SLOT *SLOT, int v) {
+static inline void set_ar_ksr(Voice *CH, Operator *SLOT, int v) {
     uint8_t old_KSR = SLOT->KSR;
     SLOT->ar = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->KSR = 3 - (v >> 6);
@@ -693,28 +713,28 @@ static inline void set_ar_ksr(FM_CH *CH, FM_SLOT *SLOT, int v) {
 }
 
 /// set decay rate
-static inline void set_dr(FM_SLOT *SLOT, int v) {
+static inline void set_dr(Operator *SLOT, int v) {
     SLOT->d1r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
     SLOT->eg_sel_d1r= eg_rate_select[SLOT->d1r + SLOT->ksr];
 }
 
 /// set sustain rate
-static inline void set_sr(FM_SLOT *SLOT, int v) {
+static inline void set_sr(Operator *SLOT, int v) {
     SLOT->d2r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
     SLOT->eg_sel_d2r= eg_rate_select[SLOT->d2r + SLOT->ksr];
 }
 
 /// set release rate
-static inline void set_sl_rr(FM_SLOT *SLOT, int v) {
+static inline void set_sl_rr(Operator *SLOT, int v) {
     SLOT->sl = sl_table[v >> 4];
     SLOT->rr = 34 + ((v & 0x0f) << 2);
     SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr + SLOT->ksr];
     SLOT->eg_sel_rr = eg_rate_select[SLOT->rr + SLOT->ksr];
 }
 
-static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
+static void reset_channels(OperatorState *ST, Voice *CH, int num) {
     // normal mode
     ST->mode   = 0;
     ST->TA     = 0;
@@ -736,7 +756,7 @@ static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
 /// SSG-EG update process
 /// The behavior is based upon Nemesis tests on real hardware
 /// This is actually executed before each samples
-static void update_ssg_eg_channel(FM_SLOT *SLOT) {
+static void update_ssg_eg_channel(Operator *SLOT) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {
         // detect SSG-EG transition. this is not required during release phase
@@ -796,15 +816,15 @@ struct FM_3SLOT {
 };
 
 /// OPN/A/B common state
-struct FM_OPN {
+struct EngineState {
     /// chip type
     uint8_t type = 0;
     /// general state
-    FM_ST ST;
+    OperatorState ST;
     /// 3 slot mode state
     FM_3SLOT SL3;
     /// pointer of CH
-    FM_CH *P_CH = nullptr;
+    Voice *P_CH = nullptr;
     /// fm channels output masks (0xffffffff = enable) */
     unsigned int pan[6 * 2];
 
@@ -855,7 +875,7 @@ struct FM_OPN {
 // ---------------------------------------------------------------------------
 
 /// initialize time tables
-static void init_timetables(FM_OPN *OPN, double freqbase) {
+static void init_timetables(EngineState *OPN, double freqbase) {
     // DeTune table
     for (int d = 0; d <= 3; d++) {
         for (int i = 0; i <= 31; i++) {
@@ -892,7 +912,7 @@ static void init_timetables(FM_OPN *OPN, double freqbase) {
 ///
 /// @param OPN the OPN emulator to set the pre-scaler and create timetables for
 ///
-static void set_prescaler(FM_OPN *OPN) {
+static void set_prescaler(EngineState *OPN) {
     // frequency base
     OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
@@ -907,7 +927,7 @@ static void set_prescaler(FM_OPN *OPN) {
 }
 
 /// set algorithm connection
-static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
+static void setup_connection(EngineState *OPN, Voice *CH, int ch) {
     int32_t *carrier = &OPN->out_fm[ch];
 
     int32_t **om1 = &CH->connect1;
@@ -992,7 +1012,7 @@ static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
 }
 
 /// advance LFO to next sample.
-static inline void advance_lfo(FM_OPN *OPN) {
+static inline void advance_lfo(EngineState *OPN) {
     if (OPN->lfo_timer_overflow) {  // LFO enabled ?
         // increment LFO timer
         OPN->lfo_timer +=  OPN->lfo_timer_add;
@@ -1014,7 +1034,7 @@ static inline void advance_lfo(FM_OPN *OPN) {
     }
 }
 
-static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
+static inline void advance_eg_channel(EngineState *OPN, Operator *SLOT) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
@@ -1103,7 +1123,7 @@ static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
     }
 }
 
-static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH) {
+static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
     uint32_t block_fnum = CH->block_fnum;
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
     int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->LFO_PM];
@@ -1140,7 +1160,7 @@ static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH) {
     }
 }
 
-static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
+static inline void chan_calc(EngineState *OPN, Voice *CH) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
     uint32_t AM = OPN->LFO_AM >> CH->ams;
     OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
@@ -1187,7 +1207,7 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
 }
 
 /// update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc) {
+static inline void refresh_fc_eg_slot(EngineState *OPN, Operator *SLOT, int fc, int kc) {
     int ksr = kc >> SLOT->KSR;
     fc += SLOT->DT[kc];
     // detects frequency overflow (credits to Nemesis)
@@ -1216,7 +1236,7 @@ static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc
 }
 
 /// update phase increment counters
-static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
+static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
     if ( CH->SLOT[SLOT1].Incr==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
@@ -1228,7 +1248,7 @@ static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
 }
 
 /// write a OPN mode register 0x20-0x2f.
-static void write_mode(FM_OPN *OPN, int r, int v) {
+static void write_mode(EngineState *OPN, int r, int v) {
     switch (r) {
     case 0x21:  // Test
         break;
@@ -1260,26 +1280,26 @@ static void write_mode(FM_OPN *OPN, int r, int v) {
         uint8_t c = v & 0x03;
         if (c == 3) break;
         if ((v & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
-        FM_CH* CH = OPN->P_CH;
+        Voice* CH = OPN->P_CH;
         CH = &CH[c];
-        if (v & 0x10) FM_KEYON(CH, SLOT1); else FM_KEYOFF(CH, SLOT1);
-        if (v & 0x20) FM_KEYON(CH, SLOT2); else FM_KEYOFF(CH, SLOT2);
-        if (v & 0x40) FM_KEYON(CH, SLOT3); else FM_KEYOFF(CH, SLOT3);
-        if (v & 0x80) FM_KEYON(CH, SLOT4); else FM_KEYOFF(CH, SLOT4);
+        if (v & 0x10) set_keyon(CH, SLOT1); else set_keyoff(CH, SLOT1);
+        if (v & 0x20) set_keyon(CH, SLOT2); else set_keyoff(CH, SLOT2);
+        if (v & 0x40) set_keyon(CH, SLOT3); else set_keyoff(CH, SLOT3);
+        if (v & 0x80) set_keyon(CH, SLOT4); else set_keyoff(CH, SLOT4);
         break;
     }
 }
 
 /// write a OPN register (0x30-0xff).
-static void write_register(FM_OPN *OPN, int r, int v) {
+static void write_register(EngineState *OPN, int r, int v) {
     uint8_t c = OPN_CHAN(r);
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
     if (r >= 0x100) c+=3;
     // get the channel
-    FM_CH* const CH = &OPN->P_CH[c];
+    Voice* const CH = &OPN->P_CH[c];
     // get the operator
-    FM_SLOT* const SLOT = &(CH->SLOT[OPN_SLOT(r)]);
+    Operator* const SLOT = &(CH->SLOT[OPN_SLOT(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
         set_det_mul(&OPN->ST, CH, SLOT, v);
@@ -1380,9 +1400,9 @@ class YamahaYM2612 {
     /// registers
     uint8_t registers[512];
     /// OPN state
-    FM_OPN OPN;
+    EngineState OPN;
     /// channel state
-    FM_CH CH[6];
+    Voice CH[6];
     /// address line A1
     uint8_t addr_A1;
 
@@ -1596,10 +1616,10 @@ class YamahaYM2612 {
         MOR = rt;
         // timer A control
         if ((OPN.ST.TAC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
-            TimerAOver(&OPN.ST);
+            timer_A_over(&OPN.ST);
         // timer B control
         if ((OPN.ST.TBC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
-            TimerBOver(&OPN.ST);
+            timer_B_over(&OPN.ST);
     }
 
     /// @brief Write data to a register on the chip.
@@ -1915,7 +1935,7 @@ class YamahaYM2612 {
     inline void setAR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AR == value) return;
         channels[channel].operators[slot].AR = value;
-        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
         set_ar_ksr(&CH[channel], s, s->ar_ksr);
     }
@@ -1929,7 +1949,7 @@ class YamahaYM2612 {
     inline void setD1(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].D1 == value) return;
         channels[channel].operators[slot].D1 = value;
-        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
         s->dr = (s->dr & 0x80) | (value & 0x1F);
         set_dr(s, s->dr);
     }
@@ -1943,7 +1963,7 @@ class YamahaYM2612 {
     inline void setSL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].SL == value) return;
         channels[channel].operators[slot].SL = value;
-        FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s =  &CH[channel].SLOT[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
         set_sl_rr(s, s->sl_rr);
     }
@@ -1969,7 +1989,7 @@ class YamahaYM2612 {
     inline void setRR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RR == value) return;
         channels[channel].operators[slot].RR = value;
-        FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s =  &CH[channel].SLOT[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
         set_sl_rr(s, s->sl_rr);
     }
@@ -2021,7 +2041,7 @@ class YamahaYM2612 {
     inline void setRS(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RS == value) return;
         channels[channel].operators[slot].RS = value;
-        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
         set_ar_ksr(&CH[channel], s, s->ar_ksr);
     }
@@ -2035,7 +2055,7 @@ class YamahaYM2612 {
     inline void setAM(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AM == value) return;
         channels[channel].operators[slot].AM = value;
-        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
         s->AMmask = (value) ? ~0 : 0;
     }
 

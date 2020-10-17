@@ -26,38 +26,35 @@
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipS_SMP_BRR : Module {
  private:
+    /// the number of voices on the module
     static constexpr unsigned NUM_VOICES = 8;
-
     /// the RAM for the S-DSP chip (64KB = 16-bit address space)
     uint8_t ram[Sony_S_DSP_BRR::SIZE_OF_RAM];
-
     /// the Sony S-DSP sound chip emulator
     Sony_S_DSP_BRR apu[NUM_VOICES][PORT_MAX_CHANNELS];
-
     /// triggers for handling gate inputs for the voices
     rack::dsp::BooleanTrigger gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
-
-    /// triggers for handling inputs to the control ports
+    /// triggers for handling inputs to the phase modulation enable ports
     dsp::BooleanTrigger pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,        NUM_VOICES),
-        ENUMS(PARAM_PM_ENABLE,   NUM_VOICES),
-        ENUMS(PARAM_VOLUME_L,    NUM_VOICES),
-        ENUMS(PARAM_VOLUME_R,    NUM_VOICES),
+        ENUMS(PARAM_FREQ,      NUM_VOICES),
+        ENUMS(PARAM_PM_ENABLE, NUM_VOICES),
+        ENUMS(PARAM_VOLUME_L,  NUM_VOICES),
+        ENUMS(PARAM_VOLUME_R,  NUM_VOICES),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,        NUM_VOICES),
-        ENUMS(INPUT_FM,          NUM_VOICES),
-        ENUMS(INPUT_PM_ENABLE,   NUM_VOICES),
-        ENUMS(INPUT_GATE,        NUM_VOICES),
-        ENUMS(INPUT_VOLUME_L,    NUM_VOICES),
-        ENUMS(INPUT_VOLUME_R,    NUM_VOICES),
+        ENUMS(INPUT_VOCT,      NUM_VOICES),
+        ENUMS(INPUT_FM,        NUM_VOICES),
+        ENUMS(INPUT_PM_ENABLE, NUM_VOICES),
+        ENUMS(INPUT_GATE,      NUM_VOICES),
+        ENUMS(INPUT_VOLUME_L,  NUM_VOICES),
+        ENUMS(INPUT_VOLUME_R,  NUM_VOICES),
         NUM_INPUTS
     };
 

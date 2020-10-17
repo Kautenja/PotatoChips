@@ -399,115 +399,73 @@ static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
         finc = fc + CH->SLOT[SLOT4].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
         CH->SLOT[SLOT4].phase += (finc*CH->SLOT[SLOT4].mul) >> 1;
-    }
-    else    /* LFO phase modulation  = zero */
-    {
-            CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
-            CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
-            CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
-            CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
-    }
-}
-
-static inline void chan_calc(FM_OPN *OPN, FM_CH *CH)
-{
-    unsigned int eg_out;
-
-    uint32_t AM = OPN->LFO_AM >> CH->ams;
-
-
-    OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
-
-    *CH->mem_connect = CH->mem_value;   /* restore delayed sample (MEM) value to m2 or c2 */
-
-    eg_out = volume_calc(&CH->SLOT[SLOT1]);
-    {
-        int32_t out = CH->op1_out[0] + CH->op1_out[1];
-        CH->op1_out[0] = CH->op1_out[1];
-
-        if ( !CH->connect1 )
-        {
-            /* algorithm 5  */
-            OPN->mem = OPN->c1 = OPN->c2 = CH->op1_out[0];
-        }
-        else
-        {
-            /* other algorithms */
-            *CH->connect1 += CH->op1_out[0];
-        }
-
-        CH->op1_out[1] = 0;
-        if ( eg_out < ENV_QUIET )    /* SLOT 1 */
-        {
-            if (!CH->FB)
-                out=0;
-
-            CH->op1_out[1] = op_calc1(CH->SLOT[SLOT1].phase, eg_out, (out<<CH->FB) );
-        }
-    }
-
-
-
-    eg_out = volume_calc(&CH->SLOT[SLOT3]);
-    if ( eg_out < ENV_QUIET )        /* SLOT 3 */
-        *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
-
-
-    eg_out = volume_calc(&CH->SLOT[SLOT2]);
-    if ( eg_out < ENV_QUIET )        /* SLOT 2 */
-        *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
-
-    eg_out = volume_calc(&CH->SLOT[SLOT4]);
-    if ( eg_out < ENV_QUIET )        /* SLOT 4 */
-        *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
-
-
-    /* store current MEM */
-    CH->mem_value = OPN->mem;
-
-
-    /* update phase counters AFTER output calculations */
-    if (CH->pms)
-    {
-        update_phase_lfo_channel(OPN, CH);
-    }
-    else    /* no LFO phase modulation */
-    {
+    } else {  // LFO phase modulation  = zero
         CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
         CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
         CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
         CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
     }
+}
 
-
+static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
+    uint32_t AM = OPN->LFO_AM >> CH->ams;
+    OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
+    // restore delayed sample (MEM) value to m2 or c2
+    *CH->mem_connect = CH->mem_value;
+    // SLOT 1
+    unsigned int eg_out = volume_calc(&CH->SLOT[SLOT1]);
+    int32_t out = CH->op1_out[0] + CH->op1_out[1];
+    CH->op1_out[0] = CH->op1_out[1];
+    if (!CH->connect1) {  // algorithm 5
+        OPN->mem = OPN->c1 = OPN->c2 = CH->op1_out[0];
+    } else {  // other algorithms
+        *CH->connect1 += CH->op1_out[0];
+    }
+    CH->op1_out[1] = 0;
+    if (eg_out < ENV_QUIET) {
+        if (!CH->FB) out = 0;
+        CH->op1_out[1] = op_calc1(CH->SLOT[SLOT1].phase, eg_out, (out << CH->FB) );
+    }
+    // SLOT 3
+    eg_out = volume_calc(&CH->SLOT[SLOT3]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
+    // SLOT 2
+    eg_out = volume_calc(&CH->SLOT[SLOT2]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
+    // SLOT 4
+    eg_out = volume_calc(&CH->SLOT[SLOT4]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
+    // store current MEM
+    CH->mem_value = OPN->mem;
+    // update phase counters AFTER output calculations
+    if (CH->pms) {
+        update_phase_lfo_channel(OPN, CH);
+    } else {  // no LFO phase modulation
+        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
+        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
+        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
+        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+    }
 }
 
 /* update phase increment and envelope generator */
-static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT , int fc , int kc )
-{
+static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc) {
     int ksr = kc >> SLOT->KSR;
-
-
     fc += SLOT->DT[kc];
-
-    /* detects frequency overflow (credits to Nemesis) */
+    // detects frequency overflow (credits to Nemesis)
     if (fc < 0) fc += OPN->fn_max;
-
-    /* (frequency) phase increment counter */
+    // (frequency) phase increment counter
     SLOT->Incr = (fc * SLOT->mul) >> 1;
-
-    if ( SLOT->ksr != ksr )
-    {
+    if ( SLOT->ksr != ksr ) {
         SLOT->ksr = ksr;
-
-        /* calculate envelope generator rates */
-        if ((SLOT->ar + SLOT->ksr) < 32+62)
-        {
+        // calculate envelope generator rates
+        if ((SLOT->ar + SLOT->ksr) < 32+62) {
             SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar  + SLOT->ksr ];
             SLOT->eg_sel_ar = eg_rate_select[SLOT->ar  + SLOT->ksr ];
-        }
-        else
-        {
+        } else {
             SLOT->eg_sh_ar  = 0;
             SLOT->eg_sel_ar = 17*RATE_STEPS;
         }
@@ -522,14 +480,9 @@ static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT , int fc , int 
     }
 }
 
-
 /* update phase increment counters */
-/* Changed from static inline to static to work around gcc 4.2.1 codegen bug */
-
-static void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH )
-{
-    if ( CH->SLOT[SLOT1].Incr==-1)
-    {
+static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
+    if ( CH->SLOT[SLOT1].Incr==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
         refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT1] , fc , kc );
@@ -539,44 +492,16 @@ static void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH )
     }
 }
 
-/*
-
-// initialize time tables
-static void init_timetables( FM_ST *ST , const uint8_t *dttable )
-{
-    int i,d;
-    double rate;
-
-
-    // DeTune table
-    for (d = 0;d <= 3;d++)
-    {
-        for (i = 0;i <= 31;i++)
-        {
-            rate = ((double)dttable[d*32 + i]) * SIN_LEN  * ST->freqbase  * (1<<FREQ_SH) / ((double)(1<<20));
-            ST->dt_tab[d][i]   = (int32_t) rate;
-            ST->dt_tab[d+4][i] = -ST->dt_tab[d][i];
-        }
-    }
-
-}
-*/
-
-static void reset_channels( FM_ST *ST , FM_CH *CH , int num )
-{
-    int c,s;
-
-    ST->mode   = 0; /* normal mode */
+static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
+    /* normal mode */
+    ST->mode   = 0;
     ST->TA     = 0;
     ST->TAC    = 0;
     ST->TB     = 0;
     ST->TBC    = 0;
-
-    for( c = 0 ; c < num ; c++ )
-    {
+    for(int c = 0; c < num; c++) {
         CH[c].fc = 0;
-        for(s = 0 ; s < 4 ; s++ )
-        {
+        for(int s = 0; s < 4; s++) {
             CH[c].SLOT[s].ssg = 0;
             CH[c].SLOT[s].ssgn = 0;
             CH[c].SLOT[s].state= EG_OFF;
@@ -585,8 +510,6 @@ static void reset_channels( FM_ST *ST , FM_CH *CH , int num )
         }
     }
 }
-
-
 
 /* SSG-EG update process */
 /* The behavior is based upon Nemesis tests on real hardware */
@@ -650,19 +573,11 @@ static void update_ssg_eg_channel(FM_SLOT *SLOT)
     } while (i);
 }
 
-
-
-
-
-
-
 /* write a OPN mode register 0x20-0x2f */
 static void OPNWriteMode(FM_OPN *OPN, int r, int v)
 {
     uint8_t c;
     FM_CH *CH;
-
-
 
     switch(r)
     {

@@ -355,12 +355,13 @@ class YamahaYM2612 {
     /// @param frequency the frequency value measured in Hz
     ///
     inline void setFREQ(uint8_t channel, float frequency) {
-        // shift the frequency to the base octave and calculate the octave to play.
-        // the base octave is defined as a 10-bit number, i.e., in [0, 1023]
+        // Shift the frequency to the base octave and calculate the octave to
+        // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
         for (; frequency >= 1024; octave++) frequency /= 2;
-        // NOTE: arbitrary shift calculated by producing note from a ground truth
-        //       oscillator and comparing the output from YM2612 via division.
+        // NOTE: arbitrary shift calculated by producing note from a ground
+        //       truth oscillator and comparing the output from YM2612 via
+        //       division.
         //       1.458166333006277
         // TODO: why is this arbitrary shift necessary to tune to C4?
         frequency = frequency / 1.458;

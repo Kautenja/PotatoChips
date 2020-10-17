@@ -579,7 +579,7 @@ struct OperatorState {
 /// @brief A single 4-operator FM voice.
 struct Voice {
     /// four SLOTs (operators)
-    Operator SLOT[4];
+    Operator operators[4];
 
     /// algorithm
     uint8_t ALGO = 0;
@@ -668,7 +668,7 @@ static inline void timer_B_over(OperatorState* state) {
 /// @param slot the slot to set the key-on flag for
 ///
 static inline void set_keyon(Voice* voice, unsigned slot) {
-    Operator *oprtr = &voice->SLOT[slot];
+    Operator *oprtr = &voice->operators[slot];
     if (!oprtr->key) {
         oprtr->key = 1;
         // restart Phase Generator
@@ -684,7 +684,7 @@ static inline void set_keyon(Voice* voice, unsigned slot) {
 /// @param slot the slot to set the key-off flag for
 ///
 static inline void set_keyoff(Voice* voice, unsigned slot) {
-    Operator *oprtr = &voice->SLOT[slot];
+    Operator *oprtr = &voice->operators[slot];
     if ( oprtr->key ) {
         oprtr->key = 0;
         if (oprtr->state>EG_REL)  // phase -> Release
@@ -696,7 +696,7 @@ static inline void set_keyoff(Voice* voice, unsigned slot) {
 static inline void set_det_mul(OperatorState* state, Voice* voice, Operator* oprtr, int value) {
     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
     oprtr->DT = state->dt_tab[(value >> 4) & 7];
-    voice->SLOT[SLOT1].Incr = -1;
+    voice->operators[SLOT1].Incr = -1;
 }
 
 /// @brief Set the 7-bit total level.
@@ -714,7 +714,7 @@ static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
     uint8_t old_KSR = oprtr->KSR;
     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
     oprtr->KSR = 3 - (value >> 6);
-    if (oprtr->KSR != old_KSR) voice->SLOT[SLOT1].Incr = -1;
+    if (oprtr->KSR != old_KSR) voice->operators[SLOT1].Incr = -1;
     // refresh Attack rate
     if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
         oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
@@ -757,11 +757,11 @@ static void reset_channels(OperatorState *ST, Voice *CH, int num) {
     for(int c = 0; c < num; c++) {
         CH[c].fc = 0;
         for(int s = 0; s < 4; s++) {
-            CH[c].SLOT[s].ssg = 0;
-            CH[c].SLOT[s].ssgn = 0;
-            CH[c].SLOT[s].state= EG_OFF;
-            CH[c].SLOT[s].volume = MAX_ATT_INDEX;
-            CH[c].SLOT[s].vol_out= MAX_ATT_INDEX;
+            CH[c].operators[s].ssg = 0;
+            CH[c].operators[s].ssgn = 0;
+            CH[c].operators[s].state= EG_OFF;
+            CH[c].operators[s].volume = MAX_ATT_INDEX;
+            CH[c].operators[s].vol_out= MAX_ATT_INDEX;
         }
     }
 }
@@ -1149,27 +1149,27 @@ static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
         // phase increment counter
         int fc = (OPN->fn_table[fn]>>(7 - blk));
         // detects frequency overflow (credits to Nemesis)
-        int finc = fc + CH->SLOT[SLOT1].DT[kc];
+        int finc = fc + CH->operators[SLOT1].DT[kc];
         // Operator 1
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT1].phase += (finc * CH->SLOT[SLOT1].mul) >> 1;
+        CH->operators[SLOT1].phase += (finc * CH->operators[SLOT1].mul) >> 1;
         // Operator 2
-        finc = fc + CH->SLOT[SLOT2].DT[kc];
+        finc = fc + CH->operators[SLOT2].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT2].phase += (finc * CH->SLOT[SLOT2].mul) >> 1;
+        CH->operators[SLOT2].phase += (finc * CH->operators[SLOT2].mul) >> 1;
         // Operator 3
-        finc = fc + CH->SLOT[SLOT3].DT[kc];
+        finc = fc + CH->operators[SLOT3].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT3].phase += (finc * CH->SLOT[SLOT3].mul) >> 1;
+        CH->operators[SLOT3].phase += (finc * CH->operators[SLOT3].mul) >> 1;
         // Operator 4
-        finc = fc + CH->SLOT[SLOT4].DT[kc];
+        finc = fc + CH->operators[SLOT4].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT4].phase += (finc * CH->SLOT[SLOT4].mul) >> 1;
+        CH->operators[SLOT4].phase += (finc * CH->operators[SLOT4].mul) >> 1;
     } else {  // LFO phase modulation is 0
-        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
-        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
-        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
-        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+        CH->operators[SLOT1].phase += CH->operators[SLOT1].Incr;
+        CH->operators[SLOT2].phase += CH->operators[SLOT2].Incr;
+        CH->operators[SLOT3].phase += CH->operators[SLOT3].Incr;
+        CH->operators[SLOT4].phase += CH->operators[SLOT4].Incr;
     }
 }
 
@@ -1180,7 +1180,7 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
     // restore delayed sample (MEM) value to m2 or c2
     *CH->mem_connect = CH->mem_value;
     // SLOT 1
-    unsigned int eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT1]);
+    unsigned int eg_out = CALCULATE_VOLUME(&CH->operators[SLOT1]);
     int32_t out = CH->op1_out[0] + CH->op1_out[1];
     CH->op1_out[0] = CH->op1_out[1];
     if (!CH->connect1) {  // algorithm 5
@@ -1191,30 +1191,30 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
     CH->op1_out[1] = 0;
     if (eg_out < ENV_QUIET) {
         if (!CH->FB) out = 0;
-        CH->op1_out[1] = op_calc1(CH->SLOT[SLOT1].phase, eg_out, (out << CH->FB) );
+        CH->op1_out[1] = op_calc1(CH->operators[SLOT1].phase, eg_out, (out << CH->FB) );
     }
     // SLOT 3
-    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT3]);
+    eg_out = CALCULATE_VOLUME(&CH->operators[SLOT3]);
     if (eg_out < ENV_QUIET)
-        *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
+        *CH->connect3 += op_calc(CH->operators[SLOT3].phase, eg_out, OPN->m2);
     // SLOT 2
-    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT2]);
+    eg_out = CALCULATE_VOLUME(&CH->operators[SLOT2]);
     if (eg_out < ENV_QUIET)
-        *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
+        *CH->connect2 += op_calc(CH->operators[SLOT2].phase, eg_out, OPN->c1);
     // SLOT 4
-    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT4]);
+    eg_out = CALCULATE_VOLUME(&CH->operators[SLOT4]);
     if (eg_out < ENV_QUIET)
-        *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
+        *CH->connect4 += op_calc(CH->operators[SLOT4].phase, eg_out, OPN->c2);
     // store current MEM
     CH->mem_value = OPN->mem;
     // update phase counters AFTER output calculations
     if (CH->pms) {
         update_phase_lfo_channel(OPN, CH);
     } else {  // no LFO phase modulation
-        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
-        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
-        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
-        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+        CH->operators[SLOT1].phase += CH->operators[SLOT1].Incr;
+        CH->operators[SLOT2].phase += CH->operators[SLOT2].Incr;
+        CH->operators[SLOT3].phase += CH->operators[SLOT3].Incr;
+        CH->operators[SLOT4].phase += CH->operators[SLOT4].Incr;
     }
 #undef CALCULATE_VOLUME
 }
@@ -1250,13 +1250,13 @@ static inline void refresh_fc_eg_slot(EngineState *OPN, Operator *SLOT, int fc, 
 
 /// update phase increment counters
 static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
-    if ( CH->SLOT[SLOT1].Incr==-1) {
+    if ( CH->operators[SLOT1].Incr==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
-        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT1] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT2] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT3] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT4] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->operators[SLOT1] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->operators[SLOT2] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->operators[SLOT3] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->operators[SLOT4] , fc , kc );
     }
 }
 
@@ -1312,7 +1312,7 @@ static void write_register(EngineState *OPN, int r, int v) {
     // get the channel
     Voice* const CH = &OPN->P_CH[c];
     // get the operator
-    Operator* const SLOT = &(CH->SLOT[OPN_SLOT(r)]);
+    Operator* const SLOT = &(CH->operators[OPN_SLOT(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
         set_det_mul(&OPN->ST, CH, SLOT, v);
@@ -1353,7 +1353,7 @@ static void write_register(EngineState *OPN, int r, int v) {
             CH->fc = OPN->fn_table[fn * 2] >> (7 - blk);
             /* store fnum in clear form for LFO PM calculations */
             CH->block_fnum = (blk << 11) | fn;
-            CH->SLOT[SLOT1].Incr = -1;
+            CH->operators[SLOT1].Incr = -1;
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
@@ -1368,7 +1368,7 @@ static void write_register(EngineState *OPN, int r, int v) {
                 /* phase increment counter */
                 OPN->SL3.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
                 OPN->SL3.block_fnum[c] = (blk << 11) | fn;
-                (OPN->P_CH)[2].SLOT[SLOT1].Incr = -1;
+                (OPN->P_CH)[2].operators[SLOT1].Incr = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
@@ -1556,12 +1556,12 @@ class YamahaYM2612 {
         OPN.out_fm[4] = 0;
         OPN.out_fm[5] = 0;
         // update SSG-EG output
-        update_ssg_eg_channel(&(CH[0].SLOT[SLOT1]));
-        update_ssg_eg_channel(&(CH[1].SLOT[SLOT1]));
-        update_ssg_eg_channel(&(CH[2].SLOT[SLOT1]));
-        update_ssg_eg_channel(&(CH[3].SLOT[SLOT1]));
-        update_ssg_eg_channel(&(CH[4].SLOT[SLOT1]));
-        update_ssg_eg_channel(&(CH[5].SLOT[SLOT1]));
+        update_ssg_eg_channel(&(CH[0].operators[SLOT1]));
+        update_ssg_eg_channel(&(CH[1].operators[SLOT1]));
+        update_ssg_eg_channel(&(CH[2].operators[SLOT1]));
+        update_ssg_eg_channel(&(CH[3].operators[SLOT1]));
+        update_ssg_eg_channel(&(CH[4].operators[SLOT1]));
+        update_ssg_eg_channel(&(CH[5].operators[SLOT1]));
         // calculate FM
         chan_calc(&OPN, &CH[0]);
         chan_calc(&OPN, &CH[1]);
@@ -1579,12 +1579,12 @@ class YamahaYM2612 {
         while (OPN.eg_timer >= OPN.eg_timer_overflow) {
             OPN.eg_timer -= OPN.eg_timer_overflow;
             OPN.eg_cnt++;
-            advance_eg_channel(&OPN, &(CH[0].SLOT[SLOT1]));
-            advance_eg_channel(&OPN, &(CH[1].SLOT[SLOT1]));
-            advance_eg_channel(&OPN, &(CH[2].SLOT[SLOT1]));
-            advance_eg_channel(&OPN, &(CH[3].SLOT[SLOT1]));
-            advance_eg_channel(&OPN, &(CH[4].SLOT[SLOT1]));
-            advance_eg_channel(&OPN, &(CH[5].SLOT[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[0].operators[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[1].operators[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[2].operators[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[3].operators[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[4].operators[SLOT1]));
+            advance_eg_channel(&OPN, &(CH[5].operators[SLOT1]));
         }
         // clip outputs
         if (OPN.out_fm[0] > 8191)
@@ -1948,7 +1948,7 @@ class YamahaYM2612 {
     inline void setAR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AR == value) return;
         channels[channel].operators[slot].AR = value;
-        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
         set_ar_ksr(&CH[channel], s, s->ar_ksr);
     }
@@ -1962,7 +1962,7 @@ class YamahaYM2612 {
     inline void setD1(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].D1 == value) return;
         channels[channel].operators[slot].D1 = value;
-        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].operators[slots_idx[slot]];
         s->dr = (s->dr & 0x80) | (value & 0x1F);
         set_dr(s, s->dr);
     }
@@ -1976,7 +1976,7 @@ class YamahaYM2612 {
     inline void setSL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].SL == value) return;
         channels[channel].operators[slot].SL = value;
-        Operator *s =  &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s =  &CH[channel].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
         set_sl_rr(s, s->sl_rr);
     }
@@ -1990,7 +1990,7 @@ class YamahaYM2612 {
     inline void setD2(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].D2 == value) return;
         channels[channel].operators[slot].D2 = value;
-        set_sr(&CH[channel].SLOT[slots_idx[slot]], value);
+        set_sr(&CH[channel].operators[slots_idx[slot]], value);
     }
 
     /// @brief Set the release rate (RR) register for the given channel and operator.
@@ -2002,7 +2002,7 @@ class YamahaYM2612 {
     inline void setRR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RR == value) return;
         channels[channel].operators[slot].RR = value;
-        Operator *s =  &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s =  &CH[channel].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
         set_sl_rr(s, s->sl_rr);
     }
@@ -2016,7 +2016,7 @@ class YamahaYM2612 {
     inline void setTL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].TL == value) return;
         channels[channel].operators[slot].TL = value;
-        set_tl(&CH[channel], &CH[channel].SLOT[slots_idx[slot]], value);
+        set_tl(&CH[channel], &CH[channel].operators[slots_idx[slot]], value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given channel and operator.
@@ -2028,8 +2028,8 @@ class YamahaYM2612 {
     inline void setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].MUL == value) return;
         channels[channel].operators[slot].MUL = value;
-        CH[channel].SLOT[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-        CH[channel].SLOT[SLOT1].Incr = -1;
+        CH[channel].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        CH[channel].operators[SLOT1].Incr = -1;
     }
 
     /// @brief Set the detune (DET) register for the given channel and operator.
@@ -2041,8 +2041,8 @@ class YamahaYM2612 {
     inline void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].DET == value) return;
         channels[channel].operators[slot].DET = value;
-        CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
-        CH[channel].SLOT[SLOT1].Incr = -1;
+        CH[channel].operators[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
+        CH[channel].operators[SLOT1].Incr = -1;
     }
 
     /// @brief Set the rate-scale (RS) register for the given channel and operator.
@@ -2054,7 +2054,7 @@ class YamahaYM2612 {
     inline void setRS(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RS == value) return;
         channels[channel].operators[slot].RS = value;
-        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
         set_ar_ksr(&CH[channel], s, s->ar_ksr);
     }
@@ -2068,7 +2068,7 @@ class YamahaYM2612 {
     inline void setAM(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AM == value) return;
         channels[channel].operators[slot].AM = value;
-        Operator *s = &CH[channel].SLOT[slots_idx[slot]];
+        Operator *s = &CH[channel].operators[slots_idx[slot]];
         s->AMmask = (value) ? ~0 : 0;
     }
 

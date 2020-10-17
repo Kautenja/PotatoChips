@@ -86,10 +86,7 @@ class YamahaYM2612 {
     /// the value of the global LFO parameter
     uint8_t lfo_setting = 0;
 
-    // /// master output left
-    // int16_t MOL = 0;
-    // /// master output right
-    // int16_t MOR = 0;
+    /// the stereo master output from the chip emulator
     int16_t stereo_output[2] = {0, 0};
 
  public:

@@ -492,18 +492,18 @@ static void write_register(EngineState* engine, int r, int v) {
     if (c == 3) return;
     if (r >= 0x100) c+=3;
     // get the channel
-    Voice* const CH = &engine->voices[c];
+    Voice* const voice = &engine->voices[c];
     // get the operator
-    Operator* const oprtr = &(CH->operators[OPERATOR(r)]);
+    Operator* const oprtr = &(voice->operators[OPERATOR(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
-        set_det_mul(&engine->state, CH, oprtr, v);
+        set_det_mul(&engine->state, voice, oprtr, v);
         break;
     case 0x40:  // TL
-        set_tl(CH, oprtr, v);
+        set_tl(voice, oprtr, v);
         break;
     case 0x50:  // KS, AR
-        set_ar_ksr(CH, oprtr, v);
+        set_ar_ksr(voice, oprtr, v);
         break;
     case 0x60:  // bit7 = AM ENABLE, DR
         set_dr(oprtr, v);
@@ -530,12 +530,12 @@ static void write_register(EngineState* engine, int r, int v) {
             uint32_t fn = (((uint32_t)( (engine->state.fn_h) & 7)) << 8) + v;
             uint8_t blk = engine->state.fn_h >> 3;
             /* key-scale code */
-            CH->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+            voice->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
             /* phase increment counter */
-            CH->fc = engine->fn_table[fn * 2] >> (7 - blk);
+            voice->fc = engine->fn_table[fn * 2] >> (7 - blk);
             /* store fnum in clear form for LFO PM calculations */
-            CH->block_fnum = (blk << 11) | fn;
-            CH->operators[Op1].phase_increment = -1;
+            voice->block_fnum = (blk << 11) | fn;
+            voice->operators[Op1].phase_increment = -1;
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
@@ -563,18 +563,18 @@ static void write_register(EngineState* engine, int r, int v) {
         switch (OPERATOR(r)) {
         case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
             int feedback = (v >> 3) & 7;
-            CH->algorithm = v & 7;
-            CH->feedback = feedback ? feedback + 6 : 0;
-            set_routing(engine, CH, c);
+            voice->algorithm = v & 7;
+            voice->feedback = feedback ? feedback + 6 : 0;
+            set_routing(engine, voice, c);
             break;
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
             if (engine->type & TYPE_LFOPAN) {
                 // b0-2 PMS
-                // CH->pms = PM depth * 32 (index in lfo_pm_table)
-                CH->pms = (v & 7) * 32;
+                // voice->pms = PM depth * 32 (index in lfo_pm_table)
+                voice->pms = (v & 7) * 32;
                 // b4-5 AMS
-                CH->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
+                voice->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
                 // PAN :  b7 = L, b6 = R
                 engine->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
                 engine->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;

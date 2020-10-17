@@ -668,6 +668,57 @@ struct FM_OPN {
 // MARK: Functional API
 // ---------------------------------------------------------------------------
 
+/// initialize time tables
+static void init_timetables(FM_OPN *OPN, double freqbase) {
+    // DeTune table
+    for (int d = 0; d <= 3; d++) {
+        for (int i = 0; i <= 31; i++) {
+            // -10 because chip works with 10.10 fixed point, while we use 16.16
+            double rate = ((double) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+            OPN->ST.dt_tab[d][i] = (int32_t) rate;
+            OPN->ST.dt_tab[d + 4][i] = -OPN->ST.dt_tab[d][i];
+        }
+    }
+    // there are 2048 FNUMs that can be generated using FNUM/BLK registers
+    // but LFO works with one more bit of a precision so we really need 4096
+    // elements. calculate fnumber -> increment counter table
+    for (int i = 0; i < 4096; i++) {
+        // freq table for octave 7
+        // OPN phase increment counter = 20bit
+        // the correct formula is
+        //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
+        // where sample clock is: M / 144
+        // this means the increment value for one clock sample is
+        //     FNUM * 2^(B-1) = FNUM * 64
+        // for octave 7
+        // we also need to handle the ratio between the chip frequency and
+        // the emulated frequency (can be 1.0)
+        // NOTE:
+        // -10 because chip works with 10.10 fixed point, while we use 16.16
+        OPN->fn_table[i] = (uint32_t)((double) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+    }
+    // maximal frequency is required for Phase overflow calculation, register
+    // size is 17 bits (Nemesis)
+    OPN->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
+}
+
+/// Set pre-scaler and make time tables.
+///
+/// @param OPN the OPN emulator to set the pre-scaler and create timetables for
+///
+static void OPNSetPrescaler(FM_OPN *OPN) {
+    // frequency base
+    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
+    // TODO: why is it necessary to scale these increments by a factor of 1/16
+    //       to get the correct timings from the EG and LFO?
+    // EG timer increment (updates every 3 samples)
+    OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
+    OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+    // LFO timer increment (updates every 16 samples)
+    OPN->lfo_timer_add = (1 << LFO_SH) * OPN->ST.freqbase / 16;
+    // make time tables
+    init_timetables(OPN, OPN->ST.freqbase);
+}
 
 // ---------------------------------------------------------------------------
 // MARK: Object-Oriented API
@@ -741,14 +792,24 @@ class YamahaYM2612 {
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100);
+    YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
+        OPN.P_CH = CH;
+        OPN.type = TYPE_YM2612;
+        OPN.ST.clock = clock_rate;
+        OPN.ST.rate = sample_rate;
+        reset();
+    }
 
     /// @brief Set the sample rate the a new value.
     ///
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    void setSampleRate(double clock_rate, double sample_rate);
+    void setSampleRate(double clock_rate, double sample_rate) {
+        OPN.ST.clock = clock_rate;
+        OPN.ST.rate = sample_rate;
+        OPNSetPrescaler(&OPN);
+    }
 
     /// @brief Reset the emulator to its initial state
     void reset();

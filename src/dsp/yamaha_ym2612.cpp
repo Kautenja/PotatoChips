@@ -358,40 +358,6 @@ static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
 
 #define volume_calc(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
 
-// static inline void update_phase_lfo_slot(FM_OPN *OPN, FM_SLOT *SLOT, int32_t pms, uint32_t block_fnum)
-// {
-//     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-//     int32_t  lfo_fn_table_index_offset = lfo_pm_table[ fnum_lfo + pms + OPN->LFO_PM ];
-
-//     if (lfo_fn_table_index_offset)    /* LFO phase modulation active */
-//     {
-//         uint8_t blk;
-//         uint32_t fn;
-//         int kc, fc;
-
-//         block_fnum = block_fnum*2 + lfo_fn_table_index_offset;
-
-//         blk = (block_fnum&0x7000) >> 12;
-//         fn  = block_fnum & 0xfff;
-
-//         /* keyscale code */
-//         kc = (blk<<2) | opn_fktable[fn >> 8];
-
-//         /* phase increment counter */
-//         fc = (OPN->fn_table[fn]>>(7-blk)) + SLOT->DT[kc];
-
-//         /* detects frequency overflow (credits to Nemesis) */
-//         if (fc < 0) fc += OPN->fn_max;
-
-//         /* update phase */
-//         SLOT->phase += (fc * SLOT->mul) >> 1;
-//     }
-//     else    /* LFO phase modulation  = zero */
-//     {
-//         SLOT->phase += SLOT->Incr;
-//     }
-// }
-
 static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
 {
     uint32_t block_fnum = CH->block_fnum;

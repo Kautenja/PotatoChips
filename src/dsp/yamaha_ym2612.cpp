@@ -102,80 +102,80 @@ static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
 
     switch( CH->ALGO ) {
     case 0:
-        /* M1---C1---MEM---M2---C2---OUT */
+        // M1---C1---MEM---M2---C2---OUT
         *om1 = &OPN->c1;
         *oc1 = &OPN->mem;
         *om2 = &OPN->c2;
         *memc= &OPN->m2;
         break;
     case 1:
-        /* M1------+-MEM---M2---C2---OUT */
-        /*      C1-+                     */
+        // M1------+-MEM---M2---C2---OUT
+        //      C1-+
         *om1 = &OPN->mem;
         *oc1 = &OPN->mem;
         *om2 = &OPN->c2;
         *memc= &OPN->m2;
         break;
     case 2:
-        /* M1-----------------+-C2---OUT */
-        /*      C1---MEM---M2-+          */
+        // M1-----------------+-C2---OUT
+        //      C1---MEM---M2-+
         *om1 = &OPN->c2;
         *oc1 = &OPN->mem;
         *om2 = &OPN->c2;
         *memc= &OPN->m2;
         break;
     case 3:
-        /* M1---C1---MEM------+-C2---OUT */
-        /*                 M2-+          */
+        // M1---C1---MEM------+-C2---OUT
+        //                 M2-+
         *om1 = &OPN->c1;
         *oc1 = &OPN->mem;
         *om2 = &OPN->c2;
         *memc= &OPN->c2;
         break;
     case 4:
-        /* M1---C1-+-OUT */
-        /* M2---C2-+     */
-        /* MEM: not used */
+        // M1---C1-+-OUT
+        // M2---C2-+
+        // MEM: not used
         *om1 = &OPN->c1;
         *oc1 = carrier;
         *om2 = &OPN->c2;
-        *memc= &OPN->mem;   /* store it anywhere where it will not be used */
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
         break;
     case 5:
-        /*    +----C1----+     */
-        /* M1-+-MEM---M2-+-OUT */
-        /*    +----C2----+     */
-        *om1 = nullptr;   /* special mark */
+        //    +----C1----+
+        // M1-+-MEM---M2-+-OUT
+        //    +----C2----+
+        *om1 = nullptr;  // special mark
         *oc1 = carrier;
         *om2 = carrier;
         *memc= &OPN->m2;
         break;
     case 6:
-        /* M1---C1-+     */
-        /*      M2-+-OUT */
-        /*      C2-+     */
-        /* MEM: not used */
+        // M1---C1-+
+        //      M2-+-OUT
+        //      C2-+
+        // MEM: not used
         *om1 = &OPN->c1;
         *oc1 = carrier;
         *om2 = carrier;
-        *memc= &OPN->mem;   /* store it anywhere where it will not be used */
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
         break;
     case 7:
-        /* M1-+     */
-        /* C1-+-OUT */
-        /* M2-+     */
-        /* C2-+     */
-        /* MEM: not used*/
+        // M1-+
+        // C1-+-OUT
+        // M2-+
+        // C2-+
+        // MEM: not used
         *om1 = carrier;
         *oc1 = carrier;
         *om2 = carrier;
-        *memc= &OPN->mem;   /* store it anywhere where it will not be used */
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
         break;
     }
     CH->connect4 = carrier;
 }
 
-/// set detune & multiple
+/// set detune & multiplier.
 static inline void set_det_mul(FM_ST *ST, FM_CH *CH, FM_SLOT *SLOT, int v) {
     SLOT->mul = (v & 0x0f) ? (v & 0x0f) * 2 : 1;
     SLOT->DT = ST->dt_tab[(v >> 4) & 7];

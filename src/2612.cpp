@@ -134,17 +134,18 @@ struct Chip2612 : rack::Module {
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
-            configParam(PARAM_TL  + i, 0, 70,  0,  opName + " Total Level");
-            configParam(PARAM_AR  + i, 0, 31,  31, opName + " Attack Rate");
-            configParam(PARAM_D1  + i, 0, 31,  0,  opName + " 1st Decay Rate");
-            configParam(PARAM_SL  + i, 0, 15,  0,  opName + " Sustain Level");
-            configParam(PARAM_D2  + i, 0, 31,  0,  opName + " 2nd Decay Rate");
-            configParam(PARAM_RR  + i, 0, 15,  15, opName + " Release Rate");
-            configParam(PARAM_MUL + i, 0, 15,  1,  opName + " Multiplier");
-            configParam(PARAM_DET + i, 0, 7,   4,  opName + " Detune");
-            configParam(PARAM_RS  + i, 0, 3,   0,  opName + " Rate Scaling");
-            configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
-            configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope");
+            configParam(PARAM_TL         + i, 0, 70,  0,  opName + " Total Level");
+            configParam(PARAM_AR         + i, 0, 31,  31, opName + " Attack Rate");
+            configParam(PARAM_D1         + i, 0, 31,  0,  opName + " 1st Decay Rate");
+            configParam(PARAM_SL         + i, 0, 15,  0,  opName + " Sustain Level");
+            configParam(PARAM_D2         + i, 0, 31,  0,  opName + " 2nd Decay Rate");
+            configParam(PARAM_RR         + i, 0, 15,  15, opName + " Release Rate");
+            configParam(PARAM_MUL        + i, 0, 15,  1,  opName + " Multiplier");
+            configParam(PARAM_DET        + i, 0, 7,   4,  opName + " Detune");
+            configParam(PARAM_RS         + i, 0, 3,   0,  opName + " Rate Scaling");
+            configParam(PARAM_AM         + i, 0, 1,   0,  opName + " Amplitude Modulation");
+            configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope Enable");
+            configParam(PARAM_SSG_MODE   + i, 0, 7,   0,  opName + " Looping Envelope Mode");
         }
         // reset the emulator
         onSampleRateChange();
@@ -180,17 +181,19 @@ struct Chip2612 : rack::Module {
             apu[channel].setFMS(osc, getParam(channel, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < NUM_OPERATORS; op++) {
-                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL  + op, INPUT_TL  + op, 70 ));
-                apu[channel].setAR (osc, op, getParam(channel, PARAM_AR  + op, INPUT_AR  + op, 31 ));
-                apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1  + op, INPUT_D1  + op, 31 ));
-                apu[channel].setSL (osc, op, getParam(channel, PARAM_SL  + op, INPUT_SL  + op, 15 ));
-                apu[channel].setD2 (osc, op, getParam(channel, PARAM_D2  + op, INPUT_D2  + op, 31 ));
-                apu[channel].setRR (osc, op, getParam(channel, PARAM_RR  + op, INPUT_RR  + op, 15 ));
-                apu[channel].setMUL(osc, op, getParam(channel, PARAM_MUL + op, INPUT_MUL + op, 15 ));
-                apu[channel].setDET(osc, op, getParam(channel, PARAM_DET + op, INPUT_DET + op, 7  ));
-                apu[channel].setRS (osc, op, getParam(channel, PARAM_RS  + op, INPUT_RS  + op, 3  ));
-                apu[channel].setAM (osc, op, getParam(channel, PARAM_AM  + op, INPUT_AM  + op, 1  ));
-                apu[channel].setSSG(osc, op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ), 0xe);
+                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+                apu[channel].setAR (osc, op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+                apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+                apu[channel].setSL (osc, op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+                apu[channel].setD2 (osc, op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+                apu[channel].setRR (osc, op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+                apu[channel].setMUL(osc, op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+                apu[channel].setDET(osc, op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+                apu[channel].setRS (osc, op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+                apu[channel].setAM (osc, op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
+                const auto enableSSG =       getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  );
+                const auto modeSSG =         getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  );
+                apu[channel].setSSG(osc, op, enableSSG, modeSSG);
             }
             // Compute the frequency from the pitch parameter and input. low
             // range of -4 octaves, high range of 6 octaves
@@ -292,9 +295,9 @@ struct Chip2612Widget : ModuleWidget {
         // operator parameters and inputs
         for (unsigned i = 0; i < Chip2612::NUM_OPERATORS; i++) {
             // the X & Y offsets for the operator bank
-            auto offsetX = 348 * (i % (Chip2612::NUM_OPERATORS / 2));
+            auto offsetX = 450 * (i % (Chip2612::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (Chip2612::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 11; parameter++) {
+            for (unsigned parameter = 0; parameter < 12; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * Chip2612::NUM_OPERATORS;
                 auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_TL + offset);

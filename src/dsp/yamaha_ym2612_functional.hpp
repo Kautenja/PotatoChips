@@ -25,11 +25,7 @@
 
 #include "yamaha_ym2612_operators.hpp"
 
-// ---------------------------------------------------------------------------
-// MARK: OPN unit
-// ---------------------------------------------------------------------------
-
-/// @brief OPN/A/B common state.
+/// @brief Emulator common state.
 struct EngineState {
     /// chip type
     uint8_t type = 0;
@@ -95,10 +91,6 @@ struct EngineState {
     int32_t out_fm[8];
 };
 
-// ---------------------------------------------------------------------------
-// MARK: Functional API
-// ---------------------------------------------------------------------------
-
 /// Initialize time tables.
 static void init_timetables(EngineState* engine, double freqbase) {
     // DeTune table
@@ -152,8 +144,8 @@ static void set_prescaler(EngineState* engine) {
 }
 
 /// Set algorithm routing.
-static void set_routing(EngineState* OPN, Voice* CH, int ch) {
-    int32_t *carrier = &OPN->out_fm[ch];
+static void set_routing(EngineState* engine, Voice* CH, int ch) {
+    int32_t *carrier = &engine->out_fm[ch];
 
     int32_t **om1 = &CH->connect1;
     int32_t **om2 = &CH->connect3;
@@ -164,43 +156,43 @@ static void set_routing(EngineState* OPN, Voice* CH, int ch) {
     switch( CH->algorithm ) {
     case 0:
         // M1---C1---MEM---M2---C2---OUT
-        *om1 = &OPN->c1;
-        *oc1 = &OPN->mem;
-        *om2 = &OPN->c2;
-        *memc= &OPN->m2;
+        *om1 = &engine->c1;
+        *oc1 = &engine->mem;
+        *om2 = &engine->c2;
+        *memc= &engine->m2;
         break;
     case 1:
         // M1------+-MEM---M2---C2---OUT
         //      C1-+
-        *om1 = &OPN->mem;
-        *oc1 = &OPN->mem;
-        *om2 = &OPN->c2;
-        *memc= &OPN->m2;
+        *om1 = &engine->mem;
+        *oc1 = &engine->mem;
+        *om2 = &engine->c2;
+        *memc= &engine->m2;
         break;
     case 2:
         // M1-----------------+-C2---OUT
         //      C1---MEM---M2-+
-        *om1 = &OPN->c2;
-        *oc1 = &OPN->mem;
-        *om2 = &OPN->c2;
-        *memc= &OPN->m2;
+        *om1 = &engine->c2;
+        *oc1 = &engine->mem;
+        *om2 = &engine->c2;
+        *memc= &engine->m2;
         break;
     case 3:
         // M1---C1---MEM------+-C2---OUT
         //                 M2-+
-        *om1 = &OPN->c1;
-        *oc1 = &OPN->mem;
-        *om2 = &OPN->c2;
-        *memc= &OPN->c2;
+        *om1 = &engine->c1;
+        *oc1 = &engine->mem;
+        *om2 = &engine->c2;
+        *memc= &engine->c2;
         break;
     case 4:
         // M1---C1-+-OUT
         // M2---C2-+
         // MEM: not used
-        *om1 = &OPN->c1;
+        *om1 = &engine->c1;
         *oc1 = carrier;
-        *om2 = &OPN->c2;
-        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        *om2 = &engine->c2;
+        *memc= &engine->mem;  // store it anywhere where it will not be used
         break;
     case 5:
         //    +----C1----+
@@ -209,17 +201,17 @@ static void set_routing(EngineState* OPN, Voice* CH, int ch) {
         *om1 = nullptr;  // special mark
         *oc1 = carrier;
         *om2 = carrier;
-        *memc= &OPN->m2;
+        *memc= &engine->m2;
         break;
     case 6:
         // M1---C1-+
         //      M2-+-OUT
         //      C2-+
         // MEM: not used
-        *om1 = &OPN->c1;
+        *om1 = &engine->c1;
         *oc1 = carrier;
         *om2 = carrier;
-        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        *memc= &engine->mem;  // store it anywhere where it will not be used
         break;
     case 7:
         // M1-+
@@ -230,43 +222,43 @@ static void set_routing(EngineState* OPN, Voice* CH, int ch) {
         *om1 = carrier;
         *oc1 = carrier;
         *om2 = carrier;
-        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        *memc= &engine->mem;  // store it anywhere where it will not be used
         break;
     }
     CH->connect4 = carrier;
 }
 
 /// advance LFO to next sample.
-static inline void advance_lfo(EngineState* OPN) {
-    if (OPN->lfo_timer_overflow) {  // LFO enabled ?
+static inline void advance_lfo(EngineState* engine) {
+    if (engine->lfo_timer_overflow) {  // LFO enabled ?
         // increment LFO timer
-        OPN->lfo_timer +=  OPN->lfo_timer_add;
+        engine->lfo_timer +=  engine->lfo_timer_add;
         // when LFO is enabled, one level will last for
         // 108, 77, 71, 67, 62, 44, 8 or 5 samples
-        while (OPN->lfo_timer >= OPN->lfo_timer_overflow) {
-            OPN->lfo_timer -= OPN->lfo_timer_overflow;
+        while (engine->lfo_timer >= engine->lfo_timer_overflow) {
+            engine->lfo_timer -= engine->lfo_timer_overflow;
             // There are 128 LFO steps
-            OPN->lfo_cnt = ( OPN->lfo_cnt + 1 ) & 127;
+            engine->lfo_cnt = ( engine->lfo_cnt + 1 ) & 127;
             // triangle (inverted)
             // AM: from 126 to 0 step -2, 0 to 126 step +2
-            if (OPN->lfo_cnt<64)
-                OPN->lfo_AM_step = (OPN->lfo_cnt ^ 63) << 1;
+            if (engine->lfo_cnt<64)
+                engine->lfo_AM_step = (engine->lfo_cnt ^ 63) << 1;
             else
-                OPN->lfo_AM_step = (OPN->lfo_cnt & 63) << 1;
+                engine->lfo_AM_step = (engine->lfo_cnt & 63) << 1;
             // PM works with 4 times slower clock
-            OPN->lfo_PM_step = OPN->lfo_cnt >> 2;
+            engine->lfo_PM_step = engine->lfo_cnt >> 2;
         }
     }
 }
 
-static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
+static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
     // four operators per channel
     for (unsigned i = 0; i < 4; i++) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
         switch(oprtr->state) {
         case EG_ATT:  // attack phase
-            if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_ar) - 1))) {
-                oprtr->volume += (~oprtr->volume * (eg_inc[oprtr->eg_sel_ar + ((OPN->eg_cnt>>oprtr->eg_sh_ar) & 7)])) >> 4;
+            if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_ar) - 1))) {
+                oprtr->volume += (~oprtr->volume * (eg_inc[oprtr->eg_sel_ar + ((engine->eg_cnt>>oprtr->eg_sh_ar) & 7)])) >> 4;
                 if (oprtr->volume <= MIN_ATT_INDEX) {
                     oprtr->volume = MIN_ATT_INDEX;
                     oprtr->state = EG_DEC;
@@ -275,14 +267,14 @@ static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
             break;
         case EG_DEC:  // decay phase
             if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
-                if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
-                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d1r + ((OPN->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
+                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
+                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d1r + ((engine->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
                     if ( oprtr->volume >= static_cast<int32_t>(oprtr->sl) )
                         oprtr->state = EG_SUS;
                 }
             } else {
-                if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
-                    oprtr->volume += eg_inc[oprtr->eg_sel_d1r + ((OPN->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
+                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
+                    oprtr->volume += eg_inc[oprtr->eg_sel_d1r + ((engine->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
                     if (oprtr->volume >= static_cast<int32_t>(oprtr->sl))
                         oprtr->state = EG_SUS;
                 }
@@ -290,8 +282,8 @@ static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
             break;
         case EG_SUS:  // sustain phase
             if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
-                if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
-                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d2r + ((OPN->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
+                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
+                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d2r + ((engine->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
                     if (oprtr->volume >= ENV_QUIET) {
                         oprtr->volume = MAX_ATT_INDEX;
                         if (oprtr->ssg & 0x01) {  // bit 0 = hold
@@ -312,8 +304,8 @@ static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
                     }
                 }
             } else {
-                if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
-                    oprtr->volume += eg_inc[oprtr->eg_sel_d2r + ((OPN->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
+                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
+                    oprtr->volume += eg_inc[oprtr->eg_sel_d2r + ((engine->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
                     if (oprtr->volume >= MAX_ATT_INDEX) {
                         oprtr->volume = MAX_ATT_INDEX;
                         // do not change oprtr->state (verified on real chip)
@@ -322,9 +314,9 @@ static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
             }
             break;
         case EG_REL:  // release phase
-            if (!(OPN->eg_cnt & ((1 << oprtr->eg_sh_rr) - 1))) {
+            if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_rr) - 1))) {
                 // SSG-EG affects Release phase also (Nemesis)
-                oprtr->volume += eg_inc[oprtr->eg_sel_rr + ((OPN->eg_cnt>>oprtr->eg_sh_rr) & 7)];
+                oprtr->volume += eg_inc[oprtr->eg_sel_rr + ((engine->eg_cnt>>oprtr->eg_sh_rr) & 7)];
                 if (oprtr->volume >= MAX_ATT_INDEX) {
                     oprtr->volume = MAX_ATT_INDEX;
                     oprtr->state = EG_OFF;
@@ -348,10 +340,10 @@ static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
     }
 }
 
-static inline void update_phase_lfo_channel(EngineState* OPN, Voice* CH) {
+static inline void update_phase_lfo_channel(EngineState* engine, Voice* CH) {
     uint32_t block_fnum = CH->block_fnum;
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->lfo_PM_step];
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + engine->lfo_PM_step];
     if (lfo_fn_table_index_offset) {  // LFO phase modulation active
         block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
         uint8_t blk = (block_fnum & 0x7000) >> 12;
@@ -359,23 +351,23 @@ static inline void update_phase_lfo_channel(EngineState* OPN, Voice* CH) {
         // key-scale code
         int kc = (blk << 2) | opn_fktable[fn >> 8];
         // phase increment counter
-        int fc = (OPN->fn_table[fn]>>(7 - blk));
+        int fc = (engine->fn_table[fn]>>(7 - blk));
         // detects frequency overflow (credits to Nemesis)
         int finc = fc + CH->operators[Op1].DT[kc];
         // Operator 1
-        if (finc < 0) finc += OPN->fn_max;
+        if (finc < 0) finc += engine->fn_max;
         CH->operators[Op1].phase += (finc * CH->operators[Op1].mul) >> 1;
         // Operator 2
         finc = fc + CH->operators[Op2].DT[kc];
-        if (finc < 0) finc += OPN->fn_max;
+        if (finc < 0) finc += engine->fn_max;
         CH->operators[Op2].phase += (finc * CH->operators[Op2].mul) >> 1;
         // Operator 3
         finc = fc + CH->operators[Op3].DT[kc];
-        if (finc < 0) finc += OPN->fn_max;
+        if (finc < 0) finc += engine->fn_max;
         CH->operators[Op3].phase += (finc * CH->operators[Op3].mul) >> 1;
         // Operator 4
         finc = fc + CH->operators[Op4].DT[kc];
-        if (finc < 0) finc += OPN->fn_max;
+        if (finc < 0) finc += engine->fn_max;
         CH->operators[Op4].phase += (finc * CH->operators[Op4].mul) >> 1;
     } else {  // LFO phase modulation is 0
         CH->operators[Op1].phase += CH->operators[Op1].phase_increment;
@@ -385,10 +377,10 @@ static inline void update_phase_lfo_channel(EngineState* OPN, Voice* CH) {
     }
 }
 
-static inline void chan_calc(EngineState* OPN, Voice* CH) {
+static inline void chan_calc(EngineState* engine, Voice* CH) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-    uint32_t AM = OPN->lfo_AM_step >> CH->ams;
-    OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
+    uint32_t AM = engine->lfo_AM_step >> CH->ams;
+    engine->m2 = engine->c1 = engine->c2 = engine->mem = 0;
     // restore delayed sample (MEM) value to m2 or c2
     *CH->mem_connect = CH->mem_value;
     // oprtr 1
@@ -396,7 +388,7 @@ static inline void chan_calc(EngineState* OPN, Voice* CH) {
     int32_t out = CH->op1_out[0] + CH->op1_out[1];
     CH->op1_out[0] = CH->op1_out[1];
     if (!CH->connect1) {  // algorithm 5
-        OPN->mem = OPN->c1 = OPN->c2 = CH->op1_out[0];
+        engine->mem = engine->c1 = engine->c2 = CH->op1_out[0];
     } else {  // other algorithms
         *CH->connect1 += CH->op1_out[0];
     }
@@ -408,20 +400,20 @@ static inline void chan_calc(EngineState* OPN, Voice* CH) {
     // oprtr 3
     eg_out = CALCULATE_VOLUME(&CH->operators[Op3]);
     if (eg_out < ENV_QUIET)
-        *CH->connect3 += op_calc(CH->operators[Op3].phase, eg_out, OPN->m2);
+        *CH->connect3 += op_calc(CH->operators[Op3].phase, eg_out, engine->m2);
     // oprtr 2
     eg_out = CALCULATE_VOLUME(&CH->operators[Op2]);
     if (eg_out < ENV_QUIET)
-        *CH->connect2 += op_calc(CH->operators[Op2].phase, eg_out, OPN->c1);
+        *CH->connect2 += op_calc(CH->operators[Op2].phase, eg_out, engine->c1);
     // oprtr 4
     eg_out = CALCULATE_VOLUME(&CH->operators[Op4]);
     if (eg_out < ENV_QUIET)
-        *CH->connect4 += op_calc(CH->operators[Op4].phase, eg_out, OPN->c2);
+        *CH->connect4 += op_calc(CH->operators[Op4].phase, eg_out, engine->c2);
     // store current MEM
-    CH->mem_value = OPN->mem;
+    CH->mem_value = engine->mem;
     // update phase counters AFTER output calculations
     if (CH->pms) {
-        update_phase_lfo_channel(OPN, CH);
+        update_phase_lfo_channel(engine, CH);
     } else {  // no LFO phase modulation
         CH->operators[Op1].phase += CH->operators[Op1].phase_increment;
         CH->operators[Op2].phase += CH->operators[Op2].phase_increment;
@@ -432,11 +424,11 @@ static inline void chan_calc(EngineState* OPN, Voice* CH) {
 }
 
 /// update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(EngineState* OPN, Operator* oprtr, int fc, int kc) {
+static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int fc, int kc) {
     int ksr = kc >> oprtr->KSR;
     fc += oprtr->DT[kc];
     // detects frequency overflow (credits to Nemesis)
-    if (fc < 0) fc += OPN->fn_max;
+    if (fc < 0) fc += engine->fn_max;
     // (frequency) phase increment counter
     oprtr->phase_increment = (fc * oprtr->mul) >> 1;
     if ( oprtr->ksr != ksr ) {
@@ -461,14 +453,14 @@ static inline void refresh_fc_eg_slot(EngineState* OPN, Operator* oprtr, int fc,
 }
 
 /// update phase increment counters
-static inline void refresh_fc_eg_chan(EngineState* OPN, Voice* CH) {
+static inline void refresh_fc_eg_chan(EngineState* engine, Voice* CH) {
     if ( CH->operators[Op1].phase_increment==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
-        refresh_fc_eg_slot(OPN, &CH->operators[Op1] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->operators[Op2] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->operators[Op3] , fc , kc );
-        refresh_fc_eg_slot(OPN, &CH->operators[Op4] , fc , kc );
+        refresh_fc_eg_slot(engine, &CH->operators[Op1] , fc , kc );
+        refresh_fc_eg_slot(engine, &CH->operators[Op2] , fc , kc );
+        refresh_fc_eg_slot(engine, &CH->operators[Op3] , fc , kc );
+        refresh_fc_eg_slot(engine, &CH->operators[Op4] , fc , kc );
     }
 }
 
@@ -492,19 +484,19 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     if (gate_mask & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
 }
 
-/// write a OPN register (0x30-0xff).
-static void write_register(EngineState* OPN, int r, int v) {
+/// write a emulator register (0x30-0xff).
+static void write_register(EngineState* engine, int r, int v) {
     uint8_t c = VOICE(r);
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
     if (r >= 0x100) c+=3;
     // get the channel
-    Voice* const CH = &OPN->voices[c];
+    Voice* const CH = &engine->voices[c];
     // get the operator
     Operator* const oprtr = &(CH->operators[OPERATOR(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
-        set_det_mul(&OPN->state, CH, oprtr, v);
+        set_det_mul(&engine->state, CH, oprtr, v);
         break;
     case 0x40:  // TL
         set_tl(CH, oprtr, v);
@@ -514,7 +506,7 @@ static void write_register(EngineState* OPN, int r, int v) {
         break;
     case 0x60:  // bit7 = AM ENABLE, DR
         set_dr(oprtr, v);
-        if (OPN->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
+        if (engine->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
             oprtr->AMmask = (v & 0x80) ? ~0 : 0;
         break;
     case 0x70:  // SR
@@ -534,35 +526,35 @@ static void write_register(EngineState* OPN, int r, int v) {
     case 0xa0:
         switch (OPERATOR(r)) {
         case 0:  {  // 0xa0-0xa2 : FNUM1
-            uint32_t fn = (((uint32_t)( (OPN->state.fn_h) & 7)) << 8) + v;
-            uint8_t blk = OPN->state.fn_h >> 3;
+            uint32_t fn = (((uint32_t)( (engine->state.fn_h) & 7)) << 8) + v;
+            uint8_t blk = engine->state.fn_h >> 3;
             /* key-scale code */
             CH->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
             /* phase increment counter */
-            CH->fc = OPN->fn_table[fn * 2] >> (7 - blk);
+            CH->fc = engine->fn_table[fn * 2] >> (7 - blk);
             /* store fnum in clear form for LFO PM calculations */
             CH->block_fnum = (blk << 11) | fn;
             CH->operators[Op1].phase_increment = -1;
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
-            OPN->state.fn_h = v&0x3f;
+            engine->state.fn_h = v&0x3f;
             break;
         case 2:  // 0xa8-0xaa : 3CH FNUM1
             if (r < 0x100) {
-                uint32_t fn = (((uint32_t)(OPN->special_mode_state.fn_h & 7)) << 8) + v;
-                uint8_t blk = OPN->special_mode_state.fn_h >> 3;
+                uint32_t fn = (((uint32_t)(engine->special_mode_state.fn_h & 7)) << 8) + v;
+                uint8_t blk = engine->special_mode_state.fn_h >> 3;
                 /* keyscale code */
-                OPN->special_mode_state.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+                engine->special_mode_state.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
                 /* phase increment counter */
-                OPN->special_mode_state.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
-                OPN->special_mode_state.block_fnum[c] = (blk << 11) | fn;
-                (OPN->voices)[2].operators[Op1].phase_increment = -1;
+                engine->special_mode_state.fc[c] = engine->fn_table[fn * 2] >> (7 - blk);
+                engine->special_mode_state.block_fnum[c] = (blk << 11) | fn;
+                (engine->voices)[2].operators[Op1].phase_increment = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
             if (r < 0x100)
-                OPN->special_mode_state.fn_h = v&0x3f;
+                engine->special_mode_state.fn_h = v&0x3f;
             break;
         }
         break;
@@ -572,19 +564,19 @@ static void write_register(EngineState* OPN, int r, int v) {
             int feedback = (v >> 3) & 7;
             CH->algorithm = v & 7;
             CH->feedback = feedback ? feedback + 6 : 0;
-            set_routing(OPN, CH, c);
+            set_routing(engine, CH, c);
             break;
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
-            if (OPN->type & TYPE_LFOPAN) {
+            if (engine->type & TYPE_LFOPAN) {
                 // b0-2 PMS
                 // CH->pms = PM depth * 32 (index in lfo_pm_table)
                 CH->pms = (v & 7) * 32;
                 // b4-5 AMS
                 CH->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
                 // PAN :  b7 = L, b6 = R
-                OPN->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
-                OPN->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;
+                engine->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
+                engine->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;
             }
             break;
         }

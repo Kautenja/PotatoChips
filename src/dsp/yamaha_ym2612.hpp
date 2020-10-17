@@ -991,6 +991,385 @@ static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
     CH->connect4 = carrier;
 }
 
+/// advance LFO to next sample.
+static inline void advance_lfo(FM_OPN *OPN) {
+    if (OPN->lfo_timer_overflow) {  // LFO enabled ?
+        // increment LFO timer
+        OPN->lfo_timer +=  OPN->lfo_timer_add;
+        // when LFO is enabled, one level will last for
+        // 108, 77, 71, 67, 62, 44, 8 or 5 samples
+        while (OPN->lfo_timer >= OPN->lfo_timer_overflow) {
+            OPN->lfo_timer -= OPN->lfo_timer_overflow;
+            // There are 128 LFO steps
+            OPN->lfo_cnt = ( OPN->lfo_cnt + 1 ) & 127;
+            // triangle (inverted)
+            // AM: from 126 to 0 step -2, 0 to 126 step +2
+            if (OPN->lfo_cnt<64)
+                OPN->LFO_AM = (OPN->lfo_cnt ^ 63) << 1;
+            else
+                OPN->LFO_AM = (OPN->lfo_cnt & 63) << 1;
+            // PM works with 4 times slower clock
+            OPN->LFO_PM = OPN->lfo_cnt >> 2;
+        }
+    }
+}
+
+static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
+    // four operators per channel
+    for (unsigned i = 4; i > 0; i--) {  // reset SSG-EG swap flag
+        unsigned int swap_flag = 0;
+        switch(SLOT->state) {
+        case EG_ATT:  // attack phase
+            if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_ar) - 1))) {
+                SLOT->volume += (~SLOT->volume * (eg_inc[SLOT->eg_sel_ar + ((OPN->eg_cnt>>SLOT->eg_sh_ar) & 7)])) >> 4;
+                if (SLOT->volume <= MIN_ATT_INDEX) {
+                    SLOT->volume = MIN_ATT_INDEX;
+                    SLOT->state = EG_DEC;
+                }
+            }
+            break;
+        case EG_DEC:  // decay phase
+            if (SLOT->ssg & 0x08) {  // SSG EG type envelope selected
+                if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_d1r) - 1))) {
+                    SLOT->volume += 4 * eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r) & 7)];
+                    if ( SLOT->volume >= static_cast<int32_t>(SLOT->sl) )
+                        SLOT->state = EG_SUS;
+                }
+            } else {
+                if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_d1r) - 1))) {
+                    SLOT->volume += eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r) & 7)];
+                    if (SLOT->volume >= static_cast<int32_t>(SLOT->sl))
+                        SLOT->state = EG_SUS;
+                }
+            }
+            break;
+        case EG_SUS:  // sustain phase
+            if (SLOT->ssg & 0x08) {  // SSG EG type envelope selected
+                if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_d2r) - 1))) {
+                    SLOT->volume += 4 * eg_inc[SLOT->eg_sel_d2r + ((OPN->eg_cnt>>SLOT->eg_sh_d2r) & 7)];
+                    if (SLOT->volume >= ENV_QUIET) {
+                        SLOT->volume = MAX_ATT_INDEX;
+                        if (SLOT->ssg & 0x01) {  // bit 0 = hold
+                            if (SLOT->ssgn & 1) {  // have we swapped once ???
+                                // yes, so do nothing, just hold current level
+                            } else {  // bit 1 = alternate
+                                swap_flag = (SLOT->ssg & 0x02) | 1;
+                            }
+                        } else {  // same as KEY-ON operation
+                            // restart of the Phase Generator should be here
+                            SLOT->phase = 0;
+                            // phase -> Attack
+                            SLOT->volume = 511;
+                            SLOT->state = EG_ATT;
+                            // bit 1 = alternate
+                            swap_flag = (SLOT->ssg & 0x02);
+                        }
+                    }
+                }
+            } else {
+                if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_d2r) - 1))) {
+                    SLOT->volume += eg_inc[SLOT->eg_sel_d2r + ((OPN->eg_cnt>>SLOT->eg_sh_d2r) & 7)];
+                    if (SLOT->volume >= MAX_ATT_INDEX) {
+                        SLOT->volume = MAX_ATT_INDEX;
+                        // do not change SLOT->state (verified on real chip)
+                    }
+                }
+            }
+            break;
+        case EG_REL:  // release phase
+            if (!(OPN->eg_cnt & ((1 << SLOT->eg_sh_rr) - 1))) {
+                // SSG-EG affects Release phase also (Nemesis)
+                SLOT->volume += eg_inc[SLOT->eg_sel_rr + ((OPN->eg_cnt>>SLOT->eg_sh_rr) & 7)];
+                if (SLOT->volume >= MAX_ATT_INDEX) {
+                    SLOT->volume = MAX_ATT_INDEX;
+                    SLOT->state = EG_OFF;
+                }
+            }
+            break;
+        }
+        // get the output volume from the slot
+        unsigned int out = static_cast<uint32_t>(SLOT->volume);
+        // negate output (changes come from alternate bit, init comes from
+        // attack bit)
+        if ((SLOT->ssg & 0x08) && (SLOT->ssgn & 2) && (SLOT->state > EG_REL))
+            out ^= MAX_ATT_INDEX;
+        // we need to store the result here because we are going to change
+        // ssgn in next instruction
+        SLOT->vol_out = out + SLOT->tl;
+        // reverse SLOT inversion flag
+        SLOT->ssgn ^= swap_flag;
+        // increment the slot and decrement the iterator
+        SLOT++;
+    }
+}
+
+static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH) {
+    uint32_t block_fnum = CH->block_fnum;
+    uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->LFO_PM];
+    if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+        block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
+        uint8_t blk = (block_fnum & 0x7000) >> 12;
+        uint32_t fn = block_fnum & 0xfff;
+        // key-scale code
+        int kc = (blk << 2) | opn_fktable[fn >> 8];
+        // phase increment counter
+        int fc = (OPN->fn_table[fn]>>(7 - blk));
+        // detects frequency overflow (credits to Nemesis)
+        int finc = fc + CH->SLOT[SLOT1].DT[kc];
+        // Operator 1
+        if (finc < 0) finc += OPN->fn_max;
+        CH->SLOT[SLOT1].phase += (finc * CH->SLOT[SLOT1].mul) >> 1;
+        // Operator 2
+        finc = fc + CH->SLOT[SLOT2].DT[kc];
+        if (finc < 0) finc += OPN->fn_max;
+        CH->SLOT[SLOT2].phase += (finc * CH->SLOT[SLOT2].mul) >> 1;
+        // Operator 3
+        finc = fc + CH->SLOT[SLOT3].DT[kc];
+        if (finc < 0) finc += OPN->fn_max;
+        CH->SLOT[SLOT3].phase += (finc * CH->SLOT[SLOT3].mul) >> 1;
+        // Operator 4
+        finc = fc + CH->SLOT[SLOT4].DT[kc];
+        if (finc < 0) finc += OPN->fn_max;
+        CH->SLOT[SLOT4].phase += (finc * CH->SLOT[SLOT4].mul) >> 1;
+    } else {  // LFO phase modulation is 0
+        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
+        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
+        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
+        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+    }
+}
+
+static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
+    uint32_t AM = OPN->LFO_AM >> CH->ams;
+    OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
+    // restore delayed sample (MEM) value to m2 or c2
+    *CH->mem_connect = CH->mem_value;
+    // SLOT 1
+    unsigned int eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT1]);
+    int32_t out = CH->op1_out[0] + CH->op1_out[1];
+    CH->op1_out[0] = CH->op1_out[1];
+    if (!CH->connect1) {  // algorithm 5
+        OPN->mem = OPN->c1 = OPN->c2 = CH->op1_out[0];
+    } else {  // other algorithms
+        *CH->connect1 += CH->op1_out[0];
+    }
+    CH->op1_out[1] = 0;
+    if (eg_out < ENV_QUIET) {
+        if (!CH->FB) out = 0;
+        CH->op1_out[1] = op_calc1(CH->SLOT[SLOT1].phase, eg_out, (out << CH->FB) );
+    }
+    // SLOT 3
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT3]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
+    // SLOT 2
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT2]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
+    // SLOT 4
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT4]);
+    if (eg_out < ENV_QUIET)
+        *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
+    // store current MEM
+    CH->mem_value = OPN->mem;
+    // update phase counters AFTER output calculations
+    if (CH->pms) {
+        update_phase_lfo_channel(OPN, CH);
+    } else {  // no LFO phase modulation
+        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
+        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
+        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
+        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+    }
+#undef CALCULATE_VOLUME
+}
+
+/// update phase increment and envelope generator
+static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc) {
+    int ksr = kc >> SLOT->KSR;
+    fc += SLOT->DT[kc];
+    // detects frequency overflow (credits to Nemesis)
+    if (fc < 0) fc += OPN->fn_max;
+    // (frequency) phase increment counter
+    SLOT->Incr = (fc * SLOT->mul) >> 1;
+    if ( SLOT->ksr != ksr ) {
+        SLOT->ksr = ksr;
+        // calculate envelope generator rates
+        if ((SLOT->ar + SLOT->ksr) < 32+62) {
+            SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar  + SLOT->ksr ];
+            SLOT->eg_sel_ar = eg_rate_select[SLOT->ar  + SLOT->ksr ];
+        } else {
+            SLOT->eg_sh_ar  = 0;
+            SLOT->eg_sel_ar = 17*RATE_STEPS;
+        }
+
+        SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
+        SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
+        SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr  + SLOT->ksr];
+
+        SLOT->eg_sel_d1r= eg_rate_select[SLOT->d1r + SLOT->ksr];
+        SLOT->eg_sel_d2r= eg_rate_select[SLOT->d2r + SLOT->ksr];
+        SLOT->eg_sel_rr = eg_rate_select[SLOT->rr  + SLOT->ksr];
+    }
+}
+
+/// update phase increment counters
+static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
+    if ( CH->SLOT[SLOT1].Incr==-1) {
+        int fc = CH->fc;
+        int kc = CH->kcode;
+        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT1] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT2] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT3] , fc , kc );
+        refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT4] , fc , kc );
+    }
+}
+
+/// write a OPN mode register 0x20-0x2f.
+static void OPNWriteMode(FM_OPN *OPN, int r, int v) {
+    switch (r) {
+    case 0x21:  // Test
+        break;
+    case 0x22:  // LFO FREQ (YM2608/YM2610/YM2610B/YM2612)
+        if (v & 8) {  // LFO enabled ?
+            OPN->lfo_timer_overflow = lfo_samples_per_step[v&7] << LFO_SH;
+        } else {
+            // hold LFO waveform in reset state
+            OPN->lfo_timer_overflow = 0;
+            OPN->lfo_timer = 0;
+            OPN->lfo_cnt   = 0;
+            OPN->LFO_PM    = 0;
+            OPN->LFO_AM    = 126;
+        }
+        break;
+    case 0x24:  // timer A High 8
+        OPN->ST.TA = (OPN->ST.TA & 0x0003) | (v << 2);
+        break;
+    case 0x25:  // timer A Low 2
+        OPN->ST.TA = (OPN->ST.TA & 0x03fc) | (v & 3);
+        break;
+    case 0x26:  // timer B
+        OPN->ST.TB = v;
+        break;
+    case 0x27:  // mode, timer control
+        set_timers(&(OPN->ST), v);
+        break;
+    case 0x28:  // key on / off
+        uint8_t c = v & 0x03;
+        if (c == 3) break;
+        if ((v & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
+        FM_CH* CH = OPN->P_CH;
+        CH = &CH[c];
+        if (v & 0x10) FM_KEYON(CH, SLOT1); else FM_KEYOFF(CH, SLOT1);
+        if (v & 0x20) FM_KEYON(CH, SLOT2); else FM_KEYOFF(CH, SLOT2);
+        if (v & 0x40) FM_KEYON(CH, SLOT3); else FM_KEYOFF(CH, SLOT3);
+        if (v & 0x80) FM_KEYON(CH, SLOT4); else FM_KEYOFF(CH, SLOT4);
+        break;
+    }
+}
+
+/// write a OPN register (0x30-0xff).
+static void OPNWriteReg(FM_OPN *OPN, int r, int v) {
+    uint8_t c = OPN_CHAN(r);
+    // 0xX3, 0xX7, 0xXB, 0xXF
+    if (c == 3) return;
+    if (r >= 0x100) c+=3;
+    // get the channel
+    FM_CH* const CH = &OPN->P_CH[c];
+    // get the operator
+    FM_SLOT* const SLOT = &(CH->SLOT[OPN_SLOT(r)]);
+    switch (r & 0xf0) {
+    case 0x30:  // DET, MUL
+        set_det_mul(&OPN->ST, CH, SLOT, v);
+        break;
+    case 0x40:  // TL
+        set_tl(CH, SLOT, v);
+        break;
+    case 0x50:  // KS, AR
+        set_ar_ksr(CH, SLOT, v);
+        break;
+    case 0x60:  // bit7 = AM ENABLE, DR
+        set_dr(SLOT, v);
+        if (OPN->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
+            SLOT->AMmask = (v & 0x80) ? ~0 : 0;
+        break;
+    case 0x70:  // SR
+        set_sr(SLOT, v);
+        break;
+    case 0x80:  // SL, RR
+        set_sl_rr(SLOT, v);
+        break;
+    case 0x90:  // SSG-EG
+        SLOT->ssg  =  v&0x0f;
+        // recalculate EG output
+        if ((SLOT->ssg & 0x08) && (SLOT->ssgn ^ (SLOT->ssg & 0x04)) && (SLOT->state > EG_REL))
+            SLOT->vol_out = ((uint32_t) (0x200 - SLOT->volume) & MAX_ATT_INDEX) + SLOT->tl;
+        else
+            SLOT->vol_out = (uint32_t) SLOT->volume + SLOT->tl;
+        break;
+    case 0xa0:
+        switch (OPN_SLOT(r)) {
+        case 0:  {  // 0xa0-0xa2 : FNUM1
+            uint32_t fn = (((uint32_t)( (OPN->ST.fn_h) & 7)) << 8) + v;
+            uint8_t blk = OPN->ST.fn_h >> 3;
+            /* key-scale code */
+            CH->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+            /* phase increment counter */
+            CH->fc = OPN->fn_table[fn * 2] >> (7 - blk);
+            /* store fnum in clear form for LFO PM calculations */
+            CH->block_fnum = (blk << 11) | fn;
+            CH->SLOT[SLOT1].Incr = -1;
+            break;
+        }
+        case 1:  // 0xa4-0xa6 : FNUM2,BLK
+            OPN->ST.fn_h = v&0x3f;
+            break;
+        case 2:  // 0xa8-0xaa : 3CH FNUM1
+            if (r < 0x100) {
+                uint32_t fn = (((uint32_t)(OPN->SL3.fn_h & 7)) << 8) + v;
+                uint8_t blk = OPN->SL3.fn_h >> 3;
+                /* keyscale code */
+                OPN->SL3.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+                /* phase increment counter */
+                OPN->SL3.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
+                OPN->SL3.block_fnum[c] = (blk << 11) | fn;
+                (OPN->P_CH)[2].SLOT[SLOT1].Incr = -1;
+            }
+            break;
+        case 3:  // 0xac-0xae : 3CH FNUM2, BLK
+            if (r < 0x100)
+                OPN->SL3.fn_h = v&0x3f;
+            break;
+        }
+        break;
+    case 0xb0:
+        switch (OPN_SLOT(r)) {
+        case 0: {  // 0xb0-0xb2 : FB,ALGO
+            int feedback = (v >> 3) & 7;
+            CH->ALGO = v & 7;
+            CH->FB = feedback ? feedback + 6 : 0;
+            setup_connection(OPN, CH, c);
+            break;
+        }
+        case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
+            if (OPN->type & TYPE_LFOPAN) {
+                // b0-2 PMS
+                // CH->pms = PM depth * 32 (index in lfo_pm_table)
+                CH->pms = (v & 7) * 32;
+                // b4-5 AMS
+                CH->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
+                // PAN :  b7 = L, b6 = R
+                OPN->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
+                OPN->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;
+            }
+            break;
+        }
+        break;
+    }
+}
+
 // ---------------------------------------------------------------------------
 // MARK: Object-Oriented API
 // ---------------------------------------------------------------------------

@@ -479,14 +479,14 @@ static void write_mode(EngineState *OPN, int r, int v) {
         break;
     case 0x22:  // LFO FREQ (YM2608/YM2610/YM2610B/YM2612)
         if (v & 8) {  // LFO enabled ?
-            OPN->lfo_timer_overflow = lfo_samples_per_step[v&7] << LFO_SH;
+            OPN->lfo_timer_overflow = lfo_samples_per_step[v & 7] << LFO_SH;
         } else {
             // hold LFO waveform in reset state
             OPN->lfo_timer_overflow = 0;
             OPN->lfo_timer = 0;
-            OPN->lfo_cnt   = 0;
-            OPN->lfo_PM_step    = 0;
-            OPN->lfo_AM_step    = 126;
+            OPN->lfo_cnt = 0;
+            OPN->lfo_PM_step = 0;
+            OPN->lfo_AM_step = 126;
         }
         break;
     case 0x24:  // timer A High 8

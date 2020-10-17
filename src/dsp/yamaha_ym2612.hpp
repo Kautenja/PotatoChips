@@ -34,8 +34,8 @@ class YamahaYM2612 {
  private:
     /// registers
     uint8_t registers[512];
-    /// OPN state
-    EngineState OPN;
+    /// OPN engine state
+    EngineState engine;
     /// channel state
     Voice CH[6];
     /// address line A1
@@ -98,10 +98,10 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        OPN.voices = CH;
-        OPN.type = TYPE_YM2612;
-        OPN.state.clock = clock_rate;
-        OPN.state.rate = sample_rate;
+        engine.voices = CH;
+        engine.type = TYPE_YM2612;
+        engine.state.clock = clock_rate;
+        engine.state.rate = sample_rate;
         reset();
     }
 
@@ -111,9 +111,9 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     void setSampleRate(double clock_rate, double sample_rate) {
-        OPN.state.clock = clock_rate;
-        OPN.state.rate = sample_rate;
-        set_prescaler(&OPN);
+        engine.state.clock = clock_rate;
+        engine.state.rate = sample_rate;
+        set_prescaler(&engine);
     }
 
     /// @brief Reset the emulator to its initial state
@@ -121,37 +121,37 @@ class YamahaYM2612 {
         // clear instance variables
         memset(registers, 0, sizeof registers);
         LFO = MOL = MOR = 0;
-        // set the frequency scaling parameters of the OPN emulator
-        set_prescaler(&OPN);
+        // set the frequency scaling parameters of the engine emulator
+        set_prescaler(&engine);
         // mode 0 , timer reset
-        write_mode(&OPN, 0x27, 0x30);
+        write_mode(&engine, 0x27, 0x30);
         // envelope generator
-        OPN.eg_timer = 0;
-        OPN.eg_cnt = 0;
+        engine.eg_timer = 0;
+        engine.eg_cnt = 0;
         // LFO
-        OPN.lfo_timer = 0;
-        OPN.lfo_cnt = 0;
-        OPN.lfo_AM_step = 126;
-        OPN.lfo_PM_step = 0;
+        engine.lfo_timer = 0;
+        engine.lfo_cnt = 0;
+        engine.lfo_AM_step = 126;
+        engine.lfo_PM_step = 0;
         // state
-        OPN.state.status = 0;
-        OPN.state.mode = 0;
+        engine.state.status = 0;
+        engine.state.mode = 0;
 
-        write_mode(&OPN, 0x27, 0x30);
-        write_mode(&OPN, 0x26, 0x00);
-        write_mode(&OPN, 0x25, 0x00);
-        write_mode(&OPN, 0x24, 0x00);
+        write_mode(&engine, 0x27, 0x30);
+        write_mode(&engine, 0x26, 0x00);
+        write_mode(&engine, 0x25, 0x00);
+        write_mode(&engine, 0x24, 0x00);
 
-        reset_voices(&(OPN.state), &CH[0], 6);
+        reset_voices(&(engine.state), &CH[0], 6);
 
         for (int i = 0xb6; i >= 0xb4; i--) {
-            write_register(&OPN, i, 0xc0);
-            write_register(&OPN, i | 0x100, 0xc0);
+            write_register(&engine, i, 0xc0);
+            write_register(&engine, i | 0x100, 0xc0);
         }
 
         for (int i = 0xb2; i >= 0x30; i--) {
-            write_register(&OPN, i, 0);
-            write_register(&OPN, i | 0x100, 0);
+            write_register(&engine, i, 0);
+            write_register(&engine, i | 0x100, 0);
         }
 
         // DAC mode clear
@@ -164,19 +164,19 @@ class YamahaYM2612 {
     void step() {
         int lt, rt;
         // refresh PG and EG
-        refresh_fc_eg_chan(&OPN, &CH[0]);
-        refresh_fc_eg_chan(&OPN, &CH[1]);
-        refresh_fc_eg_chan(&OPN, &CH[2]);
-        refresh_fc_eg_chan(&OPN, &CH[3]);
-        refresh_fc_eg_chan(&OPN, &CH[4]);
-        refresh_fc_eg_chan(&OPN, &CH[5]);
+        refresh_fc_eg_chan(&engine, &CH[0]);
+        refresh_fc_eg_chan(&engine, &CH[1]);
+        refresh_fc_eg_chan(&engine, &CH[2]);
+        refresh_fc_eg_chan(&engine, &CH[3]);
+        refresh_fc_eg_chan(&engine, &CH[4]);
+        refresh_fc_eg_chan(&engine, &CH[5]);
         // clear outputs
-        OPN.out_fm[0] = 0;
-        OPN.out_fm[1] = 0;
-        OPN.out_fm[2] = 0;
-        OPN.out_fm[3] = 0;
-        OPN.out_fm[4] = 0;
-        OPN.out_fm[5] = 0;
+        engine.out_fm[0] = 0;
+        engine.out_fm[1] = 0;
+        engine.out_fm[2] = 0;
+        engine.out_fm[3] = 0;
+        engine.out_fm[4] = 0;
+        engine.out_fm[5] = 0;
         // update SSG-EG output
         update_ssg_eg_channel(&(CH[0].operators[Op1]));
         update_ssg_eg_channel(&(CH[1].operators[Op1]));
@@ -185,76 +185,76 @@ class YamahaYM2612 {
         update_ssg_eg_channel(&(CH[4].operators[Op1]));
         update_ssg_eg_channel(&(CH[5].operators[Op1]));
         // calculate FM
-        chan_calc(&OPN, &CH[0]);
-        chan_calc(&OPN, &CH[1]);
-        chan_calc(&OPN, &CH[2]);
-        chan_calc(&OPN, &CH[3]);
-        chan_calc(&OPN, &CH[4]);
+        chan_calc(&engine, &CH[0]);
+        chan_calc(&engine, &CH[1]);
+        chan_calc(&engine, &CH[2]);
+        chan_calc(&engine, &CH[3]);
+        chan_calc(&engine, &CH[4]);
         if (is_DAC_enabled)
             *&CH[5].connect4 += out_DAC;
         else
-            chan_calc(&OPN, &CH[5]);
+            chan_calc(&engine, &CH[5]);
         // advance LFO
-        advance_lfo(&OPN);
+        advance_lfo(&engine);
         // advance envelope generator
-        OPN.eg_timer += OPN.eg_timer_add;
-        while (OPN.eg_timer >= OPN.eg_timer_overflow) {
-            OPN.eg_timer -= OPN.eg_timer_overflow;
-            OPN.eg_cnt++;
-            advance_eg_channel(&OPN, &(CH[0].operators[Op1]));
-            advance_eg_channel(&OPN, &(CH[1].operators[Op1]));
-            advance_eg_channel(&OPN, &(CH[2].operators[Op1]));
-            advance_eg_channel(&OPN, &(CH[3].operators[Op1]));
-            advance_eg_channel(&OPN, &(CH[4].operators[Op1]));
-            advance_eg_channel(&OPN, &(CH[5].operators[Op1]));
+        engine.eg_timer += engine.eg_timer_add;
+        while (engine.eg_timer >= engine.eg_timer_overflow) {
+            engine.eg_timer -= engine.eg_timer_overflow;
+            engine.eg_cnt++;
+            advance_eg_channel(&engine, &(CH[0].operators[Op1]));
+            advance_eg_channel(&engine, &(CH[1].operators[Op1]));
+            advance_eg_channel(&engine, &(CH[2].operators[Op1]));
+            advance_eg_channel(&engine, &(CH[3].operators[Op1]));
+            advance_eg_channel(&engine, &(CH[4].operators[Op1]));
+            advance_eg_channel(&engine, &(CH[5].operators[Op1]));
         }
         // clip outputs
-        if (OPN.out_fm[0] > 8191)
-            OPN.out_fm[0] = 8191;
-        else if (OPN.out_fm[0] < -8192)
-            OPN.out_fm[0] = -8192;
-        if (OPN.out_fm[1] > 8191)
-            OPN.out_fm[1] = 8191;
-        else if (OPN.out_fm[1] < -8192)
-            OPN.out_fm[1] = -8192;
-        if (OPN.out_fm[2] > 8191)
-            OPN.out_fm[2] = 8191;
-        else if (OPN.out_fm[2] < -8192)
-            OPN.out_fm[2] = -8192;
-        if (OPN.out_fm[3] > 8191)
-            OPN.out_fm[3] = 8191;
-        else if (OPN.out_fm[3] < -8192)
-            OPN.out_fm[3] = -8192;
-        if (OPN.out_fm[4] > 8191)
-            OPN.out_fm[4] = 8191;
-        else if (OPN.out_fm[4] < -8192)
-            OPN.out_fm[4] = -8192;
-        if (OPN.out_fm[5] > 8191)
-            OPN.out_fm[5] = 8191;
-        else if (OPN.out_fm[5] < -8192)
-            OPN.out_fm[5] = -8192;
+        if (engine.out_fm[0] > 8191)
+            engine.out_fm[0] = 8191;
+        else if (engine.out_fm[0] < -8192)
+            engine.out_fm[0] = -8192;
+        if (engine.out_fm[1] > 8191)
+            engine.out_fm[1] = 8191;
+        else if (engine.out_fm[1] < -8192)
+            engine.out_fm[1] = -8192;
+        if (engine.out_fm[2] > 8191)
+            engine.out_fm[2] = 8191;
+        else if (engine.out_fm[2] < -8192)
+            engine.out_fm[2] = -8192;
+        if (engine.out_fm[3] > 8191)
+            engine.out_fm[3] = 8191;
+        else if (engine.out_fm[3] < -8192)
+            engine.out_fm[3] = -8192;
+        if (engine.out_fm[4] > 8191)
+            engine.out_fm[4] = 8191;
+        else if (engine.out_fm[4] < -8192)
+            engine.out_fm[4] = -8192;
+        if (engine.out_fm[5] > 8191)
+            engine.out_fm[5] = 8191;
+        else if (engine.out_fm[5] < -8192)
+            engine.out_fm[5] = -8192;
         // 6-channels mixing
-        lt  = ((OPN.out_fm[0] >> 0) & OPN.pan[0]);
-        rt  = ((OPN.out_fm[0] >> 0) & OPN.pan[1]);
-        lt += ((OPN.out_fm[1] >> 0) & OPN.pan[2]);
-        rt += ((OPN.out_fm[1] >> 0) & OPN.pan[3]);
-        lt += ((OPN.out_fm[2] >> 0) & OPN.pan[4]);
-        rt += ((OPN.out_fm[2] >> 0) & OPN.pan[5]);
-        lt += ((OPN.out_fm[3] >> 0) & OPN.pan[6]);
-        rt += ((OPN.out_fm[3] >> 0) & OPN.pan[7]);
-        lt += ((OPN.out_fm[4] >> 0) & OPN.pan[8]);
-        rt += ((OPN.out_fm[4] >> 0) & OPN.pan[9]);
-        lt += ((OPN.out_fm[5] >> 0) & OPN.pan[10]);
-        rt += ((OPN.out_fm[5] >> 0) & OPN.pan[11]);
+        lt  = ((engine.out_fm[0] >> 0) & engine.pan[0]);
+        rt  = ((engine.out_fm[0] >> 0) & engine.pan[1]);
+        lt += ((engine.out_fm[1] >> 0) & engine.pan[2]);
+        rt += ((engine.out_fm[1] >> 0) & engine.pan[3]);
+        lt += ((engine.out_fm[2] >> 0) & engine.pan[4]);
+        rt += ((engine.out_fm[2] >> 0) & engine.pan[5]);
+        lt += ((engine.out_fm[3] >> 0) & engine.pan[6]);
+        rt += ((engine.out_fm[3] >> 0) & engine.pan[7]);
+        lt += ((engine.out_fm[4] >> 0) & engine.pan[8]);
+        rt += ((engine.out_fm[4] >> 0) & engine.pan[9]);
+        lt += ((engine.out_fm[5] >> 0) & engine.pan[10]);
+        rt += ((engine.out_fm[5] >> 0) & engine.pan[11]);
         // output buffering
         MOL = lt;
         MOR = rt;
         // timer A control
-        if ((OPN.state.TAC -= static_cast<int>(OPN.state.freqbase * 4096)) <= 0)
-            timer_A_over(&OPN.state);
+        if ((engine.state.TAC -= static_cast<int>(engine.state.freqbase * 4096)) <= 0)
+            timer_A_over(&engine.state);
         // timer B control
-        if ((OPN.state.TBC -= static_cast<int>(OPN.state.freqbase * 4096)) <= 0)
-            timer_B_over(&OPN.state);
+        if ((engine.state.TBC -= static_cast<int>(engine.state.freqbase * 4096)) <= 0)
+            timer_B_over(&engine.state);
     }
 
     /// @brief Write data to a register on the chip.
@@ -265,14 +265,14 @@ class YamahaYM2612 {
     void write(uint8_t address, uint8_t data) {
         switch (address & 3) {
         case 0:  // address port 0
-            OPN.state.address = data;
+            engine.state.address = data;
             addr_A1 = 0;
             break;
         case 1:  // data port 0
             // verified on real YM2608
             if (addr_A1 != 0) break;
             // get the address from the latch and write the data
-            address = OPN.state.address;
+            address = engine.state.address;
             registers[address] = data;
             switch (address & 0xf0) {
             case 0x20:  // 0x20-0x2f Mode
@@ -283,25 +283,25 @@ class YamahaYM2612 {
                 case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
                     is_DAC_enabled = data & 0x80;
                     break;
-                default:  // OPN section, write register
-                    write_mode(&OPN, address, data);
+                default:  // engine section, write register
+                    write_mode(&engine, address, data);
                 }
                 break;
-            default:  // 0x30-0xff OPN section, write register
-                write_register(&OPN, address, data);
+            default:  // 0x30-0xff engine section, write register
+                write_register(&engine, address, data);
             }
             break;
         case 2:  // address port 1
-            OPN.state.address = data;
+            engine.state.address = data;
             addr_A1 = 1;
             break;
         case 3:  // data port 1
             // verified on real YM2608
             if (addr_A1 != 1) break;
             // get the address from the latch and right to the given register
-            address = OPN.state.address;
+            address = engine.state.address;
             registers[address | 0x100] = data;
-            write_register(&OPN, address | 0x100, data);
+            write_register(&engine, address | 0x100, data);
             break;
         }
     }
@@ -369,7 +369,7 @@ class YamahaYM2612 {
         if (LFO == value) return;
         // update the local LFO value
         LFO = value;
-        // set the LFO on the OPN emulator
+        // set the LFO on the engine emulator
         setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
     }
 
@@ -663,7 +663,7 @@ class YamahaYM2612 {
     inline void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].DET == value) return;
         channels[channel].operators[slot].DET = value;
-        CH[channel].operators[slots_idx[slot]].DT  = OPN.state.dt_tab[(value)&7];
+        CH[channel].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
         CH[channel].operators[Op1].phase_increment = -1;
     }
 

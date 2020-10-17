@@ -461,13 +461,95 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 }
 
 // ---------------------------------------------------------------------------
-// MARK: FM operators
+// MARK: Global Operator State
 // ---------------------------------------------------------------------------
 
+// TODO: document and move
 #define getVoicePart(ch) (ch / 3)
 #define getVoiceOffset(reg, ch) (reg + (ch % 3))
 
-/// @brief A single FM operator (SLOT)
+/// @brief The global state for all FM operators.
+struct GlobalOperatorState {
+    /// master clock (Hz)
+    int clock = 0;
+    /// sampling rate (Hz)
+    int rate = 0;
+    /// frequency base
+    double freqbase = 0;
+    /// timer pre-scaler
+    int timer_prescaler = 0;
+    /// address register
+    uint8_t address = 0;
+    /// interrupt level
+    uint8_t irq = 0;
+    /// IRQ mask
+    uint8_t irqmask = 0;
+    /// status flag
+    uint8_t status = 0;
+    /// mode  CSM / 3SLOT
+    uint32_t mode = 0;
+    /// pre-scaler selector
+    uint8_t prescaler_sel = 0;
+    /// freq latch
+    uint8_t fn_h = 0;
+    /// timer A
+    int32_t TA = 0;
+    /// timer A counter
+    int32_t TAC = 0;
+    /// timer B
+    uint8_t TB = 0;
+    /// timer B counter
+    int32_t TBC = 0;
+    /// DETune table
+    int32_t dt_tab[8][32];
+};
+
+/// OPN Mode Register Write
+static inline void set_timers(GlobalOperatorState* state, int value) {
+    // b7 = CSM MODE
+    // b6 = 3 slot mode
+    // b5 = reset b
+    // b4 = reset a
+    // b3 = timer enable b
+    // b2 = timer enable a
+    // b1 = load b
+    // b0 = load a
+    state->mode = value;
+    // load b
+    if (value & 0x02) {
+        if (state->TBC == 0) state->TBC = (256 - state->TB) << 4;
+    } else {  // stop timer b
+        state->TBC = 0;
+    }
+    // load a
+    if (value & 0x01) {
+        if (state->TAC == 0) state->TAC = (1024 - state->TA);
+    } else {  // stop timer a
+        state->TAC = 0;
+    }
+}
+
+/// @brief Timer A Overflow, clear or reload the counter.
+///
+/// @param state the operator state for which timer A is over
+///
+static inline void timer_A_over(GlobalOperatorState* state) {
+    state->TAC = (1024 - state->TA);
+}
+
+/// @brief Timer B Overflow, clear or reload the counter.
+///
+/// @param state the operator state for which timer B is over
+///
+static inline void timer_B_over(GlobalOperatorState* state) {
+    state->TBC = (256 - state->TB) << 4;
+}
+
+// ---------------------------------------------------------------------------
+// MARK: FM operators
+// ---------------------------------------------------------------------------
+
+/// @brief A single FM operator
 struct Operator {
     /// detune :dt_tab[DT]
     int32_t *DT = 0;
@@ -540,41 +622,9 @@ struct Operator {
     uint8_t dr = 0;
 };
 
-/// @brief The state of an FM operator.
-struct OperatorState {
-    /// master clock (Hz)
-    int clock = 0;
-    /// sampling rate (Hz)
-    int rate = 0;
-    /// frequency base
-    double freqbase = 0;
-    /// timer pre-scaler
-    int timer_prescaler = 0;
-    /// address register
-    uint8_t address = 0;
-    /// interrupt level
-    uint8_t irq = 0;
-    /// IRQ mask
-    uint8_t irqmask = 0;
-    /// status flag
-    uint8_t status = 0;
-    /// mode  CSM / 3SLOT
-    uint32_t mode = 0;
-    /// pre-scaler selector
-    uint8_t prescaler_sel = 0;
-    /// freq latch
-    uint8_t fn_h = 0;
-    /// timer A
-    int32_t TA = 0;
-    /// timer A counter
-    int32_t TAC = 0;
-    /// timer B
-    uint8_t TB = 0;
-    /// timer B counter
-    int32_t TBC = 0;
-    /// DETune table
-    int32_t dt_tab[8][32];
-};
+// ---------------------------------------------------------------------------
+// MARK: 4-Operator FM Synthesis Voices
+// ---------------------------------------------------------------------------
 
 /// @brief A single 4-operator FM voice.
 struct Voice {
@@ -621,47 +671,6 @@ struct Voice {
     uint8_t LR_AMS_FMS = 0;
 };
 
-/// OPN Mode Register Write
-static inline void set_timers(OperatorState* state, int value) {
-    // b7 = CSM MODE
-    // b6 = 3 slot mode
-    // b5 = reset b
-    // b4 = reset a
-    // b3 = timer enable b
-    // b2 = timer enable a
-    // b1 = load b
-    // b0 = load a
-    state->mode = value;
-    // load b
-    if (value & 0x02) {
-        if (state->TBC == 0) state->TBC = (256 - state->TB) << 4;
-    } else {  // stop timer b
-        state->TBC = 0;
-    }
-    // load a
-    if (value & 0x01) {
-        if (state->TAC == 0) state->TAC = (1024 - state->TA);
-    } else {  // stop timer a
-        state->TAC = 0;
-    }
-}
-
-/// @brief Timer A Overflow, clear or reload the counter.
-///
-/// @param state the operator state for which timer A is over
-///
-static inline void timer_A_over(OperatorState* state) {
-    state->TAC = (1024 - state->TA);
-}
-
-/// @brief Timer B Overflow, clear or reload the counter.
-///
-/// @param state the operator state for which timer B is over
-///
-static inline void timer_B_over(OperatorState* state) {
-    state->TBC = (256 - state->TB) << 4;
-}
-
 /// Set the key-on flag for the given voice and slot.
 ///
 /// @param voice the voice to set the key-on flag for
@@ -693,7 +702,7 @@ static inline void set_keyoff(Voice* voice, unsigned slot) {
 }
 
 /// set detune & multiplier.
-static inline void set_det_mul(OperatorState* state, Voice* voice, Operator* oprtr, int value) {
+static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operator* oprtr, int value) {
     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
     oprtr->DT = state->dt_tab[(value >> 4) & 7];
     voice->operators[Op1].phase_increment = -1;
@@ -726,42 +735,42 @@ static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
 }
 
 /// set decay rate
-static inline void set_dr(Operator *SLOT, int v) {
+static inline void set_dr(Operator* SLOT, int v) {
     SLOT->d1r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
     SLOT->eg_sel_d1r= eg_rate_select[SLOT->d1r + SLOT->ksr];
 }
 
 /// set sustain rate
-static inline void set_sr(Operator *SLOT, int v) {
+static inline void set_sr(Operator* SLOT, int v) {
     SLOT->d2r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
     SLOT->eg_sel_d2r= eg_rate_select[SLOT->d2r + SLOT->ksr];
 }
 
 /// set release rate
-static inline void set_sl_rr(Operator *SLOT, int v) {
+static inline void set_sl_rr(Operator* SLOT, int v) {
     SLOT->sl = sl_table[v >> 4];
     SLOT->rr = 34 + ((v & 0x0f) << 2);
     SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr + SLOT->ksr];
     SLOT->eg_sel_rr = eg_rate_select[SLOT->rr + SLOT->ksr];
 }
 
-static void reset_channels(OperatorState *ST, Voice *CH, int num) {
+static void reset_channels(GlobalOperatorState* state, Voice* voices, int num) {
     // normal mode
-    ST->mode   = 0;
-    ST->TA     = 0;
-    ST->TAC    = 0;
-    ST->TB     = 0;
-    ST->TBC    = 0;
+    state->mode = 0;
+    state->TA   = 0;
+    state->TAC  = 0;
+    state->TB   = 0;
+    state->TBC  = 0;
     for(int c = 0; c < num; c++) {
-        CH[c].fc = 0;
+        voices[c].fc = 0;
         for(int s = 0; s < 4; s++) {
-            CH[c].operators[s].ssg = 0;
-            CH[c].operators[s].ssgn = 0;
-            CH[c].operators[s].state= EG_OFF;
-            CH[c].operators[s].volume = MAX_ATT_INDEX;
-            CH[c].operators[s].vol_out= MAX_ATT_INDEX;
+            voices[c].operators[s].ssg = 0;
+            voices[c].operators[s].ssgn = 0;
+            voices[c].operators[s].state= EG_OFF;
+            voices[c].operators[s].volume = MAX_ATT_INDEX;
+            voices[c].operators[s].vol_out= MAX_ATT_INDEX;
         }
     }
 }
@@ -769,7 +778,7 @@ static void reset_channels(OperatorState *ST, Voice *CH, int num) {
 /// SSG-EG update process
 /// The behavior is based upon Nemesis tests on real hardware
 /// This is actually executed before each samples
-static void update_ssg_eg_channel(Operator *SLOT) {
+static void update_ssg_eg_channel(Operator* SLOT) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {
         // detect SSG-EG transition. this is not required during release phase
@@ -820,7 +829,7 @@ struct EngineState {
     /// chip type
     uint8_t type = 0;
     /// general state
-    OperatorState state;
+    GlobalOperatorState state;
     /// 3 slot mode state (special mode where each operator on channel 3 can
     /// have a different root frequency)
     struct SpecialModeState {
@@ -1045,7 +1054,7 @@ static inline void advance_lfo(EngineState *OPN) {
     }
 }
 
-static inline void advance_eg_channel(EngineState *OPN, Operator *SLOT) {
+static inline void advance_eg_channel(EngineState *OPN, Operator* SLOT) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
@@ -1218,7 +1227,7 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
 }
 
 /// update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(EngineState *OPN, Operator *SLOT, int fc, int kc) {
+static inline void refresh_fc_eg_slot(EngineState *OPN, Operator* SLOT, int fc, int kc) {
     int ksr = kc >> SLOT->KSR;
     fc += SLOT->DT[kc];
     // detects frequency overflow (credits to Nemesis)

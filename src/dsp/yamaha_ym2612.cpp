@@ -917,39 +917,38 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
     }
 }
 
-/* initialize time tables */
-static void init_timetables(FM_OPN *OPN, double freqbase)
-{
-    int i,d;
-    double rate;
-
-    /* DeTune table */
-    for (d = 0;d <= 3;d++)
-    {
-        for (i = 0;i <= 31;i++)
-        {
-            rate = ((double)dt_tab[d*32 + i]) * freqbase * (1<<(FREQ_SH-10)); /* -10 because chip works with 10.10 fixed point, while we use 16.16 */
-            OPN->ST.dt_tab[d][i]   = (int32_t) rate;
-            OPN->ST.dt_tab[d+4][i] = -OPN->ST.dt_tab[d][i];
+/// initialize time tables
+static void init_timetables(FM_OPN *OPN, double freqbase) {
+    // DeTune table
+    for (int d = 0; d <= 3; d++) {
+        for (int i = 0; i <= 31; i++) {
+            // -10 because chip works with 10.10 fixed point, while we use 16.16
+            double rate = ((double) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+            OPN->ST.dt_tab[d][i] = (int32_t) rate;
+            OPN->ST.dt_tab[d + 4][i] = -OPN->ST.dt_tab[d][i];
         }
     }
-
-    /* there are 2048 FNUMs that can be generated using FNUM/BLK registers
-    but LFO works with one more bit of a precision so we really need 4096 elements */
-    /* calculate fnumber -> increment counter table */
-    for(i = 0; i < 4096; i++)
-    {
-        /* freq table for octave 7 */
-        /* OPN phase increment counter = 20bit */
-        /* the correct formula is : F-Number = (144 * fnote * 2^20 / M) / 2^(B-1) */
-        /* where sample clock is  M/144 */
-        /* this means the increment value for one clock sample is FNUM * 2^(B-1) = FNUM * 64 for octave 7 */
-        /* we also need to handle the ratio between the chip frequency and the emulated frequency (can be 1.0)  */
-        OPN->fn_table[i] = (uint32_t)( (double)i * 32 * freqbase * (1<<(FREQ_SH-10)) ); /* -10 because chip works with 10.10 fixed point, while we use 16.16 */
+    // there are 2048 FNUMs that can be generated using FNUM/BLK registers
+    // but LFO works with one more bit of a precision so we really need 4096
+    // elements. calculate fnumber -> increment counter table
+    for(int i = 0; i < 4096; i++) {
+        // freq table for octave 7
+        // OPN phase increment counter = 20bit
+        // the correct formula is
+        //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
+        // where sample clock is: M / 144
+        // this means the increment value for one clock sample is
+        //     FNUM * 2^(B-1) = FNUM * 64
+        // for octave 7
+        // we also need to handle the ratio between the chip frequency and
+        // the emulated frequency (can be 1.0)
+        // NOTE:
+        // -10 because chip works with 10.10 fixed point, while we use 16.16
+        OPN->fn_table[i] = (uint32_t)((double) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
     }
-
-    /* maximal frequency is required for Phase overflow calculation, register size is 17 bits (Nemesis) */
-    OPN->fn_max = (uint32_t)( (double)0x20000 * freqbase * (1<<(FREQ_SH-10)) );
+    // maximal frequency is required for Phase overflow calculation, register
+    // size is 17 bits (Nemesis)
+    OPN->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
 }
 
 /// Set pre-scaler and make time tables.

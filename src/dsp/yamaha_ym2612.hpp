@@ -820,7 +820,7 @@ struct EngineState {
     /// chip type
     uint8_t type = 0;
     /// general state
-    OperatorState ST;
+    OperatorState state;
     /// 3 slot mode state (special mode where each operator on channel 3 can
     /// have a different root frequency)
     struct SpecialModeState {
@@ -892,8 +892,8 @@ static void init_timetables(EngineState *OPN, double freqbase) {
         for (int i = 0; i <= 31; i++) {
             // -10 because chip works with 10.10 fixed point, while we use 16.16
             double rate = ((double) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
-            OPN->ST.dt_tab[d][i] = (int32_t) rate;
-            OPN->ST.dt_tab[d + 4][i] = -OPN->ST.dt_tab[d][i];
+            OPN->state.dt_tab[d][i] = (int32_t) rate;
+            OPN->state.dt_tab[d + 4][i] = -OPN->state.dt_tab[d][i];
         }
     }
     // there are 2048 FNUMs that can be generated using FNUM/BLK registers
@@ -925,16 +925,16 @@ static void init_timetables(EngineState *OPN, double freqbase) {
 ///
 static void set_prescaler(EngineState *OPN) {
     // frequency base
-    OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
+    OPN->state.freqbase = (OPN->state.rate) ? ((double)OPN->state.clock / OPN->state.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
     //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
-    OPN->eg_timer_add = (1 << EG_SH) * OPN->ST.freqbase / 16;
+    OPN->eg_timer_add = (1 << EG_SH) * OPN->state.freqbase / 16;
     OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
     // LFO timer increment (updates every 16 samples)
-    OPN->lfo_timer_add = (1 << LFO_SH) * OPN->ST.freqbase / 16;
+    OPN->lfo_timer_add = (1 << LFO_SH) * OPN->state.freqbase / 16;
     // make time tables
-    init_timetables(OPN, OPN->ST.freqbase);
+    init_timetables(OPN, OPN->state.freqbase);
 }
 
 /// set algorithm connection
@@ -1276,16 +1276,16 @@ static void write_mode(EngineState *OPN, int r, int v) {
         }
         break;
     case 0x24:  // timer A High 8
-        OPN->ST.TA = (OPN->ST.TA & 0x0003) | (v << 2);
+        OPN->state.TA = (OPN->state.TA & 0x0003) | (v << 2);
         break;
     case 0x25:  // timer A Low 2
-        OPN->ST.TA = (OPN->ST.TA & 0x03fc) | (v & 3);
+        OPN->state.TA = (OPN->state.TA & 0x03fc) | (v & 3);
         break;
     case 0x26:  // timer B
-        OPN->ST.TB = v;
+        OPN->state.TB = v;
         break;
     case 0x27:  // mode, timer control
-        set_timers(&(OPN->ST), v);
+        set_timers(&(OPN->state), v);
         break;
     case 0x28:  // key on / off
         uint8_t c = v & 0x03;
@@ -1313,7 +1313,7 @@ static void write_register(EngineState *OPN, int r, int v) {
     Operator* const SLOT = &(CH->operators[getOp(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
-        set_det_mul(&OPN->ST, CH, SLOT, v);
+        set_det_mul(&OPN->state, CH, SLOT, v);
         break;
     case 0x40:  // TL
         set_tl(CH, SLOT, v);
@@ -1343,8 +1343,8 @@ static void write_register(EngineState *OPN, int r, int v) {
     case 0xa0:
         switch (getOp(r)) {
         case 0:  {  // 0xa0-0xa2 : FNUM1
-            uint32_t fn = (((uint32_t)( (OPN->ST.fn_h) & 7)) << 8) + v;
-            uint8_t blk = OPN->ST.fn_h >> 3;
+            uint32_t fn = (((uint32_t)( (OPN->state.fn_h) & 7)) << 8) + v;
+            uint8_t blk = OPN->state.fn_h >> 3;
             /* key-scale code */
             CH->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
             /* phase increment counter */
@@ -1355,7 +1355,7 @@ static void write_register(EngineState *OPN, int r, int v) {
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
-            OPN->ST.fn_h = v&0x3f;
+            OPN->state.fn_h = v&0x3f;
             break;
         case 2:  // 0xa8-0xaa : 3CH FNUM1
             if (r < 0x100) {
@@ -1476,8 +1476,8 @@ class YamahaYM2612 {
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
         OPN.P_CH = CH;
         OPN.type = TYPE_YM2612;
-        OPN.ST.clock = clock_rate;
-        OPN.ST.rate = sample_rate;
+        OPN.state.clock = clock_rate;
+        OPN.state.rate = sample_rate;
         reset();
     }
 
@@ -1487,8 +1487,8 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     void setSampleRate(double clock_rate, double sample_rate) {
-        OPN.ST.clock = clock_rate;
-        OPN.ST.rate = sample_rate;
+        OPN.state.clock = clock_rate;
+        OPN.state.rate = sample_rate;
         set_prescaler(&OPN);
     }
 
@@ -1510,15 +1510,15 @@ class YamahaYM2612 {
         OPN.LFO_AM = 126;
         OPN.LFO_PM = 0;
         // state
-        OPN.ST.status = 0;
-        OPN.ST.mode = 0;
+        OPN.state.status = 0;
+        OPN.state.mode = 0;
 
         write_mode(&OPN, 0x27, 0x30);
         write_mode(&OPN, 0x26, 0x00);
         write_mode(&OPN, 0x25, 0x00);
         write_mode(&OPN, 0x24, 0x00);
 
-        reset_channels(&(OPN.ST), &CH[0], 6);
+        reset_channels(&(OPN.state), &CH[0], 6);
 
         for (int i = 0xb6; i >= 0xb4; i--) {
             write_register(&OPN, i, 0xc0);
@@ -1626,11 +1626,11 @@ class YamahaYM2612 {
         MOL = lt;
         MOR = rt;
         // timer A control
-        if ((OPN.ST.TAC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
-            timer_A_over(&OPN.ST);
+        if ((OPN.state.TAC -= static_cast<int>(OPN.state.freqbase * 4096)) <= 0)
+            timer_A_over(&OPN.state);
         // timer B control
-        if ((OPN.ST.TBC -= static_cast<int>(OPN.ST.freqbase * 4096)) <= 0)
-            timer_B_over(&OPN.ST);
+        if ((OPN.state.TBC -= static_cast<int>(OPN.state.freqbase * 4096)) <= 0)
+            timer_B_over(&OPN.state);
     }
 
     /// @brief Write data to a register on the chip.
@@ -1641,14 +1641,14 @@ class YamahaYM2612 {
     void write(uint8_t address, uint8_t data) {
         switch (address & 3) {
         case 0:  // address port 0
-            OPN.ST.address = data;
+            OPN.state.address = data;
             addr_A1 = 0;
             break;
         case 1:  // data port 0
             // verified on real YM2608
             if (addr_A1 != 0) break;
             // get the address from the latch and write the data
-            address = OPN.ST.address;
+            address = OPN.state.address;
             registers[address] = data;
             switch (address & 0xf0) {
             case 0x20:  // 0x20-0x2f Mode
@@ -1668,14 +1668,14 @@ class YamahaYM2612 {
             }
             break;
         case 2:  // address port 1
-            OPN.ST.address = data;
+            OPN.state.address = data;
             addr_A1 = 1;
             break;
         case 3:  // data port 1
             // verified on real YM2608
             if (addr_A1 != 1) break;
             // get the address from the latch and right to the given register
-            address = OPN.ST.address;
+            address = OPN.state.address;
             registers[address | 0x100] = data;
             write_register(&OPN, address | 0x100, data);
             break;
@@ -2039,7 +2039,7 @@ class YamahaYM2612 {
     inline void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].DET == value) return;
         channels[channel].operators[slot].DET = value;
-        CH[channel].operators[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
+        CH[channel].operators[slots_idx[slot]].DT  = OPN.state.dt_tab[(value)&7];
         CH[channel].operators[Op1].phase_increment = -1;
     }
 

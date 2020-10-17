@@ -892,7 +892,7 @@ static void init_timetables(FM_OPN *OPN, double freqbase) {
 ///
 /// @param OPN the OPN emulator to set the pre-scaler and create timetables for
 ///
-static void OPNSetPrescaler(FM_OPN *OPN) {
+static void set_prescaler(FM_OPN *OPN) {
     // frequency base
     OPN->ST.freqbase = (OPN->ST.rate) ? ((double)OPN->ST.clock / OPN->ST.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
@@ -1228,7 +1228,7 @@ static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
 }
 
 /// write a OPN mode register 0x20-0x2f.
-static void OPNWriteMode(FM_OPN *OPN, int r, int v) {
+static void write_mode(FM_OPN *OPN, int r, int v) {
     switch (r) {
     case 0x21:  // Test
         break;
@@ -1271,7 +1271,7 @@ static void OPNWriteMode(FM_OPN *OPN, int r, int v) {
 }
 
 /// write a OPN register (0x30-0xff).
-static void OPNWriteReg(FM_OPN *OPN, int r, int v) {
+static void write_register(FM_OPN *OPN, int r, int v) {
     uint8_t c = OPN_CHAN(r);
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
@@ -1458,7 +1458,7 @@ class YamahaYM2612 {
     void setSampleRate(double clock_rate, double sample_rate) {
         OPN.ST.clock = clock_rate;
         OPN.ST.rate = sample_rate;
-        OPNSetPrescaler(&OPN);
+        set_prescaler(&OPN);
     }
 
     /// @brief Reset the emulator to its initial state
@@ -1467,9 +1467,9 @@ class YamahaYM2612 {
         memset(registers, 0, sizeof registers);
         LFO = MOL = MOR = 0;
         // set the frequency scaling parameters of the OPN emulator
-        OPNSetPrescaler(&OPN);
+        set_prescaler(&OPN);
         // mode 0 , timer reset
-        OPNWriteMode(&OPN, 0x27, 0x30);
+        write_mode(&OPN, 0x27, 0x30);
         // envelope generator
         OPN.eg_timer = 0;
         OPN.eg_cnt = 0;
@@ -1482,21 +1482,21 @@ class YamahaYM2612 {
         OPN.ST.status = 0;
         OPN.ST.mode = 0;
 
-        OPNWriteMode(&OPN, 0x27, 0x30);
-        OPNWriteMode(&OPN, 0x26, 0x00);
-        OPNWriteMode(&OPN, 0x25, 0x00);
-        OPNWriteMode(&OPN, 0x24, 0x00);
+        write_mode(&OPN, 0x27, 0x30);
+        write_mode(&OPN, 0x26, 0x00);
+        write_mode(&OPN, 0x25, 0x00);
+        write_mode(&OPN, 0x24, 0x00);
 
         reset_channels(&(OPN.ST), &CH[0], 6);
 
         for (int i = 0xb6; i >= 0xb4; i--) {
-            OPNWriteReg(&OPN, i, 0xc0);
-            OPNWriteReg(&OPN, i | 0x100, 0xc0);
+            write_register(&OPN, i, 0xc0);
+            write_register(&OPN, i | 0x100, 0xc0);
         }
 
         for (int i = 0xb2; i >= 0x30; i--) {
-            OPNWriteReg(&OPN, i, 0);
-            OPNWriteReg(&OPN, i | 0x100, 0);
+            write_register(&OPN, i, 0);
+            write_register(&OPN, i | 0x100, 0);
         }
 
         // DAC mode clear
@@ -1629,11 +1629,11 @@ class YamahaYM2612 {
                     is_DAC_enabled = data & 0x80;
                     break;
                 default:  // OPN section, write register
-                    OPNWriteMode(&OPN, address, data);
+                    write_mode(&OPN, address, data);
                 }
                 break;
             default:  // 0x30-0xff OPN section, write register
-                OPNWriteReg(&OPN, address, data);
+                write_register(&OPN, address, data);
             }
             break;
         case 2:  // address port 1
@@ -1646,7 +1646,7 @@ class YamahaYM2612 {
             // get the address from the latch and right to the given register
             address = OPN.ST.address;
             registers[address | 0x100] = data;
-            OPNWriteReg(&OPN, address | 0x100, data);
+            write_register(&OPN, address | 0x100, data);
             break;
         }
     }

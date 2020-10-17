@@ -1607,7 +1607,49 @@ class YamahaYM2612 {
     /// @param address the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///
-    void write(uint8_t address, uint8_t data);
+    void write(uint8_t address, uint8_t data) {
+        switch (address & 3) {
+        case 0:  // address port 0
+            OPN.ST.address = data;
+            addr_A1 = 0;
+            break;
+        case 1:  // data port 0
+            // verified on real YM2608
+            if (addr_A1 != 0) break;
+            // get the address from the latch and write the data
+            address = OPN.ST.address;
+            registers[address] = data;
+            switch (address & 0xf0) {
+            case 0x20:  // 0x20-0x2f Mode
+                switch (address) {
+                case 0x2a:  // DAC data (YM2612), level unknown
+                    out_DAC = ((int) data - 0x80) << 6;
+                    break;
+                case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
+                    is_DAC_enabled = data & 0x80;
+                    break;
+                default:  // OPN section, write register
+                    OPNWriteMode(&OPN, address, data);
+                }
+                break;
+            default:  // 0x30-0xff OPN section, write register
+                OPNWriteReg(&OPN, address, data);
+            }
+            break;
+        case 2:  // address port 1
+            OPN.ST.address = data;
+            addr_A1 = 1;
+            break;
+        case 3:  // data port 1
+            // verified on real YM2608
+            if (addr_A1 != 1) break;
+            // get the address from the latch and right to the given register
+            address = OPN.ST.address;
+            registers[address | 0x100] = data;
+            OPNWriteReg(&OPN, address | 0x100, data);
+            break;
+        }
+    }
 
     /// @brief Set part of a 16-bit register to a given 8-bit value.
     ///

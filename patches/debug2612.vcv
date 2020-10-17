@@ -98,7 +98,7 @@
         },
         {
           "id": 2,
-          "value": 2.0
+          "value": 4.0
         },
         {
           "id": 3,
@@ -106,7 +106,7 @@
         },
         {
           "id": 4,
-          "value": 3.0
+          "value": 7.0
         },
         {
           "id": 5,
@@ -628,7 +628,7 @@
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
-      "inputId": 11,
+      "inputId": 9,
       "color": "#c9b70e"
     }
   ]

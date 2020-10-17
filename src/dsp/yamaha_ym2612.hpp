@@ -593,6 +593,68 @@ struct FM_ST {
 };
 
 // ---------------------------------------------------------------------------
+// MARK: FM operators
+// ---------------------------------------------------------------------------
+
+/// OPN Mode Register Write
+static inline void set_timers(FM_ST *ST, int v) {
+    // b7 = CSM MODE
+    // b6 = 3 slot mode
+    // b5 = reset b
+    // b4 = reset a
+    // b3 = timer enable b
+    // b2 = timer enable a
+    // b1 = load b
+    // b0 = load a
+    ST->mode = v;
+    // load b
+    if (v & 0x02) {
+        if (ST->TBC == 0) ST->TBC = (256 - ST->TB) << 4;
+    } else {  // stop timer b
+        ST->TBC = 0;
+    }
+    // load a
+    if (v & 0x01) {
+        if (ST->TAC == 0) ST->TAC = (1024 - ST->TA);
+    } else {  // stop timer a
+        ST->TAC = 0;
+    }
+}
+
+/// Timer A Overflow, clear or reload the counter
+static inline void TimerAOver(FM_ST *ST) { ST->TAC = (1024 - ST->TA); }
+
+/// Timer B Overflow, clear or reload the counter
+static inline void TimerBOver(FM_ST *ST) { ST->TBC = (256 - ST->TB) << 4; }
+
+static inline void FM_KEYON(FM_CH *CH, int s) {
+    FM_SLOT *SLOT = &CH->SLOT[s];
+    if (!SLOT->key) {
+        SLOT->key = 1;
+        // restart Phase Generator
+        SLOT->phase = 0;
+        SLOT->ssgn = (SLOT->ssg & 0x04) >> 1;
+        SLOT->state = EG_ATT;
+    }
+}
+
+static inline void FM_KEYOFF(FM_CH *CH, int s) {
+    FM_SLOT *SLOT = &CH->SLOT[s];
+    if ( SLOT->key ) {
+        SLOT->key = 0;
+        if (SLOT->state>EG_REL)  // phase -> Release
+            SLOT->state = EG_REL;
+    }
+}
+
+/// set detune & multiplier.
+static inline void set_det_mul(FM_ST *ST, FM_CH *CH, FM_SLOT *SLOT, int v) {
+    SLOT->mul = (v & 0x0f) ? (v & 0x0f) * 2 : 1;
+    SLOT->DT = ST->dt_tab[(v >> 4) & 7];
+    CH->SLOT[SLOT1].Incr = -1;
+}
+
+// ---------------------------------------------------------------------------
 // MARK: OPN unit
 // ---------------------------------------------------------------------------
 
@@ -718,6 +780,91 @@ static void OPNSetPrescaler(FM_OPN *OPN) {
     OPN->lfo_timer_add = (1 << LFO_SH) * OPN->ST.freqbase / 16;
     // make time tables
     init_timetables(OPN, OPN->ST.freqbase);
+}
+
+/// set algorithm connection
+static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
+    int32_t *carrier = &OPN->out_fm[ch];
+
+    int32_t **om1 = &CH->connect1;
+    int32_t **om2 = &CH->connect3;
+    int32_t **oc1 = &CH->connect2;
+
+    int32_t **memc = &CH->mem_connect;
+
+    switch( CH->ALGO ) {
+    case 0:
+        // M1---C1---MEM---M2---C2---OUT
+        *om1 = &OPN->c1;
+        *oc1 = &OPN->mem;
+        *om2 = &OPN->c2;
+        *memc= &OPN->m2;
+        break;
+    case 1:
+        // M1------+-MEM---M2---C2---OUT
+        //      C1-+
+        *om1 = &OPN->mem;
+        *oc1 = &OPN->mem;
+        *om2 = &OPN->c2;
+        *memc= &OPN->m2;
+        break;
+    case 2:
+        // M1-----------------+-C2---OUT
+        //      C1---MEM---M2-+
+        *om1 = &OPN->c2;
+        *oc1 = &OPN->mem;
+        *om2 = &OPN->c2;
+        *memc= &OPN->m2;
+        break;
+    case 3:
+        // M1---C1---MEM------+-C2---OUT
+        //                 M2-+
+        *om1 = &OPN->c1;
+        *oc1 = &OPN->mem;
+        *om2 = &OPN->c2;
+        *memc= &OPN->c2;
+        break;
+    case 4:
+        // M1---C1-+-OUT
+        // M2---C2-+
+        // MEM: not used
+        *om1 = &OPN->c1;
+        *oc1 = carrier;
+        *om2 = &OPN->c2;
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        break;
+    case 5:
+        //    +----C1----+
+        // M1-+-MEM---M2-+-OUT
+        //    +----C2----+
+        *om1 = nullptr;  // special mark
+        *oc1 = carrier;
+        *om2 = carrier;
+        *memc= &OPN->m2;
+        break;
+    case 6:
+        // M1---C1-+
+        //      M2-+-OUT
+        //      C2-+
+        // MEM: not used
+        *om1 = &OPN->c1;
+        *oc1 = carrier;
+        *om2 = carrier;
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        break;
+    case 7:
+        // M1-+
+        // C1-+-OUT
+        // M2-+
+        // C2-+
+        // MEM: not used
+        *om1 = carrier;
+        *oc1 = carrier;
+        *om2 = carrier;
+        *memc= &OPN->mem;  // store it anywhere where it will not be used
+        break;
+    }
+    CH->connect4 = carrier;
 }
 
 // ---------------------------------------------------------------------------

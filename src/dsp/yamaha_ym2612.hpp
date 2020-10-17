@@ -38,7 +38,7 @@ class YamahaYM2612 {
     /// channel state
     Voice voices[6];
     /// address line A1
-    uint8_t latchAddressPort;
+    uint8_t latchAddressPort = 0;
     /// address register
     uint8_t latchAddress = 0;
 

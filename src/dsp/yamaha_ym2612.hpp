@@ -1912,7 +1912,13 @@ class YamahaYM2612 {
     /// @param slot the operator to set the attack rate (AR) register of (in [0, 3])
     /// @param value the rate of the attack stage of the envelope generator
     ///
-    void setAR(uint8_t channel, uint8_t slot, uint8_t value);
+    void setAR(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].AR == value) return;
+        channels[channel].operators[slot].AR = value;
+        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
+        set_ar_ksr(&CH[channel], s, s->ar_ksr);
+    }
 
     /// @brief Set the 1st decay rate (D1) register for the given channel and operator.
     ///
@@ -1920,7 +1926,13 @@ class YamahaYM2612 {
     /// @param slot the operator to set the 1st decay rate (D1) register of (in [0, 3])
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
-    void setD1(uint8_t channel, uint8_t slot, uint8_t value);
+    void setD1(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].D1 == value) return;
+        channels[channel].operators[slot].D1 = value;
+        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        s->dr = (s->dr & 0x80) | (value & 0x1F);
+        set_dr(s, s->dr);
+    }
 
     /// @brief Set the sustain level (SL) register for the given channel and operator.
     ///
@@ -1928,7 +1940,13 @@ class YamahaYM2612 {
     /// @param slot the operator to set the sustain level (SL) register of (in [0, 3])
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
-    void setSL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setSL(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].SL == value) return;
+        channels[channel].operators[slot].SL = value;
+        FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
+        s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
+        set_sl_rr(s, s->sl_rr);
+    }
 
     /// @brief Set the 2nd decay rate (D2) register for the given channel and operator.
     ///
@@ -1936,7 +1954,11 @@ class YamahaYM2612 {
     /// @param slot the operator to set the 2nd decay rate (D2) register of (in [0, 3])
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
-    void setD2(uint8_t channel, uint8_t slot, uint8_t value);
+    void setD2(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].D2 == value) return;
+        channels[channel].operators[slot].D2 = value;
+        set_sr(&CH[channel].SLOT[slots_idx[slot]], value);
+    }
 
     /// @brief Set the release rate (RR) register for the given channel and operator.
     ///
@@ -1944,7 +1966,13 @@ class YamahaYM2612 {
     /// @param slot the operator to set the release rate (RR) register of (in [0, 3])
     /// @param value the rate of release of the envelope generator after key-off
     ///
-    void setRR(uint8_t channel, uint8_t slot, uint8_t value);
+    void setRR(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].RR == value) return;
+        channels[channel].operators[slot].RR = value;
+        FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
+        s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
+        set_sl_rr(s, s->sl_rr);
+    }
 
     /// @brief Set the total level (TL) register for the given channel and operator.
     ///
@@ -1952,7 +1980,11 @@ class YamahaYM2612 {
     /// @param slot the operator to set the total level (TL) register of (in [0, 3])
     /// @param value the total amplitude of envelope generator
     ///
-    void setTL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setTL(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].TL == value) return;
+        channels[channel].operators[slot].TL = value;
+        set_tl(&CH[channel], &CH[channel].SLOT[slots_idx[slot]], value);
+    }
 
     /// @brief Set the multiplier (MUL) register for the given channel and operator.
     ///
@@ -1960,7 +1992,12 @@ class YamahaYM2612 {
     /// @param slot the operator to set the multiplier  (MUL)register of (in [0, 3])
     /// @param value the value of the FM phase multiplier
     ///
-    void setMUL(uint8_t channel, uint8_t slot, uint8_t value);
+    void setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].MUL == value) return;
+        channels[channel].operators[slot].MUL = value;
+        CH[channel].SLOT[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        CH[channel].SLOT[SLOT1].Incr = -1;
+    }
 
     /// @brief Set the detune (DET) register for the given channel and operator.
     ///
@@ -1968,7 +2005,12 @@ class YamahaYM2612 {
     /// @param slot the operator to set the detune (DET) register of (in [0, 3])
     /// @param value the the level of detuning for the FM operator
     ///
-    void setDET(uint8_t channel, uint8_t slot, uint8_t value);
+    void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].DET == value) return;
+        channels[channel].operators[slot].DET = value;
+        CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
+        CH[channel].SLOT[SLOT1].Incr = -1;
+    }
 
     /// @brief Set the rate-scale (RS) register for the given channel and operator.
     ///
@@ -1976,7 +2018,13 @@ class YamahaYM2612 {
     /// @param slot the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    void setRS(uint8_t channel, uint8_t slot, uint8_t value);
+    void setRS(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].RS == value) return;
+        channels[channel].operators[slot].RS = value;
+        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
+        set_ar_ksr(&CH[channel], s, s->ar_ksr);
+    }
 
     /// @brief Set the amplitude modulation (AM) register for the given channel and operator.
     ///
@@ -1984,7 +2032,12 @@ class YamahaYM2612 {
     /// @param slot the operator to set the amplitude modulation (AM) register of (in [0, 3])
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
-    void setAM(uint8_t channel, uint8_t slot, uint8_t value);
+    void setAM(uint8_t channel, uint8_t slot, uint8_t value) {
+        if (channels[channel].operators[slot].AM == value) return;
+        channels[channel].operators[slot].AM = value;
+        FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
+        s->AMmask = (value) ? ~0 : 0;
+    }
 
     // -----------------------------------------------------------------------
     // MARK: Emulator output

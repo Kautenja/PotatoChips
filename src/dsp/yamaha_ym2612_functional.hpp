@@ -99,15 +99,15 @@ struct EngineState {
 // MARK: Functional API
 // ---------------------------------------------------------------------------
 
-/// initialize time tables
-static void init_timetables(EngineState *OPN, double freqbase) {
+/// Initialize time tables.
+static void init_timetables(EngineState* engine, double freqbase) {
     // DeTune table
     for (int d = 0; d <= 3; d++) {
         for (int i = 0; i <= 31; i++) {
             // -10 because chip works with 10.10 fixed point, while we use 16.16
             double rate = ((double) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
-            OPN->state.dt_tab[d][i] = (int32_t) rate;
-            OPN->state.dt_tab[d + 4][i] = -OPN->state.dt_tab[d][i];
+            engine->state.dt_tab[d][i] = (int32_t) rate;
+            engine->state.dt_tab[d + 4][i] = -engine->state.dt_tab[d][i];
         }
     }
     // there are 2048 FNUMs that can be generated using FNUM/BLK registers
@@ -115,7 +115,7 @@ static void init_timetables(EngineState *OPN, double freqbase) {
     // elements. calculate fnumber -> increment counter table
     for (int i = 0; i < 4096; i++) {
         // freq table for octave 7
-        // OPN phase increment counter = 20bit
+        // phase increment counter = 20bit
         // the correct formula is
         //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
         // where sample clock is: M / 144
@@ -126,32 +126,32 @@ static void init_timetables(EngineState *OPN, double freqbase) {
         // the emulated frequency (can be 1.0)
         // NOTE:
         // -10 because chip works with 10.10 fixed point, while we use 16.16
-        OPN->fn_table[i] = (uint32_t)((double) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+        engine->fn_table[i] = (uint32_t)((double) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
     }
     // maximal frequency is required for Phase overflow calculation, register
     // size is 17 bits (Nemesis)
-    OPN->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
+    engine->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
 }
 
 /// Set pre-scaler and make time tables.
 ///
-/// @param OPN the OPN emulator to set the pre-scaler and create timetables for
+/// @param engine the emulator to set the pre-scaler and create timetables for
 ///
-static void set_prescaler(EngineState *OPN) {
+static void set_prescaler(EngineState* engine) {
     // frequency base
-    OPN->state.freqbase = (OPN->state.rate) ? ((double)OPN->state.clock / OPN->state.rate) : 0;
+    engine->state.freqbase = (engine->state.rate) ? ((double)engine->state.clock / engine->state.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
     //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
-    OPN->eg_timer_add = (1 << EG_SH) * OPN->state.freqbase / 16;
-    OPN->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+    engine->eg_timer_add = (1 << EG_SH) * engine->state.freqbase / 16;
+    engine->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
     // LFO timer increment (updates every 16 samples)
-    OPN->lfo_timer_add = (1 << LFO_SH) * OPN->state.freqbase / 16;
+    engine->lfo_timer_add = (1 << LFO_SH) * engine->state.freqbase / 16;
     // make time tables
-    init_timetables(OPN, OPN->state.freqbase);
+    init_timetables(engine, engine->state.freqbase);
 }
 
-/// set algorithm connection
+/// Set algorithm routing.
 static void setup_connection(EngineState *OPN, Voice *CH, int ch) {
     int32_t *carrier = &OPN->out_fm[ch];
 

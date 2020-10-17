@@ -37,7 +37,7 @@ class YamahaYM2612 {
     /// OPN engine state
     EngineState engine;
     /// channel state
-    Voice CH[6];
+    Voice voices[6];
     /// address line A1
     uint8_t addr_A1;
 
@@ -84,12 +84,13 @@ class YamahaYM2612 {
     } channels[6];
 
     /// the value of the global LFO parameter
-    uint8_t LFO = 0;
+    uint8_t lfo_setting = 0;
 
-    /// master output left
-    int16_t MOL = 0;
-    /// master output right
-    int16_t MOR = 0;
+    // /// master output left
+    // int16_t MOL = 0;
+    // /// master output right
+    // int16_t MOR = 0;
+    int16_t stereo_output[2] = {0, 0};
 
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
@@ -98,7 +99,7 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        engine.voices = CH;
+        engine.voices = voices;
         engine.type = TYPE_YM2612;
         engine.state.clock = clock_rate;
         engine.state.rate = sample_rate;
@@ -120,7 +121,7 @@ class YamahaYM2612 {
     void reset() {
         // clear instance variables
         memset(registers, 0, sizeof registers);
-        LFO = MOL = MOR = 0;
+        lfo_setting = stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
         // mode 0 , timer reset
@@ -142,7 +143,7 @@ class YamahaYM2612 {
         write_mode(&engine, 0x25, 0x00);
         write_mode(&engine, 0x24, 0x00);
 
-        reset_voices(&(engine.state), &CH[0], 6);
+        reset_voices(&(engine.state), &voices[0], 6);
 
         for (int i = 0xb6; i >= 0xb4; i--) {
             write_register(&engine, i, 0xc0);
@@ -164,12 +165,12 @@ class YamahaYM2612 {
     void step() {
         int lt, rt;
         // refresh PG and EG
-        refresh_fc_eg_chan(&engine, &CH[0]);
-        refresh_fc_eg_chan(&engine, &CH[1]);
-        refresh_fc_eg_chan(&engine, &CH[2]);
-        refresh_fc_eg_chan(&engine, &CH[3]);
-        refresh_fc_eg_chan(&engine, &CH[4]);
-        refresh_fc_eg_chan(&engine, &CH[5]);
+        refresh_fc_eg_chan(&engine, &voices[0]);
+        refresh_fc_eg_chan(&engine, &voices[1]);
+        refresh_fc_eg_chan(&engine, &voices[2]);
+        refresh_fc_eg_chan(&engine, &voices[3]);
+        refresh_fc_eg_chan(&engine, &voices[4]);
+        refresh_fc_eg_chan(&engine, &voices[5]);
         // clear outputs
         engine.out_fm[0] = 0;
         engine.out_fm[1] = 0;
@@ -178,22 +179,22 @@ class YamahaYM2612 {
         engine.out_fm[4] = 0;
         engine.out_fm[5] = 0;
         // update SSG-EG output
-        update_ssg_eg_channel(&(CH[0].operators[Op1]));
-        update_ssg_eg_channel(&(CH[1].operators[Op1]));
-        update_ssg_eg_channel(&(CH[2].operators[Op1]));
-        update_ssg_eg_channel(&(CH[3].operators[Op1]));
-        update_ssg_eg_channel(&(CH[4].operators[Op1]));
-        update_ssg_eg_channel(&(CH[5].operators[Op1]));
+        update_ssg_eg_channel(&(voices[0].operators[Op1]));
+        update_ssg_eg_channel(&(voices[1].operators[Op1]));
+        update_ssg_eg_channel(&(voices[2].operators[Op1]));
+        update_ssg_eg_channel(&(voices[3].operators[Op1]));
+        update_ssg_eg_channel(&(voices[4].operators[Op1]));
+        update_ssg_eg_channel(&(voices[5].operators[Op1]));
         // calculate FM
-        chan_calc(&engine, &CH[0]);
-        chan_calc(&engine, &CH[1]);
-        chan_calc(&engine, &CH[2]);
-        chan_calc(&engine, &CH[3]);
-        chan_calc(&engine, &CH[4]);
+        chan_calc(&engine, &voices[0]);
+        chan_calc(&engine, &voices[1]);
+        chan_calc(&engine, &voices[2]);
+        chan_calc(&engine, &voices[3]);
+        chan_calc(&engine, &voices[4]);
         if (is_DAC_enabled)
-            *&CH[5].connect4 += out_DAC;
+            *&voices[5].connect4 += out_DAC;
         else
-            chan_calc(&engine, &CH[5]);
+            chan_calc(&engine, &voices[5]);
         // advance LFO
         advance_lfo(&engine);
         // advance envelope generator
@@ -201,12 +202,12 @@ class YamahaYM2612 {
         while (engine.eg_timer >= engine.eg_timer_overflow) {
             engine.eg_timer -= engine.eg_timer_overflow;
             engine.eg_cnt++;
-            advance_eg_channel(&engine, &(CH[0].operators[Op1]));
-            advance_eg_channel(&engine, &(CH[1].operators[Op1]));
-            advance_eg_channel(&engine, &(CH[2].operators[Op1]));
-            advance_eg_channel(&engine, &(CH[3].operators[Op1]));
-            advance_eg_channel(&engine, &(CH[4].operators[Op1]));
-            advance_eg_channel(&engine, &(CH[5].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[0].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[1].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[2].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[3].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[4].operators[Op1]));
+            advance_eg_channel(&engine, &(voices[5].operators[Op1]));
         }
         // clip outputs
         if (engine.out_fm[0] > 8191)
@@ -247,8 +248,8 @@ class YamahaYM2612 {
         lt += ((engine.out_fm[5] >> 0) & engine.pan[10]);
         rt += ((engine.out_fm[5] >> 0) & engine.pan[11]);
         // output buffering
-        MOL = lt;
-        MOR = rt;
+        stereo_output[0] = lt;
+        stereo_output[1] = rt;
         // timer A control
         if ((engine.state.TAC -= static_cast<int>(engine.state.freqbase * 4096)) <= 0)
             timer_A_over(&engine.state);
@@ -366,9 +367,9 @@ class YamahaYM2612 {
     ///
     inline void setLFO(uint8_t value) {
         // don't set the value if it hasn't changed
-        if (LFO == value) return;
+        if (lfo_setting == value) return;
         // update the local LFO value
-        LFO = value;
+        lfo_setting = value;
         // set the LFO on the engine emulator
         setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
     }
@@ -419,8 +420,8 @@ class YamahaYM2612 {
     inline void setAL(uint8_t channel, uint8_t value) {
         if (channels[channel].AL == value) return;
         channels[channel].AL = value;
-        CH[channel].FB_ALG = (CH[channel].FB_ALG & 0x38) | (value & 7);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), CH[channel].FB_ALG);
+        voices[channel].FB_ALG = (voices[channel].FB_ALG & 0x38) | (value & 7);
+        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), voices[channel].FB_ALG);
     }
 
     /// @brief Set the feedback (FB) register for the given channel.
@@ -431,8 +432,8 @@ class YamahaYM2612 {
     inline void setFB(uint8_t channel, uint8_t value) {
         if (channels[channel].FB == value) return;
         channels[channel].FB = value;
-        CH[channel].FB_ALG = (CH[channel].FB_ALG & 7)| ((value & 7) << 3);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), CH[channel].FB_ALG);
+        voices[channel].FB_ALG = (voices[channel].FB_ALG & 7)| ((value & 7) << 3);
+        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), voices[channel].FB_ALG);
     }
 
     /// @brief Set the state (ST) register for the given channel.
@@ -441,8 +442,8 @@ class YamahaYM2612 {
     /// @param value the value of the state register
     ///
     inline void setST(uint8_t channel, uint8_t value) {
-        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), CH[channel].LR_AMS_FMS);
+        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
+        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given channel.
@@ -453,8 +454,8 @@ class YamahaYM2612 {
     inline void setAMS(uint8_t channel, uint8_t value) {
         if (channels[channel].AMS == value) return;
         channels[channel].AMS = value;
-        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), CH[channel].LR_AMS_FMS);
+        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);
+        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given channel.
@@ -465,8 +466,8 @@ class YamahaYM2612 {
     inline void setFMS(uint8_t channel, uint8_t value) {
         if (channels[channel].FMS == value) return;
         channels[channel].FMS = value;
-        CH[channel].LR_AMS_FMS = (CH[channel].LR_AMS_FMS & 0xF8)| (value & 7);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), CH[channel].LR_AMS_FMS);
+        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xF8)| (value & 7);
+        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     // -----------------------------------------------------------------------
@@ -570,9 +571,9 @@ class YamahaYM2612 {
     inline void setAR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AR == value) return;
         channels[channel].operators[slot].AR = value;
-        Operator *s = &CH[channel].operators[slots_idx[slot]];
+        Operator *s = &voices[channel].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
-        set_ar_ksr(&CH[channel], s, s->ar_ksr);
+        set_ar_ksr(&voices[channel], s, s->ar_ksr);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given channel and operator.
@@ -584,7 +585,7 @@ class YamahaYM2612 {
     inline void setD1(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].D1 == value) return;
         channels[channel].operators[slot].D1 = value;
-        Operator *s = &CH[channel].operators[slots_idx[slot]];
+        Operator *s = &voices[channel].operators[slots_idx[slot]];
         s->dr = (s->dr & 0x80) | (value & 0x1F);
         set_dr(s, s->dr);
     }
@@ -598,7 +599,7 @@ class YamahaYM2612 {
     inline void setSL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].SL == value) return;
         channels[channel].operators[slot].SL = value;
-        Operator *s =  &CH[channel].operators[slots_idx[slot]];
+        Operator *s =  &voices[channel].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
         set_sl_rr(s, s->sl_rr);
     }
@@ -612,7 +613,7 @@ class YamahaYM2612 {
     inline void setD2(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].D2 == value) return;
         channels[channel].operators[slot].D2 = value;
-        set_sr(&CH[channel].operators[slots_idx[slot]], value);
+        set_sr(&voices[channel].operators[slots_idx[slot]], value);
     }
 
     /// @brief Set the release rate (RR) register for the given channel and operator.
@@ -624,7 +625,7 @@ class YamahaYM2612 {
     inline void setRR(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RR == value) return;
         channels[channel].operators[slot].RR = value;
-        Operator *s =  &CH[channel].operators[slots_idx[slot]];
+        Operator *s =  &voices[channel].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
         set_sl_rr(s, s->sl_rr);
     }
@@ -638,7 +639,7 @@ class YamahaYM2612 {
     inline void setTL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].TL == value) return;
         channels[channel].operators[slot].TL = value;
-        set_tl(&CH[channel], &CH[channel].operators[slots_idx[slot]], value);
+        set_tl(&voices[channel], &voices[channel].operators[slots_idx[slot]], value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given channel and operator.
@@ -650,8 +651,8 @@ class YamahaYM2612 {
     inline void setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].MUL == value) return;
         channels[channel].operators[slot].MUL = value;
-        CH[channel].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-        CH[channel].operators[Op1].phase_increment = -1;
+        voices[channel].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        voices[channel].operators[Op1].phase_increment = -1;
     }
 
     /// @brief Set the detune (DET) register for the given channel and operator.
@@ -663,8 +664,8 @@ class YamahaYM2612 {
     inline void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].DET == value) return;
         channels[channel].operators[slot].DET = value;
-        CH[channel].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
-        CH[channel].operators[Op1].phase_increment = -1;
+        voices[channel].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
+        voices[channel].operators[Op1].phase_increment = -1;
     }
 
     /// @brief Set the rate-scale (RS) register for the given channel and operator.
@@ -676,9 +677,9 @@ class YamahaYM2612 {
     inline void setRS(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].RS == value) return;
         channels[channel].operators[slot].RS = value;
-        Operator *s = &CH[channel].operators[slots_idx[slot]];
+        Operator *s = &voices[channel].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
-        set_ar_ksr(&CH[channel], s, s->ar_ksr);
+        set_ar_ksr(&voices[channel], s, s->ar_ksr);
     }
 
     /// @brief Set the amplitude modulation (AM) register for the given channel and operator.
@@ -690,7 +691,7 @@ class YamahaYM2612 {
     inline void setAM(uint8_t channel, uint8_t slot, uint8_t value) {
         if (channels[channel].operators[slot].AM == value) return;
         channels[channel].operators[slot].AM = value;
-        Operator *s = &CH[channel].operators[slots_idx[slot]];
+        Operator *s = &voices[channel].operators[slots_idx[slot]];
         s->AMmask = (value) ? ~0 : 0;
     }
 
@@ -702,20 +703,20 @@ class YamahaYM2612 {
     ///
     /// @returns the left channel of the mix output
     ///
-    inline int16_t getOutputLeft() { return MOL; }
+    inline int16_t getOutputLeft() { return stereo_output[0]; }
 
     /// @brief Return the output from the right channel of the mix output.
     ///
     /// @returns the right channel of the mix output
     ///
-    inline int16_t getOutputRight() { return MOR; }
+    inline int16_t getOutputRight() { return stereo_output[1]; }
 
     /// @brief Return the voltage from the left channel of the mix output.
     ///
     /// @returns the voltage of the left channel of the mix output
     ///
     inline float getVoltageLeft() {
-        return static_cast<float>(MOL) / std::numeric_limits<int16_t>::max();
+        return static_cast<float>(stereo_output[0]) / std::numeric_limits<int16_t>::max();
     }
 
     /// @brief Return the voltage from the right channel of the mix output.
@@ -723,7 +724,7 @@ class YamahaYM2612 {
     /// @returns the voltage of the right channel of the mix output
     ///
     inline float getVoltageRight() {
-        return static_cast<float>(MOR) / std::numeric_limits<int16_t>::max();
+        return static_cast<float>(stereo_output[1]) / std::numeric_limits<int16_t>::max();
     }
 };
 

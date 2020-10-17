@@ -242,84 +242,6 @@ class YamahaYM2612 {
             timer_B_over(&engine.state);
     }
 
-    /// @brief Write data to a register on the chip.
-    ///
-    /// @param address the address of the register to write data to
-    /// @param data the value of the data to write to the register
-    ///
-    void write(uint8_t address, uint8_t data) {
-        switch (address & 3) {
-        case 0:  // address port 0
-            latchAddressPort = 0;
-            latchAddress = data;
-            break;
-        case 1:  // data port 0
-            // verified on real YM2608
-            if (latchAddressPort != 0) break;
-            // get the address from the latch and write the data
-            address = latchAddress;
-            if ((address & 0xf0) == 0x20)  // 0x20-0x2f Mode
-                write_mode(&engine, address, data);
-            else
-                write_register(&engine, address, data);
-            break;
-        case 2:  // address port 1
-            latchAddressPort = 1;
-            latchAddress = data;
-            break;
-        case 3:  // data port 1
-            // verified on real YM2608
-            if (latchAddressPort != 1) break;
-            // get the address from the latch and right to the given register
-            address = latchAddress;
-            write_register(&engine, address | 0x100, data);
-            break;
-        }
-    }
-
-    /// @brief Set part of a 16-bit register to a given 8-bit value.
-    ///
-    /// @param part the part of the register space to access,
-    ///        0=latch1, 1=data1, 2=latch2, 3=data2
-    /// @param reg the address of the register to write data to
-    /// @param data the value of the data to write to the register
-    ///
-    /// @details
-    ///
-    /// ## [Memory map](http://www.smspower.org/maxim/Documents/YM2612#reg27)
-    ///
-    /// | REG  | Bit 7           | Bit 6 | Bit 5            | Bit 4   | Bit 3      | Bit 2          | Bit 1        | Bit 0  |
-    /// |:-----|:----------------|:------|:-----------------|:--------|:-----------|:---------------|:-------------|:-------|
-    /// | 22H  |                 |       |                  |         | LFO enable | LFO frequency  |              |        |
-    /// | 24H  | Timer A MSBs    |       |                  |         |            |                |              |        |
-    /// | 25H  |                 |       |                  |         |            |                | Timer A LSBs |        |
-    /// | 26H  | Timer B         |       |                  |         |            |                |              |        |
-    /// | 27H  | Ch3 mode        |       | Reset B          | Reset A | Enable B   | Enable A       | Load B       | Load A |
-    /// | 28H  | Operator        |       |                  |         |            | Channel        |              |        |
-    /// | 29H  |                 |       |                  |         |            |                |              |        |
-    /// | 2AH  | DAC             |       |                  |         |            |                |              |        |
-    /// | 2BH  | DAC en          |       |                  |         |            |                |              |        |
-    /// |      |                 |       |                  |         |            |                |              |        |
-    /// | 30H+ |                 | DT1   |                  |         | MUL        |                |              |        |
-    /// | 40H+ |                 | TL    |                  |         |            |                |              |        |
-    /// | 50H+ | RS              |       |                  | AR      |            |                |              |        |
-    /// | 60H+ | AM              |       |                  | D1R     |            |                |              |        |
-    /// | 70H+ |                 |       |                  | D2R     |            |                |              |        |
-    /// | 80H+ | D1L             |       |                  |         | RR         |                |              |        |
-    /// | 90H+ |                 |       |                  |         | SSG-EG     |                |              |        |
-    /// |      |                 |       |                  |         |            |                |              |        |
-    /// | A0H+ | Freq. LSB       |       |                  |         |            |                |              |        |
-    /// | A4H+ |                 |       | Block            |         |            | Freq. MSB      |              |        |
-    /// | A8H+ | Ch3 suppl. freq.|       |                  |         |            |                |              |        |
-    /// | ACH+ |                 |       | Ch3 suppl. block |         |            | Ch3 suppl freq |              |        |
-    /// | B0H+ |                 |       | Feedback         |         |            | Algorithm      |              |        |
-    /// | B4H+ | L               | R     | AMS              |         |            | FMS            |              |        |
-    ///
-    inline void setREG(uint8_t part, uint8_t reg, uint8_t data) {
-        write(part << 1, reg);
-        write((part << 1) + 1, data);
-    }
-
     /// @brief Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
@@ -530,7 +452,7 @@ class YamahaYM2612 {
         if (parameters[voice].operators[slot].SSG == value) return;
         parameters[voice].operators[slot].SSG = value;
         // TODO: slot here needs mapped to the order 1 3 2 4
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0x90 + (slot << 2), voice), value);
+        write_register(&engine, VOICE_OFFSET(0x90 + (slot << 2), voice) | (VOICE_PART(voice) * 0x100), value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.

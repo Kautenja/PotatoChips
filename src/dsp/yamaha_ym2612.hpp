@@ -377,11 +377,10 @@ class YamahaYM2612 {
     /// @brief Set the gate for the given channel.
     ///
     /// @param channel the voice on the chip to set the gate for
-    /// @param value the boolean value of the gate signal
+    /// @param is_open true if the gate is open, false otherwise
     ///
-    inline void setGATE(uint8_t channel, uint8_t value) {
-        // set the gate register based on the value. False = x00 and True = 0xF0
-        setREG(0, 0x28, (static_cast<bool>(value) * 0xF0) + ((channel / 3) * 4 + channel % 3));
+    inline void setGATE(uint8_t channel, bool is_open) {
+        write_mode(&engine, 0x28, (is_open * 0xF0) + ((channel / 3) * 4 + channel % 3));
     }
 
     /// @brief Set the algorithm (AL) register for the given channel.

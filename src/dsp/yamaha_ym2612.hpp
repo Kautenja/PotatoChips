@@ -834,8 +834,8 @@ struct EngineState {
         /// one channel in 3slot mode)
         uint32_t block_fnum[3] = {0, 0, 0};
     } special_mode_state;
-    /// pointer of CH
-    Voice *P_CH = nullptr;
+    /// pointer to voices
+    Voice* voices = nullptr;
     /// fm channels output masks (0xffffffff = enable) */
     unsigned int pan[6 * 2];
 
@@ -864,9 +864,9 @@ struct EngineState {
     /// LFO timer overflows every N samples (depends on LFO frequency)
     uint32_t lfo_timer_overflow = 0;
     /// current LFO AM step
-    uint32_t LFO_AM = 0;
+    uint32_t lfo_AM_step = 0;
     /// current LFO PM step
-    uint32_t LFO_PM = 0;
+    uint32_t lfo_PM_step = 0;
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -1036,11 +1036,11 @@ static inline void advance_lfo(EngineState *OPN) {
             // triangle (inverted)
             // AM: from 126 to 0 step -2, 0 to 126 step +2
             if (OPN->lfo_cnt<64)
-                OPN->LFO_AM = (OPN->lfo_cnt ^ 63) << 1;
+                OPN->lfo_AM_step = (OPN->lfo_cnt ^ 63) << 1;
             else
-                OPN->LFO_AM = (OPN->lfo_cnt & 63) << 1;
+                OPN->lfo_AM_step = (OPN->lfo_cnt & 63) << 1;
             // PM works with 4 times slower clock
-            OPN->LFO_PM = OPN->lfo_cnt >> 2;
+            OPN->lfo_PM_step = OPN->lfo_cnt >> 2;
         }
     }
 }
@@ -1137,7 +1137,7 @@ static inline void advance_eg_channel(EngineState *OPN, Operator *SLOT) {
 static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
     uint32_t block_fnum = CH->block_fnum;
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->LFO_PM];
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->lfo_PM_step];
     if (lfo_fn_table_index_offset) {  // LFO phase modulation active
         block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
         uint8_t blk = (block_fnum & 0x7000) >> 12;
@@ -1173,7 +1173,7 @@ static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
 
 static inline void chan_calc(EngineState *OPN, Voice *CH) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-    uint32_t AM = OPN->LFO_AM >> CH->ams;
+    uint32_t AM = OPN->lfo_AM_step >> CH->ams;
     OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
     // restore delayed sample (MEM) value to m2 or c2
     *CH->mem_connect = CH->mem_value;
@@ -1271,8 +1271,8 @@ static void write_mode(EngineState *OPN, int r, int v) {
             OPN->lfo_timer_overflow = 0;
             OPN->lfo_timer = 0;
             OPN->lfo_cnt   = 0;
-            OPN->LFO_PM    = 0;
-            OPN->LFO_AM    = 126;
+            OPN->lfo_PM_step    = 0;
+            OPN->lfo_AM_step    = 126;
         }
         break;
     case 0x24:  // timer A High 8
@@ -1291,7 +1291,7 @@ static void write_mode(EngineState *OPN, int r, int v) {
         uint8_t c = v & 0x03;
         if (c == 3) break;
         if ((v & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
-        Voice* CH = OPN->P_CH;
+        Voice* CH = OPN->voices;
         CH = &CH[c];
         if (v & 0x10) set_keyon(CH, Op1); else set_keyoff(CH, Op1);
         if (v & 0x20) set_keyon(CH, Op2); else set_keyoff(CH, Op2);
@@ -1308,7 +1308,7 @@ static void write_register(EngineState *OPN, int r, int v) {
     if (c == 3) return;
     if (r >= 0x100) c+=3;
     // get the channel
-    Voice* const CH = &OPN->P_CH[c];
+    Voice* const CH = &OPN->voices[c];
     // get the operator
     Operator* const SLOT = &(CH->operators[getOp(r)]);
     switch (r & 0xf0) {
@@ -1366,7 +1366,7 @@ static void write_register(EngineState *OPN, int r, int v) {
                 /* phase increment counter */
                 OPN->special_mode_state.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
                 OPN->special_mode_state.block_fnum[c] = (blk << 11) | fn;
-                (OPN->P_CH)[2].operators[Op1].phase_increment = -1;
+                (OPN->voices)[2].operators[Op1].phase_increment = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
@@ -1474,7 +1474,7 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        OPN.P_CH = CH;
+        OPN.voices = CH;
         OPN.type = TYPE_YM2612;
         OPN.state.clock = clock_rate;
         OPN.state.rate = sample_rate;
@@ -1507,8 +1507,8 @@ class YamahaYM2612 {
         // LFO
         OPN.lfo_timer = 0;
         OPN.lfo_cnt = 0;
-        OPN.LFO_AM = 126;
-        OPN.LFO_PM = 0;
+        OPN.lfo_AM_step = 126;
+        OPN.lfo_PM_step = 0;
         // state
         OPN.state.status = 0;
         OPN.state.mode = 0;

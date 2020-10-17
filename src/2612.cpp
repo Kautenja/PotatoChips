@@ -256,16 +256,30 @@ struct Chip2612Widget : ModuleWidget {
             Vec(115, 20),
             Vec(110, 70)
         ));
-        // global parameters and inputs
-        addParam(createParam<Rogan3PBlue>(Vec(115, 113),  module, Chip2612::PARAM_AL));
+        // Algorithm
+        auto algo = createParam<Rogan3PBlue>(Vec(115, 113),  module, Chip2612::PARAM_AL);
+        algo->snap = true;
+        addParam(algo);
         addInput(createInput<PJ301MPort>( Vec(124, 171),  module, Chip2612::INPUT_AL));
-        addParam(createParam<Rogan3PBlue>(Vec(182, 113),  module, Chip2612::PARAM_FB));
+        // Feedback
+        auto feedback = createParam<Rogan3PBlue>(Vec(182, 113),  module, Chip2612::PARAM_FB);
+        feedback->snap = true;
+        addParam(feedback);
         addInput(createInput<PJ301MPort>( Vec(191, 171),  module, Chip2612::INPUT_FB));
-        addParam(createParam<Rogan2PWhite>(Vec(187, 223), module, Chip2612::PARAM_LFO));
+        // LFO
+        auto lfo = createParam<Rogan2PWhite>(Vec(187, 223), module, Chip2612::PARAM_LFO);
+        lfo->snap = true;
+        addParam(lfo);
         addInput(createInput<PJ301MPort>( Vec(124, 226),  module, Chip2612::INPUT_LFO));
-        addParam(createParam<Rogan2PWhite>(Vec(187, 279), module, Chip2612::PARAM_AMS));
+        // Amplitude Modulation Sensitivity
+        auto ams = createParam<Rogan2PWhite>(Vec(187, 279), module, Chip2612::PARAM_AMS);
+        ams->snap = true;
+        addParam(ams);
         addInput(createInput<PJ301MPort>(  Vec(124, 282), module, Chip2612::INPUT_AMS));
-        addParam(createParam<Rogan2PWhite>(Vec(187, 335), module, Chip2612::PARAM_FMS));
+        // Frequency Modulation Sensitivity
+        auto fms = createParam<Rogan2PWhite>(Vec(187, 335), module, Chip2612::PARAM_FMS);
+        fms->snap = true;
+        addParam(fms);
         addInput(createInput<PJ301MPort>(  Vec(124, 338), module, Chip2612::INPUT_FMS));
         // operator parameters and inputs
         for (unsigned i = 0; i < Chip2612::NUM_OPERATORS; i++) {

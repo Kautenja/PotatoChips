@@ -821,6 +821,7 @@ static void reset_voices(GlobalOperatorState* state, Voice* voices, int num) {
 /// @details
 /// The behavior is based upon Nemesis tests on real hardware. This is actually
 /// executed before each sample.
+///
 static void update_ssg_eg_channel(Operator* oprtr) {
     // four operators per channel
     for (unsigned i = 4; i > 0; i--) {

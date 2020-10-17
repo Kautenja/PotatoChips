@@ -377,48 +377,48 @@ static inline void update_phase_lfo_channel(EngineState* engine, Voice* CH) {
     }
 }
 
-static inline void chan_calc(EngineState* engine, Voice* CH) {
+static inline void chan_calc(EngineState* engine, Voice* voice) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-    uint32_t AM = engine->lfo_AM_step >> CH->ams;
+    uint32_t AM = engine->lfo_AM_step >> voice->ams;
     engine->m2 = engine->c1 = engine->c2 = engine->mem = 0;
     // restore delayed sample (MEM) value to m2 or c2
-    *CH->mem_connect = CH->mem_value;
-    // oprtr 1
-    unsigned int eg_out = CALCULATE_VOLUME(&CH->operators[Op1]);
-    int32_t out = CH->op1_out[0] + CH->op1_out[1];
-    CH->op1_out[0] = CH->op1_out[1];
-    if (!CH->connect1) {  // algorithm 5
-        engine->mem = engine->c1 = engine->c2 = CH->op1_out[0];
+    *voice->mem_connect = voice->mem_value;
+    // Operator 1
+    unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
+    int32_t out = voice->op1_out[0] + voice->op1_out[1];
+    voice->op1_out[0] = voice->op1_out[1];
+    if (!voice->connect1) {  // algorithm 5
+        engine->mem = engine->c1 = engine->c2 = voice->op1_out[0];
     } else {  // other algorithms
-        *CH->connect1 += CH->op1_out[0];
+        *voice->connect1 += voice->op1_out[0];
     }
-    CH->op1_out[1] = 0;
+    voice->op1_out[1] = 0;
     if (eg_out < ENV_QUIET) {
-        if (!CH->feedback) out = 0;
-        CH->op1_out[1] = op_calc1(CH->operators[Op1].phase, eg_out, (out << CH->feedback) );
+        if (!voice->feedback) out = 0;
+        voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
     }
-    // oprtr 3
-    eg_out = CALCULATE_VOLUME(&CH->operators[Op3]);
+    // Operator 3
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
     if (eg_out < ENV_QUIET)
-        *CH->connect3 += op_calc(CH->operators[Op3].phase, eg_out, engine->m2);
-    // oprtr 2
-    eg_out = CALCULATE_VOLUME(&CH->operators[Op2]);
+        *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, engine->m2);
+    // Operator 2
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
     if (eg_out < ENV_QUIET)
-        *CH->connect2 += op_calc(CH->operators[Op2].phase, eg_out, engine->c1);
-    // oprtr 4
-    eg_out = CALCULATE_VOLUME(&CH->operators[Op4]);
+        *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, engine->c1);
+    // Operator 4
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
     if (eg_out < ENV_QUIET)
-        *CH->connect4 += op_calc(CH->operators[Op4].phase, eg_out, engine->c2);
+        *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, engine->c2);
     // store current MEM
-    CH->mem_value = engine->mem;
+    voice->mem_value = engine->mem;
     // update phase counters AFTER output calculations
-    if (CH->pms) {
-        update_phase_lfo_channel(engine, CH);
+    if (voice->pms) {
+        update_phase_lfo_channel(engine, voice);
     } else {  // no LFO phase modulation
-        CH->operators[Op1].phase += CH->operators[Op1].phase_increment;
-        CH->operators[Op2].phase += CH->operators[Op2].phase_increment;
-        CH->operators[Op3].phase += CH->operators[Op3].phase_increment;
-        CH->operators[Op4].phase += CH->operators[Op4].phase_increment;
+        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
     }
 #undef CALCULATE_VOLUME
 }
@@ -453,14 +453,14 @@ static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int 
 }
 
 /// update phase increment counters
-static inline void refresh_fc_eg_chan(EngineState* engine, Voice* CH) {
-    if ( CH->operators[Op1].phase_increment==-1) {
-        int fc = CH->fc;
-        int kc = CH->kcode;
-        refresh_fc_eg_slot(engine, &CH->operators[Op1] , fc , kc );
-        refresh_fc_eg_slot(engine, &CH->operators[Op2] , fc , kc );
-        refresh_fc_eg_slot(engine, &CH->operators[Op3] , fc , kc );
-        refresh_fc_eg_slot(engine, &CH->operators[Op4] , fc , kc );
+static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
+    if (voice->operators[Op1].phase_increment==-1) {
+        int fc = voice->fc;
+        int kc = voice->kcode;
+        refresh_fc_eg_slot(engine, &voice->operators[Op1] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op2] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op3] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op4] , fc , kc );
     }
 }
 

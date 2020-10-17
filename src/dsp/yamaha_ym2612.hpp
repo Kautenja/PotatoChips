@@ -451,8 +451,7 @@ class YamahaYM2612 {
         const uint8_t value = (is_on << 3) | (mode & 7);
         if (parameters[voice].operators[slot].SSG == value) return;
         parameters[voice].operators[slot].SSG = value;
-        // TODO: slot here needs mapped to the order 1 3 2 4
-        write_register(&engine, VOICE_OFFSET(0x90 + (slot << 2), voice) | (VOICE_PART(voice) * 0x100), value);
+        write_register(&engine, VOICE_OFFSET(0x90 + (OPERATOR_INDEXES[slot] << 2), voice) | (VOICE_PART(voice) * 0x100), value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.
@@ -464,7 +463,7 @@ class YamahaYM2612 {
     inline void setAR(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].AR == value) return;
         parameters[voice].operators[slot].AR = value;
-        Operator *s = &voices[voice].operators[slots_idx[slot]];
+        Operator *s = &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
         set_ar_ksr(&voices[voice], s, s->ar_ksr);
     }
@@ -478,7 +477,7 @@ class YamahaYM2612 {
     inline void setD1(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].D1 == value) return;
         parameters[voice].operators[slot].D1 = value;
-        Operator *s = &voices[voice].operators[slots_idx[slot]];
+        Operator *s = &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->dr = (s->dr & 0x80) | (value & 0x1F);
         set_dr(s, s->dr);
     }
@@ -492,7 +491,7 @@ class YamahaYM2612 {
     inline void setSL(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].SL == value) return;
         parameters[voice].operators[slot].SL = value;
-        Operator *s =  &voices[voice].operators[slots_idx[slot]];
+        Operator *s =  &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
         set_sl_rr(s, s->sl_rr);
     }
@@ -506,7 +505,7 @@ class YamahaYM2612 {
     inline void setD2(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].D2 == value) return;
         parameters[voice].operators[slot].D2 = value;
-        set_sr(&voices[voice].operators[slots_idx[slot]], value);
+        set_sr(&voices[voice].operators[OPERATOR_INDEXES[slot]], value);
     }
 
     /// @brief Set the release rate (RR) register for the given voice and operator.
@@ -518,7 +517,7 @@ class YamahaYM2612 {
     inline void setRR(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].RR == value) return;
         parameters[voice].operators[slot].RR = value;
-        Operator *s =  &voices[voice].operators[slots_idx[slot]];
+        Operator *s =  &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
         set_sl_rr(s, s->sl_rr);
     }
@@ -532,7 +531,7 @@ class YamahaYM2612 {
     inline void setTL(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].TL == value) return;
         parameters[voice].operators[slot].TL = value;
-        set_tl(&voices[voice], &voices[voice].operators[slots_idx[slot]], value);
+        set_tl(&voices[voice], &voices[voice].operators[OPERATOR_INDEXES[slot]], value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.
@@ -544,7 +543,7 @@ class YamahaYM2612 {
     inline void setMUL(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].MUL == value) return;
         parameters[voice].operators[slot].MUL = value;
-        voices[voice].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        voices[voice].operators[OPERATOR_INDEXES[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
         voices[voice].operators[Op1].phase_increment = -1;
     }
 
@@ -557,7 +556,7 @@ class YamahaYM2612 {
     inline void setDET(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].DET == value) return;
         parameters[voice].operators[slot].DET = value;
-        voices[voice].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
+        voices[voice].operators[OPERATOR_INDEXES[slot]].DT  = engine.state.dt_tab[(value)&7];
         voices[voice].operators[Op1].phase_increment = -1;
     }
 
@@ -570,7 +569,7 @@ class YamahaYM2612 {
     inline void setRS(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].RS == value) return;
         parameters[voice].operators[slot].RS = value;
-        Operator *s = &voices[voice].operators[slots_idx[slot]];
+        Operator *s = &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
         set_ar_ksr(&voices[voice], s, s->ar_ksr);
     }
@@ -584,7 +583,7 @@ class YamahaYM2612 {
     inline void setAM(uint8_t voice, uint8_t slot, uint8_t value) {
         if (parameters[voice].operators[slot].AM == value) return;
         parameters[voice].operators[slot].AM = value;
-        Operator *s = &voices[voice].operators[slots_idx[slot]];
+        Operator *s = &voices[voice].operators[OPERATOR_INDEXES[slot]];
         s->AMmask = (value) ? ~0 : 0;
     }
 

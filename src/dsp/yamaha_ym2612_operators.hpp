@@ -109,7 +109,7 @@ static const uint32_t sl_table[16] = {
 #undef SC
 };
 
-static const uint8_t slots_idx[4] = {0, 2, 1, 3};
+static const uint8_t OPERATOR_INDEXES[4] = {0, 2, 1, 3};
 
 #define RATE_STEPS (8)
 static const uint8_t eg_inc[19 * RATE_STEPS] = {

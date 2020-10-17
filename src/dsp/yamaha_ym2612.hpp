@@ -926,6 +926,7 @@ class YamahaYM2612 {
         const uint8_t value = (is_on << 3) | (mode & 7);
         if (channels[channel].operators[slot].SSG == value) return;
         channels[channel].operators[slot].SSG = value;
+        // TODO: slot here needs mapped to the order 1 3 2 4
         setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + (slot << 2), channel), value);
     }
 

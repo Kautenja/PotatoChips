@@ -681,7 +681,6 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v) {
     }
 }
 
-
 /// initialize time tables
 static void init_timetables(FM_OPN *OPN, double freqbase) {
     // DeTune table
@@ -733,8 +732,6 @@ static void OPNSetPres(FM_OPN *OPN) {
     // make time tables
     init_timetables(OPN, OPN->ST.freqbase);
 }
-
-
 
 // ---------------------------------------------------------------------------
 // MARK: YM2612 Emulator class

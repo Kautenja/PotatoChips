@@ -79,7 +79,7 @@ class YamahaYM2612 {
             /// the SSG mode for the operator
             uint8_t SSG = 0;
         } operators[4];
-    } channels[6];
+    } parameters[6];
 
     /// the stereo master output from the chip emulator
     int16_t stereo_output[2] = {0, 0};
@@ -218,7 +218,7 @@ class YamahaYM2612 {
             engine.out_fm[5] = 8191;
         else if (engine.out_fm[5] < -8192)
             engine.out_fm[5] = -8192;
-        // 6-channels mixing
+        // 6-parameters mixing
         lt  = ((engine.out_fm[0] >> 0) & engine.pan[0]);
         rt  = ((engine.out_fm[0] >> 0) & engine.pan[1]);
         lt += ((engine.out_fm[1] >> 0) & engine.pan[2]);
@@ -390,8 +390,8 @@ class YamahaYM2612 {
     /// @param algorithm the selected FM algorithm in [0, 7]
     ///
     inline void setAL(uint8_t voice, uint8_t algorithm) {
-        if (channels[voice].AL == algorithm) return;
-        channels[voice].AL = algorithm;
+        if (parameters[voice].AL == algorithm) return;
+        parameters[voice].AL = algorithm;
         voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (algorithm & 7);
         setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
     }
@@ -402,8 +402,8 @@ class YamahaYM2612 {
     /// @param feedback the amount of feedback for operator 1
     ///
     inline void setFB(uint8_t voice, uint8_t feedback) {
-        if (channels[voice].FB == feedback) return;
-        channels[voice].FB = feedback;
+        if (parameters[voice].FB == feedback) return;
+        parameters[voice].FB = feedback;
         voices[voice].FB_ALG = (voices[voice].FB_ALG & 7)| ((feedback & 7) << 3);
         setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
     }
@@ -424,8 +424,8 @@ class YamahaYM2612 {
     /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
     inline void setAMS(uint8_t voice, uint8_t ams) {
-        if (channels[voice].AMS == ams) return;
-        channels[voice].AMS = ams;
+        if (parameters[voice].AMS == ams) return;
+        parameters[voice].AMS = ams;
         voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
         setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
     }
@@ -436,8 +436,8 @@ class YamahaYM2612 {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void setFMS(uint8_t voice, uint8_t fms) {
-        if (channels[voice].FMS == fms) return;
-        channels[voice].FMS = fms;
+        if (parameters[voice].FMS == fms) return;
+        parameters[voice].FMS = fms;
         voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xF8)| (fms & 7);
         setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
     }
@@ -448,7 +448,7 @@ class YamahaYM2612 {
 
     /// @brief Set the SSG-envelope register for the given channel and operator.
     ///
-    /// @param channel the channel to set the SSG-EG register of (in [0, 6])
+    /// @param voice the channel to set the SSG-EG register of (in [0, 6])
     /// @param slot the operator to set the SSG-EG register of (in [0, 3])
     /// @param is_on whether the looping envelope generator should be turned on
     /// @param mode the mode for the looping generator to run in (in [0, 7])
@@ -525,144 +525,144 @@ class YamahaYM2612 {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode) {
+    inline void setSSG(uint8_t voice, uint8_t slot, bool is_on, uint8_t mode) {
         const uint8_t value = (is_on << 3) | (mode & 7);
-        if (channels[channel].operators[slot].SSG == value) return;
-        channels[channel].operators[slot].SSG = value;
+        if (parameters[voice].operators[slot].SSG == value) return;
+        parameters[voice].operators[slot].SSG = value;
         // TODO: slot here needs mapped to the order 1 3 2 4
-        setREG(VOICE_PART(channel), VOICE_OFFSET(0x90 + (slot << 2), channel), value);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0x90 + (slot << 2), voice), value);
     }
 
-    /// @brief Set the attack rate (AR) register for the given channel and operator.
+    /// @brief Set the attack rate (AR) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the attack rate (AR) register of (in [0, 6])
+    /// @param voice the voice to set the attack rate (AR) register of (in [0, 6])
     /// @param slot the operator to set the attack rate (AR) register of (in [0, 3])
     /// @param value the rate of the attack stage of the envelope generator
     ///
-    inline void setAR(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].AR == value) return;
-        channels[channel].operators[slot].AR = value;
-        Operator *s = &voices[channel].operators[slots_idx[slot]];
+    inline void setAR(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].AR == value) return;
+        parameters[voice].operators[slot].AR = value;
+        Operator *s = &voices[voice].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
-        set_ar_ksr(&voices[channel], s, s->ar_ksr);
+        set_ar_ksr(&voices[voice], s, s->ar_ksr);
     }
 
-    /// @brief Set the 1st decay rate (D1) register for the given channel and operator.
+    /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the 1st decay rate (D1) register of (in [0, 6])
+    /// @param voice the voice to set the 1st decay rate (D1) register of (in [0, 6])
     /// @param slot the operator to set the 1st decay rate (D1) register of (in [0, 3])
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
-    inline void setD1(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].D1 == value) return;
-        channels[channel].operators[slot].D1 = value;
-        Operator *s = &voices[channel].operators[slots_idx[slot]];
+    inline void setD1(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].D1 == value) return;
+        parameters[voice].operators[slot].D1 = value;
+        Operator *s = &voices[voice].operators[slots_idx[slot]];
         s->dr = (s->dr & 0x80) | (value & 0x1F);
         set_dr(s, s->dr);
     }
 
-    /// @brief Set the sustain level (SL) register for the given channel and operator.
+    /// @brief Set the sustain level (SL) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the sustain level (SL) register of (in [0, 6])
+    /// @param voice the voice to set the sustain level (SL) register of (in [0, 6])
     /// @param slot the operator to set the sustain level (SL) register of (in [0, 3])
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
-    inline void setSL(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].SL == value) return;
-        channels[channel].operators[slot].SL = value;
-        Operator *s =  &voices[channel].operators[slots_idx[slot]];
+    inline void setSL(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].SL == value) return;
+        parameters[voice].operators[slot].SL = value;
+        Operator *s =  &voices[voice].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
         set_sl_rr(s, s->sl_rr);
     }
 
-    /// @brief Set the 2nd decay rate (D2) register for the given channel and operator.
+    /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the 2nd decay rate (D2) register of (in [0, 6])
+    /// @param voice the voice to set the 2nd decay rate (D2) register of (in [0, 6])
     /// @param slot the operator to set the 2nd decay rate (D2) register of (in [0, 3])
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
-    inline void setD2(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].D2 == value) return;
-        channels[channel].operators[slot].D2 = value;
-        set_sr(&voices[channel].operators[slots_idx[slot]], value);
+    inline void setD2(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].D2 == value) return;
+        parameters[voice].operators[slot].D2 = value;
+        set_sr(&voices[voice].operators[slots_idx[slot]], value);
     }
 
-    /// @brief Set the release rate (RR) register for the given channel and operator.
+    /// @brief Set the release rate (RR) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the release rate (RR) register of (in [0, 6])
+    /// @param voice the voice to set the release rate (RR) register of (in [0, 6])
     /// @param slot the operator to set the release rate (RR) register of (in [0, 3])
     /// @param value the rate of release of the envelope generator after key-off
     ///
-    inline void setRR(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].RR == value) return;
-        channels[channel].operators[slot].RR = value;
-        Operator *s =  &voices[channel].operators[slots_idx[slot]];
+    inline void setRR(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].RR == value) return;
+        parameters[voice].operators[slot].RR = value;
+        Operator *s =  &voices[voice].operators[slots_idx[slot]];
         s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
         set_sl_rr(s, s->sl_rr);
     }
 
-    /// @brief Set the total level (TL) register for the given channel and operator.
+    /// @brief Set the total level (TL) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the total level (TL) register of (in [0, 6])
+    /// @param voice the voice to set the total level (TL) register of (in [0, 6])
     /// @param slot the operator to set the total level (TL) register of (in [0, 3])
     /// @param value the total amplitude of envelope generator
     ///
-    inline void setTL(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].TL == value) return;
-        channels[channel].operators[slot].TL = value;
-        set_tl(&voices[channel], &voices[channel].operators[slots_idx[slot]], value);
+    inline void setTL(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].TL == value) return;
+        parameters[voice].operators[slot].TL = value;
+        set_tl(&voices[voice], &voices[voice].operators[slots_idx[slot]], value);
     }
 
-    /// @brief Set the multiplier (MUL) register for the given channel and operator.
+    /// @brief Set the multiplier (MUL) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the multiplier (MUL) register of (in [0, 6])
+    /// @param voice the voice to set the multiplier (MUL) register of (in [0, 6])
     /// @param slot the operator to set the multiplier  (MUL)register of (in [0, 3])
     /// @param value the value of the FM phase multiplier
     ///
-    inline void setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].MUL == value) return;
-        channels[channel].operators[slot].MUL = value;
-        voices[channel].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-        voices[channel].operators[Op1].phase_increment = -1;
+    inline void setMUL(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].MUL == value) return;
+        parameters[voice].operators[slot].MUL = value;
+        voices[voice].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        voices[voice].operators[Op1].phase_increment = -1;
     }
 
-    /// @brief Set the detune (DET) register for the given channel and operator.
+    /// @brief Set the detune (DET) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the detune (DET) register of (in [0, 6])
+    /// @param voice the voice to set the detune (DET) register of (in [0, 6])
     /// @param slot the operator to set the detune (DET) register of (in [0, 3])
     /// @param value the the level of detuning for the FM operator
     ///
-    inline void setDET(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].DET == value) return;
-        channels[channel].operators[slot].DET = value;
-        voices[channel].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
-        voices[channel].operators[Op1].phase_increment = -1;
+    inline void setDET(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].DET == value) return;
+        parameters[voice].operators[slot].DET = value;
+        voices[voice].operators[slots_idx[slot]].DT  = engine.state.dt_tab[(value)&7];
+        voices[voice].operators[Op1].phase_increment = -1;
     }
 
-    /// @brief Set the rate-scale (RS) register for the given channel and operator.
+    /// @brief Set the rate-scale (RS) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the rate-scale (RS) register of (in [0, 6])
+    /// @param voice the voice to set the rate-scale (RS) register of (in [0, 6])
     /// @param slot the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    inline void setRS(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].RS == value) return;
-        channels[channel].operators[slot].RS = value;
-        Operator *s = &voices[channel].operators[slots_idx[slot]];
+    inline void setRS(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].RS == value) return;
+        parameters[voice].operators[slot].RS = value;
+        Operator *s = &voices[voice].operators[slots_idx[slot]];
         s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
-        set_ar_ksr(&voices[channel], s, s->ar_ksr);
+        set_ar_ksr(&voices[voice], s, s->ar_ksr);
     }
 
-    /// @brief Set the amplitude modulation (AM) register for the given channel and operator.
+    /// @brief Set the amplitude modulation (AM) register for the given voice and operator.
     ///
-    /// @param channel the channel to set the amplitude modulation (AM) register of (in [0, 6])
+    /// @param voice the voice to set the amplitude modulation (AM) register of (in [0, 6])
     /// @param slot the operator to set the amplitude modulation (AM) register of (in [0, 3])
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
-    inline void setAM(uint8_t channel, uint8_t slot, uint8_t value) {
-        if (channels[channel].operators[slot].AM == value) return;
-        channels[channel].operators[slot].AM = value;
-        Operator *s = &voices[channel].operators[slots_idx[slot]];
+    inline void setAM(uint8_t voice, uint8_t slot, uint8_t value) {
+        if (parameters[voice].operators[slot].AM == value) return;
+        parameters[voice].operators[slot].AM = value;
+        Operator *s = &voices[voice].operators[slots_idx[slot]];
         s->AMmask = (value) ? ~0 : 0;
     }
 
@@ -670,29 +670,29 @@ class YamahaYM2612 {
     // MARK: Emulator output
     // -----------------------------------------------------------------------
 
-    /// @brief Return the output from the left channel of the mix output.
+    /// @brief Return the output from the left lane of the mix output.
     ///
-    /// @returns the left channel of the mix output
+    /// @returns the left lane of the mix output
     ///
     inline int16_t getOutputLeft() { return stereo_output[0]; }
 
-    /// @brief Return the output from the right channel of the mix output.
+    /// @brief Return the output from the right lane of the mix output.
     ///
-    /// @returns the right channel of the mix output
+    /// @returns the right lane of the mix output
     ///
     inline int16_t getOutputRight() { return stereo_output[1]; }
 
-    /// @brief Return the voltage from the left channel of the mix output.
+    /// @brief Return the voltage from the left lane of the mix output.
     ///
-    /// @returns the voltage of the left channel of the mix output
+    /// @returns the voltage of the left lane of the mix output
     ///
     inline float getVoltageLeft() {
         return static_cast<float>(stereo_output[0]) / std::numeric_limits<int16_t>::max();
     }
 
-    /// @brief Return the voltage from the right channel of the mix output.
+    /// @brief Return the voltage from the right lane of the mix output.
     ///
-    /// @returns the voltage of the right channel of the mix output
+    /// @returns the voltage of the right lane of the mix output
     ///
     inline float getVoltageRight() {
         return static_cast<float>(stereo_output[1]) / std::numeric_limits<int16_t>::max();

@@ -35,66 +35,6 @@ extern const uint8_t lfo_ams_depth_shift[];
 extern const uint8_t lfo_pm_output[7 * 8][8];
 extern int32_t lfo_pm_table[];
 
-/// @brief Set the 7-bit total level.
-///
-/// @param CH a pointer to the channel
-/// @param FM_SLOT a pointer to the operator
-/// @param v the value for the TL register
-///
-static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
-    SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
-}
-
-/// set attack rate & key scale
-static inline void set_ar_ksr(FM_CH *CH, FM_SLOT *SLOT, int v) {
-    uint8_t old_KSR = SLOT->KSR;
-    SLOT->ar = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
-    SLOT->KSR = 3 - (v >> 6);
-    if (SLOT->KSR != old_KSR) CH->SLOT[SLOT1].Incr = -1;
-    // refresh Attack rate
-    if ((SLOT->ar + SLOT->ksr) < 32 + 62) {
-        SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar + SLOT->ksr ];
-        SLOT->eg_sel_ar = eg_rate_select[SLOT->ar + SLOT->ksr ];
-    } else {
-        SLOT->eg_sh_ar = 0;
-        SLOT->eg_sel_ar = 17 * RATE_STEPS;
-    }
-}
-
-/// set decay rate
-static inline void set_dr(FM_SLOT *SLOT, int v) {
-    SLOT->d1r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
-    SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
-    SLOT->eg_sel_d1r= eg_rate_select[SLOT->d1r + SLOT->ksr];
-}
-
-/// set sustain rate
-static inline void set_sr(FM_SLOT *SLOT, int v) {
-    SLOT->d2r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
-    SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
-    SLOT->eg_sel_d2r= eg_rate_select[SLOT->d2r + SLOT->ksr];
-}
-
-/// set release rate
-static inline void set_sl_rr(FM_SLOT *SLOT, int v) {
-    SLOT->sl = sl_table[v >> 4];
-    SLOT->rr = 34 + ((v & 0x0f) << 2);
-    SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr + SLOT->ksr];
-    SLOT->eg_sel_rr = eg_rate_select[SLOT->rr + SLOT->ksr];
-}
-
-static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
-static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
 /// advance LFO to next sample.
 static inline void advance_lfo(FM_OPN *OPN) {
     if (OPN->lfo_timer_overflow) {  // LFO enabled ?
@@ -328,70 +268,6 @@ static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
         refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT2] , fc , kc );
         refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT3] , fc , kc );
         refresh_fc_eg_slot(OPN, &CH->SLOT[SLOT4] , fc , kc );
-    }
-}
-
-static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
-    // normal mode
-    ST->mode   = 0;
-    ST->TA     = 0;
-    ST->TAC    = 0;
-    ST->TB     = 0;
-    ST->TBC    = 0;
-    for(int c = 0; c < num; c++) {
-        CH[c].fc = 0;
-        for(int s = 0; s < 4; s++) {
-            CH[c].SLOT[s].ssg = 0;
-            CH[c].SLOT[s].ssgn = 0;
-            CH[c].SLOT[s].state= EG_OFF;
-            CH[c].SLOT[s].volume = MAX_ATT_INDEX;
-            CH[c].SLOT[s].vol_out= MAX_ATT_INDEX;
-        }
-    }
-}
-
-/// SSG-EG update process
-/// The behavior is based upon Nemesis tests on real hardware
-/// This is actually executed before each samples
-static void update_ssg_eg_channel(FM_SLOT *SLOT) {
-    // four operators per channel
-    for (unsigned i = 4; i > 0; i--) {
-        // detect SSG-EG transition. this is not required during release phase
-        // as the attenuation has been forced to MAX and output invert flag is
-        // not used. If an Attack Phase is programmed, inversion can occur on
-        // each sample.
-        if ((SLOT->ssg & 0x08) && (SLOT->volume >= 0x200) && (SLOT->state > EG_REL)) {
-            if (SLOT->ssg & 0x01) {  // bit 0 = hold SSG-EG
-                // set inversion flag
-                if (SLOT->ssg & 0x02) SLOT->ssgn = 4;
-                // force attenuation level during decay phases
-                if ((SLOT->state != EG_ATT) && !(SLOT->ssgn ^ (SLOT->ssg & 0x04)))
-                    SLOT->volume  = MAX_ATT_INDEX;
-            } else {  // loop SSG-EG
-                // toggle output inversion flag or reset Phase Generator
-                if (SLOT->ssg & 0x02)
-                    SLOT->ssgn ^= 4;
-                else
-                    SLOT->phase = 0;
-                // same as Key ON
-                if (SLOT->state != EG_ATT) {
-                    if ((SLOT->ar + SLOT->ksr) < 32 + 62) {
-                        SLOT->state = (SLOT->volume <= MIN_ATT_INDEX) ?
-                            ((SLOT->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
-                    } else { // Attack Rate is maximal: jump to Decay or Sustain
-                        SLOT->volume = MIN_ATT_INDEX;
-                        SLOT->state = (SLOT->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
-                    }
-                }
-            }
-            // recalculate EG output
-            if (SLOT->ssgn ^ (SLOT->ssg&0x04))
-                SLOT->vol_out = ((uint32_t)(0x200 - SLOT->volume) & MAX_ATT_INDEX) + SLOT->tl;
-            else
-                SLOT->vol_out = (uint32_t)SLOT->volume + SLOT->tl;
-        }
-        // next slot
-        SLOT++;
     }
 }
 

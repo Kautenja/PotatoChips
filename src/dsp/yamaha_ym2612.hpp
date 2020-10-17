@@ -38,8 +38,6 @@ class YamahaYM2612 {
     /// channel state
     Voice voices[6];
 
-    /// the value of the global LFO parameter
-    uint8_t LFO = 0;
     /// A structure with channel data for a YM2612 voice.
     struct Channel {
         /// the index of the active FM algorithm
@@ -107,7 +105,7 @@ class YamahaYM2612 {
 
     /// @brief Reset the emulator to its initial state
     inline void reset() {
-        LFO = stereo_output[0] = stereo_output[1] = 0;
+        stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
         // mode 0 , timer reset (address 0x27)
@@ -257,12 +255,13 @@ class YamahaYM2612 {
     /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
-        // don't set the value if it hasn't changed
-        if (LFO == value) return;
-        // update the local LFO value
-        LFO = value;
-        // set the LFO on the engine emulator
-        set_lfo(&engine, ((value > 0) << 3) | (value & 7));
+        engine.lfo_timer_overflow = lfo_samples_per_step[value & 7] << LFO_SH;
+        // the LFO waveform can be held using the following segment:
+        // engine.lfo_timer_overflow = 0;
+        // engine.lfo_timer = 0;
+        // engine.lfo_cnt = 0;
+        // engine.lfo_PM_step = 0;
+        // engine.lfo_AM_step = 126;
     }
 
     // -----------------------------------------------------------------------

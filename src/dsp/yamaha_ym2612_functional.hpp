@@ -472,23 +472,6 @@ static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
     }
 }
 
-/// @brief set the LFO parameter to a new value.
-///
-/// @param state the engine state structure
-/// @param lfo_mode the lfo mode to set
-///
-static inline void set_lfo(EngineState* state, uint8_t lfo_mode) {
-    if (lfo_mode & 8) {  // LFO enabled?
-        state->lfo_timer_overflow = lfo_samples_per_step[lfo_mode & 7] << LFO_SH;
-    } else {  // hold LFO waveform in reset state
-        state->lfo_timer_overflow = 0;
-        state->lfo_timer = 0;
-        state->lfo_cnt = 0;
-        state->lfo_PM_step = 0;
-        state->lfo_AM_step = 126;
-    }
-}
-
 /// @brief set the gate mask to a new value.
 ///
 /// @param state the engine state structure

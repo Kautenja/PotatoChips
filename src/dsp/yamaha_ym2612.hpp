@@ -833,7 +833,7 @@ struct EngineState {
         /// current fnum value for this slot (can be different between slots of
         /// one channel in 3slot mode)
         uint32_t block_fnum[3] = {0, 0, 0};
-    } SL3;
+    } special_mode_state;
     /// pointer of CH
     Voice *P_CH = nullptr;
     /// fm channels output masks (0xffffffff = enable) */
@@ -1359,19 +1359,19 @@ static void write_register(EngineState *OPN, int r, int v) {
             break;
         case 2:  // 0xa8-0xaa : 3CH FNUM1
             if (r < 0x100) {
-                uint32_t fn = (((uint32_t)(OPN->SL3.fn_h & 7)) << 8) + v;
-                uint8_t blk = OPN->SL3.fn_h >> 3;
+                uint32_t fn = (((uint32_t)(OPN->special_mode_state.fn_h & 7)) << 8) + v;
+                uint8_t blk = OPN->special_mode_state.fn_h >> 3;
                 /* keyscale code */
-                OPN->SL3.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+                OPN->special_mode_state.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
                 /* phase increment counter */
-                OPN->SL3.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
-                OPN->SL3.block_fnum[c] = (blk << 11) | fn;
+                OPN->special_mode_state.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
+                OPN->special_mode_state.block_fnum[c] = (blk << 11) | fn;
                 (OPN->P_CH)[2].operators[Op1].phase_increment = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
             if (r < 0x100)
-                OPN->SL3.fn_h = v&0x3f;
+                OPN->special_mode_state.fn_h = v&0x3f;
             break;
         }
         break;

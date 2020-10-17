@@ -1051,7 +1051,7 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
     case 3:  // data port 1
         // verified on real YM2608
         if (addr_A1 != 1) break;
-
+        // get the address from the latch and right to the given register
         addr = OPN.ST.address;
         registers[addr | 0x100] = v;
         OPNWriteReg(&OPN, addr | 0x100, v);
@@ -1060,17 +1060,17 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
 }
 
 void YamahaYM2612::setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode) {
-    uint8_t value = (is_on << 3) | (mode & 7);
+    const uint8_t value = (is_on << 3) | (mode & 7);
     // if (channels[channel].operators[slot].SSG == value) return;
     // channels[channel].operators[slot].SSG = value;
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + slot, channel), value);
+    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + (slot << 2), channel), value);
 }
 
 void YamahaYM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AR == value) return;
     channels[channel].operators[slot].AR = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
-    s->ar_ksr = (s->ar_ksr&0xC0)|(value&0x1f);
+    s->ar_ksr = (s->ar_ksr & 0xC0) | (value & 0x1f);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 
@@ -1078,7 +1078,7 @@ void YamahaYM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].D1 == value) return;
     channels[channel].operators[slot].D1 = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
-    s->dr = (s->dr&0x80)|(value&0x1F);
+    s->dr = (s->dr & 0x80) | (value & 0x1F);
     set_dr(s, s->dr);
 }
 
@@ -1086,7 +1086,7 @@ void YamahaYM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].SL == value) return;
     channels[channel].operators[slot].SL = value;
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
-    s->sl_rr = (s->sl_rr&0x0f)|((value&0x0f)<<4);
+    s->sl_rr = (s->sl_rr & 0x0f) | ((value & 0x0f) << 4);
     set_sl_rr(s, s->sl_rr);
 }
 
@@ -1100,7 +1100,7 @@ void YamahaYM2612::setRR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RR == value) return;
     channels[channel].operators[slot].RR = value;
     FM_SLOT *s =  &CH[channel].SLOT[slots_idx[slot]];
-    s->sl_rr = (s->sl_rr&0xf0)|(value&0x0f);
+    s->sl_rr = (s->sl_rr & 0xf0) | (value & 0x0f);
     set_sl_rr(s, s->sl_rr);
 }
 
@@ -1113,22 +1113,22 @@ void YamahaYM2612::setTL(uint8_t channel, uint8_t slot, uint8_t value) {
 void YamahaYM2612::setMUL(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].MUL == value) return;
     channels[channel].operators[slot].MUL = value;
-    CH[channel].SLOT[slots_idx[slot]].mul = (value&0x0f)? (value&0x0f)*2 : 1;
-    CH[channel].SLOT[SLOT1].Incr=-1;
+    CH[channel].SLOT[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+    CH[channel].SLOT[SLOT1].Incr = -1;
 }
 
 void YamahaYM2612::setDET(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].DET == value) return;
     channels[channel].operators[slot].DET = value;
     CH[channel].SLOT[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
-    CH[channel].SLOT[SLOT1].Incr=-1;
+    CH[channel].SLOT[SLOT1].Incr = -1;
 }
 
 void YamahaYM2612::setRS(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].RS == value) return;
     channels[channel].operators[slot].RS = value;
     FM_SLOT *s = &CH[channel].SLOT[slots_idx[slot]];
-    s->ar_ksr = (s->ar_ksr&0x1F)|((value&0x03)<<6);
+    s->ar_ksr = (s->ar_ksr & 0x1F) | ((value & 0x03) << 6);
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 

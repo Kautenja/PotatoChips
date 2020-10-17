@@ -349,6 +349,8 @@ class YamahaYM2612 {
     // MARK: Global control for each channel
     // -----------------------------------------------------------------------
 
+    #define WRITE_REGISTER(reg, voice, value) write_register(&engine, VOICE_OFFSET(reg, voice) | (VOICE_PART(voice) * 0x100), value)
+
     /// @brief Set the frequency for the given channel.
     ///
     /// @param voice the voice on the chip to set the frequency for
@@ -369,7 +371,8 @@ class YamahaYM2612 {
         const uint16_t freq16bit = frequency;
         // write the high bits of the frequency to the register
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
+        // write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
+        WRITE_REGISTER(0xA4, voice, freqHigh);
         // write the low bits of the frequency to the register
         const auto freqLow = freq16bit & 0xff;
         write_register(&engine, VOICE_OFFSET(0xA0, voice) | (VOICE_PART(voice) * 0x100), freqLow);

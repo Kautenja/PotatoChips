@@ -622,7 +622,7 @@ struct Voice {
 };
 
 /// OPN Mode Register Write
-static inline void set_timers(OperatorState *ST, int v) {
+static inline void set_timers(OperatorState* state, int value) {
     // b7 = CSM MODE
     // b6 = 3 slot mode
     // b5 = reset b
@@ -631,18 +631,18 @@ static inline void set_timers(OperatorState *ST, int v) {
     // b2 = timer enable a
     // b1 = load b
     // b0 = load a
-    ST->mode = v;
+    state->mode = value;
     // load b
-    if (v & 0x02) {
-        if (ST->TBC == 0) ST->TBC = (256 - ST->TB) << 4;
+    if (value & 0x02) {
+        if (state->TBC == 0) state->TBC = (256 - state->TB) << 4;
     } else {  // stop timer b
-        ST->TBC = 0;
+        state->TBC = 0;
     }
     // load a
-    if (v & 0x01) {
-        if (ST->TAC == 0) ST->TAC = (1024 - ST->TA);
+    if (value & 0x01) {
+        if (state->TAC == 0) state->TAC = (1024 - state->TA);
     } else {  // stop timer a
-        ST->TAC = 0;
+        state->TAC = 0;
     }
 }
 
@@ -650,7 +650,7 @@ static inline void set_timers(OperatorState *ST, int v) {
 ///
 /// @param state the operator state for which timer A is over
 ///
-static inline void timer_A_over(OperatorState *state) {
+static inline void timer_A_over(OperatorState* state) {
     state->TAC = (1024 - state->TA);
 }
 
@@ -658,7 +658,7 @@ static inline void timer_A_over(OperatorState *state) {
 ///
 /// @param state the operator state for which timer B is over
 ///
-static inline void timer_B_over(OperatorState *state) {
+static inline void timer_B_over(OperatorState* state) {
     state->TBC = (256 - state->TB) << 4;
 }
 
@@ -667,14 +667,14 @@ static inline void timer_B_over(OperatorState *state) {
 /// @param voice the voice to set the key-on flag for
 /// @param slot the slot to set the key-on flag for
 ///
-static inline void set_keyon(Voice *voice, unsigned slot) {
-    Operator *SLOT = &voice->SLOT[slot];
-    if (!SLOT->key) {
-        SLOT->key = 1;
+static inline void set_keyon(Voice* voice, unsigned slot) {
+    Operator *oprtr = &voice->SLOT[slot];
+    if (!oprtr->key) {
+        oprtr->key = 1;
         // restart Phase Generator
-        SLOT->phase = 0;
-        SLOT->ssgn = (SLOT->ssg & 0x04) >> 1;
-        SLOT->state = EG_ATT;
+        oprtr->phase = 0;
+        oprtr->ssgn = (oprtr->ssg & 0x04) >> 1;
+        oprtr->state = EG_ATT;
     }
 }
 
@@ -683,45 +683,45 @@ static inline void set_keyon(Voice *voice, unsigned slot) {
 /// @param voice the voice to set the key-off flag for
 /// @param slot the slot to set the key-off flag for
 ///
-static inline void set_keyoff(Voice *voice, unsigned slot) {
-    Operator *SLOT = &voice->SLOT[slot];
-    if ( SLOT->key ) {
-        SLOT->key = 0;
-        if (SLOT->state>EG_REL)  // phase -> Release
-            SLOT->state = EG_REL;
+static inline void set_keyoff(Voice* voice, unsigned slot) {
+    Operator *oprtr = &voice->SLOT[slot];
+    if ( oprtr->key ) {
+        oprtr->key = 0;
+        if (oprtr->state>EG_REL)  // phase -> Release
+            oprtr->state = EG_REL;
     }
 }
 
 /// set detune & multiplier.
-static inline void set_det_mul(OperatorState *ST, Voice *CH, Operator *SLOT, int v) {
-    SLOT->mul = (v & 0x0f) ? (v & 0x0f) * 2 : 1;
-    SLOT->DT = ST->dt_tab[(v >> 4) & 7];
-    CH->SLOT[SLOT1].Incr = -1;
+static inline void set_det_mul(OperatorState* state, Voice* voice, Operator* oprtr, int value) {
+    oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+    oprtr->DT = state->dt_tab[(value >> 4) & 7];
+    voice->SLOT[SLOT1].Incr = -1;
 }
 
 /// @brief Set the 7-bit total level.
 ///
 /// @param CH a pointer to the channel
 /// @param Operator a pointer to the operator
-/// @param v the value for the TL register
+/// @param value the value for the TL register
 ///
-static inline void set_tl(Voice *CH, Operator *SLOT, int v) {
-    SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
+static inline void set_tl(Voice* voice, Operator* oprtr, int value) {
+    oprtr->tl = (value & 0x7f) << (ENV_BITS - 7);
 }
 
 /// set attack rate & key scale
-static inline void set_ar_ksr(Voice *CH, Operator *SLOT, int v) {
-    uint8_t old_KSR = SLOT->KSR;
-    SLOT->ar = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
-    SLOT->KSR = 3 - (v >> 6);
-    if (SLOT->KSR != old_KSR) CH->SLOT[SLOT1].Incr = -1;
+static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
+    uint8_t old_KSR = oprtr->KSR;
+    oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
+    oprtr->KSR = 3 - (value >> 6);
+    if (oprtr->KSR != old_KSR) voice->SLOT[SLOT1].Incr = -1;
     // refresh Attack rate
-    if ((SLOT->ar + SLOT->ksr) < 32 + 62) {
-        SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar + SLOT->ksr ];
-        SLOT->eg_sel_ar = eg_rate_select[SLOT->ar + SLOT->ksr ];
+    if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
+        oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
+        oprtr->eg_sel_ar = eg_rate_select[oprtr->ar + oprtr->ksr ];
     } else {
-        SLOT->eg_sh_ar = 0;
-        SLOT->eg_sel_ar = 17 * RATE_STEPS;
+        oprtr->eg_sh_ar = 0;
+        oprtr->eg_sel_ar = 17 * RATE_STEPS;
     }
 }
 

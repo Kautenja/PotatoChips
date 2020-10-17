@@ -39,97 +39,56 @@ extern const uint8_t lfo_ams_depth_shift[];
 extern const uint8_t lfo_pm_output[7 * 8][8];
 extern int32_t lfo_pm_table[];
 
-/* status set and IRQ handling */
-static inline void FM_STATUS_SET(FM_ST *ST, int flag) {
-    // set status flag
-    ST->status |= flag;
-    if (!ST->irq && (ST->status & ST->irqmask)) ST->irq = 1;
-}
-
-/* status reset and IRQ handling */
-static inline void FM_STATUS_RESET(FM_ST *ST, int flag) {
-    // reset status flag
-    ST->status &=~flag;
-    if (ST->irq && !(ST->status & ST->irqmask)) ST->irq = 0;
-}
-
-/* IRQ mask set */
-static inline void FM_IRQMASK_SET(FM_ST *ST, int flag) {
-    ST->irqmask = flag;
-    // IRQ handling check
-    FM_STATUS_SET(ST, 0);
-    FM_STATUS_RESET(ST, 0);
-}
-
 /* OPN Mode Register Write */
-static inline void set_timers( FM_ST *ST, int v )
-{
-    /* b7 = CSM MODE */
-    /* b6 = 3 slot mode */
-    /* b5 = reset b */
-    /* b4 = reset a */
-    /* b3 = timer enable b */
-    /* b2 = timer enable a */
-    /* b1 = load b */
-    /* b0 = load a */
+static inline void set_timers(FM_ST *ST, int v) {
+    // b7 = CSM MODE
+    // b6 = 3 slot mode
+    // b5 = reset b
+    // b4 = reset a
+    // b3 = timer enable b
+    // b2 = timer enable a
+    // b1 = load b
+    // b0 = load a
     ST->mode = v;
 
-    /* reset Timer b flag */
-    if ( v & 0x20 )
-        FM_STATUS_RESET(ST,0x02);
-    /* reset Timer a flag */
-    if ( v & 0x10 )
-        FM_STATUS_RESET(ST,0x01);
-    /* load b */
-    if ( v & 0x02 )
-    {
-        if ( ST->TBC == 0 )
-        {
-            ST->TBC = ( 256-ST->TB)<<4;
-        }
+    // TODO: remove, unused code (presumably for console emulators)
+    // /* reset Timer b flag */
+    // if ( v & 0x20 )
+    //     FM_STATUS_RESET(ST,0x02);
+    // /* reset Timer a flag */
+    // if ( v & 0x10 )
+    //     FM_STATUS_RESET(ST,0x01);
+
+    if ( v & 0x02 ) {  // load b
+        if (ST->TBC == 0) ST->TBC = (256 - ST->TB) << 4;
+    } else {  // stop timer b
+        if (ST->TBC != 0)  ST->TBC = 0;
     }
-    else
-    {   /* stop timer b */
-        if ( ST->TBC != 0 )
-        {
-            ST->TBC = 0;
-        }
-    }
-    /* load a */
-    if ( v & 0x01 )
-    {
-        if ( ST->TAC == 0 )
-        {
-            ST->TAC = (1024-ST->TA);
-        }
-    }
-    else
-    {   /* stop timer a */
-        if ( ST->TAC != 0 )
-        {
-            ST->TAC = 0;
-        }
+
+    if ( v & 0x01 ) {  // load a
+        if (ST->TAC == 0) ST->TAC = (1024 - ST->TA);
+    } else {  // stop timer a
+        if (ST->TAC != 0) ST->TAC = 0;
     }
 }
 
-
 /* Timer A Overflow */
-static inline void TimerAOver(FM_ST *ST)
-{
+static inline void TimerAOver(FM_ST *ST) {
+    // TODO: remove, unused code (presumably for console emulators)
     /* set status (if enabled) */
-    if (ST->mode & 0x04) FM_STATUS_SET(ST,0x01);
+    // if (ST->mode & 0x04) FM_STATUS_SET(ST,0x01);
     /* clear or reload the counter */
     ST->TAC = (1024-ST->TA);
 }
+
 /* Timer B Overflow */
-static inline void TimerBOver(FM_ST *ST)
-{
+static inline void TimerBOver(FM_ST *ST) {
+    // TODO: remove, unused code (presumably for console emulators)
     /* set status (if enabled) */
-    if (ST->mode & 0x08) FM_STATUS_SET(ST,0x02);
+    // if (ST->mode & 0x08) FM_STATUS_SET(ST,0x02);
     /* clear or reload the counter */
     ST->TBC = ( 256-ST->TB)<<4;
 }
-
 
 static inline void FM_KEYON(FM_CH *CH , int s )
 {
@@ -1211,8 +1170,9 @@ void YamahaYM2612::reset() {
     LFO = MOL = MOR = 0;
     // set the frequency scaling parameters of the OPN emulator
     OPNSetPres(&OPN);
+    // TODO: remove, unused code (presumably for console emulators)
     // status clear
-    FM_IRQMASK_SET(&(OPN.ST), 0x03);
+    // FM_IRQMASK_SET(&(OPN.ST), 0x03);
     // mode 0 , timer reset
     OPNWriteMode(&OPN, 0x27, 0x30);
     // envelope generator

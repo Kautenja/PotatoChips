@@ -174,9 +174,9 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {
 #undef O
 };
 
-/*rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15*/
-/*shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0 */
-/*mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0 */
+// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
+// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
+// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
 
 /// Envelope Generator counter shifts (32 + 64 rates + 32 RKS)
 static const uint8_t eg_rate_shift[32 + 64 + 32] = {
@@ -215,18 +215,18 @@ static const uint8_t eg_rate_shift[32 + 64 + 32] = {
 #undef O
 };
 
+/// this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)
 static const uint8_t dt_tab[4 * 32] = {
-// this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)
-    /* FD=0 */
+    // FD=0
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    /* FD=1 */
+    // FD=1
     0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2,
     2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 8, 8, 8, 8,
-    /* FD=2 */
+    // FD=2
     1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5,
     5, 6, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 16, 16, 16, 16,
-    /* FD=3 */
+    // FD=3
     2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7,
     8, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 20, 22, 22, 22, 22
 };
@@ -281,7 +281,6 @@ static const uint8_t lfo_ams_depth_shift[4] = {8, 3, 1, 0};
 static const uint8_t lfo_pm_output[7 * 8][8] = {
 // 7 bits meaningful (of F-NUMBER), 8 LFO output levels per one depth
 // (out of 32), 8 LFO depths
-
     /* FNUM BIT 4: 000 0001xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -291,7 +290,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 6 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 7 */ {0, 0, 0, 0, 1, 1, 1, 1},
-
     /* FNUM BIT 5: 000 0010xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -301,7 +299,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 6 */ {0, 0, 0, 0, 1, 1, 1, 1},
     /* DEPTH 7 */ {0, 0, 1, 1, 2, 2, 2, 3},
-
     /* FNUM BIT 6: 000 0100xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -311,7 +308,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 0, 0, 1, 1, 1, 1},
     /* DEPTH 6 */ {0, 0, 1, 1, 2, 2, 2, 3},
     /* DEPTH 7 */ {0, 0, 2, 3, 4, 4, 5, 6},
-
     /* FNUM BIT 7: 000 1000xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 0, 0, 0, 0},
@@ -321,7 +317,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 1, 1, 2, 2, 2, 3},
     /* DEPTH 6 */ {0, 0, 2, 3, 4, 4, 5, 6},
     /* DEPTH 7 */ {0, 0, 4, 6, 8, 8, 0xa, 0xc},
-
     /* FNUM BIT 8: 001 0000xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 1, 1, 1, 1},
@@ -331,7 +326,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 2, 3, 4, 4, 5, 6},
     /* DEPTH 6 */ {0, 0, 4, 6, 8, 8, 0xa, 0xc},
     /* DEPTH 7 */ {0, 0, 8, 0xc, 0x10, 0x10, 0x14, 0x18},
-
     /* FNUM BIT 9: 010 0000xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 2, 2, 2, 2},
@@ -341,7 +335,6 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
     /* DEPTH 5 */ {0, 0, 4, 6, 8, 8, 0xa, 0xc},
     /* DEPTH 6 */ {0, 0, 8, 0xc, 0x10, 0x10, 0x14, 0x18},
     /* DEPTH 7 */ {0, 0, 0x10, 0x18, 0x20, 0x20, 0x28, 0x30},
-
     /* FNUM BIT10: 100 0000xxxx */
     /* DEPTH 0 */ {0, 0, 0, 0, 0, 0, 0, 0},
     /* DEPTH 1 */ {0, 0, 0, 0, 4, 4, 4, 4},
@@ -397,21 +390,21 @@ struct FM_SLOT {
     /// current output from EG circuit (without AM from LFO)
     uint32_t vol_out = 0;
 
-    ///  (attack state)
+    /// attack state
     uint8_t eg_sh_ar = 0;
-    ///  (attack state)
+    /// attack state
     uint8_t eg_sel_ar = 0;
-    ///  (decay state)
+    /// decay state
     uint8_t eg_sh_d1r = 0;
-    ///  (decay state)
+    /// decay state
     uint8_t eg_sel_d1r = 0;
-    ///  (sustain state)
+    /// sustain state
     uint8_t eg_sh_d2r = 0;
-    ///  (sustain state)
+    /// sustain state
     uint8_t eg_sel_d2r = 0;
-    ///  (release state)
+    /// release state
     uint8_t eg_sh_rr = 0;
-    ///  (release state)
+    /// release state
     uint8_t eg_sel_rr = 0;
 
     /// SSG-EG waveform
@@ -425,13 +418,13 @@ struct FM_SLOT {
     /// AM enable flag
     uint32_t AMmask = 0;
 
-    /// TODO
+    /// detune and multiplier control register
     uint8_t det_mul = 0;
-    /// TODO
+    /// attack rate and key-scaling control register
     uint8_t ar_ksr = 0;
-    /// TODO
+    /// the sustain level and release rate control register
     uint8_t sl_rr = 0;
-    /// TODO
+    /// the decay rate control register
     uint8_t dr = 0;
 };
 
@@ -444,7 +437,7 @@ struct FM_CH {
     uint8_t ALGO = 0;
     /// feedback shift
     uint8_t FB = 0;
-    /// op1 output for feedback
+    /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
 
     /// SLOT1 output pointer
@@ -456,9 +449,9 @@ struct FM_CH {
     /// SLOT4 output pointer
     int32_t *connect4 = nullptr;
 
-    /* where to put the delayed sample (MEM) */
+    /// where to put the delayed sample (MEM)
     int32_t *mem_connect = nullptr;
-    /* delayed sample (MEM) value */
+    /// delayed sample (MEM) value
     int32_t mem_value = 0;
 
     /// channel phase modulation sensitivity (PMS)
@@ -470,13 +463,13 @@ struct FM_CH {
     uint32_t fc = 0;
     /// key code:
     uint8_t kcode = 0;
-    /// current blk/fnum value for this slot (can be different betweeen slots
-    /// of one channel in 3slot mode)
+    /// current blk / fnum value for this slot (can be different between slots
+    /// of one channel in 3 slot mode)
     uint32_t block_fnum = 0;
 
-    /// TODO
+    /// Feedback amount and algorithm selection
     uint8_t FB_ALG = 0;
-    /// TODO
+    /// L+R enable, AM sensitivity, FM sensitivity
     uint8_t LR_AMS_FMS = 0;
 };
 
@@ -682,7 +675,7 @@ class YamahaYM2612 {
 
     /// @brief Set part of a 16-bit register to a given 8-bit value.
     ///
-    /// @param part TODO
+    /// @param part the part of the register space to access, 0=latch, 1=data
     /// @param reg the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///

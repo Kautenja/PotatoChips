@@ -573,24 +573,16 @@ static void update_ssg_eg_channel(FM_SLOT *SLOT)
     } while (i);
 }
 
-/* write a OPN mode register 0x20-0x2f */
-static void OPNWriteMode(FM_OPN *OPN, int r, int v)
-{
-    uint8_t c;
-    FM_CH *CH;
-
-    switch(r)
-    {
-    case 0x21:  /* Test */
+/// write a OPN mode register 0x20-0x2f
+static void OPNWriteMode(FM_OPN *OPN, int r, int v) {
+    switch (r) {
+    case 0x21:  // Test
         break;
-    case 0x22:  /* LFO FREQ (YM2608/YM2610/YM2610B/YM2612) */
-        if (v&8) /* LFO enabled ? */
-        {
+    case 0x22:  // LFO FREQ (YM2608/YM2610/YM2610B/YM2612)
+        if (v & 8) {  // LFO enabled ?
             OPN->lfo_timer_overflow = lfo_samples_per_step[v&7] << LFO_SH;
-        }
-        else
-        {
-            /* hold LFO waveform in reset state */
+        } else {
+            // hold LFO waveform in reset state
             OPN->lfo_timer_overflow = 0;
             OPN->lfo_timer = 0;
             OPN->lfo_cnt   = 0;
@@ -598,28 +590,28 @@ static void OPNWriteMode(FM_OPN *OPN, int r, int v)
             OPN->LFO_AM    = 126;
         }
         break;
-    case 0x24:  /* timer A High 8*/
-        OPN->ST.TA = (OPN->ST.TA & 0x03)|(((int)v)<<2);
+    case 0x24:  // timer A High 8
+        OPN->ST.TA = (OPN->ST.TA & 0x0003) | (v << 2);
         break;
-    case 0x25:  /* timer A Low 2*/
-        OPN->ST.TA = (OPN->ST.TA & 0x3fc)|(v&3);
+    case 0x25:  // timer A Low 2
+        OPN->ST.TA = (OPN->ST.TA & 0x03fc) | (v & 3);
         break;
-    case 0x26:  /* timer B */
+    case 0x26:  // timer B
         OPN->ST.TB = v;
         break;
-    case 0x27:  /* mode, timer control */
-        set_timers(&(OPN->ST),v );
+    case 0x27:  // mode, timer control
+        set_timers(&(OPN->ST), v);
         break;
-    case 0x28:  /* key on / off */
-        c = v & 0x03;
-        if ( c == 3 ) break;
-        if ( (v&0x04) && (OPN->type & TYPE_6CH) ) c+=3;
-        CH = OPN->P_CH;
+    case 0x28:  // key on / off
+        uint8_t c = v & 0x03;
+        if (c == 3) break;
+        if ((v & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
+        FM_CH* CH = OPN->P_CH;
         CH = &CH[c];
-        if (v&0x10) FM_KEYON(CH,SLOT1); else FM_KEYOFF(CH,SLOT1);
-        if (v&0x20) FM_KEYON(CH,SLOT2); else FM_KEYOFF(CH,SLOT2);
-        if (v&0x40) FM_KEYON(CH,SLOT3); else FM_KEYOFF(CH,SLOT3);
-        if (v&0x80) FM_KEYON(CH,SLOT4); else FM_KEYOFF(CH,SLOT4);
+        if (v & 0x10) FM_KEYON(CH, SLOT1); else FM_KEYOFF(CH, SLOT1);
+        if (v & 0x20) FM_KEYON(CH, SLOT2); else FM_KEYOFF(CH, SLOT2);
+        if (v & 0x40) FM_KEYON(CH, SLOT3); else FM_KEYOFF(CH, SLOT3);
+        if (v & 0x80) FM_KEYON(CH, SLOT4); else FM_KEYOFF(CH, SLOT4);
         break;
     }
 }
@@ -745,7 +737,7 @@ static void init_timetables(FM_OPN *OPN, double freqbase) {
     // there are 2048 FNUMs that can be generated using FNUM/BLK registers
     // but LFO works with one more bit of a precision so we really need 4096
     // elements. calculate fnumber -> increment counter table
-    for(int i = 0; i < 4096; i++) {
+    for (int i = 0; i < 4096; i++) {
         // freq table for octave 7
         // OPN phase increment counter = 20bit
         // the correct formula is
@@ -830,7 +822,7 @@ static void init_tables() {
             o = 8 * log(-1.0 / m) / log(2.0);
         o = o / (ENV_STEP / 4);
         signed int n = (int)(2.0 * o);
-        if (n & 1) // round to nearest
+        if (n & 1)  // round to nearest
             n = (n >> 1) + 1;
         else
             n = n >> 1;
@@ -838,12 +830,12 @@ static void init_tables() {
         sin_tab[i] = n * 2 + (m >= 0.0 ? 0 : 1);
     }
     // build LFO PM modulation table
-    for(int i = 0; i < 8; i++) {  // 8 PM depths
+    for (int i = 0; i < 8; i++) {  // 8 PM depths
         for (uint8_t fnum = 0; fnum < 128; fnum++) {  // 7 bits of F-NUMBER
             for (uint8_t step = 0; step < 8; step++) {
                 uint8_t value = 0;
                 for (uint32_t bit_tmp = 0; bit_tmp < 7; bit_tmp++) {  // 7 bits
-                    if (fnum & (1<<bit_tmp)) {  // only if bit "bit_tmp" is set
+                    if (fnum & (1 << bit_tmp)) {
                         uint32_t offset_fnum_bit = bit_tmp * 8;
                         value += lfo_pm_output[offset_fnum_bit + i][step];
                     }

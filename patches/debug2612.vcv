@@ -372,7 +372,7 @@
         },
         {
           "id": 2,
-          "value": 4.0
+          "value": 10.0
         },
         {
           "id": 3,
@@ -538,14 +538,6 @@
       "inputModuleId": 151,
       "inputId": 3,
       "color": "#0986ad"
-    },
-    {
-      "id": 1282,
-      "outputModuleId": 151,
-      "outputId": 1,
-      "inputModuleId": 151,
-      "inputId": 6,
-      "color": "#c9b70e"
     }
   ]
 }

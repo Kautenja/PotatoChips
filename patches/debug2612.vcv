@@ -313,7 +313,6 @@
           "value": 0.0
         }
       ],
-      "rightModuleId": 151,
       "data": {
         "lissajous": 0,
         "external": 0
@@ -355,67 +354,6 @@
       "pos": [
         28,
         0
-      ]
-    },
-    {
-      "id": 151,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
-      "model": "S_SMP_Echo",
-      "params": [
-        {
-          "id": 0,
-          "value": 31.0
-        },
-        {
-          "id": 1,
-          "value": 30.0
-        },
-        {
-          "id": 2,
-          "value": 127.0
-        },
-        {
-          "id": 3,
-          "value": 127.0
-        },
-        {
-          "id": 4,
-          "value": 127.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 0.0
-        },
-        {
-          "id": 10,
-          "value": 0.0
-        },
-        {
-          "id": 11,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 143,
-      "pos": [
-        47,
-        2
       ]
     }
   ],
@@ -477,44 +415,28 @@
       "color": "#c9b70e"
     },
     {
-      "id": 1210,
-      "outputModuleId": 142,
-      "outputId": 0,
-      "inputModuleId": 151,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1208,
-      "outputModuleId": 142,
-      "outputId": 1,
-      "inputModuleId": 151,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1272,
-      "outputModuleId": 151,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1273,
-      "outputModuleId": 151,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 3,
-      "color": "#c91847"
-    },
-    {
       "id": 1222,
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
       "inputId": 11,
       "color": "#c9b70e"
+    },
+    {
+      "id": 1210,
+      "outputModuleId": 142,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 2,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1208,
+      "outputModuleId": 142,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 3,
+      "color": "#c91847"
     }
   ]
 }

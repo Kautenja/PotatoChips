@@ -356,50 +356,36 @@ static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
     } while (i);
 }
 
-#define volume_calc(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-
-static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
-{
+static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH) {
     uint32_t block_fnum = CH->block_fnum;
-
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[ fnum_lfo + CH->pms + OPN->LFO_PM ];
-
-    if (lfo_fn_table_index_offset)    /* LFO phase modulation active */
-    {
-            uint8_t blk;
-            uint32_t fn;
-        int kc, fc, finc;
-
-        block_fnum = block_fnum*2 + lfo_fn_table_index_offset;
-
-            blk = (block_fnum&0x7000) >> 12;
-            fn  = block_fnum & 0xfff;
-
-        /* keyscale code */
-            kc = (blk<<2) | opn_fktable[fn >> 8];
-
-            /* phase increment counter */
-        fc = (OPN->fn_table[fn]>>(7-blk));
-
-        /* detects frequency overflow (credits to Nemesis) */
-        finc = fc + CH->SLOT[SLOT1].DT[kc];
-
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->LFO_PM];
+    if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+        block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
+        uint8_t blk = (block_fnum & 0x7000) >> 12;
+        uint32_t fn = block_fnum & 0xfff;
+        // key-scale code
+        int kc = (blk << 2) | opn_fktable[fn >> 8];
+        // phase increment counter
+        int fc = (OPN->fn_table[fn]>>(7 - blk));
+        // detects frequency overflow (credits to Nemesis)
+        int finc = fc + CH->SLOT[SLOT1].DT[kc];
+        // Operator 1
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT1].phase += (finc*CH->SLOT[SLOT1].mul) >> 1;
-
+        CH->SLOT[SLOT1].phase += (finc * CH->SLOT[SLOT1].mul) >> 1;
+        // Operator 2
         finc = fc + CH->SLOT[SLOT2].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT2].phase += (finc*CH->SLOT[SLOT2].mul) >> 1;
-
+        CH->SLOT[SLOT2].phase += (finc * CH->SLOT[SLOT2].mul) >> 1;
+        // Operator 3
         finc = fc + CH->SLOT[SLOT3].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT3].phase += (finc*CH->SLOT[SLOT3].mul) >> 1;
-
+        CH->SLOT[SLOT3].phase += (finc * CH->SLOT[SLOT3].mul) >> 1;
+        // Operator 4
         finc = fc + CH->SLOT[SLOT4].DT[kc];
         if (finc < 0) finc += OPN->fn_max;
-        CH->SLOT[SLOT4].phase += (finc*CH->SLOT[SLOT4].mul) >> 1;
-    } else {  // LFO phase modulation  = zero
+        CH->SLOT[SLOT4].phase += (finc * CH->SLOT[SLOT4].mul) >> 1;
+    } else {  // LFO phase modulation is 0
         CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
         CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
         CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
@@ -408,12 +394,13 @@ static inline void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
 }
 
 static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
     uint32_t AM = OPN->LFO_AM >> CH->ams;
     OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
     // restore delayed sample (MEM) value to m2 or c2
     *CH->mem_connect = CH->mem_value;
     // SLOT 1
-    unsigned int eg_out = volume_calc(&CH->SLOT[SLOT1]);
+    unsigned int eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT1]);
     int32_t out = CH->op1_out[0] + CH->op1_out[1];
     CH->op1_out[0] = CH->op1_out[1];
     if (!CH->connect1) {  // algorithm 5
@@ -427,15 +414,15 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
         CH->op1_out[1] = op_calc1(CH->SLOT[SLOT1].phase, eg_out, (out << CH->FB) );
     }
     // SLOT 3
-    eg_out = volume_calc(&CH->SLOT[SLOT3]);
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT3]);
     if (eg_out < ENV_QUIET)
         *CH->connect3 += op_calc(CH->SLOT[SLOT3].phase, eg_out, OPN->m2);
     // SLOT 2
-    eg_out = volume_calc(&CH->SLOT[SLOT2]);
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT2]);
     if (eg_out < ENV_QUIET)
         *CH->connect2 += op_calc(CH->SLOT[SLOT2].phase, eg_out, OPN->c1);
     // SLOT 4
-    eg_out = volume_calc(&CH->SLOT[SLOT4]);
+    eg_out = CALCULATE_VOLUME(&CH->SLOT[SLOT4]);
     if (eg_out < ENV_QUIET)
         *CH->connect4 += op_calc(CH->SLOT[SLOT4].phase, eg_out, OPN->c2);
     // store current MEM
@@ -449,9 +436,10 @@ static inline void chan_calc(FM_OPN *OPN, FM_CH *CH) {
         CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
         CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
     }
+#undef CALCULATE_VOLUME
 }
 
-/* update phase increment and envelope generator */
+/// update phase increment and envelope generator
 static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc) {
     int ksr = kc >> SLOT->KSR;
     fc += SLOT->DT[kc];
@@ -480,7 +468,7 @@ static inline void refresh_fc_eg_slot(FM_OPN *OPN, FM_SLOT *SLOT, int fc, int kc
     }
 }
 
-/* update phase increment counters */
+/// update phase increment counters
 static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
     if ( CH->SLOT[SLOT1].Incr==-1) {
         int fc = CH->fc;
@@ -493,7 +481,7 @@ static inline void refresh_fc_eg_chan(FM_OPN *OPN, FM_CH *CH) {
 }
 
 static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
-    /* normal mode */
+    // normal mode
     ST->mode   = 0;
     ST->TA     = 0;
     ST->TAC    = 0;
@@ -511,63 +499,48 @@ static void reset_channels(FM_ST *ST, FM_CH *CH, int num) {
     }
 }
 
-/* SSG-EG update process */
-/* The behavior is based upon Nemesis tests on real hardware */
-/* This is actually executed before each samples */
-static void update_ssg_eg_channel(FM_SLOT *SLOT)
-{
-    unsigned int i = 4; /* four operators per channel */
-
-    do
-    {
-        /* detect SSG-EG transition */
-        /* this is not required during release phase as the attenuation has been forced to MAX and output invert flag is not used */
-        /* if an Attack Phase is programmed, inversion can occur on each sample */
-        if ((SLOT->ssg & 0x08) && (SLOT->volume >= 0x200) && (SLOT->state > EG_REL))
-        {
-            if (SLOT->ssg & 0x01)  /* bit 0 = hold SSG-EG */
-            {
-                /* set inversion flag */
-                    if (SLOT->ssg & 0x02)
-                        SLOT->ssgn = 4;
-
-                /* force attenuation level during decay phases */
+/// SSG-EG update process
+/// The behavior is based upon Nemesis tests on real hardware
+/// This is actually executed before each samples
+static void update_ssg_eg_channel(FM_SLOT *SLOT) {
+    // four operators per channel
+    unsigned int i = 4;
+    do {
+        // detect SSG-EG transition. this is not required during release phase
+        // as the attenuation has been forced to MAX and output invert flag is
+        // not used. If an Attack Phase is programmed, inversion can occur on
+        // each sample.
+        if ((SLOT->ssg & 0x08) && (SLOT->volume >= 0x200) && (SLOT->state > EG_REL)) {
+            if (SLOT->ssg & 0x01) {  // bit 0 = hold SSG-EG
+                // set inversion flag
+                if (SLOT->ssg & 0x02) SLOT->ssgn = 4;
+                // force attenuation level during decay phases
                 if ((SLOT->state != EG_ATT) && !(SLOT->ssgn ^ (SLOT->ssg & 0x04)))
                     SLOT->volume  = MAX_ATT_INDEX;
-            }
-            else  /* loop SSG-EG */
-            {
-                /* toggle output inversion flag or reset Phase Generator */
-                    if (SLOT->ssg & 0x02)
-                        SLOT->ssgn ^= 4;
-                    else
-                        SLOT->phase = 0;
-
-                /* same as Key ON */
-                if (SLOT->state != EG_ATT)
-                {
-                    if ((SLOT->ar + SLOT->ksr) < 94 /*32+62*/)
-                    {
-                        SLOT->state = (SLOT->volume <= MIN_ATT_INDEX) ? ((SLOT->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
-                    }
-                    else
-                    {
-                        /* Attack Rate is maximal: directly switch to Decay or Substain */
+            } else {  // loop SSG-EG
+                // toggle output inversion flag or reset Phase Generator
+                if (SLOT->ssg & 0x02)
+                    SLOT->ssgn ^= 4;
+                else
+                    SLOT->phase = 0;
+                // same as Key ON
+                if (SLOT->state != EG_ATT) {
+                    if ((SLOT->ar + SLOT->ksr) < 32 + 62) {
+                        SLOT->state = (SLOT->volume <= MIN_ATT_INDEX) ?
+                            ((SLOT->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
+                    } else { // Attack Rate is maximal: jump to Decay or Sustain
                         SLOT->volume = MIN_ATT_INDEX;
                         SLOT->state = (SLOT->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
                     }
                 }
             }
-
-            /* recalculate EG output */
+            // recalculate EG output
             if (SLOT->ssgn ^ (SLOT->ssg&0x04))
                 SLOT->vol_out = ((uint32_t)(0x200 - SLOT->volume) & MAX_ATT_INDEX) + SLOT->tl;
             else
                 SLOT->vol_out = (uint32_t)SLOT->volume + SLOT->tl;
         }
-
-
-        /* next slot */
+        // next slot
         SLOT++;
         i--;
     } while (i);

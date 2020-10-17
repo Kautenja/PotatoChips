@@ -478,8 +478,6 @@ struct GlobalOperatorState {
     double freqbase = 0;
     /// timer pre-scaler
     int timer_prescaler = 0;
-    /// address register
-    uint8_t address = 0;
     /// interrupt level
     uint8_t irq = 0;
     /// IRQ mask

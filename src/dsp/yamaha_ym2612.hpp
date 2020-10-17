@@ -38,7 +38,9 @@ class YamahaYM2612 {
     /// channel state
     Voice voices[6];
     /// address line A1
-    uint8_t addr_A1;
+    uint8_t latchAddressPort;
+    /// address register
+    uint8_t latchAddress = 0;
 
     /// the value of the global LFO parameter
     uint8_t LFO = 0;
@@ -248,28 +250,28 @@ class YamahaYM2612 {
     void write(uint8_t address, uint8_t data) {
         switch (address & 3) {
         case 0:  // address port 0
-            engine.state.address = data;
-            addr_A1 = 0;
+            latchAddressPort = 0;
+            latchAddress = data;
             break;
         case 1:  // data port 0
             // verified on real YM2608
-            if (addr_A1 != 0) break;
+            if (latchAddressPort != 0) break;
             // get the address from the latch and write the data
-            address = engine.state.address;
+            address = latchAddress;
             if ((address & 0xf0) == 0x20)  // 0x20-0x2f Mode
                 write_mode(&engine, address, data);
             else
                 write_register(&engine, address, data);
             break;
         case 2:  // address port 1
-            engine.state.address = data;
-            addr_A1 = 1;
+            latchAddressPort = 1;
+            latchAddress = data;
             break;
         case 3:  // data port 1
             // verified on real YM2608
-            if (addr_A1 != 1) break;
+            if (latchAddressPort != 1) break;
             // get the address from the latch and right to the given register
-            address = engine.state.address;
+            address = latchAddress;
             write_register(&engine, address | 0x100, data);
             break;
         }

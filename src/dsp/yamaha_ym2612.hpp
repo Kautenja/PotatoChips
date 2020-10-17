@@ -26,20 +26,17 @@
 #include <cstdint>
 #include <limits>
 
-#include <iostream>
-
-/* globals */
-#define TYPE_SSG 0x01    /* SSG support          */
-#define TYPE_LFOPAN 0x02 /* OPN type LFO and PAN */
-#define TYPE_6CH 0x04    /* FM 6CH / 3CH         */
-#define TYPE_DAC 0x08    /* YM2612's DAC device  */
-#define TYPE_ADPCM 0x10  /* two ADPCM units      */
+#define TYPE_SSG 0x01     // SSG support
+#define TYPE_LFOPAN 0x02  // OPN type LFO and PAN
+#define TYPE_6CH 0x04     // FM 6CH / 3CH
+#define TYPE_DAC 0x08     // YM2612's DAC device
+#define TYPE_ADPCM 0x10   // two ADPCM units
 #define TYPE_YM2612 (TYPE_DAC | TYPE_LFOPAN | TYPE_6CH)
 
-#define FREQ_SH 16  /* 16.16 fixed point (frequency calculations) */
-#define EG_SH 16    /* 16.16 fixed point (envelope generator timing) */
-#define LFO_SH 24   /*  8.24 fixed point (LFO calculations)       */
-#define TIMER_SH 16 /* 16.16 fixed point (timers calculations)    */
+#define FREQ_SH  16  // 16.16 fixed point (frequency calculations)
+#define EG_SH    16  // 16.16 fixed point (envelope generator timing)
+#define LFO_SH   24  //  8.24 fixed point (LFO calculations)
+#define TIMER_SH 16  // 16.16 fixed point (timers calculations)
 
 #define FREQ_MASK ((1 << FREQ_SH) - 1)
 
@@ -179,15 +176,15 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {
 /*shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0 */
 /*mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0 */
 
+/// Envelope Generator counter shifts (32 + 64 rates + 32 RKS)
+static const uint8_t eg_rate_shift[32 + 64 + 32] = {
 #define O(a) (a * 1)
-static const uint8_t eg_rate_shift[32 + 64 + 32] = {/* Envelope Generator counter shifts (32 + 64 rates + 32 RKS) */
-    /* 32 infinite time rates */
+    // 32 infinite time rates
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-
-    /* rates 00-11 */
+    // rates 00-11
     O(11), O(11), O(11), O(11),
     O(10), O(10), O(10), O(10),
     O(9), O(9), O(9), O(9),
@@ -200,27 +197,21 @@ static const uint8_t eg_rate_shift[32 + 64 + 32] = {/* Envelope Generator counte
     O(2), O(2), O(2), O(2),
     O(1), O(1), O(1), O(1),
     O(0), O(0), O(0), O(0),
-
-    /* rate 12 */
+    // rate 12
     O(0), O(0), O(0), O(0),
-
-    /* rate 13 */
+    // rate 13
     O(0), O(0), O(0), O(0),
-
-    /* rate 14 */
+    // rate 14
     O(0), O(0), O(0), O(0),
-
-    /* rate 15 */
+    // rate 15
     O(0), O(0), O(0), O(0),
-
-    /* 32 dummy rates (same as 15 3) */
+    // 32 dummy rates (same as 15 3)
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0)
-
-};
 #undef O
+};
 
 static const uint8_t dt_tab[4 * 32] = {
 // this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)

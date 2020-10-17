@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -11,8 +11,8 @@
       "rightModuleId": 150,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        34,
+        18,
         0
       ]
     },
@@ -54,7 +54,7 @@
       "leftModuleId": 5,
       "rightModuleId": 1,
       "pos": [
-        24,
+        8,
         0
       ]
     },
@@ -64,7 +64,6 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "leftModuleId": 151,
       "rightModuleId": 2,
       "data": {
         "channels": 1,
@@ -79,7 +78,7 @@
         }
       },
       "pos": [
-        16,
+        0,
         0
       ]
     },
@@ -91,7 +90,7 @@
       "params": [
         {
           "id": 0,
-          "value": 7.0
+          "value": 4.78450298
         },
         {
           "id": 1,
@@ -99,7 +98,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 3.4649992
         },
         {
           "id": 3,
@@ -107,11 +106,11 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 5.38649654
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 22.0
         },
         {
           "id": 6,
@@ -119,7 +118,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 13.0
         },
         {
           "id": 8,
@@ -127,23 +126,23 @@
         },
         {
           "id": 9,
-          "value": 29.0
+          "value": 18.0
         },
         {
           "id": 10,
-          "value": 30.0
-        },
-        {
-          "id": 11,
           "value": 31.0
         },
         {
+          "id": 11,
+          "value": 12.0
+        },
+        {
           "id": 12,
-          "value": 7.0
+          "value": 9.0
         },
         {
           "id": 13,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 14,
@@ -151,15 +150,15 @@
         },
         {
           "id": 15,
-          "value": 0.0
+          "value": 12.0
         },
         {
           "id": 16,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 17,
-          "value": 9.0
+          "value": 0.0
         },
         {
           "id": 18,
@@ -167,27 +166,27 @@
         },
         {
           "id": 19,
-          "value": 15.0
+          "value": 3.0
         },
         {
           "id": 20,
-          "value": 8.0
-        },
-        {
-          "id": 21,
           "value": 15.0
         },
         {
+          "id": 21,
+          "value": 0.0
+        },
+        {
           "id": 22,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 23,
-          "value": 18.0
+          "value": 0.0
         },
         {
           "id": 24,
-          "value": 8.0
+          "value": 4.0
         },
         {
           "id": 25,
@@ -203,7 +202,7 @@
         },
         {
           "id": 28,
-          "value": 15.0
+          "value": 0.0
         },
         {
           "id": 29,
@@ -215,7 +214,7 @@
         },
         {
           "id": 31,
-          "value": 1.0
+          "value": 3.0
         },
         {
           "id": 32,
@@ -247,7 +246,7 @@
         },
         {
           "id": 39,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 40,
@@ -271,7 +270,7 @@
         }
       ],
       "pos": [
-        18,
+        1,
         1
       ]
     },
@@ -319,7 +318,7 @@
         "external": 0
       },
       "pos": [
-        16,
+        0,
         2
       ]
     },
@@ -331,14 +330,15 @@
       "params": [],
       "leftModuleId": 150,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "good",
         "window": "kaiser"
       },
       "pos": [
-        47,
+        31,
         0
       ]
     },
@@ -352,60 +352,7 @@
       "rightModuleId": 144,
       "data": {},
       "pos": [
-        44,
-        0
-      ]
-    },
-    {
-      "id": 151,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
-      "model": "S_SMP_ADSR",
-      "params": [
-        {
-          "id": 0,
-          "value": 127.0
-        },
-        {
-          "id": 1,
-          "value": 127.0
-        },
-        {
-          "id": 2,
-          "value": 10.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 7.0
-        },
-        {
-          "id": 5,
-          "value": 7.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 2.0
-        }
-      ],
-      "rightModuleId": 5,
-      "pos": [
-        0,
+        28,
         0
       ]
     }
@@ -488,56 +435,8 @@
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
-      "inputId": 6,
+      "inputId": 11,
       "color": "#c9b70e"
-    },
-    {
-      "id": 1274,
-      "outputModuleId": 151,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 6,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1275,
-      "outputModuleId": 151,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 7,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 1276,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 151,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 1277,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 151,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1280,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 151,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1281,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 151,
-      "inputId": 3,
-      "color": "#0986ad"
     }
   ]
 }

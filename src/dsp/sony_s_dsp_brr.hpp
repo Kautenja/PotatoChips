@@ -58,9 +58,9 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         On,
         Release
     };
-    uint8_t envelope_stage: 4;
+    uint8_t envelope_stage: 3;
     /// number of nibbles remaining in current block
-    uint8_t block_remain: 4;
+    uint8_t block_remain: 5;
     /// header byte from current block
     BitRateReductionBlock::Header block_header;
     // -----------------------------------------------------------------------

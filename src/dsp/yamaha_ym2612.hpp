@@ -340,8 +340,7 @@ class YamahaYM2612 {
         // update the local LFO value
         LFO = value;
         // set the LFO on the engine emulator
-        write(0, 0x22);
-        write(1, ((value > 0) << 3) | (value & 7));
+        write_mode(&engine, 0x22, ((value > 0) << 3) | (value & 7));
     }
 
     // -----------------------------------------------------------------------

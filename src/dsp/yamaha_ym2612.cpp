@@ -81,20 +81,17 @@ static inline void FM_KEYON(FM_CH *CH, int s) {
     }
 }
 
-static inline void FM_KEYOFF(FM_CH *CH , int s )
-{
+static inline void FM_KEYOFF(FM_CH *CH, int s) {
     FM_SLOT *SLOT = &CH->SLOT[s];
-    if ( SLOT->key )
-    {
+    if ( SLOT->key ) {
         SLOT->key = 0;
-        if (SLOT->state>EG_REL)
-            SLOT->state = EG_REL;/* phase -> Release */
+        if (SLOT->state>EG_REL)  // phase -> Release
+            SLOT->state = EG_REL;
     }
 }
 
-/* set algorithm connection */
-static void setup_connection( FM_OPN *OPN, FM_CH *CH, int ch )
-{
+/// set algorithm connection
+static void setup_connection(FM_OPN *OPN, FM_CH *CH, int ch) {
     int32_t *carrier = &OPN->out_fm[ch];
 
     int32_t **om1 = &CH->connect1;
@@ -103,8 +100,7 @@ static void setup_connection( FM_OPN *OPN, FM_CH *CH, int ch )
 
     int32_t **memc = &CH->mem_connect;
 
-    switch( CH->ALGO )
-    {
+    switch( CH->ALGO ) {
     case 0:
         /* M1---C1---MEM---M2---C2---OUT */
         *om1 = &OPN->c1;
@@ -176,97 +172,73 @@ static void setup_connection( FM_OPN *OPN, FM_CH *CH, int ch )
         *memc= &OPN->mem;   /* store it anywhere where it will not be used */
         break;
     }
-
     CH->connect4 = carrier;
 }
 
-/* set detune & multiple */
-static inline void set_det_mul(FM_ST *ST,FM_CH *CH,FM_SLOT *SLOT,int v)
-{
-    SLOT->mul = (v&0x0f)? (v&0x0f)*2 : 1;
-    SLOT->DT  = ST->dt_tab[(v>>4)&7];
-    CH->SLOT[SLOT1].Incr=-1;
+/// set detune & multiple
+static inline void set_det_mul(FM_ST *ST, FM_CH *CH, FM_SLOT *SLOT, int v) {
+    SLOT->mul = (v & 0x0f) ? (v & 0x0f) * 2 : 1;
+    SLOT->DT = ST->dt_tab[(v >> 4) & 7];
+    CH->SLOT[SLOT1].Incr = -1;
 }
 
-/// Set total level.
+/// @brief Set the 7-bit total level.
 ///
 /// @param CH a pointer to the channel
 /// @param FM_SLOT a pointer to the operator
 /// @param v the value for the TL register
 ///
 static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
-    // the TL is 7 bits
     SLOT->tl = (v & 0x7f) << (ENV_BITS - 7);
 }
 
-/* set attack rate & key scale  */
-static inline void set_ar_ksr(FM_CH *CH,FM_SLOT *SLOT,int v) {
+/// set attack rate & key scale
+static inline void set_ar_ksr(FM_CH *CH, FM_SLOT *SLOT, int v) {
     uint8_t old_KSR = SLOT->KSR;
-
-    SLOT->ar = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
-
-    SLOT->KSR = 3-(v>>6);
-    if (SLOT->KSR != old_KSR)
-    {
-        CH->SLOT[SLOT1].Incr=-1;
-    }
-
-    /* refresh Attack rate */
-    if ((SLOT->ar + SLOT->ksr) < 32+62)
-    {
-        SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar  + SLOT->ksr ];
-        SLOT->eg_sel_ar = eg_rate_select[SLOT->ar  + SLOT->ksr ];
-    }
-    else
-    {
-        SLOT->eg_sh_ar  = 0;
-        SLOT->eg_sel_ar = 17*RATE_STEPS;
+    SLOT->ar = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
+    SLOT->KSR = 3 - (v >> 6);
+    if (SLOT->KSR != old_KSR) CH->SLOT[SLOT1].Incr = -1;
+    // refresh Attack rate
+    if ((SLOT->ar + SLOT->ksr) < 32 + 62) {
+        SLOT->eg_sh_ar  = eg_rate_shift [SLOT->ar + SLOT->ksr ];
+        SLOT->eg_sel_ar = eg_rate_select[SLOT->ar + SLOT->ksr ];
+    } else {
+        SLOT->eg_sh_ar = 0;
+        SLOT->eg_sel_ar = 17 * RATE_STEPS;
     }
 }
 
-/* set decay rate */
-static inline void set_dr(FM_SLOT *SLOT,int v) {
-    SLOT->d1r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
-
+/// set decay rate
+static inline void set_dr(FM_SLOT *SLOT, int v) {
+    SLOT->d1r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
     SLOT->eg_sel_d1r= eg_rate_select[SLOT->d1r + SLOT->ksr];
 }
 
-/* set sustain rate */
-static inline void set_sr(FM_SLOT *SLOT,int v) {
-    SLOT->d2r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
-
+/// set sustain rate
+static inline void set_sr(FM_SLOT *SLOT, int v) {
+    SLOT->d2r = (v & 0x1f) ? 32 + ((v & 0x1f) << 1) : 0;
     SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
     SLOT->eg_sel_d2r= eg_rate_select[SLOT->d2r + SLOT->ksr];
 }
 
-/* set release rate */
-static inline void set_sl_rr(FM_SLOT *SLOT,int v) {
-    SLOT->sl = sl_table[ v>>4 ];
-
-    SLOT->rr  = 34 + ((v&0x0f)<<2);
-
-    SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr  + SLOT->ksr];
-    SLOT->eg_sel_rr = eg_rate_select[SLOT->rr  + SLOT->ksr];
+/// set release rate
+static inline void set_sl_rr(FM_SLOT *SLOT, int v) {
+    SLOT->sl = sl_table[v >> 4];
+    SLOT->rr = 34 + ((v & 0x0f) << 2);
+    SLOT->eg_sh_rr  = eg_rate_shift [SLOT->rr + SLOT->ksr];
+    SLOT->eg_sel_rr = eg_rate_select[SLOT->rr + SLOT->ksr];
 }
 
 static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p;
-
-    p = (env<<3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + (pm<<15))) >> FREQ_SH ) & SIN_MASK ];
-
-    if (p >= TL_TAB_LEN)
-        return 0;
+    uint32_t p = (env << 3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH ) & SIN_MASK ];
+    if (p >= TL_TAB_LEN) return 0;
     return tl_tab[p];
 }
 
 static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p;
-
-    p = (env<<3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + pm      )) >> FREQ_SH ) & SIN_MASK ];
-
-    if (p >= TL_TAB_LEN)
-        return 0;
+    uint32_t p = (env << 3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + pm      )) >> FREQ_SH ) & SIN_MASK ];
+    if (p >= TL_TAB_LEN) return 0;
     return tl_tab[p];
 }
 

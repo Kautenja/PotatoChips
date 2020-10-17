@@ -351,10 +351,10 @@ class YamahaYM2612 {
 
     /// @brief Set the frequency for the given channel.
     ///
-    /// @param channel the voice on the chip to set the frequency for
+    /// @param voice the voice on the chip to set the frequency for
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void setFREQ(uint8_t channel, float frequency) {
+    inline void setFREQ(uint8_t voice, float frequency) {
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -369,31 +369,31 @@ class YamahaYM2612 {
         const uint16_t freq16bit = frequency;
         // write the high bits of the frequency to the register
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        write_register(&engine, getVoiceOffset(0xA4, channel) | getVoicePart(channel) * 0x100, freqHigh);
+        write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
         // write the low bits of the frequency to the register
         const auto freqLow = freq16bit & 0xff;
-        write_register(&engine, getVoiceOffset(0xA0, channel) | getVoicePart(channel) * 0x100, freqLow);
+        write_register(&engine, VOICE_OFFSET(0xA0, voice) | (VOICE_PART(voice) * 0x100), freqLow);
     }
 
-    /// @brief Set the gate for the given channel.
+    /// @brief Set the gate for the given voice.
     ///
-    /// @param channel the voice on the chip to set the gate for
+    /// @param voice the voice on the chip to set the gate for
     /// @param is_open true if the gate is open, false otherwise
     ///
-    inline void setGATE(uint8_t channel, bool is_open) {
-        write_mode(&engine, 0x28, (is_open * 0xF0) + ((channel / 3) * 4 + channel % 3));
+    inline void setGATE(uint8_t voice, bool is_open) {
+        write_mode(&engine, 0x28, (is_open * 0xF0) + ((voice / 3) * 4 + voice % 3));
     }
 
-    /// @brief Set the algorithm (AL) register for the given channel.
+    /// @brief Set the algorithm (AL) register for the given voice.
     ///
-    /// @param channel the channel to set the algorithm register of
+    /// @param voice the voice to set the algorithm register of
     /// @param value the selected FM algorithm in [0, 7]
     ///
-    inline void setAL(uint8_t channel, uint8_t value) {
-        if (channels[channel].AL == value) return;
-        channels[channel].AL = value;
-        voices[channel].FB_ALG = (voices[channel].FB_ALG & 0x38) | (value & 7);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), voices[channel].FB_ALG);
+    inline void setAL(uint8_t voice, uint8_t value) {
+        if (channels[voice].AL == value) return;
+        channels[voice].AL = value;
+        voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (value & 7);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
     }
 
     /// @brief Set the feedback (FB) register for the given channel.
@@ -405,7 +405,7 @@ class YamahaYM2612 {
         if (channels[channel].FB == value) return;
         channels[channel].FB = value;
         voices[channel].FB_ALG = (voices[channel].FB_ALG & 7)| ((value & 7) << 3);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB0, channel), voices[channel].FB_ALG);
+        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB0, channel), voices[channel].FB_ALG);
     }
 
     /// @brief Set the state (ST) register for the given channel.
@@ -415,7 +415,7 @@ class YamahaYM2612 {
     ///
     inline void setST(uint8_t channel, uint8_t value) {
         voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
+        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given channel.
@@ -427,7 +427,7 @@ class YamahaYM2612 {
         if (channels[channel].AMS == value) return;
         channels[channel].AMS = value;
         voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
+        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given channel.
@@ -439,7 +439,7 @@ class YamahaYM2612 {
         if (channels[channel].FMS == value) return;
         channels[channel].FMS = value;
         voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xF8)| (value & 7);
-        setREG(getVoicePart(channel), getVoiceOffset(0xB4, channel), voices[channel].LR_AMS_FMS);
+        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
     }
 
     // -----------------------------------------------------------------------
@@ -531,7 +531,7 @@ class YamahaYM2612 {
         if (channels[channel].operators[slot].SSG == value) return;
         channels[channel].operators[slot].SSG = value;
         // TODO: slot here needs mapped to the order 1 3 2 4
-        setREG(getVoicePart(channel), getVoiceOffset(0x90 + (slot << 2), channel), value);
+        setREG(VOICE_PART(channel), VOICE_OFFSET(0x90 + (slot << 2), channel), value);
     }
 
     /// @brief Set the attack rate (AR) register for the given channel and operator.

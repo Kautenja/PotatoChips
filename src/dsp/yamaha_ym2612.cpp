@@ -275,8 +275,7 @@ static inline void set_tl(FM_CH *CH, FM_SLOT *SLOT, int v) {
 }
 
 /* set attack rate & key scale  */
-static inline void set_ar_ksr(FM_CH *CH,FM_SLOT *SLOT,int v)
-{
+static inline void set_ar_ksr(FM_CH *CH,FM_SLOT *SLOT,int v) {
     uint8_t old_KSR = SLOT->KSR;
 
     SLOT->ar = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
@@ -301,8 +300,7 @@ static inline void set_ar_ksr(FM_CH *CH,FM_SLOT *SLOT,int v)
 }
 
 /* set decay rate */
-static inline void set_dr(FM_SLOT *SLOT,int v)
-{
+static inline void set_dr(FM_SLOT *SLOT,int v) {
     SLOT->d1r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
 
     SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
@@ -310,8 +308,7 @@ static inline void set_dr(FM_SLOT *SLOT,int v)
 }
 
 /* set sustain rate */
-static inline void set_sr(FM_SLOT *SLOT,int v)
-{
+static inline void set_sr(FM_SLOT *SLOT,int v) {
     SLOT->d2r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
 
     SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
@@ -319,10 +316,7 @@ static inline void set_sr(FM_SLOT *SLOT,int v)
 }
 
 /* set release rate */
-static inline void set_sl_rr(FM_SLOT *SLOT,int v)
-{
-
-
+static inline void set_sl_rr(FM_SLOT *SLOT,int v) {
     SLOT->sl = sl_table[ v>>4 ];
 
     SLOT->rr  = 34 + ((v&0x0f)<<2);
@@ -331,10 +325,7 @@ static inline void set_sl_rr(FM_SLOT *SLOT,int v)
     SLOT->eg_sel_rr = eg_rate_select[SLOT->rr  + SLOT->ksr];
 }
 
-
-
-static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm)
-{
+static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
     uint32_t p;
 
     p = (env<<3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + (pm<<15))) >> FREQ_SH ) & SIN_MASK ];
@@ -344,8 +335,7 @@ static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm
     return tl_tab[p];
 }
 
-static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm)
-{
+static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
     uint32_t p;
 
     p = (env<<3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + pm      )) >> FREQ_SH ) & SIN_MASK ];
@@ -356,16 +346,13 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 }
 
 /* advance LFO to next sample */
-static inline void advance_lfo(FM_OPN *OPN)
-{
-    if (OPN->lfo_timer_overflow)   /* LFO enabled ? */
-    {
+static inline void advance_lfo(FM_OPN *OPN) {
+    if (OPN->lfo_timer_overflow) {  /* LFO enabled ? */
         /* increment LFO timer */
         OPN->lfo_timer +=  OPN->lfo_timer_add;
 
         /* when LFO is enabled, one level will last for 108, 77, 71, 67, 62, 44, 8 or 5 samples */
-        while (OPN->lfo_timer >= OPN->lfo_timer_overflow)
-        {
+        while (OPN->lfo_timer >= OPN->lfo_timer_overflow) {
             OPN->lfo_timer -= OPN->lfo_timer_overflow;
 
             /* There are 128 LFO steps */
@@ -384,154 +371,96 @@ static inline void advance_lfo(FM_OPN *OPN)
     }
 }
 
-/* changed from static inline to static here to work around gcc 4.2.1 codegen bug */
-static void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT)
-{
-    unsigned int out;
-    unsigned int swap_flag;
-    unsigned int i;
-
-
-    i = 4; /* four operators per channel */
-    do
-    {
-        /* reset SSG-EG swap flag */
-        swap_flag = 0;
-
-        switch(SLOT->state)
-        {
-        case EG_ATT:        /* attack phase */
-            if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_ar)-1) ) )
-            {
-                SLOT->volume += (~SLOT->volume *
-                                    (eg_inc[SLOT->eg_sel_ar + ((OPN->eg_cnt>>SLOT->eg_sh_ar)&7)])
-                                ) >>4;
-
-                if (SLOT->volume <= MIN_ATT_INDEX)
-                {
+static inline void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT) {
+    // four operators per channel
+    unsigned int i = 4;
+    do {  // reset SSG-EG swap flag
+        unsigned int swap_flag = 0;
+        switch(SLOT->state) {
+        case EG_ATT:  // attack phase
+            if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_ar)-1))) {
+                SLOT->volume += (~SLOT->volume * (eg_inc[SLOT->eg_sel_ar + ((OPN->eg_cnt>>SLOT->eg_sh_ar)&7)])) >>4;
+                if (SLOT->volume <= MIN_ATT_INDEX) {
                     SLOT->volume = MIN_ATT_INDEX;
                     SLOT->state = EG_DEC;
                 }
             }
-        break;
-
-        case EG_DEC:    /* decay phase */
-            {
-                if (SLOT->ssg&0x08) /* SSG EG type envelope selected */
-                {
-                    if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_d1r)-1) ) )
-                    {
-                        SLOT->volume += 4 * eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r)&7)];
-
-                        if ( SLOT->volume >= (int32_t)(SLOT->sl) )
-                            SLOT->state = EG_SUS;
-                    }
+            break;
+        case EG_DEC:  // decay phase
+            if (SLOT->ssg&0x08) {  // SSG EG type envelope selected
+                if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_d1r)-1))) {
+                    SLOT->volume += 4 * eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r)&7)];
+                    if ( SLOT->volume >= (int32_t)(SLOT->sl) )
+                        SLOT->state = EG_SUS;
                 }
-                else
-                {
-                    if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_d1r)-1) ) )
-                    {
-                        SLOT->volume += eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r)&7)];
-
-                        if ( SLOT->volume >= (int32_t)(SLOT->sl) )
-                            SLOT->state = EG_SUS;
-                    }
+            } else {
+                if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_d1r)-1))) {
+                    SLOT->volume += eg_inc[SLOT->eg_sel_d1r + ((OPN->eg_cnt>>SLOT->eg_sh_d1r)&7)];
+                    if ( SLOT->volume >= (int32_t)(SLOT->sl) )
+                        SLOT->state = EG_SUS;
                 }
             }
-        break;
-
-        case EG_SUS:    /* sustain phase */
-            if (SLOT->ssg&0x08) /* SSG EG type envelope selected */
-            {
-                if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_d2r)-1) ) )
-                {
+            break;
+        case EG_SUS:  // sustain phase
+            if (SLOT->ssg&0x08) {  // SSG EG type envelope selected
+                if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_d2r)-1))) {
                     SLOT->volume += 4 * eg_inc[SLOT->eg_sel_d2r + ((OPN->eg_cnt>>SLOT->eg_sh_d2r)&7)];
-
-                    if ( SLOT->volume >= ENV_QUIET )
-                    {
+                    if (SLOT->volume >= ENV_QUIET) {
                         SLOT->volume = MAX_ATT_INDEX;
-
-                        if (SLOT->ssg&0x01) /* bit 0 = hold */
-                        {
-                            if (SLOT->ssgn&1)   /* have we swapped once ??? */
-                            {
-                                /* yes, so do nothing, just hold current level */
+                        if (SLOT->ssg&0x01) {  // bit 0 = hold
+                            if (SLOT->ssgn&1) {  // have we swapped once ???
+                                // yes, so do nothing, just hold current level
+                            } else {  // bit 1 = alternate
+                                swap_flag = (SLOT->ssg&0x02) | 1;
                             }
-                            else
-                                swap_flag = (SLOT->ssg&0x02) | 1 ; /* bit 1 = alternate */
-
-                        }
-                        else
-                        {
-                            /* same as KEY-ON operation */
-
-                            /* restart of the Phase Generator should be here */
+                        } else {  // same as KEY-ON operation
+                            // restart of the Phase Generator should be here
                             SLOT->phase = 0;
-
-                            {
-                                /* phase -> Attack */
-                                SLOT->volume = 511;
-                                SLOT->state = EG_ATT;
-                            }
-
-                            swap_flag = (SLOT->ssg&0x02); /* bit 1 = alternate */
+                            // phase -> Attack
+                            SLOT->volume = 511;
+                            SLOT->state = EG_ATT;
+                            // bit 1 = alternate
+                            swap_flag = (SLOT->ssg&0x02);
                         }
                     }
                 }
-            }
-            else
-            {
-                if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_d2r)-1) ) )
-                {
+            } else {
+                if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_d2r)-1))) {
                     SLOT->volume += eg_inc[SLOT->eg_sel_d2r + ((OPN->eg_cnt>>SLOT->eg_sh_d2r)&7)];
-
-                    if ( SLOT->volume >= MAX_ATT_INDEX )
-                    {
+                    if (SLOT->volume >= MAX_ATT_INDEX) {
                         SLOT->volume = MAX_ATT_INDEX;
-                        /* do not change SLOT->state (verified on real chip) */
+                        // do not change SLOT->state (verified on real chip)
                     }
                 }
-
             }
-        break;
-
-        case EG_REL:    /* release phase */
-                if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_rr)-1) ) )
-                {
-                    /* SSG-EG affects Release phase also (Nemesis) */
-                    SLOT->volume += eg_inc[SLOT->eg_sel_rr + ((OPN->eg_cnt>>SLOT->eg_sh_rr)&7)];
-
-                    if ( SLOT->volume >= MAX_ATT_INDEX )
-                    {
-                        SLOT->volume = MAX_ATT_INDEX;
-                        SLOT->state = EG_OFF;
-                    }
+            break;
+        case EG_REL:  // release phase
+            if (!(OPN->eg_cnt & ((1<<SLOT->eg_sh_rr)-1))) {
+                // SSG-EG affects Release phase also (Nemesis)
+                SLOT->volume += eg_inc[SLOT->eg_sel_rr + ((OPN->eg_cnt>>SLOT->eg_sh_rr)&7)];
+                if (SLOT->volume >= MAX_ATT_INDEX) {
+                    SLOT->volume = MAX_ATT_INDEX;
+                    SLOT->state = EG_OFF;
                 }
-        break;
-
+            }
+            break;
         }
-
-
-        out = ((uint32_t)SLOT->volume);
-
-                /* negate output (changes come from alternate bit, init comes from attack bit) */
+        // get the output volume from the slot
+        unsigned int out = ((uint32_t) SLOT->volume);
+        // negate output (changes come from alternate bit, init comes from
+        // attack bit)
         if ((SLOT->ssg&0x08) && (SLOT->ssgn&2) && (SLOT->state > EG_REL))
             out ^= MAX_ATT_INDEX;
-
-        /* we need to store the result here because we are going to change ssgn
-            in next instruction */
+        // we need to store the result here because we are going to change
+        // ssgn in next instruction
         SLOT->vol_out = out + SLOT->tl;
-
-                /* reverse SLOT inversion flag */
+        // reverse SLOT inversion flag
         SLOT->ssgn ^= swap_flag;
-
+        // increment the slot and decrement the iterator
         SLOT++;
         i--;
-    }while (i);
-
+    } while (i);
 }
-
-
 
 #define volume_calc(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
 

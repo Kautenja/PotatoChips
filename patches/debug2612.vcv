@@ -67,7 +67,7 @@
       "leftModuleId": 151,
       "rightModuleId": 2,
       "data": {
-        "channels": 4,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,

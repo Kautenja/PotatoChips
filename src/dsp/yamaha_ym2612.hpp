@@ -259,10 +259,10 @@ class YamahaYM2612 {
     /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
-        // // don't set the value if it hasn't changed
-        // if (LFO == value) return;
-        // // update the local LFO value
-        // LFO = value;
+        // don't set the value if it hasn't changed
+        if (LFO == value) return;
+        // update the local LFO value
+        LFO = value;
         // set the LFO on the engine emulator
         write_mode(&engine, 0x22, ((value > 0) << 3) | (value & 7));
     }

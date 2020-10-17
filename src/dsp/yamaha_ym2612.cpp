@@ -40,38 +40,25 @@ extern const uint8_t lfo_pm_output[7 * 8][8];
 extern int32_t lfo_pm_table[];
 
 /* status set and IRQ handling */
-static inline void FM_STATUS_SET(FM_ST *ST,int flag)
-{
-    /* set status flag */
+static inline void FM_STATUS_SET(FM_ST *ST, int flag) {
+    // set status flag
     ST->status |= flag;
-    if ( !(ST->irq) && (ST->status & ST->irqmask) )
-    {
-        ST->irq = 1;
-        /* callback user interrupt handler (IRQ is OFF to ON) */
-        //if (ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,1);
-    }
+    if (!ST->irq && (ST->status & ST->irqmask)) ST->irq = 1;
 }
 
 /* status reset and IRQ handling */
-static inline void FM_STATUS_RESET(FM_ST *ST,int flag)
-{
-    /* reset status flag */
+static inline void FM_STATUS_RESET(FM_ST *ST, int flag) {
+    // reset status flag
     ST->status &=~flag;
-    if ( (ST->irq) && !(ST->status & ST->irqmask) )
-    {
-        ST->irq = 0;
-        /* callback user interrupt handler (IRQ is ON to OFF) */
-        //if (ST->IRQ_Handler) (ST->IRQ_Handler)(ST->device,0);
-    }
+    if (ST->irq && !(ST->status & ST->irqmask)) ST->irq = 0;
 }
 
 /* IRQ mask set */
-static inline void FM_IRQMASK_SET(FM_ST *ST,int flag)
-{
+static inline void FM_IRQMASK_SET(FM_ST *ST, int flag) {
     ST->irqmask = flag;
-    /* IRQ handling check */
-    FM_STATUS_SET(ST,0);
-    FM_STATUS_RESET(ST,0);
+    // IRQ handling check
+    FM_STATUS_SET(ST, 0);
+    FM_STATUS_RESET(ST, 0);
 }
 
 /* OPN Mode Register Write */

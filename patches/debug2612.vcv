@@ -16,7 +16,7 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 256
+          "blockSize": 1024
         }
       },
       "pos": [
@@ -66,7 +66,7 @@
       "params": [],
       "rightModuleId": 2,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -90,7 +90,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 1,
@@ -114,19 +114,19 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 9,
-          "value": 8.0
+          "value": 22.0
         },
         {
           "id": 10,
@@ -134,7 +134,7 @@
         },
         {
           "id": 11,
-          "value": 12.0
+          "value": 31.0
         },
         {
           "id": 12,
@@ -142,7 +142,7 @@
         },
         {
           "id": 13,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 14,
@@ -174,7 +174,7 @@
         },
         {
           "id": 21,
-          "value": 8.0
+          "value": 10.0
         },
         {
           "id": 22,
@@ -182,7 +182,7 @@
         },
         {
           "id": 23,
-          "value": 14.0
+          "value": 0.0
         },
         {
           "id": 24,
@@ -278,15 +278,31 @@
         },
         {
           "id": 47,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 48,
           "value": 0.0
+        },
+        {
+          "id": 49,
+          "value": 0.0
+        },
+        {
+          "id": 50,
+          "value": 0.0
+        },
+        {
+          "id": 51,
+          "value": 0.0
+        },
+        {
+          "id": 52,
+          "value": 0.0
         }
       ],
       "pos": [
-        2,
+        0,
         1
       ]
     },
@@ -572,6 +588,22 @@
         },
         {
           "id": 48,
+          "value": 0.0
+        },
+        {
+          "id": 49,
+          "value": 0.0
+        },
+        {
+          "id": 50,
+          "value": 0.0
+        },
+        {
+          "id": 51,
+          "value": 0.0
+        },
+        {
+          "id": 52,
           "value": 0.0
         }
       ],

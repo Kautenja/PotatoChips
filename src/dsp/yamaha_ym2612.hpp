@@ -25,6 +25,10 @@
 
 #include <cstdint>
 #include <limits>
+#include <cstdint>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 #define TYPE_SSG 0x01     // SSG support
 #define TYPE_LFOPAN 0x02  // OPN type LFO and PAN
@@ -352,6 +356,83 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
 /// output levels per one depth
 static int32_t lfo_pm_table[128 * 8 * 32];
 
+/// Initialize generic tables.
+/// TODO: update to only set timetables once per execution context. It currently
+//        happens anytime an emulator is constructed
+static void init_tables() {
+    // build Linear Power Table
+    for (int x = 0; x < TL_RES_LEN; x++) {
+        double m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
+        m = floor(m);
+        // we never reach (1 << 16) here due to the (x+1)
+        // result fits within 16 bits at maximum
+        // 16 bits here
+        signed int n = (int) m;
+        // 12 bits here
+        n >>= 4;
+        if (n & 1)  // round to nearest
+            n = (n >> 1) + 1;
+        else
+            n = n>>1;
+        // 11 bits here (rounded)
+        // 13 bits here (as in real chip)
+        n <<= 2;
+        // 14 bits (with sign bit)
+        tl_tab[x * 2 + 0] = n;
+        tl_tab[x * 2 + 1] = -tl_tab[x * 2 + 0];
+        // one entry in the 'Power' table use the following format,
+        //     xxxxxyyyyyyyys with:
+        //        s = sign bit
+        // yyyyyyyy = 8-bits decimal part (0-TL_RES_LEN)
+        // xxxxx    = 5-bits integer 'shift' value (0-31) but, since Power
+        //            table output is 13 bits, any value above 13 (included)
+        //            would be discarded.
+        for (int i = 1; i < 13; i++) {
+            tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN] =  tl_tab[x * 2 + 0] >> i;
+            tl_tab[x * 2 + 1 + i * 2 * TL_RES_LEN] = -tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN];
+        }
+    }
+    // build Logarithmic Sinus table
+    for (int i = 0; i < SIN_LEN; i++) {
+        // non-standard sinus (checked against the real chip)
+        double m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
+        // we never reach zero here due to ((i * 2) + 1)
+        // convert to decibels
+        double o;
+        if (m > 0.0)
+            o = 8 * log(1.0 / m) / log(2.0);
+        else
+            o = 8 * log(-1.0 / m) / log(2.0);
+        o = o / (ENV_STEP / 4);
+        signed int n = (int)(2.0 * o);
+        if (n & 1)  // round to nearest
+            n = (n >> 1) + 1;
+        else
+            n = n >> 1;
+        // 13-bits (8.5) value is formatted for above 'Power' table
+        sin_tab[i] = n * 2 + (m >= 0.0 ? 0 : 1);
+    }
+    // build LFO PM modulation table
+    for (int i = 0; i < 8; i++) {  // 8 PM depths
+        for (uint8_t fnum = 0; fnum < 128; fnum++) {  // 7 bits of F-NUMBER
+            for (uint8_t step = 0; step < 8; step++) {
+                uint8_t value = 0;
+                for (uint32_t bit_tmp = 0; bit_tmp < 7; bit_tmp++) {  // 7 bits
+                    if (fnum & (1 << bit_tmp)) {
+                        uint32_t offset_fnum_bit = bit_tmp * 8;
+                        value += lfo_pm_output[offset_fnum_bit + i][step];
+                    }
+                }
+                // 32 steps for LFO PM (sinus)
+                lfo_pm_table[(fnum * 32 * 8) + (i * 32) +  step      +  0] =  value;
+                lfo_pm_table[(fnum * 32 * 8) + (i * 32) + (step ^ 7) +  8] =  value;
+                lfo_pm_table[(fnum * 32 * 8) + (i * 32) +  step      + 16] = -value;
+                lfo_pm_table[(fnum * 32 * 8) + (i * 32) + (step ^ 7) + 24] = -value;
+            }
+        }
+    }
+}
+
 #define YM_CH_PART(ch) (ch/3)
 #define YM_CH_OFFSET(reg, ch) (reg + (ch % 3))
 
@@ -582,7 +663,12 @@ struct FM_OPN {
 };
 
 // ---------------------------------------------------------------------------
-// MARK: public interface
+// MARK: Functional API
+// ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+// MARK: Object-Oriented API
 // ---------------------------------------------------------------------------
 
 /// Yamaha YM2612 chip emulator

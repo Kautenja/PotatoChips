@@ -50,25 +50,26 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     // -----------------------------------------------------------------------
     // MARK: Word 4
     // -----------------------------------------------------------------------
+    /// the output value from the envelope generator
+    int16_t envelope_value = 0;
     /// the current stage of the envelope generator
-    enum class EnvelopeStage : uint16_t {
+    enum EnvelopeStage {
         Off = 0,
         On,
         Release
-    } envelope_stage = EnvelopeStage::Off;
-    /// the output value from the envelope generator
-    int16_t envelope_value = 0;
+    };
+    uint8_t envelope_stage: 4;
+    /// number of nibbles remaining in current block
+    uint8_t block_remain: 4;
+    /// header byte from current block
+    BitRateReductionBlock::Header block_header;
     // -----------------------------------------------------------------------
     // MARK: Word 5
     // -----------------------------------------------------------------------
-    /// header byte from current block
-    BitRateReductionBlock::Header block_header;
-    /// number of nibbles remaining in current block
-    uint8_t block_remain = 0;
-    /// the volume for the left channel output
-    int8_t volumeLeft = 0;
-    /// the volume for the right channel output
-    int8_t volumeRight = 0;
+    /// the 14-bit frequency value
+    uint16_t rate = 0;
+    /// 12-bit fractional position
+    uint16_t fraction = 0;
     // -----------------------------------------------------------------------
     // MARK: Word 6,7
     // -----------------------------------------------------------------------
@@ -77,12 +78,12 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     // -----------------------------------------------------------------------
     // MARK: Word 8
     // -----------------------------------------------------------------------
-    /// the 14-bit frequency value
-    uint16_t rate = 0;
-    /// 12-bit fractional position
-    uint16_t fraction = 0;
-
+    /// the monophonic output from the voice
     int16_t output = 0;
+    /// the volume for the left channel output
+    int8_t volumeLeft = 0;
+    /// the volume for the right channel output
+    int8_t volumeRight = 0;
 
     /// @brief Process the envelope for the voice with given index.
     ///
@@ -115,7 +116,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
 
  public:
     /// @brief Initialize a new Sony_S_DSP_BRR.
-    Sony_S_DSP_BRR() { }
+    Sony_S_DSP_BRR() : envelope_stage(EnvelopeStage::Off), block_remain(0) { }
 
     /// @brief Set the RAM pointer to a new value.
     ///

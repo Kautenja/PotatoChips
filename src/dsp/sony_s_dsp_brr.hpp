@@ -82,6 +82,8 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     /// 12-bit fractional position
     uint16_t fraction = 0;
 
+    int16_t output = 0;
+
     /// @brief Process the envelope for the voice with given index.
     ///
     /// @returns the envelope counter value for given index in the table
@@ -101,6 +103,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
             if (envelope_value <= 0) {
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
+                output = 0;
                 return -1;
             }
             return envelope_value;
@@ -188,6 +191,8 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     ///
     inline void setVolumeRight(int8_t value) { volumeRight = value; }
 
+    inline int16_t getOutput() { return output; }
+
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
     /// @param out the output buffer to write the samples to
@@ -236,6 +241,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
                     } else {  // first block was end block; don't play anything
                         envelope_stage = EnvelopeStage::Off;
                         envelope_value = 0;
+                        output = 0;
                         samples[0] = samples[1] = samples[2] = samples[3] = 0;
                         break;
                     }
@@ -251,6 +257,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
             ) {  // next block has end flag set, this block ends early
                 envelope_stage = EnvelopeStage::Off;
                 envelope_value = 0;
+                output = 0;
                 samples[0] = samples[1] = samples[2] = samples[3] = 0;
                 break;
             }
@@ -318,7 +325,7 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
         sample = static_cast<int16_t>(2 * sample);
         sample +=     (table2[0] * samples[0]) >> 11 & ~1;
         // scale output from this voice
-        int output = clamp_16(sample);
+        output = clamp_16(sample);
         output = (output * envelope) >> 11 & ~1;
         // -------------------------------------------------------------------
         // MARK: Output

@@ -37,6 +37,9 @@ struct ChipS_SMP_BRR : Module {
     /// triggers for handling gate inputs for the voices
     rack::dsp::BooleanTrigger gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
 
+    /// triggers for handling inputs to the control ports
+    dsp::BooleanTrigger pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
+
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -166,7 +169,16 @@ struct ChipS_SMP_BRR : Module {
         // MARK: Stereo output
         // -------------------------------------------------------------------
         StereoSample output;
-        apu[voice][channel].run(output, trigger, gateTriggers[voice][channel].state);
+        // get a flag determining whether phase modulation is enabled for the voice
+        pmTriggers[voice][channel].process(rescale(inputs[INPUT_PM_ENABLE + voice].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        bool is_pm = (1 - params[PARAM_PM_ENABLE + voice].getValue()) - !pmTriggers[voice][channel].state;
+        // run the sample through the voice
+        apu[voice][channel].run(
+            output,
+            trigger,
+            gateTriggers[voice][channel].state,
+            is_pm ? apu[voice - 1][channel].getOutput() : 0
+        );
         outputs[OUTPUT_AUDIO_L + voice].setVoltage(5.f * output.samples[0] / std::numeric_limits<int16_t>::max(), channel);
         outputs[OUTPUT_AUDIO_R + voice].setVoltage(5.f * output.samples[1] / std::numeric_limits<int16_t>::max(), channel);
     }

@@ -110,8 +110,8 @@ class YamahaYM2612 {
         LFO = stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
-        // mode 0 , timer reset
-        write_mode(&engine, 0x27, 0x30);
+        // mode 0 , timer reset (address 0x27)
+        set_timers(&engine.state, 0x30);
         // envelope generator
         engine.eg_timer = 0;
         engine.eg_cnt = 0;
@@ -124,10 +124,12 @@ class YamahaYM2612 {
         engine.state.status = 0;
         engine.state.mode = 0;
 
-        write_mode(&engine, 0x27, 0x30);
-        write_mode(&engine, 0x26, 0x00);
-        write_mode(&engine, 0x25, 0x00);
-        write_mode(&engine, 0x24, 0x00);
+        // timer B (address 0x26)
+        engine.state.TB = 0x00;
+        // timer A Low 2 (address 0x25)
+        engine.state.TA = (engine.state.TA & 0x03fc) | (0x00 & 3);
+        // timer A High 8 (address 0x24)
+        engine.state.TA = (engine.state.TA & 0x0003) | (0x00 << 2);
 
         reset_voices(&engine.state, &voices[0], 6);
 
@@ -260,7 +262,7 @@ class YamahaYM2612 {
         // update the local LFO value
         LFO = value;
         // set the LFO on the engine emulator
-        write_mode(&engine, 0x22, ((value > 0) << 3) | (value & 7));
+        set_lfo(&engine, ((value > 0) << 3) | (value & 7));
     }
 
     // -----------------------------------------------------------------------
@@ -299,7 +301,7 @@ class YamahaYM2612 {
     /// @param is_open true if the gate is open, false otherwise
     ///
     inline void setGATE(uint8_t voice, bool is_open) {
-        write_mode(&engine, 0x28, (is_open * 0xF0) + ((voice / 3) * 4 + voice % 3));
+        set_gate(&engine, (is_open * 0xF0) + ((voice / 3) * 4 + voice % 3));
     }
 
     /// @brief Set the algorithm (AL) register for the given voice.

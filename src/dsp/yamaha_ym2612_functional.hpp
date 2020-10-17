@@ -472,47 +472,38 @@ static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
     }
 }
 
-/// write a OPN mode register 0x20-0x2f.
-static void write_mode(EngineState *OPN, int address, int data) {
-    switch (address) {
-    case 0x21:  // Test
-        break;
-    case 0x22:  // LFO FREQ (YM2608/YM2610/YM2610B/YM2612)
-        if (data & 8) {  // LFO enabled ?
-            OPN->lfo_timer_overflow = lfo_samples_per_step[data & 7] << LFO_SH;
-        } else {
-            // hold LFO waveform in reset state
-            OPN->lfo_timer_overflow = 0;
-            OPN->lfo_timer = 0;
-            OPN->lfo_cnt = 0;
-            OPN->lfo_PM_step = 0;
-            OPN->lfo_AM_step = 126;
-        }
-        break;
-    case 0x24:  // timer A High 8
-        OPN->state.TA = (OPN->state.TA & 0x0003) | (data << 2);
-        break;
-    case 0x25:  // timer A Low 2
-        OPN->state.TA = (OPN->state.TA & 0x03fc) | (data & 3);
-        break;
-    case 0x26:  // timer B
-        OPN->state.TB = data;
-        break;
-    case 0x27:  // mode, timer control
-        set_timers(&(OPN->state), data);
-        break;
-    case 0x28:  // key on / off
-        uint8_t c = data & 0x03;
-        if (c == 3) break;
-        if ((data & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
-        Voice* voice = OPN->voices;
-        voice = &voice[c];
-        if (data & 0x10) set_keyon(voice, Op1); else set_keyoff(voice, Op1);
-        if (data & 0x20) set_keyon(voice, Op2); else set_keyoff(voice, Op2);
-        if (data & 0x40) set_keyon(voice, Op3); else set_keyoff(voice, Op3);
-        if (data & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
-        break;
+/// @brief set the LFO parameter to a new value.
+///
+/// @param state the engine state structure
+/// @param lfo_mode the lfo mode to set
+///
+static inline void set_lfo(EngineState* state, int lfo_mode) {
+    if (lfo_mode & 8) {  // LFO enabled?
+        state->lfo_timer_overflow = lfo_samples_per_step[lfo_mode & 7] << LFO_SH;
+    } else { // hold LFO waveform in reset state
+        state->lfo_timer_overflow = 0;
+        state->lfo_timer = 0;
+        state->lfo_cnt = 0;
+        state->lfo_PM_step = 0;
+        state->lfo_AM_step = 126;
     }
+}
+
+/// @brief set the gate mask to a new value.
+///
+/// @param state the engine state structure
+/// @param gate_mask a bitmask with a bit for each voice on the chip
+///
+static inline void set_gate(EngineState* state, int gate_mask) {
+    uint8_t c = gate_mask & 0x03;
+    if (c == 3) return;
+    if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) c += 3;
+    Voice* voice = state->voices;
+    voice = &voice[c];
+    if (gate_mask & 0x10) set_keyon(voice, Op1); else set_keyoff(voice, Op1);
+    if (gate_mask & 0x20) set_keyon(voice, Op2); else set_keyoff(voice, Op2);
+    if (gate_mask & 0x40) set_keyon(voice, Op3); else set_keyoff(voice, Op3);
+    if (gate_mask & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
 }
 
 /// write a OPN register (0x30-0xff).

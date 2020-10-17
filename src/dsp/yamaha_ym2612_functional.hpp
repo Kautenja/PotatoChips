@@ -477,7 +477,7 @@ static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
 /// @param state the engine state structure
 /// @param lfo_mode the lfo mode to set
 ///
-static inline void set_lfo(EngineState* state, int lfo_mode) {
+static inline void set_lfo(EngineState* state, uint8_t lfo_mode) {
     if (lfo_mode & 8) {  // LFO enabled?
         state->lfo_timer_overflow = lfo_samples_per_step[lfo_mode & 7] << LFO_SH;
     } else { // hold LFO waveform in reset state
@@ -494,7 +494,7 @@ static inline void set_lfo(EngineState* state, int lfo_mode) {
 /// @param state the engine state structure
 /// @param gate_mask a bitmask with a bit for each voice on the chip
 ///
-static inline void set_gate(EngineState* state, int gate_mask) {
+static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     uint8_t c = gate_mask & 0x03;
     if (c == 3) return;
     if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) c += 3;

@@ -360,7 +360,8 @@ static int32_t lfo_pm_table[128 * 8 * 32];
 /// @details
 /// This function is not meant to be called directly. It is marked with the
 /// constructor attribute to ensure the function is executed automatically and
-/// precisely once before control enters the scope of the `main` function
+/// precisely once before control enters the scope of the `main` function.
+///
 static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
     for (int x = 0; x < TL_RES_LEN; x++) {
@@ -435,12 +436,24 @@ static __attribute__((constructor)) void init_tables() {
     }
 }
 
+/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
 static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
     uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
     if (p >= TL_TAB_LEN) return 0;
     return tl_tab[p];
 }
 
+/// @brief Return the value of operator (1) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
 static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
     uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
     if (p >= TL_TAB_LEN) return 0;

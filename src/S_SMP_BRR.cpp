@@ -25,9 +25,11 @@
 
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
 struct ChipS_SMP_BRR : Module {
- private:
+ public:
     /// the number of voices on the module
     static constexpr unsigned NUM_VOICES = 8;
+
+ private:
     /// the RAM for the S-DSP chip (64KB = 16-bit address space)
     uint8_t ram[Sony_S_DSP_BRR::SIZE_OF_RAM];
     /// the Sony S-DSP sound chip emulator
@@ -75,7 +77,7 @@ struct ChipS_SMP_BRR : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ     + osc, -6.f, 6.f, 2.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FREQ     + osc, -6.f, 6.f, 4.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_VOLUME_L + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R + osc, -128, 127, 127, osc_name + " Volume (Right)");
             osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
@@ -221,7 +223,7 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
-        for (unsigned i = 0; i < 8; i++) {
+        for (unsigned i = 0; i < ChipS_SMP_BRR::NUM_VOICES; i++) {
             // Frequency
             addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOCT + i));
             addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FM + i));

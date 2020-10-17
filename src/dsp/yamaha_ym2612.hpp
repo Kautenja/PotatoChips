@@ -41,11 +41,8 @@ class YamahaYM2612 {
     /// address line A1
     uint8_t addr_A1;
 
-    /// whether the emulated DAC is enabled
-    bool is_DAC_enabled;
-    /// the output value from the emulated DAC
-    int32_t out_DAC;
-
+    /// the value of the global LFO parameter
+    uint8_t LFO = 0;
     /// A structure with channel data for a YM2612 voice.
     struct Channel {
         /// the index of the active FM algorithm
@@ -83,9 +80,10 @@ class YamahaYM2612 {
         } operators[4];
     } channels[6];
 
-    /// the value of the global LFO parameter
-    uint8_t lfo_setting = 0;
-
+    /// whether the emulated DAC is enabled
+    bool is_DAC_enabled;
+    /// the output value from the emulated DAC
+    int32_t out_DAC;
     /// the stereo master output from the chip emulator
     int16_t stereo_output[2] = {0, 0};
 
@@ -118,7 +116,7 @@ class YamahaYM2612 {
     void reset() {
         // clear instance variables
         memset(registers, 0, sizeof registers);
-        lfo_setting = stereo_output[0] = stereo_output[1] = 0;
+        LFO = stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
         // mode 0 , timer reset
@@ -364,9 +362,9 @@ class YamahaYM2612 {
     ///
     inline void setLFO(uint8_t value) {
         // don't set the value if it hasn't changed
-        if (lfo_setting == value) return;
+        if (LFO == value) return;
         // update the local LFO value
-        lfo_setting = value;
+        LFO = value;
         // set the LFO on the engine emulator
         setREG(0, 0x22, ((value > 0) << 3) | (value & 7));
     }

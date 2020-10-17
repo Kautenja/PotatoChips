@@ -190,17 +190,6 @@
       ]
     },
     {
-      "slug": "2413",
-      "name": "2413",
-      "description": "An emulation of the Yamaha YM2413 FM synthesis chip from the Sega Mark III.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2413.pdf",
-      "tags": [
-        "Noise",
-        "Oscillator"
-      ],
-      "disabled": true
-    },
-    {
       "slug": "2612",
       "name": "2612",
       "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Master System and Sega Mega Drive.",

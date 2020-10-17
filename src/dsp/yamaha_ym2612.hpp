@@ -137,51 +137,43 @@ static const uint8_t eg_inc[19 * RATE_STEPS] = {
     /*18 */ 0, 0, 0, 0, 0, 0, 0, 0,         /* infinity rates for attack and decay(s) */
 };
 
+/// Envelope Generator rates (32 + 64 rates + 32 RKS).
+/// NOTE: there is no O(17) in this table - it's directly in the code
+static const uint8_t eg_rate_select[32 + 64 + 32] = {
 #define O(a) (a * RATE_STEPS)
-
-/*note that there is no O(17) in this table - it's directly in the code */
-static const uint8_t eg_rate_select[32 + 64 + 32] = {/* Envelope Generator rates (32 + 64 rates + 32 RKS) */
-                                                     /* 32 infinite time rates */
-                                                     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
-                                                     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
-                                                     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
-                                                     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
-
-                                                     /* rates 00-11 */
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-                                                     O(0), O(1), O(2), O(3),
-
-                                                     /* rate 12 */
-                                                     O(4), O(5), O(6), O(7),
-
-                                                     /* rate 13 */
-                                                     O(8), O(9), O(10), O(11),
-
-                                                     /* rate 14 */
-                                                     O(12), O(13), O(14), O(15),
-
-                                                     /* rate 15 */
-                                                     O(16), O(16), O(16), O(16),
-
-                                                     /* 32 dummy rates (same as 15 3) */
-                                                     O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
-                                                     O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
-                                                     O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
-                                                     O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16)
-
-};
-
+    // 32 infinite time rates
+    O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
+    O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
+    O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
+    O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
+    // rates 00-11
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    O(0), O(1), O(2), O(3),
+    // rate 12
+    O(4), O(5), O(6), O(7),
+    // rate 13
+    O(8), O(9), O(10), O(11),
+    // rate 14
+    O(12), O(13), O(14), O(15),
+    // rate 15
+    O(16), O(16), O(16), O(16),
+    // 32 dummy rates (same as 15 3)
+    O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
+    O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
+    O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16),
+    O(16), O(16), O(16), O(16), O(16), O(16), O(16), O(16)
 #undef O
+};
 
 /*rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15*/
 /*shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0 */
@@ -189,43 +181,43 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {/* Envelope Generator rates
 
 #define O(a) (a * 1)
 static const uint8_t eg_rate_shift[32 + 64 + 32] = {/* Envelope Generator counter shifts (32 + 64 rates + 32 RKS) */
-                                                    /* 32 infinite time rates */
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    /* 32 infinite time rates */
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
 
-                                                    /* rates 00-11 */
-                                                    O(11), O(11), O(11), O(11),
-                                                    O(10), O(10), O(10), O(10),
-                                                    O(9), O(9), O(9), O(9),
-                                                    O(8), O(8), O(8), O(8),
-                                                    O(7), O(7), O(7), O(7),
-                                                    O(6), O(6), O(6), O(6),
-                                                    O(5), O(5), O(5), O(5),
-                                                    O(4), O(4), O(4), O(4),
-                                                    O(3), O(3), O(3), O(3),
-                                                    O(2), O(2), O(2), O(2),
-                                                    O(1), O(1), O(1), O(1),
-                                                    O(0), O(0), O(0), O(0),
+    /* rates 00-11 */
+    O(11), O(11), O(11), O(11),
+    O(10), O(10), O(10), O(10),
+    O(9), O(9), O(9), O(9),
+    O(8), O(8), O(8), O(8),
+    O(7), O(7), O(7), O(7),
+    O(6), O(6), O(6), O(6),
+    O(5), O(5), O(5), O(5),
+    O(4), O(4), O(4), O(4),
+    O(3), O(3), O(3), O(3),
+    O(2), O(2), O(2), O(2),
+    O(1), O(1), O(1), O(1),
+    O(0), O(0), O(0), O(0),
 
-                                                    /* rate 12 */
-                                                    O(0), O(0), O(0), O(0),
+    /* rate 12 */
+    O(0), O(0), O(0), O(0),
 
-                                                    /* rate 13 */
-                                                    O(0), O(0), O(0), O(0),
+    /* rate 13 */
+    O(0), O(0), O(0), O(0),
 
-                                                    /* rate 14 */
-                                                    O(0), O(0), O(0), O(0),
+    /* rate 14 */
+    O(0), O(0), O(0), O(0),
 
-                                                    /* rate 15 */
-                                                    O(0), O(0), O(0), O(0),
+    /* rate 15 */
+    O(0), O(0), O(0), O(0),
 
-                                                    /* 32 dummy rates (same as 15 3) */
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
-                                                    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0)
+    /* 32 dummy rates (same as 15 3) */
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
+    O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0)
 
 };
 #undef O
@@ -869,23 +861,30 @@ class YamahaYM2612 {
     /// @param is_on whether the looping envelope generator should be turned on
     /// @param mode the mode for the looping generator to run in (in [0, 7])
     /// @details
-    /// the mode can be any of the following
-    /// AtAlH
-    /// 0 0 0  \\\\
+    /// The mode can be any of the following:
     ///
-    /// 0 0 1  \___
-    ///
-    /// 0 1 0  \/\/
-    ///         ___
-    /// 0 1 1  \
-    ///
-    /// 1 0 0  ////
-    ///         ___
-    /// 1 0 1  /
-    ///
-    /// 1 1 0  /\/\
-    ///
-    /// 1 1 1  /___
+    /// Table: SSG-EG LFO Patterns
+    /// +-------+-------------+
+    /// | AtAlH | LFO Pattern |
+    /// +=======+=============+
+    /// | 0 0 0 |  \\\\       |
+    /// +-------+-------------+
+    /// | 0 0 1 |  \___       |
+    /// +-------+-------------+
+    /// | 0 1 0 |  \/\/       |
+    /// +-------+-------------+
+    /// |       |   ___       |
+    /// | 0 1 1 |  \          |
+    /// +-------+-------------+
+    /// | 1 0 0 |  ////       |
+    /// +-------+-------------+
+    /// |       |   ___       |
+    /// | 1 0 1 |  /          |
+    /// +-------+-------------+
+    /// | 1 1 0 |  /\/\       |
+    /// +-------+-------------+
+    /// | 1 1 1 |  /___       |
+    /// +-------+-------------+
     ///
     /// The shapes are generated using Attack, Decay and Sustain phases.
     ///
@@ -908,7 +907,8 @@ class YamahaYM2612 {
     ///
     /// Important is that when switch to Attack phase occurs, the phase counter
     /// of that operator will be zeroed-out (as in normal KEY-ON) but not always.
-    /// (I havent found the rule for that - perhaps only when the output level is low)
+    /// (I haven't found the rule for that - perhaps only when the output
+    /// level is low)
     ///
     /// The difference (when compared to normal Envelope Generator mode) is
     /// that the resolution in Decay and Sustain phases is 4 times lower;
@@ -924,12 +924,12 @@ class YamahaYM2612 {
     /// it is the same in both SSG and no-SSG modes, with this exception:
     ///
     /// when the SSG-EG is enabled and is generating raising levels
-    /// (when the EG output is inverted) the SL will be found at wrong level !!!
+    /// (when the EG output is inverted) the SL will be found at wrong level!!!
     /// For example, when SL=02:
     ///     0 -6 = -6dB in non-inverted EG output
     ///     96-6 = -90dB in inverted EG output
     /// Which means that EG compares its level to SL as usual, and that the
-    /// output is simply inverted afterall.
+    /// output is simply inverted after all.
     ///
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.

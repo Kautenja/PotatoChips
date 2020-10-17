@@ -23,6 +23,7 @@
 #ifndef DSP_YAMAHA_YM2612_HPP_
 #define DSP_YAMAHA_YM2612_HPP_
 
+#include <iostream>
 #include "yamaha_ym2612_functional.hpp"
 
 // ---------------------------------------------------------------------------
@@ -80,10 +81,6 @@ class YamahaYM2612 {
         } operators[4];
     } channels[6];
 
-    /// whether the emulated DAC is enabled
-    bool is_DAC_enabled;
-    /// the output value from the emulated DAC
-    int32_t out_DAC;
     /// the stereo master output from the chip emulator
     int16_t stereo_output[2] = {0, 0};
 
@@ -150,9 +147,6 @@ class YamahaYM2612 {
             write_register(&engine, i | 0x100, 0);
         }
 
-        // DAC mode clear
-        is_DAC_enabled = 0;
-        out_DAC = 0;
         for (int c = 0; c < 6; c++) setST(c, 3);
     }
 
@@ -186,10 +180,7 @@ class YamahaYM2612 {
         chan_calc(&engine, &voices[2]);
         chan_calc(&engine, &voices[3]);
         chan_calc(&engine, &voices[4]);
-        if (is_DAC_enabled)
-            *&voices[5].connect4 += out_DAC;
-        else
-            chan_calc(&engine, &voices[5]);
+        chan_calc(&engine, &voices[5]);
         // advance LFO
         advance_lfo(&engine);
         // advance envelope generator
@@ -270,22 +261,10 @@ class YamahaYM2612 {
             // get the address from the latch and write the data
             address = engine.state.address;
             registers[address] = data;
-            switch (address & 0xf0) {
-            case 0x20:  // 0x20-0x2f Mode
-                switch (address) {
-                case 0x2a:  // DAC data (YM2612), level unknown
-                    out_DAC = ((int) data - 0x80) << 6;
-                    break;
-                case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
-                    is_DAC_enabled = data & 0x80;
-                    break;
-                default:  // engine section, write register
-                    write_mode(&engine, address, data);
-                }
-                break;
-            default:  // 0x30-0xff engine section, write register
+            if ((address & 0xf0) == 0x20)  // 0x20-0x2f Mode
+                write_mode(&engine, address, data);
+            else
                 write_register(&engine, address, data);
-            }
             break;
         case 2:  // address port 1
             engine.state.address = data;
@@ -304,7 +283,8 @@ class YamahaYM2612 {
 
     /// @brief Set part of a 16-bit register to a given 8-bit value.
     ///
-    /// @param part the part of the register space to access, 0=latch, 1=data
+    /// @param part the part of the register space to access,
+    ///        0=latch1, 1=data1, 2=latch2, 3=data2
     /// @param reg the address of the register to write data to
     /// @param data the value of the data to write to the register
     ///

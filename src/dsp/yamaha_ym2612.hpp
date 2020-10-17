@@ -489,7 +489,7 @@ struct Operator {
     /// phase counter
     uint32_t phase = 0;
     /// phase step
-    int32_t Incr = 0;
+    int32_t phase_increment = 0;
 
     /// phase type
     uint8_t state = 0;
@@ -696,7 +696,7 @@ static inline void set_keyoff(Voice* voice, unsigned slot) {
 static inline void set_det_mul(OperatorState* state, Voice* voice, Operator* oprtr, int value) {
     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
     oprtr->DT = state->dt_tab[(value >> 4) & 7];
-    voice->operators[SLOT1].Incr = -1;
+    voice->operators[SLOT1].phase_increment = -1;
 }
 
 /// @brief Set the 7-bit total level.
@@ -714,7 +714,7 @@ static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
     uint8_t old_KSR = oprtr->KSR;
     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
     oprtr->KSR = 3 - (value >> 6);
-    if (oprtr->KSR != old_KSR) voice->operators[SLOT1].Incr = -1;
+    if (oprtr->KSR != old_KSR) voice->operators[SLOT1].phase_increment = -1;
     // refresh Attack rate
     if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
         oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
@@ -1166,10 +1166,10 @@ static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
         if (finc < 0) finc += OPN->fn_max;
         CH->operators[SLOT4].phase += (finc * CH->operators[SLOT4].mul) >> 1;
     } else {  // LFO phase modulation is 0
-        CH->operators[SLOT1].phase += CH->operators[SLOT1].Incr;
-        CH->operators[SLOT2].phase += CH->operators[SLOT2].Incr;
-        CH->operators[SLOT3].phase += CH->operators[SLOT3].Incr;
-        CH->operators[SLOT4].phase += CH->operators[SLOT4].Incr;
+        CH->operators[SLOT1].phase += CH->operators[SLOT1].phase_increment;
+        CH->operators[SLOT2].phase += CH->operators[SLOT2].phase_increment;
+        CH->operators[SLOT3].phase += CH->operators[SLOT3].phase_increment;
+        CH->operators[SLOT4].phase += CH->operators[SLOT4].phase_increment;
     }
 }
 
@@ -1211,10 +1211,10 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
     if (CH->pms) {
         update_phase_lfo_channel(OPN, CH);
     } else {  // no LFO phase modulation
-        CH->operators[SLOT1].phase += CH->operators[SLOT1].Incr;
-        CH->operators[SLOT2].phase += CH->operators[SLOT2].Incr;
-        CH->operators[SLOT3].phase += CH->operators[SLOT3].Incr;
-        CH->operators[SLOT4].phase += CH->operators[SLOT4].Incr;
+        CH->operators[SLOT1].phase += CH->operators[SLOT1].phase_increment;
+        CH->operators[SLOT2].phase += CH->operators[SLOT2].phase_increment;
+        CH->operators[SLOT3].phase += CH->operators[SLOT3].phase_increment;
+        CH->operators[SLOT4].phase += CH->operators[SLOT4].phase_increment;
     }
 #undef CALCULATE_VOLUME
 }
@@ -1226,7 +1226,7 @@ static inline void refresh_fc_eg_slot(EngineState *OPN, Operator *SLOT, int fc, 
     // detects frequency overflow (credits to Nemesis)
     if (fc < 0) fc += OPN->fn_max;
     // (frequency) phase increment counter
-    SLOT->Incr = (fc * SLOT->mul) >> 1;
+    SLOT->phase_increment = (fc * SLOT->mul) >> 1;
     if ( SLOT->ksr != ksr ) {
         SLOT->ksr = ksr;
         // calculate envelope generator rates
@@ -1250,7 +1250,7 @@ static inline void refresh_fc_eg_slot(EngineState *OPN, Operator *SLOT, int fc, 
 
 /// update phase increment counters
 static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
-    if ( CH->operators[SLOT1].Incr==-1) {
+    if ( CH->operators[SLOT1].phase_increment==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
         refresh_fc_eg_slot(OPN, &CH->operators[SLOT1] , fc , kc );
@@ -1353,7 +1353,7 @@ static void write_register(EngineState *OPN, int r, int v) {
             CH->fc = OPN->fn_table[fn * 2] >> (7 - blk);
             /* store fnum in clear form for LFO PM calculations */
             CH->block_fnum = (blk << 11) | fn;
-            CH->operators[SLOT1].Incr = -1;
+            CH->operators[SLOT1].phase_increment = -1;
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
@@ -1368,7 +1368,7 @@ static void write_register(EngineState *OPN, int r, int v) {
                 /* phase increment counter */
                 OPN->SL3.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
                 OPN->SL3.block_fnum[c] = (blk << 11) | fn;
-                (OPN->P_CH)[2].operators[SLOT1].Incr = -1;
+                (OPN->P_CH)[2].operators[SLOT1].phase_increment = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
@@ -2029,7 +2029,7 @@ class YamahaYM2612 {
         if (channels[channel].operators[slot].MUL == value) return;
         channels[channel].operators[slot].MUL = value;
         CH[channel].operators[slots_idx[slot]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-        CH[channel].operators[SLOT1].Incr = -1;
+        CH[channel].operators[SLOT1].phase_increment = -1;
     }
 
     /// @brief Set the detune (DET) register for the given channel and operator.
@@ -2042,7 +2042,7 @@ class YamahaYM2612 {
         if (channels[channel].operators[slot].DET == value) return;
         channels[channel].operators[slot].DET = value;
         CH[channel].operators[slots_idx[slot]].DT  = OPN.ST.dt_tab[(value)&7];
-        CH[channel].operators[SLOT1].Incr = -1;
+        CH[channel].operators[SLOT1].phase_increment = -1;
     }
 
     /// @brief Set the rate-scale (RS) register for the given channel and operator.

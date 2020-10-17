@@ -99,14 +99,14 @@ class YamahaYM2612 {
     /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
-    void setSampleRate(double clock_rate, double sample_rate) {
+    inline void setSampleRate(double clock_rate, double sample_rate) {
         engine.state.clock = clock_rate;
         engine.state.rate = sample_rate;
         set_prescaler(&engine);
     }
 
     /// @brief Reset the emulator to its initial state
-    void reset() {
+    inline void reset() {
         LFO = stereo_output[0] = stereo_output[1] = 0;
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
@@ -145,7 +145,7 @@ class YamahaYM2612 {
     }
 
     /// @brief Run a step on the emulator
-    void step() {
+    inline void step() {
         int lt, rt;
         // refresh PG and EG
         refresh_fc_eg_chan(&engine, &voices[0]);

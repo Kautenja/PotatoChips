@@ -131,7 +131,7 @@ class YamahaYM2612 {
         write_mode(&engine, 0x25, 0x00);
         write_mode(&engine, 0x24, 0x00);
 
-        reset_voices(&(engine.state), &voices[0], 6);
+        reset_voices(&engine.state, &voices[0], 6);
 
         for (int i = 0xb6; i >= 0xb4; i--) {
             write_register(&engine, i, 0xc0);
@@ -143,7 +143,7 @@ class YamahaYM2612 {
             write_register(&engine, i | 0x100, 0);
         }
 
-        for (int c = 0; c < 6; c++) setST(c, 3);
+        for (int voice = 0; voice < 6; voice++) setST(voice, 3);
     }
 
     /// @brief Run a step on the emulator

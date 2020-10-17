@@ -548,7 +548,7 @@ struct OperatorState {
     int rate = 0;
     /// frequency base
     double freqbase = 0;
-    /// timer prescaler
+    /// timer pre-scaler
     int timer_prescaler = 0;
     /// address register
     uint8_t address = 0;
@@ -581,10 +581,10 @@ struct Voice {
     /// four SLOTs (operators)
     Operator operators[4];
 
-    /// algorithm
-    uint8_t ALGO = 0;
-    /// feedback shift
-    uint8_t FB = 0;
+    /// algorithm (ALGO)
+    uint8_t algorithm = 0;
+    /// feedback shift (FB)
+    uint8_t feedback = 0;
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
 
@@ -949,7 +949,7 @@ static void setup_connection(EngineState *OPN, Voice *CH, int ch) {
 
     int32_t **memc = &CH->mem_connect;
 
-    switch( CH->ALGO ) {
+    switch( CH->algorithm ) {
     case 0:
         // M1---C1---MEM---M2---C2---OUT
         *om1 = &OPN->c1;
@@ -1190,8 +1190,8 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
     }
     CH->op1_out[1] = 0;
     if (eg_out < ENV_QUIET) {
-        if (!CH->FB) out = 0;
-        CH->op1_out[1] = op_calc1(CH->operators[SLOT1].phase, eg_out, (out << CH->FB) );
+        if (!CH->feedback) out = 0;
+        CH->op1_out[1] = op_calc1(CH->operators[SLOT1].phase, eg_out, (out << CH->feedback) );
     }
     // SLOT 3
     eg_out = CALCULATE_VOLUME(&CH->operators[SLOT3]);
@@ -1379,10 +1379,10 @@ static void write_register(EngineState *OPN, int r, int v) {
         break;
     case 0xb0:
         switch (OPN_SLOT(r)) {
-        case 0: {  // 0xb0-0xb2 : FB,ALGO
+        case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
             int feedback = (v >> 3) & 7;
-            CH->ALGO = v & 7;
-            CH->FB = feedback ? feedback + 6 : 0;
+            CH->algorithm = v & 7;
+            CH->feedback = feedback ? feedback + 6 : 0;
             setup_connection(OPN, CH, c);
             break;
         }

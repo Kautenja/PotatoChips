@@ -182,6 +182,7 @@ struct Chip2612 : rack::Module {
                 apu[channel].setDET(osc, op, getParam(channel, PARAM_DET + op, INPUT_DET + op, 7  ));
                 apu[channel].setRS (osc, op, getParam(channel, PARAM_RS  + op, INPUT_RS  + op, 3  ));
                 apu[channel].setAM (osc, op, getParam(channel, PARAM_AM  + op, INPUT_AM  + op, 1  ));
+                // apu[channel].setSSG(osc, op << 2, true, 0xe);
             }
             // Compute the frequency from the pitch parameter and input. low
             // range of -4 octaves, high range of 6 octaves

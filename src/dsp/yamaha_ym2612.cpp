@@ -624,15 +624,15 @@ static void OPNWriteMode(FM_OPN *OPN, int r, int v)
     }
 }
 
-/* write a OPN register (0x30-0xff) */
-static void OPNWriteReg(FM_OPN *OPN, int r, int v)
-{
+/// write a OPN register (0x30-0xff)
+static void OPNWriteReg(FM_OPN *OPN, int r, int v) {
     FM_CH *CH;
     FM_SLOT *SLOT;
 
     uint8_t c = OPN_CHAN(r);
 
-    if (c == 3) return; /* 0xX3,0xX7,0xXB,0xXF */
+    // 0xX3, 0xX7, 0xXB, 0xXF
+    if (c == 3) return;
 
     if (r >= 0x100) c+=3;
 
@@ -641,190 +641,89 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
 
     SLOT = &(CH->SLOT[OPN_SLOT(r)]);
 
-    switch( r & 0xf0 ) {
-    case 0x30:  /* DET , MUL */
-        set_det_mul(&OPN->ST,CH,SLOT,v);
+    switch (r & 0xf0) {
+    case 0x30:  // DET, MUL
+        set_det_mul(&OPN->ST, CH, SLOT, v);
         break;
-
-    case 0x40:  /* TL */
-        set_tl(CH,SLOT,v);
+    case 0x40:  // TL
+        set_tl(CH, SLOT, v);
         break;
-
-    case 0x50:  /* KS, AR */
-        set_ar_ksr(CH,SLOT,v);
+    case 0x50:  // KS, AR
+        set_ar_ksr(CH, SLOT, v);
         break;
-
-    case 0x60:  /* bit7 = AM ENABLE, DR */
-        set_dr(SLOT,v);
-
-        if (OPN->type & TYPE_LFOPAN) /* YM2608/2610/2610B/2612 */
-        {
-            SLOT->AMmask = (v&0x80) ? ~0 : 0;
-        }
+    case 0x60:  // bit7 = AM ENABLE, DR
+        set_dr(SLOT, v);
+        if (OPN->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
+            SLOT->AMmask = (v & 0x80) ? ~0 : 0;
         break;
-
-    case 0x70:  /*     SR */
-        set_sr(SLOT,v);
+    case 0x70:  // SR
+        set_sr(SLOT, v);
         break;
-
-    case 0x80:  /* SL, RR */
-        set_sl_rr(SLOT,v);
+    case 0x80:  // SL, RR
+        set_sl_rr(SLOT, v);
         break;
-
-    case 0x90:  /* SSG-EG */
+    case 0x90:  // SSG-EG
         SLOT->ssg  =  v&0x0f;
-
-            /* recalculate EG output */
-        if ((SLOT->ssg&0x08) && (SLOT->ssgn ^ (SLOT->ssg&0x04)) && (SLOT->state > EG_REL))
-            SLOT->vol_out = ((uint32_t)(0x200 - SLOT->volume) & MAX_ATT_INDEX) + SLOT->tl;
+        // recalculate EG output
+        if ((SLOT->ssg & 0x08) && (SLOT->ssgn ^ (SLOT->ssg & 0x04)) && (SLOT->state > EG_REL))
+            SLOT->vol_out = ((uint32_t) (0x200 - SLOT->volume) & MAX_ATT_INDEX) + SLOT->tl;
         else
-            SLOT->vol_out = (uint32_t)SLOT->volume + SLOT->tl;
-
-        /* SSG-EG envelope shapes :
-
-        E AtAlH
-        1 0 0 0  \\\\
-
-        1 0 0 1  \___
-
-        1 0 1 0  \/\/
-                  ___
-        1 0 1 1  \
-
-        1 1 0 0  ////
-                  ___
-        1 1 0 1  /
-
-        1 1 1 0  /\/\
-
-        1 1 1 1  /___
-
-
-        E = SSG-EG enable
-
-
-        The shapes are generated using Attack, Decay and Sustain phases.
-
-        Each single character in the diagrams above represents this whole
-        sequence:
-
-        - when KEY-ON = 1, normal Attack phase is generated (*without* any
-          difference when compared to normal mode),
-
-        - later, when envelope level reaches minimum level (max volume),
-          the EG switches to Decay phase (which works with bigger steps
-          when compared to normal mode - see below),
-
-        - later when envelope level passes the SL level,
-          the EG swithes to Sustain phase (which works with bigger steps
-          when compared to normal mode - see below),
-
-        - finally when envelope level reaches maximum level (min volume),
-          the EG switches to Attack phase again (depends on actual waveform).
-
-        Important is that when switch to Attack phase occurs, the phase counter
-        of that operator will be zeroed-out (as in normal KEY-ON) but not always.
-        (I havent found the rule for that - perhaps only when the output level is low)
-
-        The difference (when compared to normal Envelope Generator mode) is
-        that the resolution in Decay and Sustain phases is 4 times lower;
-        this results in only 256 steps instead of normal 1024.
-        In other words:
-        when SSG-EG is disabled, the step inside of the EG is one,
-        when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
-
-        Times between the level changes are the same in both modes.
-
-
-        Important:
-        Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
-        it is the same in both SSG and no-SSG modes, with this exception:
-
-        when the SSG-EG is enabled and is generating raising levels
-        (when the EG output is inverted) the SL will be found at wrong level !!!
-        For example, when SL=02:
-            0 -6 = -6dB in non-inverted EG output
-            96-6 = -90dB in inverted EG output
-        Which means that EG compares its level to SL as usual, and that the
-        output is simply inverted afterall.
-
-
-        The Yamaha's manuals say that AR should be set to 0x1f (max speed).
-        That is not necessary, but then EG will be generating Attack phase.
-
-        */
-
-
+            SLOT->vol_out = (uint32_t) SLOT->volume + SLOT->tl;
         break;
-
     case 0xa0:
-        switch( OPN_SLOT(r) )
-        {
-        case 0:     /* 0xa0-0xa2 : FNUM1 */
-            {
-                uint32_t fn = (((uint32_t)( (OPN->ST.fn_h)&7))<<8) + v;
-                uint8_t blk = OPN->ST.fn_h>>3;
-                /* keyscale code */
-                CH->kcode = (blk<<2) | opn_fktable[(fn >> 7) & 0xf];
-                /* phase increment counter */
-                CH->fc = OPN->fn_table[fn*2]>>(7-blk);
-
-                /* store fnum in clear form for LFO PM calculations */
-                CH->block_fnum = (blk<<11) | fn;
-
-                CH->SLOT[SLOT1].Incr=-1;
-            }
+        switch (OPN_SLOT(r)) {
+        case 0:  {  // 0xa0-0xa2 : FNUM1
+            uint32_t fn = (((uint32_t)( (OPN->ST.fn_h) & 7)) << 8) + v;
+            uint8_t blk = OPN->ST.fn_h >> 3;
+            /* key-scale code */
+            CH->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+            /* phase increment counter */
+            CH->fc = OPN->fn_table[fn * 2] >> (7 - blk);
+            /* store fnum in clear form for LFO PM calculations */
+            CH->block_fnum = (blk << 11) | fn;
+            CH->SLOT[SLOT1].Incr = -1;
             break;
-        case 1:     /* 0xa4-0xa6 : FNUM2,BLK */
+        }
+        case 1:  // 0xa4-0xa6 : FNUM2,BLK
             OPN->ST.fn_h = v&0x3f;
             break;
-        case 2:     /* 0xa8-0xaa : 3CH FNUM1 */
-            if (r < 0x100)
-            {
-                uint32_t fn = (((uint32_t)(OPN->SL3.fn_h&7))<<8) + v;
-                uint8_t blk = OPN->SL3.fn_h>>3;
+        case 2:  // 0xa8-0xaa : 3CH FNUM1
+            if (r < 0x100) {
+                uint32_t fn = (((uint32_t)(OPN->SL3.fn_h & 7)) << 8) + v;
+                uint8_t blk = OPN->SL3.fn_h >> 3;
                 /* keyscale code */
-                OPN->SL3.kcode[c]= (blk<<2) | opn_fktable[(fn >> 7) & 0xf];
+                OPN->SL3.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
                 /* phase increment counter */
-                OPN->SL3.fc[c] = OPN->fn_table[fn*2]>>(7-blk);
-                OPN->SL3.block_fnum[c] = (blk<<11) | fn;
-                (OPN->P_CH)[2].SLOT[SLOT1].Incr=-1;
+                OPN->SL3.fc[c] = OPN->fn_table[fn * 2] >> (7 - blk);
+                OPN->SL3.block_fnum[c] = (blk << 11) | fn;
+                (OPN->P_CH)[2].SLOT[SLOT1].Incr = -1;
             }
             break;
-        case 3:     /* 0xac-0xae : 3CH FNUM2,BLK */
+        case 3:  // 0xac-0xae : 3CH FNUM2, BLK
             if (r < 0x100)
                 OPN->SL3.fn_h = v&0x3f;
             break;
         }
         break;
-
     case 0xb0:
-
-        switch( OPN_SLOT(r) )
-        {
-        case 0:     /* 0xb0-0xb2 : FB,ALGO */
-            {
-                int feedback = (v>>3)&7;
-                CH->ALGO = v&7;
-                CH->FB   = feedback ? feedback+6 : 0;
-                setup_connection( OPN, CH, c );
-
-            }
+        switch (OPN_SLOT(r)) {
+        case 0: {  // 0xb0-0xb2 : FB,ALGO
+            int feedback = (v >> 3) & 7;
+            CH->ALGO = v & 7;
+            CH->FB = feedback ? feedback + 6 : 0;
+            setup_connection(OPN, CH, c);
             break;
-        case 1:     /* 0xb4-0xb6 : L , R , AMS , PMS (YM2612/YM2610B/YM2610/YM2608) */
-            if ( OPN->type & TYPE_LFOPAN)
-            {
-                /* b0-2 PMS */
-                CH->pms = (v & 7) * 32; /* CH->pms = PM depth * 32 (index in lfo_pm_table) */
-
-                /* b4-5 AMS */
-                CH->ams = lfo_ams_depth_shift[(v>>4) & 0x03];
-
-
-                /* PAN :  b7 = L, b6 = R */
-                OPN->pan[ c*2   ] = (v & 0x80) ? ~0 : 0;
-                OPN->pan[ c*2+1 ] = (v & 0x40) ? ~0 : 0;
-
+        }
+        case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
+            if (OPN->type & TYPE_LFOPAN) {
+                // b0-2 PMS
+                // CH->pms = PM depth * 32 (index in lfo_pm_table)
+                CH->pms = (v & 7) * 32;
+                // b4-5 AMS
+                CH->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
+                // PAN :  b7 = L, b6 = R
+                OPN->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
+                OPN->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;
             }
             break;
         }
@@ -1138,7 +1037,7 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
         case 0x20:  // 0x20-0x2f Mode
             switch (addr) {
             case 0x2a:  // DAC data (YM2612), level unknown
-                out_DAC = ((int)v - 0x80) << 6;
+                out_DAC = ((int) v - 0x80) << 6;
                 break;
             case 0x2b:  // DAC Sel (YM2612), b7 = dac enable
                 is_DAC_enabled = v & 0x80;
@@ -1152,12 +1051,12 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
         }
         break;
 
-    case 2: // address port 1
+    case 2:  // address port 1
         OPN.ST.address = v;
         addr_A1 = 1;
         break;
 
-    case 3: // data port 1
+    case 3:  // data port 1
         // verified on real YM2608
         if (addr_A1 != 1) break;
 
@@ -1168,6 +1067,13 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
     }
 }
 
+void YamahaYM2612::setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode) {
+    uint8_t value = (is_on << 3) | (mode & 7);
+    // if (channels[channel].operators[slot].SSG == value) return;
+    // channels[channel].operators[slot].SSG = value;
+    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + slot, channel), value);
+}
+
 void YamahaYM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AR == value) return;
     channels[channel].operators[slot].AR = value;
@@ -1176,7 +1082,6 @@ void YamahaYM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     set_ar_ksr(&CH[channel], s, s->ar_ksr);
 }
 
-/* set decay rate */
 void YamahaYM2612::setD1(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].D1 == value) return;
     channels[channel].operators[slot].D1 = value;
@@ -1193,7 +1098,6 @@ void YamahaYM2612::setSL(uint8_t channel, uint8_t slot, uint8_t value) {
     set_sl_rr(s, s->sl_rr);
 }
 
-/* set sustain rate */
 void YamahaYM2612::setD2(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].D2 == value) return;
     channels[channel].operators[slot].D2 = value;

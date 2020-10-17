@@ -495,11 +495,14 @@ static inline void set_lfo(EngineState* state, uint8_t lfo_mode) {
 /// @param gate_mask a bitmask with a bit for each voice on the chip
 ///
 static inline void set_gate(EngineState* state, uint8_t gate_mask) {
-    uint8_t c = gate_mask & 0x03;
-    if (c == 3) return;
-    if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) c += 3;
-    Voice* voice = state->voices;
-    voice = &voice[c];
+    // get the voice index in {0, 1, 2} (ignore 3)
+    uint8_t voice_index = gate_mask & 0x03;
+    if (voice_index == 3) return;
+    // check the high bit to address the high 3 voices {3, 4, 5}
+    if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) voice_index += 3;
+    // cache a pointer to the voice
+    Voice* voice = &state->voices[voice_index];
+    // process the gate for each operator on the voice
     if (gate_mask & 0x10) set_keyon(voice, Op1); else set_keyoff(voice, Op1);
     if (gate_mask & 0x20) set_keyon(voice, Op2); else set_keyoff(voice, Op2);
     if (gate_mask & 0x40) set_keyon(voice, Op3); else set_keyoff(voice, Op3);

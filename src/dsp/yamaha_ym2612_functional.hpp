@@ -91,7 +91,7 @@ struct EngineState {
     int32_t out_fm[8];
 };
 
-/// Initialize time tables.
+/// @brief Initialize time tables.
 static void init_timetables(EngineState* engine, double freqbase) {
     // DeTune table
     for (int d = 0; d <= 3; d++) {
@@ -125,13 +125,14 @@ static void init_timetables(EngineState* engine, double freqbase) {
     engine->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
 }
 
-/// Set pre-scaler and make time tables.
+/// @brief Set pre-scaler and make time tables.
 ///
 /// @param engine the emulator to set the pre-scaler and create timetables for
 ///
 static void set_prescaler(EngineState* engine) {
     // frequency base
-    engine->state.freqbase = (engine->state.rate) ? ((double)engine->state.clock / engine->state.rate) : 0;
+    engine->state.freqbase = (engine->state.rate) ?
+        ((double)engine->state.clock / engine->state.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
     //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
@@ -143,17 +144,17 @@ static void set_prescaler(EngineState* engine) {
     init_timetables(engine, engine->state.freqbase);
 }
 
-/// Set algorithm routing.
-static void set_routing(EngineState* engine, Voice* CH, int ch) {
-    int32_t *carrier = &engine->out_fm[ch];
+/// @brief Set algorithm routing.
+static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
+    int32_t *carrier = &engine->out_fm[carrier_index];
 
-    int32_t **om1 = &CH->connect1;
-    int32_t **om2 = &CH->connect3;
-    int32_t **oc1 = &CH->connect2;
+    int32_t **om1 = &voice->connect1;
+    int32_t **om2 = &voice->connect3;
+    int32_t **oc1 = &voice->connect2;
 
-    int32_t **memc = &CH->mem_connect;
+    int32_t **memc = &voice->mem_connect;
 
-    switch( CH->algorithm ) {
+    switch(voice->algorithm) {
     case 0:
         // M1---C1---MEM---M2---C2---OUT
         *om1 = &engine->c1;
@@ -225,10 +226,10 @@ static void set_routing(EngineState* engine, Voice* CH, int ch) {
         *memc= &engine->mem;  // store it anywhere where it will not be used
         break;
     }
-    CH->connect4 = carrier;
+    voice->connect4 = carrier;
 }
 
-/// advance LFO to next sample.
+/// @brief Advance LFO to next sample.
 static inline void advance_lfo(EngineState* engine) {
     if (engine->lfo_timer_overflow) {  // LFO enabled ?
         // increment LFO timer
@@ -340,10 +341,10 @@ static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
     }
 }
 
-static inline void update_phase_lfo_channel(EngineState* engine, Voice* CH) {
-    uint32_t block_fnum = CH->block_fnum;
+static inline void update_phase_lfo_channel(EngineState* engine, Voice* voice) {
+    uint32_t block_fnum = voice->block_fnum;
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + engine->lfo_PM_step];
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + engine->lfo_PM_step];
     if (lfo_fn_table_index_offset) {  // LFO phase modulation active
         block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
         uint8_t blk = (block_fnum & 0x7000) >> 12;
@@ -353,27 +354,27 @@ static inline void update_phase_lfo_channel(EngineState* engine, Voice* CH) {
         // phase increment counter
         int fc = (engine->fn_table[fn]>>(7 - blk));
         // detects frequency overflow (credits to Nemesis)
-        int finc = fc + CH->operators[Op1].DT[kc];
+        int finc = fc + voice->operators[Op1].DT[kc];
         // Operator 1
         if (finc < 0) finc += engine->fn_max;
-        CH->operators[Op1].phase += (finc * CH->operators[Op1].mul) >> 1;
+        voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
         // Operator 2
-        finc = fc + CH->operators[Op2].DT[kc];
+        finc = fc + voice->operators[Op2].DT[kc];
         if (finc < 0) finc += engine->fn_max;
-        CH->operators[Op2].phase += (finc * CH->operators[Op2].mul) >> 1;
+        voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
         // Operator 3
-        finc = fc + CH->operators[Op3].DT[kc];
+        finc = fc + voice->operators[Op3].DT[kc];
         if (finc < 0) finc += engine->fn_max;
-        CH->operators[Op3].phase += (finc * CH->operators[Op3].mul) >> 1;
+        voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
         // Operator 4
-        finc = fc + CH->operators[Op4].DT[kc];
+        finc = fc + voice->operators[Op4].DT[kc];
         if (finc < 0) finc += engine->fn_max;
-        CH->operators[Op4].phase += (finc * CH->operators[Op4].mul) >> 1;
+        voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
     } else {  // LFO phase modulation is 0
-        CH->operators[Op1].phase += CH->operators[Op1].phase_increment;
-        CH->operators[Op2].phase += CH->operators[Op2].phase_increment;
-        CH->operators[Op3].phase += CH->operators[Op3].phase_increment;
-        CH->operators[Op4].phase += CH->operators[Op4].phase_increment;
+        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
     }
 }
 
@@ -423,7 +424,7 @@ static inline void chan_calc(EngineState* engine, Voice* voice) {
 #undef CALCULATE_VOLUME
 }
 
-/// update phase increment and envelope generator
+/// @brief Update phase increment and envelope generator
 static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int fc, int kc) {
     int ksr = kc >> oprtr->KSR;
     fc += oprtr->DT[kc];
@@ -452,7 +453,7 @@ static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int 
     }
 }
 
-/// update phase increment counters
+/// @brief Update phase increment counters
 static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
     if (voice->operators[Op1].phase_increment==-1) {
         int fc = voice->fc;
@@ -484,7 +485,7 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     if (gate_mask & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
 }
 
-/// write a emulator register (0x30-0xff).
+/// @brief Write a emulator register (0x30-0xff).
 static void write_register(EngineState* engine, int r, int v) {
     uint8_t c = VOICE(r);
     // 0xX3, 0xX7, 0xXB, 0xXF

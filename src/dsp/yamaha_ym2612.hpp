@@ -815,27 +815,25 @@ static void update_ssg_eg_channel(Operator *SLOT) {
 // MARK: OPN unit
 // ---------------------------------------------------------------------------
 
-/// OPN 3slot struct
-struct FM_3SLOT {
-    /// fnum3,blk3: calculated
-    uint32_t fc[3] = {0, 0, 0};
-    /// freq3 latch
-    uint8_t fn_h = 0;
-    /// key code
-    uint8_t kcode[3] = {0, 0, 0};
-    /// current fnum value for this slot (can be different between slots of
-    /// one channel in 3slot mode)
-    uint32_t block_fnum[3] = {0, 0, 0};
-};
-
 /// OPN/A/B common state
 struct EngineState {
     /// chip type
     uint8_t type = 0;
     /// general state
     OperatorState ST;
-    /// 3 slot mode state
-    FM_3SLOT SL3;
+    /// 3 slot mode state (special mode where each operator on channel 3 can
+    /// have a different root frequency)
+    struct SpecialModeState {
+        /// fnum3,blk3: calculated
+        uint32_t fc[3] = {0, 0, 0};
+        /// freq3 latch
+        uint8_t fn_h = 0;
+        /// key code
+        uint8_t kcode[3] = {0, 0, 0};
+        /// current fnum value for this slot (can be different between slots of
+        /// one channel in 3slot mode)
+        uint32_t block_fnum[3] = {0, 0, 0};
+    } SL3;
     /// pointer of CH
     Voice *P_CH = nullptr;
     /// fm channels output masks (0xffffffff = enable) */

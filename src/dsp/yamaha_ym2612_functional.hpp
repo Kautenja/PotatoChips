@@ -152,7 +152,7 @@ static void set_prescaler(EngineState* engine) {
 }
 
 /// Set algorithm routing.
-static void setup_connection(EngineState *OPN, Voice *CH, int ch) {
+static void set_routing(EngineState* OPN, Voice* CH, int ch) {
     int32_t *carrier = &OPN->out_fm[ch];
 
     int32_t **om1 = &CH->connect1;
@@ -237,7 +237,7 @@ static void setup_connection(EngineState *OPN, Voice *CH, int ch) {
 }
 
 /// advance LFO to next sample.
-static inline void advance_lfo(EngineState *OPN) {
+static inline void advance_lfo(EngineState* OPN) {
     if (OPN->lfo_timer_overflow) {  // LFO enabled ?
         // increment LFO timer
         OPN->lfo_timer +=  OPN->lfo_timer_add;
@@ -259,7 +259,7 @@ static inline void advance_lfo(EngineState *OPN) {
     }
 }
 
-static inline void advance_eg_channel(EngineState *OPN, Operator* oprtr) {
+static inline void advance_eg_channel(EngineState* OPN, Operator* oprtr) {
     // four operators per channel
     for (unsigned i = 0; i < 4; i++) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
@@ -348,7 +348,7 @@ static inline void advance_eg_channel(EngineState *OPN, Operator* oprtr) {
     }
 }
 
-static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
+static inline void update_phase_lfo_channel(EngineState* OPN, Voice* CH) {
     uint32_t block_fnum = CH->block_fnum;
     uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
     int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + CH->pms + OPN->lfo_PM_step];
@@ -385,7 +385,7 @@ static inline void update_phase_lfo_channel(EngineState *OPN, Voice *CH) {
     }
 }
 
-static inline void chan_calc(EngineState *OPN, Voice *CH) {
+static inline void chan_calc(EngineState* OPN, Voice* CH) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
     uint32_t AM = OPN->lfo_AM_step >> CH->ams;
     OPN->m2 = OPN->c1 = OPN->c2 = OPN->mem = 0;
@@ -432,7 +432,7 @@ static inline void chan_calc(EngineState *OPN, Voice *CH) {
 }
 
 /// update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(EngineState *OPN, Operator* oprtr, int fc, int kc) {
+static inline void refresh_fc_eg_slot(EngineState* OPN, Operator* oprtr, int fc, int kc) {
     int ksr = kc >> oprtr->KSR;
     fc += oprtr->DT[kc];
     // detects frequency overflow (credits to Nemesis)
@@ -461,7 +461,7 @@ static inline void refresh_fc_eg_slot(EngineState *OPN, Operator* oprtr, int fc,
 }
 
 /// update phase increment counters
-static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
+static inline void refresh_fc_eg_chan(EngineState* OPN, Voice* CH) {
     if ( CH->operators[Op1].phase_increment==-1) {
         int fc = CH->fc;
         int kc = CH->kcode;
@@ -493,7 +493,7 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
 }
 
 /// write a OPN register (0x30-0xff).
-static void write_register(EngineState *OPN, int r, int v) {
+static void write_register(EngineState* OPN, int r, int v) {
     uint8_t c = VOICE(r);
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
@@ -572,7 +572,7 @@ static void write_register(EngineState *OPN, int r, int v) {
             int feedback = (v >> 3) & 7;
             CH->algorithm = v & 7;
             CH->feedback = feedback ? feedback + 6 : 0;
-            setup_connection(OPN, CH, c);
+            set_routing(OPN, CH, c);
             break;
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)

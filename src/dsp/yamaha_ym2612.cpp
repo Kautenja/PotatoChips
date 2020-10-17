@@ -1049,13 +1049,6 @@ void YamahaYM2612::write(uint8_t a, uint8_t v) {
     }
 }
 
-void YamahaYM2612::setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode) {
-    const uint8_t value = (is_on << 3) | (mode & 7);
-    // if (channels[channel].operators[slot].SSG == value) return;
-    // channels[channel].operators[slot].SSG = value;
-    setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + (slot << 2), channel), value);
-}
-
 void YamahaYM2612::setAR(uint8_t channel, uint8_t slot, uint8_t value) {
     if (channels[channel].operators[slot].AR == value) return;
     channels[channel].operators[slot].AR = value;

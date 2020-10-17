@@ -634,6 +634,8 @@ class YamahaYM2612 {
             uint8_t RS = 0;
             /// whether amplitude modulation from the LFO enabled
             uint8_t AM = 0;
+            /// the SSG mode for the operator
+            uint8_t SSG = 0;
         } operators[4];
     } channels[6];
 
@@ -920,7 +922,12 @@ class YamahaYM2612 {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    void setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode);
+    inline void setSSG(uint8_t channel, uint8_t slot, bool is_on, uint8_t mode) {
+        const uint8_t value = (is_on << 3) | (mode & 7);
+        if (channels[channel].operators[slot].SSG == value) return;
+        channels[channel].operators[slot].SSG = value;
+        setREG(YM_CH_PART(channel), YM_CH_OFFSET(0x90 + (slot << 2), channel), value);
+    }
 
     /// @brief Set the attack rate (AR) register for the given channel and operator.
     ///

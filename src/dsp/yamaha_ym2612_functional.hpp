@@ -261,7 +261,7 @@ static inline void advance_lfo(EngineState *OPN) {
 
 static inline void advance_eg_channel(EngineState *OPN, Operator* oprtr) {
     // four operators per channel
-    for (unsigned i = 4; i > 0; i--) {  // reset SSG-EG swap flag
+    for (unsigned i = 0; i < 4; i++) {  // reset SSG-EG swap flag
         unsigned int swap_flag = 0;
         switch(oprtr->state) {
         case EG_ATT:  // attack phase

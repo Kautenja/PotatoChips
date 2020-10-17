@@ -824,7 +824,7 @@ static void reset_voices(GlobalOperatorState* state, Voice* voices, int num) {
 ///
 static void update_ssg_eg_channel(Operator* oprtr) {
     // four operators per channel
-    for (unsigned i = 4; i > 0; i--) {
+    for (unsigned i = 0; i < 4; i++) {
         // detect SSG-EG transition. this is not required during release phase
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on

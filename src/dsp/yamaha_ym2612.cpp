@@ -231,13 +231,13 @@ static inline void set_sl_rr(FM_SLOT *SLOT, int v) {
 }
 
 static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH ) & SIN_MASK ];
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
     if (p >= TL_TAB_LEN) return 0;
     return tl_tab[p];
 }
 
 static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[ ( ((signed int)((phase & ~FREQ_MASK) + pm      )) >> FREQ_SH ) & SIN_MASK ];
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
     if (p >= TL_TAB_LEN) return 0;
     return tl_tab[p];
 }

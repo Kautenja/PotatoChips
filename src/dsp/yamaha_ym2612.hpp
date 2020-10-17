@@ -387,59 +387,59 @@ class YamahaYM2612 {
     /// @brief Set the algorithm (AL) register for the given voice.
     ///
     /// @param voice the voice to set the algorithm register of
-    /// @param value the selected FM algorithm in [0, 7]
+    /// @param algorithm the selected FM algorithm in [0, 7]
     ///
-    inline void setAL(uint8_t voice, uint8_t value) {
-        if (channels[voice].AL == value) return;
-        channels[voice].AL = value;
-        voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (value & 7);
+    inline void setAL(uint8_t voice, uint8_t algorithm) {
+        if (channels[voice].AL == algorithm) return;
+        channels[voice].AL = algorithm;
+        voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (algorithm & 7);
         setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
     }
 
-    /// @brief Set the feedback (FB) register for the given channel.
+    /// @brief Set the feedback (FB) register for the given voice.
     ///
-    /// @param channel the channel to set the feedback register of
-    /// @param value the amount of feedback for operator 1
+    /// @param voice the voice to set the feedback register of
+    /// @param feedback the amount of feedback for operator 1
     ///
-    inline void setFB(uint8_t channel, uint8_t value) {
-        if (channels[channel].FB == value) return;
-        channels[channel].FB = value;
-        voices[channel].FB_ALG = (voices[channel].FB_ALG & 7)| ((value & 7) << 3);
-        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB0, channel), voices[channel].FB_ALG);
+    inline void setFB(uint8_t voice, uint8_t feedback) {
+        if (channels[voice].FB == feedback) return;
+        channels[voice].FB = feedback;
+        voices[voice].FB_ALG = (voices[voice].FB_ALG & 7)| ((feedback & 7) << 3);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB0, voice), voices[voice].FB_ALG);
     }
 
-    /// @brief Set the state (ST) register for the given channel.
+    /// @brief Set the state (ST) register for the given voice.
     ///
-    /// @param channel the channel to set the state register of
-    /// @param value the value of the state register
+    /// @param voice the voice to set the state register of
+    /// @param state the value of the state register
     ///
-    inline void setST(uint8_t channel, uint8_t value) {
-        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0x3F)| ((value & 3) << 6);
-        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
+    inline void setST(uint8_t voice, uint8_t state) {
+        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
     }
 
-    /// @brief Set the AM sensitivity (AMS) register for the given channel.
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
-    /// @param channel the channel to set the AM sensitivity register of
-    /// @param value the amount of amplitude modulation (AM) sensitivity
+    /// @param voice the voice to set the AM sensitivity register of
+    /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
-    inline void setAMS(uint8_t channel, uint8_t value) {
-        if (channels[channel].AMS == value) return;
-        channels[channel].AMS = value;
-        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xCF)| ((value & 3) << 4);
-        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
+    inline void setAMS(uint8_t voice, uint8_t ams) {
+        if (channels[voice].AMS == ams) return;
+        channels[voice].AMS = ams;
+        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
     }
 
-    /// @brief Set the FM sensitivity (FMS) register for the given channel.
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
     ///
-    /// @param channel the channel to set the FM sensitivity register of
+    /// @param voice the voice to set the FM sensitivity register of
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void setFMS(uint8_t channel, uint8_t value) {
-        if (channels[channel].FMS == value) return;
-        channels[channel].FMS = value;
-        voices[channel].LR_AMS_FMS = (voices[channel].LR_AMS_FMS & 0xF8)| (value & 7);
-        setREG(VOICE_PART(channel), VOICE_OFFSET(0xB4, channel), voices[channel].LR_AMS_FMS);
+    inline void setFMS(uint8_t voice, uint8_t fms) {
+        if (channels[voice].FMS == fms) return;
+        channels[voice].FMS = fms;
+        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xF8)| (fms & 7);
+        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
     }
 
     // -----------------------------------------------------------------------

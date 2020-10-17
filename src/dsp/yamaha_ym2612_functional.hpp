@@ -494,14 +494,14 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
 
 /// write a OPN register (0x30-0xff).
 static void write_register(EngineState *OPN, int r, int v) {
-    uint8_t c = getVoice(r);
+    uint8_t c = VOICE(r);
     // 0xX3, 0xX7, 0xXB, 0xXF
     if (c == 3) return;
     if (r >= 0x100) c+=3;
     // get the channel
     Voice* const CH = &OPN->voices[c];
     // get the operator
-    Operator* const oprtr = &(CH->operators[getOp(r)]);
+    Operator* const oprtr = &(CH->operators[OPERATOR(r)]);
     switch (r & 0xf0) {
     case 0x30:  // DET, MUL
         set_det_mul(&OPN->state, CH, oprtr, v);
@@ -532,7 +532,7 @@ static void write_register(EngineState *OPN, int r, int v) {
             oprtr->vol_out = (uint32_t) oprtr->volume + oprtr->tl;
         break;
     case 0xa0:
-        switch (getOp(r)) {
+        switch (OPERATOR(r)) {
         case 0:  {  // 0xa0-0xa2 : FNUM1
             uint32_t fn = (((uint32_t)( (OPN->state.fn_h) & 7)) << 8) + v;
             uint8_t blk = OPN->state.fn_h >> 3;
@@ -567,7 +567,7 @@ static void write_register(EngineState *OPN, int r, int v) {
         }
         break;
     case 0xb0:
-        switch (getOp(r)) {
+        switch (OPERATOR(r)) {
         case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
             int feedback = (v >> 3) & 7;
             CH->algorithm = v & 7;

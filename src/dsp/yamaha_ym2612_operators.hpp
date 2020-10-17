@@ -69,8 +69,8 @@
 #define MINOUT (-32768)
 
 // register number to channel number, slot offset
-#define getVoice(N) (N & 3)
-#define getOp(N) ((N >> 2) & 3)
+#define VOICE(N) (N & 3)
+#define OPERATOR(N) ((N >> 2) & 3)
 
 #define Op1 0
 #define Op2 2

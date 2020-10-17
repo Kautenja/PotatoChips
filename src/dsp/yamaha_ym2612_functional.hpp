@@ -473,13 +473,13 @@ static inline void refresh_fc_eg_chan(EngineState *OPN, Voice *CH) {
 }
 
 /// write a OPN mode register 0x20-0x2f.
-static void write_mode(EngineState *OPN, int r, int v) {
-    switch (r) {
+static void write_mode(EngineState *OPN, int address, int data) {
+    switch (address) {
     case 0x21:  // Test
         break;
     case 0x22:  // LFO FREQ (YM2608/YM2610/YM2610B/YM2612)
-        if (v & 8) {  // LFO enabled ?
-            OPN->lfo_timer_overflow = lfo_samples_per_step[v & 7] << LFO_SH;
+        if (data & 8) {  // LFO enabled ?
+            OPN->lfo_timer_overflow = lfo_samples_per_step[data & 7] << LFO_SH;
         } else {
             // hold LFO waveform in reset state
             OPN->lfo_timer_overflow = 0;
@@ -490,27 +490,27 @@ static void write_mode(EngineState *OPN, int r, int v) {
         }
         break;
     case 0x24:  // timer A High 8
-        OPN->state.TA = (OPN->state.TA & 0x0003) | (v << 2);
+        OPN->state.TA = (OPN->state.TA & 0x0003) | (data << 2);
         break;
     case 0x25:  // timer A Low 2
-        OPN->state.TA = (OPN->state.TA & 0x03fc) | (v & 3);
+        OPN->state.TA = (OPN->state.TA & 0x03fc) | (data & 3);
         break;
     case 0x26:  // timer B
-        OPN->state.TB = v;
+        OPN->state.TB = data;
         break;
     case 0x27:  // mode, timer control
-        set_timers(&(OPN->state), v);
+        set_timers(&(OPN->state), data);
         break;
     case 0x28:  // key on / off
-        uint8_t c = v & 0x03;
+        uint8_t c = data & 0x03;
         if (c == 3) break;
-        if ((v & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
-        Voice* CH = OPN->voices;
-        CH = &CH[c];
-        if (v & 0x10) set_keyon(CH, Op1); else set_keyoff(CH, Op1);
-        if (v & 0x20) set_keyon(CH, Op2); else set_keyoff(CH, Op2);
-        if (v & 0x40) set_keyon(CH, Op3); else set_keyoff(CH, Op3);
-        if (v & 0x80) set_keyon(CH, Op4); else set_keyoff(CH, Op4);
+        if ((data & 0x04) && (OPN->type & TYPE_6CH)) c += 3;
+        Voice* voice = OPN->voices;
+        voice = &voice[c];
+        if (data & 0x10) set_keyon(voice, Op1); else set_keyoff(voice, Op1);
+        if (data & 0x20) set_keyon(voice, Op2); else set_keyoff(voice, Op2);
+        if (data & 0x40) set_keyon(voice, Op3); else set_keyoff(voice, Op3);
+        if (data & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
         break;
     }
 }

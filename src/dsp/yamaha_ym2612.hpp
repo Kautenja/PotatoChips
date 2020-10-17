@@ -44,8 +44,8 @@
 #define ENV_LEN (1 << ENV_BITS)
 #define ENV_STEP (128.0 / ENV_LEN)
 
-#define MAX_ATT_INDEX (ENV_LEN - 1) /* 1023 */
-#define MIN_ATT_INDEX (0)           /* 0 */
+#define MAX_ATT_INDEX (ENV_LEN - 1)
+#define MIN_ATT_INDEX (0)
 
 #define EG_ATT 4
 #define EG_DEC 3
@@ -57,81 +57,83 @@
 #define SIN_LEN (1 << SIN_BITS)
 #define SIN_MASK (SIN_LEN - 1)
 
-#define TL_RES_LEN (256) /* 8 bits addressing (real chip) */
+// 8 bits addressing (real chip)
+#define TL_RES_LEN (256)
 
 #define FINAL_SH (0)
 #define MAXOUT (+32767)
 #define MINOUT (-32768)
 
-/* register number to channel number , slot offset */
+// register number to channel number, slot offset
 #define OPN_CHAN(N) (N & 3)
 #define OPN_SLOT(N) ((N >> 2) & 3)
 
-/* slot number */
 #define SLOT1 0
 #define SLOT2 2
 #define SLOT3 1
 #define SLOT4 3
 
-/* bit0 = Right enable , bit1 = Left enable */
+/// bit0   = Right enable
 #define OUTD_RIGHT 1
+/// bit1   = Left enable
 #define OUTD_LEFT 2
+/// bit1&2 = Center
 #define OUTD_CENTER 3
 
-/*  TL_TAB_LEN is calculated as:
-*   13 - sinus amplitude bits     (Y axis)
-*   2  - sinus sign bit           (Y axis)
-*   TL_RES_LEN - sinus resolution (X axis)
-*/
+/// TL_TAB_LEN is calculated as:
+/// 13 - sinus amplitude bits     (Y axis)
+/// 2  - sinus sign bit           (Y axis)
+/// TL_RES_LEN - sinus resolution (X axis)
 #define TL_TAB_LEN (13 * 2 * TL_RES_LEN)
 static signed int tl_tab[TL_TAB_LEN];
 
 #define ENV_QUIET (TL_TAB_LEN >> 3)
 
-/* sin waveform table in 'decibel' scale */
+/// sin waveform table in 'decibel' scale
 static unsigned int sin_tab[SIN_LEN];
 
-/* sustain level table (3dB per step) */
-/* bit0, bit1, bit2, bit3, bit4, bit5, bit6 */
-/* 1,    2,    4,    8,    16,   32,   64   (value)*/
-/* 0.75, 1.5,  3,    6,    12,   24,   48   (dB)*/
-
-/* 0 - 15: 0, 3, 6, 9,12,15,18,21,24,27,30,33,36,39,42,93 (dB)*/
-#define SC(db) (uint32_t)(db * (4.0 / ENV_STEP))
+/// sustain level table (3dB per step)
+/// bit0, bit1, bit2, bit3, bit4, bit5, bit6
+/// 1,    2,    4,    8,    16,   32,   64   (value)
+/// 0.75, 1.5,  3,    6,    12,   24,   48   (dB)
+///
+/// 0 - 15: 0, 3, 6, 9,12,15,18,21,24,27,30,33,36,39,42,93 (dB)
 static const uint32_t sl_table[16] = {
+#define SC(db) (uint32_t)(db * (4.0 / ENV_STEP))
     SC(0), SC(1), SC(2), SC(3), SC(4), SC(5), SC(6), SC(7),
-    SC(8), SC(9), SC(10), SC(11), SC(12), SC(13), SC(14), SC(31)};
+    SC(8), SC(9), SC(10), SC(11), SC(12), SC(13), SC(14), SC(31)
 #undef SC
+};
 
-static const uint8_t slots_idx[4] = {0,2,1,3};
+static const uint8_t slots_idx[4] = {0, 2, 1, 3};
 
 #define RATE_STEPS (8)
 static const uint8_t eg_inc[19 * RATE_STEPS] = {
-    /*cycle:0 1  2 3  4 5  6 7*/
+// Cycle
+//  0    1   2   3   4   5   6   7
+    0,   1,  0,  1,  0,  1,  0,  1,  // 0:  rates 00..11 0 (increment by 0 or 1)
+    0,   1,  0,  1,  1,  1,  0,  1,  // 1:  rates 00..11 1
+    0,   1,  1,  1,  0,  1,  1,  1,  // 2:  rates 00..11 2
+    0,   1,  1,  1,  1,  1,  1,  1,  // 3:  rates 00..11 3
 
-    /* 0 */ 0, 1, 0, 1, 0, 1, 0, 1, /* rates 00..11 0 (increment by 0 or 1) */
-    /* 1 */ 0, 1, 0, 1, 1, 1, 0, 1, /* rates 00..11 1 */
-    /* 2 */ 0, 1, 1, 1, 0, 1, 1, 1, /* rates 00..11 2 */
-    /* 3 */ 0, 1, 1, 1, 1, 1, 1, 1, /* rates 00..11 3 */
+    1,   1,  1,  1,  1,  1,  1,  1,  // 4:  rate 12 0 (increment by 1)
+    1,   1,  1,  2,  1,  1,  1,  2,  // 5:  rate 12 1
+    1,   2,  1,  2,  1,  2,  1,  2,  // 6:  rate 12 2
+    1,   2,  2,  2,  1,  2,  2,  2,  // 7:  rate 12 3
 
-    /* 4 */ 1, 1, 1, 1, 1, 1, 1, 1, /* rate 12 0 (increment by 1) */
-    /* 5 */ 1, 1, 1, 2, 1, 1, 1, 2, /* rate 12 1 */
-    /* 6 */ 1, 2, 1, 2, 1, 2, 1, 2, /* rate 12 2 */
-    /* 7 */ 1, 2, 2, 2, 1, 2, 2, 2, /* rate 12 3 */
+    2,   2,  2,  2,  2,  2,  2,  2,  // 8:  rate 13 0 (increment by 2)
+    2,   2,  2,  4,  2,  2,  2,  4,  // 9:  rate 13 1
+    2,   4,  2,  4,  2,  4,  2,  4,  // 10: rate 13 2
+    2,   4,  4,  4,  2,  4,  4,  4,  // 11: rate 13 3
 
-    /* 8 */ 2, 2, 2, 2, 2, 2, 2, 2, /* rate 13 0 (increment by 2) */
-    /* 9 */ 2, 2, 2, 4, 2, 2, 2, 4, /* rate 13 1 */
-    /*10 */ 2, 4, 2, 4, 2, 4, 2, 4, /* rate 13 2 */
-    /*11 */ 2, 4, 4, 4, 2, 4, 4, 4, /* rate 13 3 */
+    4,   4,  4,  4,  4,  4,  4,  4,  // 12: rate 14 0 (increment by 4)
+    4,   4,  4,  8,  4,  4,  4,  8,  // 13: rate 14 1
+    4,   8,  4,  8,  4,  8,  4,  8,  // 14: rate 14 2
+    4,   8,  8,  8,  4,  8,  8,  8,  // 15: rate 14 3
 
-    /*12 */ 4, 4, 4, 4, 4, 4, 4, 4, /* rate 14 0 (increment by 4) */
-    /*13 */ 4, 4, 4, 8, 4, 4, 4, 8, /* rate 14 1 */
-    /*14 */ 4, 8, 4, 8, 4, 8, 4, 8, /* rate 14 2 */
-    /*15 */ 4, 8, 8, 8, 4, 8, 8, 8, /* rate 14 3 */
-
-    /*16 */ 8, 8, 8, 8, 8, 8, 8, 8,         /* rates 15 0, 15 1, 15 2, 15 3 (increment by 8) */
-    /*17 */ 16, 16, 16, 16, 16, 16, 16, 16, /* rates 15 2, 15 3 for attack */
-    /*18 */ 0, 0, 0, 0, 0, 0, 0, 0,         /* infinity rates for attack and decay(s) */
+    8,   8,  8,  8,  8,  8,  8,  8,  // 16: rates 15 0, 15 1, 15 2, 15 3 (increment by 8)
+    16, 16, 16, 16, 16, 16, 16, 16,  // 17: rates 15 2, 15 3 for attack
+    0,   0,  0,  0,  0,  0,  0,  0,  // 18: infinity rates for attack and decay(s)
 };
 
 /// Envelope Generator rates (32 + 64 rates + 32 RKS).

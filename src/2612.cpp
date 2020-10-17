@@ -80,6 +80,7 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_DET, NUM_OPERATORS),
         ENUMS(PARAM_RS,  NUM_OPERATORS),
         ENUMS(PARAM_AM,  NUM_OPERATORS),
+        ENUMS(PARAM_SSG, NUM_OPERATORS),
         NUM_PARAMS
     };
     /// the indexes of input ports on the module
@@ -101,6 +102,7 @@ struct Chip2612 : rack::Module {
         ENUMS(INPUT_DET, NUM_OPERATORS),
         ENUMS(INPUT_RS,  NUM_OPERATORS),
         ENUMS(INPUT_AM,  NUM_OPERATORS),
+        ENUMS(INPUT_SSG, NUM_OPERATORS),
         NUM_INPUTS
     };
     /// the indexes of output ports on the module
@@ -137,6 +139,7 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_DET + i, 0, 7,   4,  opName + " Detune");
             configParam(PARAM_RS  + i, 0, 3,   0,  opName + " Rate Scaling");
             configParam(PARAM_AM  + i, 0, 1,   0,  opName + " Amplitude Modulation");
+            configParam(PARAM_SSG + i, 0, 1,   0,  opName + " Looping Envelope");
         }
         // reset the emulator
         onSampleRateChange();
@@ -182,7 +185,7 @@ struct Chip2612 : rack::Module {
                 apu[channel].setDET(osc, op, getParam(channel, PARAM_DET + op, INPUT_DET + op, 7  ));
                 apu[channel].setRS (osc, op, getParam(channel, PARAM_RS  + op, INPUT_RS  + op, 3  ));
                 apu[channel].setAM (osc, op, getParam(channel, PARAM_AM  + op, INPUT_AM  + op, 1  ));
-                // apu[channel].setSSG(osc, op, true, 0xe);
+                apu[channel].setSSG(osc, op, getParam(channel, PARAM_SSG + op, INPUT_SSG + op, 1  ), 0xe);
             }
             // Compute the frequency from the pitch parameter and input. low
             // range of -4 octaves, high range of 6 octaves
@@ -286,7 +289,7 @@ struct Chip2612Widget : ModuleWidget {
             // the X & Y offsets for the operator bank
             auto offsetX = 348 * (i % (Chip2612::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (Chip2612::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 10; parameter++) {
+            for (unsigned parameter = 0; parameter < 11; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * Chip2612::NUM_OPERATORS;
                 auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_TL + offset);

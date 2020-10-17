@@ -349,8 +349,6 @@ class YamahaYM2612 {
     // MARK: Global control for each channel
     // -----------------------------------------------------------------------
 
-    #define WRITE_REGISTER(reg, voice, value) write_register(&engine, VOICE_OFFSET(reg, voice) | (VOICE_PART(voice) * 0x100), value)
-
     /// @brief Set the frequency for the given channel.
     ///
     /// @param voice the voice on the chip to set the frequency for
@@ -371,8 +369,7 @@ class YamahaYM2612 {
         const uint16_t freq16bit = frequency;
         // write the high bits of the frequency to the register
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        // write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
-        WRITE_REGISTER(0xA4, voice, freqHigh);
+        write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
         // write the low bits of the frequency to the register
         const auto freqLow = freq16bit & 0xff;
         write_register(&engine, VOICE_OFFSET(0xA0, voice) | (VOICE_PART(voice) * 0x100), freqLow);
@@ -418,7 +415,7 @@ class YamahaYM2612 {
     ///
     inline void setST(uint8_t voice, uint8_t state) {
         voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
+        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
@@ -430,7 +427,7 @@ class YamahaYM2612 {
         if (parameters[voice].AMS == ams) return;
         parameters[voice].AMS = ams;
         voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
+        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -442,7 +439,7 @@ class YamahaYM2612 {
         if (parameters[voice].FMS == fms) return;
         parameters[voice].FMS = fms;
         voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xF8)| (fms & 7);
-        setREG(VOICE_PART(voice), VOICE_OFFSET(0xB4, voice), voices[voice].LR_AMS_FMS);
+        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
     }
 
     // -----------------------------------------------------------------------

@@ -759,11 +759,10 @@ static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operato
 
 /// @brief Set the 7-bit total level.
 ///
-/// @param voice a pointer to the channel
 /// @param oprtr a pointer to the operator
 /// @param value the value for the total level (TL)
 ///
-static inline void set_tl(Voice* voice, Operator* oprtr, int value) {
+static inline void set_tl(Operator* oprtr, int value) {
     oprtr->tl = (value & 0x7f) << (ENV_BITS - 7);
 }
 

@@ -495,7 +495,7 @@ static void write_register(EngineState* engine, int address, int data) {
         set_det_mul(&engine->state, voice, oprtr, data);
         break;
     case 0x40:  // TL
-        set_tl(voice, oprtr, data);
+        set_tl(oprtr, data);
         break;
     case 0x50:  // KS, AR
         set_ar_ksr(voice, oprtr, data);

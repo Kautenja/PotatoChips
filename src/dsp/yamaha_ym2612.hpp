@@ -521,7 +521,7 @@ class YamahaYM2612 {
     inline void setTL(uint8_t voice, uint8_t oprtr, uint8_t value) {
         if (parameters[voice].operators[oprtr].TL == value) return;
         parameters[voice].operators[oprtr].TL = value;
-        voices[voice].operators[OPERATOR_INDEXES[oprtr]].tl = (value & 0x7f) << (ENV_BITS - 7);
+        set_tl(&voices[voice].operators[OPERATOR_INDEXES[oprtr]], value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.

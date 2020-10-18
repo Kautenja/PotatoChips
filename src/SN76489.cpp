@@ -71,7 +71,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
                 configParam(PARAM_FREQ   + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
                 configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " FM Attenuator");
             } else {
-                configParam(PARAM_FREQ   + i, 0, 4, 0, "Noise Period", "");
+                configParam(PARAM_FREQ   + i, 0, 3, 0, "Noise Period", "");
                 configParam(PARAM_FM_ATT + i, 0, 1, 0, "LFSR", "");
             }
             configParam(PARAM_LEVEL + i, 0, 15, 7, "Voice " + std::to_string(i + 1) + " Level");
@@ -248,7 +248,7 @@ struct ChipSN76489Widget : ModuleWidget {
             if (i < TexasInstrumentsSN76489::NOISE)
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 278), module, ChipSN76489::PARAM_FM_ATT      + i));
             else
-                addParam(createParam<CKSS>(    Vec(119, 276), module, ChipSN76489::PARAM_FM_ATT      + i));
+                addParam(createParam<CKSS>(    Vec(120, 276), module, ChipSN76489::PARAM_FM_ATT      + i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
         }

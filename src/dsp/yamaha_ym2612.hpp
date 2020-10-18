@@ -330,27 +330,41 @@ class YamahaYM2612 {
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
-    /// @param voice the voice to set the AM sensitivity register of
+    /// @param voice_idx the voice to set the AM sensitivity register of
     /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
-    inline void setAMS(uint8_t voice, uint8_t ams) {
-        if (parameters[voice].AMS == ams) return;
-        parameters[voice].AMS = ams;
-        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
-        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
+    inline void setAMS(uint8_t voice_idx, uint8_t ams) {
+        if (parameters[voice_idx].AMS == ams) return;
+        parameters[voice_idx].AMS = ams;
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.LR_AMS_FMS = (voices[voice_idx].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
+        voice.ams = lfo_ams_depth_shift[ams & 0x03];
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
     ///
-    /// @param voice the voice to set the FM sensitivity register of
+    /// @param voice_idx the voice to set the FM sensitivity register of
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void setFMS(uint8_t voice, uint8_t fms) {
-        if (parameters[voice].FMS == fms) return;
-        parameters[voice].FMS = fms;
-        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0xF8)| (fms & 7);
-        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
+    inline void setFMS(uint8_t voice_idx, uint8_t fms) {
+        if (parameters[voice_idx].FMS == fms) return;
+        parameters[voice_idx].FMS = fms;
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.LR_AMS_FMS = (voices[voice_idx].LR_AMS_FMS & 0xF8)| (fms & 7);
+        voice.pms = (fms & 7) * 32;
     }
+
+    // inline void setPAN(uint8_t voice_idx, bool is_left, bool is_right) {
+    //     if (parameters[voice_idx].PAN == ?) return;
+    //     parameters[voice_idx].PAN = ?;
+    //     // get the voice and set the value
+    //     Voice& voice = voices[voice_idx];
+    //     // PAN :  b7 = L, b6 = R
+    //     engine.pan[voice_idx * 2    ] = is_left ? ~0 : 0;
+    //     engine.pan[voice_idx * 2 + 1] = is_right ? ~0 : 0;
+    // }
 
     // -----------------------------------------------------------------------
     // MARK: Operator control for each channel

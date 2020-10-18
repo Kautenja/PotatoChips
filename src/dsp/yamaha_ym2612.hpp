@@ -361,7 +361,7 @@ class YamahaYM2612 {
     /// @brief Set the SSG-envelope register for the given channel and operator.
     ///
     /// @param voice the channel to set the SSG-EG register of (in [0, 6])
-    /// @param oprtr the operator to set the SSG-EG register of (in [0, 3])
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
     /// @param is_on whether the looping envelope generator should be turned on
     /// @param mode the mode for the looping generator to run in (in [0, 7])
     /// @details
@@ -437,11 +437,20 @@ class YamahaYM2612 {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void setSSG(uint8_t voice, uint8_t oprtr, bool is_on, uint8_t mode) {
+    inline void setSSG(uint8_t voice, uint8_t op_index, bool is_on, uint8_t mode) {
         const uint8_t value = (is_on << 3) | (mode & 7);
-        if (parameters[voice].operators[oprtr].SSG == value) return;
-        parameters[voice].operators[oprtr].SSG = value;
-        write_register(&engine, VOICE_OFFSET(0x90 + (OPERATOR_INDEXES[oprtr] << 2), voice) | (VOICE_PART(voice) * 0x100), value);
+        // return if the cached value has not changed
+        // TODO: remove this?
+        if (parameters[voice].operators[op_index].SSG == value) return;
+        parameters[voice].operators[op_index].SSG = value;
+        // get the operator
+        Operator* oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
+        oprtr->ssg = value;
+        // recalculate EG output
+        if ((oprtr->ssg & 0x08) && (oprtr->ssgn ^ (oprtr->ssg & 0x04)) && (oprtr->state > EG_REL))
+            oprtr->vol_out = ((uint32_t) (0x200 - oprtr->volume) & MAX_ATT_INDEX) + oprtr->tl;
+        else
+            oprtr->vol_out = (uint32_t) oprtr->volume + oprtr->tl;
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.

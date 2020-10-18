@@ -32,11 +32,17 @@
 
 /// Yamaha YM2612 chip emulator
 class YamahaYM2612 {
+ public:
+    /// the number of FM operators on the module
+    static constexpr unsigned NUM_OPERATORS = 4;
+    /// the number of independent FM synthesis oscillators on the module
+    static constexpr unsigned NUM_VOICES = 6;
+
  private:
     /// OPN engine state
     EngineState engine;
     /// channel state
-    Voice voices[6];
+    Voice voices[NUM_VOICES];
 
     // TODO: remove and replace references with access to internal emulator
     //       data structures
@@ -72,8 +78,8 @@ class YamahaYM2612 {
             uint8_t RS = 0;
             /// whether amplitude modulation from the LFO enabled
             uint8_t AM = 0;
-        } operators[4];
-    } parameters[6];
+        } operators[NUM_OPERATORS];
+    } parameters[NUM_VOICES];
 
     /// the stereo master output from the chip emulator
     int16_t stereo_output[2] = {0, 0};

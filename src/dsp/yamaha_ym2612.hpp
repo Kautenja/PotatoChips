@@ -438,13 +438,13 @@ class YamahaYM2612 {
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
     inline void setSSG(uint8_t voice, uint8_t op_index, bool is_on, uint8_t mode) {
+        // get the value for the SSG register. the high bit determines whether
+        // SSG mode is on and the low three bits determine the mode
         const uint8_t value = (is_on << 3) | (mode & 7);
-        // return if the cached value has not changed
-        // TODO: remove this?
-        if (parameters[voice].operators[op_index].SSG == value) return;
-        parameters[voice].operators[op_index].SSG = value;
-        // get the operator
+        // get the operator and check if the value has changed. If there is no
+        // change return, otherwise set the value and proceed
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
+        if (oprtr->ssg == value) return;
         oprtr->ssg = value;
         // recalculate EG output
         if ((oprtr->ssg & 0x08) && (oprtr->ssgn ^ (oprtr->ssg & 0x04)) && (oprtr->state > EG_REL))

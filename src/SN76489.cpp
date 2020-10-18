@@ -39,6 +39,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT - 1),
         PARAM_NOISE_PERIOD,
         PARAM_LFSR,
+        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_PARAMS
     };
@@ -47,7 +48,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT - 1),
         INPUT_NOISE_PERIOD,
         INPUT_LFSR,
-        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_INPUTS
     };
@@ -68,9 +69,11 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE)
                 configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
+            else
+                configParam(PARAM_FREQ + i, 0, 4, 0, "Noise Control", "");
             configParam(PARAM_LEVEL + i, 0, 1, 0.8, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
+            configParam(PARAM_FM_ATT + i, -1, 1, 0, "Voice " + std::to_string(i + 1) + " FM Attenuator");
         }
-        configParam(PARAM_NOISE_PERIOD, 0, 4, 0, "Noise Control", "");
         configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         // setup the control register values
         memset(update_noise_control, true, sizeof update_noise_control);
@@ -230,19 +233,20 @@ struct ChipSN76489Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
-            if (i < TexasInstrumentsSN76489::NOISE) {
-                addInput(createInput<PJ301MPort>(  Vec(19, 73 + i * 85),  module, ChipSN76489::INPUT_VOCT     + i));
-                addInput(createInput<PJ301MPort>(  Vec(19, 38 + i * 85),  module, ChipSN76489::INPUT_FM       + i));
-                addParam(createParam<Rogan5PSGray>(Vec(46, 39 + i * 85),  module, ChipSN76489::PARAM_FREQ     + i));
-            }
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(107, 24 + i * 85),  module, ChipSN76489::PARAM_LEVEL + i, ChipSN76489::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(      Vec(135, 28 + i * 85), module, ChipSN76489::INPUT_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(    Vec(137, 74 + i * 85), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
+            // Frequency / Noise Period
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 33),  module, ChipSN76489::PARAM_FREQ  + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 80),  module, ChipSN76489::INPUT_VOCT  + i));
+            // Level
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 140), module, ChipSN76489::PARAM_LEVEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 187), module, ChipSN76489::INPUT_LEVEL + i));
+            // FM
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 241), module, ChipSN76489::INPUT_FM    + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 278), module, ChipSN76489::PARAM_FM_ATT    + i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
         }
-        addParam(createParam<Rogan1PWhite>(Vec(64, 296), module, ChipSN76489::PARAM_NOISE_PERIOD));
-        addInput(createInput<PJ301MPort>(  Vec(76, 332), module, ChipSN76489::INPUT_NOISE_PERIOD));
-        addParam(createParam<CKSS>(        Vec(22, 288), module, ChipSN76489::PARAM_LFSR));
-        addInput(createInput<PJ301MPort>(  Vec(19, 326), module, ChipSN76489::INPUT_LFSR));
+        addParam(createParam<CKSS>(            Vec(115, 100), module, ChipSN76489::PARAM_LFSR));
+        addInput(createInput<PJ301MPort>(      Vec(115, 120), module, ChipSN76489::INPUT_LFSR));
     }
 };
 

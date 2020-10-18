@@ -80,22 +80,6 @@ enum EnvelopeStage {
     EG_ATT = 4
 };
 
-/// @brief Return the voice index based on the input.
-///
-/// @param N the value to convert to a voice index
-/// @returns the index of the voice \f$\in \{0, 1, 2, 3\}\f$
-/// @details
-/// There are three voice indexes, additional voices are indexed using paging.
-///
-#define VOICE(N) (N & 3)
-
-/// @brief Return the operator index based on the input.
-///
-/// @param N the value to convert to a operator index
-/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
-///
-#define OPERATOR(N) ((N >> 2) & 3)
-
 /// The logical indexes of operators based on semantic name.
 enum OperatorIndex {
     /// The index of operator 1
@@ -494,6 +478,22 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 // ---------------------------------------------------------------------------
 // MARK: Global Operator State
 // ---------------------------------------------------------------------------
+
+/// @brief Return the voice index based on the input.
+///
+/// @param address the value to convert to a voice index
+/// @returns the index of the voice \f$\in \{0, 1, 2, 3\}\f$
+/// @details
+/// There are three voice indexes, additional voices are indexed using paging.
+///
+#define VOICE(address) (address & 3)
+
+/// @brief Return the operator index based on the input.
+///
+/// @param address the value to convert to a operator index
+/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
+///
+#define OPERATOR(address) ((address >> 2) & 3)
 
 /// Return the data port associated with the given voice.
 ///

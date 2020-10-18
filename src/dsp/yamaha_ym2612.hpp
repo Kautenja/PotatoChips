@@ -546,7 +546,7 @@ class YamahaYM2612 {
     inline void setDET(uint8_t voice, uint8_t oprtr, uint8_t value) {
         if (parameters[voice].operators[oprtr].DET == value) return;
         parameters[voice].operators[oprtr].DET = value;
-        voices[voice].operators[OPERATOR_INDEXES[oprtr]].DT  = engine.state.dt_tab[(value)&7];
+        voices[voice].operators[OPERATOR_INDEXES[oprtr]].DT = engine.state.dt_tab[value & 7];
         voices[voice].operators[Op1].phase_increment = -1;
     }
 

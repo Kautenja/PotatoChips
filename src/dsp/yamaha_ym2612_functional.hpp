@@ -29,19 +29,6 @@
 struct EngineState {
     /// general state
     GlobalOperatorState state;
-    /// @brief 3 slot mode state (special mode where each operator on channel
-    /// 3 can have a different root frequency)
-    struct SpecialModeState {
-        /// fnum3,blk3: calculated
-        uint32_t fc[3] = {0, 0, 0};
-        /// freq3 latch
-        uint8_t fn_h = 0;
-        /// key code
-        uint8_t kcode[3] = {0, 0, 0};
-        /// current fnum value for this slot (can be different between slots of
-        /// one channel in 3slot mode)
-        uint32_t block_fnum[3] = {0, 0, 0};
-    } special_mode_state;
     /// pointer to voices
     Voice* voices = nullptr;
     /// fm channels output masks (0xffffffff = enable) */
@@ -534,22 +521,6 @@ static void write_register(EngineState* engine, int address, int data) {
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
             engine->state.fn_h = data & 0x3f;
-            break;
-        case 2:  // 0xa8-0xaa : 3CH FNUM1
-            if (address < 0x100) {
-                uint32_t fn = (((uint32_t)(engine->special_mode_state.fn_h & 7)) << 8) + data;
-                uint8_t blk = engine->special_mode_state.fn_h >> 3;
-                /* keyscale code */
-                engine->special_mode_state.kcode[voice_index] = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
-                /* phase increment counter */
-                engine->special_mode_state.fc[voice_index] = engine->fn_table[fn * 2] >> (7 - blk);
-                engine->special_mode_state.block_fnum[voice_index] = (blk << 11) | fn;
-                (engine->voices)[2].operators[Op1].phase_increment = -1;
-            }
-            break;
-        case 3:  // 0xac-0xae : 3CH FNUM2, BLK
-            if (address < 0x100)
-                engine->special_mode_state.fn_h = data & 0x3f;
             break;
         }
         break;

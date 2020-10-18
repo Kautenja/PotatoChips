@@ -138,7 +138,7 @@ class YamahaYM2612 {
             write_register(&engine, i | 0x100, 0);
         }
 
-        for (int voice = 0; voice < 6; voice++) setST(voice, 3);
+        for (int voice = 0; voice < 6; voice++) setPAN(voice, 3);
     }
 
     /// @brief Run a step on the emulator
@@ -261,10 +261,10 @@ class YamahaYM2612 {
 
     /// @brief Set the frequency for the given channel.
     ///
-    /// @param voice the voice on the chip to set the frequency for
+    /// @param voice_idx the voice on the chip to set the frequency for
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void setFREQ(uint8_t voice, float frequency) {
+    inline void setFREQ(uint8_t voice_idx, float frequency) {
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -279,31 +279,31 @@ class YamahaYM2612 {
         const uint16_t freq16bit = frequency;
         // write the high bits of the frequency to the register
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        write_register(&engine, VOICE_OFFSET(0xA4, voice) | (VOICE_PART(voice) * 0x100), freqHigh);
+        write_register(&engine, VOICE_OFFSET(0xA4, voice_idx) | (VOICE_PART(voice_idx) * 0x100), freqHigh);
         // write the low bits of the frequency to the register
         const auto freqLow = freq16bit & 0xff;
-        write_register(&engine, VOICE_OFFSET(0xA0, voice) | (VOICE_PART(voice) * 0x100), freqLow);
+        write_register(&engine, VOICE_OFFSET(0xA0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), freqLow);
     }
 
     /// @brief Set the gate for the given voice.
     ///
-    /// @param voice the voice on the chip to set the gate for
+    /// @param voice_idx the voice on the chip to set the gate for
     /// @param is_open true if the gate is open, false otherwise
     ///
-    inline void setGATE(uint8_t voice, bool is_open) {
-        set_gate(&engine, (is_open * 0xF0) + ((voice / 3) * 4 + voice % 3));
+    inline void setGATE(uint8_t voice_idx, bool is_open) {
+        set_gate(&engine, (is_open * 0xF0) + ((voice_idx / 3) * 4 + voice_idx % 3));
     }
 
     /// @brief Set the algorithm (AL) register for the given voice.
     ///
-    /// @param voice the voice to set the algorithm register of
+    /// @param voice_idx the voice to set the algorithm register of
     /// @param algorithm the selected FM algorithm in [0, 7]
     ///
-    inline void setAL(uint8_t voice, uint8_t algorithm) {
-        if (parameters[voice].AL == algorithm) return;
-        parameters[voice].AL = algorithm;
-        voices[voice].FB_ALG = (voices[voice].FB_ALG & 0x38) | (algorithm & 7);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice) | (VOICE_PART(voice) * 0x100), voices[voice].FB_ALG);
+    inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
+        if (parameters[voice_idx].AL == algorithm) return;
+        parameters[voice_idx].AL = algorithm;
+        voices[voice_idx].FB_ALG = (voices[voice_idx].FB_ALG & 0x38) | (algorithm & 7);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voices[voice_idx].FB_ALG);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -311,21 +311,24 @@ class YamahaYM2612 {
     /// @param voice the voice to set the feedback register of
     /// @param feedback the amount of feedback for operator 1
     ///
-    inline void setFB(uint8_t voice, uint8_t feedback) {
-        if (parameters[voice].FB == feedback) return;
-        parameters[voice].FB = feedback;
-        voices[voice].FB_ALG = (voices[voice].FB_ALG & 7)| ((feedback & 7) << 3);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice) | (VOICE_PART(voice) * 0x100), voices[voice].FB_ALG);
+    inline void setFB(uint8_t voice_idx, uint8_t feedback) {
+        if (parameters[voice_idx].FB == feedback) return;
+        parameters[voice_idx].FB = feedback;
+        voices[voice_idx].FB_ALG = (voices[voice_idx].FB_ALG & 7)| ((feedback & 7) << 3);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voices[voice_idx].FB_ALG);
     }
 
-    /// @brief Set the state (ST) register for the given voice.
+    /// @brief Set the state (ST) register for the given voice, i.e., the pan.
     ///
     /// @param voice the voice to set the state register of
     /// @param state the value of the state register
     ///
-    inline void setST(uint8_t voice, uint8_t state) {
-        voices[voice].LR_AMS_FMS = (voices[voice].LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
-        write_register(&engine, VOICE_OFFSET(0xB4, voice) | (VOICE_PART(voice) * 0x100), voices[voice].LR_AMS_FMS);
+    inline void setPAN(uint8_t voice_idx, uint8_t state) {
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
+        engine.pan[voice_idx * 2    ] = (state & 0x2) ? ~0 : 0;
+        engine.pan[voice_idx * 2 + 1] = (state & 0x1) ? ~0 : 0;
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
@@ -338,7 +341,7 @@ class YamahaYM2612 {
         parameters[voice_idx].AMS = ams;
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voices[voice_idx].LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
+        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
         voice.ams = lfo_ams_depth_shift[ams & 0x03];
     }
 
@@ -352,19 +355,9 @@ class YamahaYM2612 {
         parameters[voice_idx].FMS = fms;
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voices[voice_idx].LR_AMS_FMS & 0xF8)| (fms & 7);
+        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0xF8)| (fms & 7);
         voice.pms = (fms & 7) * 32;
     }
-
-    // inline void setPAN(uint8_t voice_idx, bool is_left, bool is_right) {
-    //     if (parameters[voice_idx].PAN == ?) return;
-    //     parameters[voice_idx].PAN = ?;
-    //     // get the voice and set the value
-    //     Voice& voice = voices[voice_idx];
-    //     // PAN :  b7 = L, b6 = R
-    //     engine.pan[voice_idx * 2    ] = is_left ? ~0 : 0;
-    //     engine.pan[voice_idx * 2 + 1] = is_right ? ~0 : 0;
-    // }
 
     // -----------------------------------------------------------------------
     // MARK: Operator control for each channel

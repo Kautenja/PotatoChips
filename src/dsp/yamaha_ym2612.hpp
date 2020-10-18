@@ -161,12 +161,12 @@ class YamahaYM2612 {
         engine.out_fm[4] = 0;
         engine.out_fm[5] = 0;
         // update SSG-EG output
-        update_ssg_eg_channel(&(voices[0].operators[Op1]));
-        update_ssg_eg_channel(&(voices[1].operators[Op1]));
-        update_ssg_eg_channel(&(voices[2].operators[Op1]));
-        update_ssg_eg_channel(&(voices[3].operators[Op1]));
-        update_ssg_eg_channel(&(voices[4].operators[Op1]));
-        update_ssg_eg_channel(&(voices[5].operators[Op1]));
+        update_ssg_eg_channel(voices[0].operators);
+        update_ssg_eg_channel(voices[1].operators);
+        update_ssg_eg_channel(voices[2].operators);
+        update_ssg_eg_channel(voices[3].operators);
+        update_ssg_eg_channel(voices[4].operators);
+        update_ssg_eg_channel(voices[5].operators);
         // calculate FM
         chan_calc(&engine, &voices[0]);
         chan_calc(&engine, &voices[1]);
@@ -181,12 +181,12 @@ class YamahaYM2612 {
         while (engine.eg_timer >= engine.eg_timer_overflow) {
             engine.eg_timer -= engine.eg_timer_overflow;
             engine.eg_cnt++;
-            advance_eg_channel(&engine, &(voices[0].operators[Op1]));
-            advance_eg_channel(&engine, &(voices[1].operators[Op1]));
-            advance_eg_channel(&engine, &(voices[2].operators[Op1]));
-            advance_eg_channel(&engine, &(voices[3].operators[Op1]));
-            advance_eg_channel(&engine, &(voices[4].operators[Op1]));
-            advance_eg_channel(&engine, &(voices[5].operators[Op1]));
+            advance_eg_channel(&engine, voices[0].operators);
+            advance_eg_channel(&engine, voices[1].operators);
+            advance_eg_channel(&engine, voices[2].operators);
+            advance_eg_channel(&engine, voices[3].operators);
+            advance_eg_channel(&engine, voices[4].operators);
+            advance_eg_channel(&engine, voices[5].operators);
         }
         // clip outputs
         if (engine.out_fm[0] > 8191)

@@ -471,8 +471,7 @@ static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
 /// @param gate_mask a bitmask with a bit for each voice on the chip
 ///
 static inline void set_gate(EngineState* state, uint8_t gate_mask) {
-    // get the voice index in {0, 1, 2} (ignore 3)
-    uint8_t voice_index = gate_mask & 0x03;
+    uint8_t voice_index = VOICE(gate_mask);
     if (voice_index == 3) return;
     // check the high bit to address the high 3 voices {3, 4, 5}
     if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) voice_index += 3;
@@ -486,38 +485,36 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
 }
 
 /// @brief Write a emulator register (0x30-0xff).
-static void write_register(EngineState* engine, int r, int v) {
-    uint8_t c = VOICE(r);
-    // 0xX3, 0xX7, 0xXB, 0xXF
-    if (c == 3) return;
-    if (r >= 0x100) c+=3;
-    // get the channel
-    Voice* const voice = &engine->voices[c];
-    // get the operator
-    Operator* const oprtr = &(voice->operators[OPERATOR(r)]);
-    switch (r & 0xf0) {
+static void write_register(EngineState* engine, int address, int data) {
+    uint8_t voice_index = VOICE(address);
+    if (voice_index == 3) return;
+    if (address >= 0x100) voice_index += 3;
+    // cache the voice and operator
+    Voice* const voice = &engine->voices[voice_index];
+    Operator* const oprtr = &voice->operators[OPERATOR(address)];
+    switch (address & 0xf0) {
     case 0x30:  // DET, MUL
-        set_det_mul(&engine->state, voice, oprtr, v);
+        set_det_mul(&engine->state, voice, oprtr, data);
         break;
     case 0x40:  // TL
-        set_tl(voice, oprtr, v);
+        set_tl(voice, oprtr, data);
         break;
     case 0x50:  // KS, AR
-        set_ar_ksr(voice, oprtr, v);
+        set_ar_ksr(voice, oprtr, data);
         break;
     case 0x60:  // bit7 = AM ENABLE, DR
-        set_dr(oprtr, v);
+        set_dr(oprtr, data);
         if (engine->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
-            oprtr->AMmask = (v & 0x80) ? ~0 : 0;
+            oprtr->AMmask = (data & 0x80) ? ~0 : 0;
         break;
     case 0x70:  // SR
-        set_sr(oprtr, v);
+        set_sr(oprtr, data);
         break;
     case 0x80:  // SL, RR
-        set_sl_rr(oprtr, v);
+        set_sl_rr(oprtr, data);
         break;
     case 0x90:  // SSG-EG
-        oprtr->ssg  =  v&0x0f;
+        oprtr->ssg = data & 0x0f;
         // recalculate EG output
         if ((oprtr->ssg & 0x08) && (oprtr->ssgn ^ (oprtr->ssg & 0x04)) && (oprtr->state > EG_REL))
             oprtr->vol_out = ((uint32_t) (0x200 - oprtr->volume) & MAX_ATT_INDEX) + oprtr->tl;
@@ -525,9 +522,9 @@ static void write_register(EngineState* engine, int r, int v) {
             oprtr->vol_out = (uint32_t) oprtr->volume + oprtr->tl;
         break;
     case 0xa0:
-        switch (OPERATOR(r)) {
+        switch (OPERATOR(address)) {
         case 0:  {  // 0xa0-0xa2 : FNUM1
-            uint32_t fn = (((uint32_t)( (engine->state.fn_h) & 7)) << 8) + v;
+            uint32_t fn = (((uint32_t)( (engine->state.fn_h) & 7)) << 8) + data;
             uint8_t blk = engine->state.fn_h >> 3;
             /* key-scale code */
             voice->kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
@@ -539,45 +536,45 @@ static void write_register(EngineState* engine, int r, int v) {
             break;
         }
         case 1:  // 0xa4-0xa6 : FNUM2,BLK
-            engine->state.fn_h = v&0x3f;
+            engine->state.fn_h = data & 0x3f;
             break;
         case 2:  // 0xa8-0xaa : 3CH FNUM1
-            if (r < 0x100) {
-                uint32_t fn = (((uint32_t)(engine->special_mode_state.fn_h & 7)) << 8) + v;
+            if (address < 0x100) {
+                uint32_t fn = (((uint32_t)(engine->special_mode_state.fn_h & 7)) << 8) + data;
                 uint8_t blk = engine->special_mode_state.fn_h >> 3;
                 /* keyscale code */
-                engine->special_mode_state.kcode[c]= (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+                engine->special_mode_state.kcode[voice_index] = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
                 /* phase increment counter */
-                engine->special_mode_state.fc[c] = engine->fn_table[fn * 2] >> (7 - blk);
-                engine->special_mode_state.block_fnum[c] = (blk << 11) | fn;
+                engine->special_mode_state.fc[voice_index] = engine->fn_table[fn * 2] >> (7 - blk);
+                engine->special_mode_state.block_fnum[voice_index] = (blk << 11) | fn;
                 (engine->voices)[2].operators[Op1].phase_increment = -1;
             }
             break;
         case 3:  // 0xac-0xae : 3CH FNUM2, BLK
-            if (r < 0x100)
-                engine->special_mode_state.fn_h = v&0x3f;
+            if (address < 0x100)
+                engine->special_mode_state.fn_h = data & 0x3f;
             break;
         }
         break;
     case 0xb0:
-        switch (OPERATOR(r)) {
+        switch (OPERATOR(address)) {
         case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
-            int feedback = (v >> 3) & 7;
-            voice->algorithm = v & 7;
+            int feedback = (data >> 3) & 7;
+            voice->algorithm = data & 7;
             voice->feedback = feedback ? feedback + 6 : 0;
-            set_routing(engine, voice, c);
+            set_routing(engine, voice, voice_index);
             break;
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
             if (engine->type & TYPE_LFOPAN) {
                 // b0-2 PMS
                 // voice->pms = PM depth * 32 (index in lfo_pm_table)
-                voice->pms = (v & 7) * 32;
+                voice->pms = (data & 7) * 32;
                 // b4-5 AMS
-                voice->ams = lfo_ams_depth_shift[(v >> 4) & 0x03];
+                voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
                 // PAN :  b7 = L, b6 = R
-                engine->pan[c * 2    ] = (v & 0x80) ? ~0 : 0;
-                engine->pan[c * 2 + 1] = (v & 0x40) ? ~0 : 0;
+                engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
+                engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
             }
             break;
         }

@@ -33,6 +33,12 @@
       ]
     },
     {
+      "slug": "2612_Blank1",
+      "name": "2612 Envelope Generator Blank",
+      "description": "A blank panel with an illustration of the envelope generator from the YM2612 chip.",
+      "tags": ["Blank"]
+    },
+    {
       "slug": "2A03",
       "name": "2A03",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",

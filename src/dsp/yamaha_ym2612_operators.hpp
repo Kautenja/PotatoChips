@@ -30,73 +30,88 @@
 #include <cstdlib>
 #include <cstring>
 
-#define TYPE_SSG 0x01     // SSG support
-#define TYPE_LFOPAN 0x02  // OPN type LFO and PAN
-#define TYPE_6CH 0x04     // FM 6CH / 3CH
-#define TYPE_DAC 0x08     // YM2612's DAC device
-#define TYPE_ADPCM 0x10   // two ADPCM units
-#define TYPE_YM2612 (TYPE_DAC | TYPE_LFOPAN | TYPE_6CH)
+/// The number of fixed point bits for various functions of the chip.
+enum FixedPointBits {
+    /// the number of bits for addressing the envelope table
+    ENV_BITS = 10,
+    /// the number of bits for addressing the sine table
+    SIN_BITS = 10,
+    /// 16.16 fixed point (timers calculations)
+    TIMER_SH = 16,
+    /// 16.16 fixed point (frequency calculations)
+    FREQ_SH  = 16,
+    /// 16.16 fixed point (envelope generator timing)
+    EG_SH    = 16,
+    ///  8.24 fixed point (LFO calculations)
+    LFO_SH   = 24
+};
 
-#define FREQ_SH  16  // 16.16 fixed point (frequency calculations)
-#define EG_SH    16  // 16.16 fixed point (envelope generator timing)
-#define LFO_SH   24  //  8.24 fixed point (LFO calculations)
-#define TIMER_SH 16  // 16.16 fixed point (timers calculations)
+/// a mask for extracting valid phase from the 16-bit phase counter
+static constexpr unsigned FREQ_MASK = (1 << FREQ_SH) - 1;
 
-#define FREQ_MASK ((1 << FREQ_SH) - 1)
+/// the maximal size of an unsigned envelope table index
+static constexpr unsigned ENV_LEN = 1 << ENV_BITS;
+/// the step size of increments in the envelope table
+static constexpr float ENV_STEP = 128.0 / ENV_LEN;
 
-#define ENV_BITS 10
-#define ENV_LEN (1 << ENV_BITS)
-#define ENV_STEP (128.0 / ENV_LEN)
+/// the maximal size of an unsigned sine table index
+static constexpr unsigned SIN_LEN = 1 << SIN_BITS;
+/// a bit mask for extracting sine table indexes in the valid range
+static constexpr unsigned SIN_MASK = SIN_LEN - 1;
 
-#define MAX_ATT_INDEX (ENV_LEN - 1)
-#define MIN_ATT_INDEX (0)
+/// the index of the maximal envelope value
+static constexpr int MAX_ATT_INDEX = ENV_LEN - 1;
+/// the index of the minimal envelope value
+static constexpr int MIN_ATT_INDEX = 0;
 
-#define EG_ATT 4
-#define EG_DEC 3
-#define EG_SUS 2
-#define EG_REL 1
-#define EG_OFF 0
+/// The stages of the envelope generator.
+enum EnvelopeStage {
+    /// the off stage, i.e., 0 output
+    EG_OFF = 0,
+    /// the release stage, i.e., falling to 0 after note-off from any stage
+    EG_REL = 1,
+    /// the sustain stage, i.e., holding until note-off after the decay stage
+    /// ends
+    EG_SUS = 2,
+    /// the decay stage, i.e., falling to sustain level after the attack stage
+    /// reaches the total level
+    EG_DEC = 3,
+    /// the attack stage, i.e., rising from 0 to the total level
+    EG_ATT = 4
+};
 
-#define SIN_BITS 10
-#define SIN_LEN (1 << SIN_BITS)
-#define SIN_MASK (SIN_LEN - 1)
+/// The logical indexes of operators based on semantic name.
+enum OperatorIndex {
+    /// The index of operator 1
+    Op1 = 0,
+    /// The index of operator 2
+    Op2 = 2,
+    /// The index of operator 3
+    Op3 = 1,
+    /// The index of operator 4
+    Op4 = 3
+};
 
-// 8 bits addressing (real chip)
-#define TL_RES_LEN (256)
+/// The logical indexes of operators based on sequential index.
+static const uint8_t OPERATOR_INDEXES[4] = {0, 2, 1, 3};
 
-#define FINAL_SH (0)
-#define MAXOUT (+32767)
-#define MINOUT (-32768)
-
-// register number to channel number, slot offset
-#define getVoice(N) (N & 3)
-#define getOp(N) ((N >> 2) & 3)
-
-#define Op1 0
-#define Op2 2
-#define Op3 1
-#define Op4 3
-
-/// bit0   = Right enable
-#define OUTD_RIGHT 1
-/// bit1   = Left enable
-#define OUTD_LEFT 2
-/// bit1&2 = Center
-#define OUTD_CENTER 3
-
+/// 8 bits addressing (real chip)
+static constexpr unsigned TL_RES_LEN = 256;
 /// TL_TAB_LEN is calculated as:
 /// 13 - sinus amplitude bits     (Y axis)
 /// 2  - sinus sign bit           (Y axis)
 /// TL_RES_LEN - sinus resolution (X axis)
-#define TL_TAB_LEN (13 * 2 * TL_RES_LEN)
-static signed int tl_tab[TL_TAB_LEN];
+static constexpr unsigned TL_TAB_LEN = 13 * 2 * TL_RES_LEN;
+/// TODO:
+static int tl_tab[TL_TAB_LEN];
 
-#define ENV_QUIET (TL_TAB_LEN >> 3)
+/// The level at which the envelope becomes quiet, i.e., goes to 0
+static constexpr int ENV_QUIET = TL_TAB_LEN >> 3;
 
-/// sin waveform table in 'decibel' scale
-static unsigned int sin_tab[SIN_LEN];
+/// Sinusoid waveform table in 'decibel' scale
+static unsigned sin_tab[SIN_LEN];
 
-/// sustain level table (3dB per step)
+/// Sustain level table (3dB per step)
 /// bit0, bit1, bit2, bit3, bit4, bit5, bit6
 /// 1,    2,    4,    8,    16,   32,   64   (value)
 /// 0.75, 1.5,  3,    6,    12,   24,   48   (dB)
@@ -109,9 +124,10 @@ static const uint32_t sl_table[16] = {
 #undef SC
 };
 
-static const uint8_t slots_idx[4] = {0, 2, 1, 3};
+/// TODO:
+static constexpr unsigned RATE_STEPS = 8;
 
-#define RATE_STEPS (8)
+/// TODO:
 static const uint8_t eg_inc[19 * RATE_STEPS] = {
 // Cycle
 //  0    1   2   3   4   5   6   7
@@ -178,11 +194,10 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {
 #undef O
 };
 
-// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
-// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
-// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
-
 /// Envelope Generator counter shifts (32 + 64 rates + 32 RKS)
+/// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
+/// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
+/// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
 static const uint8_t eg_rate_shift[32 + 64 + 32] = {
 #define O(a) (a * 1)
     // 32 infinite time rates
@@ -364,7 +379,7 @@ static int32_t lfo_pm_table[128 * 8 * 32];
 ///
 static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
-    for (int x = 0; x < TL_RES_LEN; x++) {
+    for (unsigned x = 0; x < TL_RES_LEN; x++) {
         double m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
         m = floor(m);
         // we never reach (1 << 16) here due to the (x+1)
@@ -396,7 +411,7 @@ static __attribute__((constructor)) void init_tables() {
         }
     }
     // build Logarithmic Sinus table
-    for (int i = 0; i < SIN_LEN; i++) {
+    for (unsigned i = 0; i < SIN_LEN; i++) {
         // non-standard sinus (checked against the real chip)
         double m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
         // we never reach zero here due to ((i * 2) + 1)
@@ -464,9 +479,36 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 // MARK: Global Operator State
 // ---------------------------------------------------------------------------
 
-// TODO: document and move
-#define getVoicePart(ch) (ch / 3)
-#define getVoiceOffset(reg, ch) (reg + (ch % 3))
+/// @brief Return the voice index based on the input.
+///
+/// @param address the value to convert to a voice index
+/// @returns the index of the voice \f$\in \{0, 1, 2, 3\}\f$
+/// @details
+/// There are three voice indexes, additional voices are indexed using paging.
+///
+#define VOICE(address) (address & 3)
+
+/// Return the data port associated with the given voice.
+///
+/// @param voice the voice to get the data port index of
+/// @returns the data port for the voice (3 voices per port, starting at 0)
+///
+#define VOICE_PART(voice) (voice / 3)
+
+/// @brief Return the address offset for the given voice.
+///
+/// @param address the register to offset
+/// @param voice the voice to get the offset register of
+/// @returns the register based of the offset for the voice
+///
+#define VOICE_OFFSET(address, voice) (address + (voice % 3))
+
+/// @brief Return the operator index based on the input.
+///
+/// @param address the value to convert to a operator index
+/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
+///
+#define OPERATOR(address) ((address >> 2) & 3)
 
 /// @brief The global state for all FM operators.
 struct GlobalOperatorState {
@@ -478,8 +520,6 @@ struct GlobalOperatorState {
     double freqbase = 0;
     /// timer pre-scaler
     int timer_prescaler = 0;
-    /// address register
-    uint8_t address = 0;
     /// interrupt level
     uint8_t irq = 0;
     /// IRQ mask
@@ -719,11 +759,10 @@ static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operato
 
 /// @brief Set the 7-bit total level.
 ///
-/// @param voice a pointer to the channel
 /// @param oprtr a pointer to the operator
 /// @param value the value for the total level (TL)
 ///
-static inline void set_tl(Voice* voice, Operator* oprtr, int value) {
+static inline void set_tl(Operator* oprtr, int value) {
     oprtr->tl = (value & 0x7f) << (ENV_BITS - 7);
 }
 
@@ -835,7 +874,7 @@ static void update_ssg_eg_channel(Operator* oprtr) {
                 if (oprtr->ssg & 0x02) oprtr->ssgn = 4;
                 // force attenuation level during decay phases
                 if ((oprtr->state != EG_ATT) && !(oprtr->ssgn ^ (oprtr->ssg & 0x04)))
-                    oprtr->volume  = MAX_ATT_INDEX;
+                    oprtr->volume = MAX_ATT_INDEX;
             } else {  // loop SSG-EG
                 // toggle output inversion flag or reset Phase Generator
                 if (oprtr->ssg & 0x02)

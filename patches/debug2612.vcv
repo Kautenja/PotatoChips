@@ -16,7 +16,7 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 256
+          "blockSize": 1024
         }
       },
       "pos": [
@@ -66,7 +66,7 @@
       "params": [],
       "rightModuleId": 2,
       "data": {
-        "channels": 4,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -98,7 +98,7 @@
         },
         {
           "id": 2,
-          "value": 4.31549835
+          "value": 1.0
         },
         {
           "id": 3,
@@ -106,7 +106,7 @@
         },
         {
           "id": 4,
-          "value": 5.38649654
+          "value": 0.0
         },
         {
           "id": 5,
@@ -114,35 +114,35 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 9,
-          "value": 5.0
+          "value": 3.0
         },
         {
           "id": 10,
-          "value": 9.0
+          "value": 31.0
         },
         {
           "id": 11,
-          "value": 5.0
+          "value": 1.0
         },
         {
           "id": 12,
-          "value": 9.0
+          "value": 31.0
         },
         {
           "id": 13,
-          "value": 12.0
+          "value": 0.0
         },
         {
           "id": 14,
@@ -150,15 +150,15 @@
         },
         {
           "id": 15,
-          "value": 8.0
+          "value": 0.0
         },
         {
           "id": 16,
-          "value": 3.0
+          "value": 0.0
         },
         {
           "id": 17,
-          "value": 4.0
+          "value": 0.0
         },
         {
           "id": 18,
@@ -166,7 +166,7 @@
         },
         {
           "id": 19,
-          "value": 3.0
+          "value": 0.0
         },
         {
           "id": 20,
@@ -178,19 +178,19 @@
         },
         {
           "id": 22,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 23,
-          "value": 14.0
+          "value": 7.0
         },
         {
           "id": 24,
-          "value": 9.0
+          "value": 0.0
         },
         {
           "id": 25,
-          "value": 15.0
+          "value": 4.0
         },
         {
           "id": 26,
@@ -202,7 +202,7 @@
         },
         {
           "id": 28,
-          "value": 0.0
+          "value": 15.0
         },
         {
           "id": 29,
@@ -214,7 +214,7 @@
         },
         {
           "id": 31,
-          "value": 3.0
+          "value": 1.0
         },
         {
           "id": 32,
@@ -246,7 +246,7 @@
         },
         {
           "id": 39,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 40,
@@ -258,7 +258,7 @@
         },
         {
           "id": 42,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 43,
@@ -267,10 +267,42 @@
         {
           "id": 44,
           "value": 0.0
+        },
+        {
+          "id": 45,
+          "value": 0.0
+        },
+        {
+          "id": 46,
+          "value": 0.0
+        },
+        {
+          "id": 47,
+          "value": 0.0
+        },
+        {
+          "id": 48,
+          "value": 0.0
+        },
+        {
+          "id": 49,
+          "value": 0.0
+        },
+        {
+          "id": 50,
+          "value": 0.0
+        },
+        {
+          "id": 51,
+          "value": 0.0
+        },
+        {
+          "id": 52,
+          "value": 0.0
         }
       ],
       "pos": [
-        1,
+        0,
         1
       ]
     },
@@ -329,6 +361,7 @@
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "leftModuleId": 150,
+      "rightModuleId": 152,
       "data": {
         "frequency_plot": "log",
         "range": 0.0,
@@ -353,6 +386,18 @@
       "data": {},
       "pos": [
         28,
+        0
+      ]
+    },
+    {
+      "id": 152,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "2612_Blank1",
+      "params": [],
+      "leftModuleId": 144,
+      "pos": [
+        73,
         0
       ]
     }
@@ -435,7 +480,7 @@
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
-      "inputId": 11,
+      "inputId": 9,
       "color": "#c9b70e"
     }
   ]

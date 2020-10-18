@@ -38,9 +38,11 @@ void init(Plugin* instance) {
     instance->addModel(modelChipS_SMP_BRR);
     instance->addModel(modelChipS_SMP_Echo);
     instance->addModel(modelChipS_SMP_Gauss);
-    instance->addModel(modelChipS_SMP_Blank);
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipSN76489);
     instance->addModel(modelChipTurboGrafx16);
     instance->addModel(modelChipVRC6);
+    // blanks
+    instance->addModel(modelChipS_SMP_Blank);
+    instance->addModel(model2612_Blank);
 }

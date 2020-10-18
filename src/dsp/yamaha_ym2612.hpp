@@ -393,6 +393,46 @@ class YamahaYM2612 {
     // MARK: Operator control for each channel
     // -----------------------------------------------------------------------
 
+    // /// @brief Set the frequency for the given channel.
+    // ///
+    // /// @param voice_idx the voice on the chip to set the frequency for
+    // /// @param op_index the index of the operator whose frequency to set
+    // /// @param frequency the frequency value measured in Hz
+    // ///
+    // inline void setSpecialModeFREQ(uint8_t voice_idx, uint8_t op_index, float frequency) {
+    //     // cache the voice to set the frequency of
+    //     Voice& voice = voices[voice_idx];
+    //     // Shift the frequency to the base octave and calculate the octave to
+    //     // play. The base octave is defined as a 10-bit number in [0, 1023].
+    //     int octave = 2;
+    //     for (; frequency >= 1024; octave++) frequency /= 2;
+    //     // NOTE: arbitrary shift calculated by producing note from a ground
+    //     //       truth oscillator and comparing the output from YM2612 via
+    //     //       division.
+    //     //       1.458166333006277
+    //     // TODO: why is this arbitrary shift necessary to tune to C4?
+    //     frequency = frequency / 1.458;
+    //     // cast the shifted frequency to a 16-bit container
+    //     const uint16_t freq16bit = frequency;
+    //     // -------------------------------------------------------------------
+    //     // MARK: Frequency Low
+    //     // -------------------------------------------------------------------
+    //     const auto freqLow = freq16bit & 0xff;
+    //     uint32_t fn = (((uint32_t)(engine.special_mode_state.fn_h & 7)) << 8) + freqLow;
+    //     uint8_t blk = engine.special_mode_state.fn_h >> 3;
+    //     /* keyscale code */
+    //     engine.special_mode_state.kcode[op_index] = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+    //     /* phase increment counter */
+    //     engine.special_mode_state.fc[op_index] = engine.fn_table[fn * 2] >> (7 - blk);
+    //     engine.special_mode_state.block_fnum[op_index] = (blk << 11) | fn;
+    //     (engine.voices)[2].operators[Op1].phase_increment = -1;
+    //     // -------------------------------------------------------------------
+    //     // MARK: Frequency High
+    //     // -------------------------------------------------------------------
+    //     const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
+    //     engine.special_mode_state.fn_h = freqHigh & 0x3f;
+    // }
+
     /// @brief Set the SSG-envelope register for the given channel and operator.
     ///
     /// @param voice the channel to set the SSG-EG register of (in [0, 6])

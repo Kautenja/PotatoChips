@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.476a49b",
+  "version": "1.dev.eefe794",
   "modules": [
     {
       "id": 1,
@@ -11,8 +11,8 @@
       "rightModuleId": 150,
       "data": {
         "audio": {
-          "driver": 1,
-          "deviceName": "default",
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -66,7 +66,7 @@
       "params": [],
       "rightModuleId": 2,
       "data": {
-        "channels": 4,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -94,11 +94,11 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 4.0
         },
         {
           "id": 3,
@@ -106,15 +106,15 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 5,
-          "value": 70.0
+          "value": 0.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 70.0
         },
         {
           "id": 7,
@@ -126,7 +126,7 @@
         },
         {
           "id": 9,
-          "value": 1.0
+          "value": 5.0
         },
         {
           "id": 10,
@@ -134,7 +134,7 @@
         },
         {
           "id": 11,
-          "value": 1.0
+          "value": 31.0
         },
         {
           "id": 12,
@@ -174,7 +174,7 @@
         },
         {
           "id": 21,
-          "value": 7.0
+          "value": 10.0
         },
         {
           "id": 22,
@@ -182,7 +182,7 @@
         },
         {
           "id": 23,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 24,
@@ -190,7 +190,7 @@
         },
         {
           "id": 25,
-          "value": 4.0
+          "value": 15.0
         },
         {
           "id": 26,
@@ -258,7 +258,7 @@
         },
         {
           "id": 42,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 43,
@@ -362,9 +362,8 @@
       "params": [],
       "leftModuleId": 150,
       "data": {
-        "frequency_plot": "log",
         "range": 0.0,
-        "amplitude_plot": "decibels_80",
+        "range_db": 80.0,
         "smooth": 0.25,
         "quality": "good",
         "window": "kaiser"
@@ -693,6 +692,14 @@
       "outputId": 1,
       "inputModuleId": 142,
       "inputId": 9,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1272,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 142,
+      "inputId": 15,
       "color": "#c9b70e"
     }
   ]

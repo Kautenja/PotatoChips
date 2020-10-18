@@ -36,6 +36,8 @@ struct Chip2612 : rack::Module {
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS][YamahaYM2612::NUM_VOICES];
+    /// triggers for handling input re-trigger signals
+    rack::dsp::BooleanTrigger retrig_triggers[PORT_MAX_CHANNELS][YamahaYM2612::NUM_VOICES];
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
@@ -83,8 +85,9 @@ struct Chip2612 : rack::Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_PITCH, YamahaYM2612::NUM_VOICES),
-        ENUMS(INPUT_GATE,  YamahaYM2612::NUM_VOICES),
+        ENUMS(INPUT_PITCH,      YamahaYM2612::NUM_VOICES),
+        ENUMS(INPUT_GATE,       YamahaYM2612::NUM_VOICES),
+        ENUMS(INPUT_RETRIG,     YamahaYM2612::NUM_VOICES),
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
@@ -169,6 +172,7 @@ struct Chip2612 : rack::Module {
         // iterate over each oscillator on the chip
         float pitch = 0;
         float gate = 0;
+        float retrig = 0;
         for (unsigned osc = 0; osc < YamahaYM2612::NUM_VOICES; osc++) {
             // set the global parameters
             apu[channel].setAL (osc, getParam(channel, PARAM_AL,  INPUT_AL,  7));
@@ -198,7 +202,15 @@ struct Chip2612 : rack::Module {
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + osc].getNormalVoltage(gate, channel);
             gate_triggers[channel][osc].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-            apu[channel].setGATE(osc, gate_triggers[channel][osc].state);
+            // process the retrig trigger, high at 2V
+            retrig = inputs[INPUT_RETRIG + osc].getNormalVoltage(retrig, channel);
+            auto trigger = retrig_triggers[channel][osc].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
+            // use the exclusive or of the gate and retrigger. This ensures that
+            // when either gate or trigger alone is high, the gate is open,
+            // but when neither or both are high, the gate is closed. This
+            // causes the gate to get shut for a sample when re-triggering an
+            // already gated voice
+            apu[channel].setGATE(osc, trigger ^ gate_triggers[channel][osc].state);
         }
     }
 
@@ -250,8 +262,9 @@ struct Chip2612Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // voice inputs (pitch and gate)
         for (unsigned i = 0; i < YamahaYM2612::NUM_VOICES; i++) {
-            addInput(createInput<PJ301MPort>(Vec(26, 84 + 34 * i), module, Chip2612::INPUT_PITCH + i));
-            addInput(createInput<PJ301MPort>(Vec(71, 84 + 34 * i), module, Chip2612::INPUT_GATE  + i));
+            addInput(createInput<PJ301MPort>(Vec(16, 84 + 34 * i), module, Chip2612::INPUT_PITCH  + i));
+            addInput(createInput<PJ301MPort>(Vec(61, 84 + 34 * i), module, Chip2612::INPUT_GATE   + i));
+            addInput(createInput<PJ301MPort>(Vec(106, 84 + 34 * i), module, Chip2612::INPUT_RETRIG + i));
         }
         // algorithm display
         addChild(new IndexedFrameDisplay(

@@ -90,19 +90,19 @@
       "params": [
         {
           "id": 0,
-          "value": 7.0
+          "value": 5.0
         },
         {
           "id": 1,
-          "value": 4.0
+          "value": 7.0
         },
         {
           "id": 2,
-          "value": 4.0
+          "value": 7.0
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 4,
@@ -110,35 +110,35 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 31.0
         },
         {
           "id": 6,
-          "value": 70.0
+          "value": 0.0
         },
         {
           "id": 7,
-          "value": 70.0
+          "value": 0.0
         },
         {
           "id": 8,
-          "value": 70.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": 5.0
+          "value": 4.0
         },
         {
           "id": 10,
-          "value": 31.0
+          "value": 2.0
         },
         {
           "id": 11,
-          "value": 31.0
+          "value": 2.0
         },
         {
           "id": 12,
-          "value": 31.0
+          "value": 6.0
         },
         {
           "id": 13,
@@ -146,15 +146,15 @@
         },
         {
           "id": 14,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 15,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 16,
-          "value": 0.0
+          "value": 8.0
         },
         {
           "id": 17,
@@ -162,31 +162,31 @@
         },
         {
           "id": 18,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 19,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 20,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 21,
-          "value": 10.0
+          "value": 23.0
         },
         {
           "id": 22,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 23,
-          "value": 0.0
+          "value": 13.0
         },
         {
           "id": 24,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 25,
@@ -206,7 +206,7 @@
         },
         {
           "id": 29,
-          "value": 1.0
+          "value": 5.0
         },
         {
           "id": 30,
@@ -238,7 +238,7 @@
         },
         {
           "id": 37,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 38,
@@ -254,19 +254,19 @@
         },
         {
           "id": 41,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 42,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 43,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 44,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 45,
@@ -361,6 +361,7 @@
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "leftModuleId": 150,
+      "rightModuleId": 152,
       "data": {
         "range": 0.0,
         "range_db": 80.0,
@@ -611,6 +612,18 @@
         5,
         3
       ]
+    },
+    {
+      "id": 152,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "2612_Blank1",
+      "params": [],
+      "leftModuleId": 144,
+      "pos": [
+        73,
+        0
+      ]
     }
   ],
   "cables": [
@@ -663,14 +676,6 @@
       "color": "#c91847"
     },
     {
-      "id": 1271,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
       "id": 1210,
       "outputModuleId": 142,
       "outputId": 0,
@@ -687,11 +692,19 @@
       "color": "#c91847"
     },
     {
+      "id": 1273,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
       "id": 1222,
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
-      "inputId": 9,
+      "inputId": 6,
       "color": "#c9b70e"
     },
     {
@@ -699,8 +712,16 @@
       "outputModuleId": 5,
       "outputId": 6,
       "inputModuleId": 142,
-      "inputId": 15,
+      "inputId": 12,
       "color": "#c9b70e"
+    },
+    {
+      "id": 1274,
+      "outputModuleId": 5,
+      "outputId": 10,
+      "inputModuleId": 142,
+      "inputId": 7,
+      "color": "#0986ad"
     }
   ]
 }

@@ -57,8 +57,11 @@
 #define EG_REL 1
 #define EG_OFF 0
 
+/// the number of bits for addressing the sine table
 #define SIN_BITS 10
+/// the maximal size of an unsigned sine table index
 #define SIN_LEN (1 << SIN_BITS)
+/// a bit mask for extracting sine table indexes in the valid range
 #define SIN_MASK (SIN_LEN - 1)
 
 /// @brief Return the voice index based on the input.
@@ -98,6 +101,7 @@ enum OperatorIndex {
 #define TL_TAB_LEN (13 * 2 * TL_RES_LEN)
 static signed int tl_tab[TL_TAB_LEN];
 
+/// The level at which the envelope becomes quiet, i.e., goes to 0
 #define ENV_QUIET (TL_TAB_LEN >> 3)
 
 /// sin waveform table in 'decibel' scale

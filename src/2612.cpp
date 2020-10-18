@@ -26,10 +26,6 @@
 
 /// A Yamaha YM2612 chip emulator module.
 struct Chip2612 : rack::Module {
- public:
-    /// the number of FM algorithms on the module
-    static constexpr unsigned NUM_ALGORITHMS = 8;
-
  private:
     /// the YM2612 chip emulator
     YamahaYM2612 apu[PORT_MAX_CHANNELS];
@@ -272,7 +268,7 @@ struct Chip2612Widget : ModuleWidget {
                 return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
             },
             "res/2612algorithms/",
-            Chip2612::NUM_ALGORITHMS,
+            YamahaYM2612::NUM_ALGORITHMS,
             Vec(115, 20),
             Vec(110, 70)
         ));

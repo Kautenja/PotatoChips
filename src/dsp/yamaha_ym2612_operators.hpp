@@ -108,22 +108,26 @@ enum OperatorIndex {
     Op4 = 3
 };
 
+/// The logical indexes of operators based on sequential index.
+static const uint8_t OPERATOR_INDEXES[4] = {0, 2, 1, 3};
+
 /// 8 bits addressing (real chip)
-#define TL_RES_LEN (256)
+static constexpr unsigned TL_RES_LEN = 256;
 /// TL_TAB_LEN is calculated as:
 /// 13 - sinus amplitude bits     (Y axis)
 /// 2  - sinus sign bit           (Y axis)
 /// TL_RES_LEN - sinus resolution (X axis)
-#define TL_TAB_LEN (13 * 2 * TL_RES_LEN)
-static signed int tl_tab[TL_TAB_LEN];
+static constexpr unsigned TL_TAB_LEN = 13 * 2 * TL_RES_LEN;
+/// TODO:
+static int tl_tab[TL_TAB_LEN];
 
 /// The level at which the envelope becomes quiet, i.e., goes to 0
-#define ENV_QUIET (TL_TAB_LEN >> 3)
+static constexpr int ENV_QUIET = TL_TAB_LEN >> 3;
 
-/// sin waveform table in 'decibel' scale
-static unsigned int sin_tab[SIN_LEN];
+/// Sinusoid waveform table in 'decibel' scale
+static unsigned sin_tab[SIN_LEN];
 
-/// sustain level table (3dB per step)
+/// Sustain level table (3dB per step)
 /// bit0, bit1, bit2, bit3, bit4, bit5, bit6
 /// 1,    2,    4,    8,    16,   32,   64   (value)
 /// 0.75, 1.5,  3,    6,    12,   24,   48   (dB)
@@ -136,9 +140,10 @@ static const uint32_t sl_table[16] = {
 #undef SC
 };
 
-static const uint8_t OPERATOR_INDEXES[4] = {0, 2, 1, 3};
+/// TODO:
+static constexpr unsigned RATE_STEPS = 8;
 
-#define RATE_STEPS (8)
+/// TODO:
 static const uint8_t eg_inc[19 * RATE_STEPS] = {
 // Cycle
 //  0    1   2   3   4   5   6   7
@@ -205,11 +210,10 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {
 #undef O
 };
 
-// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
-// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
-// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
-
 /// Envelope Generator counter shifts (32 + 64 rates + 32 RKS)
+/// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
+/// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
+/// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
 static const uint8_t eg_rate_shift[32 + 64 + 32] = {
 #define O(a) (a * 1)
     // 32 infinite time rates
@@ -391,7 +395,7 @@ static int32_t lfo_pm_table[128 * 8 * 32];
 ///
 static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
-    for (int x = 0; x < TL_RES_LEN; x++) {
+    for (unsigned x = 0; x < TL_RES_LEN; x++) {
         double m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
         m = floor(m);
         // we never reach (1 << 16) here due to the (x+1)

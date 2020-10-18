@@ -64,10 +64,6 @@
 // 8 bits addressing (real chip)
 #define TL_RES_LEN (256)
 
-#define FINAL_SH (0)
-#define MAXOUT (+32767)
-#define MINOUT (-32768)
-
 /// @brief Return the voice index based on the input.
 ///
 /// @param N the value to convert to a voice index

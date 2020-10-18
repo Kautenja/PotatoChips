@@ -302,8 +302,10 @@ class YamahaYM2612 {
     inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
         if (parameters[voice_idx].AL == algorithm) return;
         parameters[voice_idx].AL = algorithm;
-        voices[voice_idx].FB_ALG = (voices[voice_idx].FB_ALG & 0x38) | (algorithm & 7);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voices[voice_idx].FB_ALG);
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.FB_ALG = (voice.FB_ALG & 0x38) | (algorithm & 7);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voice.FB_ALG);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -314,14 +316,17 @@ class YamahaYM2612 {
     inline void setFB(uint8_t voice_idx, uint8_t feedback) {
         if (parameters[voice_idx].FB == feedback) return;
         parameters[voice_idx].FB = feedback;
-        voices[voice_idx].FB_ALG = (voices[voice_idx].FB_ALG & 7)| ((feedback & 7) << 3);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voices[voice_idx].FB_ALG);
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.FB_ALG = (voice.FB_ALG & 7)| ((feedback & 7) << 3);
+        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voice.FB_ALG);
     }
 
     /// @brief Set the state (ST) register for the given voice, i.e., the pan.
     ///
     /// @param voice the voice to set the state register of
-    /// @param state the value of the state register
+    /// @param state the value of the state register. the first bit enables the
+    /// right channel. the second bit enables the left channel
     ///
     inline void setPAN(uint8_t voice_idx, uint8_t state) {
         // get the voice and set the value

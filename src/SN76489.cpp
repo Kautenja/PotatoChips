@@ -72,7 +72,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
                 configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " FM Attenuator");
             } else {
                 configParam(PARAM_FREQ   + i, 0, 4, 0, "Noise Control", "");
-                configParam(PARAM_FM_ATT + i, 0, 1, 1, "LFSR Polarity", "");
+                configParam(PARAM_FM_ATT + i, 0, 1, 0, "LFSR", "");
             }
             configParam(PARAM_LEVEL + i, 0, 15, 7, "Voice " + std::to_string(i + 1) + " Level");
         }
@@ -188,16 +188,16 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         // 2-bit noise period
         auto period = getNoisePeriod(channel);
         // determine the state of the LFSR switch
-        bool state = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].state;
+        bool is_lfsr = !(params[PARAM_LFSR].getValue() - lfsr[channel].state);
         // update noise registers if a variable has changed
-        if (period != noise_period[channel] or update_noise_control[channel] != state) {
+        if (period != noise_period[channel] or update_noise_control[channel] != is_lfsr) {
             apu[channel].write(
                 TexasInstrumentsSN76489::NOISE_CONTROL |
                 (0b00000011 & period) |
-                state * TexasInstrumentsSN76489::NOISE_FEEDBACK
+                is_lfsr * TexasInstrumentsSN76489::NOISE_FEEDBACK
             );
             noise_period[channel] = period;
-            update_noise_control[channel] = state;
+            update_noise_control[channel] = is_lfsr;
         }
         // set the 4-bit attenuation value
         apu[channel].write(TexasInstrumentsSN76489::NOISE_ATTENUATION | getVolume(TexasInstrumentsSN76489::NOISE, channel));

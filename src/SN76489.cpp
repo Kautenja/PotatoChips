@@ -233,22 +233,22 @@ struct ChipSN76489Widget : ModuleWidget {
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 33),  module, ChipSN76489::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 49),  module, ChipSN76489::PARAM_FREQ        + i);
             if (i == TexasInstrumentsSN76489::NOISE)
                 freq->snap = true;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 80),  module, ChipSN76489::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 88),  module, ChipSN76489::INPUT_VOCT        + i));
+            // FM / LFSR
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 138), module, ChipSN76489::INPUT_FM          + i));
+            if (i < TexasInstrumentsSN76489::NOISE)
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 183), module, ChipSN76489::PARAM_FM_ATT      + i));
+            else
+                addParam(createParam<CKSS>(    Vec(120, 181), module, ChipSN76489::PARAM_FM_ATT              + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 140), module, ChipSN76489::PARAM_LEVEL       + i);
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 232), module, ChipSN76489::PARAM_LEVEL       + i);
             level->snap = true;
             addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 187), module, ChipSN76489::INPUT_LEVEL       + i));
-            // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 241), module, ChipSN76489::INPUT_FM          + i));
-            if (i < TexasInstrumentsSN76489::NOISE)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 278), module, ChipSN76489::PARAM_FM_ATT      + i));
-            else
-                addParam(createParam<CKSS>(    Vec(120, 276), module, ChipSN76489::PARAM_FM_ATT      + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 272), module, ChipSN76489::INPUT_LEVEL       + i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
         }

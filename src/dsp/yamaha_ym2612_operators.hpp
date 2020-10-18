@@ -30,28 +30,39 @@
 #include <cstdlib>
 #include <cstring>
 
-// TODO: make an enumeration instead
+/// The number of fixed point bits for various functions of the chip.
+enum FixedPointBits {
+    /// the number of bits for addressing the envelope table
+    ENV_BITS = 10,
+    /// the number of bits for addressing the sine table
+    SIN_BITS = 10,
+    /// 16.16 fixed point (timers calculations)
+    TIMER_SH = 16,
+    /// 16.16 fixed point (frequency calculations)
+    FREQ_SH  = 16,
+    /// 16.16 fixed point (envelope generator timing)
+    EG_SH    = 16,
+    ///  8.24 fixed point (LFO calculations)
+    LFO_SH   = 24
+};
 
-/// 16.16 fixed point (timers calculations)
-#define TIMER_SH 16
-/// 16.16 fixed point (frequency calculations)
-#define FREQ_SH  16
-/// 16.16 fixed point (envelope generator timing)
-#define EG_SH    16
-///  8.24 fixed point (LFO calculations)
-#define LFO_SH   24
+/// a mask for extracting valid phase from the 16-bit phase counter
+static constexpr unsigned FREQ_MASK = (1 << FREQ_SH) - 1;
 
-#define FREQ_MASK ((1 << FREQ_SH) - 1)
-
-/// the number of bits for addressing the envelope table
-#define ENV_BITS 10
 /// the maximal size of an unsigned envelope table index
-#define ENV_LEN (1 << ENV_BITS)
-/// TODO:
-#define ENV_STEP (128.0 / ENV_LEN)
+static constexpr unsigned ENV_LEN = 1 << ENV_BITS;
+/// the step size of increments in the envelope table
+static constexpr float ENV_STEP = 128.0 / ENV_LEN;
 
-#define MAX_ATT_INDEX (ENV_LEN - 1)
-#define MIN_ATT_INDEX (0)
+/// the maximal size of an unsigned sine table index
+static constexpr unsigned SIN_LEN = 1 << SIN_BITS;
+/// a bit mask for extracting sine table indexes in the valid range
+static constexpr unsigned SIN_MASK = SIN_LEN - 1;
+
+/// the index of the maximal envelope value
+static constexpr int MAX_ATT_INDEX = ENV_LEN - 1;
+/// the index of the minimal envelope value
+static constexpr int MIN_ATT_INDEX = 0;
 
 /// The stages of the envelope generator.
 enum EnvelopeStage {
@@ -68,13 +79,6 @@ enum EnvelopeStage {
     /// the attack stage, i.e., rising from 0 to the total level
     EG_ATT = 4
 };
-
-/// the number of bits for addressing the sine table
-#define SIN_BITS 10
-/// the maximal size of an unsigned sine table index
-#define SIN_LEN (1 << SIN_BITS)
-/// a bit mask for extracting sine table indexes in the valid range
-#define SIN_MASK (SIN_LEN - 1)
 
 /// @brief Return the voice index based on the input.
 ///
@@ -419,7 +423,7 @@ static __attribute__((constructor)) void init_tables() {
         }
     }
     // build Logarithmic Sinus table
-    for (int i = 0; i < SIN_LEN; i++) {
+    for (unsigned i = 0; i < SIN_LEN; i++) {
         // non-standard sinus (checked against the real chip)
         double m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
         // we never reach zero here due to ((i * 2) + 1)
@@ -867,7 +871,7 @@ static void update_ssg_eg_channel(Operator* oprtr) {
                 if (oprtr->ssg & 0x02) oprtr->ssgn = 4;
                 // force attenuation level during decay phases
                 if ((oprtr->state != EG_ATT) && !(oprtr->ssgn ^ (oprtr->ssg & 0x04)))
-                    oprtr->volume  = MAX_ATT_INDEX;
+                    oprtr->volume = MAX_ATT_INDEX;
             } else {  // loop SSG-EG
                 // toggle output inversion flag or reset Phase Generator
                 if (oprtr->ssg & 0x02)

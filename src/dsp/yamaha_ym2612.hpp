@@ -70,8 +70,6 @@ class YamahaYM2612 {
             uint8_t RS = 0;
             /// whether amplitude modulation from the LFO enabled
             uint8_t AM = 0;
-            /// the SSG mode for the operator
-            uint8_t SSG = 0;
         } operators[4];
     } parameters[6];
 

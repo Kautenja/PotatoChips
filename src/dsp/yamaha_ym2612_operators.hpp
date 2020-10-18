@@ -488,13 +488,6 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 ///
 #define VOICE(address) (address & 3)
 
-/// @brief Return the operator index based on the input.
-///
-/// @param address the value to convert to a operator index
-/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
-///
-#define OPERATOR(address) ((address >> 2) & 3)
-
 /// Return the data port associated with the given voice.
 ///
 /// @param voice the voice to get the data port index of
@@ -504,11 +497,18 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 
 /// @brief Return the address offset for the given voice.
 ///
-/// @param reg the register to offset
+/// @param address the register to offset
 /// @param voice the voice to get the offset register of
 /// @returns the register based of the offset for the voice
 ///
-#define VOICE_OFFSET(reg, voice) (reg + (voice % 3))
+#define VOICE_OFFSET(address, voice) (address + (voice % 3))
+
+/// @brief Return the operator index based on the input.
+///
+/// @param address the value to convert to a operator index
+/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
+///
+#define OPERATOR(address) ((address >> 2) & 3)
 
 /// @brief The global state for all FM operators.
 struct GlobalOperatorState {

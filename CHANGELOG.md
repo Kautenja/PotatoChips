@@ -180,3 +180,6 @@
     -   retrigger input for envelope generators
 -   new panel designs:
     -   SN76489
+-   new blank panels:
+    -   illustration of Sony S-SMP IC
+    -   illustration of envelope generation from Yamaha YM2612

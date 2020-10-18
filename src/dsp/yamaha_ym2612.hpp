@@ -300,12 +300,14 @@ class YamahaYM2612 {
     /// @param algorithm the selected FM algorithm in [0, 7]
     ///
     inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
+        // TODO: replace with check on voice.algorithm
         if (parameters[voice_idx].AL == algorithm) return;
         parameters[voice_idx].AL = algorithm;
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.FB_ALG = (voice.FB_ALG & 0x38) | (algorithm & 7);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voice.FB_ALG);
+        voice.algorithm = algorithm & 7;
+        set_routing(&engine, &voice, voice_idx);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -314,12 +316,14 @@ class YamahaYM2612 {
     /// @param feedback the amount of feedback for operator 1
     ///
     inline void setFB(uint8_t voice_idx, uint8_t feedback) {
+        // TODO: replace with check on voice.feedback
         if (parameters[voice_idx].FB == feedback) return;
         parameters[voice_idx].FB = feedback;
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.FB_ALG = (voice.FB_ALG & 7)| ((feedback & 7) << 3);
-        write_register(&engine, VOICE_OFFSET(0xB0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), voice.FB_ALG);
+        feedback = feedback & 7;
+        voice.feedback = feedback ? feedback + 6 : 0;
     }
 
     /// @brief Set the state (ST) register for the given voice, i.e., the pan.

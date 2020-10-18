@@ -175,3 +175,6 @@
 -   new module: S-SMP(Blank)
     -   a blank panel with an illustration of the S-SMP audio processing chip
 -   header-only DSP library
+-   update 2612
+    -   code optimizations
+    -   retrigger input for envelope generators

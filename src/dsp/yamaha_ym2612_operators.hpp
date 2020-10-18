@@ -61,9 +61,6 @@
 #define SIN_LEN (1 << SIN_BITS)
 #define SIN_MASK (SIN_LEN - 1)
 
-// 8 bits addressing (real chip)
-#define TL_RES_LEN (256)
-
 /// @brief Return the voice index based on the input.
 ///
 /// @param N the value to convert to a voice index
@@ -80,18 +77,20 @@
 ///
 #define OPERATOR(N) ((N >> 2) & 3)
 
-#define Op1 0
-#define Op2 2
-#define Op3 1
-#define Op4 3
+/// The logical indexes of operators based on semantic name.
+enum OperatorIndex {
+    /// The index of operator 1
+    Op1 = 0,
+    /// The index of operator 2
+    Op2 = 2,
+    /// The index of operator 3
+    Op3 = 1,
+    /// The index of operator 4
+    Op4 = 3
+};
 
-/// bit0   = Right enable
-#define OUTD_RIGHT 1
-/// bit1   = Left enable
-#define OUTD_LEFT 2
-/// bit1&2 = Center
-#define OUTD_CENTER 3
-
+/// 8 bits addressing (real chip)
+#define TL_RES_LEN (256)
 /// TL_TAB_LEN is calculated as:
 /// 13 - sinus amplitude bits     (Y axis)
 /// 2  - sinus sign bit           (Y axis)

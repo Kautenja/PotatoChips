@@ -130,17 +130,17 @@ class YamahaYM2612 {
 
         reset_voices(&engine.state, &voices[0], 6);
 
-        for (int i = 0xb6; i >= 0xb4; i--) {
-            write_register(&engine, i, 0xc0);
-            write_register(&engine, i | 0x100, 0xc0);
-        }
-
         for (int i = 0xb2; i >= 0x30; i--) {
             write_register(&engine, i, 0);
             write_register(&engine, i | 0x100, 0);
         }
 
-        for (int voice = 0; voice < 6; voice++) setPAN(voice, 3);
+        for (int voice = 0; voice < 6; voice++) {
+            setAMS(voice, 0);
+            setFMS(voice, 0);
+            // set both bits of pan to enable both channel outputs
+            setPAN(voice, 3);
+        }
     }
 
     /// @brief Run a step on the emulator

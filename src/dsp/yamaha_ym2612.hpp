@@ -86,7 +86,6 @@ class YamahaYM2612 {
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
         engine.voices = voices;
-        engine.type = TYPE_YM2612;
         engine.state.clock = clock_rate;
         engine.state.rate = sample_rate;
         reset();

@@ -27,8 +27,6 @@
 
 /// @brief Emulator common state.
 struct EngineState {
-    /// chip type
-    uint8_t type = 0;
     /// general state
     GlobalOperatorState state;
     /// @brief 3 slot mode state (special mode where each operator on channel
@@ -474,7 +472,7 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     uint8_t voice_index = VOICE(gate_mask);
     if (voice_index == 3) return;
     // check the high bit to address the high 3 voices {3, 4, 5}
-    if ((gate_mask & 0x04) && (state->type & TYPE_6CH)) voice_index += 3;
+    if (gate_mask & 0x04) voice_index += 3;
     // cache a pointer to the voice
     Voice* voice = &state->voices[voice_index];
     // process the gate for each operator on the voice
@@ -504,8 +502,7 @@ static void write_register(EngineState* engine, int address, int data) {
         break;
     case 0x60:  // bit7 = AM ENABLE, DR
         set_dr(oprtr, data);
-        if (engine->type & TYPE_LFOPAN)  // YM2608/2610/2610B/2612
-            oprtr->AMmask = (data & 0x80) ? ~0 : 0;
+        oprtr->AMmask = (data & 0x80) ? ~0 : 0;
         break;
     case 0x70:  // SR
         set_sr(oprtr, data);
@@ -566,16 +563,14 @@ static void write_register(EngineState* engine, int address, int data) {
             break;
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
-            if (engine->type & TYPE_LFOPAN) {
-                // b0-2 PMS
-                // voice->pms = PM depth * 32 (index in lfo_pm_table)
-                voice->pms = (data & 7) * 32;
-                // b4-5 AMS
-                voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
-                // PAN :  b7 = L, b6 = R
-                engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
-                engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
-            }
+            // b0-2 PMS
+            // voice->pms = PM depth * 32 (index in lfo_pm_table)
+            voice->pms = (data & 7) * 32;
+            // b4-5 AMS
+            voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
+            // PAN :  b7 = L, b6 = R
+            engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
+            engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
             break;
         }
         break;

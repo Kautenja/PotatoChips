@@ -30,22 +30,24 @@
 #include <cstdlib>
 #include <cstring>
 
-/// OPN type LFO and PAN
-#define TYPE_LFOPAN 0x02
-/// FM 6CH / 3CH
-#define TYPE_6CH 0x04
-// #define TYPE_ADPCM 0x10
-#define TYPE_YM2612 (TYPE_LFOPAN | TYPE_6CH)
+// TODO: make an enumeration instead
 
-#define FREQ_SH  16  // 16.16 fixed point (frequency calculations)
-#define EG_SH    16  // 16.16 fixed point (envelope generator timing)
-#define LFO_SH   24  //  8.24 fixed point (LFO calculations)
-#define TIMER_SH 16  // 16.16 fixed point (timers calculations)
+/// 16.16 fixed point (timers calculations)
+#define TIMER_SH 16
+/// 16.16 fixed point (frequency calculations)
+#define FREQ_SH  16
+/// 16.16 fixed point (envelope generator timing)
+#define EG_SH    16
+///  8.24 fixed point (LFO calculations)
+#define LFO_SH   24
 
 #define FREQ_MASK ((1 << FREQ_SH) - 1)
 
+/// the number of bits for addressing the envelope table
 #define ENV_BITS 10
+/// the maximal size of an unsigned envelope table index
 #define ENV_LEN (1 << ENV_BITS)
+/// TODO:
 #define ENV_STEP (128.0 / ENV_LEN)
 
 #define MAX_ATT_INDEX (ENV_LEN - 1)

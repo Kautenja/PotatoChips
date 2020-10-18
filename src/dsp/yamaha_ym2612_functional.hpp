@@ -469,7 +469,12 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     if (gate_mask & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
 }
 
-/// @brief Write a emulator register (0x30-0xff).
+/// @brief Write an emulator register (0x30-0xff).
+///
+/// @param engine the engine to write the register value of
+/// @param address the address of the register to write to
+/// @param data the data to write to the given register on the engine
+///
 static void write_register(EngineState* engine, int address, int data) {
     uint8_t voice_index = VOICE(address);
     if (voice_index == 3) return;
@@ -535,7 +540,6 @@ static void write_register(EngineState* engine, int address, int data) {
         }
         case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
             // b0-2 PMS
-            // voice->pms = PM depth * 32 (index in lfo_pm_table)
             voice->pms = (data & 7) * 32;
             // b4-5 AMS
             voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];

@@ -30,12 +30,12 @@
 #include <cstdlib>
 #include <cstring>
 
-#define TYPE_SSG 0x01     // SSG support
-#define TYPE_LFOPAN 0x02  // OPN type LFO and PAN
-#define TYPE_6CH 0x04     // FM 6CH / 3CH
-#define TYPE_DAC 0x08     // YM2612's DAC device
-#define TYPE_ADPCM 0x10   // two ADPCM units
-#define TYPE_YM2612 (TYPE_DAC | TYPE_LFOPAN | TYPE_6CH)
+/// OPN type LFO and PAN
+#define TYPE_LFOPAN 0x02
+/// FM 6CH / 3CH
+#define TYPE_6CH 0x04
+// #define TYPE_ADPCM 0x10
+#define TYPE_YM2612 (TYPE_LFOPAN | TYPE_6CH)
 
 #define FREQ_SH  16  // 16.16 fixed point (frequency calculations)
 #define EG_SH    16  // 16.16 fixed point (envelope generator timing)
@@ -66,12 +66,6 @@ enum EnvelopeStage {
     /// the attack stage, i.e., rising from 0 to the total level
     EG_ATT = 4
 };
-
-// #define EG_ATT 4
-// #define EG_DEC 3
-// #define EG_SUS 2
-// #define EG_REL 1
-// #define EG_OFF 0
 
 /// the number of bits for addressing the sine table
 #define SIN_BITS 10

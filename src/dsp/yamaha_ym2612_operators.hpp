@@ -68,8 +68,20 @@
 #define MAXOUT (+32767)
 #define MINOUT (-32768)
 
-// register number to channel number, slot offset
+/// @brief Return the voice index based on the input.
+///
+/// @param N the value to convert to a voice index
+/// @returns the index of the voice \f$\in \{0, 1, 2, 3\}\f$
+/// @details
+/// There are three voice indexes, additional voices are indexed using paging.
+///
 #define VOICE(N) (N & 3)
+
+/// @brief Return the operator index based on the input.
+///
+/// @param N the value to convert to a operator index
+/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
+///
 #define OPERATOR(N) ((N >> 2) & 3)
 
 #define Op1 0

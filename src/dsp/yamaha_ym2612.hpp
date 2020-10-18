@@ -38,6 +38,8 @@ class YamahaYM2612 {
     /// channel state
     Voice voices[6];
 
+    // TODO: remove and replace references with access to internal emulator
+    //       data structures
     /// A structure with channel data for a YM2612 voice.
     struct Channel {
         /// the index of the active FM algorithm
@@ -346,6 +348,7 @@ class YamahaYM2612 {
     /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
     inline void setAMS(uint8_t voice_idx, uint8_t ams) {
+        // TODO: replace with check on voice.LR_AMS_FMS
         if (parameters[voice_idx].AMS == ams) return;
         parameters[voice_idx].AMS = ams;
         // get the voice and set the value
@@ -360,6 +363,7 @@ class YamahaYM2612 {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void setFMS(uint8_t voice_idx, uint8_t fms) {
+        // TODO: replace with check on voice.LR_AMS_FMS
         if (parameters[voice_idx].FMS == fms) return;
         parameters[voice_idx].FMS = fms;
         // get the voice and set the value
@@ -375,6 +379,9 @@ class YamahaYM2612 {
     /// right channel. the second bit enables the left channel
     ///
     inline void setPAN(uint8_t voice_idx, uint8_t state) {
+        // TODO: replace with check on voice.LR_AMS_FMS
+        // if (parameters[voice_idx].PAN == state) return;
+        // parameters[voice_idx].PAN = state;
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
@@ -488,6 +495,7 @@ class YamahaYM2612 {
     /// @param value the rate of the attack stage of the envelope generator
     ///
     inline void setAR(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->ar_ksr
         if (parameters[voice].operators[op_index].AR == value) return;
         parameters[voice].operators[op_index].AR = value;
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
@@ -502,6 +510,7 @@ class YamahaYM2612 {
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
     inline void setD1(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->dr
         if (parameters[voice].operators[op_index].D1 == value) return;
         parameters[voice].operators[op_index].D1 = value;
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
@@ -516,6 +525,7 @@ class YamahaYM2612 {
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
     inline void setSL(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->sl_rr
         if (parameters[voice].operators[op_index].SL == value) return;
         parameters[voice].operators[op_index].SL = value;
         Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
@@ -530,6 +540,7 @@ class YamahaYM2612 {
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
     inline void setD2(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->sr
         if (parameters[voice].operators[op_index].D2 == value) return;
         parameters[voice].operators[op_index].D2 = value;
         set_sr(&voices[voice].operators[OPERATOR_INDEXES[op_index]], value);
@@ -542,6 +553,7 @@ class YamahaYM2612 {
     /// @param value the rate of release of the envelope generator after key-off
     ///
     inline void setRR(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->sl_rr
         if (parameters[voice].operators[op_index].RR == value) return;
         parameters[voice].operators[op_index].RR = value;
         Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
@@ -556,6 +568,7 @@ class YamahaYM2612 {
     /// @param value the total amplitude of envelope generator
     ///
     inline void setTL(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->tl
         if (parameters[voice].operators[op_index].TL == value) return;
         parameters[voice].operators[op_index].TL = value;
         set_tl(&voices[voice].operators[OPERATOR_INDEXES[op_index]], value);
@@ -568,6 +581,7 @@ class YamahaYM2612 {
     /// @param value the value of the FM phase multiplier
     ///
     inline void setMUL(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->mul
         if (parameters[voice].operators[op_index].MUL == value) return;
         parameters[voice].operators[op_index].MUL = value;
         voices[voice].operators[OPERATOR_INDEXES[op_index]].mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
@@ -581,6 +595,7 @@ class YamahaYM2612 {
     /// @param value the the level of detuning for the FM operator
     ///
     inline void setDET(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->DT
         if (parameters[voice].operators[op_index].DET == value) return;
         parameters[voice].operators[op_index].DET = value;
         voices[voice].operators[OPERATOR_INDEXES[op_index]].DT = engine.state.dt_tab[value & 7];
@@ -594,6 +609,7 @@ class YamahaYM2612 {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void setRS(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->ar_ksr
         if (parameters[voice].operators[op_index].RS == value) return;
         parameters[voice].operators[op_index].RS = value;
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
@@ -608,6 +624,7 @@ class YamahaYM2612 {
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
     inline void setAM(uint8_t voice, uint8_t op_index, uint8_t value) {
+        // TODO: replace with check on oprtr->AMmask
         if (parameters[voice].operators[op_index].AM == value) return;
         parameters[voice].operators[op_index].AM = value;
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];

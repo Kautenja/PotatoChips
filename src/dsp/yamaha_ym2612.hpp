@@ -265,6 +265,8 @@ class YamahaYM2612 {
     /// @param frequency the frequency value measured in Hz
     ///
     inline void setFREQ(uint8_t voice_idx, float frequency) {
+        // cache the voice to set the frequency of
+        Voice& voice = voices[voice_idx];
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -277,12 +279,24 @@ class YamahaYM2612 {
         frequency = frequency / 1.458;
         // cast the shifted frequency to a 16-bit container
         const uint16_t freq16bit = frequency;
-        // write the high bits of the frequency to the register
-        const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        write_register(&engine, VOICE_OFFSET(0xA4, voice_idx) | (VOICE_PART(voice_idx) * 0x100), freqHigh);
-        // write the low bits of the frequency to the register
+        // -------------------------------------------------------------------
+        // MARK: Frequency Low
+        // -------------------------------------------------------------------
         const auto freqLow = freq16bit & 0xff;
-        write_register(&engine, VOICE_OFFSET(0xA0, voice_idx) | (VOICE_PART(voice_idx) * 0x100), freqLow);
+        uint32_t fn = (((uint32_t)( (engine.state.fn_h) & 7)) << 8) + freqLow;
+        uint8_t blk = engine.state.fn_h >> 3;
+        /* key-scale code */
+        voice.kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+        /* phase increment counter */
+        voice.fc = engine.fn_table[fn * 2] >> (7 - blk);
+        /* store fnum in clear form for LFO PM calculations */
+        voice.block_fnum = (blk << 11) | fn;
+        voice.operators[Op1].phase_increment = -1;
+        // -------------------------------------------------------------------
+        // MARK: Frequency High
+        // -------------------------------------------------------------------
+        const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
+        engine.state.fn_h = freqHigh & 0x3f;
     }
 
     /// @brief Set the gate for the given voice.
@@ -326,20 +340,6 @@ class YamahaYM2612 {
         voice.feedback = feedback ? feedback + 6 : 0;
     }
 
-    /// @brief Set the state (ST) register for the given voice, i.e., the pan.
-    ///
-    /// @param voice the voice to set the state register of
-    /// @param state the value of the state register. the first bit enables the
-    /// right channel. the second bit enables the left channel
-    ///
-    inline void setPAN(uint8_t voice_idx, uint8_t state) {
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
-        engine.pan[voice_idx * 2    ] = (state & 0x2) ? ~0 : 0;
-        engine.pan[voice_idx * 2 + 1] = (state & 0x1) ? ~0 : 0;
-    }
-
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
     /// @param voice_idx the voice to set the AM sensitivity register of
@@ -366,6 +366,20 @@ class YamahaYM2612 {
         Voice& voice = voices[voice_idx];
         voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0xF8)| (fms & 7);
         voice.pms = (fms & 7) * 32;
+    }
+
+    /// @brief Set the state (ST) register for the given voice, i.e., the pan.
+    ///
+    /// @param voice the voice to set the state register of
+    /// @param state the value of the state register. the first bit enables the
+    /// right channel. the second bit enables the left channel
+    ///
+    inline void setPAN(uint8_t voice_idx, uint8_t state) {
+        // get the voice and set the value
+        Voice& voice = voices[voice_idx];
+        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
+        engine.pan[voice_idx * 2    ] = (state & 0x2) ? ~0 : 0;
+        engine.pan[voice_idx * 2 + 1] = (state & 0x1) ? ~0 : 0;
     }
 
     // -----------------------------------------------------------------------

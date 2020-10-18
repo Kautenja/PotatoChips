@@ -38,8 +38,8 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     enum ParamIds {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT - 1),
         PARAM_NOISE_PERIOD,
+        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::OSC_COUNT - 1),
         PARAM_LFSR,
-        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_PARAMS
     };
@@ -47,8 +47,8 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     enum InputIds {
         ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT - 1),
         INPUT_NOISE_PERIOD,
+        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT - 1),
         INPUT_LFSR,
-        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT),
         ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_INPUTS
     };
@@ -67,49 +67,51 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     ChipSN76489() : ChipModule<TexasInstrumentsSN76489>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
-            if (i < TexasInstrumentsSN76489::NOISE)
-                configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
-            else
-                configParam(PARAM_FREQ + i, 0, 4, 0, "Noise Control", "");
-            configParam(PARAM_LEVEL + i, 0, 1, 0.8, "Tone " + std::to_string(i + 1) + " Level", "%", 0, 100);
-            configParam(PARAM_FM_ATT + i, -1, 1, 0, "Voice " + std::to_string(i + 1) + " FM Attenuator");
+            if (i < TexasInstrumentsSN76489::NOISE) {
+                configParam(PARAM_FREQ   + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
+                configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " FM Attenuator");
+            } else {
+                configParam(PARAM_FREQ   + i, 0, 4, 0, "Noise Control", "");
+                configParam(PARAM_FM_ATT + i, 0, 1, 1, "LFSR Polarity", "");
+            }
+            configParam(PARAM_LEVEL + i, 0, 15, 7, "Voice " + std::to_string(i + 1) + " Level");
         }
-        configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
+        // configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         // setup the control register values
         memset(update_noise_control, true, sizeof update_noise_control);
         memset(noise_period, 0, sizeof noise_period);
     }
 
  protected:
-    /// Get the 10-bit frequency parameter for the given pulse oscillator.
+    /// Get the 10-bit frequency parameter for the given pulse voice.
     ///
-    /// @param oscillator the oscillator to return the frequency for
+    /// @param voice the voice to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 10 bit frequency value from the panel
     ///
-    inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
+    inline uint16_t getFrequency(unsigned voice, unsigned channel) {
         // the minimal value for the frequency register to produce sound
         static constexpr float FREQ10BIT_MIN = 9;
         // the maximal value for the frequency register
         static constexpr float FREQ10BIT_MAX = 1023;
-        // the clock division of the oscillator relative to the CPU
+        // the clock division of the voice relative to the CPU
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        float pitch = params[PARAM_FREQ + voice].getValue();
+        pitch += inputs[INPUT_VOCT + voice].getPolyVoltage(channel);
+        pitch += inputs[INPUT_FM + voice].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = (buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq));
+        freq = (buffers[channel][voice].get_clock_rate() / (CLOCK_DIVISION * freq));
         return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
-    /// Return the period of the noise oscillator from the panel controls.
+    /// Return the period of the noise voice from the panel controls.
     ///
     /// @param channel the polyphonic channel to return the noise period for
-    /// @returns the period for the noise oscillator with given channel
+    /// @returns the period for the noise voice with given channel
     ///
     inline uint8_t getNoisePeriod(unsigned channel) {
         // the minimal value for the frequency register to produce sound
@@ -126,40 +128,37 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
 
     /// Return the volume level from the panel controls.
     ///
-    /// @param oscillator the oscillator to return the volume level of
+    /// @param voice the voice to return the volume level of
     /// @param channel the polyphonic channel to return the volume for
-    /// @returns the volume level of the given oscillator
+    /// @returns the volume level of the given voice
     ///
-    inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
+    inline uint8_t getVolume(unsigned voice, unsigned channel) {
         // the minimal value for the volume width register
-        static constexpr float ATT_MIN = 0;
+        static constexpr float MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float ATT_MAX = 15;
-        // get the attenuation from the parameter knob
-        auto attenuationParam = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel);
-            cv = rack::clamp(cv / 10.f, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            attenuationParam *= 2 * cv;
-        }
-        // get the 8-bit attenuation clamped within legal limits
-        return ATT_MAX - rack::clamp(ATT_MAX * attenuationParam, ATT_MIN, ATT_MAX);
+        static constexpr float MAX = 15;
+        // get the level from the parameter knob
+        auto level = params[PARAM_LEVEL + voice].getValue();
+        // apply the control voltage to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        level = roundf(level * inputs[INPUT_LEVEL + voice].getNormalVoltage(10.f, channel) / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return MAX - rack::clamp(level, MIN, MAX);
     }
 
     /// Return a 10V signed sample from the APU.
     ///
-    /// @param oscillator the oscillator to get the audio sample for
+    /// @param voice the voice to get the audio sample for
     /// @param channel the polyphonic channel to return the audio output for
     ///
-    inline float getAudioOut(unsigned oscillator, unsigned channel) {
+    inline float getAudioOut(unsigned voice, unsigned channel) {
         // the peak to peak output of the voltage
         static constexpr float Vpp = 10.f;
         // the amount of voltage per increment of 16-bit fidelity volume
         static constexpr float divisor = std::numeric_limits<int16_t>::max();
         // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][oscillator].read_sample() / divisor;
+        return Vpp * buffers[channel][voice].read_sample() / divisor;
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -170,21 +169,21 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     void processCV(const ProcessArgs &args, unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // ---------------------------------------------------------------
-        // pulse oscillator (3)
+        // pulse voice (3)
         // ---------------------------------------------------------------
-        for (unsigned oscillator = 0; oscillator < TexasInstrumentsSN76489::OSC_COUNT - 1; oscillator++) {
+        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT - 1; voice++) {
             // 10-bit frequency
-            auto freq = getFrequency(oscillator, channel);
+            auto freq = getFrequency(voice, channel);
             uint8_t lo = 0b00001111 & freq;
             uint8_t hi = 0b00111111 & (freq >> 4);
-            auto offset = (2 * oscillator) << 4;
+            auto offset = (2 * voice) << 4;
             apu[channel].write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + offset) | lo);
             apu[channel].write(hi);
             // 4-bit attenuation
-            apu[channel].write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + offset) | getVolume(oscillator, channel));
+            apu[channel].write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + offset) | getVolume(voice, channel));
         }
         // ---------------------------------------------------------------
-        // noise oscillator
+        // noise voice
         // ---------------------------------------------------------------
         // 2-bit noise period
         auto period = getNoisePeriod(channel);
@@ -234,19 +233,25 @@ struct ChipSN76489Widget : ModuleWidget {
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 33),  module, ChipSN76489::PARAM_FREQ  + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 80),  module, ChipSN76489::INPUT_VOCT  + i));
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 33),  module, ChipSN76489::PARAM_FREQ        + i);
+            if (i == TexasInstrumentsSN76489::NOISE)
+                freq->snap = true;
+            addParam(freq);
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 80),  module, ChipSN76489::INPUT_VOCT        + i));
             // Level
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 140), module, ChipSN76489::PARAM_LEVEL + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 187), module, ChipSN76489::INPUT_LEVEL + i));
-            // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 241), module, ChipSN76489::INPUT_FM    + i));
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 278), module, ChipSN76489::PARAM_FM_ATT    + i));
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 140), module, ChipSN76489::PARAM_LEVEL       + i);
+            level->snap = true;
+            addParam(level);
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 187), module, ChipSN76489::INPUT_LEVEL       + i));
+            // FM / LFSR
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 241), module, ChipSN76489::INPUT_FM          + i));
+            if (i < TexasInstrumentsSN76489::NOISE)
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 278), module, ChipSN76489::PARAM_FM_ATT      + i));
+            else
+                addParam(createParam<CKSS>(    Vec(119, 276), module, ChipSN76489::PARAM_FM_ATT      + i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
         }
-        addParam(createParam<CKSS>(            Vec(115, 100), module, ChipSN76489::PARAM_LFSR));
-        addInput(createInput<PJ301MPort>(      Vec(115, 120), module, ChipSN76489::INPUT_LFSR));
     }
 };
 

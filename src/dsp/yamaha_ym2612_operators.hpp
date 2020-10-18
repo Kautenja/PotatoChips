@@ -51,11 +51,27 @@
 #define MAX_ATT_INDEX (ENV_LEN - 1)
 #define MIN_ATT_INDEX (0)
 
-#define EG_ATT 4
-#define EG_DEC 3
-#define EG_SUS 2
-#define EG_REL 1
-#define EG_OFF 0
+/// The stages of the envelope generator.
+enum EnvelopeStage {
+    /// the off stage, i.e., 0 output
+    EG_OFF = 0,
+    /// the release stage, i.e., falling to 0 after note-off from any stage
+    EG_REL = 1,
+    /// the sustain stage, i.e., holding until note-off after the decay stage
+    /// ends
+    EG_SUS = 2,
+    /// the decay stage, i.e., falling to sustain level after the attack stage
+    /// reaches the total level
+    EG_DEC = 3,
+    /// the attack stage, i.e., rising from 0 to the total level
+    EG_ATT = 4
+};
+
+// #define EG_ATT 4
+// #define EG_DEC 3
+// #define EG_SUS 2
+// #define EG_REL 1
+// #define EG_OFF 0
 
 /// the number of bits for addressing the sine table
 #define SIN_BITS 10

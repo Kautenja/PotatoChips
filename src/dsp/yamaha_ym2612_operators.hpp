@@ -451,30 +451,6 @@ static __attribute__((constructor)) void init_tables() {
     }
 }
 
-/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
-/// @brief Return the value of operator (1) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
 // ---------------------------------------------------------------------------
 // MARK: Global Operator State
 // ---------------------------------------------------------------------------
@@ -538,7 +514,7 @@ struct Operator {
     uint32_t rr = 0;
 
     /// detune :dt_tab[DT]
-    int32_t *DT = 0;
+    int32_t* DT = 0;
     /// multiple :ML_TABLE[ML]
     uint32_t mul = 0;
 
@@ -590,6 +566,15 @@ struct Operator {
 
     /// attack rate and key-scaling control register
     uint8_t ar_ksr = 0;
+
+    /// @brief Reset the operator to its initial/default state.
+    inline void reset() {
+        ssg = 0;
+        ssgn = 0;
+        state = EG_OFF;
+        volume = MAX_ATT_INDEX;
+        vol_out = MAX_ATT_INDEX;
+    }
 
     /// @brief Set the key-on flag for the given operator.
     inline void set_keyon() {
@@ -739,6 +724,12 @@ struct Voice {
     /// of one channel in 3 slot mode)
     uint32_t block_fnum = 0;
 
+    /// @brief Reset the voice to its initial/default state.
+    inline void reset() {
+        fc = 0;
+        for (auto &oprtr : operators) oprtr.reset();
+    }
+
     /// @brief Set the feedback amount.
     ///
     /// @param feedback the amount of feedback for the first operator
@@ -760,8 +751,8 @@ struct Voice {
         oprtr->KSR = 3 - (value >> 6);
         if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
         // refresh Attack rate
-        if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
-            oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
+        if (oprtr->ar + oprtr->ksr < 32 + 62) {
+            oprtr->eg_sh_ar = eg_rate_shift[oprtr->ar + oprtr->ksr ];
             oprtr->eg_sel_ar = eg_rate_select[oprtr->ar + oprtr->ksr ];
         } else {
             oprtr->eg_sh_ar = 0;
@@ -782,27 +773,5 @@ struct Voice {
     //     operators[Op1].phase_increment = -1;
     // }
 };
-
-/// @brief reset the channels.
-///
-/// @param voices the array of voices to reset the channels for
-/// @param num the number of voices in the `voices` array
-///
-static void reset_voices(Voice* voices, int num) {
-    // iterate over the number of voices to reset
-    for(int idx = 0; idx < num; idx++) {
-        // cache a reference to the voice structure
-        auto &voice = voices[idx];
-        voice.fc = 0;
-        // iterate over the operators on the voice
-        for(auto &oprtr : voice.operators) {
-            oprtr.ssg = 0;
-            oprtr.ssgn = 0;
-            oprtr.state= EG_OFF;
-            oprtr.volume = MAX_ATT_INDEX;
-            oprtr.vol_out= MAX_ATT_INDEX;
-        }
-    }
-}
 
 #endif  // DSP_YAMAHA_YM2612_OPERATORS_HPP_

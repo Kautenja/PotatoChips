@@ -82,10 +82,12 @@ class YamahaYM2612 {
         engine.lfo_AM_step = 126;
         engine.lfo_PM_step = 0;
         // reset the engine state and basic voice data
-        reset_voices(&voices[0], NUM_VOICES);
+        // reset_voices(&voices[0], NUM_VOICES);
+
         // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
+            voices[voice_idx].reset();
             setAL(voice_idx, 0);
             setFB(voice_idx, 0);
             setFREQ(voice_idx, 0);

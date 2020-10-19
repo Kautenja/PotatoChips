@@ -368,6 +368,30 @@ static inline void update_phase_lfo_channel(EngineState* engine, Voice* voice) {
     }
 }
 
+/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
+static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TAB_LEN) return 0;
+    return tl_tab[p];
+}
+
+/// @brief Return the value of operator (1) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
+static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TAB_LEN) return 0;
+    return tl_tab[p];
+}
+
 static inline void chan_calc(EngineState* engine, Voice* voice) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
     uint32_t AM = engine->lfo_AM_step >> voice->ams;

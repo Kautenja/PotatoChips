@@ -119,7 +119,8 @@ class YamahaYM2612 {
             // clear outputs
             engine.out_fm[voice] = 0;
             // update SSG-EG output
-            update_ssg_eg_channel(voices[voice].operators);
+            for (unsigned i = 0; i < 4; i++)
+                voices[voice].operators[i].update_ssg_eg_channel();
             // calculate FM
             chan_calc(&engine, &voices[voice]);
         }
@@ -384,7 +385,7 @@ class YamahaYM2612 {
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
     inline void setSL(uint8_t voice, uint8_t op_index, uint8_t value) {
-        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_sl_rr(value);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_sl(value);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
@@ -404,9 +405,7 @@ class YamahaYM2612 {
     /// @param value the rate of release of the envelope generator after key-off
     ///
     inline void setRR(uint8_t voice, uint8_t op_index, uint8_t value) {
-        Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
-        oprtr->sl_rr = (oprtr->sl_rr & 0xf0) | (value & 0x0f);
-        oprtr->set_sl_rr(oprtr->sl_rr);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_rr(value);
     }
 
     /// @brief Set the total level (TL) register for the given voice and operator.

@@ -524,20 +524,21 @@ struct GlobalOperatorState {
 
 /// @brief A single FM operator
 struct Operator {
-    /// detune :dt_tab[DT]
-    int32_t *DT = 0;
-    /// key scale rate :3-KSR
-    uint8_t KSR = 0;
     /// attack rate
     uint32_t ar = 0;
+    /// total level: TL << 3
+    uint32_t tl = 0;
     /// decay rate
     uint32_t d1r = 0;
+    /// sustain level:sl_table[SL]
+    uint32_t sl = 0;
     /// sustain rate
     uint32_t d2r = 0;
     /// release rate
     uint32_t rr = 0;
-    /// key scale rate :kcode>>(3-KSR)
-    uint8_t ksr = 0;
+
+    /// detune :dt_tab[DT]
+    int32_t *DT = 0;
     /// multiple :ML_TABLE[ML]
     uint32_t mul = 0;
 
@@ -546,16 +547,18 @@ struct Operator {
     /// phase step
     int32_t phase_increment = 0;
 
-    /// phase type
-    uint8_t state = 0;
-    /// total level: TL << 3
-    uint32_t tl = 0;
     /// envelope counter
     int32_t volume = 0;
-    /// sustain level:sl_table[SL]
-    uint32_t sl = 0;
     /// current output from EG circuit (without AM from LFO)
     uint32_t vol_out = 0;
+
+    /// key scale rate :3-KSR
+    uint8_t KSR = 0;
+    /// key scale rate :kcode>>(3-KSR)
+    uint8_t ksr = 0;
+
+    /// phase type
+    uint8_t state = 0;
 
     /// attack state
     uint8_t eg_sh_ar = 0;
@@ -585,14 +588,27 @@ struct Operator {
     /// AM enable flag
     uint32_t AMmask = 0;
 
-    /// detune and multiplier control register
-    uint8_t det_mul = 0;
     /// attack rate and key-scaling control register
     uint8_t ar_ksr = 0;
-    /// the sustain level and release rate control register
-    uint8_t sl_rr = 0;
-    /// the decay rate control register
-    uint8_t dr = 0;
+
+    /// @brief Set the key-on flag for the given operator.
+    inline void set_keyon() {
+        if (key) return;
+        key = 1;
+        // restart Phase Generator
+        phase = 0;
+        ssgn = (ssg & 0x04) >> 1;
+        state = EG_ATT;
+    }
+
+    /// @brief Set the key-off flag for the given operator.
+    inline void set_keyoff() {
+        if (!key) return;
+        key = 0;
+        // phase -> Release
+        if (state > EG_REL)
+            state = EG_REL;
+    }
 
     /// @brief Set the 7-bit total level.
     ///
@@ -605,11 +621,16 @@ struct Operator {
     /// @param value the value for the decay 1 rate (D1R)
     ///
     inline void set_dr(uint8_t value) {
-        dr = (dr & 0x80) | (value & 0x1F);
-        d1r = (dr & 0x1f) ? 32 + ((dr & 0x1f) << 1) : 0;
+        d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
         eg_sh_d1r = eg_rate_shift[d1r + ksr];
         eg_sel_d1r = eg_rate_select[d1r + ksr];
     }
+
+    /// @brief Set the sustain level rate.
+    ///
+    /// @param value the value to index from the sustain level table
+    ///
+    inline void set_sl(uint8_t value) { sl = sl_table[value]; }
 
     /// @brief Set the decay 2 rate, i.e., sustain rate.
     ///
@@ -625,12 +646,53 @@ struct Operator {
     ///
     /// @param value the value for the release rate (RR)
     ///
-    inline void set_sl_rr(uint8_t value) {
-        sl_rr = (sl_rr & 0x0f) | ((value & 0x0f) << 4);
-        sl = sl_table[sl_rr >> 4];
-        rr = 34 + ((sl_rr & 0x0f) << 2);
+    inline void set_rr(uint8_t value) {
+        rr = 34 + (value << 2);
         eg_sh_rr = eg_rate_shift[rr + ksr];
         eg_sel_rr = eg_rate_select[rr + ksr];
+    }
+
+    /// @brief SSG-EG update process.
+    ///
+    /// @details
+    /// The behavior is based upon Nemesis tests on real hardware. This is actually
+    /// executed before each sample.
+    ///
+    inline void update_ssg_eg_channel() {
+        // detect SSG-EG transition. this is not required during release phase
+        // as the attenuation has been forced to MAX and output invert flag is
+        // not used. If an Attack Phase is programmed, inversion can occur on
+        // each sample.
+        if ((ssg & 0x08) && (volume >= 0x200) && (state > EG_REL)) {
+            if (ssg & 0x01) {  // bit 0 = hold SSG-EG
+                // set inversion flag
+                if (ssg & 0x02) ssgn = 4;
+                // force attenuation level during decay phases
+                if ((state != EG_ATT) && !(ssgn ^ (ssg & 0x04)))
+                    volume = MAX_ATT_INDEX;
+            } else {  // loop SSG-EG
+                // toggle output inversion flag or reset Phase Generator
+                if (ssg & 0x02)
+                    ssgn ^= 4;
+                else
+                    phase = 0;
+                // same as Key ON
+                if (state != EG_ATT) {
+                    if ((ar + ksr) < 32 + 62) {
+                        state = (volume <= MIN_ATT_INDEX) ?
+                            ((sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
+                    } else { // Attack Rate is maximal: jump to Decay or Sustain
+                        volume = MIN_ATT_INDEX;
+                        state = (sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
+                    }
+                }
+            }
+            // recalculate EG output
+            if (ssgn ^ (ssg&0x04))
+                vol_out = ((uint32_t)(0x200 - volume) & MAX_ATT_INDEX) + tl;
+            else
+                vol_out = (uint32_t)volume + tl;
+        }
     }
 };
 
@@ -684,34 +746,6 @@ struct Voice {
     inline void set_feedback(uint8_t value) {
         value = value & 7;
         feedback = value ? value + 6 : 0;
-    }
-
-    /// @brief Set the key-on flag for the given operator.
-    ///
-    /// @param oprtr_idx the operator to set the key-on flag for
-    ///
-    inline void set_keyon(unsigned oprtr_idx) {
-        Operator& oprtr = operators[oprtr_idx];
-        if (!oprtr.key) {
-            oprtr.key = 1;
-            // restart Phase Generator
-            oprtr.phase = 0;
-            oprtr.ssgn = (oprtr.ssg & 0x04) >> 1;
-            oprtr.state = EG_ATT;
-        }
-    }
-
-    /// @brief Set the key-off flag for the given operator.
-    ///
-    /// @param slot the operator to set the key-off flag for
-    ///
-    inline void set_keyoff(unsigned oprtr_idx) {
-        Operator& oprtr = operators[oprtr_idx];
-        if (oprtr.key) {
-            oprtr.key = 0;
-            if (oprtr.state > EG_REL)  // phase -> Release
-                oprtr.state = EG_REL;
-        }
     }
 };
 
@@ -767,56 +801,6 @@ static void reset_voices(Voice* voices, int num) {
             oprtr.volume = MAX_ATT_INDEX;
             oprtr.vol_out= MAX_ATT_INDEX;
         }
-    }
-}
-
-/// @brief SSG-EG update process.
-///
-/// @param oprtr the operator to update the SSG envelope generator of
-///
-/// @details
-/// The behavior is based upon Nemesis tests on real hardware. This is actually
-/// executed before each sample.
-///
-static void update_ssg_eg_channel(Operator* oprtr) {
-    // four operators per channel
-    for (unsigned i = 0; i < 4; i++) {
-        // detect SSG-EG transition. this is not required during release phase
-        // as the attenuation has been forced to MAX and output invert flag is
-        // not used. If an Attack Phase is programmed, inversion can occur on
-        // each sample.
-        if ((oprtr->ssg & 0x08) && (oprtr->volume >= 0x200) && (oprtr->state > EG_REL)) {
-            if (oprtr->ssg & 0x01) {  // bit 0 = hold SSG-EG
-                // set inversion flag
-                if (oprtr->ssg & 0x02) oprtr->ssgn = 4;
-                // force attenuation level during decay phases
-                if ((oprtr->state != EG_ATT) && !(oprtr->ssgn ^ (oprtr->ssg & 0x04)))
-                    oprtr->volume = MAX_ATT_INDEX;
-            } else {  // loop SSG-EG
-                // toggle output inversion flag or reset Phase Generator
-                if (oprtr->ssg & 0x02)
-                    oprtr->ssgn ^= 4;
-                else
-                    oprtr->phase = 0;
-                // same as Key ON
-                if (oprtr->state != EG_ATT) {
-                    if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
-                        oprtr->state = (oprtr->volume <= MIN_ATT_INDEX) ?
-                            ((oprtr->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
-                    } else { // Attack Rate is maximal: jump to Decay or Sustain
-                        oprtr->volume = MIN_ATT_INDEX;
-                        oprtr->state = (oprtr->sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
-                    }
-                }
-            }
-            // recalculate EG output
-            if (oprtr->ssgn ^ (oprtr->ssg&0x04))
-                oprtr->vol_out = ((uint32_t)(0x200 - oprtr->volume) & MAX_ATT_INDEX) + oprtr->tl;
-            else
-                oprtr->vol_out = (uint32_t)oprtr->volume + oprtr->tl;
-        }
-        // next slot
-        oprtr++;
     }
 }
 

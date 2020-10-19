@@ -526,8 +526,6 @@ struct GlobalOperatorState {
     uint8_t irqmask = 0;
     /// status flag
     uint8_t status = 0;
-    /// mode  CSM / 3oprtr
-    uint32_t mode = 0;
     /// pre-scaler selector
     uint8_t prescaler_sel = 0;
     /// freq latch
@@ -550,15 +548,6 @@ struct GlobalOperatorState {
 /// @param value the value to write to the OPN mode
 ///
 static inline void set_timers(GlobalOperatorState* state, int value) {
-    // b7 = CSM MODE
-    // b6 = 3 slot mode
-    // b5 = reset b
-    // b4 = reset a
-    // b3 = timer enable b
-    // b2 = timer enable a
-    // b1 = load b
-    // b0 = load a
-    state->mode = value;
     // load b
     if (value & 0x02) {
         if (state->TBC == 0) state->TBC = (256 - state->TB) << 4;
@@ -836,8 +825,6 @@ static inline void set_feedback(Voice* voice, uint8_t feedback) {
 /// @param num the number of voices in the `voices` array
 ///
 static void reset_voices(GlobalOperatorState* state, Voice* voices, int num) {
-    // normal mode
-    state->mode = 0;
     state->TA   = 0;
     state->TAC  = 0;
     state->TB   = 0;

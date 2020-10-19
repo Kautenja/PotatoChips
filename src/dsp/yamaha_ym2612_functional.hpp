@@ -127,92 +127,100 @@ struct EngineState {
         // make time tables
         init_timetables();
     }
-};
 
-/// @brief Set algorithm routing.
-static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
-    int32_t *carrier = &engine->out_fm[carrier_index];
-
-    int32_t **om1 = &voice->connect1;
-    int32_t **om2 = &voice->connect3;
-    int32_t **oc1 = &voice->connect2;
-
-    int32_t **memc = &voice->mem_connect;
-
-    switch (voice->algorithm) {
-    case 0:
-        // M1---C1---MEM---M2---C2---OUT
-        *om1  = &engine->c1;
-        *oc1  = &engine->mem;
-        *om2  = &engine->c2;
-        *memc = &engine->m2;
-        break;
-    case 1:
-        // M1------+-MEM---M2---C2---OUT
-        //      C1-+
-        *om1  = &engine->mem;
-        *oc1  = &engine->mem;
-        *om2  = &engine->c2;
-        *memc = &engine->m2;
-        break;
-    case 2:
-        // M1-----------------+-C2---OUT
-        //      C1---MEM---M2-+
-        *om1  = &engine->c2;
-        *oc1  = &engine->mem;
-        *om2  = &engine->c2;
-        *memc = &engine->m2;
-        break;
-    case 3:
-        // M1---C1---MEM------+-C2---OUT
-        //                 M2-+
-        *om1  = &engine->c1;
-        *oc1  = &engine->mem;
-        *om2  = &engine->c2;
-        *memc = &engine->c2;
-        break;
-    case 4:
-        // M1---C1-+-OUT
-        // M2---C2-+
-        // MEM: not used
-        *om1  = &engine->c1;
-        *oc1  = carrier;
-        *om2  = &engine->c2;
-        *memc = &engine->mem;  // store it anywhere where it will not be used
-        break;
-    case 5:
-        //    +----C1----+
-        // M1-+-MEM---M2-+-OUT
-        //    +----C2----+
-        *om1  = nullptr;  // special mark
-        *oc1  = carrier;
-        *om2  = carrier;
-        *memc = &engine->m2;
-        break;
-    case 6:
-        // M1---C1-+
-        //      M2-+-OUT
-        //      C2-+
-        // MEM: not used
-        *om1  = &engine->c1;
-        *oc1  = carrier;
-        *om2  = carrier;
-        *memc = &engine->mem;  // store it anywhere where it will not be used
-        break;
-    case 7:
-        // M1-+
-        // C1-+-OUT
-        // M2-+
-        // C2-+
-        // MEM: not used
-        *om1  = carrier;
-        *oc1  = carrier;
-        *om2  = carrier;
-        *memc = &engine->mem;  // store it anywhere where it will not be used
-        break;
+    // TODO: remove carrier_index? all caller pass a copy of voice_idx to this
+    /// @brief Set algorithm routing.
+    ///
+    /// @param voice_idx the index of the voice to set the routing of
+    /// @param carrier_index the index of the carrier wave for the voice
+    /// @param algorithm the algorithm to set the voice to
+    ///
+    inline void set_routing(unsigned voice_idx, unsigned carrier_index, uint8_t algorithm) {
+        // get the voice and carrier wave
+        Voice* const voice = &voices[voice_idx];
+        voice->algorithm = algorithm & 7;
+        int32_t *carrier = &out_fm[carrier_index];
+        // get the connections
+        int32_t **om1 = &voice->connect1;
+        int32_t **om2 = &voice->connect3;
+        int32_t **oc1 = &voice->connect2;
+        int32_t **memc = &voice->mem_connect;
+        // set the algorithm
+        switch (voice->algorithm) {
+        case 0:
+            // M1---C1---MEM---M2---C2---OUT
+            *om1  = &c1;
+            *oc1  = &mem;
+            *om2  = &c2;
+            *memc = &m2;
+            break;
+        case 1:
+            // M1------+-MEM---M2---C2---OUT
+            //      C1-+
+            *om1  = &mem;
+            *oc1  = &mem;
+            *om2  = &c2;
+            *memc = &m2;
+            break;
+        case 2:
+            // M1-----------------+-C2---OUT
+            //      C1---MEM---M2-+
+            *om1  = &c2;
+            *oc1  = &mem;
+            *om2  = &c2;
+            *memc = &m2;
+            break;
+        case 3:
+            // M1---C1---MEM------+-C2---OUT
+            //                 M2-+
+            *om1  = &c1;
+            *oc1  = &mem;
+            *om2  = &c2;
+            *memc = &c2;
+            break;
+        case 4:
+            // M1---C1-+-OUT
+            // M2---C2-+
+            // MEM: not used
+            *om1  = &c1;
+            *oc1  = carrier;
+            *om2  = &c2;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 5:
+            //    +----C1----+
+            // M1-+-MEM---M2-+-OUT
+            //    +----C2----+
+            *om1  = nullptr;  // special mark
+            *oc1  = carrier;
+            *om2  = carrier;
+            *memc = &m2;
+            break;
+        case 6:
+            // M1---C1-+
+            //      M2-+-OUT
+            //      C2-+
+            // MEM: not used
+            *om1  = &c1;
+            *oc1  = carrier;
+            *om2  = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 7:
+            // M1-+
+            // C1-+-OUT
+            // M2-+
+            // C2-+
+            // MEM: not used
+            *om1  = carrier;
+            *oc1  = carrier;
+            *om2  = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        }
+        voice->connect4 = carrier;
     }
-    voice->connect4 = carrier;
-}
+};
 
 /// @brief Advance LFO to next sample.
 static inline void advance_lfo(EngineState* engine) {

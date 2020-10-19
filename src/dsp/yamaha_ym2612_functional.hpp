@@ -273,219 +273,219 @@ struct EngineState {
             }
         }
     }
-};
 
-/// @brief Update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int fc, int kc) {
-    int ksr = kc >> oprtr->KSR;
-    fc += oprtr->DT[kc];
-    // detects frequency overflow (credits to Nemesis)
-    if (fc < 0) fc += engine->fn_max;
-    // (frequency) phase increment counter
-    oprtr->phase_increment = (fc * oprtr->mul) >> 1;
-    if ( oprtr->ksr != ksr ) {
-        oprtr->ksr = ksr;
-        // calculate envelope generator rates
-        if ((oprtr->ar + oprtr->ksr) < 32+62) {
-            oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar  + oprtr->ksr ];
-            oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr ];
-        } else {
-            oprtr->eg_sh_ar  = 0;
-            oprtr->eg_sel_ar = 17*RATE_STEPS;
-        }
-
-        oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
-        oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
-        oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr  + oprtr->ksr];
-
-        oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
-        oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
-        oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
-    }
-}
-
-/// @brief Update phase increment counters
-static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
-    if (voice->operators[Op1].phase_increment==-1) {
-        int fc = voice->fc;
-        int kc = voice->kcode;
-        refresh_fc_eg_slot(engine, &voice->operators[Op1] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op2] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op3] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op4] , fc , kc );
-    }
-}
-
-static inline void update_phase_lfo_channel(EngineState* engine, Voice* voice) {
-    uint32_t block_fnum = voice->block_fnum;
-    uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + engine->lfo_PM_step];
-    if (lfo_fn_table_index_offset) {  // LFO phase modulation active
-        block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
-        uint8_t blk = (block_fnum & 0x7000) >> 12;
-        uint32_t fn = block_fnum & 0xfff;
-        // key-scale code
-        int kc = (blk << 2) | opn_fktable[fn >> 8];
-        // phase increment counter
-        int fc = (engine->fn_table[fn]>>(7 - blk));
+    /// @brief Update phase increment and envelope generator
+    inline void refresh_fc_eg_slot(Operator* oprtr, int fc, int kc) {
+        int ksr = kc >> oprtr->KSR;
+        fc += oprtr->DT[kc];
         // detects frequency overflow (credits to Nemesis)
-        int finc = fc + voice->operators[Op1].DT[kc];
-        // Operator 1
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
-        // Operator 2
-        finc = fc + voice->operators[Op2].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
-        // Operator 3
-        finc = fc + voice->operators[Op3].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
-        // Operator 4
-        finc = fc + voice->operators[Op4].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
-    } else {  // LFO phase modulation is 0
-        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
-        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
-        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
-        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
-    }
-}
-
-static inline void chan_calc(EngineState* engine, Voice* voice) {
-#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-    uint32_t AM = engine->lfo_AM_step >> voice->ams;
-    engine->m2 = engine->c1 = engine->c2 = engine->mem = 0;
-    // restore delayed sample (MEM) value to m2 or c2
-    *voice->mem_connect = voice->mem_value;
-    // Operator 1
-    unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
-    int32_t out = voice->op1_out[0] + voice->op1_out[1];
-    voice->op1_out[0] = voice->op1_out[1];
-    if (!voice->connect1) {  // algorithm 5
-        engine->mem = engine->c1 = engine->c2 = voice->op1_out[0];
-    } else {  // other algorithms
-        *voice->connect1 += voice->op1_out[0];
-    }
-    voice->op1_out[1] = 0;
-    if (eg_out < ENV_QUIET) {
-        if (!voice->feedback) out = 0;
-        voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
-    }
-    // Operator 3
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, engine->m2);
-    // Operator 2
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, engine->c1);
-    // Operator 4
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, engine->c2);
-    // store current MEM
-    voice->mem_value = engine->mem;
-    // update phase counters AFTER output calculations
-    if (voice->pms) {
-        update_phase_lfo_channel(engine, voice);
-    } else {  // no LFO phase modulation
-        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
-        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
-        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
-        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
-    }
-#undef CALCULATE_VOLUME
-}
-
-static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
-    // four operators per channel
-    for (unsigned i = 0; i < 4; i++) {  // reset SSG-EG swap flag
-        unsigned int swap_flag = 0;
-        switch(oprtr->state) {
-        case EG_ATT:  // attack phase
-            if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_ar) - 1))) {
-                oprtr->volume += (~oprtr->volume * (eg_inc[oprtr->eg_sel_ar + ((engine->eg_cnt>>oprtr->eg_sh_ar) & 7)])) >> 4;
-                if (oprtr->volume <= MIN_ATT_INDEX) {
-                    oprtr->volume = MIN_ATT_INDEX;
-                    oprtr->state = EG_DEC;
-                }
-            }
-            break;
-        case EG_DEC:  // decay phase
-            if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
-                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
-                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d1r + ((engine->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
-                    if ( oprtr->volume >= static_cast<int32_t>(oprtr->sl) )
-                        oprtr->state = EG_SUS;
-                }
+        if (fc < 0) fc += fn_max;
+        // (frequency) phase increment counter
+        oprtr->phase_increment = (fc * oprtr->mul) >> 1;
+        if ( oprtr->ksr != ksr ) {
+            oprtr->ksr = ksr;
+            // calculate envelope generator rates
+            if ((oprtr->ar + oprtr->ksr) < 32+62) {
+                oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar  + oprtr->ksr ];
+                oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr ];
             } else {
-                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
-                    oprtr->volume += eg_inc[oprtr->eg_sel_d1r + ((engine->eg_cnt>>oprtr->eg_sh_d1r) & 7)];
-                    if (oprtr->volume >= static_cast<int32_t>(oprtr->sl))
-                        oprtr->state = EG_SUS;
-                }
+                oprtr->eg_sh_ar  = 0;
+                oprtr->eg_sel_ar = 17*RATE_STEPS;
             }
-            break;
-        case EG_SUS:  // sustain phase
-            if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
-                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
-                    oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d2r + ((engine->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
-                    if (oprtr->volume >= ENV_QUIET) {
-                        oprtr->volume = MAX_ATT_INDEX;
-                        if (oprtr->ssg & 0x01) {  // bit 0 = hold
-                            if (oprtr->ssgn & 1) {  // have we swapped once ???
-                                // yes, so do nothing, just hold current level
-                            } else {  // bit 1 = alternate
-                                swap_flag = (oprtr->ssg & 0x02) | 1;
+
+            oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr  + oprtr->ksr];
+
+            oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
+        }
+    }
+
+    /// @brief Update phase increment counters
+    inline void refresh_fc_eg_chan(Voice* voice) {
+        if (voice->operators[Op1].phase_increment==-1) {
+            int fc = voice->fc;
+            int kc = voice->kcode;
+            refresh_fc_eg_slot(&voice->operators[Op1] , fc , kc );
+            refresh_fc_eg_slot(&voice->operators[Op2] , fc , kc );
+            refresh_fc_eg_slot(&voice->operators[Op3] , fc , kc );
+            refresh_fc_eg_slot(&voice->operators[Op4] , fc , kc );
+        }
+    }
+
+    inline void update_phase_lfo_channel(Voice* voice) {
+        uint32_t block_fnum = voice->block_fnum;
+        uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + lfo_PM_step];
+        if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+            block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
+            uint8_t blk = (block_fnum & 0x7000) >> 12;
+            uint32_t fn = block_fnum & 0xfff;
+            // key-scale code
+            int kc = (blk << 2) | opn_fktable[fn >> 8];
+            // phase increment counter
+            int fc = (fn_table[fn]>>(7 - blk));
+            // detects frequency overflow (credits to Nemesis)
+            int finc = fc + voice->operators[Op1].DT[kc];
+            // Operator 1
+            if (finc < 0) finc += fn_max;
+            voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
+            // Operator 2
+            finc = fc + voice->operators[Op2].DT[kc];
+            if (finc < 0) finc += fn_max;
+            voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
+            // Operator 3
+            finc = fc + voice->operators[Op3].DT[kc];
+            if (finc < 0) finc += fn_max;
+            voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
+            // Operator 4
+            finc = fc + voice->operators[Op4].DT[kc];
+            if (finc < 0) finc += fn_max;
+            voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
+        } else {  // LFO phase modulation is 0
+            voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+            voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+            voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+            voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+        }
+    }
+
+    inline void chan_calc(Voice* voice) {
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
+        uint32_t AM = lfo_AM_step >> voice->ams;
+        m2 = c1 = c2 = mem = 0;
+        // restore delayed sample (MEM) value to m2 or c2
+        *voice->mem_connect = voice->mem_value;
+        // Operator 1
+        unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
+        int32_t out = voice->op1_out[0] + voice->op1_out[1];
+        voice->op1_out[0] = voice->op1_out[1];
+        if (!voice->connect1) {  // algorithm 5
+            mem = c1 = c2 = voice->op1_out[0];
+        } else {  // other algorithms
+            *voice->connect1 += voice->op1_out[0];
+        }
+        voice->op1_out[1] = 0;
+        if (eg_out < ENV_QUIET) {
+            if (!voice->feedback) out = 0;
+            voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
+        }
+        // Operator 3
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, m2);
+        // Operator 2
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, c1);
+        // Operator 4
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, c2);
+        // store current MEM
+        voice->mem_value = mem;
+        // update phase counters AFTER output calculations
+        if (voice->pms) {
+            update_phase_lfo_channel(voice);
+        } else {  // no LFO phase modulation
+            voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+            voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+            voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+            voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+        }
+#undef CALCULATE_VOLUME
+    }
+
+    inline void advance_eg_channel(Operator* oprtr) {
+        // four operators per channel
+        for (unsigned i = 0; i < 4; i++) {  // reset SSG-EG swap flag
+            unsigned int swap_flag = 0;
+            switch(oprtr->state) {
+            case EG_ATT:  // attack phase
+                if (!(eg_cnt & ((1 << oprtr->eg_sh_ar) - 1))) {
+                    oprtr->volume += (~oprtr->volume * (eg_inc[oprtr->eg_sel_ar + ((eg_cnt>>oprtr->eg_sh_ar) & 7)])) >> 4;
+                    if (oprtr->volume <= MIN_ATT_INDEX) {
+                        oprtr->volume = MIN_ATT_INDEX;
+                        oprtr->state = EG_DEC;
+                    }
+                }
+                break;
+            case EG_DEC:  // decay phase
+                if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
+                    if (!(eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
+                        oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d1r + ((eg_cnt>>oprtr->eg_sh_d1r) & 7)];
+                        if ( oprtr->volume >= static_cast<int32_t>(oprtr->sl) )
+                            oprtr->state = EG_SUS;
+                    }
+                } else {
+                    if (!(eg_cnt & ((1 << oprtr->eg_sh_d1r) - 1))) {
+                        oprtr->volume += eg_inc[oprtr->eg_sel_d1r + ((eg_cnt>>oprtr->eg_sh_d1r) & 7)];
+                        if (oprtr->volume >= static_cast<int32_t>(oprtr->sl))
+                            oprtr->state = EG_SUS;
+                    }
+                }
+                break;
+            case EG_SUS:  // sustain phase
+                if (oprtr->ssg & 0x08) {  // SSG EG type envelope selected
+                    if (!(eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
+                        oprtr->volume += 4 * eg_inc[oprtr->eg_sel_d2r + ((eg_cnt>>oprtr->eg_sh_d2r) & 7)];
+                        if (oprtr->volume >= ENV_QUIET) {
+                            oprtr->volume = MAX_ATT_INDEX;
+                            if (oprtr->ssg & 0x01) {  // bit 0 = hold
+                                if (oprtr->ssgn & 1) {  // have we swapped once ???
+                                    // yes, so do nothing, just hold current level
+                                } else {  // bit 1 = alternate
+                                    swap_flag = (oprtr->ssg & 0x02) | 1;
+                                }
+                            } else {  // same as KEY-ON operation
+                                // restart of the Phase Generator should be here
+                                oprtr->phase = 0;
+                                // phase -> Attack
+                                oprtr->volume = 511;
+                                oprtr->state = EG_ATT;
+                                // bit 1 = alternate
+                                swap_flag = (oprtr->ssg & 0x02);
                             }
-                        } else {  // same as KEY-ON operation
-                            // restart of the Phase Generator should be here
-                            oprtr->phase = 0;
-                            // phase -> Attack
-                            oprtr->volume = 511;
-                            oprtr->state = EG_ATT;
-                            // bit 1 = alternate
-                            swap_flag = (oprtr->ssg & 0x02);
+                        }
+                    }
+                } else {
+                    if (!(eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
+                        oprtr->volume += eg_inc[oprtr->eg_sel_d2r + ((eg_cnt>>oprtr->eg_sh_d2r) & 7)];
+                        if (oprtr->volume >= MAX_ATT_INDEX) {
+                            oprtr->volume = MAX_ATT_INDEX;
+                            // do not change oprtr->state (verified on real chip)
                         }
                     }
                 }
-            } else {
-                if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_d2r) - 1))) {
-                    oprtr->volume += eg_inc[oprtr->eg_sel_d2r + ((engine->eg_cnt>>oprtr->eg_sh_d2r) & 7)];
+                break;
+            case EG_REL:  // release phase
+                if (!(eg_cnt & ((1 << oprtr->eg_sh_rr) - 1))) {
+                    // SSG-EG affects Release phase also (Nemesis)
+                    oprtr->volume += eg_inc[oprtr->eg_sel_rr + ((eg_cnt>>oprtr->eg_sh_rr) & 7)];
                     if (oprtr->volume >= MAX_ATT_INDEX) {
                         oprtr->volume = MAX_ATT_INDEX;
-                        // do not change oprtr->state (verified on real chip)
+                        oprtr->state = EG_OFF;
                     }
                 }
+                break;
             }
-            break;
-        case EG_REL:  // release phase
-            if (!(engine->eg_cnt & ((1 << oprtr->eg_sh_rr) - 1))) {
-                // SSG-EG affects Release phase also (Nemesis)
-                oprtr->volume += eg_inc[oprtr->eg_sel_rr + ((engine->eg_cnt>>oprtr->eg_sh_rr) & 7)];
-                if (oprtr->volume >= MAX_ATT_INDEX) {
-                    oprtr->volume = MAX_ATT_INDEX;
-                    oprtr->state = EG_OFF;
-                }
-            }
-            break;
+            // get the output volume from the slot
+            unsigned int out = static_cast<uint32_t>(oprtr->volume);
+            // negate output (changes come from alternate bit, init comes from
+            // attack bit)
+            if ((oprtr->ssg & 0x08) && (oprtr->ssgn & 2) && (oprtr->state > EG_REL))
+                out ^= MAX_ATT_INDEX;
+            // we need to store the result here because we are going to change
+            // ssgn in next instruction
+            oprtr->vol_out = out + oprtr->tl;
+            // reverse oprtr inversion flag
+            oprtr->ssgn ^= swap_flag;
+            // increment the slot and decrement the iterator
+            oprtr++;
         }
-        // get the output volume from the slot
-        unsigned int out = static_cast<uint32_t>(oprtr->volume);
-        // negate output (changes come from alternate bit, init comes from
-        // attack bit)
-        if ((oprtr->ssg & 0x08) && (oprtr->ssgn & 2) && (oprtr->state > EG_REL))
-            out ^= MAX_ATT_INDEX;
-        // we need to store the result here because we are going to change
-        // ssgn in next instruction
-        oprtr->vol_out = out + oprtr->tl;
-        // reverse oprtr inversion flag
-        oprtr->ssgn ^= swap_flag;
-        // increment the slot and decrement the iterator
-        oprtr++;
     }
-}
+};
 
 #endif  // DSP_YAMAHA_YM2612_FUNCTIONAL_HPP_

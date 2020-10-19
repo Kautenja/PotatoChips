@@ -110,14 +110,14 @@ class YamahaYM2612 {
     inline void step(int16_t output[2]) {
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
             // refresh PG and EG
-            refresh_fc_eg_chan(&engine, &voices[voice]);
+            engine.refresh_fc_eg_chan(&voices[voice]);
             // clear outputs
             engine.out_fm[voice] = 0;
             // update SSG-EG output
             for (unsigned i = 0; i < 4; i++)
                 voices[voice].operators[i].update_ssg_eg_channel();
             // calculate FM
-            chan_calc(&engine, &voices[voice]);
+            engine.chan_calc(&voices[voice]);
         }
         // advance LFO
         engine.advance_lfo();
@@ -127,7 +127,7 @@ class YamahaYM2612 {
             engine.eg_timer -= engine.eg_timer_overflow;
             engine.eg_cnt++;
             for (unsigned voice = 0; voice < NUM_VOICES; voice++)
-                advance_eg_channel(&engine, voices[voice].operators);
+                engine.advance_eg_channel(voices[voice].operators);
         }
         // clip outputs
         output[0] = output[1] = 0;

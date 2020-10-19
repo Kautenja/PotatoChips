@@ -342,14 +342,7 @@ class YamahaYM2612 {
         const uint8_t value = (is_on << 3) | (mode & 7);
         // get the operator and check if the value has changed. If there is no
         // change return, otherwise set the value and proceed
-        Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
-        if (oprtr->ssg == value) return;
-        oprtr->ssg = value;
-        // recalculate EG output
-        if ((oprtr->ssg & 0x08) && (oprtr->ssgn ^ (oprtr->ssg & 0x04)) && (oprtr->state > EG_REL))
-            oprtr->vol_out = ((uint32_t) (0x200 - oprtr->volume) & MAX_ATT_INDEX) + oprtr->tl;
-        else
-            oprtr->vol_out = (uint32_t) oprtr->volume + oprtr->tl;
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_ssg(value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.

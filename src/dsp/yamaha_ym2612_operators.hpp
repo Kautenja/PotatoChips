@@ -630,6 +630,23 @@ struct Operator {
         eg_sel_rr = eg_rate_select[rr + ksr];
     }
 
+    /// @brief set the SSG register to a new value.
+    ///
+    /// @param value the value for the looping envelope generator register (SSG)
+    /// @details
+    /// the first three bits describe the mode of the looping EG, the fourth
+    /// bit enables / disables the looping EG
+    ///
+    inline void set_ssg(uint8_t value) {
+        if (ssg == value) return;
+        ssg = value;
+        // recalculate EG output
+        if ((ssg & 0x08) && (ssgn ^ (ssg & 0x04)) && (state > EG_REL))
+            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
+        else
+            vol_out = (uint32_t) volume + tl;
+    }
+
     /// @brief SSG-EG update process.
     ///
     /// @details

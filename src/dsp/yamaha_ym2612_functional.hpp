@@ -26,6 +26,30 @@
 #include "yamaha_ym2612_operators.hpp"
 #include "exceptions.hpp"
 
+/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
+static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TAB_LEN) return 0;
+    return tl_tab[p];
+}
+
+/// @brief Return the value of operator (1) given phase, envelope, and PM.
+///
+/// @param phase the current phase of the operator's oscillator
+/// @param env the value of the operator's envelope
+/// @param pm the amount of phase modulation for the operator
+///
+static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
+    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TAB_LEN) return 0;
+    return tl_tab[p];
+}
+
 /// @brief Emulator common state.
 struct EngineState {
     /// frequency base
@@ -229,9 +253,9 @@ struct EngineState {
 
     /// @brief Advance LFO to next sample.
     inline void advance_lfo() {
-        if (lfo_timer_overflow) {  // LFO enabled ?
+        if (lfo_timer_overflow) {  // LFO enabled
             // increment LFO timer
-            lfo_timer +=  lfo_timer_add;
+            lfo_timer += lfo_timer_add;
             // when LFO is enabled, one level will last for
             // 108, 77, 71, 67, 62, 44, 8 or 5 samples
             while (lfo_timer >= lfo_timer_overflow) {
@@ -250,6 +274,130 @@ struct EngineState {
         }
     }
 };
+
+/// @brief Update phase increment and envelope generator
+static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int fc, int kc) {
+    int ksr = kc >> oprtr->KSR;
+    fc += oprtr->DT[kc];
+    // detects frequency overflow (credits to Nemesis)
+    if (fc < 0) fc += engine->fn_max;
+    // (frequency) phase increment counter
+    oprtr->phase_increment = (fc * oprtr->mul) >> 1;
+    if ( oprtr->ksr != ksr ) {
+        oprtr->ksr = ksr;
+        // calculate envelope generator rates
+        if ((oprtr->ar + oprtr->ksr) < 32+62) {
+            oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar  + oprtr->ksr ];
+            oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr ];
+        } else {
+            oprtr->eg_sh_ar  = 0;
+            oprtr->eg_sel_ar = 17*RATE_STEPS;
+        }
+
+        oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
+        oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
+        oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr  + oprtr->ksr];
+
+        oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
+        oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
+        oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
+    }
+}
+
+/// @brief Update phase increment counters
+static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
+    if (voice->operators[Op1].phase_increment==-1) {
+        int fc = voice->fc;
+        int kc = voice->kcode;
+        refresh_fc_eg_slot(engine, &voice->operators[Op1] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op2] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op3] , fc , kc );
+        refresh_fc_eg_slot(engine, &voice->operators[Op4] , fc , kc );
+    }
+}
+
+static inline void update_phase_lfo_channel(EngineState* engine, Voice* voice) {
+    uint32_t block_fnum = voice->block_fnum;
+    uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + engine->lfo_PM_step];
+    if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+        block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
+        uint8_t blk = (block_fnum & 0x7000) >> 12;
+        uint32_t fn = block_fnum & 0xfff;
+        // key-scale code
+        int kc = (blk << 2) | opn_fktable[fn >> 8];
+        // phase increment counter
+        int fc = (engine->fn_table[fn]>>(7 - blk));
+        // detects frequency overflow (credits to Nemesis)
+        int finc = fc + voice->operators[Op1].DT[kc];
+        // Operator 1
+        if (finc < 0) finc += engine->fn_max;
+        voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
+        // Operator 2
+        finc = fc + voice->operators[Op2].DT[kc];
+        if (finc < 0) finc += engine->fn_max;
+        voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
+        // Operator 3
+        finc = fc + voice->operators[Op3].DT[kc];
+        if (finc < 0) finc += engine->fn_max;
+        voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
+        // Operator 4
+        finc = fc + voice->operators[Op4].DT[kc];
+        if (finc < 0) finc += engine->fn_max;
+        voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
+    } else {  // LFO phase modulation is 0
+        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+    }
+}
+
+static inline void chan_calc(EngineState* engine, Voice* voice) {
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
+    uint32_t AM = engine->lfo_AM_step >> voice->ams;
+    engine->m2 = engine->c1 = engine->c2 = engine->mem = 0;
+    // restore delayed sample (MEM) value to m2 or c2
+    *voice->mem_connect = voice->mem_value;
+    // Operator 1
+    unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
+    int32_t out = voice->op1_out[0] + voice->op1_out[1];
+    voice->op1_out[0] = voice->op1_out[1];
+    if (!voice->connect1) {  // algorithm 5
+        engine->mem = engine->c1 = engine->c2 = voice->op1_out[0];
+    } else {  // other algorithms
+        *voice->connect1 += voice->op1_out[0];
+    }
+    voice->op1_out[1] = 0;
+    if (eg_out < ENV_QUIET) {
+        if (!voice->feedback) out = 0;
+        voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
+    }
+    // Operator 3
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
+    if (eg_out < ENV_QUIET)
+        *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, engine->m2);
+    // Operator 2
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
+    if (eg_out < ENV_QUIET)
+        *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, engine->c1);
+    // Operator 4
+    eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
+    if (eg_out < ENV_QUIET)
+        *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, engine->c2);
+    // store current MEM
+    voice->mem_value = engine->mem;
+    // update phase counters AFTER output calculations
+    if (voice->pms) {
+        update_phase_lfo_channel(engine, voice);
+    } else {  // no LFO phase modulation
+        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+    }
+#undef CALCULATE_VOLUME
+}
 
 static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
     // four operators per channel
@@ -337,154 +485,6 @@ static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
         oprtr->ssgn ^= swap_flag;
         // increment the slot and decrement the iterator
         oprtr++;
-    }
-}
-
-static inline void update_phase_lfo_channel(EngineState* engine, Voice* voice) {
-    uint32_t block_fnum = voice->block_fnum;
-    uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-    int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + engine->lfo_PM_step];
-    if (lfo_fn_table_index_offset) {  // LFO phase modulation active
-        block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
-        uint8_t blk = (block_fnum & 0x7000) >> 12;
-        uint32_t fn = block_fnum & 0xfff;
-        // key-scale code
-        int kc = (blk << 2) | opn_fktable[fn >> 8];
-        // phase increment counter
-        int fc = (engine->fn_table[fn]>>(7 - blk));
-        // detects frequency overflow (credits to Nemesis)
-        int finc = fc + voice->operators[Op1].DT[kc];
-        // Operator 1
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
-        // Operator 2
-        finc = fc + voice->operators[Op2].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
-        // Operator 3
-        finc = fc + voice->operators[Op3].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
-        // Operator 4
-        finc = fc + voice->operators[Op4].DT[kc];
-        if (finc < 0) finc += engine->fn_max;
-        voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
-    } else {  // LFO phase modulation is 0
-        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
-        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
-        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
-        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
-    }
-}
-
-/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
-/// @brief Return the value of operator (1) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
-}
-
-static inline void chan_calc(EngineState* engine, Voice* voice) {
-#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-    uint32_t AM = engine->lfo_AM_step >> voice->ams;
-    engine->m2 = engine->c1 = engine->c2 = engine->mem = 0;
-    // restore delayed sample (MEM) value to m2 or c2
-    *voice->mem_connect = voice->mem_value;
-    // Operator 1
-    unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
-    int32_t out = voice->op1_out[0] + voice->op1_out[1];
-    voice->op1_out[0] = voice->op1_out[1];
-    if (!voice->connect1) {  // algorithm 5
-        engine->mem = engine->c1 = engine->c2 = voice->op1_out[0];
-    } else {  // other algorithms
-        *voice->connect1 += voice->op1_out[0];
-    }
-    voice->op1_out[1] = 0;
-    if (eg_out < ENV_QUIET) {
-        if (!voice->feedback) out = 0;
-        voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
-    }
-    // Operator 3
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, engine->m2);
-    // Operator 2
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, engine->c1);
-    // Operator 4
-    eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
-    if (eg_out < ENV_QUIET)
-        *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, engine->c2);
-    // store current MEM
-    voice->mem_value = engine->mem;
-    // update phase counters AFTER output calculations
-    if (voice->pms) {
-        update_phase_lfo_channel(engine, voice);
-    } else {  // no LFO phase modulation
-        voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
-        voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
-        voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
-        voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
-    }
-#undef CALCULATE_VOLUME
-}
-
-/// @brief Update phase increment and envelope generator
-static inline void refresh_fc_eg_slot(EngineState* engine, Operator* oprtr, int fc, int kc) {
-    int ksr = kc >> oprtr->KSR;
-    fc += oprtr->DT[kc];
-    // detects frequency overflow (credits to Nemesis)
-    if (fc < 0) fc += engine->fn_max;
-    // (frequency) phase increment counter
-    oprtr->phase_increment = (fc * oprtr->mul) >> 1;
-    if ( oprtr->ksr != ksr ) {
-        oprtr->ksr = ksr;
-        // calculate envelope generator rates
-        if ((oprtr->ar + oprtr->ksr) < 32+62) {
-            oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar  + oprtr->ksr ];
-            oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr ];
-        } else {
-            oprtr->eg_sh_ar  = 0;
-            oprtr->eg_sel_ar = 17*RATE_STEPS;
-        }
-
-        oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
-        oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
-        oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr  + oprtr->ksr];
-
-        oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
-        oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
-        oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
-    }
-}
-
-/// @brief Update phase increment counters
-static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
-    if (voice->operators[Op1].phase_increment==-1) {
-        int fc = voice->fc;
-        int kc = voice->kcode;
-        refresh_fc_eg_slot(engine, &voice->operators[Op1] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op2] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op3] , fc , kc );
-        refresh_fc_eg_slot(engine, &voice->operators[Op4] , fc , kc );
     }
 }
 

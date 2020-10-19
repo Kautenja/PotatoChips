@@ -214,24 +214,6 @@ static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
     voice->connect4 = carrier;
 }
 
-// TODO: dont pass in voice_idx? or replace voice and use voice_idx to get
-/// @brief Set the algorithm parameter to a new value.
-///
-/// @param engine the engine to set the voice algorithm for
-/// @param voice the voice to set the algorithm of
-/// @param voice_idx the index of the voice to set the algorithm of
-/// @param algorithm the index of the algorithm \f$\in [0, 7]\f$
-///
-static inline void set_algorithm(
-    EngineState* engine,
-    Voice* voice,
-    unsigned voice_idx,
-    uint8_t algorithm
-) {
-    voice->algorithm = algorithm;
-    set_routing(engine, voice, voice_idx);
-}
-
 /// @brief Set the pan register to a new value.
 ///
 /// @param engine the engine to set the PAN register for

@@ -230,10 +230,11 @@ struct Chip2612 : rack::Module {
                 processCV(args, channel);
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
-            apu[channel].step();
+            int16_t samples[2] = {0, 0};
+            apu[channel].step(samples);
             // set the outputs of the module
-            outputs[OUTPUT_MASTER + 0].setVoltage(apu[channel].getVoltageLeft(), channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(apu[channel].getVoltageRight(), channel);
+            outputs[OUTPUT_MASTER + 0].setVoltage(static_cast<float>(samples[0]) / std::numeric_limits<int16_t>::max(), channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(static_cast<float>(samples[1]) / std::numeric_limits<int16_t>::max(), channel);
         }
     }
 };

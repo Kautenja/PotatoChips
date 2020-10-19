@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 2.0
+          "value": 1.0
         },
         {
           "id": 1,
@@ -40,15 +40,15 @@
         },
         {
           "id": 2,
-          "value": 1.41421354
+          "value": 1.0
         },
         {
           "id": 3,
-          "value": 1.41421354
+          "value": 1.0
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "leftModuleId": 5,

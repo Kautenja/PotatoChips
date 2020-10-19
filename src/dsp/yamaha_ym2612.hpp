@@ -171,7 +171,7 @@ class YamahaYM2612 {
     /// @param algorithm the selected FM algorithm in [0, 7]
     ///
     inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
-        engine.set_routing(voice_idx, voice_idx, algorithm);
+        engine.set_algorithm(voice_idx, algorithm);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.

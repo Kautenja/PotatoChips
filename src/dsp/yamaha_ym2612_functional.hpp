@@ -128,18 +128,18 @@ struct EngineState {
         init_timetables();
     }
 
-    // TODO: remove carrier_index? all caller pass a copy of voice_idx to this
-    /// @brief Set algorithm routing.
+    // TODO: enum for the operator?
+    // TODO: better ASCII illustrations of the operators
+    /// @brief Set algorithm, i.e., operator routing.
     ///
     /// @param voice_idx the index of the voice to set the routing of
-    /// @param carrier_index the index of the carrier wave for the voice
     /// @param algorithm the algorithm to set the voice to
     ///
-    inline void set_routing(unsigned voice_idx, unsigned carrier_index, uint8_t algorithm) {
+    inline void set_algorithm(unsigned voice_idx, uint8_t algorithm) {
         // get the voice and carrier wave
         Voice* const voice = &voices[voice_idx];
         voice->algorithm = algorithm & 7;
-        int32_t *carrier = &out_fm[carrier_index];
+        int32_t *carrier = &out_fm[voice_idx];
         // get the connections
         int32_t **om1 = &voice->connect1;
         int32_t **om2 = &voice->connect3;

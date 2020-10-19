@@ -380,7 +380,7 @@ static int32_t lfo_pm_table[128 * 8 * 32];
 static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
     for (unsigned x = 0; x < TL_RES_LEN; x++) {
-        double m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
+        float m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
         m = floor(m);
         // we never reach (1 << 16) here due to the (x+1)
         // result fits within 16 bits at maximum
@@ -413,10 +413,10 @@ static __attribute__((constructor)) void init_tables() {
     // build Logarithmic Sinus table
     for (unsigned i = 0; i < SIN_LEN; i++) {
         // non-standard sinus (checked against the real chip)
-        double m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
+        float m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
         // we never reach zero here due to ((i * 2) + 1)
         // convert to decibels
-        double o;
+        float o;
         if (m > 0.0)
             o = 8 * log(1.0 / m) / log(2.0);
         else
@@ -517,7 +517,7 @@ struct GlobalOperatorState {
     /// sampling rate (Hz)
     int rate = 0;
     /// frequency base
-    double freqbase = 0;
+    float freqbase = 0;
     /// timer pre-scaler
     int timer_prescaler = 0;
     /// interrupt level

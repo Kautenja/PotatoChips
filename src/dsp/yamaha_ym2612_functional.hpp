@@ -77,12 +77,12 @@ struct EngineState {
 };
 
 /// @brief Initialize time tables.
-static void init_timetables(EngineState* engine, double freqbase) {
+static void init_timetables(EngineState* engine, float freqbase) {
     // DeTune table
     for (int d = 0; d <= 3; d++) {
         for (int i = 0; i <= 31; i++) {
             // -10 because chip works with 10.10 fixed point, while we use 16.16
-            double rate = ((double) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+            float rate = ((float) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
             engine->state.dt_tab[d][i] = (int32_t) rate;
             engine->state.dt_tab[d + 4][i] = -engine->state.dt_tab[d][i];
         }
@@ -103,11 +103,11 @@ static void init_timetables(EngineState* engine, double freqbase) {
         // the emulated frequency (can be 1.0)
         // NOTE:
         // -10 because chip works with 10.10 fixed point, while we use 16.16
-        engine->fn_table[i] = (uint32_t)((double) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+        engine->fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
     }
     // maximal frequency is required for Phase overflow calculation, register
     // size is 17 bits (Nemesis)
-    engine->fn_max = (uint32_t)((double) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
+    engine->fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
 }
 
 /// @brief Set pre-scaler and make time tables.
@@ -117,7 +117,7 @@ static void init_timetables(EngineState* engine, double freqbase) {
 static void set_prescaler(EngineState* engine) {
     // frequency base
     engine->state.freqbase = (engine->state.rate) ?
-        ((double)engine->state.clock / engine->state.rate) : 0;
+        (static_cast<float>(engine->state.clock) / engine->state.rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
     //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
@@ -139,65 +139,65 @@ static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
 
     int32_t **memc = &voice->mem_connect;
 
-    switch(voice->algorithm) {
+    switch (voice->algorithm) {
     case 0:
         // M1---C1---MEM---M2---C2---OUT
-        *om1 = &engine->c1;
-        *oc1 = &engine->mem;
-        *om2 = &engine->c2;
-        *memc= &engine->m2;
+        *om1  = &engine->c1;
+        *oc1  = &engine->mem;
+        *om2  = &engine->c2;
+        *memc = &engine->m2;
         break;
     case 1:
         // M1------+-MEM---M2---C2---OUT
         //      C1-+
-        *om1 = &engine->mem;
-        *oc1 = &engine->mem;
-        *om2 = &engine->c2;
-        *memc= &engine->m2;
+        *om1  = &engine->mem;
+        *oc1  = &engine->mem;
+        *om2  = &engine->c2;
+        *memc = &engine->m2;
         break;
     case 2:
         // M1-----------------+-C2---OUT
         //      C1---MEM---M2-+
-        *om1 = &engine->c2;
-        *oc1 = &engine->mem;
-        *om2 = &engine->c2;
-        *memc= &engine->m2;
+        *om1  = &engine->c2;
+        *oc1  = &engine->mem;
+        *om2  = &engine->c2;
+        *memc = &engine->m2;
         break;
     case 3:
         // M1---C1---MEM------+-C2---OUT
         //                 M2-+
-        *om1 = &engine->c1;
-        *oc1 = &engine->mem;
-        *om2 = &engine->c2;
-        *memc= &engine->c2;
+        *om1  = &engine->c1;
+        *oc1  = &engine->mem;
+        *om2  = &engine->c2;
+        *memc = &engine->c2;
         break;
     case 4:
         // M1---C1-+-OUT
         // M2---C2-+
         // MEM: not used
-        *om1 = &engine->c1;
-        *oc1 = carrier;
-        *om2 = &engine->c2;
-        *memc= &engine->mem;  // store it anywhere where it will not be used
+        *om1  = &engine->c1;
+        *oc1  = carrier;
+        *om2  = &engine->c2;
+        *memc = &engine->mem;  // store it anywhere where it will not be used
         break;
     case 5:
         //    +----C1----+
         // M1-+-MEM---M2-+-OUT
         //    +----C2----+
-        *om1 = nullptr;  // special mark
-        *oc1 = carrier;
-        *om2 = carrier;
-        *memc= &engine->m2;
+        *om1  = nullptr;  // special mark
+        *oc1  = carrier;
+        *om2  = carrier;
+        *memc = &engine->m2;
         break;
     case 6:
         // M1---C1-+
         //      M2-+-OUT
         //      C2-+
         // MEM: not used
-        *om1 = &engine->c1;
-        *oc1 = carrier;
-        *om2 = carrier;
-        *memc= &engine->mem;  // store it anywhere where it will not be used
+        *om1  = &engine->c1;
+        *oc1  = carrier;
+        *om2  = carrier;
+        *memc = &engine->mem;  // store it anywhere where it will not be used
         break;
     case 7:
         // M1-+
@@ -205,10 +205,10 @@ static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
         // M2-+
         // C2-+
         // MEM: not used
-        *om1 = carrier;
-        *oc1 = carrier;
-        *om2 = carrier;
-        *memc= &engine->mem;  // store it anywhere where it will not be used
+        *om1  = carrier;
+        *oc1  = carrier;
+        *om2  = carrier;
+        *memc = &engine->mem;  // store it anywhere where it will not be used
         break;
     }
     voice->connect4 = carrier;

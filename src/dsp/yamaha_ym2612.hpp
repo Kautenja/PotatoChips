@@ -23,7 +23,6 @@
 #ifndef DSP_YAMAHA_YM2612_HPP_
 #define DSP_YAMAHA_YM2612_HPP_
 
-#include <iostream>
 #include "yamaha_ym2612_functional.hpp"
 
 // ---------------------------------------------------------------------------
@@ -87,16 +86,15 @@ class YamahaYM2612 {
         // state
         engine.state.status = 0;
         engine.state.mode = 0;
-
         // timer B (address 0x26)
         engine.state.TB = 0x00;
         // timer A Low 2 (address 0x25)
         engine.state.TA = (engine.state.TA & 0x03fc) | (0x00 & 3);
         // timer A High 8 (address 0x24)
         engine.state.TA = (engine.state.TA & 0x0003) | (0x00 << 2);
-
+        // reset the engine state and basic voice data
         reset_voices(&engine.state, &voices[0], NUM_VOICES);
-
+        // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
             // set both bits of pan to enable both channel outputs

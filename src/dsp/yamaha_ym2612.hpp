@@ -86,8 +86,6 @@ class YamahaYM2612 {
         // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
-            // set both bits of pan to enable both channel outputs
-            setPAN(voice_idx, 3);
             setAL(voice_idx, 0);
             setFB(voice_idx, 0);
             setFREQ(voice_idx, 0);
@@ -142,8 +140,8 @@ class YamahaYM2612 {
                 engine.out_fm[voice] = 8191;
             else if (engine.out_fm[voice] < -8192)
                 engine.out_fm[voice] = -8192;
-            output[0] += (engine.out_fm[voice] & engine.pan[2 * voice + 0]);
-            output[1] += (engine.out_fm[voice] & engine.pan[2 * voice + 1]);
+            output[0] += engine.out_fm[voice];
+            output[1] += engine.out_fm[voice];
         }
     }
 
@@ -256,16 +254,6 @@ class YamahaYM2612 {
     ///
     inline void setFMS(uint8_t voice_idx, uint8_t fms) {
         voices[voice_idx].pms = (fms & 7) * 32;
-    }
-
-    /// @brief Set the state (ST) register for the given voice, i.e., the pan.
-    ///
-    /// @param voice the voice to set the state register of
-    /// @param state the value of the state register. the first bit enables the
-    /// right channel. the second bit enables the left channel
-    ///
-    inline void setPAN(uint8_t voice_idx, uint8_t state) {
-        set_pan(&engine, voice_idx, state);
     }
 
     // -----------------------------------------------------------------------

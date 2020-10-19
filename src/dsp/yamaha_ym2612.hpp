@@ -51,10 +51,9 @@ class YamahaYM2612 {
     // TODO: better ASCII illustrations of the operators
     /// @brief Set algorithm, i.e., operator routing.
     ///
-    /// @param voice_idx the index of the voice to set the routing of
     /// @param algorithm the algorithm to set the voice to
     ///
-    inline void set_algorithm(unsigned voice_idx, uint8_t algorithm) {
+    inline void set_algorithm(uint8_t algorithm) {
         // get the voice and carrier wave
         voice.algorithm = algorithm & 7;
         int32_t *carrier = &out_fm;
@@ -297,24 +296,24 @@ class YamahaYM2612 {
         setLFO(0);
         voice.reset();
         // TODO: move all this reset code to voice.reset()
-        setAL(0, 0);
-        setFB(0, 0);
-        setFREQ(0, 0);
-        setGATE(0, 0);
-        setAMS(0, 0);
-        setFMS(0, 0);
+        setAL(0);
+        setFB(0);
+        setFREQ(0);
+        setGATE(0);
+        setAMS(0);
+        setFMS(0);
         for (unsigned oprtr_idx = 0; oprtr_idx < NUM_OPERATORS; oprtr_idx++) {
-            setSSG(0, oprtr_idx, false, 0);
-            setAR(0, oprtr_idx, 0);
-            setD1(0, oprtr_idx, 0);
-            setSL(0, oprtr_idx, 0);
-            setD2(0, oprtr_idx, 0);
-            setRR(0, oprtr_idx, 0);
-            setTL(0, oprtr_idx, 0);
-            setMUL(0, oprtr_idx, 0);
-            setDET(0, oprtr_idx, 0);
-            setRS(0, oprtr_idx, 0);
-            setAM(0, oprtr_idx, 0);
+            setSSG(oprtr_idx, false, 0);
+            setAR(oprtr_idx, 0);
+            setD1(oprtr_idx, 0);
+            setSL(oprtr_idx, 0);
+            setD2(oprtr_idx, 0);
+            setRR(oprtr_idx, 0);
+            setTL(oprtr_idx, 0);
+            setMUL(oprtr_idx, 0);
+            setDET(oprtr_idx, 0);
+            setRS(oprtr_idx, 0);
+            setAM(oprtr_idx, 0);
         }
     }
 
@@ -343,13 +342,18 @@ class YamahaYM2612 {
                 oprtr.update_eg_channel(state.eg_cnt);
         }
         // clip the output to 14-bits
-        if (out_fm > Operator::OUTPUT_MAX)
+        // TODO: output clipping indicator
+        if (out_fm > Operator::OUTPUT_MAX) {
             return Operator::OUTPUT_MAX;
-        else if (out_fm < Operator::OUTPUT_MIN)
+        } else if (out_fm < Operator::OUTPUT_MIN) {
             return Operator::OUTPUT_MIN;
-
+        }
         return out_fm;
     }
+
+    // -----------------------------------------------------------------------
+    // MARK: Global control
+    // -----------------------------------------------------------------------
 
     /// @brief Set the global LFO for the chip.
     ///
@@ -371,31 +375,27 @@ class YamahaYM2612 {
         state.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
-    // -----------------------------------------------------------------------
-    // MARK: Global control for each voice
-    // -----------------------------------------------------------------------
-
     /// @brief Set the algorithm (AL) register for the given voice.
     ///
-    /// @param algorithm the selected FM algorithm in [0, 7]
+    /// @param value the selected FM algorithm in [0, 7]
     ///
-    inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
-        set_algorithm(voice_idx, algorithm);
+    inline void setAL(uint8_t value) {
+        set_algorithm(value);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
     ///
-    /// @param feedback the amount of feedback for operator 1
+    /// @param value the amount of feedback for operator 1
     ///
-    inline void setFB(uint8_t voice_idx, uint8_t feedback) {
-        voice.set_feedback(feedback);
+    inline void setFB(uint8_t value) {
+        voice.set_feedback(value);
     }
 
     /// @brief Set the gate for the given voice.
     ///
     /// @param is_open true if the gate is open, false otherwise
     ///
-    inline void setGATE(uint8_t voice_idx, bool is_open) {
+    inline void setGATE(bool is_open) {
         if (is_open)  // open the gate for all operators
             for (Operator& op : voice.operators) op.set_keyon();
         else  // shut the gate for all operators
@@ -406,7 +406,7 @@ class YamahaYM2612 {
     ///
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void setFREQ(uint8_t voice_idx, float frequency) {
+    inline void setFREQ(float frequency) {
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -432,22 +432,22 @@ class YamahaYM2612 {
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
-    /// @param ams the amount of amplitude modulation (AM) sensitivity
+    /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
-    inline void setAMS(uint8_t voice_idx, uint8_t ams) {
-        voice.ams = LFO_AMS_DEPTH_SHIFT[ams & 0x03];
+    inline void setAMS(uint8_t value) {
+        voice.ams = LFO_AMS_DEPTH_SHIFT[value & 0x03];
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
     ///
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void setFMS(uint8_t voice_idx, uint8_t fms) {
-        voice.pms = (fms & 7) * 32;
+    inline void setFMS(uint8_t value) {
+        voice.pms = (value & 7) * 32;
     }
 
     // -----------------------------------------------------------------------
-    // MARK: Operator control for each voice
+    // MARK: Operator control
     // -----------------------------------------------------------------------
 
     /// @brief Set the SSG-envelope register for the given channel and operator.
@@ -528,7 +528,7 @@ class YamahaYM2612 {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void setSSG(uint8_t voice_idx, uint8_t op_index, bool is_on, uint8_t mode) {
+    inline void setSSG(uint8_t op_index, bool is_on, uint8_t mode) {
         // get the value for the SSG register. the high bit determines whether
         // SSG mode is on and the low three bits determine the mode
         const uint8_t value = (is_on << 3) | (mode & 7);
@@ -542,7 +542,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the attack rate (AR) register of (in [0, 3])
     /// @param value the rate of the attack stage of the envelope generator
     ///
-    inline void setAR(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setAR(uint8_t op_index, uint8_t value) {
         Operator* const oprtr = &voice.operators[OPERATOR_INDEXES[op_index]];
         oprtr->ar_ksr = (oprtr->ar_ksr & 0xC0) | (value & 0x1f);
         voice.set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
@@ -553,7 +553,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the 1st decay rate (D1) register of (in [0, 3])
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
-    inline void setD1(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setD1(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].set_dr(value);
     }
 
@@ -562,7 +562,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the sustain level (SL) register of (in [0, 3])
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
-    inline void setSL(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setSL(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].set_sl(value);
     }
 
@@ -571,7 +571,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the 2nd decay rate (D2) register of (in [0, 3])
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
-    inline void setD2(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setD2(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].set_sr(value);
     }
 
@@ -580,7 +580,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the release rate (RR) register of (in [0, 3])
     /// @param value the rate of release of the envelope generator after key-off
     ///
-    inline void setRR(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setRR(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].set_rr(value);
     }
 
@@ -589,7 +589,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
     /// @param value the total amplitude of envelope generator
     ///
-    inline void setTL(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setTL(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].set_tl(value);
     }
 
@@ -598,7 +598,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the multiplier  (MUL)register of (in [0, 3])
     /// @param value the value of the FM phase multiplier
     ///
-    inline void setMUL(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setMUL(uint8_t op_index, uint8_t value) {
         Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
         // calculate the new MUL register value
         const uint32_t mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
@@ -613,7 +613,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the detune (DET) register of (in [0, 3])
     /// @param value the the level of detuning for the FM operator
     ///
-    inline void setDET(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setDET(uint8_t op_index, uint8_t value) {
         Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
         // calculate the new DT register value
         int32_t* const DT = state.dt_table[value & 7];
@@ -628,7 +628,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    inline void setRS(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setRS(uint8_t op_index, uint8_t value) {
         Operator* const oprtr = &voice.operators[OPERATOR_INDEXES[op_index]];
         oprtr->ar_ksr = (oprtr->ar_ksr & 0x1F) | ((value & 0x03) << 6);
         voice.set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
@@ -639,7 +639,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the amplitude modulation (AM) register of (in [0, 3])
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
-    inline void setAM(uint8_t voice_idx, uint8_t op_index, uint8_t value) {
+    inline void setAM(uint8_t op_index, uint8_t value) {
         voice.operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
     }
 };

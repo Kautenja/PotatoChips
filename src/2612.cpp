@@ -167,33 +167,31 @@ struct Chip2612 : rack::Module {
         float pitch = 0;
         float gate = 0;
         float retrig = 0;
-        // TODO: remove this osc variable
-        const auto osc = 0;
         // set the global parameters
-        apu[channel].setAL (osc, getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].setFB (osc, getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].setAMS(osc, getParam(channel, PARAM_AMS, INPUT_AMS, 3));
-        apu[channel].setFMS(osc, getParam(channel, PARAM_FMS, INPUT_FMS, 7));
+        apu[channel].setAL (getParam(channel, PARAM_AL,  INPUT_AL,  7));
+        apu[channel].setFB (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].setAMS(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
+        apu[channel].setFMS(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::NUM_OPERATORS; op++) {
-            apu[channel].setAR (osc, op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].setTL (osc, op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
-            apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].setSL (osc, op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
-            apu[channel].setD2 (osc, op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].setRR (osc, op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].setMUL(osc, op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].setDET(osc, op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
-            apu[channel].setRS (osc, op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].setAM (osc, op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
+            apu[channel].setAR (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+            apu[channel].setTL (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].setD1 (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+            apu[channel].setSL (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].setD2 (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+            apu[channel].setRR (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+            apu[channel].setMUL(op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+            apu[channel].setDET(op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+            apu[channel].setRS (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            apu[channel].setAM (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             const auto enableSSG =       getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  );
             const auto modeSSG =         getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  );
-            apu[channel].setSSG(osc, op, enableSSG, modeSSG);
+            apu[channel].setSSG(op, enableSSG, modeSSG);
         }
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves
         pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
-        apu[channel].setFREQ(osc, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
+        apu[channel].setFREQ(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
         // process the gate trigger, high at 2V
         gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
         gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
@@ -205,7 +203,7 @@ struct Chip2612 : rack::Module {
         // but when neither or both are high, the gate is closed. This
         // causes the gate to get shut for a sample when re-triggering an
         // already gated voice
-        apu[channel].setGATE(osc, trigger ^ gate_triggers[channel].state);
+        apu[channel].setGATE(trigger ^ gate_triggers[channel].state);
     }
 
     /// @brief Process a sample.

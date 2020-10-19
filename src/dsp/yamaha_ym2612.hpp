@@ -384,9 +384,7 @@ class YamahaYM2612 {
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
     inline void setSL(uint8_t voice, uint8_t op_index, uint8_t value) {
-        Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
-        oprtr->sl_rr = (oprtr->sl_rr & 0x0f) | ((value & 0x0f) << 4);
-        oprtr->set_sl_rr(oprtr->sl_rr);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_sl_rr(value);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.

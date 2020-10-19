@@ -626,8 +626,9 @@ struct Operator {
     /// @param value the value for the release rate (RR)
     ///
     inline void set_sl_rr(uint8_t value) {
-        sl = sl_table[value >> 4];
-        rr = 34 + ((value & 0x0f) << 2);
+        sl_rr = (sl_rr & 0x0f) | ((value & 0x0f) << 4);
+        sl = sl_table[sl_rr >> 4];
+        rr = 34 + ((sl_rr & 0x0f) << 2);
         eg_sh_rr = eg_rate_shift[rr + ksr];
         eg_sel_rr = eg_rate_select[rr + ksr];
     }

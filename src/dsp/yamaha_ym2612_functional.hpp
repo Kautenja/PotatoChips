@@ -24,6 +24,7 @@
 #define DSP_YAMAHA_YM2612_FUNCTIONAL_HPP_
 
 #include "yamaha_ym2612_operators.hpp"
+#include "exceptions.hpp"
 
 /// @brief Emulator common state.
 struct EngineState {
@@ -76,6 +77,8 @@ struct EngineState {
     /// outputs of working channels
     int32_t out_fm[8];
 
+    // TODO: make private
+    // TODO: inline in set_sample_rate?
     /// @brief Initialize time tables.
     void init_timetables() {
         // DeTune table
@@ -110,13 +113,16 @@ struct EngineState {
         fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
     }
 
-    /// @brief Set pre-scaler and make time tables.
+    /// @brief Set the output sample rate and clock rate.
     ///
-    /// @param engine the emulator to set the pre-scaler and create timetables for
+    /// @param sample_rate the number of samples per second
+    /// @param clock_rate the number of source clock cycles per second
     ///
-    void set_prescaler(int rate, int clock) {
+    void set_sample_rate(float sample_rate, float clock_rate) {
+        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
+        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
         // frequency base
-        freqbase = rate ? static_cast<float>(clock) / rate : 0;
+        freqbase = clock_rate / sample_rate;
         // TODO: why is it necessary to scale these increments by a factor of 1/16
         //       to get the correct timings from the EG and LFO?
         // EG timer increment (updates every 3 samples)

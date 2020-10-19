@@ -262,20 +262,20 @@ struct EngineState {
             oprtr->ksr = ksr;
             // calculate envelope generator rates
             if ((oprtr->ar + oprtr->ksr) < 32+62) {
-                oprtr->eg_sh_ar  = eg_rate_shift[oprtr->ar  + oprtr->ksr];
-                oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sh_ar  = EG_RATE_SHIFT[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sel_ar = EG_RATE_SELECT[oprtr->ar  + oprtr->ksr];
             } else {
                 oprtr->eg_sh_ar  = 0;
                 oprtr->eg_sel_ar = 17 * RATE_STEPS;
             }
             // set the shift
-            oprtr->eg_sh_d1r = eg_rate_shift[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sh_d2r = eg_rate_shift[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sh_rr = eg_rate_shift[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sh_d1r = EG_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sh_d2r = EG_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sh_rr = EG_RATE_SHIFT[oprtr->rr  + oprtr->ksr];
             // set the selector
-            oprtr->eg_sel_d1r = eg_rate_select[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sel_d2r = eg_rate_select[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sel_d1r = EG_RATE_SELECT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sel_d2r = EG_RATE_SELECT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sel_rr = EG_RATE_SELECT[oprtr->rr  + oprtr->ksr];
         }
     }
 
@@ -300,7 +300,7 @@ struct EngineState {
             uint8_t blk = (block_fnum & 0x7000) >> 12;
             uint32_t fn = block_fnum & 0xfff;
             // key-scale code
-            int kc = (blk << 2) | opn_fktable[fn >> 8];
+            int kc = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fn >> 8];
             // phase increment counter
             int fc = (fn_table[fn]>>(7 - blk));
             // detects frequency overflow (credits to Nemesis)

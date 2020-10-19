@@ -161,7 +161,7 @@ class YamahaYM2612 {
     /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
-        engine.lfo_timer_overflow = lfo_samples_per_step[value & 7] << LFO_SH;
+        engine.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
     // -----------------------------------------------------------------------
@@ -225,7 +225,7 @@ class YamahaYM2612 {
         uint32_t fn = (((uint32_t)( (engine.state.fn_h) & 7)) << 8) + freqLow;
         uint8_t blk = engine.state.fn_h >> 3;
         /* key-scale code */
-        voice.kcode = (blk << 2) | opn_fktable[(fn >> 7) & 0xf];
+        voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
         /* phase increment counter */
         voice.fc = engine.fn_table[fn * 2] >> (7 - blk);
         /* store fnum in clear form for LFO PM calculations */
@@ -244,7 +244,7 @@ class YamahaYM2612 {
     /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
     inline void setAMS(uint8_t voice_idx, uint8_t ams) {
-        voices[voice_idx].ams = lfo_ams_depth_shift[ams & 0x03];
+        voices[voice_idx].ams = LFO_AMS_DEPTH_SHIFT[ams & 0x03];
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.

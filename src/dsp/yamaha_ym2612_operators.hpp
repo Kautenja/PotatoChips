@@ -182,7 +182,7 @@ static const uint8_t eg_inc[19 * RATE_STEPS] = {
 
 /// Envelope Generator rates (32 + 64 rates + 32 RKS).
 /// NOTE: there is no O(17) in this table - it's directly in the code
-static const uint8_t eg_rate_select[32 + 64 + 32] = {
+static const uint8_t EG_RATE_SELECT[32 + 64 + 32] = {
 #define O(a) (a * RATE_STEPS)
     // 32 infinite time rates
     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
@@ -222,7 +222,7 @@ static const uint8_t eg_rate_select[32 + 64 + 32] = {
 /// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
 /// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
 /// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
-static const uint8_t eg_rate_shift[32 + 64 + 32] = {
+static const uint8_t EG_RATE_SHIFT[32 + 64 + 32] = {
 #define O(a) (a * 1)
     // 32 infinite time rates
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
@@ -276,11 +276,13 @@ static const uint8_t DT_TABLE[4 * 32] = {
 
 /// OPN key frequency number -> key code follow table
 /// fnum higher 4bit -> keycode lower 2bit
-static const uint8_t opn_fktable[16] = {0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3};
+static const uint8_t FREQUENCY_KEYCODE_TABLE[16] = {
+    0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3
+};
 
 /// 8 LFO speed parameters. Each value represents number of samples that one
 /// LFO level will last for
-static const uint32_t lfo_samples_per_step[8] = {108, 77, 71, 67, 62, 44, 8, 5};
+static const uint32_t LFO_SAMPLES_PER_STEP[8] = {108, 77, 71, 67, 62, 44, 8, 5};
 
 /// There are 4 different LFO AM depths available, they are:
 /// 0 dB, 1.4 dB, 5.9 dB, 11.8 dB
@@ -299,7 +301,7 @@ static const uint32_t lfo_samples_per_step[8] = {108, 77, 71, 67, 62, 44, 8, 5};
 /// -   1 for 5.9 dB
 /// -   0 for 11.8 dB
 ///
-static const uint8_t lfo_ams_depth_shift[4] = {8, 3, 1, 0};
+static const uint8_t LFO_AMS_DEPTH_SHIFT[4] = {8, 3, 1, 0};
 
 /// There are 8 different LFO PM depths available, they are:
 ///   0, 3.4, 6.7, 10, 14, 20, 40, 80 (cents)
@@ -316,12 +318,12 @@ static const uint8_t lfo_ams_depth_shift[4] = {8, 3, 1, 0};
 ///
 ///   For example:
 ///    at LFO SPEED=0 (which is 108 samples per basic LFO step)
-///    one value from "lfo_pm_output" table lasts for 432 consecutive
+///    one value from "LFO_PM_OUTPUT" table lasts for 432 consecutive
 ///    samples (4*108=432) and one full LFO waveform cycle lasts for 13824
 ///    samples (32*432=13824; 32 because we store only a quarter of whole
 ///             waveform in the table below)
 ///
-static const uint8_t lfo_pm_output[7 * 8][8] = {
+static const uint8_t LFO_PM_OUTPUT[7 * 8][8] = {
 // 7 bits meaningful (of F-NUMBER), 8 LFO output levels per one depth
 // (out of 32), 8 LFO depths
     /* FNUM BIT 4: 000 0001xxxx */
@@ -395,6 +397,7 @@ static const uint8_t lfo_pm_output[7 * 8][8] = {
 /// output levels per one depth
 static int32_t lfo_pm_table[128 * 8 * 32];
 
+// TODO: replace with constant tables, i.e., compile elsewhere, run, and extract the tables
 /// Initialize generic tables.
 /// @details
 /// This function is not meant to be called directly. It is marked with the
@@ -462,7 +465,7 @@ static __attribute__((constructor)) void init_tables() {
                 for (uint32_t bit_tmp = 0; bit_tmp < 7; bit_tmp++) {  // 7 bits
                     if (fnum & (1 << bit_tmp)) {
                         uint32_t offset_fnum_bit = bit_tmp * 8;
-                        value += lfo_pm_output[offset_fnum_bit + i][step];
+                        value += LFO_PM_OUTPUT[offset_fnum_bit + i][step];
                     }
                 }
                 // 32 steps for LFO PM (sinus)
@@ -600,8 +603,8 @@ struct Operator {
     ///
     inline void set_dr(uint8_t value) {
         d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-        eg_sh_d1r = eg_rate_shift[d1r + ksr];
-        eg_sel_d1r = eg_rate_select[d1r + ksr];
+        eg_sh_d1r = EG_RATE_SHIFT[d1r + ksr];
+        eg_sel_d1r = EG_RATE_SELECT[d1r + ksr];
     }
 
     /// @brief Set the sustain level rate.
@@ -616,8 +619,8 @@ struct Operator {
     ///
     inline void set_sr(uint8_t value) {
         d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-        eg_sh_d2r = eg_rate_shift[d2r + ksr];
-        eg_sel_d2r = eg_rate_select[d2r + ksr];
+        eg_sh_d2r = EG_RATE_SHIFT[d2r + ksr];
+        eg_sel_d2r = EG_RATE_SELECT[d2r + ksr];
     }
 
     /// @brief Set the release rate.
@@ -626,8 +629,8 @@ struct Operator {
     ///
     inline void set_rr(uint8_t value) {
         rr = 34 + (value << 2);
-        eg_sh_rr = eg_rate_shift[rr + ksr];
-        eg_sel_rr = eg_rate_select[rr + ksr];
+        eg_sh_rr = EG_RATE_SHIFT[rr + ksr];
+        eg_sel_rr = EG_RATE_SELECT[rr + ksr];
     }
 
     /// @brief set the SSG register to a new value.
@@ -850,8 +853,8 @@ struct Voice {
         if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
         // refresh Attack rate
         if (oprtr->ar + oprtr->ksr < 32 + 62) {
-            oprtr->eg_sh_ar = eg_rate_shift[oprtr->ar + oprtr->ksr ];
-            oprtr->eg_sel_ar = eg_rate_select[oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sh_ar = EG_RATE_SHIFT[oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sel_ar = EG_RATE_SELECT[oprtr->ar + oprtr->ksr ];
         } else {
             oprtr->eg_sh_ar = 0;
             oprtr->eg_sel_ar = 17 * RATE_STEPS;

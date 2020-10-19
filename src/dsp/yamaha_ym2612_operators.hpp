@@ -688,10 +688,10 @@ struct Operator {
                 }
             }
             // recalculate EG output
-            if (ssgn ^ (ssg&0x04))
-                vol_out = ((uint32_t)(0x200 - volume) & MAX_ATT_INDEX) + tl;
+            if (ssgn ^ (ssg & 0x04))
+                vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
             else
-                vol_out = (uint32_t)volume + tl;
+                vol_out = (uint32_t) volume + tl;
         }
     }
 };

@@ -126,8 +126,11 @@ class YamahaYM2612 {
         while (engine.eg_timer >= engine.eg_timer_overflow) {
             engine.eg_timer -= engine.eg_timer_overflow;
             engine.eg_cnt++;
-            for (unsigned voice = 0; voice < NUM_VOICES; voice++)
-                engine.advance_eg_channel(voices[voice].operators);
+            for (Voice& voice : voices) {
+                for (Operator& oprtr : voice.operators) {
+                    oprtr.update_eg_channel(engine.eg_cnt);
+                }
+            }
         }
         // clip outputs
         output[0] = output[1] = 0;

@@ -689,6 +689,94 @@ struct Operator {
                 vol_out = (uint32_t) volume + tl;
         }
     }
+
+    /// Update the envelope generator for the operator.
+    ///
+    /// @param eg_cnt the counter for the envelope generator
+    ///
+    inline void update_eg_channel(uint32_t eg_cnt) {
+        unsigned int swap_flag = 0;
+        switch (state) {
+        case EG_ATT:  // attack phase
+            if (!(eg_cnt & ((1 << eg_sh_ar) - 1))) {
+                volume += (~volume * (eg_inc[eg_sel_ar + ((eg_cnt >> eg_sh_ar) & 7)])) >> 4;
+                if (volume <= MIN_ATT_INDEX) {
+                    volume = MIN_ATT_INDEX;
+                    state = EG_DEC;
+                }
+            }
+            break;
+        case EG_DEC:  // decay phase
+            if (ssg & 0x08) {  // SSG EG type envelope selected
+                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
+                    volume += 4 * eg_inc[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                    if ( volume >= static_cast<int32_t>(sl) )
+                        state = EG_SUS;
+                }
+            } else {
+                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
+                    volume += eg_inc[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                    if (volume >= static_cast<int32_t>(sl))
+                        state = EG_SUS;
+                }
+            }
+            break;
+        case EG_SUS:  // sustain phase
+            if (ssg & 0x08) {  // SSG EG type envelope selected
+                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                    volume += 4 * eg_inc[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
+                    if (volume >= ENV_QUIET) {
+                        volume = MAX_ATT_INDEX;
+                        if (ssg & 0x01) {  // bit 0 = hold
+                            if (ssgn & 1) {  // have we swapped once ???
+                                // yes, so do nothing, just hold current level
+                            } else {  // bit 1 = alternate
+                                swap_flag = (ssg & 0x02) | 1;
+                            }
+                        } else {  // same as KEY-ON operation
+                            // restart of the Phase Generator should be here
+                            phase = 0;
+                            // phase -> Attack
+                            volume = 511;
+                            state = EG_ATT;
+                            // bit 1 = alternate
+                            swap_flag = (ssg & 0x02);
+                        }
+                    }
+                }
+            } else {
+                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                    volume += eg_inc[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
+                    if (volume >= MAX_ATT_INDEX) {
+                        volume = MAX_ATT_INDEX;
+                        // do not change state (verified on real chip)
+                    }
+                }
+            }
+            break;
+        case EG_REL:  // release phase
+            if (!(eg_cnt & ((1 << eg_sh_rr) - 1))) {
+                // SSG-EG affects Release phase also (Nemesis)
+                volume += eg_inc[eg_sel_rr + ((eg_cnt >> eg_sh_rr) & 7)];
+                if (volume >= MAX_ATT_INDEX) {
+                    volume = MAX_ATT_INDEX;
+                    state = EG_OFF;
+                }
+            }
+            break;
+        }
+        // get the output volume from the slot
+        unsigned int out = static_cast<uint32_t>(volume);
+        // negate output (changes come from alternate bit, init comes from
+        // attack bit)
+        if ((ssg & 0x08) && (ssgn & 2) && (state > EG_REL))
+            out ^= MAX_ATT_INDEX;
+        // we need to store the result here because we are going to change
+        // ssgn in next instruction
+        vol_out = out + tl;
+        // reverse oprtr inversion flag
+        ssgn ^= swap_flag;
+    }
 };
 
 // ---------------------------------------------------------------------------

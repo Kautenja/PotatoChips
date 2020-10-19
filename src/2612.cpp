@@ -104,7 +104,7 @@ struct Chip2612 : rack::Module {
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_MASTER, 2),
+        OUTPUT_MASTER,
         NUM_OUTPUTS
     };
 
@@ -228,11 +228,10 @@ struct Chip2612 : rack::Module {
                 processCV(args, channel);
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
-            int16_t samples[2] = {0, 0};
-            apu[channel].step(samples);
-            // set the outputs of the module
-            outputs[OUTPUT_MASTER + 0].setVoltage(5.f * static_cast<float>(samples[0]) / std::numeric_limits<int16_t>::max(), channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(5.f * static_cast<float>(samples[1]) / std::numeric_limits<int16_t>::max(), channel);
+            // run a step on the emulator, cast the 16-bit PCM sample as float
+            const float sample = apu[channel].step();
+            // set the 5V voltage based on the PCM sample
+            outputs[OUTPUT_MASTER].setVoltage(5.f * sample / std::numeric_limits<int16_t>::max(), channel);
         }
     }
 };
@@ -311,8 +310,7 @@ struct Chip2612Widget : ModuleWidget {
             }
         }
         // left + right master outputs
-        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(71, 325), module, Chip2612::OUTPUT_MASTER + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER));
     }
 };
 

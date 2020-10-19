@@ -324,11 +324,11 @@ class YamahaYM2612 {
         }
     }
 
-    /// @brief Run a step on the emulator.
+    /// @brief Run a step on the emulator to produce a sample.
     ///
-    /// @param output the stereo output buffer to dump sample data into
+    /// @returns a 16-bit PCM sample from the synthesizer
     ///
-    inline void step(int16_t output[2]) {
+    inline int16_t step() {
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
             // refresh PG and EG
             refresh_fc_eg_chan(&voices[voice]);
@@ -354,15 +354,15 @@ class YamahaYM2612 {
             }
         }
         // clip outputs
-        output[0] = output[1] = 0;
+        int16_t output = 0;
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
             if (out_fm[voice] > 8191)
                 out_fm[voice] = 8191;
             else if (out_fm[voice] < -8192)
                 out_fm[voice] = -8192;
-            output[0] += out_fm[voice];
-            output[1] += out_fm[voice];
+            output += out_fm[voice];
         }
+        return output;
     }
 
     /// @brief Set the global LFO for the chip.

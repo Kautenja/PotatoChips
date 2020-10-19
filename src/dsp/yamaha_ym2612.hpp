@@ -136,18 +136,24 @@ class YamahaYM2612 {
         // timer A High 8 (address 0x24)
         engine.state.TA = (engine.state.TA & 0x0003) | (0x00 << 2);
 
-        reset_voices(&engine.state, &voices[0], 6);
+        reset_voices(&engine.state, &voices[0], NUM_VOICES);
 
-        for (int i = 0xb2; i >= 0x30; i--) {
-            write_register(&engine, i, 0);
-            write_register(&engine, i | 0x100, 0);
+        setLFO(0);
+        for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
+            Voice& voice = voices[voice_idx];
+            // set both bits of pan to enable both channel outputs
+            setPAN(voice_idx, 3);
+            set_algorithm(&engine, &voice, voice_idx, 0);
+            set_feedback(&voice, 0);
+            setFREQ(voice_idx, 0);
+            setGATE(voice_idx, 0);
+            setAMS(voice_idx, 0);
+            setFMS(voice_idx, 0);
         }
 
-        for (int voice = 0; voice < 6; voice++) {
-            setAMS(voice, 0);
-            setFMS(voice, 0);
-            // set both bits of pan to enable both channel outputs
-            setPAN(voice, 3);
+        for (unsigned i = 0xb2; i >= 0x30; i--) {
+            write_register(&engine, i, 0);
+            write_register(&engine, i | 0x100, 0);
         }
     }
 
@@ -330,8 +336,7 @@ class YamahaYM2612 {
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.FB_ALG = (voice.FB_ALG & 0x38) | (algorithm & 7);
-        voice.algorithm = algorithm & 7;
-        set_routing(&engine, &voice, voice_idx);
+        set_algorithm(&engine, &voice, voice_idx, algorithm);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -346,8 +351,7 @@ class YamahaYM2612 {
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.FB_ALG = (voice.FB_ALG & 7)| ((feedback & 7) << 3);
-        feedback = feedback & 7;
-        voice.feedback = feedback ? feedback + 6 : 0;
+        set_feedback(&voice, feedback);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
@@ -393,8 +397,7 @@ class YamahaYM2612 {
         // get the voice and set the value
         Voice& voice = voices[voice_idx];
         voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
-        engine.pan[voice_idx * 2    ] = (state & 0x2) ? ~0 : 0;
-        engine.pan[voice_idx * 2 + 1] = (state & 0x1) ? ~0 : 0;
+        set_pan(&engine, voice_idx, state);
     }
 
     // -----------------------------------------------------------------------

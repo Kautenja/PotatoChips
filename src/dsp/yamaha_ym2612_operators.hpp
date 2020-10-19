@@ -824,6 +824,16 @@ static inline void set_sl_rr(Operator* oprtr, int value) {
     oprtr->eg_sel_rr = eg_rate_select[oprtr->rr + oprtr->ksr];
 }
 
+/// @brief Set the feedback amount.
+///
+/// @param voice a pointer to the voice
+/// @param feedback the amount of feedback for the first operator on the voice
+///
+static inline void set_feedback(Voice* voice, uint8_t feedback) {
+    feedback = feedback & 7;
+    voice->feedback = feedback ? feedback + 6 : 0;
+}
+
 /// @brief reset the channels.
 ///
 /// @param state the global operator state to reset

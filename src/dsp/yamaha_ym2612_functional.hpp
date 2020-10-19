@@ -214,6 +214,29 @@ static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
     voice->connect4 = carrier;
 }
 
+// TODO: dont pass in voice_idx? or replace voice and use voice_idx to get
+/// @brief Set the algorithm parameter to a new value.
+///
+/// @param engine the engine to set the voice algorithm for
+/// @param voice the voice to set the algorithm of
+/// @param voice_idx the index of the voice to set the algorithm of
+/// @param algorithm the index of the algorithm \f$\in [0, 7]\f$
+///
+static inline void set_algorithm(
+    EngineState* engine,
+    Voice* voice,
+    unsigned voice_idx,
+    uint8_t algorithm
+) {
+    voice->algorithm = algorithm;
+    set_routing(engine, voice, voice_idx);
+}
+
+static inline void set_pan(EngineState* engine, unsigned voice_idx, uint8_t data) {
+    engine->pan[voice_idx * 2    ] = (data & 0x2) ? ~0 : 0;
+    engine->pan[voice_idx * 2 + 1] = (data & 0x1) ? ~0 : 0;
+}
+
 /// @brief Advance LFO to next sample.
 static inline void advance_lfo(EngineState* engine) {
     if (engine->lfo_timer_overflow) {  // LFO enabled ?
@@ -531,22 +554,22 @@ static void write_register(EngineState* engine, int address, int data) {
         break;
     case 0xb0:
         switch (OPERATOR(address)) {
-        case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
-            int feedback = (data >> 3) & 7;
-            voice->algorithm = data & 7;
-            voice->feedback = feedback ? feedback + 6 : 0;
-            set_routing(engine, voice, voice_index);
-            break;
-        }
-        case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
-            // b0-2 PMS
-            voice->pms = (data & 7) * 32;
-            // b4-5 AMS
-            voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
-            // PAN :  b7 = L, b6 = R
-            engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
-            engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
-            break;
+        // case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
+        //     int feedback = (data >> 3) & 7;
+        //     voice->algorithm = data & 7;
+        //     voice->feedback = feedback ? feedback + 6 : 0;
+        //     set_routing(engine, voice, voice_index);
+        //     break;
+        // }
+        // case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
+        //     // b0-2 PMS
+        //     voice->pms = (data & 7) * 32;
+        //     // b4-5 AMS
+        //     voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
+        //     // PAN :  b7 = L, b6 = R
+        //     engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
+        //     engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
+        //     break;
         }
         break;
     }

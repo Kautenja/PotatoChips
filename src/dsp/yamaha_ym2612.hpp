@@ -23,7 +23,7 @@
 #ifndef DSP_YAMAHA_YM2612_HPP_
 #define DSP_YAMAHA_YM2612_HPP_
 
-#include "yamaha_ym2612_functional.hpp"
+#include "yamaha_ym2612_operators.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Object-Oriented API
@@ -40,10 +40,239 @@ class YamahaYM2612 {
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
  private:
-    /// OPN engine state
-    EngineState engine;
+    /// general state
+    GlobalOperatorState state;
     /// channel state
     Voice voices[NUM_VOICES];
+
+    /// Phase Modulation input for operator 2
+    int32_t m2 = 0;
+    /// Phase Modulation input for operator 3
+    int32_t c1 = 0;
+    /// Phase Modulation input for operator 4
+    int32_t c2 = 0;
+
+    /// one sample delay memory
+    int32_t mem = 0;
+    /// outputs of working channels
+    int32_t out_fm[8];
+
+    // TODO: enum for the operator?
+    // TODO: better ASCII illustrations of the operators
+    /// @brief Set algorithm, i.e., operator routing.
+    ///
+    /// @param voice_idx the index of the voice to set the routing of
+    /// @param algorithm the algorithm to set the voice to
+    ///
+    inline void set_algorithm(unsigned voice_idx, uint8_t algorithm) {
+        // get the voice and carrier wave
+        Voice* const voice = &voices[voice_idx];
+        voice->algorithm = algorithm & 7;
+        int32_t *carrier = &out_fm[voice_idx];
+        // get the connections
+        int32_t **om1 = &voice->connect1;
+        int32_t **om2 = &voice->connect3;
+        int32_t **oc1 = &voice->connect2;
+        int32_t **memc = &voice->mem_connect;
+        // set the algorithm
+        switch (voice->algorithm) {
+        case 0:
+            // M1---C1---MEM---M2---C2---OUT
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 1:
+            // M1------+-MEM---M2---C2---OUT
+            //      C1-+
+            *om1 = &mem;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 2:
+            // M1-----------------+-C2---OUT
+            //      C1---MEM---M2-+
+            *om1 = &c2;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 3:
+            // M1---C1---MEM------+-C2---OUT
+            //                 M2-+
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &c2;
+            break;
+        case 4:
+            // M1---C1-+-OUT
+            // M2---C2-+
+            // MEM: not used
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = &c2;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 5:
+            //    +----C1----+
+            // M1-+-MEM---M2-+-OUT
+            //    +----C2----+
+            *om1 = nullptr;  // special mark
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &m2;
+            break;
+        case 6:
+            // M1---C1-+
+            //      M2-+-OUT
+            //      C2-+
+            // MEM: not used
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 7:
+            // M1-+
+            // C1-+-OUT
+            // M2-+
+            // C2-+
+            // MEM: not used
+            *om1 = carrier;
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        }
+        voice->connect4 = carrier;
+    }
+
+    /// @brief Update phase increment and envelope generator
+    inline void refresh_fc_eg_slot(Operator* oprtr, int fc, int kc) {
+        int ksr = kc >> oprtr->KSR;
+        fc += oprtr->DT[kc];
+        // detects frequency overflow (credits to Nemesis)
+        if (fc < 0) fc += state.fn_max;
+        // (frequency) phase increment counter
+        oprtr->phase_increment = (fc * oprtr->mul) >> 1;
+        if (oprtr->ksr != ksr) {
+            oprtr->ksr = ksr;
+            // calculate envelope generator rates
+            if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
+                oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
+                oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
+            } else {
+                oprtr->eg_sh_ar = 0;
+                oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
+            }
+            // set the shift
+            oprtr->eg_sh_d1r = ENV_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sh_d2r = ENV_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sh_rr = ENV_RATE_SHIFT[oprtr->rr + oprtr->ksr];
+            // set the selector
+            oprtr->eg_sel_d1r = ENV_RATE_SELECT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sel_d2r = ENV_RATE_SELECT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sel_rr = ENV_RATE_SELECT[oprtr->rr + oprtr->ksr];
+        }
+    }
+
+    /// @brief Update phase increment counters
+    inline void refresh_fc_eg_chan(Voice* voice) {
+        if (voice->operators[Op1].phase_increment == -1) {
+            int fc = voice->fc;
+            int kc = voice->kcode;
+            refresh_fc_eg_slot(&voice->operators[Op1], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op2], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op3], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op4], fc, kc);
+        }
+    }
+
+    inline void update_phase_lfo_channel(Voice* voice) {
+        uint32_t block_fnum = voice->block_fnum;
+        uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + state.lfo_PM_step];
+        if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+            block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
+            uint8_t blk = (block_fnum & 0x7000) >> 12;
+            uint32_t fn = block_fnum & 0xfff;
+            // key-scale code
+            int kc = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fn >> 8];
+            // phase increment counter
+            int fc = (state.fn_table[fn] >> (7 - blk));
+            // detects frequency overflow (credits to Nemesis)
+            int finc = fc + voice->operators[Op1].DT[kc];
+            // Operator 1
+            if (finc < 0) finc += state.fn_max;
+            voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
+            // Operator 2
+            finc = fc + voice->operators[Op2].DT[kc];
+            if (finc < 0) finc += state.fn_max;
+            voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
+            // Operator 3
+            finc = fc + voice->operators[Op3].DT[kc];
+            if (finc < 0) finc += state.fn_max;
+            voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
+            // Operator 4
+            finc = fc + voice->operators[Op4].DT[kc];
+            if (finc < 0) finc += state.fn_max;
+            voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
+        } else {  // LFO phase modulation is 0
+            voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+            voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+            voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+            voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+        }
+    }
+
+    inline void chan_calc(Voice* voice) {
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
+        uint32_t AM = state.lfo_AM_step >> voice->ams;
+        m2 = c1 = c2 = mem = 0;
+        // restore delayed sample (MEM) value to m2 or c2
+        *voice->mem_connect = voice->mem_value;
+        // Operator 1
+        unsigned int eg_out = CALCULATE_VOLUME(&voice->operators[Op1]);
+        int32_t out = voice->op1_out[0] + voice->op1_out[1];
+        voice->op1_out[0] = voice->op1_out[1];
+        if (!voice->connect1) {  // algorithm 5
+            mem = c1 = c2 = voice->op1_out[0];
+        } else {  // other algorithms
+            *voice->connect1 += voice->op1_out[0];
+        }
+        voice->op1_out[1] = 0;
+        if (eg_out < ENV_QUIET) {
+            if (!voice->feedback) out = 0;
+            voice->op1_out[1] = op_calc1(voice->operators[Op1].phase, eg_out, (out << voice->feedback) );
+        }
+        // Operator 3
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op3]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect3 += op_calc(voice->operators[Op3].phase, eg_out, m2);
+        // Operator 2
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op2]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect2 += op_calc(voice->operators[Op2].phase, eg_out, c1);
+        // Operator 4
+        eg_out = CALCULATE_VOLUME(&voice->operators[Op4]);
+        if (eg_out < ENV_QUIET)
+            *voice->connect4 += op_calc(voice->operators[Op4].phase, eg_out, c2);
+        // store current MEM
+        voice->mem_value = mem;
+        // update phase counters AFTER output calculations
+        if (voice->pms) {
+            update_phase_lfo_channel(voice);
+        } else {  // no LFO phase modulation
+            voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
+            voice->operators[Op2].phase += voice->operators[Op2].phase_increment;
+            voice->operators[Op3].phase += voice->operators[Op3].phase_increment;
+            voice->operators[Op4].phase += voice->operators[Op4].phase_increment;
+        }
+#undef CALCULATE_VOLUME
+    }
 
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
@@ -52,8 +281,7 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        engine.voices = voices;
-        engine.state.set_sample_rate(sample_rate, clock_rate);
+        state.set_sample_rate(sample_rate, clock_rate);
         reset();
     }
 
@@ -63,19 +291,19 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     inline void setSampleRate(double clock_rate, double sample_rate) {
-        engine.state.set_sample_rate(sample_rate, clock_rate);
+        state.set_sample_rate(sample_rate, clock_rate);
     }
 
     /// @brief Reset the emulator to its initial state
     inline void reset() {
         // envelope generator
-        engine.state.eg_timer = 0;
-        engine.state.eg_cnt = 0;
+        state.eg_timer = 0;
+        state.eg_cnt = 0;
         // LFO
-        engine.state.lfo_timer = 0;
-        engine.state.lfo_cnt = 0;
-        engine.state.lfo_AM_step = 126;
-        engine.state.lfo_PM_step = 0;
+        state.lfo_timer = 0;
+        state.lfo_cnt = 0;
+        state.lfo_AM_step = 126;
+        state.lfo_PM_step = 0;
         // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
@@ -110,37 +338,37 @@ class YamahaYM2612 {
     inline void step(int16_t output[2]) {
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
             // refresh PG and EG
-            engine.refresh_fc_eg_chan(&voices[voice]);
+            refresh_fc_eg_chan(&voices[voice]);
             // clear outputs
-            engine.out_fm[voice] = 0;
+            out_fm[voice] = 0;
             // update SSG-EG output
             for (unsigned i = 0; i < 4; i++)
                 voices[voice].operators[i].update_ssg_eg_channel();
             // calculate FM
-            engine.chan_calc(&voices[voice]);
+            chan_calc(&voices[voice]);
         }
         // advance LFO
-        engine.state.advance_lfo();
+        state.advance_lfo();
         // advance envelope generator
-        engine.state.eg_timer += engine.state.eg_timer_add;
-        while (engine.state.eg_timer >= engine.state.eg_timer_overflow) {
-            engine.state.eg_timer -= engine.state.eg_timer_overflow;
-            engine.state.eg_cnt++;
+        state.eg_timer += state.eg_timer_add;
+        while (state.eg_timer >= state.eg_timer_overflow) {
+            state.eg_timer -= state.eg_timer_overflow;
+            state.eg_cnt++;
             for (Voice& voice : voices) {
                 for (Operator& oprtr : voice.operators) {
-                    oprtr.update_eg_channel(engine.state.eg_cnt);
+                    oprtr.update_eg_channel(state.eg_cnt);
                 }
             }
         }
         // clip outputs
         output[0] = output[1] = 0;
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
-            if (engine.out_fm[voice] > 8191)
-                engine.out_fm[voice] = 8191;
-            else if (engine.out_fm[voice] < -8192)
-                engine.out_fm[voice] = -8192;
-            output[0] += engine.out_fm[voice];
-            output[1] += engine.out_fm[voice];
+            if (out_fm[voice] > 8191)
+                out_fm[voice] = 8191;
+            else if (out_fm[voice] < -8192)
+                out_fm[voice] = -8192;
+            output[0] += out_fm[voice];
+            output[1] += out_fm[voice];
         }
     }
 
@@ -161,7 +389,7 @@ class YamahaYM2612 {
     /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
-        engine.state.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
+        state.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
     // -----------------------------------------------------------------------
@@ -174,7 +402,7 @@ class YamahaYM2612 {
     /// @param algorithm the selected FM algorithm in [0, 7]
     ///
     inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
-        engine.set_algorithm(voice_idx, algorithm);
+        set_algorithm(voice_idx, algorithm);
     }
 
     /// @brief Set the feedback (FB) register for the given voice.
@@ -222,12 +450,12 @@ class YamahaYM2612 {
         // MARK: Frequency Low
         // -------------------------------------------------------------------
         const auto freqLow = freq16bit & 0xff;
-        uint32_t fn = (((uint32_t)( (engine.state.fn_h) & 7)) << 8) + freqLow;
-        uint8_t blk = engine.state.fn_h >> 3;
+        uint32_t fn = (((uint32_t)( (state.fn_h) & 7)) << 8) + freqLow;
+        uint8_t blk = state.fn_h >> 3;
         /* key-scale code */
         voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
         /* phase increment counter */
-        voice.fc = engine.state.fn_table[fn * 2] >> (7 - blk);
+        voice.fc = state.fn_table[fn * 2] >> (7 - blk);
         /* store fnum in clear form for LFO PM calculations */
         voice.block_fnum = (blk << 11) | fn;
         voice.operators[Op1].phase_increment = -1;
@@ -235,7 +463,7 @@ class YamahaYM2612 {
         // MARK: Frequency High
         // -------------------------------------------------------------------
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        engine.state.fn_h = freqHigh & 0x3f;
+        state.fn_h = freqHigh & 0x3f;
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
@@ -439,7 +667,7 @@ class YamahaYM2612 {
         Voice& voice = voices[voice_idx];
         Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
         // calculate the new DT register value
-        int32_t* const DT = engine.state.dt_table[value & 7];
+        int32_t* const DT = state.dt_table[value & 7];
         // check if the value changed to update phase increment
         if (oprtr.DT != DT) voice.operators[Op1].phase_increment = -1;
         // set the DT register for the operator

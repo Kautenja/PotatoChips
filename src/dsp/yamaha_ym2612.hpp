@@ -53,8 +53,7 @@ class YamahaYM2612 {
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
         engine.voices = voices;
-        engine.clock = clock_rate;
-        engine.rate = sample_rate;
+        engine.set_prescaler(sample_rate, clock_rate);
         reset();
     }
 
@@ -64,15 +63,11 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     inline void setSampleRate(double clock_rate, double sample_rate) {
-        engine.clock = clock_rate;
-        engine.rate = sample_rate;
-        set_prescaler(&engine);
+        engine.set_prescaler(sample_rate, clock_rate);
     }
 
     /// @brief Reset the emulator to its initial state
     inline void reset() {
-        // set the frequency scaling parameters of the engine emulator
-        set_prescaler(&engine);
         // envelope generator
         engine.eg_timer = 0;
         engine.eg_cnt = 0;
@@ -196,7 +191,13 @@ class YamahaYM2612 {
     /// @param is_open true if the gate is open, false otherwise
     ///
     inline void setGATE(uint8_t voice_idx, bool is_open) {
-        set_gate(&engine, (is_open * 0xF0) + ((voice_idx / 3) * 4 + voice_idx % 3));
+        // cache a pointer to the voice
+        Voice& voice = voices[voice_idx];
+        // process the gate for each operator on the voice
+        if (is_open) voice.operators[Op1].set_keyon(); else voice.operators[Op1].set_keyoff();
+        if (is_open) voice.operators[Op2].set_keyon(); else voice.operators[Op2].set_keyoff();
+        if (is_open) voice.operators[Op3].set_keyon(); else voice.operators[Op3].set_keyoff();
+        if (is_open) voice.operators[Op4].set_keyon(); else voice.operators[Op4].set_keyoff();
     }
 
     /// @brief Set the frequency for the given channel.

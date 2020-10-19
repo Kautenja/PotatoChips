@@ -27,10 +27,6 @@
 
 /// @brief Emulator common state.
 struct EngineState {
-    /// master clock (Hz)
-    int clock = 0;
-    /// sampling rate (Hz)
-    int rate = 0;
     /// frequency base
     float freqbase = 0;
 
@@ -79,60 +75,59 @@ struct EngineState {
     int32_t mem = 0;
     /// outputs of working channels
     int32_t out_fm[8];
-};
 
-/// @brief Initialize time tables.
-static void init_timetables(EngineState* engine, float freqbase) {
-    // DeTune table
-    for (int d = 0; d <= 3; d++) {
-        for (int i = 0; i <= 31; i++) {
-            // -10 because chip works with 10.10 fixed point, while we use 16.16
-            float rate = ((float) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
-            engine->state.dt_tab[d][i] = (int32_t) rate;
-            engine->state.dt_tab[d + 4][i] = -engine->state.dt_tab[d][i];
+    /// @brief Initialize time tables.
+    void init_timetables() {
+        // DeTune table
+        for (int d = 0; d <= 3; d++) {
+            for (int i = 0; i <= 31; i++) {
+                // -10 because chip works with 10.10 fixed point, while we use 16.16
+                float rate = ((float) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+                state.dt_tab[d][i] = (int32_t) rate;
+                state.dt_tab[d + 4][i] = -state.dt_tab[d][i];
+            }
         }
+        // there are 2048 FNUMs that can be generated using FNUM/BLK registers
+        // but LFO works with one more bit of a precision so we really need 4096
+        // elements. calculate fnumber -> increment counter table
+        for (int i = 0; i < 4096; i++) {
+            // freq table for octave 7
+            // phase increment counter = 20bit
+            // the correct formula is
+            //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
+            // where sample clock is: M / 144
+            // this means the increment value for one clock sample is
+            //     FNUM * 2^(B-1) = FNUM * 64
+            // for octave 7
+            // we also need to handle the ratio between the chip frequency and
+            // the emulated frequency (can be 1.0)
+            // NOTE:
+            // -10 because chip works with 10.10 fixed point, while we use 16.16
+            fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+        }
+        // maximal frequency is required for Phase overflow calculation, register
+        // size is 17 bits (Nemesis)
+        fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
     }
-    // there are 2048 FNUMs that can be generated using FNUM/BLK registers
-    // but LFO works with one more bit of a precision so we really need 4096
-    // elements. calculate fnumber -> increment counter table
-    for (int i = 0; i < 4096; i++) {
-        // freq table for octave 7
-        // phase increment counter = 20bit
-        // the correct formula is
-        //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
-        // where sample clock is: M / 144
-        // this means the increment value for one clock sample is
-        //     FNUM * 2^(B-1) = FNUM * 64
-        // for octave 7
-        // we also need to handle the ratio between the chip frequency and
-        // the emulated frequency (can be 1.0)
-        // NOTE:
-        // -10 because chip works with 10.10 fixed point, while we use 16.16
-        engine->fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
-    }
-    // maximal frequency is required for Phase overflow calculation, register
-    // size is 17 bits (Nemesis)
-    engine->fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
-}
 
-/// @brief Set pre-scaler and make time tables.
-///
-/// @param engine the emulator to set the pre-scaler and create timetables for
-///
-static void set_prescaler(EngineState* engine) {
-    // frequency base
-    engine->freqbase = (engine->rate) ?
-        (static_cast<float>(engine->clock) / engine->rate) : 0;
-    // TODO: why is it necessary to scale these increments by a factor of 1/16
-    //       to get the correct timings from the EG and LFO?
-    // EG timer increment (updates every 3 samples)
-    engine->eg_timer_add = (1 << EG_SH) * engine->freqbase / 16;
-    engine->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
-    // LFO timer increment (updates every 16 samples)
-    engine->lfo_timer_add = (1 << LFO_SH) * engine->freqbase / 16;
-    // make time tables
-    init_timetables(engine, engine->freqbase);
-}
+    /// @brief Set pre-scaler and make time tables.
+    ///
+    /// @param engine the emulator to set the pre-scaler and create timetables for
+    ///
+    void set_prescaler(int rate, int clock) {
+        // frequency base
+        freqbase = rate ? static_cast<float>(clock) / rate : 0;
+        // TODO: why is it necessary to scale these increments by a factor of 1/16
+        //       to get the correct timings from the EG and LFO?
+        // EG timer increment (updates every 3 samples)
+        eg_timer_add = (1 << EG_SH) * freqbase / 16;
+        eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+        // LFO timer increment (updates every 16 samples)
+        lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
+        // make time tables
+        init_timetables();
+    }
+};
 
 /// @brief Set algorithm routing.
 static void set_routing(EngineState* engine, Voice* voice, int carrier_index) {
@@ -477,25 +472,6 @@ static inline void refresh_fc_eg_chan(EngineState* engine, Voice* voice) {
         refresh_fc_eg_slot(engine, &voice->operators[Op3] , fc , kc );
         refresh_fc_eg_slot(engine, &voice->operators[Op4] , fc , kc );
     }
-}
-
-/// @brief set the gate mask to a new value.
-///
-/// @param state the engine state structure
-/// @param gate_mask a bitmask with a bit for each voice on the chip
-///
-static inline void set_gate(EngineState* state, uint8_t gate_mask) {
-    uint8_t voice_index = VOICE(gate_mask);
-    if (voice_index == 3) return;
-    // check the high bit to address the high 3 voices {3, 4, 5}
-    if (gate_mask & 0x04) voice_index += 3;
-    // cache a pointer to the voice
-    Voice* voice = &state->voices[voice_index];
-    // process the gate for each operator on the voice
-    if (gate_mask & 0x10) voice->operators[Op1].set_keyon(); else voice->operators[Op1].set_keyoff();
-    if (gate_mask & 0x20) voice->operators[Op2].set_keyon(); else voice->operators[Op2].set_keyoff();
-    if (gate_mask & 0x40) voice->operators[Op3].set_keyon(); else voice->operators[Op3].set_keyoff();
-    if (gate_mask & 0x80) voice->operators[Op4].set_keyon(); else voice->operators[Op4].set_keyoff();
 }
 
 #endif  // DSP_YAMAHA_YM2612_FUNCTIONAL_HPP_

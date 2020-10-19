@@ -262,32 +262,32 @@ struct EngineState {
             oprtr->ksr = ksr;
             // calculate envelope generator rates
             if ((oprtr->ar + oprtr->ksr) < 32+62) {
-                oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar  + oprtr->ksr ];
-                oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr ];
+                oprtr->eg_sh_ar  = eg_rate_shift[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sel_ar = eg_rate_select[oprtr->ar  + oprtr->ksr];
             } else {
                 oprtr->eg_sh_ar  = 0;
-                oprtr->eg_sel_ar = 17*RATE_STEPS;
+                oprtr->eg_sel_ar = 17 * RATE_STEPS;
             }
-
-            oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr  + oprtr->ksr];
-
-            oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
+            // set the shift
+            oprtr->eg_sh_d1r = eg_rate_shift[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sh_d2r = eg_rate_shift[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sh_rr = eg_rate_shift[oprtr->rr  + oprtr->ksr];
+            // set the selector
+            oprtr->eg_sel_d1r = eg_rate_select[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sel_d2r = eg_rate_select[oprtr->d2r + oprtr->ksr];
             oprtr->eg_sel_rr = eg_rate_select[oprtr->rr  + oprtr->ksr];
         }
     }
 
     /// @brief Update phase increment counters
     inline void refresh_fc_eg_chan(Voice* voice) {
-        if (voice->operators[Op1].phase_increment==-1) {
+        if (voice->operators[Op1].phase_increment == -1) {
             int fc = voice->fc;
             int kc = voice->kcode;
-            refresh_fc_eg_slot(&voice->operators[Op1] , fc , kc );
-            refresh_fc_eg_slot(&voice->operators[Op2] , fc , kc );
-            refresh_fc_eg_slot(&voice->operators[Op3] , fc , kc );
-            refresh_fc_eg_slot(&voice->operators[Op4] , fc , kc );
+            refresh_fc_eg_slot(&voice->operators[Op1], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op2], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op3], fc, kc);
+            refresh_fc_eg_slot(&voice->operators[Op4], fc, kc);
         }
     }
 

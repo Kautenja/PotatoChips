@@ -322,15 +322,15 @@ class YamahaYM2612 {
     /// @returns a 16-bit PCM sample from the synthesizer
     ///
     inline int16_t step() {
-            // refresh PG and EG
-            refresh_fc_eg_chan();
-            // clear outputs
-            out_fm = 0;
-            // update SSG-EG output
-            for (unsigned i = 0; i < 4; i++)
-                voice.operators[i].update_ssg_eg_channel();
-            // calculate FM
-            chan_calc();
+        // refresh PG and EG
+        refresh_fc_eg_chan();
+        // clear outputs
+        out_fm = 0;
+        // update SSG-EG output
+        for (unsigned i = 0; i < 4; i++)
+            voice.operators[i].update_ssg_eg_channel();
+        // calculate FM
+        chan_calc();
         // advance LFO
         state.advance_lfo();
         // advance envelope generator
@@ -344,9 +344,9 @@ class YamahaYM2612 {
         // clip the output to 14-bits
         // TODO: output clipping indicator
         if (out_fm > Operator::OUTPUT_MAX) {
-            return Operator::OUTPUT_MAX;
+            out_fm = Operator::OUTPUT_MAX;
         } else if (out_fm < Operator::OUTPUT_MIN) {
-            return Operator::OUTPUT_MIN;
+            out_fm = Operator::OUTPUT_MIN;
         }
         return out_fm;
     }

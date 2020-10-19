@@ -479,37 +479,6 @@ static __attribute__((constructor)) void init_tables() {
 // MARK: Global Operator State
 // ---------------------------------------------------------------------------
 
-/// @brief Return the voice index based on the input.
-///
-/// @param address the value to convert to a voice index
-/// @returns the index of the voice \f$\in \{0, 1, 2, 3\}\f$
-/// @details
-/// There are three voice indexes, additional voices are indexed using paging.
-///
-#define VOICE(address) (address & 3)
-
-/// Return the data port associated with the given voice.
-///
-/// @param voice the voice to get the data port index of
-/// @returns the data port for the voice (3 voices per port, starting at 0)
-///
-#define VOICE_PART(voice) (voice / 3)
-
-/// @brief Return the address offset for the given voice.
-///
-/// @param address the register to offset
-/// @param voice the voice to get the offset register of
-/// @returns the register based of the offset for the voice
-///
-#define VOICE_OFFSET(address, voice) (address + (voice % 3))
-
-/// @brief Return the operator index based on the input.
-///
-/// @param address the value to convert to a operator index
-/// @returns the index of the operator \f$\in \{0, 1, 2, 3\}\f$
-///
-#define OPERATOR(address) ((address >> 2) & 3)
-
 /// @brief The global state for all FM operators.
 struct GlobalOperatorState {
     /// freq latch

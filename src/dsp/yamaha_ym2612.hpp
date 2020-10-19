@@ -120,7 +120,7 @@ class YamahaYM2612 {
             chan_calc(&engine, &voices[voice]);
         }
         // advance LFO
-        advance_lfo(&engine);
+        engine.advance_lfo();
         // advance envelope generator
         engine.eg_timer += engine.eg_timer_add;
         while (engine.eg_timer >= engine.eg_timer_overflow) {

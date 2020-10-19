@@ -226,30 +226,30 @@ struct EngineState {
         }
         voice->connect4 = carrier;
     }
-};
 
-/// @brief Advance LFO to next sample.
-static inline void advance_lfo(EngineState* engine) {
-    if (engine->lfo_timer_overflow) {  // LFO enabled ?
-        // increment LFO timer
-        engine->lfo_timer +=  engine->lfo_timer_add;
-        // when LFO is enabled, one level will last for
-        // 108, 77, 71, 67, 62, 44, 8 or 5 samples
-        while (engine->lfo_timer >= engine->lfo_timer_overflow) {
-            engine->lfo_timer -= engine->lfo_timer_overflow;
-            // There are 128 LFO steps
-            engine->lfo_cnt = ( engine->lfo_cnt + 1 ) & 127;
-            // triangle (inverted)
-            // AM: from 126 to 0 step -2, 0 to 126 step +2
-            if (engine->lfo_cnt<64)
-                engine->lfo_AM_step = (engine->lfo_cnt ^ 63) << 1;
-            else
-                engine->lfo_AM_step = (engine->lfo_cnt & 63) << 1;
-            // PM works with 4 times slower clock
-            engine->lfo_PM_step = engine->lfo_cnt >> 2;
+    /// @brief Advance LFO to next sample.
+    inline void advance_lfo() {
+        if (lfo_timer_overflow) {  // LFO enabled ?
+            // increment LFO timer
+            lfo_timer +=  lfo_timer_add;
+            // when LFO is enabled, one level will last for
+            // 108, 77, 71, 67, 62, 44, 8 or 5 samples
+            while (lfo_timer >= lfo_timer_overflow) {
+                lfo_timer -= lfo_timer_overflow;
+                // There are 128 LFO steps
+                lfo_cnt = ( lfo_cnt + 1 ) & 127;
+                // triangle (inverted)
+                // AM: from 126 to 0 step -2, 0 to 126 step +2
+                if (lfo_cnt<64)
+                    lfo_AM_step = (lfo_cnt ^ 63) << 1;
+                else
+                    lfo_AM_step = (lfo_cnt & 63) << 1;
+                // PM works with 4 times slower clock
+                lfo_PM_step = lfo_cnt >> 2;
+            }
         }
     }
-}
+};
 
 static inline void advance_eg_channel(EngineState* engine, Operator* oprtr) {
     // four operators per channel

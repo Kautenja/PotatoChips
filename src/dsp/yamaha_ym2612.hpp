@@ -436,11 +436,10 @@ class YamahaYM2612 {
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
         for (; frequency >= 1024; octave++) frequency /= 2;
-        // NOTE: arbitrary shift calculated by producing note from a ground
-        //       truth oscillator and comparing the output from YM2612 via
-        //       division.
-        //       1.458166333006277
         // TODO: why is this arbitrary shift necessary to tune to C4?
+        // NOTE: shift calculated by producing C4 note from a ground truth
+        //       oscillator and comparing the output from YM2612 via division:
+        //       1.458166333006277
         frequency = frequency / 1.458;
         // cast the shifted frequency to a 16-bit container
         const uint16_t freq16bit = frequency;

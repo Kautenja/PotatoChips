@@ -360,13 +360,7 @@ class YamahaYM2612 {
     /// @param ams the amount of amplitude modulation (AM) sensitivity
     ///
     inline void setAMS(uint8_t voice_idx, uint8_t ams) {
-        // TODO: replace with check on voice.LR_AMS_FMS
-        if (parameters[voice_idx].AMS == ams) return;
-        parameters[voice_idx].AMS = ams;
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0xCF)| ((ams & 3) << 4);
-        voice.ams = lfo_ams_depth_shift[ams & 0x03];
+        voices[voice_idx].ams = lfo_ams_depth_shift[ams & 0x03];
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -375,13 +369,7 @@ class YamahaYM2612 {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void setFMS(uint8_t voice_idx, uint8_t fms) {
-        // TODO: replace with check on voice.LR_AMS_FMS
-        if (parameters[voice_idx].FMS == fms) return;
-        parameters[voice_idx].FMS = fms;
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0xF8)| (fms & 7);
-        voice.pms = (fms & 7) * 32;
+        voices[voice_idx].pms = (fms & 7) * 32;
     }
 
     /// @brief Set the state (ST) register for the given voice, i.e., the pan.
@@ -391,12 +379,6 @@ class YamahaYM2612 {
     /// right channel. the second bit enables the left channel
     ///
     inline void setPAN(uint8_t voice_idx, uint8_t state) {
-        // TODO: replace with check on voice.LR_AMS_FMS
-        // if (parameters[voice_idx].PAN == state) return;
-        // parameters[voice_idx].PAN = state;
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.LR_AMS_FMS = (voice.LR_AMS_FMS & 0x3F)| ((state & 3) << 6);
         set_pan(&engine, voice_idx, state);
     }
 

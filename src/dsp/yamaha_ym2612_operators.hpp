@@ -708,9 +708,6 @@ struct Voice {
     /// current blk / fnum value for this slot (can be different between slots
     /// of one channel in 3 slot mode)
     uint32_t block_fnum = 0;
-
-    /// L+R enable, AM sensitivity, FM sensitivity
-    uint8_t LR_AMS_FMS = 0;
 };
 
 /// @brief Set the key-on flag for the given voice and slot.

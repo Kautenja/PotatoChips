@@ -30,7 +30,7 @@ class YamahaYM2612 {
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
     /// the number of independent FM synthesis oscillators on the module
-    static constexpr unsigned NUM_VOICES = 6;
+    static constexpr unsigned NUM_VOICES = 1;
 
  private:
     /// general state

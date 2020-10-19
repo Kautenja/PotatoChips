@@ -365,7 +365,7 @@ class YamahaYM2612 {
     inline void setAR(uint8_t voice, uint8_t op_index, uint8_t value) {
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
         oprtr->ar_ksr = (oprtr->ar_ksr & 0xC0) | (value & 0x1f);
-        set_ar_ksr(&voices[voice], oprtr, oprtr->ar_ksr);
+        voices[voice].set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
@@ -463,7 +463,7 @@ class YamahaYM2612 {
     inline void setRS(uint8_t voice, uint8_t op_index, uint8_t value) {
         Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
         oprtr->ar_ksr = (oprtr->ar_ksr & 0x1F) | ((value & 0x03) << 6);
-        set_ar_ksr(&voices[voice], oprtr, oprtr->ar_ksr);
+        voices[voice].set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
     }
 
     /// @brief Set the amplitude modulation (AM) register for the given voice and operator.

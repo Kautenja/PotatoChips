@@ -655,8 +655,8 @@ struct Operator {
     /// @brief SSG-EG update process.
     ///
     /// @details
-    /// The behavior is based upon Nemesis tests on real hardware. This is actually
-    /// executed before each sample.
+    /// The behavior is based upon Nemesis tests on real hardware. This is
+    /// actually executed before each sample.
     ///
     inline void update_ssg_eg_channel() {
         // detect SSG-EG transition. this is not required during release phase
@@ -678,10 +678,10 @@ struct Operator {
                     phase = 0;
                 // same as Key ON
                 if (state != EG_ATT) {
-                    if ((ar + ksr) < 32 + 62) {
+                    if ((ar + ksr) < 32 + 62) {  // attacking
                         state = (volume <= MIN_ATT_INDEX) ?
                             ((sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
-                    } else { // Attack Rate is maximal: jump to Decay or Sustain
+                    } else {  // Attack Rate @ max -> jump to next stage
                         volume = MIN_ATT_INDEX;
                         state = (sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
                     }
@@ -747,40 +747,41 @@ struct Voice {
         value = value & 7;
         feedback = value ? value + 6 : 0;
     }
-};
 
-/// @brief set detune & multiplier.
-///
-/// @param voice a pointer to the channel
-/// @param oprtr a pointer to the operator
-/// @param value the value for the set detune (DT) & multiplier (MUL)
-///
-static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operator* oprtr, int value) {
-    oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-    oprtr->DT = state->dt_tab[(value >> 4) & 7];
-    voice->operators[Op1].phase_increment = -1;
-}
-
-/// @brief Set attack rate & key scale
-///
-/// @param voice a pointer to the channel
-/// @param oprtr a pointer to the operator
-/// @param value the value for the attack rate (AR) and key-scale rate (KSR)
-///
-static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
-    uint8_t old_KSR = oprtr->KSR;
-    oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-    oprtr->KSR = 3 - (value >> 6);
-    if (oprtr->KSR != old_KSR) voice->operators[Op1].phase_increment = -1;
-    // refresh Attack rate
-    if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
-        oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
-        oprtr->eg_sel_ar = eg_rate_select[oprtr->ar + oprtr->ksr ];
-    } else {
-        oprtr->eg_sh_ar = 0;
-        oprtr->eg_sel_ar = 17 * RATE_STEPS;
+    /// @brief Set attack rate & key scale
+    ///
+    /// @param oprtr_idx the index of the operator
+    /// @param value the value for the attack rate (AR) and key-scale rate (KSR)
+    ///
+    inline void set_ar_ksr(unsigned oprtr_idx, int value) {
+        Operator* oprtr = &operators[oprtr_idx];
+        uint8_t old_KSR = oprtr->KSR;
+        oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
+        oprtr->KSR = 3 - (value >> 6);
+        if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
+        // refresh Attack rate
+        if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
+            oprtr->eg_sh_ar  = eg_rate_shift [oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sel_ar = eg_rate_select[oprtr->ar + oprtr->ksr ];
+        } else {
+            oprtr->eg_sh_ar = 0;
+            oprtr->eg_sel_ar = 17 * RATE_STEPS;
+        }
     }
-}
+
+    // /// @brief set detune & multiplier.
+    // ///
+    // /// @param oprtr_idx the index of the operator
+    // /// @param state TODO
+    // /// @param value the value for the set detune (DT) & multiplier (MUL)
+    // ///
+    // inline void set_det_mul(unsigned oprtr_idx, GlobalOperatorState* state, int value) {
+    //     Operator* oprtr = &operators[oprtr_idx];
+    //     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+    //     oprtr->DT = state->dt_tab[(value >> 4) & 7];
+    //     operators[Op1].phase_increment = -1;
+    // }
+};
 
 /// @brief reset the channels.
 ///

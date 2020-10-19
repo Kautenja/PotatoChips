@@ -439,7 +439,7 @@ class YamahaYM2612 {
         Voice& voice = voices[voice_idx];
         Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
         // calculate the new DT register value
-        int32_t* const DT = engine.state.dt_tab[value & 7];
+        int32_t* const DT = engine.state.dt_table[value & 7];
         // check if the value changed to update phase increment
         if (oprtr.DT != DT) voice.operators[Op1].phase_increment = -1;
         // set the DT register for the operator

@@ -85,9 +85,9 @@ struct EngineState {
         for (int d = 0; d <= 3; d++) {
             for (int i = 0; i <= 31; i++) {
                 // -10 because chip works with 10.10 fixed point, while we use 16.16
-                float rate = ((float) dt_tab[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
-                state.dt_tab[d][i] = (int32_t) rate;
-                state.dt_tab[d + 4][i] = -state.dt_tab[d][i];
+                float rate = ((float) DT_TABLE[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+                state.dt_table[d][i] = (int32_t) rate;
+                state.dt_table[d + 4][i] = -state.dt_table[d][i];
             }
         }
         // there are 2048 FNUMs that can be generated using FNUM/BLK registers

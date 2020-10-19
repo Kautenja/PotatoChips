@@ -259,7 +259,7 @@ static const uint8_t eg_rate_shift[32 + 64 + 32] = {
 };
 
 /// this is YM2151 and YM2612 phase increment data (in 10.10 fixed point format)
-static const uint8_t dt_tab[4 * 32] = {
+static const uint8_t DT_TABLE[4 * 32] = {
     // FD=0
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -484,7 +484,7 @@ struct GlobalOperatorState {
     /// freq latch
     uint8_t fn_h = 0;
     /// DETune table
-    int32_t dt_tab[8][32];
+    int32_t dt_table[8][32];
 };
 
 // ---------------------------------------------------------------------------
@@ -506,7 +506,7 @@ struct Operator {
     /// release rate
     uint32_t rr = 0;
 
-    /// detune :dt_tab[DT]
+    /// detune :dt_table[DT]
     int32_t* DT = 0;
     /// multiple :ML_TABLE[ML]
     uint32_t mul = 0;
@@ -867,7 +867,7 @@ struct Voice {
     // inline void set_det_mul(unsigned oprtr_idx, GlobalOperatorState* state, int value) {
     //     Operator* oprtr = &operators[oprtr_idx];
     //     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-    //     oprtr->DT = state->dt_tab[(value >> 4) & 7];
+    //     oprtr->DT = state->dt_table[(value >> 4) & 7];
     //     operators[Op1].phase_increment = -1;
     // }
 };

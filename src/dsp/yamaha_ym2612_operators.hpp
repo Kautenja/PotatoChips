@@ -649,7 +649,7 @@ struct Voice {
 
     /// @brief Set the key-on flag for the given operator.
     ///
-    /// @param oprtr_idx the slot to set the key-on flag for
+    /// @param oprtr_idx the operator to set the key-on flag for
     ///
     inline void set_keyon(unsigned oprtr_idx) {
         Operator& oprtr = operators[oprtr_idx];
@@ -662,9 +662,9 @@ struct Voice {
         }
     }
 
-    /// @brief Set the key-off flag for the given voice and slot.
+    /// @brief Set the key-off flag for the given operator.
     ///
-    /// @param slot the slot to set the key-off flag for
+    /// @param slot the operator to set the key-off flag for
     ///
     inline void set_keyoff(unsigned oprtr_idx) {
         Operator& oprtr = operators[oprtr_idx];

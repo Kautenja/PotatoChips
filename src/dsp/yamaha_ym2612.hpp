@@ -186,7 +186,7 @@ class YamahaYM2612 {
     /// @param feedback the amount of feedback for operator 1
     ///
     inline void setFB(uint8_t voice_idx, uint8_t feedback) {
-        set_feedback(&voices[voice_idx], feedback);
+        voices[voice_idx].set_feedback(feedback);
     }
 
     /// @brief Set the gate for the given voice.

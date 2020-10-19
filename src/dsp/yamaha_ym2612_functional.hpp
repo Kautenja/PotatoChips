@@ -468,10 +468,10 @@ static inline void set_gate(EngineState* state, uint8_t gate_mask) {
     // cache a pointer to the voice
     Voice* voice = &state->voices[voice_index];
     // process the gate for each operator on the voice
-    if (gate_mask & 0x10) set_keyon(voice, Op1); else set_keyoff(voice, Op1);
-    if (gate_mask & 0x20) set_keyon(voice, Op2); else set_keyoff(voice, Op2);
-    if (gate_mask & 0x40) set_keyon(voice, Op3); else set_keyoff(voice, Op3);
-    if (gate_mask & 0x80) set_keyon(voice, Op4); else set_keyoff(voice, Op4);
+    if (gate_mask & 0x10) voice->set_keyon(Op1); else voice->set_keyoff(Op1);
+    if (gate_mask & 0x20) voice->set_keyon(Op2); else voice->set_keyoff(Op2);
+    if (gate_mask & 0x40) voice->set_keyon(Op3); else voice->set_keyoff(Op3);
+    if (gate_mask & 0x80) voice->set_keyon(Op4); else voice->set_keyoff(Op4);
 }
 
 #endif  // DSP_YAMAHA_YM2612_FUNCTIONAL_HPP_

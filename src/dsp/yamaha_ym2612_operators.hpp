@@ -637,37 +637,44 @@ struct Voice {
     /// current blk / fnum value for this slot (can be different between slots
     /// of one channel in 3 slot mode)
     uint32_t block_fnum = 0;
+
+    /// @brief Set the feedback amount.
+    ///
+    /// @param feedback the amount of feedback for the first operator
+    ///
+    inline void set_feedback(uint8_t value) {
+        value = value & 7;
+        feedback = value ? value + 6 : 0;
+    }
+
+    /// @brief Set the key-on flag for the given operator.
+    ///
+    /// @param oprtr_idx the slot to set the key-on flag for
+    ///
+    inline void set_keyon(unsigned oprtr_idx) {
+        Operator& oprtr = operators[oprtr_idx];
+        if (!oprtr.key) {
+            oprtr.key = 1;
+            // restart Phase Generator
+            oprtr.phase = 0;
+            oprtr.ssgn = (oprtr.ssg & 0x04) >> 1;
+            oprtr.state = EG_ATT;
+        }
+    }
+
+    /// @brief Set the key-off flag for the given voice and slot.
+    ///
+    /// @param slot the slot to set the key-off flag for
+    ///
+    inline void set_keyoff(unsigned oprtr_idx) {
+        Operator& oprtr = operators[oprtr_idx];
+        if (oprtr.key) {
+            oprtr.key = 0;
+            if (oprtr.state > EG_REL)  // phase -> Release
+                oprtr.state = EG_REL;
+        }
+    }
 };
-
-/// @brief Set the key-on flag for the given voice and slot.
-///
-/// @param voice the voice to set the key-on flag for
-/// @param slot the slot to set the key-on flag for
-///
-static inline void set_keyon(Voice* voice, unsigned slot) {
-    Operator *oprtr = &voice->operators[slot];
-    if (!oprtr->key) {
-        oprtr->key = 1;
-        // restart Phase Generator
-        oprtr->phase = 0;
-        oprtr->ssgn = (oprtr->ssg & 0x04) >> 1;
-        oprtr->state = EG_ATT;
-    }
-}
-
-/// @brief Set the key-off flag for the given voice and slot.
-///
-/// @param voice the voice to set the key-off flag for
-/// @param slot the slot to set the key-off flag for
-///
-static inline void set_keyoff(Voice* voice, unsigned slot) {
-    Operator *oprtr = &voice->operators[slot];
-    if ( oprtr->key ) {
-        oprtr->key = 0;
-        if (oprtr->state>EG_REL)  // phase -> Release
-            oprtr->state = EG_REL;
-    }
-}
 
 /// @brief set detune & multiplier.
 ///
@@ -746,16 +753,6 @@ static inline void set_sl_rr(Operator* oprtr, int value) {
     oprtr->rr = 34 + ((value & 0x0f) << 2);
     oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr + oprtr->ksr];
     oprtr->eg_sel_rr = eg_rate_select[oprtr->rr + oprtr->ksr];
-}
-
-/// @brief Set the feedback amount.
-///
-/// @param voice a pointer to the voice
-/// @param feedback the amount of feedback for the first operator on the voice
-///
-static inline void set_feedback(Voice* voice, uint8_t feedback) {
-    feedback = feedback & 7;
-    voice->feedback = feedback ? feedback + 6 : 0;
 }
 
 /// @brief reset the channels.

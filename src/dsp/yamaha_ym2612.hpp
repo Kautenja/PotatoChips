@@ -83,8 +83,6 @@ class YamahaYM2612 {
         engine.lfo_cnt = 0;
         engine.lfo_AM_step = 126;
         engine.lfo_PM_step = 0;
-        // state
-        engine.state.status = 0;
         // timer B (address 0x26)
         engine.state.TB = 0x00;
         // timer A Low 2 (address 0x25)

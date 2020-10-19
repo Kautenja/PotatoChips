@@ -520,14 +520,6 @@ struct GlobalOperatorState {
     float freqbase = 0;
     /// timer pre-scaler
     int timer_prescaler = 0;
-    /// interrupt level
-    uint8_t irq = 0;
-    /// IRQ mask
-    uint8_t irqmask = 0;
-    /// status flag
-    uint8_t status = 0;
-    /// pre-scaler selector
-    uint8_t prescaler_sel = 0;
     /// freq latch
     uint8_t fn_h = 0;
     /// timer A

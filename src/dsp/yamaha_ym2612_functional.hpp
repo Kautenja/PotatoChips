@@ -232,6 +232,12 @@ static inline void set_algorithm(
     set_routing(engine, voice, voice_idx);
 }
 
+/// @brief Set the pan register to a new value.
+///
+/// @param engine the engine to set the PAN register for
+/// @param voice_idx the index of the voice to set the PAN register of
+/// @param data the value to set to the PAN register
+///
 static inline void set_pan(EngineState* engine, unsigned voice_idx, uint8_t data) {
     engine->pan[voice_idx * 2    ] = (data & 0x2) ? ~0 : 0;
     engine->pan[voice_idx * 2 + 1] = (data & 0x1) ? ~0 : 0;

@@ -521,10 +521,29 @@ struct GlobalOperatorState {
     /// current LFO PM step
     uint32_t lfo_PM_step = 0;
 
-    // TODO: make private
-    // TODO: inline in set_sample_rate?
-    /// @brief Initialize time tables.
-    void init_timetables() {
+    /// @brief Set the sample rate based on the source clock rate.
+    ///
+    /// @param sample_rate the number of samples per second
+    /// @param clock_rate the number of source clock cycles per second
+    ///
+    void set_sample_rate(float sample_rate, float clock_rate) {
+        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
+        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
+        // -------------------------------------------------------------------
+        // MARK: frequency scaling
+        // -------------------------------------------------------------------
+        // frequency base
+        freqbase = clock_rate / sample_rate;
+        // TODO: why is it necessary to scale these increments by a factor of 1/16
+        //       to get the correct timings from the EG and LFO?
+        // EG timer increment (updates every 3 samples)
+        eg_timer_add = (1 << EG_SH) * freqbase / 16;
+        eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+        // LFO timer increment (updates every 16 samples)
+        lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
+        // -------------------------------------------------------------------
+        // MARK: make timetables
+        // -------------------------------------------------------------------
         // DeTune table
         for (int d = 0; d <= 3; d++) {
             for (int i = 0; i <= 31; i++) {
@@ -555,27 +574,6 @@ struct GlobalOperatorState {
         // maximal frequency is required for Phase overflow calculation, register
         // size is 17 bits (Nemesis)
         fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
-    }
-
-    /// @brief Set the output sample rate and clock rate.
-    ///
-    /// @param sample_rate the number of samples per second
-    /// @param clock_rate the number of source clock cycles per second
-    ///
-    void set_sample_rate(float sample_rate, float clock_rate) {
-        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
-        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
-        // frequency base
-        freqbase = clock_rate / sample_rate;
-        // TODO: why is it necessary to scale these increments by a factor of 1/16
-        //       to get the correct timings from the EG and LFO?
-        // EG timer increment (updates every 3 samples)
-        eg_timer_add = (1 << EG_SH) * freqbase / 16;
-        eg_timer_overflow = 3 * (1 << EG_SH) / 16;
-        // LFO timer increment (updates every 16 samples)
-        lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
-        // make time tables
-        init_timetables();
     }
 
     /// @brief Advance LFO to next sample.

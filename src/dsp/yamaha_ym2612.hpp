@@ -53,8 +53,8 @@ class YamahaYM2612 {
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
         engine.voices = voices;
-        engine.state.clock = clock_rate;
-        engine.state.rate = sample_rate;
+        engine.clock = clock_rate;
+        engine.rate = sample_rate;
         reset();
     }
 
@@ -64,8 +64,8 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     inline void setSampleRate(double clock_rate, double sample_rate) {
-        engine.state.clock = clock_rate;
-        engine.state.rate = sample_rate;
+        engine.clock = clock_rate;
+        engine.rate = sample_rate;
         set_prescaler(&engine);
     }
 

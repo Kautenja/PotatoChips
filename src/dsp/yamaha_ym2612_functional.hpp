@@ -27,6 +27,13 @@
 
 /// @brief Emulator common state.
 struct EngineState {
+    /// master clock (Hz)
+    int clock = 0;
+    /// sampling rate (Hz)
+    int rate = 0;
+    /// frequency base
+    float freqbase = 0;
+
     /// general state
     GlobalOperatorState state;
     /// pointer to voices
@@ -116,17 +123,17 @@ static void init_timetables(EngineState* engine, float freqbase) {
 ///
 static void set_prescaler(EngineState* engine) {
     // frequency base
-    engine->state.freqbase = (engine->state.rate) ?
-        (static_cast<float>(engine->state.clock) / engine->state.rate) : 0;
+    engine->freqbase = (engine->rate) ?
+        (static_cast<float>(engine->clock) / engine->rate) : 0;
     // TODO: why is it necessary to scale these increments by a factor of 1/16
     //       to get the correct timings from the EG and LFO?
     // EG timer increment (updates every 3 samples)
-    engine->eg_timer_add = (1 << EG_SH) * engine->state.freqbase / 16;
+    engine->eg_timer_add = (1 << EG_SH) * engine->freqbase / 16;
     engine->eg_timer_overflow = 3 * (1 << EG_SH) / 16;
     // LFO timer increment (updates every 16 samples)
-    engine->lfo_timer_add = (1 << LFO_SH) * engine->state.freqbase / 16;
+    engine->lfo_timer_add = (1 << LFO_SH) * engine->freqbase / 16;
     // make time tables
-    init_timetables(engine, engine->state.freqbase);
+    init_timetables(engine, engine->freqbase);
 }
 
 /// @brief Set algorithm routing.

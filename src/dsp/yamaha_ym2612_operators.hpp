@@ -512,12 +512,6 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 
 /// @brief The global state for all FM operators.
 struct GlobalOperatorState {
-    /// master clock (Hz)
-    int clock = 0;
-    /// sampling rate (Hz)
-    int rate = 0;
-    /// frequency base
-    float freqbase = 0;
     /// freq latch
     uint8_t fn_h = 0;
     /// DETune table

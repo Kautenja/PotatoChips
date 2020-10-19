@@ -585,6 +585,11 @@ struct GlobalOperatorState {
 
 /// @brief A single FM operator
 struct Operator {
+    /// the maximal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MAX = 8191;
+    /// the minimal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MIN = -8192;
+
     /// attack rate
     uint32_t ar = 0;
     /// total level: TL << 3

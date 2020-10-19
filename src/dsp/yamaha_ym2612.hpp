@@ -354,10 +354,10 @@ class YamahaYM2612 {
         }
         // clip the output to 14-bits
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
-            if (out_fm > 8191)
-                out_fm = 8191;
-            else if (out_fm < -8192)
-                out_fm = -8192;
+            if (out_fm > Operator::OUTPUT_MAX)
+                out_fm = Operator::OUTPUT_MAX;
+            else if (out_fm < Operator::OUTPUT_MIN)
+                out_fm = Operator::OUTPUT_MIN;
         }
         return out_fm;
     }

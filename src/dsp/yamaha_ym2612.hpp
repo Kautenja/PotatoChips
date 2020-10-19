@@ -25,10 +25,6 @@
 
 #include "yamaha_ym2612_operators.hpp"
 
-// ---------------------------------------------------------------------------
-// MARK: Object-Oriented API
-// ---------------------------------------------------------------------------
-
 /// Yamaha YM2612 chip emulator
 class YamahaYM2612 {
  public:
@@ -55,7 +51,7 @@ class YamahaYM2612 {
     /// one sample delay memory
     int32_t mem = 0;
     /// outputs of working channels
-    int32_t out_fm[8];
+    int32_t out_fm[NUM_VOICES] = {0, 0, 0, 0, 0, 0};
 
     // TODO: enum for the operator?
     // TODO: better ASCII illustrations of the operators
@@ -393,7 +389,7 @@ class YamahaYM2612 {
     }
 
     // -----------------------------------------------------------------------
-    // MARK: Global control for each channel
+    // MARK: Global control for each voice
     // -----------------------------------------------------------------------
 
     /// @brief Set the algorithm (AL) register for the given voice.
@@ -476,7 +472,7 @@ class YamahaYM2612 {
     }
 
     // -----------------------------------------------------------------------
-    // MARK: Operator control for each channel
+    // MARK: Operator control for each voice
     // -----------------------------------------------------------------------
 
     /// @brief Set the SSG-envelope register for the given channel and operator.

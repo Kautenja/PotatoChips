@@ -31,6 +31,10 @@
 #include <cstring>
 #include "exceptions.hpp"
 
+// ---------------------------------------------------------------------------
+// MARK: Constants and Tables
+// ---------------------------------------------------------------------------
+
 /// The number of fixed point bits for various functions of the chip.
 enum FixedPointBits {
     /// the number of bits for addressing the envelope table
@@ -527,9 +531,7 @@ struct GlobalOperatorState {
     void set_sample_rate(float sample_rate, float clock_rate) {
         if (sample_rate == 0) throw Exception("sample_rate must be above 0");
         if (clock_rate == 0) throw Exception("clock_rate must be above 0");
-        // -------------------------------------------------------------------
-        // MARK: frequency scaling
-        // -------------------------------------------------------------------
+
         // frequency base
         freqbase = clock_rate / sample_rate;
         // TODO: why is it necessary to scale these increments by a factor of 1/16
@@ -539,9 +541,7 @@ struct GlobalOperatorState {
         eg_timer_overflow = 3 * (1 << EG_SH) / 16;
         // LFO timer increment (updates every 16 samples)
         lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
-        // -------------------------------------------------------------------
-        // MARK: make timetables
-        // -------------------------------------------------------------------
+
         // DeTune table
         for (int d = 0; d <= 3; d++) {
             for (int i = 0; i <= 31; i++) {
@@ -891,7 +891,7 @@ struct Operator {
 };
 
 // ---------------------------------------------------------------------------
-// MARK: 4-Operator FM Synthesis Voices
+// MARK: 4-Operator FM Synthesis Voice
 // ---------------------------------------------------------------------------
 
 /// @brief A single 4-operator FM voice.

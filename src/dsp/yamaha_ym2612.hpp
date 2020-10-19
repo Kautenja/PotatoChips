@@ -221,7 +221,7 @@ class YamahaYM2612 {
     }
 
     inline void chan_calc(Voice* voice) {
-#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
+#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM * (OP)->is_amplitude_mod_on))
         uint32_t AM = state.lfo_AM_step >> voice->ams;
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2
@@ -677,8 +677,7 @@ class YamahaYM2612 {
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
     inline void setAM(uint8_t voice, uint8_t op_index, uint8_t value) {
-        Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
-        oprtr->AMmask = (value) ? ~0 : 0;
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
     }
 };
 

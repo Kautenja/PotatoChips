@@ -659,11 +659,10 @@ struct Operator {
     /// SSG-EG negated output
     uint8_t ssgn = 0;
 
-    /// Whether the gate for the envelope generator is open
+    /// whether the gate for the envelope generator is open
     bool is_gate_open = false;
-
-    /// AM enable flag
-    uint32_t AMmask = 0;
+    /// whether amplitude modulation is enabled for the operator
+    bool is_amplitude_mod_on = false;
 
     /// attack rate and key-scaling control register
     uint8_t ar_ksr = 0;

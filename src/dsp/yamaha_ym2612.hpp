@@ -432,8 +432,6 @@ class YamahaYM2612 {
     /// @param frequency the frequency value measured in Hz
     ///
     inline void setFREQ(uint8_t voice_idx, float frequency) {
-        // cache the voice to set the frequency of
-        Voice& voice = voices[voice_idx];
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -446,23 +444,17 @@ class YamahaYM2612 {
         frequency = frequency / 1.458;
         // cast the shifted frequency to a 16-bit container
         const uint16_t freq16bit = frequency;
-        // -------------------------------------------------------------------
-        // MARK: Frequency High
-        // -------------------------------------------------------------------
-        const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
-        state.fn_h = freqHigh & 0x3f;
-        // -------------------------------------------------------------------
-        // MARK: Frequency Low
-        // -------------------------------------------------------------------
-        const auto freqLow = freq16bit & 0xff;
-        uint32_t fn = (((uint32_t) (state.fn_h & 7)) << 8) + freqLow;
-        uint8_t blk = state.fn_h >> 3;
+
+        // cache the voice to set the frequency of
+        Voice& voice = voices[voice_idx];
         // key-scale code
-        voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
+        voice.kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
         // phase increment counter
-        voice.fc = state.fn_table[fn * 2] >> (7 - blk);
+        voice.fc = state.fn_table[freq16bit * 2] >> (7 - octave);
         // store fnum in clear form for LFO PM calculations
-        voice.block_fnum = (blk << 11) | fn;
+        voice.block_fnum = (octave << 11) | freq16bit;
+
+        // TODO: only set this when the frequency changes?
         voice.operators[Op1].phase_increment = -1;
     }
 

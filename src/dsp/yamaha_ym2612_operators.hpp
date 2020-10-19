@@ -493,8 +493,6 @@ struct GlobalOperatorState {
     uint32_t fn_table[4096];
     /// maximal phase increment (used for phase overflow)
     uint32_t fn_max = 0;
-    /// freq latch
-    uint8_t fn_h = 0;
 
     /// DETune table
     int32_t dt_table[8][32];

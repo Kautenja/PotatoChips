@@ -518,8 +518,6 @@ struct GlobalOperatorState {
     int rate = 0;
     /// frequency base
     float freqbase = 0;
-    /// timer pre-scaler
-    int timer_prescaler = 0;
     /// freq latch
     uint8_t fn_h = 0;
     /// timer A

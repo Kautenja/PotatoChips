@@ -38,7 +38,7 @@ class YamahaYM2612 {
     /// channel state
     Voice voices[NUM_VOICES];
     /// outputs of working channels
-    int32_t out_fm[NUM_VOICES];
+    int32_t out_fm;
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -60,7 +60,7 @@ class YamahaYM2612 {
         // get the voice and carrier wave
         Voice* const voice = &voices[voice_idx];
         voice->algorithm = algorithm & 7;
-        int32_t *carrier = &out_fm[voice_idx];
+        int32_t *carrier = &out_fm;
         // get the connections
         int32_t **om1 = &voice->connect1;
         int32_t **om2 = &voice->connect3;
@@ -273,7 +273,6 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        memset(out_fm, 0, sizeof out_fm);
         state.set_sample_rate(sample_rate, clock_rate);
         reset();
     }
@@ -333,7 +332,7 @@ class YamahaYM2612 {
             // refresh PG and EG
             refresh_fc_eg_chan(&voices[voice]);
             // clear outputs
-            out_fm[voice] = 0;
+            out_fm = 0;
             // update SSG-EG output
             for (unsigned i = 0; i < 4; i++)
                 voices[voice].operators[i].update_ssg_eg_channel();
@@ -353,16 +352,14 @@ class YamahaYM2612 {
                 }
             }
         }
-        // clip outputs
-        int16_t output = 0;
+        // clip the output to 14-bits
         for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
-            if (out_fm[voice] > 8191)
-                out_fm[voice] = 8191;
-            else if (out_fm[voice] < -8192)
-                out_fm[voice] = -8192;
-            output += out_fm[voice];
+            if (out_fm > 8191)
+                out_fm = 8191;
+            else if (out_fm < -8192)
+                out_fm = -8192;
         }
-        return output;
+        return out_fm;
     }
 
     /// @brief Set the global LFO for the chip.

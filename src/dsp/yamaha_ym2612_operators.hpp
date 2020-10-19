@@ -593,6 +593,44 @@ struct Operator {
     uint8_t sl_rr = 0;
     /// the decay rate control register
     uint8_t dr = 0;
+
+    /// @brief Set the 7-bit total level.
+    ///
+    /// @param value the value for the total level (TL)
+    ///
+    inline void set_tl(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
+
+    /// @brief Set the decay 1 rate, i.e., decay rate.
+    ///
+    /// @param value the value for the decay 1 rate (D1R)
+    ///
+    inline void set_dr(uint8_t value) {
+        dr = (dr & 0x80) | (value & 0x1F);
+        d1r = (dr & 0x1f) ? 32 + ((dr & 0x1f) << 1) : 0;
+        eg_sh_d1r = eg_rate_shift[d1r + ksr];
+        eg_sel_d1r = eg_rate_select[d1r + ksr];
+    }
+
+    /// @brief Set the decay 2 rate, i.e., sustain rate.
+    ///
+    /// @param value the value for the decay 2 rate (D2R)
+    ///
+    inline void set_sr(uint8_t value) {
+        d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
+        eg_sh_d2r = eg_rate_shift[d2r + ksr];
+        eg_sel_d2r = eg_rate_select[d2r + ksr];
+    }
+
+    /// @brief Set the release rate.
+    ///
+    /// @param value the value for the release rate (RR)
+    ///
+    inline void set_sl_rr(uint8_t value) {
+        sl = sl_table[value >> 4];
+        rr = 34 + ((value & 0x0f) << 2);
+        eg_sh_rr = eg_rate_shift[rr + ksr];
+        eg_sel_rr = eg_rate_select[rr + ksr];
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -601,12 +639,12 @@ struct Operator {
 
 /// @brief A single 4-operator FM voice.
 struct Voice {
-    /// four oprtrs (operators)
+    /// four operators
     Operator operators[4];
 
-    /// algorithm (ALGO)
+    /// algorithm
     uint8_t algorithm = 0;
-    /// feedback shift (FB)
+    /// feedback shift
     uint8_t feedback = 0;
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
@@ -688,15 +726,6 @@ static inline void set_det_mul(GlobalOperatorState* state, Voice* voice, Operato
     voice->operators[Op1].phase_increment = -1;
 }
 
-/// @brief Set the 7-bit total level.
-///
-/// @param oprtr a pointer to the operator
-/// @param value the value for the total level (TL)
-///
-static inline void set_tl(Operator* oprtr, int value) {
-    oprtr->tl = (value & 0x7f) << (ENV_BITS - 7);
-}
-
 /// @brief Set attack rate & key scale
 ///
 /// @param voice a pointer to the channel
@@ -716,43 +745,6 @@ static inline void set_ar_ksr(Voice* voice, Operator* oprtr, int value) {
         oprtr->eg_sh_ar = 0;
         oprtr->eg_sel_ar = 17 * RATE_STEPS;
     }
-}
-
-/// @brief Set the decay 1 rate, i.e., decay rate.
-///
-/// @param voice a pointer to the channel
-/// @param oprtr a pointer to the operator
-/// @param value the value for the decay 1 rate (D1R)
-///
-static inline void set_dr(Operator* oprtr, int value) {
-    oprtr->d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-    oprtr->eg_sh_d1r = eg_rate_shift [oprtr->d1r + oprtr->ksr];
-    oprtr->eg_sel_d1r= eg_rate_select[oprtr->d1r + oprtr->ksr];
-}
-
-/// @brief Set the decay 2 rate, i.e., sustain rate.
-///
-/// @param voice a pointer to the channel
-/// @param oprtr a pointer to the operator
-/// @param value the value for the decay 2 rate (D2R)
-///
-static inline void set_sr(Operator* oprtr, int value) {
-    oprtr->d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-    oprtr->eg_sh_d2r = eg_rate_shift [oprtr->d2r + oprtr->ksr];
-    oprtr->eg_sel_d2r= eg_rate_select[oprtr->d2r + oprtr->ksr];
-}
-
-/// @brief Set the release rate.
-///
-/// @param voice a pointer to the channel
-/// @param oprtr a pointer to the operator
-/// @param value the value for the release rate (RR)
-///
-static inline void set_sl_rr(Operator* oprtr, int value) {
-    oprtr->sl = sl_table[value >> 4];
-    oprtr->rr = 34 + ((value & 0x0f) << 2);
-    oprtr->eg_sh_rr  = eg_rate_shift [oprtr->rr + oprtr->ksr];
-    oprtr->eg_sel_rr = eg_rate_select[oprtr->rr + oprtr->ksr];
 }
 
 /// @brief reset the channels.

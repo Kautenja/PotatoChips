@@ -374,9 +374,7 @@ class YamahaYM2612 {
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
     inline void setD1(uint8_t voice, uint8_t op_index, uint8_t value) {
-        Operator* const oprtr = &voices[voice].operators[OPERATOR_INDEXES[op_index]];
-        oprtr->dr = (oprtr->dr & 0x80) | (value & 0x1F);
-        set_dr(oprtr, oprtr->dr);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_dr(value);
     }
 
     /// @brief Set the sustain level (SL) register for the given voice and operator.
@@ -388,7 +386,7 @@ class YamahaYM2612 {
     inline void setSL(uint8_t voice, uint8_t op_index, uint8_t value) {
         Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
         oprtr->sl_rr = (oprtr->sl_rr & 0x0f) | ((value & 0x0f) << 4);
-        set_sl_rr(oprtr, oprtr->sl_rr);
+        oprtr->set_sl_rr(oprtr->sl_rr);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
@@ -398,7 +396,7 @@ class YamahaYM2612 {
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
     inline void setD2(uint8_t voice, uint8_t op_index, uint8_t value) {
-        set_sr(&voices[voice].operators[OPERATOR_INDEXES[op_index]], value);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_sr(value);
     }
 
     /// @brief Set the release rate (RR) register for the given voice and operator.
@@ -410,7 +408,7 @@ class YamahaYM2612 {
     inline void setRR(uint8_t voice, uint8_t op_index, uint8_t value) {
         Operator* const oprtr =  &voices[voice].operators[OPERATOR_INDEXES[op_index]];
         oprtr->sl_rr = (oprtr->sl_rr & 0xf0) | (value & 0x0f);
-        set_sl_rr(oprtr, oprtr->sl_rr);
+        oprtr->set_sl_rr(oprtr->sl_rr);
     }
 
     /// @brief Set the total level (TL) register for the given voice and operator.
@@ -420,7 +418,7 @@ class YamahaYM2612 {
     /// @param value the total amplitude of envelope generator
     ///
     inline void setTL(uint8_t voice, uint8_t op_index, uint8_t value) {
-        set_tl(&voices[voice].operators[OPERATOR_INDEXES[op_index]], value);
+        voices[voice].operators[OPERATOR_INDEXES[op_index]].set_tl(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.

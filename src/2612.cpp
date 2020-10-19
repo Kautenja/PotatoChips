@@ -64,8 +64,8 @@ struct Chip2612 : rack::Module {
         PARAM_LFO,
         PARAM_AMS,
         PARAM_FMS,
-        ENUMS(PARAM_TL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(PARAM_AR,         YamahaYM2612::NUM_OPERATORS),
+        ENUMS(PARAM_TL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(PARAM_D1,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(PARAM_SL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(PARAM_D2,         YamahaYM2612::NUM_OPERATORS),
@@ -89,8 +89,8 @@ struct Chip2612 : rack::Module {
         INPUT_LFO,
         INPUT_AMS,
         INPUT_FMS,
-        ENUMS(INPUT_TL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(INPUT_AR,         YamahaYM2612::NUM_OPERATORS),
+        ENUMS(INPUT_TL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(INPUT_D1,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(INPUT_SL,         YamahaYM2612::NUM_OPERATORS),
         ENUMS(INPUT_D2,         YamahaYM2612::NUM_OPERATORS),
@@ -129,8 +129,8 @@ struct Chip2612 : rack::Module {
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
-            configParam(PARAM_TL         + i, 0, 70,  0,  opName + " Total Level");
             configParam(PARAM_AR         + i, 0, 31,  31, opName + " Attack Rate");
+            configParam(PARAM_TL         + i, 0, 70,  0,  opName + " Total Level");
             configParam(PARAM_D1         + i, 0, 31,  0,  opName + " 1st Decay Rate");
             configParam(PARAM_SL         + i, 0, 15,  0,  opName + " Sustain Level");
             configParam(PARAM_D2         + i, 0, 31,  0,  opName + " 2nd Decay Rate");
@@ -177,8 +177,8 @@ struct Chip2612 : rack::Module {
             apu[channel].setFMS(osc, getParam(channel, PARAM_FMS, INPUT_FMS, 7));
             // set the operator parameters
             for (unsigned op = 0; op < YamahaYM2612::NUM_OPERATORS; op++) {
-                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
                 apu[channel].setAR (osc, op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+                apu[channel].setTL (osc, op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
                 apu[channel].setD1 (osc, op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
                 apu[channel].setSL (osc, op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
                 apu[channel].setD2 (osc, op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
@@ -306,10 +306,10 @@ struct Chip2612Widget : ModuleWidget {
             for (unsigned parameter = 0; parameter < 12; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * YamahaYM2612::NUM_OPERATORS;
-                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_TL + offset);
+                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset);
                 param->snap = true;
                 addParam(param);
-                addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_TL + offset));
+                addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_AR + offset));
             }
         }
         // left + right master outputs

@@ -520,53 +520,9 @@ struct GlobalOperatorState {
     float freqbase = 0;
     /// freq latch
     uint8_t fn_h = 0;
-    /// timer A
-    int32_t TA = 0;
-    /// timer A counter
-    int32_t TAC = 0;
-    /// timer B
-    uint8_t TB = 0;
-    /// timer B counter
-    int32_t TBC = 0;
     /// DETune table
     int32_t dt_tab[8][32];
 };
-
-/// @brief Set the OPN Mode Register.
-///
-/// @param state the global state of the operators
-/// @param value the value to write to the OPN mode
-///
-static inline void set_timers(GlobalOperatorState* state, int value) {
-    // load b
-    if (value & 0x02) {
-        if (state->TBC == 0) state->TBC = (256 - state->TB) << 4;
-    } else {  // stop timer b
-        state->TBC = 0;
-    }
-    // load a
-    if (value & 0x01) {
-        if (state->TAC == 0) state->TAC = (1024 - state->TA);
-    } else {  // stop timer a
-        state->TAC = 0;
-    }
-}
-
-/// @brief Timer A Overflow, clear or reload the counter.
-///
-/// @param state the operator state for which timer A is over
-///
-static inline void timer_A_over(GlobalOperatorState* state) {
-    state->TAC = (1024 - state->TA);
-}
-
-/// @brief Timer B Overflow, clear or reload the counter.
-///
-/// @param state the operator state for which timer B is over
-///
-static inline void timer_B_over(GlobalOperatorState* state) {
-    state->TBC = (256 - state->TB) << 4;
-}
 
 // ---------------------------------------------------------------------------
 // MARK: FM operators
@@ -810,15 +766,10 @@ static inline void set_feedback(Voice* voice, uint8_t feedback) {
 
 /// @brief reset the channels.
 ///
-/// @param state the global operator state to reset
 /// @param voices the array of voices to reset the channels for
 /// @param num the number of voices in the `voices` array
 ///
-static void reset_voices(GlobalOperatorState* state, Voice* voices, int num) {
-    state->TA   = 0;
-    state->TAC  = 0;
-    state->TB   = 0;
-    state->TBC  = 0;
+static void reset_voices(Voice* voices, int num) {
     // iterate over the number of voices to reset
     for(int idx = 0; idx < num; idx++) {
         // cache a reference to the voice structure

@@ -73,8 +73,6 @@ class YamahaYM2612 {
     inline void reset() {
         // set the frequency scaling parameters of the engine emulator
         set_prescaler(&engine);
-        // mode 0 , timer reset (address 0x27)
-        set_timers(&engine.state, 0x30);
         // envelope generator
         engine.eg_timer = 0;
         engine.eg_cnt = 0;
@@ -83,14 +81,8 @@ class YamahaYM2612 {
         engine.lfo_cnt = 0;
         engine.lfo_AM_step = 126;
         engine.lfo_PM_step = 0;
-        // timer B (address 0x26)
-        engine.state.TB = 0x00;
-        // timer A Low 2 (address 0x25)
-        engine.state.TA = (engine.state.TA & 0x03fc) | (0x00 & 3);
-        // timer A High 8 (address 0x24)
-        engine.state.TA = (engine.state.TA & 0x0003) | (0x00 << 2);
         // reset the engine state and basic voice data
-        reset_voices(&engine.state, &voices[0], NUM_VOICES);
+        reset_voices(&voices[0], NUM_VOICES);
         // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
@@ -153,12 +145,6 @@ class YamahaYM2612 {
             output[0] += (engine.out_fm[voice] & engine.pan[2 * voice + 0]);
             output[1] += (engine.out_fm[voice] & engine.pan[2 * voice + 1]);
         }
-        // timer A control
-        if ((engine.state.TAC -= 4096 * engine.state.freqbase) <= 0)
-            timer_A_over(&engine.state);
-        // timer B control
-        if ((engine.state.TBC -= 4096 * engine.state.freqbase) <= 0)
-            timer_B_over(&engine.state);
     }
 
     /// @brief Set the global LFO for the chip.

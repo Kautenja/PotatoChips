@@ -659,8 +659,8 @@ struct Operator {
     /// SSG-EG negated output
     uint8_t ssgn = 0;
 
-    /// 0=last key was KEY OFF, 1=KEY ON
-    uint32_t key = 0;
+    /// Whether the gate for the envelope generator is open
+    bool is_gate_open = false;
 
     /// AM enable flag
     uint32_t AMmask = 0;
@@ -679,8 +679,8 @@ struct Operator {
 
     /// @brief Set the key-on flag for the given operator.
     inline void set_keyon() {
-        if (key) return;
-        key = 1;
+        if (is_gate_open) return;
+        is_gate_open = true;
         // restart Phase Generator
         phase = 0;
         ssgn = (ssg & 0x04) >> 1;
@@ -689,11 +689,10 @@ struct Operator {
 
     /// @brief Set the key-off flag for the given operator.
     inline void set_keyoff() {
-        if (!key) return;
-        key = 0;
+        if (!is_gate_open) return;
+        is_gate_open = false;
         // phase -> Release
-        if (state > EG_REL)
-            state = EG_REL;
+        if (state > EG_REL) state = EG_REL;
     }
 
     /// @brief Set the 7-bit total level.

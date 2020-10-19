@@ -1,6 +1,6 @@
 // Band-limited sound synthesis buffer (forked from Blip_Buffer 0.4.1).
 // Copyright 2020 Christian Kauten
-// Copyright 2003-2006 Shay Green
+// Copyright 2006 Shay Green
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

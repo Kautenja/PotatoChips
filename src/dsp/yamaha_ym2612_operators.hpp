@@ -16,9 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-// Version 1.4 (final beta)
-//
 
 #ifndef DSP_YAMAHA_YM2612_OPERATORS_HPP_
 #define DSP_YAMAHA_YM2612_OPERATORS_HPP_

@@ -16,9 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-// Version 1.4 (final beta)
-//
 
 #ifndef DSP_YAMAHA_YM2612_HPP_
 #define DSP_YAMAHA_YM2612_HPP_
@@ -30,16 +27,18 @@ class YamahaYM2612 {
  public:
     /// the number of FM operators on the module
     static constexpr unsigned NUM_OPERATORS = 4;
-    /// the number of independent FM synthesis oscillators on the module
-    static constexpr unsigned NUM_VOICES = 6;
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
+    /// the number of independent FM synthesis oscillators on the module
+    static constexpr unsigned NUM_VOICES = 6;
 
  private:
     /// general state
     GlobalOperatorState state;
     /// channel state
     Voice voices[NUM_VOICES];
+    /// outputs of working channels
+    int32_t out_fm[NUM_VOICES];
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -47,13 +46,10 @@ class YamahaYM2612 {
     int32_t c1 = 0;
     /// Phase Modulation input for operator 4
     int32_t c2 = 0;
-
     /// one sample delay memory
     int32_t mem = 0;
-    /// outputs of working channels
-    int32_t out_fm[NUM_VOICES] = {0, 0, 0, 0, 0, 0};
 
-    // TODO: enum for the operator?
+    // TODO: enum for the operator/algorithm?
     // TODO: better ASCII illustrations of the operators
     /// @brief Set algorithm, i.e., operator routing.
     ///
@@ -277,6 +273,7 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
+        memset(out_fm, 0, sizeof out_fm);
         state.set_sample_rate(sample_rate, clock_rate);
         reset();
     }

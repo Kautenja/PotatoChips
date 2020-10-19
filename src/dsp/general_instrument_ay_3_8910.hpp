@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-//
 
 #ifndef DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
 #define DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_

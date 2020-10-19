@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-// Based on Brad Martin's OpenSPC DSP emulator
-//
 
 #ifndef DSP_SONY_S_DSP_ADSR_HPP_
 #define DSP_SONY_S_DSP_ADSR_HPP_

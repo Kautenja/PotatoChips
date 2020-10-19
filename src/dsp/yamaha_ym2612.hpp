@@ -191,13 +191,10 @@ class YamahaYM2612 {
     /// @param is_open true if the gate is open, false otherwise
     ///
     inline void setGATE(uint8_t voice_idx, bool is_open) {
-        // cache a pointer to the voice
-        Voice& voice = voices[voice_idx];
-        // process the gate for each operator on the voice
-        if (is_open) voice.operators[Op1].set_keyon(); else voice.operators[Op1].set_keyoff();
-        if (is_open) voice.operators[Op2].set_keyon(); else voice.operators[Op2].set_keyoff();
-        if (is_open) voice.operators[Op3].set_keyon(); else voice.operators[Op3].set_keyoff();
-        if (is_open) voice.operators[Op4].set_keyon(); else voice.operators[Op4].set_keyoff();
+        if (is_open)  // open the gate for all operators
+            for (Operator& op : voices[voice_idx].operators) op.set_keyon();
+        else  // shut the gate for all operators
+            for (Operator& op : voices[voice_idx].operators) op.set_keyoff();
     }
 
     /// @brief Set the frequency for the given channel.

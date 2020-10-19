@@ -262,20 +262,20 @@ struct EngineState {
             oprtr->ksr = ksr;
             // calculate envelope generator rates
             if ((oprtr->ar + oprtr->ksr) < 32+62) {
-                oprtr->eg_sh_ar  = EG_RATE_SHIFT[oprtr->ar  + oprtr->ksr];
-                oprtr->eg_sel_ar = EG_RATE_SELECT[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sh_ar  = ENV_RATE_SHIFT[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar  + oprtr->ksr];
             } else {
                 oprtr->eg_sh_ar  = 0;
-                oprtr->eg_sel_ar = 17 * RATE_STEPS;
+                oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
             }
             // set the shift
-            oprtr->eg_sh_d1r = EG_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sh_d2r = EG_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sh_rr = EG_RATE_SHIFT[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sh_d1r = ENV_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sh_d2r = ENV_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sh_rr = ENV_RATE_SHIFT[oprtr->rr  + oprtr->ksr];
             // set the selector
-            oprtr->eg_sel_d1r = EG_RATE_SELECT[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sel_d2r = EG_RATE_SELECT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sel_rr = EG_RATE_SELECT[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sel_d1r = ENV_RATE_SELECT[oprtr->d1r + oprtr->ksr];
+            oprtr->eg_sel_d2r = ENV_RATE_SELECT[oprtr->d2r + oprtr->ksr];
+            oprtr->eg_sel_rr = ENV_RATE_SELECT[oprtr->rr  + oprtr->ksr];
         }
     }
 
@@ -294,7 +294,7 @@ struct EngineState {
     inline void update_phase_lfo_channel(Voice* voice) {
         uint32_t block_fnum = voice->block_fnum;
         uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        int32_t  lfo_fn_table_index_offset = lfo_pm_table[fnum_lfo + voice->pms + lfo_PM_step];
+        int32_t  lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + lfo_PM_step];
         if (lfo_fn_table_index_offset) {  // LFO phase modulation active
             block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
             uint8_t blk = (block_fnum & 0x7000) >> 12;

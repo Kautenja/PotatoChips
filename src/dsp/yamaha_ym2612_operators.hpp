@@ -50,17 +50,12 @@ enum FixedPointBits {
 static constexpr unsigned FREQ_MASK = (1 << FREQ_SH) - 1;
 
 /// the maximal size of an unsigned envelope table index
-static constexpr unsigned ENV_LEN = 1 << ENV_BITS;
+static constexpr unsigned ENV_LENGTH = 1 << ENV_BITS;
 /// the step size of increments in the envelope table
-static constexpr float ENV_STEP = 128.0 / ENV_LEN;
-
-/// the maximal size of an unsigned sine table index
-static constexpr unsigned SIN_LEN = 1 << SIN_BITS;
-/// a bit mask for extracting sine table indexes in the valid range
-static constexpr unsigned SIN_MASK = SIN_LEN - 1;
+static constexpr float ENV_STEP = 128.0 / ENV_LENGTH;
 
 /// the index of the maximal envelope value
-static constexpr int MAX_ATT_INDEX = ENV_LEN - 1;
+static constexpr int MAX_ATT_INDEX = ENV_LENGTH - 1;
 /// the index of the minimal envelope value
 static constexpr int MIN_ATT_INDEX = 0;
 
@@ -96,20 +91,24 @@ enum OperatorIndex {
 static const uint8_t OPERATOR_INDEXES[4] = {0, 2, 1, 3};
 
 /// 8 bits addressing (real chip)
-static constexpr unsigned TL_RES_LEN = 256;
-/// TL_TAB_LEN is calculated as:
-/// 13 - sinus amplitude bits     (Y axis)
-/// 2  - sinus sign bit           (Y axis)
-/// TL_RES_LEN - sinus resolution (X axis)
-static constexpr unsigned TL_TAB_LEN = 13 * 2 * TL_RES_LEN;
-/// TODO:
-static int tl_tab[TL_TAB_LEN];
+static constexpr unsigned TL_RESOLUTION_LENGTH = 256;
+/// TL_TABLE_LENGTH is calculated as:
+/// 13                   - sinus amplitude bits     (Y axis)
+/// 2                    - sinus sign bit           (Y axis)
+/// TL_RESOLUTION_LENGTH - sinus resolution         (X axis)
+static constexpr unsigned TL_TABLE_LENGTH = 13 * 2 * TL_RESOLUTION_LENGTH;
+/// The total level amplitude table for the envelope generator
+static int TL_TABLE[TL_TABLE_LENGTH];
 
 /// The level at which the envelope becomes quiet, i.e., goes to 0
-static constexpr int ENV_QUIET = TL_TAB_LEN >> 3;
+static constexpr int ENV_QUIET = TL_TABLE_LENGTH >> 3;
 
+/// the maximal size of an unsigned sine table index
+static constexpr unsigned SIN_LENGTH = 1 << SIN_BITS;
+/// a bit mask for extracting sine table indexes in the valid range
+static constexpr unsigned SIN_MASK = SIN_LENGTH - 1;
 /// Sinusoid waveform table in 'decibel' scale
-static unsigned sin_tab[SIN_LEN];
+static unsigned SIN_TABLE[SIN_LENGTH];
 
 /// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
 ///
@@ -118,9 +117,9 @@ static unsigned sin_tab[SIN_LEN];
 /// @param pm the amount of phase modulation for the operator
 ///
 static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
+    uint32_t p = (env << 3) + SIN_TABLE[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TABLE_LENGTH) return 0;
+    return TL_TABLE[p];
 }
 
 /// @brief Return the value of operator (1) given phase, envelope, and PM.
@@ -130,9 +129,9 @@ static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm
 /// @param pm the amount of phase modulation for the operator
 ///
 static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + sin_tab[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TAB_LEN) return 0;
-    return tl_tab[p];
+    uint32_t p = (env << 3) + SIN_TABLE[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
+    if (p >= TL_TABLE_LENGTH) return 0;
+    return TL_TABLE[p];
 }
 
 /// Sustain level table (3dB per step)
@@ -141,7 +140,7 @@ static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int p
 /// 0.75, 1.5,  3,    6,    12,   24,   48   (dB)
 ///
 /// 0 - 15: 0, 3, 6, 9,12,15,18,21,24,27,30,33,36,39,42,93 (dB)
-static const uint32_t sl_table[16] = {
+static const uint32_t SL_TABLE[16] = {
 #define SC(db) (uint32_t)(db * (4.0 / ENV_STEP))
     SC(0), SC(1), SC(2), SC(3), SC(4), SC(5), SC(6), SC(7),
     SC(8), SC(9), SC(10), SC(11), SC(12), SC(13), SC(14), SC(31)
@@ -149,10 +148,10 @@ static const uint32_t sl_table[16] = {
 };
 
 /// TODO:
-static constexpr unsigned RATE_STEPS = 8;
+static constexpr unsigned ENV_RATE_STEPS = 8;
 
 /// TODO:
-static const uint8_t eg_inc[19 * RATE_STEPS] = {
+static const uint8_t ENV_INCREMENT_TABLE[19 * ENV_RATE_STEPS] = {
 // Cycle
 //  0    1   2   3   4   5   6   7
     0,   1,  0,  1,  0,  1,  0,  1,  // 0:  rates 00..11 0 (increment by 0 or 1)
@@ -182,8 +181,8 @@ static const uint8_t eg_inc[19 * RATE_STEPS] = {
 
 /// Envelope Generator rates (32 + 64 rates + 32 RKS).
 /// NOTE: there is no O(17) in this table - it's directly in the code
-static const uint8_t EG_RATE_SELECT[32 + 64 + 32] = {
-#define O(a) (a * RATE_STEPS)
+static const uint8_t ENV_RATE_SELECT[32 + 64 + 32] = {
+#define O(a) (a * ENV_RATE_STEPS)
     // 32 infinite time rates
     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
     O(18), O(18), O(18), O(18), O(18), O(18), O(18), O(18),
@@ -222,7 +221,7 @@ static const uint8_t EG_RATE_SELECT[32 + 64 + 32] = {
 /// rate  0,    1,    2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
 /// shift 11,  10,  9,  8,  7,  6,  5,  4,  3,  2, 1,  0,  0,  0,  0,  0
 /// mask  2047, 1023, 511, 255, 127, 63, 31, 15, 7,  3, 1,  0,  0,  0,  0,  0
-static const uint8_t EG_RATE_SHIFT[32 + 64 + 32] = {
+static const uint8_t ENV_RATE_SHIFT[32 + 64 + 32] = {
 #define O(a) (a * 1)
     // 32 infinite time rates
     O(0), O(0), O(0), O(0), O(0), O(0), O(0), O(0),
@@ -310,7 +309,7 @@ static const uint8_t LFO_AMS_DEPTH_SHIFT[4] = {8, 3, 1, 0};
 ///   (bits 8,9,10 = FNUM MSB from OCT/FNUM register)
 ///
 ///   Here we store only first quarter (positive one) of full waveform.
-///   Full table (lfo_pm_table) containing all 128 waveforms is build
+///   Full table (LFO_PM_TABLE) containing all 128 waveforms is build
 ///   at run (init) time.
 ///
 ///   One value in table below represents 4 (four) basic LFO steps
@@ -395,7 +394,7 @@ static const uint8_t LFO_PM_OUTPUT[7 * 8][8] = {
 /// @details
 /// 128 combinations of 7 bits meaningful (of F-NUMBER), 8 LFO depths, 32 LFO
 /// output levels per one depth
-static int32_t lfo_pm_table[128 * 8 * 32];
+static int32_t LFO_PM_TABLE[128 * 8 * 32];
 
 // TODO: replace with constant tables, i.e., compile elsewhere, run, and extract the tables
 /// Initialize generic tables.
@@ -406,7 +405,7 @@ static int32_t lfo_pm_table[128 * 8 * 32];
 ///
 static __attribute__((constructor)) void init_tables() {
     // build Linear Power Table
-    for (unsigned x = 0; x < TL_RES_LEN; x++) {
+    for (unsigned x = 0; x < TL_RESOLUTION_LENGTH; x++) {
         float m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
         m = floor(m);
         // we never reach (1 << 16) here due to the (x+1)
@@ -423,24 +422,24 @@ static __attribute__((constructor)) void init_tables() {
         // 13 bits here (as in real chip)
         n <<= 2;
         // 14 bits (with sign bit)
-        tl_tab[x * 2 + 0] = n;
-        tl_tab[x * 2 + 1] = -tl_tab[x * 2 + 0];
+        TL_TABLE[x * 2 + 0] = n;
+        TL_TABLE[x * 2 + 1] = -TL_TABLE[x * 2 + 0];
         // one entry in the 'Power' table use the following format,
         //     xxxxxyyyyyyyys with:
         //        s = sign bit
-        // yyyyyyyy = 8-bits decimal part (0-TL_RES_LEN)
+        // yyyyyyyy = 8-bits decimal part (0-TL_RESOLUTION_LENGTH)
         // xxxxx    = 5-bits integer 'shift' value (0-31) but, since Power
         //            table output is 13 bits, any value above 13 (included)
         //            would be discarded.
         for (int i = 1; i < 13; i++) {
-            tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN] =  tl_tab[x * 2 + 0] >> i;
-            tl_tab[x * 2 + 1 + i * 2 * TL_RES_LEN] = -tl_tab[x * 2 + 0 + i * 2 * TL_RES_LEN];
+            TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH] =  TL_TABLE[x * 2 + 0] >> i;
+            TL_TABLE[x * 2 + 1 + i * 2 * TL_RESOLUTION_LENGTH] = -TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH];
         }
     }
     // build Logarithmic Sinus table
-    for (unsigned i = 0; i < SIN_LEN; i++) {
+    for (unsigned i = 0; i < SIN_LENGTH; i++) {
         // non-standard sinus (checked against the real chip)
-        float m = sin(((i * 2) + 1) * M_PI / SIN_LEN);
+        float m = sin(((i * 2) + 1) * M_PI / SIN_LENGTH);
         // we never reach zero here due to ((i * 2) + 1)
         // convert to decibels
         float o;
@@ -455,7 +454,7 @@ static __attribute__((constructor)) void init_tables() {
         else
             n = n >> 1;
         // 13-bits (8.5) value is formatted for above 'Power' table
-        sin_tab[i] = n * 2 + (m >= 0.0 ? 0 : 1);
+        SIN_TABLE[i] = n * 2 + (m >= 0.0 ? 0 : 1);
     }
     // build LFO PM modulation table
     for (int i = 0; i < 8; i++) {  // 8 PM depths
@@ -469,10 +468,10 @@ static __attribute__((constructor)) void init_tables() {
                     }
                 }
                 // 32 steps for LFO PM (sinus)
-                lfo_pm_table[(fnum * 32 * 8) + (i * 32) +  step      +  0] =  value;
-                lfo_pm_table[(fnum * 32 * 8) + (i * 32) + (step ^ 7) +  8] =  value;
-                lfo_pm_table[(fnum * 32 * 8) + (i * 32) +  step      + 16] = -value;
-                lfo_pm_table[(fnum * 32 * 8) + (i * 32) + (step ^ 7) + 24] = -value;
+                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      +  0] =  value;
+                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) +  8] =  value;
+                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      + 16] = -value;
+                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) + 24] = -value;
             }
         }
     }
@@ -502,7 +501,7 @@ struct Operator {
     uint32_t tl = 0;
     /// decay rate
     uint32_t d1r = 0;
-    /// sustain level:sl_table[SL]
+    /// sustain level:SL_TABLE[SL]
     uint32_t sl = 0;
     /// sustain rate
     uint32_t d2r = 0;
@@ -603,15 +602,15 @@ struct Operator {
     ///
     inline void set_dr(uint8_t value) {
         d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-        eg_sh_d1r = EG_RATE_SHIFT[d1r + ksr];
-        eg_sel_d1r = EG_RATE_SELECT[d1r + ksr];
+        eg_sh_d1r = ENV_RATE_SHIFT[d1r + ksr];
+        eg_sel_d1r = ENV_RATE_SELECT[d1r + ksr];
     }
 
     /// @brief Set the sustain level rate.
     ///
     /// @param value the value to index from the sustain level table
     ///
-    inline void set_sl(uint8_t value) { sl = sl_table[value]; }
+    inline void set_sl(uint8_t value) { sl = SL_TABLE[value]; }
 
     /// @brief Set the decay 2 rate, i.e., sustain rate.
     ///
@@ -619,8 +618,8 @@ struct Operator {
     ///
     inline void set_sr(uint8_t value) {
         d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-        eg_sh_d2r = EG_RATE_SHIFT[d2r + ksr];
-        eg_sel_d2r = EG_RATE_SELECT[d2r + ksr];
+        eg_sh_d2r = ENV_RATE_SHIFT[d2r + ksr];
+        eg_sel_d2r = ENV_RATE_SELECT[d2r + ksr];
     }
 
     /// @brief Set the release rate.
@@ -629,8 +628,8 @@ struct Operator {
     ///
     inline void set_rr(uint8_t value) {
         rr = 34 + (value << 2);
-        eg_sh_rr = EG_RATE_SHIFT[rr + ksr];
-        eg_sel_rr = EG_RATE_SELECT[rr + ksr];
+        eg_sh_rr = ENV_RATE_SHIFT[rr + ksr];
+        eg_sel_rr = ENV_RATE_SELECT[rr + ksr];
     }
 
     /// @brief set the SSG register to a new value.
@@ -702,7 +701,7 @@ struct Operator {
         switch (state) {
         case EG_ATT:  // attack phase
             if (!(eg_cnt & ((1 << eg_sh_ar) - 1))) {
-                volume += (~volume * (eg_inc[eg_sel_ar + ((eg_cnt >> eg_sh_ar) & 7)])) >> 4;
+                volume += (~volume * (ENV_INCREMENT_TABLE[eg_sel_ar + ((eg_cnt >> eg_sh_ar) & 7)])) >> 4;
                 if (volume <= MIN_ATT_INDEX) {
                     volume = MIN_ATT_INDEX;
                     state = EG_DEC;
@@ -712,13 +711,13 @@ struct Operator {
         case EG_DEC:  // decay phase
             if (ssg & 0x08) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += 4 * eg_inc[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                    volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
                     if ( volume >= static_cast<int32_t>(sl) )
                         state = EG_SUS;
                 }
             } else {
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += eg_inc[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                    volume += ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
                     if (volume >= static_cast<int32_t>(sl))
                         state = EG_SUS;
                 }
@@ -727,7 +726,7 @@ struct Operator {
         case EG_SUS:  // sustain phase
             if (ssg & 0x08) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
-                    volume += 4 * eg_inc[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
+                    volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
                         volume = MAX_ATT_INDEX;
                         if (ssg & 0x01) {  // bit 0 = hold
@@ -749,7 +748,7 @@ struct Operator {
                 }
             } else {
                 if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
-                    volume += eg_inc[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
+                    volume += ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= MAX_ATT_INDEX) {
                         volume = MAX_ATT_INDEX;
                         // do not change state (verified on real chip)
@@ -760,7 +759,7 @@ struct Operator {
         case EG_REL:  // release phase
             if (!(eg_cnt & ((1 << eg_sh_rr) - 1))) {
                 // SSG-EG affects Release phase also (Nemesis)
-                volume += eg_inc[eg_sel_rr + ((eg_cnt >> eg_sh_rr) & 7)];
+                volume += ENV_INCREMENT_TABLE[eg_sel_rr + ((eg_cnt >> eg_sh_rr) & 7)];
                 if (volume >= MAX_ATT_INDEX) {
                     volume = MAX_ATT_INDEX;
                     state = EG_OFF;
@@ -853,11 +852,11 @@ struct Voice {
         if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
         // refresh Attack rate
         if (oprtr->ar + oprtr->ksr < 32 + 62) {
-            oprtr->eg_sh_ar = EG_RATE_SHIFT[oprtr->ar + oprtr->ksr ];
-            oprtr->eg_sel_ar = EG_RATE_SELECT[oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr ];
         } else {
             oprtr->eg_sh_ar = 0;
-            oprtr->eg_sel_ar = 17 * RATE_STEPS;
+            oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
         }
     }
 

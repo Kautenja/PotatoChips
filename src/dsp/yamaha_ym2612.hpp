@@ -447,23 +447,23 @@ class YamahaYM2612 {
         // cast the shifted frequency to a 16-bit container
         const uint16_t freq16bit = frequency;
         // -------------------------------------------------------------------
-        // MARK: Frequency Low
-        // -------------------------------------------------------------------
-        const auto freqLow = freq16bit & 0xff;
-        uint32_t fn = (((uint32_t)( (state.fn_h) & 7)) << 8) + freqLow;
-        uint8_t blk = state.fn_h >> 3;
-        /* key-scale code */
-        voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
-        /* phase increment counter */
-        voice.fc = state.fn_table[fn * 2] >> (7 - blk);
-        /* store fnum in clear form for LFO PM calculations */
-        voice.block_fnum = (blk << 11) | fn;
-        voice.operators[Op1].phase_increment = -1;
-        // -------------------------------------------------------------------
         // MARK: Frequency High
         // -------------------------------------------------------------------
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
         state.fn_h = freqHigh & 0x3f;
+        // -------------------------------------------------------------------
+        // MARK: Frequency Low
+        // -------------------------------------------------------------------
+        const auto freqLow = freq16bit & 0xff;
+        uint32_t fn = (((uint32_t) (state.fn_h & 7)) << 8) + freqLow;
+        uint8_t blk = state.fn_h >> 3;
+        // key-scale code
+        voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
+        // phase increment counter
+        voice.fc = state.fn_table[fn * 2] >> (7 - blk);
+        // store fnum in clear form for LFO PM calculations
+        voice.block_fnum = (blk << 11) | fn;
+        voice.operators[Op1].phase_increment = -1;
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.

@@ -121,11 +121,6 @@ class YamahaYM2612 {
                 setAM(voice_idx, oprtr_idx, 0);
             }
         }
-
-        for (unsigned i = 0xb2; i >= 0x30; i--) {
-            write_register(&engine, i, 0);
-            write_register(&engine, i | 0x100, 0);
-        }
     }
 
     /// @brief Run a step on the emulator

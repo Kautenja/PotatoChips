@@ -140,15 +140,27 @@ class YamahaYM2612 {
 
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
-            Voice& voice = voices[voice_idx];
             // set both bits of pan to enable both channel outputs
             setPAN(voice_idx, 3);
-            set_algorithm(&engine, &voice, voice_idx, 0);
-            set_feedback(&voice, 0);
+            setAL(voice_idx, 0);
+            setFB(voice_idx, 0);
             setFREQ(voice_idx, 0);
             setGATE(voice_idx, 0);
             setAMS(voice_idx, 0);
             setFMS(voice_idx, 0);
+            for (unsigned oprtr_idx = 0; oprtr_idx < NUM_OPERATORS; oprtr_idx++) {
+                setSSG(voice_idx, oprtr_idx, false, 0);
+                setAR(voice_idx, oprtr_idx, 0);
+                setD1(voice_idx, oprtr_idx, 0);
+                setSL(voice_idx, oprtr_idx, 0);
+                setD2(voice_idx, oprtr_idx, 0);
+                setRR(voice_idx, oprtr_idx, 0);
+                setTL(voice_idx, oprtr_idx, 0);
+                setMUL(voice_idx, oprtr_idx, 0);
+                setDET(voice_idx, oprtr_idx, 0);
+                setRS(voice_idx, oprtr_idx, 0);
+                setAM(voice_idx, oprtr_idx, 0);
+            }
         }
 
         for (unsigned i = 0xb2; i >= 0x30; i--) {
@@ -275,6 +287,33 @@ class YamahaYM2612 {
     // MARK: Global control for each channel
     // -----------------------------------------------------------------------
 
+    /// @brief Set the algorithm (AL) register for the given voice.
+    ///
+    /// @param voice_idx the voice to set the algorithm register of
+    /// @param algorithm the selected FM algorithm in [0, 7]
+    ///
+    inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
+        set_algorithm(&engine, &voices[voice_idx], voice_idx, algorithm & 7);
+    }
+
+    /// @brief Set the feedback (FB) register for the given voice.
+    ///
+    /// @param voice the voice to set the feedback register of
+    /// @param feedback the amount of feedback for operator 1
+    ///
+    inline void setFB(uint8_t voice_idx, uint8_t feedback) {
+        set_feedback(&voices[voice_idx], feedback);
+    }
+
+    /// @brief Set the gate for the given voice.
+    ///
+    /// @param voice_idx the voice on the chip to set the gate for
+    /// @param is_open true if the gate is open, false otherwise
+    ///
+    inline void setGATE(uint8_t voice_idx, bool is_open) {
+        set_gate(&engine, (is_open * 0xF0) + ((voice_idx / 3) * 4 + voice_idx % 3));
+    }
+
     /// @brief Set the frequency for the given channel.
     ///
     /// @param voice_idx the voice on the chip to set the frequency for
@@ -313,45 +352,6 @@ class YamahaYM2612 {
         // -------------------------------------------------------------------
         const auto freqHigh = ((freq16bit >> 8) & 0x07) | ((octave & 0x07) << 3);
         engine.state.fn_h = freqHigh & 0x3f;
-    }
-
-    /// @brief Set the gate for the given voice.
-    ///
-    /// @param voice_idx the voice on the chip to set the gate for
-    /// @param is_open true if the gate is open, false otherwise
-    ///
-    inline void setGATE(uint8_t voice_idx, bool is_open) {
-        set_gate(&engine, (is_open * 0xF0) + ((voice_idx / 3) * 4 + voice_idx % 3));
-    }
-
-    /// @brief Set the algorithm (AL) register for the given voice.
-    ///
-    /// @param voice_idx the voice to set the algorithm register of
-    /// @param algorithm the selected FM algorithm in [0, 7]
-    ///
-    inline void setAL(uint8_t voice_idx, uint8_t algorithm) {
-        // TODO: replace with check on voice.algorithm
-        if (parameters[voice_idx].AL == algorithm) return;
-        parameters[voice_idx].AL = algorithm;
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.FB_ALG = (voice.FB_ALG & 0x38) | (algorithm & 7);
-        set_algorithm(&engine, &voice, voice_idx, algorithm);
-    }
-
-    /// @brief Set the feedback (FB) register for the given voice.
-    ///
-    /// @param voice the voice to set the feedback register of
-    /// @param feedback the amount of feedback for operator 1
-    ///
-    inline void setFB(uint8_t voice_idx, uint8_t feedback) {
-        // TODO: replace with check on voice.feedback
-        if (parameters[voice_idx].FB == feedback) return;
-        parameters[voice_idx].FB = feedback;
-        // get the voice and set the value
-        Voice& voice = voices[voice_idx];
-        voice.FB_ALG = (voice.FB_ALG & 7)| ((feedback & 7) << 3);
-        set_feedback(&voice, feedback);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.

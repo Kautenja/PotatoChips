@@ -709,8 +709,6 @@ struct Voice {
     /// of one channel in 3 slot mode)
     uint32_t block_fnum = 0;
 
-    /// Feedback amount and algorithm selection
-    uint8_t FB_ALG = 0;
     /// L+R enable, AM sensitivity, FM sensitivity
     uint8_t LR_AMS_FMS = 0;
 };

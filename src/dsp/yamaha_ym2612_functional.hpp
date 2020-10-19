@@ -558,26 +558,26 @@ static void write_register(EngineState* engine, int address, int data) {
             break;
         }
         break;
-    case 0xb0:
-        switch (OPERATOR(address)) {
-        // case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
-        //     int feedback = (data >> 3) & 7;
-        //     voice->algorithm = data & 7;
-        //     voice->feedback = feedback ? feedback + 6 : 0;
-        //     set_routing(engine, voice, voice_index);
-        //     break;
-        // }
-        // case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
-        //     // b0-2 PMS
-        //     voice->pms = (data & 7) * 32;
-        //     // b4-5 AMS
-        //     voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
-        //     // PAN :  b7 = L, b6 = R
-        //     engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
-        //     engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
-        //     break;
-        }
-        break;
+    // case 0xb0:
+    //     switch (OPERATOR(address)) {
+    //     case 0: {  // 0xb0-0xb2 : feedback (FB), algorithm (ALGO)
+    //         int feedback = (data >> 3) & 7;
+    //         voice->algorithm = data & 7;
+    //         voice->feedback = feedback ? feedback + 6 : 0;
+    //         set_routing(engine, voice, voice_index);
+    //         break;
+    //     }
+    //     case 1:  // 0xb4-0xb6 : L, R, AMS, PMS (YM2612/YM2610B/YM2610/YM2608)
+    //         // b0-2 PMS
+    //         voice->pms = (data & 7) * 32;
+    //         // b4-5 AMS
+    //         voice->ams = lfo_ams_depth_shift[(data >> 4) & 0x03];
+    //         // PAN :  b7 = L, b6 = R
+    //         engine->pan[voice_index * 2    ] = (data & 0x80) ? ~0 : 0;
+    //         engine->pan[voice_index * 2 + 1] = (data & 0x40) ? ~0 : 0;
+    //         break;
+    //     }
+    //     break;
     }
 }
 

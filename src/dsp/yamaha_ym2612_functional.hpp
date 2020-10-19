@@ -24,46 +24,13 @@
 #define DSP_YAMAHA_YM2612_FUNCTIONAL_HPP_
 
 #include "yamaha_ym2612_operators.hpp"
-#include "exceptions.hpp"
 
 /// @brief Emulator common state.
 struct EngineState {
-    /// frequency base
-    float freqbase = 0;
-
     /// general state
     GlobalOperatorState state;
     /// pointer to voices
     Voice* voices = nullptr;
-
-    /// global envelope generator counter
-    uint32_t eg_cnt = 0;
-    /// global envelope generator counter works at frequency = chipclock/144/3
-    uint32_t eg_timer = 0;
-    /// step of eg_timer
-    uint32_t eg_timer_add = 0;
-    /// envelope generator timer overflows every 3 samples (on real chip)
-    uint32_t eg_timer_overflow = 0;
-
-    /// there are 2048 FNUMs that can be generated using FNUM/BLK registers
-    /// but LFO works with one more bit of a precision so we really need 4096
-    /// elements. fnumber->increment counter
-    uint32_t fn_table[4096];
-    /// maximal phase increment (used for phase overflow)
-    uint32_t fn_max = 0;
-
-    /// current LFO phase (out of 128)
-    uint8_t lfo_cnt = 0;
-    /// current LFO phase runs at LFO frequency
-    uint32_t lfo_timer = 0;
-    /// step of lfo_timer
-    uint32_t lfo_timer_add = 0;
-    /// LFO timer overflows every N samples (depends on LFO frequency)
-    uint32_t lfo_timer_overflow = 0;
-    /// current LFO AM step
-    uint32_t lfo_AM_step = 0;
-    /// current LFO PM step
-    uint32_t lfo_PM_step = 0;
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -76,63 +43,6 @@ struct EngineState {
     int32_t mem = 0;
     /// outputs of working channels
     int32_t out_fm[8];
-
-    // TODO: make private
-    // TODO: inline in set_sample_rate?
-    /// @brief Initialize time tables.
-    void init_timetables() {
-        // DeTune table
-        for (int d = 0; d <= 3; d++) {
-            for (int i = 0; i <= 31; i++) {
-                // -10 because chip works with 10.10 fixed point, while we use 16.16
-                float rate = ((float) DT_TABLE[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
-                state.dt_table[d][i] = (int32_t) rate;
-                state.dt_table[d + 4][i] = -state.dt_table[d][i];
-            }
-        }
-        // there are 2048 FNUMs that can be generated using FNUM/BLK registers
-        // but LFO works with one more bit of a precision so we really need 4096
-        // elements. calculate fnumber -> increment counter table
-        for (int i = 0; i < 4096; i++) {
-            // freq table for octave 7
-            // phase increment counter = 20bit
-            // the correct formula is
-            //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
-            // where sample clock is: M / 144
-            // this means the increment value for one clock sample is
-            //     FNUM * 2^(B-1) = FNUM * 64
-            // for octave 7
-            // we also need to handle the ratio between the chip frequency and
-            // the emulated frequency (can be 1.0)
-            // NOTE:
-            // -10 because chip works with 10.10 fixed point, while we use 16.16
-            fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
-        }
-        // maximal frequency is required for Phase overflow calculation, register
-        // size is 17 bits (Nemesis)
-        fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
-    }
-
-    /// @brief Set the output sample rate and clock rate.
-    ///
-    /// @param sample_rate the number of samples per second
-    /// @param clock_rate the number of source clock cycles per second
-    ///
-    void set_sample_rate(float sample_rate, float clock_rate) {
-        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
-        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
-        // frequency base
-        freqbase = clock_rate / sample_rate;
-        // TODO: why is it necessary to scale these increments by a factor of 1/16
-        //       to get the correct timings from the EG and LFO?
-        // EG timer increment (updates every 3 samples)
-        eg_timer_add = (1 << EG_SH) * freqbase / 16;
-        eg_timer_overflow = 3 * (1 << EG_SH) / 16;
-        // LFO timer increment (updates every 16 samples)
-        lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
-        // make time tables
-        init_timetables();
-    }
 
     // TODO: enum for the operator?
     // TODO: better ASCII illustrations of the operators
@@ -227,41 +137,18 @@ struct EngineState {
         voice->connect4 = carrier;
     }
 
-    /// @brief Advance LFO to next sample.
-    inline void advance_lfo() {
-        if (lfo_timer_overflow) {  // LFO enabled
-            // increment LFO timer
-            lfo_timer += lfo_timer_add;
-            // when LFO is enabled, one level will last for
-            // 108, 77, 71, 67, 62, 44, 8 or 5 samples
-            while (lfo_timer >= lfo_timer_overflow) {
-                lfo_timer -= lfo_timer_overflow;
-                // There are 128 LFO steps
-                lfo_cnt = ( lfo_cnt + 1 ) & 127;
-                // triangle (inverted)
-                // AM: from 126 to 0 step -2, 0 to 126 step +2
-                if (lfo_cnt<64)
-                    lfo_AM_step = (lfo_cnt ^ 63) << 1;
-                else
-                    lfo_AM_step = (lfo_cnt & 63) << 1;
-                // PM works with 4 times slower clock
-                lfo_PM_step = lfo_cnt >> 2;
-            }
-        }
-    }
-
     /// @brief Update phase increment and envelope generator
     inline void refresh_fc_eg_slot(Operator* oprtr, int fc, int kc) {
         int ksr = kc >> oprtr->KSR;
         fc += oprtr->DT[kc];
         // detects frequency overflow (credits to Nemesis)
-        if (fc < 0) fc += fn_max;
+        if (fc < 0) fc += state.fn_max;
         // (frequency) phase increment counter
         oprtr->phase_increment = (fc * oprtr->mul) >> 1;
-        if ( oprtr->ksr != ksr ) {
+        if (oprtr->ksr != ksr) {
             oprtr->ksr = ksr;
             // calculate envelope generator rates
-            if ((oprtr->ar + oprtr->ksr) < 32+62) {
+            if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
                 oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
                 oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
             } else {
@@ -294,7 +181,7 @@ struct EngineState {
     inline void update_phase_lfo_channel(Voice* voice) {
         uint32_t block_fnum = voice->block_fnum;
         uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + lfo_PM_step];
+        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + state.lfo_PM_step];
         if (lfo_fn_table_index_offset) {  // LFO phase modulation active
             block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
             uint8_t blk = (block_fnum & 0x7000) >> 12;
@@ -302,23 +189,23 @@ struct EngineState {
             // key-scale code
             int kc = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fn >> 8];
             // phase increment counter
-            int fc = (fn_table[fn]>>(7 - blk));
+            int fc = (state.fn_table[fn] >> (7 - blk));
             // detects frequency overflow (credits to Nemesis)
             int finc = fc + voice->operators[Op1].DT[kc];
             // Operator 1
-            if (finc < 0) finc += fn_max;
+            if (finc < 0) finc += state.fn_max;
             voice->operators[Op1].phase += (finc * voice->operators[Op1].mul) >> 1;
             // Operator 2
             finc = fc + voice->operators[Op2].DT[kc];
-            if (finc < 0) finc += fn_max;
+            if (finc < 0) finc += state.fn_max;
             voice->operators[Op2].phase += (finc * voice->operators[Op2].mul) >> 1;
             // Operator 3
             finc = fc + voice->operators[Op3].DT[kc];
-            if (finc < 0) finc += fn_max;
+            if (finc < 0) finc += state.fn_max;
             voice->operators[Op3].phase += (finc * voice->operators[Op3].mul) >> 1;
             // Operator 4
             finc = fc + voice->operators[Op4].DT[kc];
-            if (finc < 0) finc += fn_max;
+            if (finc < 0) finc += state.fn_max;
             voice->operators[Op4].phase += (finc * voice->operators[Op4].mul) >> 1;
         } else {  // LFO phase modulation is 0
             voice->operators[Op1].phase += voice->operators[Op1].phase_increment;
@@ -330,7 +217,7 @@ struct EngineState {
 
     inline void chan_calc(Voice* voice) {
 #define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM & (OP)->AMmask))
-        uint32_t AM = lfo_AM_step >> voice->ams;
+        uint32_t AM = state.lfo_AM_step >> voice->ams;
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2
         *voice->mem_connect = voice->mem_value;

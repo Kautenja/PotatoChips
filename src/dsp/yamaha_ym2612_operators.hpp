@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include "exceptions.hpp"
 
 /// The number of fixed point bits for various functions of the chip.
 enum FixedPointBits {
@@ -483,10 +484,122 @@ static __attribute__((constructor)) void init_tables() {
 
 /// @brief The global state for all FM operators.
 struct GlobalOperatorState {
+    /// frequency base
+    float freqbase = 0;
+
+    /// there are 2048 FNUMs that can be generated using FNUM/BLK registers
+    /// but LFO works with one more bit of a precision so we really need 4096
+    /// elements. fnumber->increment counter
+    uint32_t fn_table[4096];
+    /// maximal phase increment (used for phase overflow)
+    uint32_t fn_max = 0;
     /// freq latch
     uint8_t fn_h = 0;
+
     /// DETune table
     int32_t dt_table[8][32];
+
+    /// global envelope generator counter
+    uint32_t eg_cnt = 0;
+    /// global envelope generator counter works at frequency = chipclock/144/3
+    uint32_t eg_timer = 0;
+    /// step of eg_timer
+    uint32_t eg_timer_add = 0;
+    /// envelope generator timer overflows every 3 samples (on real chip)
+    uint32_t eg_timer_overflow = 0;
+
+    /// current LFO phase (out of 128)
+    uint8_t lfo_cnt = 0;
+    /// current LFO phase runs at LFO frequency
+    uint32_t lfo_timer = 0;
+    /// step of lfo_timer
+    uint32_t lfo_timer_add = 0;
+    /// LFO timer overflows every N samples (depends on LFO frequency)
+    uint32_t lfo_timer_overflow = 0;
+    /// current LFO AM step
+    uint32_t lfo_AM_step = 0;
+    /// current LFO PM step
+    uint32_t lfo_PM_step = 0;
+
+    // TODO: make private
+    // TODO: inline in set_sample_rate?
+    /// @brief Initialize time tables.
+    void init_timetables() {
+        // DeTune table
+        for (int d = 0; d <= 3; d++) {
+            for (int i = 0; i <= 31; i++) {
+                // -10 because chip works with 10.10 fixed point, while we use 16.16
+                float rate = ((float) DT_TABLE[d * 32 + i]) * freqbase * (1 << (FREQ_SH - 10));
+                dt_table[d][i] = (int32_t) rate;
+                dt_table[d + 4][i] = -dt_table[d][i];
+            }
+        }
+        // there are 2048 FNUMs that can be generated using FNUM/BLK registers
+        // but LFO works with one more bit of a precision so we really need 4096
+        // elements. calculate fnumber -> increment counter table
+        for (int i = 0; i < 4096; i++) {
+            // freq table for octave 7
+            // phase increment counter = 20bit
+            // the correct formula is
+            //     F-Number = (144 * fnote * 2^20 / M) / 2^(B-1)
+            // where sample clock is: M / 144
+            // this means the increment value for one clock sample is
+            //     FNUM * 2^(B-1) = FNUM * 64
+            // for octave 7
+            // we also need to handle the ratio between the chip frequency and
+            // the emulated frequency (can be 1.0)
+            // NOTE:
+            // -10 because chip works with 10.10 fixed point, while we use 16.16
+            fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+        }
+        // maximal frequency is required for Phase overflow calculation, register
+        // size is 17 bits (Nemesis)
+        fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
+    }
+
+    /// @brief Set the output sample rate and clock rate.
+    ///
+    /// @param sample_rate the number of samples per second
+    /// @param clock_rate the number of source clock cycles per second
+    ///
+    void set_sample_rate(float sample_rate, float clock_rate) {
+        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
+        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
+        // frequency base
+        freqbase = clock_rate / sample_rate;
+        // TODO: why is it necessary to scale these increments by a factor of 1/16
+        //       to get the correct timings from the EG and LFO?
+        // EG timer increment (updates every 3 samples)
+        eg_timer_add = (1 << EG_SH) * freqbase / 16;
+        eg_timer_overflow = 3 * (1 << EG_SH) / 16;
+        // LFO timer increment (updates every 16 samples)
+        lfo_timer_add = (1 << LFO_SH) * freqbase / 16;
+        // make time tables
+        init_timetables();
+    }
+
+    /// @brief Advance LFO to next sample.
+    inline void advance_lfo() {
+        if (lfo_timer_overflow) {  // LFO enabled
+            // increment LFO timer
+            lfo_timer += lfo_timer_add;
+            // when LFO is enabled, one level will last for
+            // 108, 77, 71, 67, 62, 44, 8 or 5 samples
+            while (lfo_timer >= lfo_timer_overflow) {
+                lfo_timer -= lfo_timer_overflow;
+                // There are 128 LFO steps
+                lfo_cnt = ( lfo_cnt + 1 ) & 127;
+                // triangle (inverted)
+                // AM: from 126 to 0 step -2, 0 to 126 step +2
+                if (lfo_cnt<64)
+                    lfo_AM_step = (lfo_cnt ^ 63) << 1;
+                else
+                    lfo_AM_step = (lfo_cnt & 63) << 1;
+                // PM works with 4 times slower clock
+                lfo_PM_step = lfo_cnt >> 2;
+            }
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------

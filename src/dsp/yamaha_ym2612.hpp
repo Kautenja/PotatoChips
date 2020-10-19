@@ -53,7 +53,7 @@ class YamahaYM2612 {
     ///
     YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
         engine.voices = voices;
-        engine.set_sample_rate(sample_rate, clock_rate);
+        engine.state.set_sample_rate(sample_rate, clock_rate);
         reset();
     }
 
@@ -63,19 +63,19 @@ class YamahaYM2612 {
     /// @param sample_rate the rate to draw samples from the emulator at
     ///
     inline void setSampleRate(double clock_rate, double sample_rate) {
-        engine.set_sample_rate(sample_rate, clock_rate);
+        engine.state.set_sample_rate(sample_rate, clock_rate);
     }
 
     /// @brief Reset the emulator to its initial state
     inline void reset() {
         // envelope generator
-        engine.eg_timer = 0;
-        engine.eg_cnt = 0;
+        engine.state.eg_timer = 0;
+        engine.state.eg_cnt = 0;
         // LFO
-        engine.lfo_timer = 0;
-        engine.lfo_cnt = 0;
-        engine.lfo_AM_step = 126;
-        engine.lfo_PM_step = 0;
+        engine.state.lfo_timer = 0;
+        engine.state.lfo_cnt = 0;
+        engine.state.lfo_AM_step = 126;
+        engine.state.lfo_PM_step = 0;
         // reset the voice data specific to the YM2612
         setLFO(0);
         for (unsigned voice_idx = 0; voice_idx < NUM_VOICES; voice_idx++) {
@@ -120,15 +120,15 @@ class YamahaYM2612 {
             engine.chan_calc(&voices[voice]);
         }
         // advance LFO
-        engine.advance_lfo();
+        engine.state.advance_lfo();
         // advance envelope generator
-        engine.eg_timer += engine.eg_timer_add;
-        while (engine.eg_timer >= engine.eg_timer_overflow) {
-            engine.eg_timer -= engine.eg_timer_overflow;
-            engine.eg_cnt++;
+        engine.state.eg_timer += engine.state.eg_timer_add;
+        while (engine.state.eg_timer >= engine.state.eg_timer_overflow) {
+            engine.state.eg_timer -= engine.state.eg_timer_overflow;
+            engine.state.eg_cnt++;
             for (Voice& voice : voices) {
                 for (Operator& oprtr : voice.operators) {
-                    oprtr.update_eg_channel(engine.eg_cnt);
+                    oprtr.update_eg_channel(engine.state.eg_cnt);
                 }
             }
         }
@@ -161,7 +161,7 @@ class YamahaYM2612 {
     /// | 7     | 72.2
     ///
     inline void setLFO(uint8_t value) {
-        engine.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
+        engine.state.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
     // -----------------------------------------------------------------------
@@ -227,7 +227,7 @@ class YamahaYM2612 {
         /* key-scale code */
         voice.kcode = (blk << 2) | FREQUENCY_KEYCODE_TABLE[(fn >> 7) & 0xf];
         /* phase increment counter */
-        voice.fc = engine.fn_table[fn * 2] >> (7 - blk);
+        voice.fc = engine.state.fn_table[fn * 2] >> (7 - blk);
         /* store fnum in clear form for LFO PM calculations */
         voice.block_fnum = (blk << 11) | fn;
         voice.operators[Op1].phase_increment = -1;

@@ -123,37 +123,21 @@ class YamahaYM2612 {
         }
     }
 
-    /// @brief Run a step on the emulator
+    /// @brief Run a step on the emulator.
+    ///
+    /// @param output the stereo output buffer to dump sample data into
+    ///
     inline void step(int16_t output[2]) {
-        int lt, rt;
-        // refresh PG and EG
-        refresh_fc_eg_chan(&engine, &voices[0]);
-        refresh_fc_eg_chan(&engine, &voices[1]);
-        refresh_fc_eg_chan(&engine, &voices[2]);
-        refresh_fc_eg_chan(&engine, &voices[3]);
-        refresh_fc_eg_chan(&engine, &voices[4]);
-        refresh_fc_eg_chan(&engine, &voices[5]);
-        // clear outputs
-        engine.out_fm[0] = 0;
-        engine.out_fm[1] = 0;
-        engine.out_fm[2] = 0;
-        engine.out_fm[3] = 0;
-        engine.out_fm[4] = 0;
-        engine.out_fm[5] = 0;
-        // update SSG-EG output
-        update_ssg_eg_channel(voices[0].operators);
-        update_ssg_eg_channel(voices[1].operators);
-        update_ssg_eg_channel(voices[2].operators);
-        update_ssg_eg_channel(voices[3].operators);
-        update_ssg_eg_channel(voices[4].operators);
-        update_ssg_eg_channel(voices[5].operators);
-        // calculate FM
-        chan_calc(&engine, &voices[0]);
-        chan_calc(&engine, &voices[1]);
-        chan_calc(&engine, &voices[2]);
-        chan_calc(&engine, &voices[3]);
-        chan_calc(&engine, &voices[4]);
-        chan_calc(&engine, &voices[5]);
+        for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
+            // refresh PG and EG
+            refresh_fc_eg_chan(&engine, &voices[voice]);
+            // clear outputs
+            engine.out_fm[voice] = 0;
+            // update SSG-EG output
+            update_ssg_eg_channel(voices[voice].operators);
+            // calculate FM
+            chan_calc(&engine, &voices[voice]);
+        }
         // advance LFO
         advance_lfo(&engine);
         // advance envelope generator
@@ -161,59 +145,24 @@ class YamahaYM2612 {
         while (engine.eg_timer >= engine.eg_timer_overflow) {
             engine.eg_timer -= engine.eg_timer_overflow;
             engine.eg_cnt++;
-            advance_eg_channel(&engine, voices[0].operators);
-            advance_eg_channel(&engine, voices[1].operators);
-            advance_eg_channel(&engine, voices[2].operators);
-            advance_eg_channel(&engine, voices[3].operators);
-            advance_eg_channel(&engine, voices[4].operators);
-            advance_eg_channel(&engine, voices[5].operators);
+            for (unsigned voice = 0; voice < NUM_VOICES; voice++)
+                advance_eg_channel(&engine, voices[voice].operators);
         }
         // clip outputs
-        if (engine.out_fm[0] > 8191)
-            engine.out_fm[0] = 8191;
-        else if (engine.out_fm[0] < -8192)
-            engine.out_fm[0] = -8192;
-        if (engine.out_fm[1] > 8191)
-            engine.out_fm[1] = 8191;
-        else if (engine.out_fm[1] < -8192)
-            engine.out_fm[1] = -8192;
-        if (engine.out_fm[2] > 8191)
-            engine.out_fm[2] = 8191;
-        else if (engine.out_fm[2] < -8192)
-            engine.out_fm[2] = -8192;
-        if (engine.out_fm[3] > 8191)
-            engine.out_fm[3] = 8191;
-        else if (engine.out_fm[3] < -8192)
-            engine.out_fm[3] = -8192;
-        if (engine.out_fm[4] > 8191)
-            engine.out_fm[4] = 8191;
-        else if (engine.out_fm[4] < -8192)
-            engine.out_fm[4] = -8192;
-        if (engine.out_fm[5] > 8191)
-            engine.out_fm[5] = 8191;
-        else if (engine.out_fm[5] < -8192)
-            engine.out_fm[5] = -8192;
-        // 6-parameters mixing
-        lt  = ((engine.out_fm[0] >> 0) & engine.pan[0]);
-        rt  = ((engine.out_fm[0] >> 0) & engine.pan[1]);
-        lt += ((engine.out_fm[1] >> 0) & engine.pan[2]);
-        rt += ((engine.out_fm[1] >> 0) & engine.pan[3]);
-        lt += ((engine.out_fm[2] >> 0) & engine.pan[4]);
-        rt += ((engine.out_fm[2] >> 0) & engine.pan[5]);
-        lt += ((engine.out_fm[3] >> 0) & engine.pan[6]);
-        rt += ((engine.out_fm[3] >> 0) & engine.pan[7]);
-        lt += ((engine.out_fm[4] >> 0) & engine.pan[8]);
-        rt += ((engine.out_fm[4] >> 0) & engine.pan[9]);
-        lt += ((engine.out_fm[5] >> 0) & engine.pan[10]);
-        rt += ((engine.out_fm[5] >> 0) & engine.pan[11]);
-        // output buffering
-        output[0] = lt;
-        output[1] = rt;
+        output[0] = output[1] = 0;
+        for (unsigned voice = 0; voice < NUM_VOICES; voice++) {
+            if (engine.out_fm[voice] > 8191)
+                engine.out_fm[voice] = 8191;
+            else if (engine.out_fm[voice] < -8192)
+                engine.out_fm[voice] = -8192;
+            output[0] += (engine.out_fm[voice] & engine.pan[2 * voice + 0]);
+            output[1] += (engine.out_fm[voice] & engine.pan[2 * voice + 1]);
+        }
         // timer A control
-        if ((engine.state.TAC -= static_cast<int>(engine.state.freqbase * 4096)) <= 0)
+        if ((engine.state.TAC -= 4096 * engine.state.freqbase) <= 0)
             timer_A_over(&engine.state);
         // timer B control
-        if ((engine.state.TBC -= static_cast<int>(engine.state.freqbase * 4096)) <= 0)
+        if ((engine.state.TBC -= 4096 * engine.state.freqbase) <= 0)
             timer_B_over(&engine.state);
     }
 

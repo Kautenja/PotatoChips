@@ -155,51 +155,51 @@ struct EngineState {
         switch (voice->algorithm) {
         case 0:
             // M1---C1---MEM---M2---C2---OUT
-            *om1  = &c1;
-            *oc1  = &mem;
-            *om2  = &c2;
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
             *memc = &m2;
             break;
         case 1:
             // M1------+-MEM---M2---C2---OUT
             //      C1-+
-            *om1  = &mem;
-            *oc1  = &mem;
-            *om2  = &c2;
+            *om1 = &mem;
+            *oc1 = &mem;
+            *om2 = &c2;
             *memc = &m2;
             break;
         case 2:
             // M1-----------------+-C2---OUT
             //      C1---MEM---M2-+
-            *om1  = &c2;
-            *oc1  = &mem;
-            *om2  = &c2;
+            *om1 = &c2;
+            *oc1 = &mem;
+            *om2 = &c2;
             *memc = &m2;
             break;
         case 3:
             // M1---C1---MEM------+-C2---OUT
             //                 M2-+
-            *om1  = &c1;
-            *oc1  = &mem;
-            *om2  = &c2;
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
             *memc = &c2;
             break;
         case 4:
             // M1---C1-+-OUT
             // M2---C2-+
             // MEM: not used
-            *om1  = &c1;
-            *oc1  = carrier;
-            *om2  = &c2;
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = &c2;
             *memc = &mem;  // store it anywhere where it will not be used
             break;
         case 5:
             //    +----C1----+
             // M1-+-MEM---M2-+-OUT
             //    +----C2----+
-            *om1  = nullptr;  // special mark
-            *oc1  = carrier;
-            *om2  = carrier;
+            *om1 = nullptr;  // special mark
+            *oc1 = carrier;
+            *om2 = carrier;
             *memc = &m2;
             break;
         case 6:
@@ -207,9 +207,9 @@ struct EngineState {
             //      M2-+-OUT
             //      C2-+
             // MEM: not used
-            *om1  = &c1;
-            *oc1  = carrier;
-            *om2  = carrier;
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = carrier;
             *memc = &mem;  // store it anywhere where it will not be used
             break;
         case 7:
@@ -218,9 +218,9 @@ struct EngineState {
             // M2-+
             // C2-+
             // MEM: not used
-            *om1  = carrier;
-            *oc1  = carrier;
-            *om2  = carrier;
+            *om1 = carrier;
+            *oc1 = carrier;
+            *om2 = carrier;
             *memc = &mem;  // store it anywhere where it will not be used
             break;
         }
@@ -262,20 +262,20 @@ struct EngineState {
             oprtr->ksr = ksr;
             // calculate envelope generator rates
             if ((oprtr->ar + oprtr->ksr) < 32+62) {
-                oprtr->eg_sh_ar  = ENV_RATE_SHIFT[oprtr->ar  + oprtr->ksr];
-                oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar  + oprtr->ksr];
+                oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
+                oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
             } else {
-                oprtr->eg_sh_ar  = 0;
+                oprtr->eg_sh_ar = 0;
                 oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
             }
             // set the shift
             oprtr->eg_sh_d1r = ENV_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
             oprtr->eg_sh_d2r = ENV_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sh_rr = ENV_RATE_SHIFT[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sh_rr = ENV_RATE_SHIFT[oprtr->rr + oprtr->ksr];
             // set the selector
             oprtr->eg_sel_d1r = ENV_RATE_SELECT[oprtr->d1r + oprtr->ksr];
             oprtr->eg_sel_d2r = ENV_RATE_SELECT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sel_rr = ENV_RATE_SELECT[oprtr->rr  + oprtr->ksr];
+            oprtr->eg_sel_rr = ENV_RATE_SELECT[oprtr->rr + oprtr->ksr];
         }
     }
 
@@ -293,8 +293,8 @@ struct EngineState {
 
     inline void update_phase_lfo_channel(Voice* voice) {
         uint32_t block_fnum = voice->block_fnum;
-        uint32_t fnum_lfo  = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        int32_t  lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + lfo_PM_step];
+        uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + voice->pms + lfo_PM_step];
         if (lfo_fn_table_index_offset) {  // LFO phase modulation active
             block_fnum = block_fnum * 2 + lfo_fn_table_index_offset;
             uint8_t blk = (block_fnum & 0x7000) >> 12;

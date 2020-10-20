@@ -555,6 +555,26 @@ struct GlobalOperatorState {
         fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
     }
 
+    /// @brief Set the global LFO for the chip.
+    ///
+    /// @param value the value of the LFO register
+    /// @details
+    /// ## Mapping values to frequencies in Hz
+    /// | value | LFO frequency (Hz)
+    /// |:------|:-------------------|
+    /// | 0     | 3.98
+    /// | 1     | 5.56
+    /// | 2     | 6.02
+    /// | 3     | 6.37
+    /// | 4     | 6.88
+    /// | 5     | 9.63
+    /// | 6     | 48.1
+    /// | 7     | 72.2
+    ///
+    inline void set_lfo(uint8_t value) {
+        lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
+    }
+
     /// @brief Advance LFO to next sample.
     inline void advance_lfo() {
         if (lfo_timer_overflow) {  // LFO enabled

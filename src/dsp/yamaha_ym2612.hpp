@@ -358,38 +358,20 @@ class YamahaYM2612 {
     /// @brief Set the global LFO for the chip.
     ///
     /// @param value the value of the LFO register
-    /// @details
-    /// ## Mapping values to frequencies in Hz
-    /// | value | LFO frequency (Hz)
-    /// |:------|:-------------------|
-    /// | 0     | 3.98
-    /// | 1     | 5.56
-    /// | 2     | 6.02
-    /// | 3     | 6.37
-    /// | 4     | 6.88
-    /// | 5     | 9.63
-    /// | 6     | 48.1
-    /// | 7     | 72.2
     ///
-    inline void setLFO(uint8_t value) {
-        state.lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
-    }
+    inline void setLFO(uint8_t value) { state.set_lfo(value); }
 
     /// @brief Set the algorithm (AL) register for the given voice.
     ///
     /// @param value the selected FM algorithm in [0, 7]
     ///
-    inline void setAL(uint8_t value) {
-        set_algorithm(value);
-    }
+    inline void setAL(uint8_t value) { set_algorithm(value); }
 
     /// @brief Set the feedback (FB) register for the given voice.
     ///
     /// @param value the amount of feedback for operator 1
     ///
-    inline void setFB(uint8_t value) {
-        voice.set_feedback(value);
-    }
+    inline void setFB(uint8_t value) { voice.set_feedback(value); }
 
     /// @brief Set the gate for the given voice.
     ///

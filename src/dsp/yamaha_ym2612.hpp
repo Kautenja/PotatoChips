@@ -294,7 +294,7 @@ class YamahaYM2612 {
         state.lfo_PM_step = 0;
         // reset the voice data specific to the YM2612
         setLFO(0);
-        voice.reset();
+        voice.reset(state);
         // TODO: move all this reset code to voice.reset()
         setAL(0);
         setFB(0);
@@ -302,19 +302,7 @@ class YamahaYM2612 {
         setGATE(0);
         setAMS(0);
         setFMS(0);
-        for (unsigned oprtr_idx = 0; oprtr_idx < NUM_OPERATORS; oprtr_idx++) {
-            // setSSG(oprtr_idx, false, 0);
-            // setAR(oprtr_idx, 0);
-            // setD1(oprtr_idx, 0);
-            // setSL(oprtr_idx, 0);
-            // setD2(oprtr_idx, 0);
-            // setRR(oprtr_idx, 0);
-            // setTL(oprtr_idx, 0);
-            setMUL(oprtr_idx, 0);
-            setDET(oprtr_idx, 0);
-            // setRS(oprtr_idx, 0);
-            // setAM(oprtr_idx, 0);
-        }
+        voice.operators[Op1].phase_increment = -1;
     }
 
     /// @brief Run a step on the emulator to produce a sample.

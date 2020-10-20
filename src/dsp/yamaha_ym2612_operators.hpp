@@ -687,7 +687,7 @@ struct Operator {
     bool is_amplitude_mod_on = false;
 
     /// @brief Reset the operator to its initial / default value.
-    inline void reset() {
+    inline void reset(const GlobalOperatorState& state) {
         ssg = ssgn = 0;
         env_stage = SILENT;
         volume = MAX_ATT_INDEX;
@@ -700,6 +700,8 @@ struct Operator {
         set_sr(0);
         set_rr(0);
         set_ssg(0);
+        mul = 1;
+        DT = state.dt_table[0];
         is_gate_open = false;
         is_amplitude_mod_on = false;
     }
@@ -994,9 +996,9 @@ struct Voice {
     uint32_t block_fnum = 0;
 
     /// @brief Reset the voice to default.
-    inline void reset() {
+    inline void reset(const GlobalOperatorState& state) {
         fc = 0;
-        for (auto &op : operators) op.reset();
+        for (auto &op : operators) op.reset(state);
     }
 
     /// @brief Set the feedback amount.

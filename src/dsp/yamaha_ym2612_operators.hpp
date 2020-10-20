@@ -959,8 +959,8 @@ struct Voice {
         if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
         // refresh Attack rate
         if (oprtr->ar + oprtr->ksr < 32 + 62) {
-            oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr ];
-            oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr ];
+            oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
+            oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
         } else {
             oprtr->eg_sh_ar = 0;
             oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;

@@ -537,15 +537,42 @@ class YamahaYM2612 {
         voice.operators[OPERATOR_INDEXES[op_index]].set_ssg(value);
     }
 
+    /// @brief Set the rate-scale (RS) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
+    /// @param value the amount of rate-scale applied to the FM operator
+    ///
+    inline void setRS(uint8_t op_index, uint8_t value) {
+        Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
+        uint8_t old_KSR = oprtr.KSR;
+        oprtr.KSR = 3 - value;
+        if (oprtr.KSR != old_KSR) voice.operators[Op1].phase_increment = -1;
+        // refresh Attack rate
+        if (oprtr.ar + oprtr.ksr < 32 + 62) {
+            oprtr.eg_sh_ar = ENV_RATE_SHIFT[oprtr.ar + oprtr.ksr];
+            oprtr.eg_sel_ar = ENV_RATE_SELECT[oprtr.ar + oprtr.ksr];
+        } else {
+            oprtr.eg_sh_ar = 0;
+            oprtr.eg_sel_ar = 17 * ENV_RATE_STEPS;
+        }
+    }
+
     /// @brief Set the attack rate (AR) register for the given voice and operator.
     ///
     /// @param op_index the operator to set the attack rate (AR) register of (in [0, 3])
     /// @param value the rate of the attack stage of the envelope generator
     ///
     inline void setAR(uint8_t op_index, uint8_t value) {
-        Operator* const oprtr = &voice.operators[OPERATOR_INDEXES[op_index]];
-        oprtr->ar_ksr = (oprtr->ar_ksr & 0xC0) | (value & 0x1f);
-        voice.set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
+        voice.operators[OPERATOR_INDEXES[op_index]].set_ar(value);
+    }
+
+    /// @brief Set the total level (TL) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
+    /// @param value the total amplitude of envelope generator
+    ///
+    inline void setTL(uint8_t op_index, uint8_t value) {
+        voice.operators[OPERATOR_INDEXES[op_index]].set_tl(value);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
@@ -584,15 +611,6 @@ class YamahaYM2612 {
         voice.operators[OPERATOR_INDEXES[op_index]].set_rr(value);
     }
 
-    /// @brief Set the total level (TL) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
-    /// @param value the total amplitude of envelope generator
-    ///
-    inline void setTL(uint8_t op_index, uint8_t value) {
-        voice.operators[OPERATOR_INDEXES[op_index]].set_tl(value);
-    }
-
     /// @brief Set the multiplier (MUL) register for the given voice and operator.
     ///
     /// @param op_index the operator to set the multiplier  (MUL)register of (in [0, 3])
@@ -621,17 +639,6 @@ class YamahaYM2612 {
         if (oprtr.DT != DT) voice.operators[Op1].phase_increment = -1;
         // set the DT register for the operator
         oprtr.DT = DT;
-    }
-
-    /// @brief Set the rate-scale (RS) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
-    /// @param value the amount of rate-scale applied to the FM operator
-    ///
-    inline void setRS(uint8_t op_index, uint8_t value) {
-        Operator* const oprtr = &voice.operators[OPERATOR_INDEXES[op_index]];
-        oprtr->ar_ksr = (oprtr->ar_ksr & 0x1F) | ((value & 0x03) << 6);
-        voice.set_ar_ksr(OPERATOR_INDEXES[op_index], oprtr->ar_ksr);
     }
 
     /// @brief Set the amplitude modulation (AM) register for the given voice and operator.

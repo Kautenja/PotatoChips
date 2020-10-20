@@ -666,9 +666,6 @@ struct Operator {
     /// whether amplitude modulation is enabled for the operator
     bool is_amplitude_mod_on = false;
 
-    /// attack rate and key-scaling control register
-    uint8_t ar_ksr = 0;
-
     /// @brief Reset the operator to its initial / default value.
     inline void reset() {
         ssg = ssgn = 0;
@@ -700,6 +697,36 @@ struct Operator {
     /// @param value the value for the total level (TL)
     ///
     inline void set_tl(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
+
+    /// @brief Set the 5-bit attack rate.
+    ///
+    /// @param value the value for the attack rate (AR)
+    ///
+    inline void set_ar(uint8_t value) {
+        ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
+        // refresh Attack rate
+        if (ar + ksr < 32 + 62) {
+            eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
+            eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
+        } else {
+            eg_sh_ar = 0;
+            eg_sel_ar = 17 * ENV_RATE_STEPS;
+        }
+    }
+
+    // inline bool set_rs(uint8_t value) {
+    //     uint8_t old_KSR = KSR;
+    //     KSR = 3 - value;
+    //     // refresh Attack rate
+    //     if (ar + ksr < 32 + 62) {
+    //         eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
+    //         eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
+    //     } else {
+    //         eg_sh_ar = 0;
+    //         eg_sel_ar = 17 * ENV_RATE_STEPS;
+    //     }
+    //     return KSR != old_KSR;
+    // }
 
     /// @brief Set the decay 1 rate, i.e., decay rate.
     ///
@@ -934,7 +961,7 @@ struct Voice {
     /// @brief Reset the voice to default.
     inline void reset() {
         fc = 0;
-        for (auto &oprtr : operators) oprtr.reset();
+        for (auto &op : operators) op.reset();
     }
 
     /// @brief Set the feedback amount.
@@ -942,30 +969,29 @@ struct Voice {
     /// @param feedback the amount of feedback for the first operator
     ///
     inline void set_feedback(uint8_t value) {
-        value = value & 7;
-        feedback = value ? value + 6 : 0;
+        feedback = (value & 7) ? (value & 7) + 6 : 0;
     }
 
-    /// @brief Set attack rate & key scale
-    ///
-    /// @param oprtr_idx the index of the operator
-    /// @param value the value for the attack rate (AR) and key-scale rate (KSR)
-    ///
-    inline void set_ar_ksr(unsigned oprtr_idx, int value) {
-        Operator* oprtr = &operators[oprtr_idx];
-        uint8_t old_KSR = oprtr->KSR;
-        oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-        oprtr->KSR = 3 - (value >> 6);
-        if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
-        // refresh Attack rate
-        if (oprtr->ar + oprtr->ksr < 32 + 62) {
-            oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
-            oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
-        } else {
-            oprtr->eg_sh_ar = 0;
-            oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
-        }
-    }
+    // /// @brief Set attack rate & key scale
+    // ///
+    // /// @param oprtr_idx the index of the operator
+    // /// @param value the value for the attack rate (AR) and key-scale rate (KSR)
+    // ///
+    // inline void set_ar_ksr(unsigned oprtr_idx, int value) {
+    //     Operator* oprtr = &operators[oprtr_idx];
+    //     uint8_t old_KSR = oprtr->KSR;
+    //     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
+    //     oprtr->KSR = 3 - (value >> 6);
+    //     if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
+    //     // refresh Attack rate
+    //     if (oprtr->ar + oprtr->ksr < 32 + 62) {
+    //         oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
+    //         oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
+    //     } else {
+    //         oprtr->eg_sh_ar = 0;
+    //         oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
+    //     }
+    // }
 
     // /// @brief set detune & multiplier.
     // ///

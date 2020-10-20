@@ -504,6 +504,17 @@ struct GlobalOperatorState {
     /// current LFO PM step
     uint32_t lfo_PM_step = 0;
 
+    /// @brief Reset the operator state to it's initial values.
+    inline void reset() {
+        eg_timer = 0;
+        eg_cnt = 0;
+        lfo_timer = 0;
+        lfo_cnt = 0;
+        lfo_AM_step = 126;
+        lfo_PM_step = 0;
+        set_lfo(0);
+    }
+
     /// @brief Set the sample rate based on the source clock rate.
     ///
     /// @param sample_rate the number of samples per second

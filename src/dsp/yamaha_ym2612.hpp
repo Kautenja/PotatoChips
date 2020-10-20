@@ -284,16 +284,7 @@ class YamahaYM2612 {
 
     /// @brief Reset the emulator to its initial state
     inline void reset() {
-        // envelope generator
-        state.eg_timer = 0;
-        state.eg_cnt = 0;
-        // LFO
-        state.lfo_timer = 0;
-        state.lfo_cnt = 0;
-        state.lfo_AM_step = 126;
-        state.lfo_PM_step = 0;
-        // reset the voice data specific to the YM2612
-        setLFO(0);
+        state.reset();
         voice.reset(state);
         // TODO: move all this reset code to voice.reset()
         setAL(0);

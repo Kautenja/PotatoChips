@@ -306,8 +306,8 @@ class YamahaYM2612 {
         // clear outputs
         out_fm = 0;
         // update SSG-EG output
-        for (unsigned i = 0; i < 4; i++)
-            voice.operators[i].update_ssg_eg_channel();
+        for (Operator& oprtr : voice.operators)
+            oprtr.update_ssg_eg_channel();
         // calculate FM
         chan_calc();
         // advance LFO

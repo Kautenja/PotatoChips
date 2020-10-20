@@ -604,7 +604,7 @@ struct Operator {
     uint32_t rr = 0;
 
     /// detune :dt_table[DT]
-    int32_t* DT = 0;
+    const int32_t* DT = 0;
     /// multiple :ML_TABLE[ML]
     uint32_t mul = 0;
 
@@ -625,19 +625,19 @@ struct Operator {
 
     /// The stages of the envelope generator.
     enum EnvelopeStage {
-        /// the off stage, i.e., 0 output
-        EG_OFF = 0,
+        /// the silent/off stage, i.e., 0 output
+        SILENT = 0,
         /// the release stage, i.e., falling to 0 after note-off from any stage
-        EG_REL = 1,
+        RELEASE = 1,
         /// the sustain stage, i.e., holding until note-off after the decay stage
         /// ends
-        EG_SUS = 2,
+        SUSTAIN = 2,
         /// the decay stage, i.e., falling to sustain level after the attack stage
         /// reaches the total level
-        EG_DEC = 3,
+        DECAY = 3,
         /// the attack stage, i.e., rising from 0 to the total level
-        EG_ATT = 4
-    } env_stage = EG_OFF;
+        ATTACK = 4
+    } env_stage = SILENT;
 
     /// attack stage
     uint8_t eg_sh_ar = 0;
@@ -672,7 +672,7 @@ struct Operator {
     /// @brief Reset the operator to its initial / default value.
     inline void reset() {
         ssg = ssgn = 0;
-        env_stage = EG_OFF;
+        env_stage = SILENT;
         volume = MAX_ATT_INDEX;
         vol_out = MAX_ATT_INDEX;
     }
@@ -684,7 +684,7 @@ struct Operator {
         // restart Phase Generator
         phase = 0;
         ssgn = (ssg & 0x04) >> 1;
-        env_stage = EG_ATT;
+        env_stage = ATTACK;
     }
 
     /// @brief Set the key-off flag for the given operator.
@@ -692,7 +692,7 @@ struct Operator {
         if (!is_gate_open) return;
         is_gate_open = false;
         // phase -> Release
-        if (env_stage > EG_REL) env_stage = EG_REL;
+        if (env_stage > RELEASE) env_stage = RELEASE;
     }
 
     /// @brief Set the 7-bit total level.
@@ -748,7 +748,7 @@ struct Operator {
         if (ssg == value) return;
         ssg = value;
         // recalculate EG output
-        if ((ssg & 0x08) && (ssgn ^ (ssg & 0x04)) && (env_stage > EG_REL))
+        if ((ssg & 0x08) && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
             vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
         else
             vol_out = (uint32_t) volume + tl;
@@ -765,12 +765,12 @@ struct Operator {
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
-        if ((ssg & 0x08) && (volume >= 0x200) && (env_stage > EG_REL)) {
+        if ((ssg & 0x08) && (volume >= 0x200) && (env_stage > RELEASE)) {
             if (ssg & 0x01) {  // bit 0 = hold SSG-EG
                 // set inversion flag
                 if (ssg & 0x02) ssgn = 4;
                 // force attenuation level during decay phases
-                if ((env_stage != EG_ATT) && !(ssgn ^ (ssg & 0x04)))
+                if ((env_stage != ATTACK) && !(ssgn ^ (ssg & 0x04)))
                     volume = MAX_ATT_INDEX;
             } else {  // loop SSG-EG
                 // toggle output inversion flag or reset Phase Generator
@@ -779,13 +779,13 @@ struct Operator {
                 else
                     phase = 0;
                 // same as Key ON
-                if (env_stage != EG_ATT) {
+                if (env_stage != ATTACK) {
                     if ((ar + ksr) < 32 + 62) {  // attacking
                         env_stage = (volume <= MIN_ATT_INDEX) ?
-                            ((sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC) : EG_ATT;
+                            ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
                     } else {  // Attack Rate @ max -> jump to next stage
                         volume = MIN_ATT_INDEX;
-                        env_stage = (sl == MIN_ATT_INDEX) ? EG_SUS : EG_DEC;
+                        env_stage = (sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY;
                     }
                 }
             }
@@ -804,33 +804,33 @@ struct Operator {
     inline void update_eg_channel(uint32_t eg_cnt) {
         unsigned int swap_flag = 0;
         switch (env_stage) {
-        case EG_OFF:  // not running
+        case SILENT:  // not running
             break;
-        case EG_ATT:  // attack stage
+        case ATTACK:  // attack stage
             if (!(eg_cnt & ((1 << eg_sh_ar) - 1))) {
                 volume += (~volume * (ENV_INCREMENT_TABLE[eg_sel_ar + ((eg_cnt >> eg_sh_ar) & 7)])) >> 4;
                 if (volume <= MIN_ATT_INDEX) {
                     volume = MIN_ATT_INDEX;
-                    env_stage = EG_DEC;
+                    env_stage = DECAY;
                 }
             }
             break;
-        case EG_DEC:  // decay stage
+        case DECAY:  // decay stage
             if (ssg & 0x08) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
                     if ( volume >= static_cast<int32_t>(sl) )
-                        env_stage = EG_SUS;
+                        env_stage = SUSTAIN;
                 }
             } else {
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
                     volume += ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
                     if (volume >= static_cast<int32_t>(sl))
-                        env_stage = EG_SUS;
+                        env_stage = SUSTAIN;
                 }
             }
             break;
-        case EG_SUS:  // sustain stage
+        case SUSTAIN:  // sustain stage
             if (ssg & 0x08) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
@@ -847,7 +847,7 @@ struct Operator {
                             phase = 0;
                             // stage -> Attack
                             volume = 511;
-                            env_stage = EG_ATT;
+                            env_stage = ATTACK;
                             // bit 1 = alternate
                             swap_flag = (ssg & 0x02);
                         }
@@ -863,13 +863,13 @@ struct Operator {
                 }
             }
             break;
-        case EG_REL:  // release stage
+        case RELEASE:  // release stage
             if (!(eg_cnt & ((1 << eg_sh_rr) - 1))) {
                 // SSG-EG affects Release stage also (Nemesis)
                 volume += ENV_INCREMENT_TABLE[eg_sel_rr + ((eg_cnt >> eg_sh_rr) & 7)];
                 if (volume >= MAX_ATT_INDEX) {
                     volume = MAX_ATT_INDEX;
-                    env_stage = EG_OFF;
+                    env_stage = SILENT;
                 }
             }
             break;
@@ -878,7 +878,7 @@ struct Operator {
         unsigned int out = static_cast<uint32_t>(volume);
         // negate output (changes come from alternate bit, init comes from
         // attack bit)
-        if ((ssg & 0x08) && (ssgn & 2) && (env_stage > EG_REL))
+        if ((ssg & 0x08) && (ssgn & 2) && (env_stage > RELEASE))
             out ^= MAX_ATT_INDEX;
         // we need to store the result here because we are going to change
         // ssgn in next instruction

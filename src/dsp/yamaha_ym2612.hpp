@@ -138,44 +138,15 @@ class YamahaYM2612 {
         voice.connect4 = carrier;
     }
 
-    /// @brief Update phase increment and envelope generator
-    inline void refresh_fc_eg_slot(Operator* oprtr, int fc, int kc) {
-        int ksr = kc >> oprtr->KSR;
-        fc += oprtr->DT[kc];
-        // detects frequency overflow (credits to Nemesis)
-        if (fc < 0) fc += state.fn_max;
-        // (frequency) phase increment counter
-        oprtr->phase_increment = (fc * oprtr->mul) >> 1;
-        if (oprtr->ksr != ksr) {
-            oprtr->ksr = ksr;
-            // calculate envelope generator rates
-            if ((oprtr->ar + oprtr->ksr) < 32 + 62) {
-                oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
-                oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
-            } else {
-                oprtr->eg_sh_ar = 0;
-                oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
-            }
-            // set the shift
-            oprtr->eg_sh_d1r = ENV_RATE_SHIFT[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sh_d2r = ENV_RATE_SHIFT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sh_rr = ENV_RATE_SHIFT[oprtr->rr + oprtr->ksr];
-            // set the selector
-            oprtr->eg_sel_d1r = ENV_RATE_SELECT[oprtr->d1r + oprtr->ksr];
-            oprtr->eg_sel_d2r = ENV_RATE_SELECT[oprtr->d2r + oprtr->ksr];
-            oprtr->eg_sel_rr = ENV_RATE_SELECT[oprtr->rr + oprtr->ksr];
-        }
-    }
-
     /// @brief Update phase increment counters
     inline void refresh_fc_eg_chan() {
         if (voice.operators[Op1].phase_increment == -1) {
             int fc = voice.fc;
             int kc = voice.kcode;
-            refresh_fc_eg_slot(&voice.operators[Op1], fc, kc);
-            refresh_fc_eg_slot(&voice.operators[Op2], fc, kc);
-            refresh_fc_eg_slot(&voice.operators[Op3], fc, kc);
-            refresh_fc_eg_slot(&voice.operators[Op4], fc, kc);
+            voice.operators[Op1].refresh_fc_eg_slot(state.fn_max, fc, kc);
+            voice.operators[Op2].refresh_fc_eg_slot(state.fn_max, fc, kc);
+            voice.operators[Op3].refresh_fc_eg_slot(state.fn_max, fc, kc);
+            voice.operators[Op4].refresh_fc_eg_slot(state.fn_max, fc, kc);
         }
     }
 

@@ -961,6 +961,34 @@ struct Operator {
         // reverse oprtr inversion flag
         ssgn ^= swap_flag;
     }
+
+    /// @brief Update phase increment and envelope generator
+    inline void refresh_fc_eg_slot(uint32_t fn_max, int fc, int kc) {
+        fc += DT[kc];
+        // detects frequency overflow (credits to Nemesis)
+        if (fc < 0) fc += fn_max;
+        // (frequency) phase increment counter
+        phase_increment = (fc * mul) >> 1;
+        if (ksr != kc >> KSR) {
+            ksr = kc >> KSR;
+            // calculate envelope generator rates
+            if ((ar + ksr) < 32 + 62) {
+                eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
+                eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
+            } else {
+                eg_sh_ar = 0;
+                eg_sel_ar = 17 * ENV_RATE_STEPS;
+            }
+            // set the shift
+            eg_sh_d1r = ENV_RATE_SHIFT[d1r + ksr];
+            eg_sh_d2r = ENV_RATE_SHIFT[d2r + ksr];
+            eg_sh_rr = ENV_RATE_SHIFT[rr + ksr];
+            // set the selector
+            eg_sel_d1r = ENV_RATE_SELECT[d1r + ksr];
+            eg_sel_d2r = ENV_RATE_SELECT[d2r + ksr];
+            eg_sel_rr = ENV_RATE_SELECT[rr + ksr];
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------

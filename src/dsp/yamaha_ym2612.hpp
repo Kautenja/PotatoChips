@@ -303,17 +303,17 @@ class YamahaYM2612 {
         setAMS(0);
         setFMS(0);
         for (unsigned oprtr_idx = 0; oprtr_idx < NUM_OPERATORS; oprtr_idx++) {
-            setSSG(oprtr_idx, false, 0);
-            setAR(oprtr_idx, 0);
-            setD1(oprtr_idx, 0);
-            setSL(oprtr_idx, 0);
-            setD2(oprtr_idx, 0);
-            setRR(oprtr_idx, 0);
-            setTL(oprtr_idx, 0);
+            // setSSG(oprtr_idx, false, 0);
+            // setAR(oprtr_idx, 0);
+            // setD1(oprtr_idx, 0);
+            // setSL(oprtr_idx, 0);
+            // setD2(oprtr_idx, 0);
+            // setRR(oprtr_idx, 0);
+            // setTL(oprtr_idx, 0);
             setMUL(oprtr_idx, 0);
             setDET(oprtr_idx, 0);
-            setRS(oprtr_idx, 0);
-            setAM(oprtr_idx, 0);
+            // setRS(oprtr_idx, 0);
+            // setAM(oprtr_idx, 0);
         }
     }
 
@@ -619,7 +619,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the amplitude modulation (AM) register of (in [0, 3])
     /// @param value the true to enable amplitude modulation from the LFO, false to disable it
     ///
-    inline void setAM(uint8_t op_index, uint8_t value) {
+    inline void setAM(uint8_t op_index, bool value) {
         voice.operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
     }
 };

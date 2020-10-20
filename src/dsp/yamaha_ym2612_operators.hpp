@@ -692,6 +692,16 @@ struct Operator {
         env_stage = SILENT;
         volume = MAX_ATT_INDEX;
         vol_out = MAX_ATT_INDEX;
+        set_rs(0);
+        set_ar(0);
+        set_tl(0);
+        set_dr(0);
+        set_sl(0);
+        set_sr(0);
+        set_rr(0);
+        set_ssg(0);
+        is_gate_open = false;
+        is_amplitude_mod_on = false;
     }
 
     /// @brief Set the key-on flag for the given operator.

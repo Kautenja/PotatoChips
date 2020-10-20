@@ -688,10 +688,14 @@ struct Operator {
 
     /// @brief Reset the operator to its initial / default value.
     inline void reset(const GlobalOperatorState& state) {
-        ssg = ssgn = 0;
         env_stage = SILENT;
         volume = MAX_ATT_INDEX;
         vol_out = MAX_ATT_INDEX;
+        DT = state.dt_table[0];
+        mul = 1;
+        ssg = ssgn = 0;
+        is_gate_open = false;
+        is_amplitude_mod_on = false;
         set_rs(0);
         set_ar(0);
         set_tl(0);
@@ -700,10 +704,6 @@ struct Operator {
         set_sr(0);
         set_rr(0);
         set_ssg(0);
-        mul = 1;
-        DT = state.dt_table[0];
-        is_gate_open = false;
-        is_amplitude_mod_on = false;
     }
 
     /// @brief Set the key-on flag for the given operator.

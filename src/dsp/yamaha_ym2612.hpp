@@ -543,18 +543,9 @@ class YamahaYM2612 {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void setRS(uint8_t op_index, uint8_t value) {
-        Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
-        uint8_t old_KSR = oprtr.KSR;
-        oprtr.KSR = 3 - value;
-        if (oprtr.KSR != old_KSR) voice.operators[Op1].phase_increment = -1;
-        // refresh Attack rate
-        if (oprtr.ar + oprtr.ksr < 32 + 62) {
-            oprtr.eg_sh_ar = ENV_RATE_SHIFT[oprtr.ar + oprtr.ksr];
-            oprtr.eg_sel_ar = ENV_RATE_SELECT[oprtr.ar + oprtr.ksr];
-        } else {
-            oprtr.eg_sh_ar = 0;
-            oprtr.eg_sel_ar = 17 * ENV_RATE_STEPS;
-        }
+        // TODO: is it necessary to reset the phase increment for operator 1?
+        if (voice.operators[OPERATOR_INDEXES[op_index]].set_rs(value))
+            voice.operators[Op1].phase_increment = -1;
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.

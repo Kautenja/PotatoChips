@@ -692,11 +692,24 @@ struct Operator {
         if (env_stage > RELEASE) env_stage = RELEASE;
     }
 
-    /// @brief Set the 7-bit total level.
+    // TODO: is it necessary to return a boolean keeping track of KSR changing?
+    /// @brief Set the 2-bit rate scale.
     ///
-    /// @param value the value for the total level (TL)
+    /// @param value the value for the rate scale (RS)
     ///
-    inline void set_tl(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
+    inline bool set_rs(uint8_t value) {
+        uint8_t old_KSR = KSR;
+        KSR = 3 - (value & 4);
+        // refresh Attack rate
+        if (ar + ksr < 32 + 62) {
+            eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
+            eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
+        } else {
+            eg_sh_ar = 0;
+            eg_sel_ar = 17 * ENV_RATE_STEPS;
+        }
+        return KSR != old_KSR;
+    }
 
     /// @brief Set the 5-bit attack rate.
     ///
@@ -714,19 +727,11 @@ struct Operator {
         }
     }
 
-    // inline bool set_rs(uint8_t value) {
-    //     uint8_t old_KSR = KSR;
-    //     KSR = 3 - value;
-    //     // refresh Attack rate
-    //     if (ar + ksr < 32 + 62) {
-    //         eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
-    //         eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
-    //     } else {
-    //         eg_sh_ar = 0;
-    //         eg_sel_ar = 17 * ENV_RATE_STEPS;
-    //     }
-    //     return KSR != old_KSR;
-    // }
+    /// @brief Set the 7-bit total level.
+    ///
+    /// @param value the value for the total level (TL)
+    ///
+    inline void set_tl(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
 
     /// @brief Set the decay 1 rate, i.e., decay rate.
     ///

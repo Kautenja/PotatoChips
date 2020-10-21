@@ -267,10 +267,8 @@ class YamahaYM2612 {
     inline void reset() {
         state.reset();
         voice.reset(state);
-        // TODO: move all this reset code to voice.reset()
+        // TODO: move the following reset code to voice.reset()
         setAL(0);
-        setFB(0);
-        setFREQ(0);
         voice.operators[Op1].phase_increment = -1;
     }
 

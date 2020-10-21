@@ -673,23 +673,6 @@ struct Operator {
     /// whether amplitude modulation is enabled for the operator
     bool is_amplitude_mod_on = false;
 
-    /// @brief Return the value of operator (1) given envelope and PM.
-    ///
-    /// @param env the value of the operator's envelope (after AM is applied)
-    /// @param pm the amount of phase modulation for the operator
-    /// @details
-    /// the `pm` parameter for operators 2, 3, and 4 (BUT NOT 1) should be
-    /// shifted left by 15 bits before being passed in. Operator 1 should be
-    /// shift left by the setting of its `FB` (feedback) parameter.
-    ///
-    inline int32_t calculate_output(uint32_t env, int32_t pm) const {
-        const uint32_t p = (env << 3) + SIN_TABLE[
-            (((int32_t)((phase & ~FREQ_MASK) + pm)) >> FREQ_SH) & SIN_MASK
-        ];
-        if (p >= TL_TABLE_LENGTH) return 0;
-        return TL_TABLE[p];
-    }
-
     /// @brief Reset the operator to its initial / default value.
     inline void reset(const GlobalOperatorState& state) {
         env_stage = SILENT;
@@ -992,6 +975,23 @@ struct Operator {
     ///
     inline uint32_t get_envelope(uint32_t amplitude_modulation) const {
         return vol_out + is_amplitude_mod_on * amplitude_modulation;
+    }
+
+    /// @brief Return the value of operator (1) given envelope and PM.
+    ///
+    /// @param env the value of the operator's envelope (after AM is applied)
+    /// @param pm the amount of phase modulation for the operator
+    /// @details
+    /// the `pm` parameter for operators 2, 3, and 4 (BUT NOT 1) should be
+    /// shifted left by 15 bits before being passed in. Operator 1 should be
+    /// shift left by the setting of its `FB` (feedback) parameter.
+    ///
+    inline int32_t calculate_output(uint32_t env, int32_t pm) const {
+        const uint32_t p = (env << 3) + SIN_TABLE[
+            (((int32_t)((phase & ~FREQ_MASK) + pm)) >> FREQ_SH) & SIN_MASK
+        ];
+        if (p >= TL_TABLE_LENGTH) return 0;
+        return TL_TABLE[p];
     }
 };
 

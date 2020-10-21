@@ -96,30 +96,6 @@ static constexpr unsigned SIN_MASK = SIN_LENGTH - 1;
 /// Sinusoid waveform table in 'decibel' scale
 static unsigned SIN_TABLE[SIN_LENGTH];
 
-/// @brief Return the value of operator (2,3,4) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + SIN_TABLE[(((signed int)((phase & ~FREQ_MASK) + (pm << 15))) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TABLE_LENGTH) return 0;
-    return TL_TABLE[p];
-}
-
-/// @brief Return the value of operator (1) given phase, envelope, and PM.
-///
-/// @param phase the current phase of the operator's oscillator
-/// @param env the value of the operator's envelope
-/// @param pm the amount of phase modulation for the operator
-///
-static inline signed int op_calc1(uint32_t phase, unsigned int env, signed int pm) {
-    uint32_t p = (env << 3) + SIN_TABLE[(((signed int)((phase & ~FREQ_MASK) + pm        )) >> FREQ_SH) & SIN_MASK];
-    if (p >= TL_TABLE_LENGTH) return 0;
-    return TL_TABLE[p];
-}
-
 /// Sustain level table (3dB per step)
 /// bit0, bit1, bit2, bit3, bit4, bit5, bit6
 /// 1,    2,    4,    8,    16,   32,   64   (value)
@@ -696,6 +672,23 @@ struct Operator {
     bool is_gate_open = false;
     /// whether amplitude modulation is enabled for the operator
     bool is_amplitude_mod_on = false;
+
+    /// @brief Return the value of operator (1) given envelope and PM.
+    ///
+    /// @param env the value of the operator's envelope (after AM is applied)
+    /// @param pm the amount of phase modulation for the operator
+    /// @details
+    /// the `pm` parameter for operators 2, 3, and 4 (BUT NOT 1) should be
+    /// shifted left by 15 bits before being passed in. Operator 1 should be
+    /// shift left by the setting of its `FB` (feedback) parameter.
+    ///
+    inline int32_t calculate_output(uint32_t env, int32_t pm) const {
+        const uint32_t p = (env << 3) + SIN_TABLE[
+            (((int32_t)((phase & ~FREQ_MASK) + pm)) >> FREQ_SH) & SIN_MASK
+        ];
+        if (p >= TL_TABLE_LENGTH) return 0;
+        return TL_TABLE[p];
+    }
 
     /// @brief Reset the operator to its initial / default value.
     inline void reset(const GlobalOperatorState& state) {

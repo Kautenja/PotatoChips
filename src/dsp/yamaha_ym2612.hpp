@@ -209,24 +209,23 @@ class YamahaYM2612 {
         if (eg_out < ENV_QUIET) {  // operator 1 envelope is open
             // if feedback is disabled, set feedback carrier to 0
             if (!voice.feedback) op1_feedback = 0;
-            // shift carrier by the feedback amount before passing to op_calc1
-            // and updating the next output for operator 1
-            voice.op1_out[1] = op_calc1(voice.operators[Op1].phase, eg_out, op1_feedback << voice.feedback);
+            // shift carrier by the feedback amount
+            voice.op1_out[1] = voice.operators[Op1].calculate_output(eg_out, op1_feedback << voice.feedback);
         } else {  // clear the next output from operator 1
             voice.op1_out[1] = 0;
         }
         // Operator 3
         eg_out = voice.operators[Op3].get_envelope(AM);;
         if (eg_out < ENV_QUIET)
-            *voice.connections[Op3] += op_calc(voice.operators[Op3].phase, eg_out, m2);
+            *voice.connections[Op3] += voice.operators[Op3].calculate_output(eg_out, m2 << 15);
         // Operator 2
         eg_out = voice.operators[Op2].get_envelope(AM);
         if (eg_out < ENV_QUIET)
-            *voice.connections[Op2] += op_calc(voice.operators[Op2].phase, eg_out, c1);
+            *voice.connections[Op2] += voice.operators[Op2].calculate_output(eg_out, c1 << 15);
         // Operator 4
         eg_out = voice.operators[Op4].get_envelope(AM);
         if (eg_out < ENV_QUIET)
-            *voice.connections[Op4] += op_calc(voice.operators[Op4].phase, eg_out, c2);
+            *voice.connections[Op4] += voice.operators[Op4].calculate_output(eg_out, c2 << 15);
         // store current MEM
         voice.mem_value = mem;
         // update phase counters AFTER output calculations

@@ -1007,14 +1007,8 @@ struct Voice {
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
 
-    /// Op1 output pointer
-    int32_t *connect1 = nullptr;
-    /// Op3 output pointer
-    int32_t *connect3 = nullptr;
-    /// Op2 output pointer
-    int32_t *connect2 = nullptr;
-    /// Op4 output pointer
-    int32_t *connect4 = nullptr;
+    /// the output of the operators based on the algorithm connections
+    int32_t *connections[4] = {nullptr, nullptr, nullptr, nullptr};
 
     /// where to put the delayed sample (MEM)
     int32_t *mem_connect = nullptr;

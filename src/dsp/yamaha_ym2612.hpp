@@ -58,9 +58,9 @@ class YamahaYM2612 {
         voice.algorithm = algorithm & 7;
         int32_t *carrier = &out_fm;
         // get the connections
-        int32_t **om1 = &voice.connect1;
-        int32_t **om2 = &voice.connect3;
-        int32_t **oc1 = &voice.connect2;
+        int32_t **om1 = &voice.connections[0];
+        int32_t **om2 = &voice.connections[2];
+        int32_t **oc1 = &voice.connections[1];
         int32_t **memc = &voice.mem_connect;
         // set the algorithm
         switch (voice.algorithm) {
@@ -135,7 +135,7 @@ class YamahaYM2612 {
             *memc = &mem;  // store it anywhere where it will not be used
             break;
         }
-        voice.connect4 = carrier;
+        voice.connections[3] = carrier;
     }
 
     /// @brief Update phase increment counters
@@ -197,10 +197,10 @@ class YamahaYM2612 {
         unsigned int eg_out = CALCULATE_VOLUME(&voice.operators[Op1]);
         int32_t out = voice.op1_out[0] + voice.op1_out[1];
         voice.op1_out[0] = voice.op1_out[1];
-        if (!voice.connect1) {  // algorithm 5
+        if (!voice.connections[0]) {  // algorithm 5
             mem = c1 = c2 = voice.op1_out[0];
         } else {  // other algorithms
-            *voice.connect1 += voice.op1_out[0];
+            *voice.connections[0] += voice.op1_out[0];
         }
         voice.op1_out[1] = 0;
         if (eg_out < ENV_QUIET) {
@@ -210,15 +210,15 @@ class YamahaYM2612 {
         // Operator 3
         eg_out = CALCULATE_VOLUME(&voice.operators[Op3]);
         if (eg_out < ENV_QUIET)
-            *voice.connect3 += op_calc(voice.operators[Op3].phase, eg_out, m2);
+            *voice.connections[2] += op_calc(voice.operators[Op3].phase, eg_out, m2);
         // Operator 2
         eg_out = CALCULATE_VOLUME(&voice.operators[Op2]);
         if (eg_out < ENV_QUIET)
-            *voice.connect2 += op_calc(voice.operators[Op2].phase, eg_out, c1);
+            *voice.connections[1] += op_calc(voice.operators[Op2].phase, eg_out, c1);
         // Operator 4
         eg_out = CALCULATE_VOLUME(&voice.operators[Op4]);
         if (eg_out < ENV_QUIET)
-            *voice.connect4 += op_calc(voice.operators[Op4].phase, eg_out, c2);
+            *voice.connections[3] += op_calc(voice.operators[Op4].phase, eg_out, c2);
         // store current MEM
         voice.mem_value = mem;
         // update phase counters AFTER output calculations

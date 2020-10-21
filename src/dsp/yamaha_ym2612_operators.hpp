@@ -674,6 +674,11 @@ struct Operator {
     bool is_amplitude_mod_on = false;
 
     /// @brief Reset the operator to its initial / default value.
+    ///
+    /// @param state the global operator state to use (for detune table values)
+    /// @details
+    /// `state` should be `reset()` before calls to this function.
+    ///
     inline void reset(const GlobalOperatorState& state) {
         env_stage = SILENT;
         volume = MAX_ATT_INDEX;
@@ -1019,23 +1024,51 @@ struct Voice {
     /// delayed sample (MEM) value
     int32_t mem_value = 0;
 
-    /// channel phase modulation sensitivity (PMS)
+    /// phase modulation sensitivity (PMS)
     int32_t pms = 0;
-    /// channel amplitude modulation sensitivity (AMS)
+    /// amplitude modulation sensitivity (AMS)
     uint8_t ams = 0;
 
     /// fnum, blk : adjusted to sample rate
     uint32_t fc = 0;
-    /// key code:
+    /// key code :
     uint8_t kcode = 0;
-    /// current blk / fnum value for this slot (can be different between slots
-    /// of one channel in 3 slot mode)
+    /// current blk / fnum value for this slot
     uint32_t block_fnum = 0;
 
     /// @brief Reset the voice to default.
+    ///
+    /// @param state the global operator state to use for resetting operators
+    ///
     inline void reset(const GlobalOperatorState& state) {
-        fc = 0;
         for (auto &op : operators) op.reset(state);
+        algorithm = 0;
+        feedback = 0;
+        op1_out[0] = op1_out[1] = 0;
+        connections[0] = connections[1] = connections[2] = connections[3] = nullptr;
+        mem_connect = nullptr;
+        mem_value = 0;
+        pms = 0;
+        ams = LFO_AMS_DEPTH_SHIFT[0];
+        fc = 0;
+        kcode = 0;
+        block_fnum = 0;
+    }
+
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t value) {
+        ams = LFO_AMS_DEPTH_SHIFT[value & 0x03];
+    }
+
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void set_fm_sensitivity(uint8_t value) {
+        pms = (value & 7) * 32;
     }
 
     /// @brief Set the feedback amount.
@@ -1044,6 +1077,45 @@ struct Voice {
     ///
     inline void set_feedback(uint8_t value) {
         feedback = (value & 7) ? (value & 7) + 6 : 0;
+    }
+
+    /// @brief Set the gate for the given voice.
+    ///
+    /// @param is_open true if the gate is open, false otherwise
+    ///
+    inline void set_gate(bool is_open) {
+        if (is_open)  // open the gate for all operators
+            for (Operator& op : operators) op.set_keyon();
+        else  // shut the gate for all operators
+            for (Operator& op : operators) op.set_keyoff();
+    }
+
+    /// @brief Set the frequency of the voice.
+    ///
+    /// @param frequency the frequency value measured in Hz
+    ///
+    inline void set_frequency(const GlobalOperatorState& state, float frequency) {
+        // Shift the frequency to the base octave and calculate the octave to
+        // play. The base octave is defined as a 10-bit number in [0, 1023].
+        int octave = 2;
+        for (; frequency >= 1024; octave++) frequency /= 2;
+        // TODO: why is this arbitrary shift necessary to tune to C4?
+        // NOTE: shift calculated by producing C4 note from a ground truth
+        //       oscillator and comparing the output from YM2612 via division:
+        //       1.458166333006277
+        frequency = frequency / 1.458;
+        // cast the shifted frequency to a 16-bit container
+        const uint16_t freq16bit = frequency;
+
+        // key-scale code
+        kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
+        // phase increment counter
+        fc = state.fn_table[freq16bit * 2] >> (7 - octave);
+        // store fnum in clear form for LFO PM calculations
+        block_fnum = (octave << 11) | freq16bit;
+
+        // TODO: only set this when the frequency changes?
+        operators[Op1].phase_increment = -1;
     }
 
     // /// @brief Set attack rate & key scale

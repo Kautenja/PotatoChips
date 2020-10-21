@@ -150,7 +150,7 @@ struct Chip2612 : rack::Module {
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
-            apu[channel].setSampleRate(CLOCK_RATE, APP->engine->getSampleRate());
+            apu[channel].setSampleRate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// @brief Process the CV inputs for the given channel.

@@ -188,6 +188,9 @@ class YamahaYM2612 {
     }
 
     /// @brief Advance the operators to compute the next output from the voice.
+    /// @details
+    /// The operators advance in the order 1, 3, 2, 4.
+    ///
     inline void calculate_operator_outputs() {
         // get the amount of amplitude modulation for the voice
         const uint32_t AM = state.lfo_AM_step >> voice.ams;
@@ -196,40 +199,41 @@ class YamahaYM2612 {
         // restore delayed sample (MEM) value to m2 or c2
         *voice.mem_connect = voice.mem_value;
         // Operator 1
-        unsigned eg_out = voice.operators[Op1].get_envelope(AM);;
+        unsigned envelope = voice.operators[Op1].get_envelope(AM);;
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
-        int32_t op1_feedback = voice.op1_out[0] + voice.op1_out[1];
+        int32_t feedback = voice.op1_out[0] + voice.op1_out[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         voice.op1_out[0] = voice.op1_out[1];
+        // set the connection outputs from operator 1 based on the algorithm
         if (!voice.connections[Op1])  // algorithm 5
             mem = c1 = c2 = voice.op1_out[1];
         else  // other algorithms
             *voice.connections[Op1] += voice.op1_out[1];
         // calculate the next output from operator 1
-        if (eg_out < ENV_QUIET) {  // operator 1 envelope is open
+        if (envelope < ENV_QUIET) {  // operator 1 envelope is open
             // if feedback is disabled, set feedback carrier to 0
-            if (!voice.feedback) op1_feedback = 0;
+            if (!voice.feedback) feedback = 0;
             // shift carrier by the feedback amount
-            voice.op1_out[1] = voice.operators[Op1].calculate_output(eg_out, op1_feedback << voice.feedback);
+            voice.op1_out[1] = voice.operators[Op1].calculate_output(envelope, feedback << voice.feedback);
         } else {  // clear the next output from operator 1
             voice.op1_out[1] = 0;
         }
         // Operator 3
-        eg_out = voice.operators[Op3].get_envelope(AM);;
-        if (eg_out < ENV_QUIET)
-            *voice.connections[Op3] += voice.operators[Op3].calculate_output(eg_out, m2 << 15);
+        envelope = voice.operators[Op3].get_envelope(AM);;
+        if (envelope < ENV_QUIET)
+            *voice.connections[Op3] += voice.operators[Op3].calculate_output(envelope, m2 << 15);
         // Operator 2
-        eg_out = voice.operators[Op2].get_envelope(AM);
-        if (eg_out < ENV_QUIET)
-            *voice.connections[Op2] += voice.operators[Op2].calculate_output(eg_out, c1 << 15);
+        envelope = voice.operators[Op2].get_envelope(AM);
+        if (envelope < ENV_QUIET)
+            *voice.connections[Op2] += voice.operators[Op2].calculate_output(envelope, c1 << 15);
         // Operator 4
-        eg_out = voice.operators[Op4].get_envelope(AM);
-        if (eg_out < ENV_QUIET)
-            *voice.connections[Op4] += voice.operators[Op4].calculate_output(eg_out, c2 << 15);
+        envelope = voice.operators[Op4].get_envelope(AM);
+        if (envelope < ENV_QUIET)
+            *voice.connections[Op4] += voice.operators[Op4].calculate_output(envelope, c2 << 15);
         // store current MEM
         voice.mem_value = mem;
         // update phase counters AFTER output calculations
-        if (voice.pms) {
+        if (voice.pms) {  // update the phase using the LFO
             update_phase_lfo_channel();
         } else {  // no LFO phase modulation
             voice.operators[Op1].phase += voice.operators[Op1].phase_increment;
@@ -242,24 +246,24 @@ class YamahaYM2612 {
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
     ///
-    /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
+    /// @param clock_rate the underlying clock rate of the system
     ///
-    YamahaYM2612(double clock_rate = 768000, double sample_rate = 44100) {
-        state.set_sample_rate(sample_rate, clock_rate);
+    explicit YamahaYM2612(double sample_rate = 44100, double clock_rate = 768000) {
+        setSampleRate(sample_rate, clock_rate);
         reset();
     }
 
     /// @brief Set the sample rate the a new value.
     ///
-    /// @param clock_rate the underlying clock rate of the system
     /// @param sample_rate the rate to draw samples from the emulator at
+    /// @param clock_rate the underlying clock rate of the system
     ///
-    inline void setSampleRate(double clock_rate, double sample_rate) {
+    inline void setSampleRate(double sample_rate, double clock_rate) {
         state.set_sample_rate(sample_rate, clock_rate);
     }
 
-    /// @brief Reset the emulator to its initial state
+    /// @brief Reset the emulator to its initial state.
     inline void reset() {
         state.reset();
         voice.reset(state);
@@ -267,9 +271,6 @@ class YamahaYM2612 {
         setAL(0);
         setFB(0);
         setFREQ(0);
-        setGATE(0);
-        setAMS(0);
-        setFMS(0);
         voice.operators[Op1].phase_increment = -1;
     }
 
@@ -317,6 +318,18 @@ class YamahaYM2612 {
     ///
     inline void setLFO(uint8_t value) { state.set_lfo(value); }
 
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void setAMS(uint8_t value) { voice.set_am_sensitivity(value); }
+
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void setFMS(uint8_t value) { voice.set_fm_sensitivity(value); }
+
     /// @brief Set the algorithm (AL) register for the given voice.
     ///
     /// @param value the selected FM algorithm in [0, 7]
@@ -333,56 +346,13 @@ class YamahaYM2612 {
     ///
     /// @param is_open true if the gate is open, false otherwise
     ///
-    inline void setGATE(bool is_open) {
-        if (is_open)  // open the gate for all operators
-            for (Operator& op : voice.operators) op.set_keyon();
-        else  // shut the gate for all operators
-            for (Operator& op : voice.operators) op.set_keyoff();
-    }
+    inline void setGATE(bool is_open) { voice.set_gate(is_open); }
 
-    /// @brief Set the frequency for the given channel.
+    /// @brief Set the frequency of the voice.
     ///
-    /// @param frequency the frequency value measured in Hz
+    /// @param value the frequency value measured in Hz
     ///
-    inline void setFREQ(float frequency) {
-        // Shift the frequency to the base octave and calculate the octave to
-        // play. The base octave is defined as a 10-bit number in [0, 1023].
-        int octave = 2;
-        for (; frequency >= 1024; octave++) frequency /= 2;
-        // TODO: why is this arbitrary shift necessary to tune to C4?
-        // NOTE: shift calculated by producing C4 note from a ground truth
-        //       oscillator and comparing the output from YM2612 via division:
-        //       1.458166333006277
-        frequency = frequency / 1.458;
-        // cast the shifted frequency to a 16-bit container
-        const uint16_t freq16bit = frequency;
-
-        // key-scale code
-        voice.kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
-        // phase increment counter
-        voice.fc = state.fn_table[freq16bit * 2] >> (7 - octave);
-        // store fnum in clear form for LFO PM calculations
-        voice.block_fnum = (octave << 11) | freq16bit;
-
-        // TODO: only set this when the frequency changes?
-        voice.operators[Op1].phase_increment = -1;
-    }
-
-    /// @brief Set the AM sensitivity (AMS) register for the given voice.
-    ///
-    /// @param value the amount of amplitude modulation (AM) sensitivity
-    ///
-    inline void setAMS(uint8_t value) {
-        voice.ams = LFO_AMS_DEPTH_SHIFT[value & 0x03];
-    }
-
-    /// @brief Set the FM sensitivity (FMS) register for the given voice.
-    ///
-    /// @param value the amount of frequency modulation (FM) sensitivity
-    ///
-    inline void setFMS(uint8_t value) {
-        voice.pms = (value & 7) * 32;
-    }
+    inline void setFREQ(float value) { voice.set_frequency(state, value); }
 
     // -----------------------------------------------------------------------
     // MARK: Operator control

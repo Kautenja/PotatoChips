@@ -1027,12 +1027,12 @@ struct Voice {
     /// phase modulation sensitivity (PMS)
     int32_t pms = 0;
     /// amplitude modulation sensitivity (AMS)
-    uint8_t ams = 0;
+    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
 
     /// fnum, blk : adjusted to sample rate
     uint32_t fc = 0;
     /// key code :
-    uint8_t kcode = 0;
+    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
     /// current blk / fnum value for this slot
     uint32_t block_fnum = 0;
 
@@ -1051,7 +1051,7 @@ struct Voice {
         pms = 0;
         ams = LFO_AMS_DEPTH_SHIFT[0];
         fc = 0;
-        kcode = 0;
+        kcode = FREQUENCY_KEYCODE_TABLE[0];
         block_fnum = 0;
     }
 
@@ -1067,9 +1067,7 @@ struct Voice {
     ///
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void set_fm_sensitivity(uint8_t value) {
-        pms = (value & 7) * 32;
-    }
+    inline void set_fm_sensitivity(uint8_t value) { pms = (value & 7) * 32; }
 
     /// @brief Set the feedback amount.
     ///

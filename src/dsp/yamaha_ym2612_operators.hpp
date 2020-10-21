@@ -989,6 +989,17 @@ struct Operator {
             eg_sel_rr = ENV_RATE_SELECT[rr + ksr];
         }
     }
+
+    /// @brief Get the envelope volume based on amplitude modulation level.
+    ///
+    /// @param amplitude_modulation the amount of amplitude modulation to apply
+    /// @details
+    /// `amplitude_modulation` is only applied to the envelope if
+    /// `this->is_amplitude_mod_on` is set to `true`.
+    ///
+    inline uint32_t get_envelope(uint32_t amplitude_modulation) const {
+        return vol_out + is_amplitude_mod_on * amplitude_modulation;
+    }
 };
 
 // ---------------------------------------------------------------------------

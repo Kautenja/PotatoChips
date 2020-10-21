@@ -58,9 +58,9 @@ class YamahaYM2612 {
         voice.algorithm = algorithm & 7;
         int32_t *carrier = &out_fm;
         // get the connections
-        int32_t **om1 = &voice.connections[0];
-        int32_t **om2 = &voice.connections[2];
-        int32_t **oc1 = &voice.connections[1];
+        int32_t **om1 = &voice.connections[Op1];
+        int32_t **om2 = &voice.connections[Op3];
+        int32_t **oc1 = &voice.connections[Op2];
         int32_t **memc = &voice.mem_connect;
         // set the algorithm
         switch (voice.algorithm) {
@@ -135,7 +135,7 @@ class YamahaYM2612 {
             *memc = &mem;  // store it anywhere where it will not be used
             break;
         }
-        voice.connections[3] = carrier;
+        voice.connections[Op4] = carrier;
     }
 
     /// @brief Update phase increment counters
@@ -187,38 +187,46 @@ class YamahaYM2612 {
         }
     }
 
-    inline void chan_calc() {
-#define CALCULATE_VOLUME(OP) ((OP)->vol_out + (AM * (OP)->is_amplitude_mod_on))
-        uint32_t AM = state.lfo_AM_step >> voice.ams;
+    /// @brief Advance the operators to compute the next output from the voice.
+    inline void calculate_operator_outputs() {
+        // get the amount of amplitude modulation for the voice
+        const uint32_t AM = state.lfo_AM_step >> voice.ams;
+        // reset the algorithm outputs to 0
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2
         *voice.mem_connect = voice.mem_value;
         // Operator 1
-        unsigned int eg_out = CALCULATE_VOLUME(&voice.operators[Op1]);
-        int32_t out = voice.op1_out[0] + voice.op1_out[1];
+        unsigned eg_out = voice.operators[Op1].get_envelope(AM);;
+        // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
+        int32_t op1_feedback = voice.op1_out[0] + voice.op1_out[1];
+        // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         voice.op1_out[0] = voice.op1_out[1];
-        if (!voice.connections[0]) {  // algorithm 5
-            mem = c1 = c2 = voice.op1_out[0];
-        } else {  // other algorithms
-            *voice.connections[0] += voice.op1_out[0];
-        }
-        voice.op1_out[1] = 0;
-        if (eg_out < ENV_QUIET) {
-            if (!voice.feedback) out = 0;
-            voice.op1_out[1] = op_calc1(voice.operators[Op1].phase, eg_out, (out << voice.feedback) );
+        if (!voice.connections[Op1])  // algorithm 5
+            mem = c1 = c2 = voice.op1_out[1];
+        else  // other algorithms
+            *voice.connections[Op1] += voice.op1_out[1];
+        // calculate the next output from operator 1
+        if (eg_out < ENV_QUIET) {  // operator 1 envelope is open
+            // if feedback is disabled, set feedback carrier to 0
+            if (!voice.feedback) op1_feedback = 0;
+            // shift carrier by the feedback amount before passing to op_calc1
+            // and updating the next output for operator 1
+            voice.op1_out[1] = op_calc1(voice.operators[Op1].phase, eg_out, op1_feedback << voice.feedback);
+        } else {  // clear the next output from operator 1
+            voice.op1_out[1] = 0;
         }
         // Operator 3
-        eg_out = CALCULATE_VOLUME(&voice.operators[Op3]);
+        eg_out = voice.operators[Op3].get_envelope(AM);;
         if (eg_out < ENV_QUIET)
-            *voice.connections[2] += op_calc(voice.operators[Op3].phase, eg_out, m2);
+            *voice.connections[Op3] += op_calc(voice.operators[Op3].phase, eg_out, m2);
         // Operator 2
-        eg_out = CALCULATE_VOLUME(&voice.operators[Op2]);
+        eg_out = voice.operators[Op2].get_envelope(AM);
         if (eg_out < ENV_QUIET)
-            *voice.connections[1] += op_calc(voice.operators[Op2].phase, eg_out, c1);
+            *voice.connections[Op2] += op_calc(voice.operators[Op2].phase, eg_out, c1);
         // Operator 4
-        eg_out = CALCULATE_VOLUME(&voice.operators[Op4]);
+        eg_out = voice.operators[Op4].get_envelope(AM);
         if (eg_out < ENV_QUIET)
-            *voice.connections[3] += op_calc(voice.operators[Op4].phase, eg_out, c2);
+            *voice.connections[Op4] += op_calc(voice.operators[Op4].phase, eg_out, c2);
         // store current MEM
         voice.mem_value = mem;
         // update phase counters AFTER output calculations
@@ -230,7 +238,6 @@ class YamahaYM2612 {
             voice.operators[Op3].phase += voice.operators[Op3].phase_increment;
             voice.operators[Op4].phase += voice.operators[Op4].phase_increment;
         }
-#undef CALCULATE_VOLUME
     }
 
  public:
@@ -280,7 +287,7 @@ class YamahaYM2612 {
         for (Operator& oprtr : voice.operators)
             oprtr.update_ssg_eg_channel();
         // calculate FM
-        chan_calc();
+        calculate_operator_outputs();
         // advance LFO
         state.advance_lfo();
         // advance envelope generator

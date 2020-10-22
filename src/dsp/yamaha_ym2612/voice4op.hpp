@@ -28,7 +28,7 @@ class YamahaYM2612 {
     /// general state
     GlobalOperatorState state;
     /// channel state
-    Voice voice;
+    Voice4Op voice;
 
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
@@ -202,7 +202,7 @@ class YamahaYM2612 {
     /// @param op_index the operator to set the detune (DET) register of (in [0, 3])
     /// @param value the the level of detuning for the FM operator
     ///
-    inline void setDET(uint8_t op_index, uint8_t value) {
+    inline void setDET(uint8_t op_index, uint8_t value = 4) {
         voice.update_phase_increment |= voice.operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
     }
 

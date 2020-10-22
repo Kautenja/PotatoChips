@@ -700,6 +700,10 @@ struct Operator {
         set_ssg_mode(0);
     }
 
+    // -----------------------------------------------------------------------
+    // MARK: Parameter Setters
+    // -----------------------------------------------------------------------
+
     /// @brief Set the key-on flag for the given operator.
     inline void set_keyon() {
         if (is_gate_open) return;
@@ -801,7 +805,7 @@ struct Operator {
     ///
     /// @param enabled true to enable SSG mode, false to disable it
     ///
-    inline void set_ssg_enabled(bool enabled) {
+    inline void set_ssg_enabled(bool enabled = false) {
         if (ssg_enabled == enabled) return;
         ssg_enabled = enabled;
         // recalculate EG output
@@ -888,7 +892,7 @@ struct Operator {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void set_ssg_mode(uint8_t value) {
+    inline void set_ssg_mode(uint8_t value = 0) {
         value = value & 7;
         if (ssg == value) return;
         ssg = value;
@@ -905,14 +909,13 @@ struct Operator {
     /// @returns true if the phase increments need to be recalculated, i.e.,
     /// true if the new value differs from the old value
     ///
-    inline bool set_multiplier(uint8_t value) {
+    inline bool set_multiplier(uint8_t value = 1) {
         uint8_t old_multiplier = mul;
         // calculate the new MUL register value
         mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
         return mul != old_multiplier;
     }
 
-    // TODO: is 3 or 4 the standard tuning?
     /// @brief set the rate detune register to a new value.
     ///
     /// @param state the global emulation context the operator is running in
@@ -920,11 +923,15 @@ struct Operator {
     /// @returns true if the phase increments need to be recalculated, i.e.,
     /// true if the new value differs from the old value
     ///
-    inline bool set_detune(const GlobalOperatorState& state, uint8_t value) {
+    inline bool set_detune(const GlobalOperatorState& state, uint8_t value = 4) {
         const int32_t* old_DETUNE = DT;
         DT = state.dt_table[value & 7];
         return DT != old_DETUNE;
     }
+
+    // -----------------------------------------------------------------------
+    // MARK: Voice Interface
+    // -----------------------------------------------------------------------
 
     /// @brief SSG-EG update process.
     ///
@@ -1121,7 +1128,7 @@ struct Operator {
 // ---------------------------------------------------------------------------
 
 /// @brief A single 4-operator FM voice.
-struct Voice {
+struct Voice4Op {
  public:
     /// the number of FM operators on the module
     static constexpr unsigned NUM_OPERATORS = 4;
@@ -1176,7 +1183,7 @@ struct Voice {
     bool update_phase_increment = false;
 
     /// Initialize a new voice.
-    Voice() {
+    Voice4Op() {
         memset(connections, 0, sizeof connections);
         set_algorithm(0);
     }

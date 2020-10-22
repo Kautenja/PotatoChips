@@ -22,6 +22,9 @@
 
 #include "operator.hpp"
 
+/// @brief Yamaha YM2612 emulation components.
+namespace YamahaYM2612 {
+
 /// @brief A single 4-operator FM voice.
 struct Voice4Op {
  public:
@@ -531,5 +534,7 @@ struct Voice4Op {
         return audio_output;
     }
 };
+
+};  // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_VOICE4OP_HPP_

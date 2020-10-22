@@ -23,6 +23,9 @@
 #include "../exceptions.hpp"
 #include "tables.hpp"
 
+/// @brief Yamaha YM2612 emulation components.
+namespace YamahaYM2612 {
+
 /// @brief The global data for all FM operators.
 struct OperatorContext {
     /// frequency base
@@ -698,5 +701,7 @@ struct Operator {
         return TL_TABLE[p];
     }
 };
+
+}; // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_OPERATOR_HPP_

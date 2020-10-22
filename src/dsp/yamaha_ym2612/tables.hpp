@@ -27,6 +27,9 @@
 #include <cstdlib>
 #include <cstring>
 
+/// @brief Yamaha YM2612 emulation components.
+namespace YamahaYM2612 {
+
 /// The number of fixed point bits for various functions of the chip.
 enum FixedPointBits {
     /// the number of bits for addressing the envelope table
@@ -433,5 +436,7 @@ static __attribute__((constructor)) void init_tables() {
         }
     }
 }
+
+};  // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_TABLES_HPP_

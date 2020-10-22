@@ -26,7 +26,7 @@
 struct Chip2612 : rack::Module {
  private:
     /// the YM2612 chip emulator
-    YamahaYM2612 apu[PORT_MAX_CHANNELS];
+    Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];
@@ -168,8 +168,8 @@ struct Chip2612 : rack::Module {
         float gate = 0;
         float retrig = 0;
         // set the global parameters
-        apu[channel].set_algorithm (getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].set_feedback (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
+        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
         apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
         apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // set the operator parameters

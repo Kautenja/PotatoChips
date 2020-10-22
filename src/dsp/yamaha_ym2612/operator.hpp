@@ -34,9 +34,9 @@ struct OperatorContext {
     /// there are 2048 FNUMs that can be generated using FNUM/BLK registers
     /// but LFO works with one more bit of a precision so we really need 4096
     /// elements. fnumber->increment counter
-    uint32_t fn_table[4096];
+    uint32_t fnum_table[4096];
     /// maximal phase increment (used for phase overflow)
-    uint32_t fn_max = 0;
+    uint32_t fnum_max = 0;
 
     /// DETune table
     int32_t dt_table[8][32];
@@ -118,11 +118,11 @@ struct OperatorContext {
             // the emulated frequency (can be 1.0)
             // NOTE:
             // -10 because chip works with 10.10 fixed point, while we use 16.16
-            fn_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
+            fnum_table[i] = (uint32_t)((float) i * 32 * freqbase * (1 << (FREQ_SH - 10)));
         }
         // maximal frequency is required for Phase overflow calculation, register
         // size is 17 bits (Nemesis)
-        fn_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
+        fnum_max = (uint32_t)((float) 0x20000 * freqbase * (1 << (FREQ_SH - 10)));
     }
 
     /// @brief Set the global LFO for the chip.
@@ -646,10 +646,10 @@ struct Operator {
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_phase_and_envelope(uint32_t fn_max, int fc, int kc) {
+    inline void refresh_phase_and_envelope(uint32_t fnum_max, int fc, int kc) {
         fc += DT[kc];
         // detects frequency overflow (credits to Nemesis)
-        if (fc < 0) fc += fn_max;
+        if (fc < 0) fc += fnum_max;
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;
         if (ksr != kc >> KSR) {

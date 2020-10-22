@@ -188,7 +188,7 @@ struct Voice4Op {
         kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
         // phase increment counter
         uint32_t old_fc = fc;
-        fc = state.fn_table[freq16bit * 2] >> (7 - octave);
+        fc = state.fnum_table[freq16bit * 2] >> (7 - octave);
         // store fnum in clear form for LFO PM calculations
         block_fnum = (octave << 11) | freq16bit;
         // update the phase increment if the frequency changed
@@ -409,29 +409,29 @@ struct Voice4Op {
     inline void update_phase_using_lfo() {
         uint32_t block_fnum_local = block_fnum;
         uint32_t fnum_lfo = ((block_fnum_local & 0x7f0) >> 4) * 32 * 8;
-        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
-        if (lfo_fn_table_index_offset) {  // LFO phase modulation active
-            block_fnum_local = block_fnum_local * 2 + lfo_fn_table_index_offset;
+        int32_t lfo_fnum_table_index_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        if (lfo_fnum_table_index_offset) {  // LFO phase modulation active
+            block_fnum_local = block_fnum_local * 2 + lfo_fnum_table_index_offset;
             uint8_t blk = (block_fnum_local & 0x7000) >> 12;
-            uint32_t fn = block_fnum_local & 0xfff;
-            int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fn >> 8];
-            int phase_increment_counter = (state.fn_table[fn] >> (7 - blk));
+            uint32_t fnum = block_fnum_local & 0xfff;
+            int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
+            int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
             // detects frequency overflow (credits to Nemesis)
             int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
             // Operator 1
-            if (finc < 0) finc += state.fn_max;
+            if (finc < 0) finc += state.fnum_max;
             operators[Op1].phase += (finc * operators[Op1].mul) >> 1;
             // Operator 2
             finc = phase_increment_counter + operators[Op2].DT[keyscale_code];
-            if (finc < 0) finc += state.fn_max;
+            if (finc < 0) finc += state.fnum_max;
             operators[Op2].phase += (finc * operators[Op2].mul) >> 1;
             // Operator 3
             finc = phase_increment_counter + operators[Op3].DT[keyscale_code];
-            if (finc < 0) finc += state.fn_max;
+            if (finc < 0) finc += state.fnum_max;
             operators[Op3].phase += (finc * operators[Op3].mul) >> 1;
             // Operator 4
             finc = phase_increment_counter + operators[Op4].DT[keyscale_code];
-            if (finc < 0) finc += state.fn_max;
+            if (finc < 0) finc += state.fnum_max;
             operators[Op4].phase += (finc * operators[Op4].mul) >> 1;
         } else {  // LFO phase modulation is 0
             operators[Op1].phase += operators[Op1].phase_increment;
@@ -503,7 +503,7 @@ struct Voice4Op {
         // calculate the next output
         if (update_phase_increment) {
             for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fn_max, fc, kcode);
+                oprtr.refresh_phase_and_envelope(state.fnum_max, fc, kcode);
             update_phase_increment = false;
         }
         audio_output = 0;

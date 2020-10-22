@@ -404,9 +404,26 @@ struct Voice4Op {
     // MARK: Sampling / Stepping
     // -----------------------------------------------------------------------
 
- private:
-    /// @brief Advance the operators to compute the next output from the
-    inline void calculate_operator_outputs() {
+ public:
+    /// @brief Run a step on the emulator to produce a sample.
+    ///
+    /// @returns a 16-bit PCM sample from the synthesizer
+    ///
+    inline int16_t step() {
+        // refresh phase and envelopes (KSR may have changed)
+        if (update_phase_increment) {
+            for (Operator& oprtr : operators)
+                oprtr.refresh_phase_and_envelope(state.fnum_max, fc, kcode);
+            update_phase_increment = false;
+        }
+        // clear the audio output
+        audio_output = 0;
+        // update the SSG envelope
+        for (Operator& oprtr : operators)
+            oprtr.update_ssg_envelope_generator();
+        // -------------------------------------------------------------------
+        // calculate operator outputs
+        // -------------------------------------------------------------------
         // get the amount of amplitude modulation for the voice
         const uint32_t AM = state.lfo_AM_step >> ams;
         // reset the algorithm outputs to 0
@@ -463,40 +480,25 @@ struct Voice4Op {
         } else {  // no LFO phase modulation
             for (Operator& oprtr : operators) oprtr.update_phase();
         }
-    }
-
- public:
-    /// @brief Run a step on the emulator to produce a sample.
-    ///
-    /// @returns a 16-bit PCM sample from the synthesizer
-    ///
-    inline int16_t step() {
-        // calculate the next output
-        if (update_phase_increment) {
-            for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fnum_max, fc, kcode);
-            update_phase_increment = false;
-        }
-        audio_output = 0;
-        for (Operator& oprtr : operators)
-            oprtr.update_ssg_eg_channel();
-        // calculate operator outputs
-        calculate_operator_outputs();
+        // -------------------------------------------------------------------
         // advance LFO & envelope generator
+        // -------------------------------------------------------------------
         state.advance_lfo();
         state.eg_timer += state.eg_timer_add;
         while (state.eg_timer >= state.eg_timer_overflow) {
             state.eg_timer -= state.eg_timer_overflow;
             state.eg_cnt++;
             for (Operator& oprtr : operators)
-                oprtr.update_eg_channel(state.eg_cnt);
+                oprtr.update_envelope_generator(state.eg_cnt);
         }
-        // clip the output to 14-bits
+        // -------------------------------------------------------------------
+        // clipping
+        // -------------------------------------------------------------------
         if (audio_output > Operator::OUTPUT_MAX)
             audio_output = Operator::OUTPUT_MAX;
         else if (audio_output < Operator::OUTPUT_MIN)
             audio_output = Operator::OUTPUT_MIN;
-        // TODO: return output from each operator in addition to the sum?
+
         return audio_output;
     }
 };

@@ -518,7 +518,7 @@ struct Operator {
     /// The behavior is based upon Nemesis tests on real hardware. This is
     /// actually executed before each sample.
     ///
-    inline void update_ssg_eg_channel() {
+    inline void update_ssg_envelope_generator() {
         // detect SSG-EG transition. this is not required during release phase
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
@@ -559,7 +559,7 @@ struct Operator {
     ///
     /// @param eg_cnt the counter for the envelope generator
     ///
-    inline void update_eg_channel(uint32_t eg_cnt) {
+    inline void update_envelope_generator(uint32_t eg_cnt) {
         unsigned int swap_flag = 0;
         switch (env_stage) {
         case SILENT:  // not running

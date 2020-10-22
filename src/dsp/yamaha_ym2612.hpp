@@ -449,7 +449,6 @@ class YamahaYM2612 {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void setRS(uint8_t op_index, uint8_t value) {
-        // TODO: is it necessary to reset the phase increment for operator 1?
         if (voice.operators[OPERATOR_INDEXES[op_index]].set_rs(value))
             voice.operators[Op1].phase_increment = -1;
     }

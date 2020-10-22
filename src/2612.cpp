@@ -127,7 +127,7 @@ struct Chip2612 : rack::Module {
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
-            configParam(PARAM_AR         + i, 0, 31,  31, opName + " Attack Rate");
+            configParam(PARAM_AR         + i, 1, 31,  31, opName + " Attack Rate");
             configParam(PARAM_TL         + i, 0, 70,  0,  opName + " Total Level");
             configParam(PARAM_D1         + i, 0, 31,  0,  opName + " 1st Decay Rate");
             configParam(PARAM_SL         + i, 0, 15,  0,  opName + " Sustain Level");

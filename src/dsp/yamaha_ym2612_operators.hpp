@@ -618,7 +618,7 @@ struct Operator {
     /// phase counter
     uint32_t phase = 0;
     /// phase step
-    int32_t phase_increment = 0;
+    int32_t phase_increment = -1;
 
     /// envelope counter
     int32_t volume = 0;
@@ -723,7 +723,7 @@ struct Operator {
     ///
     inline bool set_rs(uint8_t value) {
         uint8_t old_KSR = KSR;
-        KSR = 3 - (value & 4);
+        KSR = 3 - (value & 3);
         // refresh Attack rate
         if (ar + ksr < 32 + 62) {
             eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];

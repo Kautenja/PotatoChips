@@ -13,10 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "plugin.hpp"
-#include "dsp/yamaha_ym2612.hpp"
-#include "widget/indexed_frame_display.hpp"
 #include <functional>
+#include "plugin.hpp"
+#include "dsp/yamaha_ym2612/voice4op.hpp"
+#include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -174,19 +174,18 @@ struct Chip2612 : rack::Module {
         apu[channel].setFMS(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // set the operator parameters
         for (unsigned op = 0; op < Voice::NUM_OPERATORS; op++) {
-            apu[channel].setAR (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].setTL (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
-            apu[channel].setD1 (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].setSL (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
-            apu[channel].setD2 (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].setRR (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].setMUL(op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].setDET(op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
-            apu[channel].setRS (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].setAM (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
-            const auto enableSSG =       getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  );
-            const auto modeSSG =         getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  );
-            apu[channel].setSSG(op, enableSSG, modeSSG);
+            apu[channel].setAR         (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+            apu[channel].setTL         (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].setD1         (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+            apu[channel].setSL         (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].setD2         (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+            apu[channel].setRR         (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+            apu[channel].setMUL        (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+            apu[channel].setDET        (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+            apu[channel].setRS         (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            apu[channel].setAM         (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
+            apu[channel].setSSG_enabled(op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            apu[channel].setSSG_mode   (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
         }
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves

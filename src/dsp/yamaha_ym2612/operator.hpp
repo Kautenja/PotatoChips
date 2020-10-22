@@ -17,8 +17,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_YAMAHA_YM2612_OPERATORS_HPP_
-#define DSP_YAMAHA_YM2612_OPERATORS_HPP_
+#ifndef DSP_YAMAHA_YM2612_OPERATOR_HPP_
+#define DSP_YAMAHA_YM2612_OPERATOR_HPP_
 
 #include <cstdint>
 #include <limits>
@@ -26,7 +26,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include "exceptions.hpp"
+#include "../exceptions.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Constants and Tables
@@ -572,7 +572,7 @@ struct GlobalOperatorState {
             while (lfo_timer >= lfo_timer_overflow) {
                 lfo_timer -= lfo_timer_overflow;
                 // There are 128 LFO steps
-                lfo_cnt = ( lfo_cnt + 1 ) & 127;
+                lfo_cnt = (lfo_cnt + 1) & 127;
                 // triangle (inverted)
                 // AM: from 126 to 0 step -2, 0 to 126 step +2
                 if (lfo_cnt<64)
@@ -696,7 +696,8 @@ struct Operator {
         set_sl(0);
         set_sr(0);
         set_rr(0);
-        set_ssg(false, 0);
+        set_ssg_enabled(false);
+        set_ssg_mode(0);
     }
 
     /// @brief Set the key-on flag for the given operator.
@@ -795,12 +796,25 @@ struct Operator {
         return KSR != old_KSR;
     }
 
+
+    /// @brief set whether the SSG mode is enabled or not
+    ///
+    /// @param enabled true to enable SSG mode, false to disable it
+    ///
+    inline void set_ssg_enabled(bool enabled) {
+        if (ssg_enabled == enabled) return;
+        ssg_enabled = enabled;
+        // recalculate EG output
+        if (ssg_enabled && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
+            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
+        else
+            vol_out = (uint32_t) volume + tl;
+    }
+
     /// @brief set the SSG register to a new value.
     ///
     /// @param value the value for the looping envelope generator register (SSG)
     /// @details
-    /// the first three bits describe the mode of the looping EG, the fourth
-    /// bit enables / disables the looping EG
     ///
     /// The mode can be any of the following:
     ///
@@ -874,10 +888,9 @@ struct Operator {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void set_ssg(bool enabled, uint8_t value) {
+    inline void set_ssg_mode(uint8_t value) {
         value = value & 7;
-        if (ssg_enabled == enabled && ssg == value) return;
-        ssg_enabled = enabled;
+        if (ssg == value) return;
         ssg = value;
         // recalculate EG output
         if (ssg_enabled && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
@@ -978,7 +991,7 @@ struct Operator {
             if (ssg_enabled) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
-                    if ( volume >= static_cast<int32_t>(sl) )
+                    if (volume >= static_cast<int32_t>(sl))
                         env_stage = SUSTAIN;
                 }
             } else {
@@ -1498,4 +1511,4 @@ struct Voice {
     }
 };
 
-#endif  // DSP_YAMAHA_YM2612_OPERATORS_HPP_
+#endif  // DSP_YAMAHA_YM2612_OPERATOR_HPP_

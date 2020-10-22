@@ -1,4 +1,4 @@
-// YM2612 FM sound chip emulator interface
+// A 4-operator FM synthesizer based on the MAME Yamaha YM2612 emulation.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2001 Jarek Burczynski
@@ -17,10 +17,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_YAMAHA_YM2612_HPP_
-#define DSP_YAMAHA_YM2612_HPP_
+#ifndef DSP_YAMAHA_YM2612_VOICE4OP_HPP_
+#define DSP_YAMAHA_YM2612_VOICE4OP_HPP_
 
-#include "yamaha_ym2612_operators.hpp"
+#include "operator.hpp"
 
 /// Yamaha YM2612 chip emulator
 class YamahaYM2612 {
@@ -106,17 +106,23 @@ class YamahaYM2612 {
     // MARK: Operator control
     // -----------------------------------------------------------------------
 
-    // TODO: separate into two functions, one to enable / disable and another
-    // to set the mode
-    // TODO: fix why some modes aren't working right.
-    /// @brief Set the SSG-envelope register for the given channel and operator.
+    /// @brief Set whether SSG envelopes are enabled for the given operator.
     ///
     /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
     /// @param is_on whether the looping envelope generator should be turned on
+    ///
+    inline void setSSG_enabled(uint8_t op_index, bool is_on) {
+        voice.operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
+    }
+
+    // TODO: fix why some modes aren't working right.
+    /// @brief Set the SSG-envelope mode for the given operator.
+    ///
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
     /// @param mode the mode for the looping generator to run in (in [0, 7])
     ///
-    inline void setSSG(uint8_t op_index, bool is_on, uint8_t mode) {
-        voice.operators[OPERATOR_INDEXES[op_index]].set_ssg(is_on, mode);
+    inline void setSSG_mode(uint8_t op_index, uint8_t mode) {
+        voice.operators[OPERATOR_INDEXES[op_index]].set_ssg_mode(mode);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -210,4 +216,4 @@ class YamahaYM2612 {
     }
 };
 
-#endif  // DSP_YAMAHA_YM2612_HPP_
+#endif  // DSP_YAMAHA_YM2612_VOICE4OP_HPP_

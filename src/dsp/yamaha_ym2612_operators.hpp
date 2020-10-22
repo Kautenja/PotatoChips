@@ -1044,7 +1044,7 @@ struct Operator {
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_fc_eg_slot(uint32_t fn_max, int fc, int kc) {
+    inline void refresh_phase_and_envelope(uint32_t fn_max, int fc, int kc) {
         fc += DT[kc];
         // detects frequency overflow (credits to Nemesis)
         if (fc < 0) fc += fn_max;
@@ -1106,14 +1106,13 @@ struct Operator {
 
 /// @brief A single 4-operator FM voice.
 struct Voice {
+ public:
     /// the number of FM operators on the module
     static constexpr unsigned NUM_OPERATORS = 4;
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
-    /// four operators
-    Operator operators[NUM_OPERATORS];
-
+ private:
     /// algorithm
     uint8_t algorithm = 0;
     /// feedback shift
@@ -1141,11 +1140,32 @@ struct Voice {
     /// current blk / fnum value for this slot
     uint32_t block_fnum = 0;
 
+    // Algorithm and Routing Data
+
+    /// Phase Modulation input for operator 2
+    int32_t m2 = 0;
+    /// Phase Modulation input for operator 3
+    int32_t c1 = 0;
+    /// Phase Modulation input for operator 4
+    int32_t c2 = 0;
+    /// one sample delay memory
+    int32_t mem = 0;
+
+    /// the last output sample from the voice
+    int32_t audio_output = 0;
+
+ public:
+    /// four operators
+    Operator operators[NUM_OPERATORS];
+
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
 
     /// Initialize a new voice.
-    Voice() { memset(connections, 0, sizeof connections); }
+    Voice() {
+        memset(connections, 0, sizeof connections);
+        set_algorithm(0);
+    }
 
     /// @brief Reset the voice to default.
     ///
@@ -1164,7 +1184,13 @@ struct Voice {
         fc = 0;
         kcode = FREQUENCY_KEYCODE_TABLE[0];
         block_fnum = 0;
+        set_algorithm(0);
+        update_phase_increment = true;
     }
+
+    // -----------------------------------------------------------------------
+    // MARK: Parameter Setters
+    // -----------------------------------------------------------------------
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
@@ -1227,39 +1253,248 @@ struct Voice {
         update_phase_increment |= old_fc != fc;
     }
 
-    // /// @brief Set attack rate & key scale
-    // ///
-    // /// @param oprtr_idx the index of the operator
-    // /// @param value the value for the attack rate (AR) and key-scale rate (KSR)
-    // ///
-    // inline void set_ar_ksr(unsigned oprtr_idx, int value) {
-    //     Operator* oprtr = &operators[oprtr_idx];
-    //     uint8_t old_KSR = oprtr->KSR;
-    //     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
-    //     oprtr->KSR = 3 - (value >> 6);
-    //     if (oprtr->KSR != old_KSR) update_phase_increment = true;
-    //     // refresh Attack rate
-    //     if (oprtr->ar + oprtr->ksr < 32 + 62) {
-    //         oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
-    //         oprtr->eg_sel_ar = ENV_RATE_SELECT[oprtr->ar + oprtr->ksr];
-    //     } else {
-    //         oprtr->eg_sh_ar = 0;
-    //         oprtr->eg_sel_ar = 17 * ENV_RATE_STEPS;
-    //     }
-    // }
+    // -----------------------------------------------------------------------
+    // MARK: Algorithm / Routing
+    // -----------------------------------------------------------------------
 
-    // /// @brief set detune & multiplier.
-    // ///
-    // /// @param oprtr_idx the index of the operator
-    // /// @param env the environment data for the operator
-    // /// @param value the value for the set detune (DT) & multiplier (MUL)
-    // ///
-    // inline void set_det_mul(unsigned oprtr_idx, GlobalOperatorState* env, int value) {
-    //     Operator* oprtr = &operators[oprtr_idx];
-    //     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-    //     oprtr->DT = env->dt_table[(value >> 4) & 7];
-    //     update_phase_increment = true;
-    // }
+    // TODO: enum for the operator/algorithm?
+    // TODO: better ASCII illustrations of the operators
+    /// @brief Set algorithm, i.e., operator routing.
+    ///
+    /// @param value the algorithm / routing to set the voice to
+    ///
+    inline void set_algorithm(uint8_t value) {
+        algorithm = value & 7;
+        int32_t *carrier = &audio_output;
+        // get the connections
+        int32_t **om1 = &connections[Op1];
+        int32_t **om2 = &connections[Op3];
+        int32_t **oc1 = &connections[Op2];
+        int32_t **memc = &mem_connect;
+        // set the algorithm
+        switch (algorithm) {
+        case 0:
+            // M1---C1---MEM---M2---C2---OUT
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 1:
+            // M1------+-MEM---M2---C2---OUT
+            //      C1-+
+            *om1 = &mem;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 2:
+            // M1-----------------+-C2---OUT
+            //      C1---MEM---M2-+
+            *om1 = &c2;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &m2;
+            break;
+        case 3:
+            // M1---C1---MEM------+-C2---OUT
+            //                 M2-+
+            *om1 = &c1;
+            *oc1 = &mem;
+            *om2 = &c2;
+            *memc = &c2;
+            break;
+        case 4:
+            // M1---C1-+-OUT
+            // M2---C2-+
+            // MEM: not used
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = &c2;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 5:
+            //    +----C1----+
+            // M1-+-MEM---M2-+-OUT
+            //    +----C2----+
+            *om1 = nullptr;  // special mark
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &m2;
+            break;
+        case 6:
+            // M1---C1-+
+            //      M2-+-OUT
+            //      C2-+
+            // MEM: not used
+            *om1 = &c1;
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        case 7:
+            // M1-+
+            // C1-+-OUT
+            // M2-+
+            // C2-+
+            // MEM: not used
+            *om1 = carrier;
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+            break;
+        }
+        connections[Op4] = carrier;
+    }
+
+    // -----------------------------------------------------------------------
+    // MARK: Sampling / Stepping
+    // -----------------------------------------------------------------------
+
+    /// @brief Update phase increment counters.
+    ///
+    /// @param state the global operator state associated with the voice
+    ///
+    inline void refresh_phase_and_envelope(const GlobalOperatorState& state) {
+        if (!update_phase_increment) return;
+        operators[Op1].refresh_phase_and_envelope(state.fn_max, fc, kcode);
+        operators[Op2].refresh_phase_and_envelope(state.fn_max, fc, kcode);
+        operators[Op3].refresh_phase_and_envelope(state.fn_max, fc, kcode);
+        operators[Op4].refresh_phase_and_envelope(state.fn_max, fc, kcode);
+        update_phase_increment = false;
+    }
+
+    /// @brief Update the phase counter using the global LFO for PM.
+    ///
+    /// @param state the global operator state associated with the voice
+    ///
+    inline void update_phase_using_lfo(const GlobalOperatorState& state) {
+        uint32_t block_fnum_local = block_fnum;
+        uint32_t fnum_lfo = ((block_fnum_local & 0x7f0) >> 4) * 32 * 8;
+        int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        if (lfo_fn_table_index_offset) {  // LFO phase modulation active
+            block_fnum_local = block_fnum_local * 2 + lfo_fn_table_index_offset;
+            uint8_t blk = (block_fnum_local & 0x7000) >> 12;
+            uint32_t fn = block_fnum_local & 0xfff;
+            int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fn >> 8];
+            int phase_increment_counter = (state.fn_table[fn] >> (7 - blk));
+            // detects frequency overflow (credits to Nemesis)
+            int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
+            // Operator 1
+            if (finc < 0) finc += state.fn_max;
+            operators[Op1].phase += (finc * operators[Op1].mul) >> 1;
+            // Operator 2
+            finc = phase_increment_counter + operators[Op2].DT[keyscale_code];
+            if (finc < 0) finc += state.fn_max;
+            operators[Op2].phase += (finc * operators[Op2].mul) >> 1;
+            // Operator 3
+            finc = phase_increment_counter + operators[Op3].DT[keyscale_code];
+            if (finc < 0) finc += state.fn_max;
+            operators[Op3].phase += (finc * operators[Op3].mul) >> 1;
+            // Operator 4
+            finc = phase_increment_counter + operators[Op4].DT[keyscale_code];
+            if (finc < 0) finc += state.fn_max;
+            operators[Op4].phase += (finc * operators[Op4].mul) >> 1;
+        } else {  // LFO phase modulation is 0
+            operators[Op1].phase += operators[Op1].phase_increment;
+            operators[Op2].phase += operators[Op2].phase_increment;
+            operators[Op3].phase += operators[Op3].phase_increment;
+            operators[Op4].phase += operators[Op4].phase_increment;
+        }
+    }
+
+    /// @brief Advance the operators to compute the next output from the
+    ///
+    /// @param state the global operator state associated with the voice
+    /// @details
+    /// The operators advance in the order 1, 3, 2, 4.
+    ///
+    inline void calculate_operator_outputs(const GlobalOperatorState& state) {
+        // get the amount of amplitude modulation for the voice
+        const uint32_t AM = state.lfo_AM_step >> ams;
+        // reset the algorithm outputs to 0
+        m2 = c1 = c2 = mem = 0;
+        // restore delayed sample (MEM) value to m2 or c2
+        *mem_connect = mem_value;
+        // Operator 1
+        unsigned envelope = operators[Op1].get_envelope(AM);;
+        // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
+        int32_t feedback_carrier = op1_out[0] + op1_out[1];
+        // set the [t-2] sample as the [t-1] sample (i.e., step the history)
+        op1_out[0] = op1_out[1];
+        // set the connection outputs from operator 1 based on the algorithm
+        if (!connections[Op1])  // algorithm 5
+            mem = c1 = c2 = op1_out[1];
+        else  // other algorithms
+            *connections[Op1] += op1_out[1];
+        // calculate the next output from operator 1
+        if (envelope < ENV_QUIET) {  // operator 1 envelope is open
+            // if feedback is disabled, set feedback carrier to 0
+            if (!feedback) feedback_carrier = 0;
+            // shift carrier by the feedback amount
+            op1_out[1] = operators[Op1].calculate_output(envelope, feedback_carrier << feedback);
+        } else {  // clear the next output from operator 1
+            op1_out[1] = 0;
+        }
+        // Operator 3
+        envelope = operators[Op3].get_envelope(AM);;
+        if (envelope < ENV_QUIET)
+            *connections[Op3] += operators[Op3].calculate_output(envelope, m2 << 15);
+        // Operator 2
+        envelope = operators[Op2].get_envelope(AM);
+        if (envelope < ENV_QUIET)
+            *connections[Op2] += operators[Op2].calculate_output(envelope, c1 << 15);
+        // Operator 4
+        envelope = operators[Op4].get_envelope(AM);
+        if (envelope < ENV_QUIET)
+            *connections[Op4] += operators[Op4].calculate_output(envelope, c2 << 15);
+        // store current MEM
+        mem_value = mem;
+        // update phase counters AFTER output calculations
+        if (pms) {  // update the phase using the LFO
+            update_phase_using_lfo(state);
+        } else {  // no LFO phase modulation
+            operators[Op1].phase += operators[Op1].phase_increment;
+            operators[Op2].phase += operators[Op2].phase_increment;
+            operators[Op3].phase += operators[Op3].phase_increment;
+            operators[Op4].phase += operators[Op4].phase_increment;
+        }
+    }
+
+    /// @brief Run a step on the emulator to produce a sample.
+    ///
+    /// @param state the global operator state associated with the voice
+    /// @returns a 16-bit PCM sample from the synthesizer
+    ///
+    inline int16_t step(GlobalOperatorState& state) {
+        // refresh PG and EG
+        refresh_phase_and_envelope(state);
+        // clear outputs
+        audio_output = 0;
+        // update SSG-EG output
+        for (Operator& oprtr : operators)
+            oprtr.update_ssg_eg_channel();
+        // calculate FM
+        calculate_operator_outputs(state);
+        // advance LFO
+        state.advance_lfo();
+        // advance envelope generator
+        state.eg_timer += state.eg_timer_add;
+        while (state.eg_timer >= state.eg_timer_overflow) {
+            state.eg_timer -= state.eg_timer_overflow;
+            state.eg_cnt++;
+            for (Operator& oprtr : operators)
+                oprtr.update_eg_channel(state.eg_cnt);
+        }
+        // clip the output to 14-bits
+        // TODO: output clipping indicator
+        if (audio_output > Operator::OUTPUT_MAX) {
+            audio_output = Operator::OUTPUT_MAX;
+        } else if (audio_output < Operator::OUTPUT_MIN) {
+            audio_output = Operator::OUTPUT_MIN;
+        }
+        return audio_output;
+    }
 };
 
 #endif  // DSP_YAMAHA_YM2612_OPERATORS_HPP_

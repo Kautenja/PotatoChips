@@ -406,39 +406,29 @@ struct Voice4Op {
 
  private:
     /// @brief Update the phase counter using the global LFO for PM.
-    inline void update_phase_using_lfo() {
-        uint32_t block_fnum_local = block_fnum;
-        uint32_t fnum_lfo = ((block_fnum_local & 0x7f0) >> 4) * 32 * 8;
-        int32_t lfo_fnum_table_index_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
-        if (lfo_fnum_table_index_offset) {  // LFO phase modulation active
-            block_fnum_local = block_fnum_local * 2 + lfo_fnum_table_index_offset;
-            uint8_t blk = (block_fnum_local & 0x7000) >> 12;
-            uint32_t fnum = block_fnum_local & 0xfff;
-            int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
-            int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
-            // detects frequency overflow (credits to Nemesis)
-            int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
-            // Operator 1
-            if (finc < 0) finc += state.fnum_max;
-            operators[Op1].phase += (finc * operators[Op1].mul) >> 1;
-            // Operator 2
-            finc = phase_increment_counter + operators[Op2].DT[keyscale_code];
-            if (finc < 0) finc += state.fnum_max;
-            operators[Op2].phase += (finc * operators[Op2].mul) >> 1;
-            // Operator 3
-            finc = phase_increment_counter + operators[Op3].DT[keyscale_code];
-            if (finc < 0) finc += state.fnum_max;
-            operators[Op3].phase += (finc * operators[Op3].mul) >> 1;
-            // Operator 4
-            finc = phase_increment_counter + operators[Op4].DT[keyscale_code];
-            if (finc < 0) finc += state.fnum_max;
-            operators[Op4].phase += (finc * operators[Op4].mul) >> 1;
-        } else {  // LFO phase modulation is 0
-            operators[Op1].phase += operators[Op1].phase_increment;
-            operators[Op2].phase += operators[Op2].phase_increment;
-            operators[Op3].phase += operators[Op3].phase_increment;
-            operators[Op4].phase += operators[Op4].phase_increment;
-        }
+    inline void update_phase_using_lfo(uint32_t fnum, int32_t offset) {
+        fnum = fnum * 2 + offset;
+        uint8_t blk = (fnum & 0x7000) >> 12;
+        fnum = fnum & 0xfff;
+        int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
+        int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
+        // detects frequency overflow (credits to Nemesis)
+        int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
+        // Operator 1
+        if (finc < 0) finc += state.fnum_max;
+        operators[Op1].phase += (finc * operators[Op1].mul) >> 1;
+        // Operator 2
+        finc = phase_increment_counter + operators[Op2].DT[keyscale_code];
+        if (finc < 0) finc += state.fnum_max;
+        operators[Op2].phase += (finc * operators[Op2].mul) >> 1;
+        // Operator 3
+        finc = phase_increment_counter + operators[Op3].DT[keyscale_code];
+        if (finc < 0) finc += state.fnum_max;
+        operators[Op3].phase += (finc * operators[Op3].mul) >> 1;
+        // Operator 4
+        finc = phase_increment_counter + operators[Op4].DT[keyscale_code];
+        if (finc < 0) finc += state.fnum_max;
+        operators[Op4].phase += (finc * operators[Op4].mul) >> 1;
     }
 
     /// @brief Advance the operators to compute the next output from the
@@ -484,8 +474,10 @@ struct Voice4Op {
         // store current MEM
         mem_value = mem;
         // update phase counters AFTER output calculations
-        if (pms) {  // update the phase using the LFO
-            update_phase_using_lfo();
+        uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        if (pms && lfo_fnum_offset) {  // update the phase using the LFO
+            update_phase_using_lfo(block_fnum, lfo_fnum_offset);
         } else {  // no LFO phase modulation
             operators[Op1].phase += operators[Op1].phase_increment;
             operators[Op2].phase += operators[Op2].phase_increment;

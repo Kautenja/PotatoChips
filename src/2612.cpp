@@ -150,7 +150,7 @@ struct Chip2612 : rack::Module {
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
-            apu[channel].setSampleRate(APP->engine->getSampleRate(), CLOCK_RATE);
+            apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -162,35 +162,35 @@ struct Chip2612 : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
-        apu[channel].setLFO(getParam(0, PARAM_LFO, INPUT_LFO, 7));
+        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         // iterate over each oscillator on the chip
         float pitch = 0;
         float gate = 0;
         float retrig = 0;
         // set the global parameters
-        apu[channel].setAL (getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].setFB (getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].setAMS(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
-        apu[channel].setFMS(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
+        apu[channel].set_algorithm (getParam(channel, PARAM_AL,  INPUT_AL,  7));
+        apu[channel].set_feedback (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
+        apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // set the operator parameters
         for (unsigned op = 0; op < Voice4Op::NUM_OPERATORS; op++) {
-            apu[channel].setAR         (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].setTL         (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
-            apu[channel].setD1         (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].setSL         (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
-            apu[channel].setD2         (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].setRR         (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].setMUL        (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].setDET        (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
-            apu[channel].setRS         (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].setAM         (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
-            apu[channel].setSSG_enabled(op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
-            apu[channel].setSSG_mode   (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
+            apu[channel].set_attack_rate  (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+            apu[channel].set_total_level  (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].set_decay_rate   (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+            apu[channel].set_sustain_level(op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].set_sustain_rate (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+            apu[channel].set_release_rate (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+            apu[channel].set_multiplier   (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+            apu[channel].set_detune       (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+            apu[channel].set_rate_scale   (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
+            apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            apu[channel].set_ssg_mode     (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
         }
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves
         pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
-        apu[channel].setFREQ(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
+        apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
         // process the gate trigger, high at 2V
         gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
         gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
@@ -202,7 +202,7 @@ struct Chip2612 : rack::Module {
         // but when neither or both are high, the gate is closed. This
         // causes the gate to get shut for a sample when re-triggering an
         // already gated voice
-        apu[channel].setGATE(trigger ^ gate_triggers[channel].state);
+        apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
     }
 
     /// @brief Process a sample.

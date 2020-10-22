@@ -13,10 +13,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "plugin.hpp"
-#include "dsp/yamaha_ym2612.hpp"
-#include "widget/indexed_frame_display.hpp"
 #include <functional>
+#include "plugin.hpp"
+#include "dsp/yamaha_ym2612/voice4op.hpp"
+#include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -26,7 +26,7 @@
 struct Chip2612 : rack::Module {
  private:
     /// the YM2612 chip emulator
-    YamahaYM2612 apu[PORT_MAX_CHANNELS];
+    Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];
@@ -62,18 +62,18 @@ struct Chip2612 : rack::Module {
         PARAM_LFO,
         PARAM_AMS,
         PARAM_FMS,
-        ENUMS(PARAM_AR,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_TL,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_D1,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_SL,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_D2,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_RR,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_MUL,        Voice::NUM_OPERATORS),
-        ENUMS(PARAM_DET,        Voice::NUM_OPERATORS),
-        ENUMS(PARAM_RS,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_AM,         Voice::NUM_OPERATORS),
-        ENUMS(PARAM_SSG_ENABLE, Voice::NUM_OPERATORS),
-        ENUMS(PARAM_SSG_MODE,   Voice::NUM_OPERATORS),
+        ENUMS(PARAM_AR,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_TL,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_D1,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_SL,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_D2,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_RR,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_MUL,        Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_DET,        Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_RS,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_AM,         Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_SSG_ENABLE, Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_SSG_MODE,   Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
     };
 
@@ -87,18 +87,18 @@ struct Chip2612 : rack::Module {
         INPUT_LFO,
         INPUT_AMS,
         INPUT_FMS,
-        ENUMS(INPUT_AR,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_TL,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_D1,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_SL,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_D2,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_RR,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_MUL,        Voice::NUM_OPERATORS),
-        ENUMS(INPUT_DET,        Voice::NUM_OPERATORS),
-        ENUMS(INPUT_RS,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_AM,         Voice::NUM_OPERATORS),
-        ENUMS(INPUT_SSG_ENABLE, Voice::NUM_OPERATORS),
-        ENUMS(INPUT_SSG_MODE,   Voice::NUM_OPERATORS),
+        ENUMS(INPUT_AR,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_TL,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_D1,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_SL,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_D2,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_RR,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_MUL,        Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_DET,        Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_RS,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_AM,         Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_SSG_ENABLE, Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_SSG_MODE,   Voice4Op::NUM_OPERATORS),
         NUM_INPUTS
     };
 
@@ -123,7 +123,7 @@ struct Chip2612 : rack::Module {
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
         configParam(PARAM_AMS, 0, 3, 0, "Amplitude modulation sensitivity");
         configParam(PARAM_FMS, 0, 7, 0, "Frequency modulation sensitivity");
-        for (unsigned i = 0; i < Voice::NUM_OPERATORS; i++) {  // operator parameters
+        for (unsigned i = 0; i < Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
@@ -150,7 +150,7 @@ struct Chip2612 : rack::Module {
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
-            apu[channel].setSampleRate(APP->engine->getSampleRate(), CLOCK_RATE);
+            apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -162,36 +162,35 @@ struct Chip2612 : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
-        apu[channel].setLFO(getParam(0, PARAM_LFO, INPUT_LFO, 7));
+        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         // iterate over each oscillator on the chip
         float pitch = 0;
         float gate = 0;
         float retrig = 0;
         // set the global parameters
-        apu[channel].setAL (getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].setFB (getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].setAMS(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
-        apu[channel].setFMS(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
+        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
+        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
+        apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // set the operator parameters
-        for (unsigned op = 0; op < Voice::NUM_OPERATORS; op++) {
-            apu[channel].setAR (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].setTL (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
-            apu[channel].setD1 (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].setSL (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
-            apu[channel].setD2 (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].setRR (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].setMUL(op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].setDET(op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
-            apu[channel].setRS (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].setAM (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
-            const auto enableSSG =       getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  );
-            const auto modeSSG =         getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  );
-            apu[channel].setSSG(op, enableSSG, modeSSG);
+        for (unsigned op = 0; op < Voice4Op::NUM_OPERATORS; op++) {
+            apu[channel].set_attack_rate  (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+            apu[channel].set_total_level  (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].set_decay_rate   (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+            apu[channel].set_sustain_level(op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].set_sustain_rate (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+            apu[channel].set_release_rate (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+            apu[channel].set_multiplier   (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+            apu[channel].set_detune       (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+            apu[channel].set_rate_scale   (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
+            apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            apu[channel].set_ssg_mode     (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
         }
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves
         pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
-        apu[channel].setFREQ(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
+        apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
         // process the gate trigger, high at 2V
         gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
         gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
@@ -203,7 +202,7 @@ struct Chip2612 : rack::Module {
         // but when neither or both are high, the gate is closed. This
         // causes the gate to get shut for a sample when re-triggering an
         // already gated voice
-        apu[channel].setGATE(trigger ^ gate_triggers[channel].state);
+        apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
     }
 
     /// @brief Process a sample.
@@ -230,6 +229,7 @@ struct Chip2612 : rack::Module {
             const auto sample = static_cast<float>(apu[channel].step()) / (1 << 13);
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
         }
+        // TODO: clipping indicator
     }
 };
 
@@ -261,7 +261,7 @@ struct Chip2612Widget : ModuleWidget {
                 return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
             },
             "res/2612algorithms/",
-            Voice::NUM_ALGORITHMS,
+            Voice4Op::NUM_ALGORITHMS,
             Vec(115, 20),
             Vec(110, 70)
         ));
@@ -291,13 +291,13 @@ struct Chip2612Widget : ModuleWidget {
         addParam(fms);
         addInput(createInput<PJ301MPort>(  Vec(124, 338), module, Chip2612::INPUT_FMS));
         // operator parameters and inputs
-        for (unsigned i = 0; i < Voice::NUM_OPERATORS; i++) {
+        for (unsigned i = 0; i < Voice4Op::NUM_OPERATORS; i++) {
             // the X & Y offsets for the operator bank
-            auto offsetX = 450 * (i % (Voice::NUM_OPERATORS / 2));
-            auto offsetY = 175 * (i / (Voice::NUM_OPERATORS / 2));
+            auto offsetX = 450 * (i % (Voice4Op::NUM_OPERATORS / 2));
+            auto offsetY = 175 * (i / (Voice4Op::NUM_OPERATORS / 2));
             for (unsigned parameter = 0; parameter < 12; parameter++) {
                 // the parameter & input offset
-                auto offset = i + parameter * Voice::NUM_OPERATORS;
+                auto offset = i + parameter * Voice4Op::NUM_OPERATORS;
                 auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset);
                 param->snap = true;
                 addParam(param);

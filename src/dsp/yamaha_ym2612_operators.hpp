@@ -716,25 +716,6 @@ struct Operator {
         if (env_stage > RELEASE) env_stage = RELEASE;
     }
 
-    // TODO: is it necessary to return a boolean keeping track of KSR changing?
-    /// @brief Set the 2-bit rate scale.
-    ///
-    /// @param value the value for the rate scale (RS)
-    ///
-    inline bool set_rs(uint8_t value) {
-        uint8_t old_KSR = KSR;
-        KSR = 3 - (value & 3);
-        // refresh Attack rate
-        if (ar + ksr < 32 + 62) {
-            eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
-            eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
-        } else {
-            eg_sh_ar = 0;
-            eg_sel_ar = 17 * ENV_RATE_STEPS;
-        }
-        return KSR != old_KSR;
-    }
-
     /// @brief Set the 5-bit attack rate.
     ///
     /// @param value the value for the attack rate (AR)
@@ -793,6 +774,26 @@ struct Operator {
         eg_sel_rr = ENV_RATE_SELECT[rr + ksr];
     }
 
+    /// @brief Set the 2-bit rate scale.
+    ///
+    /// @param value the value for the rate scale (RS)
+    /// @returns true if the phase increments need to be recalculated, i.e.,
+    /// true if the new value differs from the old value
+    ///
+    inline bool set_rs(uint8_t value) {
+        uint8_t old_KSR = KSR;
+        KSR = 3 - (value & 3);
+        // refresh Attack rate
+        if (ar + ksr < 32 + 62) {
+            eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
+            eg_sel_ar = ENV_RATE_SELECT[ar + ksr];
+        } else {
+            eg_sh_ar = 0;
+            eg_sel_ar = 17 * ENV_RATE_STEPS;
+        }
+        return KSR != old_KSR;
+    }
+
     /// @brief set the SSG register to a new value.
     ///
     /// @param value the value for the looping envelope generator register (SSG)
@@ -808,6 +809,33 @@ struct Operator {
             vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
         else
             vol_out = (uint32_t) volume + tl;
+    }
+
+    /// @brief set the rate multiplier to a new value.
+    ///
+    /// @param value the value for the rate multiplier \f$\in [0, 15]\f$
+    /// @returns true if the phase increments need to be recalculated, i.e.,
+    /// true if the new value differs from the old value
+    ///
+    inline bool set_multiplier(uint8_t value) {
+        uint8_t old_multiplier = mul;
+        // calculate the new MUL register value
+        mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
+        return mul != old_multiplier;
+    }
+
+    // TODO: is 3 or 4 the standard tuning?
+    /// @brief set the rate detune register to a new value.
+    ///
+    /// @param state the global emulation context the operator is running in
+    /// @param value the value for the detune register \f$\in [0, 7]\f$
+    /// @returns true if the phase increments need to be recalculated, i.e.,
+    /// true if the new value differs from the old value
+    ///
+    inline bool set_detune(const GlobalOperatorState& state, uint8_t value) {
+        const int32_t* old_DETUNE = DT;
+        DT = state.dt_table[value & 7];
+        return DT != old_DETUNE;
     }
 
     /// @brief SSG-EG update process.
@@ -1036,6 +1064,8 @@ struct Voice {
     /// current blk / fnum value for this slot
     uint32_t block_fnum = 0;
 
+    bool update_phase_increment = false;
+
     /// @brief Reset the voice to default.
     ///
     /// @param state the global operator state to use for resetting operators
@@ -1108,12 +1138,12 @@ struct Voice {
         // key-scale code
         kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
         // phase increment counter
+        uint32_t old_fc = fc;
         fc = state.fn_table[freq16bit * 2] >> (7 - octave);
         // store fnum in clear form for LFO PM calculations
         block_fnum = (octave << 11) | freq16bit;
-
-        // TODO: only set this when the frequency changes?
-        operators[Op1].phase_increment = -1;
+        // update the phase increment if the frequency changed
+        update_phase_increment |= old_fc != fc;
     }
 
     // /// @brief Set attack rate & key scale
@@ -1126,7 +1156,7 @@ struct Voice {
     //     uint8_t old_KSR = oprtr->KSR;
     //     oprtr->ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
     //     oprtr->KSR = 3 - (value >> 6);
-    //     if (oprtr->KSR != old_KSR) operators[Op1].phase_increment = -1;
+    //     if (oprtr->KSR != old_KSR) update_phase_increment = true;
     //     // refresh Attack rate
     //     if (oprtr->ar + oprtr->ksr < 32 + 62) {
     //         oprtr->eg_sh_ar = ENV_RATE_SHIFT[oprtr->ar + oprtr->ksr];
@@ -1147,7 +1177,7 @@ struct Voice {
     //     Operator* oprtr = &operators[oprtr_idx];
     //     oprtr->mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
     //     oprtr->DT = env->dt_table[(value >> 4) & 7];
-    //     operators[Op1].phase_increment = -1;
+    //     update_phase_increment = true;
     // }
 };
 

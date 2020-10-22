@@ -140,14 +140,14 @@ class YamahaYM2612 {
 
     /// @brief Update phase increment counters
     inline void refresh_fc_eg_chan() {
-        if (voice.operators[Op1].phase_increment == -1) {
-            int fc = voice.fc;
-            int kc = voice.kcode;
-            voice.operators[Op1].refresh_fc_eg_slot(state.fn_max, fc, kc);
-            voice.operators[Op2].refresh_fc_eg_slot(state.fn_max, fc, kc);
-            voice.operators[Op3].refresh_fc_eg_slot(state.fn_max, fc, kc);
-            voice.operators[Op4].refresh_fc_eg_slot(state.fn_max, fc, kc);
-        }
+        if (!voice.update_phase_increment) return;
+        int fc = voice.fc;
+        int kc = voice.kcode;
+        voice.operators[Op1].refresh_fc_eg_slot(state.fn_max, fc, kc);
+        voice.operators[Op2].refresh_fc_eg_slot(state.fn_max, fc, kc);
+        voice.operators[Op3].refresh_fc_eg_slot(state.fn_max, fc, kc);
+        voice.operators[Op4].refresh_fc_eg_slot(state.fn_max, fc, kc);
+        voice.update_phase_increment = false;
     }
 
     inline void update_phase_lfo_channel() {
@@ -269,7 +269,7 @@ class YamahaYM2612 {
         voice.reset(state);
         // TODO: move the following reset code to voice.reset()
         setAL(0);
-        voice.operators[Op1].phase_increment = -1;
+        voice.update_phase_increment = true;
     }
 
     /// @brief Run a step on the emulator to produce a sample.
@@ -449,8 +449,7 @@ class YamahaYM2612 {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void setRS(uint8_t op_index, uint8_t value) {
-        if (voice.operators[OPERATOR_INDEXES[op_index]].set_rs(value))
-            voice.operators[Op1].phase_increment = -1;
+        voice.update_phase_increment |= voice.operators[OPERATOR_INDEXES[op_index]].set_rs(value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.
@@ -513,13 +512,7 @@ class YamahaYM2612 {
     /// @param value the value of the FM phase multiplier
     ///
     inline void setMUL(uint8_t op_index, uint8_t value) {
-        Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
-        // calculate the new MUL register value
-        const uint32_t mul = (value & 0x0f) ? (value & 0x0f) * 2 : 1;
-        // check if the value changed to update phase increment
-        if (oprtr.mul != mul) voice.operators[Op1].phase_increment = -1;
-        // set the MUL register for the operator
-        oprtr.mul = mul;
+        voice.update_phase_increment |= voice.operators[OPERATOR_INDEXES[op_index]].set_multiplier(value);
     }
 
     /// @brief Set the detune (DET) register for the given voice and operator.
@@ -528,13 +521,7 @@ class YamahaYM2612 {
     /// @param value the the level of detuning for the FM operator
     ///
     inline void setDET(uint8_t op_index, uint8_t value) {
-        Operator& oprtr = voice.operators[OPERATOR_INDEXES[op_index]];
-        // calculate the new DT register value
-        int32_t* const DT = state.dt_table[value & 7];
-        // check if the value changed to update phase increment
-        if (oprtr.DT != DT) voice.operators[Op1].phase_increment = -1;
-        // set the DT register for the operator
-        oprtr.DT = DT;
+        voice.update_phase_increment |= voice.operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
     }
 
     /// @brief Set the amplitude modulation (AM) register for the given voice and operator.

@@ -412,25 +412,12 @@ struct Voice4Op {
     inline void update_phase_using_lfo(uint32_t fnum) {
         const uint8_t blk = (fnum & 0x7000) >> 12;
         fnum = fnum & 0xfff;
-        const int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
-        const int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
-        // detects frequency overflow (credits to Nemesis)
-        int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
-        // Operator 1
-        if (finc < 0) finc += state.fnum_max;
-        operators[Op1].phase += (finc * operators[Op1].mul) >> 1;
-        // Operator 2
-        finc = phase_increment_counter + operators[Op2].DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        operators[Op2].phase += (finc * operators[Op2].mul) >> 1;
-        // Operator 3
-        finc = phase_increment_counter + operators[Op3].DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        operators[Op3].phase += (finc * operators[Op3].mul) >> 1;
-        // Operator 4
-        finc = phase_increment_counter + operators[Op4].DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        operators[Op4].phase += (finc * operators[Op4].mul) >> 1;
+        for (Operator& oprtr : operators)
+            oprtr.update_phase_using_lfo(
+                state,
+                state.fnum_table[fnum] >> (7 - blk),
+                (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
+            );
     }
 
     /// @brief Advance the operators to compute the next output from the

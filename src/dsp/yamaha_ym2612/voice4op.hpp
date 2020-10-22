@@ -406,12 +406,11 @@ struct Voice4Op {
 
  private:
     /// @brief Update the phase counter using the global LFO for PM.
-    inline void update_phase_using_lfo(uint32_t fnum, int32_t offset) {
-        fnum = fnum * 2 + offset;
-        uint8_t blk = (fnum & 0x7000) >> 12;
+    inline void update_phase_using_lfo(uint32_t fnum) {
+        const uint8_t blk = (fnum & 0x7000) >> 12;
         fnum = fnum & 0xfff;
-        int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
-        int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
+        const int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
+        const int phase_increment_counter = (state.fnum_table[fnum] >> (7 - blk));
         // detects frequency overflow (credits to Nemesis)
         int finc = phase_increment_counter + operators[Op1].DT[keyscale_code];
         // Operator 1
@@ -474,10 +473,10 @@ struct Voice4Op {
         // store current MEM
         mem_value = mem;
         // update phase counters AFTER output calculations
-        uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
         if (pms && lfo_fnum_offset) {  // update the phase using the LFO
-            update_phase_using_lfo(block_fnum, lfo_fnum_offset);
+            update_phase_using_lfo(2 * block_fnum + lfo_fnum_offset);
         } else {  // no LFO phase modulation
             operators[Op1].phase += operators[Op1].phase_increment;
             operators[Op2].phase += operators[Op2].phase_increment;

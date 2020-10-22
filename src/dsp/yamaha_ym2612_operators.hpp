@@ -1113,34 +1113,25 @@ struct Voice {
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
  private:
-    /// algorithm
+    /// fnum, blk : adjusted to sample rate
+    uint32_t fc = 0;
+    /// current blk / fnum value for this slot
+    uint32_t block_fnum = 0;
+    /// key code :
+    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
+
+    /// the currently selected algorithm
     uint8_t algorithm = 0;
     /// feedback shift
     uint8_t feedback = 0;
-    /// operator 1 output for feedback
-    int32_t op1_out[2] = {0, 0};
 
-    /// the output of the operators based on the algorithm connections
-    int32_t* connections[NUM_OPERATORS];
-
-    /// where to put the delayed sample (MEM)
-    int32_t *mem_connect = nullptr;
-    /// delayed sample (MEM) value
-    int32_t mem_value = 0;
-
-    /// phase modulation sensitivity (PMS)
-    int32_t pms = 0;
     /// amplitude modulation sensitivity (AMS)
     uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
+    /// phase modulation sensitivity (PMS)
+    int32_t pms = 0;
 
-    /// fnum, blk : adjusted to sample rate
-    uint32_t fc = 0;
-    /// key code :
-    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
-    /// current blk / fnum value for this slot
-    uint32_t block_fnum = 0;
-
-    // Algorithm and Routing Data
+    /// operator 1 output for feedback
+    int32_t op1_out[2] = {0, 0};
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -1150,6 +1141,13 @@ struct Voice {
     int32_t c2 = 0;
     /// one sample delay memory
     int32_t mem = 0;
+
+    /// the output of the operators based on the algorithm connections
+    int32_t* connections[NUM_OPERATORS];
+    /// where to put the delayed sample (MEM)
+    int32_t *mem_connect = nullptr;
+    /// delayed sample (MEM) value
+    int32_t mem_value = 0;
 
     /// the last output sample from the voice
     int32_t audio_output = 0;

@@ -406,6 +406,9 @@ struct Voice4Op {
 
  private:
     /// @brief Update the phase counter using the global LFO for PM.
+    ///
+    /// @param fnum TODO
+    ///
     inline void update_phase_using_lfo(uint32_t fnum) {
         const uint8_t blk = (fnum & 0x7000) >> 12;
         fnum = fnum & 0xfff;

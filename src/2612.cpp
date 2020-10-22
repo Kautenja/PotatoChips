@@ -18,6 +18,13 @@
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
+// TODO: potential features
+// outputs for each operator
+// envelope generator outputs
+// individual operator frequency
+// individual operator triggering
+// LFO output
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

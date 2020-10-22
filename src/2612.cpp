@@ -230,6 +230,7 @@ struct Chip2612 : rack::Module {
             const auto sample = static_cast<float>(apu[channel].step()) / (1 << 13);
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
         }
+        // TODO: clipping indicator
     }
 };
 

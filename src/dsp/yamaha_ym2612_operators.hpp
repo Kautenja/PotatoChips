@@ -1485,12 +1485,10 @@ struct Voice {
                 oprtr.update_eg_channel(state.eg_cnt);
         }
         // clip the output to 14-bits
-        // TODO: output clipping indicator
-        if (audio_output > Operator::OUTPUT_MAX) {
+        if (audio_output > Operator::OUTPUT_MAX)
             audio_output = Operator::OUTPUT_MAX;
-        } else if (audio_output < Operator::OUTPUT_MIN) {
+        else if (audio_output < Operator::OUTPUT_MIN)
             audio_output = Operator::OUTPUT_MIN;
-        }
         return audio_output;
     }
 };

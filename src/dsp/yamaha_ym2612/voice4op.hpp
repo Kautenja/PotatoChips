@@ -405,21 +405,6 @@ struct Voice4Op {
     // -----------------------------------------------------------------------
 
  private:
-    /// @brief Update the phase counter using the global LFO for PM.
-    ///
-    /// @param fnum TODO
-    ///
-    inline void update_phase_using_lfo(uint32_t fnum) {
-        const uint8_t blk = (fnum & 0x7000) >> 12;
-        fnum = fnum & 0xfff;
-        for (Operator& oprtr : operators)
-            oprtr.update_phase_using_lfo(
-                state,
-                state.fnum_table[fnum] >> (7 - blk),
-                (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
-            );
-    }
-
     /// @brief Advance the operators to compute the next output from the
     inline void calculate_operator_outputs() {
         // get the amount of amplitude modulation for the voice
@@ -466,12 +451,17 @@ struct Voice4Op {
         const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
         const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
         if (pms && lfo_fnum_offset) {  // update the phase using the LFO
-            update_phase_using_lfo(2 * block_fnum + lfo_fnum_offset);
+            uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
+            const uint8_t blk = (fnum & 0x7000) >> 12;
+            fnum = fnum & 0xfff;
+            for (Operator& oprtr : operators)
+                oprtr.update_phase_using_lfo(
+                    state,
+                    state.fnum_table[fnum] >> (7 - blk),
+                    (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
+                );
         } else {  // no LFO phase modulation
-            operators[Op1].phase += operators[Op1].phase_increment;
-            operators[Op2].phase += operators[Op2].phase_increment;
-            operators[Op3].phase += operators[Op3].phase_increment;
-            operators[Op4].phase += operators[Op4].phase_increment;
+            for (Operator& oprtr : operators) oprtr.update_phase();
         }
     }
 
@@ -490,9 +480,10 @@ struct Voice4Op {
         audio_output = 0;
         for (Operator& oprtr : operators)
             oprtr.update_ssg_eg_channel();
+        // calculate operator outputs
         calculate_operator_outputs();
+        // advance LFO & envelope generator
         state.advance_lfo();
-        // advance envelope generator
         state.eg_timer += state.eg_timer_add;
         while (state.eg_timer >= state.eg_timer_overflow) {
             state.eg_timer -= state.eg_timer_overflow;

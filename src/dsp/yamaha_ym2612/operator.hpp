@@ -673,23 +673,6 @@ struct Operator {
         }
     }
 
-    /// Update the phase of the operator using the LFO
-    ///
-    /// @param state the global context the operator is working in
-    /// @param phase_increment_counter TODO
-    /// @param keyscale_code TODO
-    ///
-    inline void update_phase_using_lfo(
-        const OperatorContext& state,
-        int phase_increment_counter,
-        int keyscale_code
-    ) {
-        // detects frequency overflow (credits to Nemesis)
-        int finc = phase_increment_counter + DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        phase += (finc * mul) >> 1;
-    }
-
     /// @brief Get the envelope volume based on amplitude modulation level.
     ///
     /// @param amplitude_modulation the amount of amplitude modulation to apply
@@ -716,6 +699,26 @@ struct Operator {
         ];
         if (p >= TL_TABLE_LENGTH) return 0;
         return TL_TABLE[p];
+    }
+
+    /// @brief Update the phase of the operator (without the LFO).
+    inline void update_phase() { phase += phase_increment; }
+
+    /// @briefUpdate the phase of the operator using the LFO
+    ///
+    /// @param state the global context the operator is working in
+    /// @param phase_increment_counter TODO
+    /// @param keyscale_code TODO
+    ///
+    inline void update_phase_using_lfo(
+        const OperatorContext& state,
+        int phase_increment_counter,
+        int keyscale_code
+    ) {
+        // detects frequency overflow (credits to Nemesis)
+        int finc = phase_increment_counter + DT[keyscale_code];
+        if (finc < 0) finc += state.fnum_max;
+        phase += (finc * mul) >> 1;
     }
 };
 

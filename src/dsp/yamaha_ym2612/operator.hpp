@@ -1510,6 +1510,7 @@ struct Voice4Op {
     // MARK: Sampling / Stepping
     // -----------------------------------------------------------------------
 
+ private:
     /// @brief Update phase increment counters.
     ///
     /// @param state the global operator state associated with the voice
@@ -1620,6 +1621,7 @@ struct Voice4Op {
         }
     }
 
+ public:
     /// @brief Run a step on the emulator to produce a sample.
     ///
     /// @param state the global operator state associated with the voice

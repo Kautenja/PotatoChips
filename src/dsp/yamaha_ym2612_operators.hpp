@@ -663,6 +663,8 @@ struct Operator {
     /// release stage
     uint8_t eg_sel_rr = 0;
 
+    bool ssg_enabled = false;
+
     /// SSG-EG waveform
     uint8_t ssg = 0;
     /// SSG-EG negated output
@@ -685,7 +687,6 @@ struct Operator {
         vol_out = MAX_ATT_INDEX;
         DT = state.dt_table[0];
         mul = 1;
-        ssg = ssgn = 0;
         is_gate_open = false;
         is_amplitude_mod_on = false;
         set_rs(0);
@@ -695,7 +696,7 @@ struct Operator {
         set_sl(0);
         set_sr(0);
         set_rr(0);
-        set_ssg(0);
+        set_ssg(false, 0);
     }
 
     /// @brief Set the key-on flag for the given operator.
@@ -873,11 +874,13 @@ struct Operator {
     /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
     /// That is not necessary, but then EG will be generating Attack phase.
     ///
-    inline void set_ssg(uint8_t value) {
-        if (ssg == value) return;
+    inline void set_ssg(bool enabled, uint8_t value) {
+        value = value & 7;
+        if (ssg_enabled == enabled && ssg == value) return;
+        ssg_enabled = enabled;
         ssg = value;
         // recalculate EG output
-        if ((ssg & 0x08) && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
+        if (ssg_enabled && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
             vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
         else
             vol_out = (uint32_t) volume + tl;
@@ -921,7 +924,7 @@ struct Operator {
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
-        if ((ssg & 0x08) && (volume >= 0x200) && (env_stage > RELEASE)) {
+        if (ssg_enabled && (volume >= 0x200) && (env_stage > RELEASE)) {
             if (ssg & 0x01) {  // bit 0 = hold SSG-EG
                 // set inversion flag
                 if (ssg & 0x02) ssgn = 4;
@@ -972,7 +975,7 @@ struct Operator {
             }
             break;
         case DECAY:  // decay stage
-            if (ssg & 0x08) {  // SSG EG type envelope selected
+            if (ssg_enabled) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
                     if ( volume >= static_cast<int32_t>(sl) )
@@ -987,7 +990,7 @@ struct Operator {
             }
             break;
         case SUSTAIN:  // sustain stage
-            if (ssg & 0x08) {  // SSG EG type envelope selected
+            if (ssg_enabled) {  // SSG EG type envelope selected
                 if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
@@ -1034,7 +1037,7 @@ struct Operator {
         unsigned int out = static_cast<uint32_t>(volume);
         // negate output (changes come from alternate bit, init comes from
         // attack bit)
-        if ((ssg & 0x08) && (ssgn & 2) && (env_stage > RELEASE))
+        if (ssg_enabled && (ssgn & 2) && (env_stage > RELEASE))
             out ^= MAX_ATT_INDEX;
         // we need to store the result here because we are going to change
         // ssgn in next instruction
@@ -1202,7 +1205,9 @@ struct Voice {
     ///
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void set_fm_sensitivity(uint8_t value) { pms = (value & 7) * 32; }
+    inline void set_fm_sensitivity(uint8_t value) {
+        pms = (value & 7) * 32;
+    }
 
     /// @brief Set the feedback amount.
     ///

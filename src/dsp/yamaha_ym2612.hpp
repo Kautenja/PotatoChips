@@ -116,9 +116,7 @@ class YamahaYM2612 {
     /// @param mode the mode for the looping generator to run in (in [0, 7])
     ///
     inline void setSSG(uint8_t op_index, bool is_on, uint8_t mode) {
-        // set the value for the SSG register. the high bit determines whether
-        // SSG mode is on and the low three bits determine the mode
-        voice.operators[OPERATOR_INDEXES[op_index]].set_ssg((is_on << 3) | (mode & 7));
+        voice.operators[OPERATOR_INDEXES[op_index]].set_ssg(is_on, mode);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.

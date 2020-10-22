@@ -1106,8 +1106,13 @@ struct Operator {
 
 /// @brief A single 4-operator FM voice.
 struct Voice {
+    /// the number of FM operators on the module
+    static constexpr unsigned NUM_OPERATORS = 4;
+    /// the number of FM algorithms on the module
+    static constexpr unsigned NUM_ALGORITHMS = 8;
+
     /// four operators
-    Operator operators[4];
+    Operator operators[NUM_OPERATORS];
 
     /// algorithm
     uint8_t algorithm = 0;
@@ -1117,7 +1122,7 @@ struct Voice {
     int32_t op1_out[2] = {0, 0};
 
     /// the output of the operators based on the algorithm connections
-    int32_t *connections[4] = {nullptr, nullptr, nullptr, nullptr};
+    int32_t* connections[NUM_OPERATORS];
 
     /// where to put the delayed sample (MEM)
     int32_t *mem_connect = nullptr;
@@ -1136,7 +1141,11 @@ struct Voice {
     /// current blk / fnum value for this slot
     uint32_t block_fnum = 0;
 
+    /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
+
+    /// Initialize a new voice.
+    Voice() { memset(connections, 0, sizeof connections); }
 
     /// @brief Reset the voice to default.
     ///
@@ -1147,7 +1156,7 @@ struct Voice {
         algorithm = 0;
         feedback = 0;
         op1_out[0] = op1_out[1] = 0;
-        connections[0] = connections[1] = connections[2] = connections[3] = nullptr;
+        memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
         pms = 0;

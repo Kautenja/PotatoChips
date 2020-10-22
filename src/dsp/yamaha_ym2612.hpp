@@ -24,12 +24,6 @@
 
 /// Yamaha YM2612 chip emulator
 class YamahaYM2612 {
- public:
-    /// the number of FM operators on the module
-    static constexpr unsigned NUM_OPERATORS = 4;
-    /// the number of FM algorithms on the module
-    static constexpr unsigned NUM_ALGORITHMS = 8;
-
  private:
     /// general state
     GlobalOperatorState state;

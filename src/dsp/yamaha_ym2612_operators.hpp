@@ -663,10 +663,10 @@ struct Operator {
     /// release stage
     uint8_t eg_sel_rr = 0;
 
-    bool ssg_enabled = false;
-
     /// SSG-EG waveform
     uint8_t ssg = 0;
+    /// whether SSG-EG is enabled
+    bool ssg_enabled = false;
     /// SSG-EG negated output
     uint8_t ssgn = 0;
 

@@ -1,4 +1,4 @@
-// A 4-operator FM synthesizer based on the MAME Yamaha YM2612 emulation.
+// A 4-operator FM synthesizer based on Yamaha YM2612 emulation.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 // Copyright 2001 Jarek Burczynski
@@ -30,10 +30,9 @@ struct Voice4Op {
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
-    /// general state
-    GlobalOperatorState state;
-
  private:
+    /// general state
+    OperatorContext state;
     /// fnum, blk : adjusted to sample rate
     uint32_t fc = 0;
     /// current blk / fnum value for this slot
@@ -100,9 +99,6 @@ struct Voice4Op {
     }
 
     /// @brief Reset the voice to default.
-    ///
-    /// @param state the global operator state to use for resetting operators
-    ///
     inline void reset() {
         state.reset();
         for (auto &op : operators) op.reset(state);
@@ -136,7 +132,7 @@ struct Voice4Op {
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
     inline void set_am_sensitivity(uint8_t value) {
-        ams = LFO_AMS_DEPTH_SHIFT[value & 0x03];
+        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -155,6 +151,7 @@ struct Voice4Op {
         feedback = (value & 7) ? (value & 7) + 6 : 0;
     }
 
+    // TODO: change gate to allow independent operator gates
     /// @brief Set the gate for the given voice.
     ///
     /// @param is_open true if the gate is open, false otherwise
@@ -166,6 +163,7 @@ struct Voice4Op {
             for (Operator& op : operators) op.set_keyoff();
     }
 
+    // TODO: change frequency to allow independent operator frequencies
     /// @brief Set the frequency of the voice.
     ///
     /// @param frequency the frequency value measured in Hz
@@ -311,8 +309,6 @@ struct Voice4Op {
     // MARK: Algorithm / Routing
     // -----------------------------------------------------------------------
 
-    // TODO: enum for the operator/algorithm?
-    // TODO: better ASCII illustrations of the operators
     /// @brief Set algorithm, i.e., operator routing.
     ///
     /// @param value the algorithm / routing to set the voice to
@@ -407,9 +403,6 @@ struct Voice4Op {
 
  private:
     /// @brief Update phase increment counters.
-    ///
-    /// @param state the global operator state associated with the voice
-    ///
     inline void refresh_phase_and_envelope() {
         if (!update_phase_increment) return;
         operators[Op1].refresh_phase_and_envelope(state.fn_max, fc, kcode);
@@ -420,9 +413,6 @@ struct Voice4Op {
     }
 
     /// @brief Update the phase counter using the global LFO for PM.
-    ///
-    /// @param state the global operator state associated with the voice
-    ///
     inline void update_phase_using_lfo() {
         uint32_t block_fnum_local = block_fnum;
         uint32_t fnum_lfo = ((block_fnum_local & 0x7f0) >> 4) * 32 * 8;
@@ -459,11 +449,6 @@ struct Voice4Op {
     }
 
     /// @brief Advance the operators to compute the next output from the
-    ///
-    /// @param state the global operator state associated with the voice
-    /// @details
-    /// The operators advance in the order 1, 3, 2, 4.
-    ///
     inline void calculate_operator_outputs() {
         // get the amount of amplitude modulation for the voice
         const uint32_t AM = state.lfo_AM_step >> ams;
@@ -519,20 +504,15 @@ struct Voice4Op {
  public:
     /// @brief Run a step on the emulator to produce a sample.
     ///
-    /// @param state the global operator state associated with the voice
     /// @returns a 16-bit PCM sample from the synthesizer
     ///
     inline int16_t step() {
-        // refresh PG and EG
+        // calculate the next output
         refresh_phase_and_envelope();
-        // clear outputs
         audio_output = 0;
-        // update SSG-EG output
         for (Operator& oprtr : operators)
             oprtr.update_ssg_eg_channel();
-        // calculate FM
         calculate_operator_outputs();
-        // advance LFO
         state.advance_lfo();
         // advance envelope generator
         state.eg_timer += state.eg_timer_add;
@@ -547,6 +527,7 @@ struct Voice4Op {
             audio_output = Operator::OUTPUT_MAX;
         else if (audio_output < Operator::OUTPUT_MIN)
             audio_output = Operator::OUTPUT_MIN;
+
         return audio_output;
     }
 };

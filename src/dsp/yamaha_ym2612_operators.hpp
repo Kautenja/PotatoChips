@@ -801,6 +801,78 @@ struct Operator {
     /// the first three bits describe the mode of the looping EG, the fourth
     /// bit enables / disables the looping EG
     ///
+    /// The mode can be any of the following:
+    ///
+    /// Table: SSG-EG LFO Patterns
+    /// | At | Al | H | LFO Pattern |
+    /// |:---|:---|:--|:------------|
+    /// | 0  | 0  | 0 |  \\\\       |
+    /// |    |    |   |             |
+    /// | 0  | 0  | 1 |  \___       |
+    /// |    |    |   |             |
+    /// | 0  | 1  | 0 |  \/\/       |
+    /// |    |    |   |             |
+    /// |    |    |   |   ___       |
+    /// | 0  | 1  | 1 |  \          |
+    /// |    |    |   |             |
+    /// | 1  | 0  | 0 |  ////       |
+    /// |    |    |   |             |
+    /// |    |    |   |   ___       |
+    /// | 1  | 0  | 1 |  /          |
+    /// |    |    |   |             |
+    /// | 1  | 1  | 0 |  /\/\       |
+    /// |    |    |   |             |
+    /// | 1  | 1  | 1 |  /___       |
+    /// |    |    |   |             |
+    ///
+    /// The shapes are generated using Attack, Decay and Sustain phases.
+    ///
+    /// Each single character in the diagrams above represents this whole
+    /// sequence:
+    ///
+    /// - when KEY-ON = 1, normal Attack phase is generated (*without* any
+    ///   difference when compared to normal mode),
+    ///
+    /// - later, when envelope level reaches minimum level (max volume),
+    ///   the EG switches to Decay phase (which works with bigger steps
+    ///   when compared to normal mode - see below),
+    ///
+    /// - later when envelope level passes the SL level,
+    ///   the EG swithes to Sustain phase (which works with bigger steps
+    ///   when compared to normal mode - see below),
+    ///
+    /// - finally when envelope level reaches maximum level (min volume),
+    ///   the EG switches to Attack phase again (depends on actual waveform).
+    ///
+    /// Important is that when switch to Attack phase occurs, the phase counter
+    /// of that operator will be zeroed-out (as in normal KEY-ON) but not always.
+    /// (I haven't found the rule for that - perhaps only when the output
+    /// level is low)
+    ///
+    /// The difference (when compared to normal Envelope Generator mode) is
+    /// that the resolution in Decay and Sustain phases is 4 times lower;
+    /// this results in only 256 steps instead of normal 1024.
+    /// In other words:
+    /// when SSG-EG is disabled, the step inside of the EG is one,
+    /// when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
+    ///
+    /// Times between the level changes are the same in both modes.
+    ///
+    /// Important:
+    /// Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
+    /// it is the same in both SSG and no-SSG modes, with this exception:
+    ///
+    /// when the SSG-EG is enabled and is generating raising levels
+    /// (when the EG output is inverted) the SL will be found at wrong level!!!
+    /// For example, when SL=02:
+    ///     0 -6 = -6dB in non-inverted EG output
+    ///     96-6 = -90dB in inverted EG output
+    /// Which means that EG compares its level to SL as usual, and that the
+    /// output is simply inverted after all.
+    ///
+    /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
+    /// That is not necessary, but then EG will be generating Attack phase.
+    ///
     inline void set_ssg(uint8_t value) {
         if (ssg == value) return;
         ssg = value;

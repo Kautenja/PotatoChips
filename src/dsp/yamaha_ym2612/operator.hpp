@@ -171,11 +171,13 @@ struct OperatorContext {
 
 /// @brief A single FM operator
 struct Operator {
+ public:
     /// the maximal value that an operator can output (signed 14-bit)
     static constexpr int32_t OUTPUT_MAX = 8191;
     /// the minimal value that an operator can output (signed 14-bit)
     static constexpr int32_t OUTPUT_MIN = -8192;
 
+ private:
     /// attack rate
     uint32_t ar = 0;
     /// total level: TL << 3
@@ -249,6 +251,7 @@ struct Operator {
     /// SSG-EG negated output
     uint8_t ssgn = 0;
 
+ public:
     /// whether the gate for the envelope generator is open
     bool is_gate_open = false;
     /// whether amplitude modulation is enabled for the operator
@@ -284,21 +287,23 @@ struct Operator {
     // -----------------------------------------------------------------------
 
     /// @brief Set the key-on flag for the given operator.
-    inline void set_keyon() {
-        if (is_gate_open) return;
-        is_gate_open = true;
-        // restart Phase Generator
-        phase = 0;
-        ssgn = (ssg & 0x04) >> 1;
-        env_stage = ATTACK;
-    }
-
-    /// @brief Set the key-off flag for the given operator.
-    inline void set_keyoff() {
-        if (!is_gate_open) return;
-        is_gate_open = false;
-        // phase -> Release
-        if (env_stage > RELEASE) env_stage = RELEASE;
+    ///
+    /// @param is_gate_open true if the gate is open, false otherwise
+    /// @param prevent_clicks true to prevent clicks from the operator
+    /// @details
+    /// Preventing clicks is not authentic functionality, but may be preferred.
+    ///
+    inline void set_gate(bool is_gate_open, bool prevent_clicks = false) {
+        if (this->is_gate_open == is_gate_open) return;
+        this->is_gate_open = is_gate_open;
+        if (is_gate_open) {  // reset the phase and set envelope to attack
+            // reset the phase if preventing clicks has not been enabled
+            if (!prevent_clicks) phase = 0;
+            ssgn = (ssg & 0x04) >> 1;
+            env_stage = ATTACK;
+        } else {  // set the envelope to the release stage
+            if (env_stage != SILENT) env_stage = RELEASE;
+        }
     }
 
     /// @brief Set the 5-bit attack rate.

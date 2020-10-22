@@ -249,10 +249,7 @@ struct Voice4Op {
     /// @param is_open true if the gate is open, false otherwise
     ///
     inline void set_gate(bool is_open) {
-        if (is_open)  // open the gate for all operators
-            for (Operator& op : operators) op.set_keyon();
-        else  // shut the gate for all operators
-            for (Operator& op : operators) op.set_keyoff();
+        for (Operator& op : operators) op.set_gate(is_open);
     }
 
     // TODO: change frequency to allow independent operator frequencies

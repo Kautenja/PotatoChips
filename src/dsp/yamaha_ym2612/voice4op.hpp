@@ -405,16 +405,6 @@ struct Voice4Op {
     // -----------------------------------------------------------------------
 
  private:
-    /// @brief Update phase increment counters.
-    inline void refresh_phase_and_envelope() {
-        if (!update_phase_increment) return;
-        operators[Op1].refresh_phase_and_envelope(state.fn_max, fc, kcode);
-        operators[Op2].refresh_phase_and_envelope(state.fn_max, fc, kcode);
-        operators[Op3].refresh_phase_and_envelope(state.fn_max, fc, kcode);
-        operators[Op4].refresh_phase_and_envelope(state.fn_max, fc, kcode);
-        update_phase_increment = false;
-    }
-
     /// @brief Update the phase counter using the global LFO for PM.
     inline void update_phase_using_lfo() {
         uint32_t block_fnum_local = block_fnum;
@@ -511,7 +501,11 @@ struct Voice4Op {
     ///
     inline int16_t step() {
         // calculate the next output
-        refresh_phase_and_envelope();
+        if (update_phase_increment) {
+            for (Operator& oprtr : operators)
+                oprtr.refresh_phase_and_envelope(state.fn_max, fc, kcode);
+            update_phase_increment = false;
+        }
         audio_output = 0;
         for (Operator& oprtr : operators)
             oprtr.update_ssg_eg_channel();

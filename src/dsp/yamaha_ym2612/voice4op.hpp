@@ -243,15 +243,6 @@ struct Voice4Op {
         pms = (value & 7) * 32;
     }
 
-    // TODO: change gate to allow independent operator gates
-    /// @brief Set the gate for the given voice.
-    ///
-    /// @param is_open true if the gate is open, false otherwise
-    ///
-    inline void set_gate(bool is_open) {
-        for (Operator& op : operators) op.set_gate(is_open);
-    }
-
     // TODO: change frequency to allow independent operator frequencies
     /// @brief Set the frequency of the voice.
     ///
@@ -284,6 +275,15 @@ struct Voice4Op {
     // -----------------------------------------------------------------------
     // MARK: Operator Parameter Settings
     // -----------------------------------------------------------------------
+
+    /// @brief Set the gate for the given voice.
+    ///
+    /// @param op_index the operator to set the gate of of (in [0, 3])
+    /// @param is_open true if the gate is open, false otherwise
+    ///
+    inline void set_gate(uint8_t op_index, bool is_open) {
+        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open);
+    }
 
     /// @brief Set whether SSG envelopes are enabled for the given operator.
     ///

@@ -24,6 +24,7 @@
 // individual operator frequency
 // individual operator triggering
 // LFO output
+// option to prevent clicks in context menu
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -179,6 +180,18 @@ struct Chip2612 : rack::Module {
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
         apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
         apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
+        // process the gate trigger, high at 2V
+        gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
+        gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+        // process the retrig trigger, high at 2V
+        retrig = inputs[INPUT_RETRIG].getNormalVoltage(retrig, channel);
+        auto trigger = retrig_triggers[channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
+        // use the exclusive or of the gate and retrigger. This ensures that
+        // when either gate or trigger alone is high, the gate is open,
+        // but when neither or both are high, the gate is closed. This
+        // causes the gate to get shut for a sample when re-triggering an
+        // already gated voice
+        auto is_gate_open = trigger ^ gate_triggers[channel].state;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate  (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
@@ -193,23 +206,13 @@ struct Chip2612 : rack::Module {
             apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_ssg_mode     (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
+            apu[channel].set_gate         (op, is_gate_open);
         }
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves
         pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
         apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
-        // process the gate trigger, high at 2V
-        gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
-        gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-        // process the retrig trigger, high at 2V
-        retrig = inputs[INPUT_RETRIG].getNormalVoltage(retrig, channel);
-        auto trigger = retrig_triggers[channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
-        // use the exclusive or of the gate and retrigger. This ensures that
-        // when either gate or trigger alone is high, the gate is open,
-        // but when neither or both are high, the gate is closed. This
-        // causes the gate to get shut for a sample when re-triggering an
-        // already gated voice
-        apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
+
     }
 
     /// @brief Process a sample.

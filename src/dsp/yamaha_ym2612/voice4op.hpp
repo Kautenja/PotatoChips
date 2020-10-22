@@ -530,7 +530,7 @@ struct Voice4Op {
             audio_output = Operator::OUTPUT_MAX;
         else if (audio_output < Operator::OUTPUT_MIN)
             audio_output = Operator::OUTPUT_MIN;
-
+        // TODO: return output from each operator in addition to the sum?
         return audio_output;
     }
 };

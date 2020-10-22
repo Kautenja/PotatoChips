@@ -356,6 +356,9 @@ class YamahaYM2612 {
     // MARK: Operator control
     // -----------------------------------------------------------------------
 
+    // TODO: separate into two functions, one to enable / disable and another
+    // to set the mode
+    // TODO: fix why some modes aren't working right.
     /// @brief Set the SSG-envelope register for the given channel and operator.
     ///
     /// @param op_index the operator to set the SSG-EG register of (in [0, 3])

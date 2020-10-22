@@ -1135,6 +1135,9 @@ struct Voice4Op {
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
+    /// general state
+    GlobalOperatorState state;
+
  private:
     /// fnum, blk : adjusted to sample rate
     uint32_t fc = 0;
@@ -1182,17 +1185,31 @@ struct Voice4Op {
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
 
-    /// Initialize a new voice.
-    Voice4Op() {
-        memset(connections, 0, sizeof connections);
-        set_algorithm(0);
+    /// @brief Initialize a new YamahaYM2612 with given sample rate.
+    ///
+    /// @param sample_rate the rate to draw samples from the emulator at
+    /// @param clock_rate the underlying clock rate of the system
+    ///
+    Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
+        state.set_sample_rate(sample_rate, clock_rate);
+        reset();
+    }
+
+    /// @brief Set the sample rate the a new value.
+    ///
+    /// @param sample_rate the rate to draw samples from the emulator at
+    /// @param clock_rate the underlying clock rate of the system
+    ///
+    inline void set_sample_rate(float sample_rate, float clock_rate) {
+        state.set_sample_rate(sample_rate, clock_rate);
     }
 
     /// @brief Reset the voice to default.
     ///
     /// @param state the global operator state to use for resetting operators
     ///
-    inline void reset(const GlobalOperatorState& state) {
+    inline void reset() {
+        state.reset();
         for (auto &op : operators) op.reset(state);
         algorithm = 0;
         feedback = 0;
@@ -1212,6 +1229,12 @@ struct Voice4Op {
     // -----------------------------------------------------------------------
     // MARK: Parameter Setters
     // -----------------------------------------------------------------------
+
+    /// @brief Set the global LFO for the voice.
+    ///
+    /// @param value the value of the LFO register
+    ///
+    inline void set_lfo(uint8_t value) { state.set_lfo(value); }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
@@ -1252,7 +1275,7 @@ struct Voice4Op {
     ///
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void set_frequency(const GlobalOperatorState& state, float frequency) {
+    inline void set_frequency(float frequency) {
         // Shift the frequency to the base octave and calculate the octave to
         // play. The base octave is defined as a 10-bit number in [0, 1023].
         int octave = 2;
@@ -1274,6 +1297,119 @@ struct Voice4Op {
         block_fnum = (octave << 11) | freq16bit;
         // update the phase increment if the frequency changed
         update_phase_increment |= old_fc != fc;
+    }
+
+    // -----------------------------------------------------------------------
+    // MARK: Operator Parameter Settings
+    // -----------------------------------------------------------------------
+
+    /// @brief Set whether SSG envelopes are enabled for the given operator.
+    ///
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
+    /// @param is_on whether the looping envelope generator should be turned on
+    ///
+    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
+        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
+    }
+
+    // TODO: fix why some modes aren't working right.
+    /// @brief Set the SSG-envelope mode for the given operator.
+    ///
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
+    /// @param mode the mode for the looping generator to run in (in [0, 7])
+    ///
+    inline void set_ssg_mode(uint8_t op_index, uint8_t mode) {
+        operators[OPERATOR_INDEXES[op_index]].set_ssg_mode(mode);
+    }
+
+    /// @brief Set the rate-scale (RS) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
+    /// @param value the amount of rate-scale applied to the FM operator
+    ///
+    inline void set_rate_scale(uint8_t op_index, uint8_t value) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_rs(value);
+    }
+
+    /// @brief Set the attack rate (AR) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the attack rate (AR) register of (in [0, 3])
+    /// @param value the rate of the attack stage of the envelope generator
+    ///
+    inline void set_attack_rate(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_ar(value);
+    }
+
+    /// @brief Set the total level (TL) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
+    /// @param value the total amplitude of envelope generator
+    ///
+    inline void set_total_level(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_tl(value);
+    }
+
+    /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the 1st decay rate (D1) register of (in [0, 3])
+    /// @param value the rate of decay for the 1st decay stage of the envelope generator
+    ///
+    inline void set_decay_rate(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_dr(value);
+    }
+
+    /// @brief Set the sustain level (SL) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the sustain level (SL) register of (in [0, 3])
+    /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
+    ///
+    inline void set_sustain_level(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_sl(value);
+    }
+
+    /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the 2nd decay rate (D2) register of (in [0, 3])
+    /// @param value the rate of decay for the 2nd decay stage of the envelope generator
+    ///
+    inline void set_sustain_rate(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_sr(value);
+    }
+
+    /// @brief Set the release rate (RR) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the release rate (RR) register of (in [0, 3])
+    /// @param value the rate of release of the envelope generator after key-off
+    ///
+    inline void set_release_rate(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_rr(value);
+    }
+
+    /// @brief Set the multiplier (MUL) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the multiplier  (MUL)register of (in [0, 3])
+    /// @param value the value of the FM phase multiplier
+    ///
+    inline void set_multiplier(uint8_t op_index, uint8_t value) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_multiplier(value);
+    }
+
+    /// @brief Set the detune (DET) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the detune (DET) register of (in [0, 3])
+    /// @param value the the level of detuning for the FM operator
+    ///
+    inline void set_detune(uint8_t op_index, uint8_t value = 4) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
+    }
+
+    /// @brief Set the amplitude modulation (AM) register for the given voice and operator.
+    ///
+    /// @param op_index the operator to set the amplitude modulation (AM) register of (in [0, 3])
+    /// @param value the true to enable amplitude modulation from the LFO, false to disable it
+    ///
+    inline void set_am_enabled(uint8_t op_index, bool value) {
+        operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
     }
 
     // -----------------------------------------------------------------------
@@ -1378,7 +1514,7 @@ struct Voice4Op {
     ///
     /// @param state the global operator state associated with the voice
     ///
-    inline void refresh_phase_and_envelope(const GlobalOperatorState& state) {
+    inline void refresh_phase_and_envelope() {
         if (!update_phase_increment) return;
         operators[Op1].refresh_phase_and_envelope(state.fn_max, fc, kcode);
         operators[Op2].refresh_phase_and_envelope(state.fn_max, fc, kcode);
@@ -1391,7 +1527,7 @@ struct Voice4Op {
     ///
     /// @param state the global operator state associated with the voice
     ///
-    inline void update_phase_using_lfo(const GlobalOperatorState& state) {
+    inline void update_phase_using_lfo() {
         uint32_t block_fnum_local = block_fnum;
         uint32_t fnum_lfo = ((block_fnum_local & 0x7f0) >> 4) * 32 * 8;
         int32_t lfo_fn_table_index_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
@@ -1432,7 +1568,7 @@ struct Voice4Op {
     /// @details
     /// The operators advance in the order 1, 3, 2, 4.
     ///
-    inline void calculate_operator_outputs(const GlobalOperatorState& state) {
+    inline void calculate_operator_outputs() {
         // get the amount of amplitude modulation for the voice
         const uint32_t AM = state.lfo_AM_step >> ams;
         // reset the algorithm outputs to 0
@@ -1475,7 +1611,7 @@ struct Voice4Op {
         mem_value = mem;
         // update phase counters AFTER output calculations
         if (pms) {  // update the phase using the LFO
-            update_phase_using_lfo(state);
+            update_phase_using_lfo();
         } else {  // no LFO phase modulation
             operators[Op1].phase += operators[Op1].phase_increment;
             operators[Op2].phase += operators[Op2].phase_increment;
@@ -1489,16 +1625,16 @@ struct Voice4Op {
     /// @param state the global operator state associated with the voice
     /// @returns a 16-bit PCM sample from the synthesizer
     ///
-    inline int16_t step(GlobalOperatorState& state) {
+    inline int16_t step() {
         // refresh PG and EG
-        refresh_phase_and_envelope(state);
+        refresh_phase_and_envelope();
         // clear outputs
         audio_output = 0;
         // update SSG-EG output
         for (Operator& oprtr : operators)
             oprtr.update_ssg_eg_channel();
         // calculate FM
-        calculate_operator_outputs(state);
+        calculate_operator_outputs();
         // advance LFO
         state.advance_lfo();
         // advance envelope generator

@@ -264,15 +264,6 @@ struct Voice4Op {
         operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
     }
 
-    /// @brief Set the SSG-envelope mode for the given operator.
-    ///
-    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
-    /// @param mode the mode for the looping generator to run in (in [0, 7])
-    ///
-    inline void set_ssg_mode(uint8_t op_index, uint8_t mode) {
-        operators[OPERATOR_INDEXES[op_index]].set_ssg_mode(mode);
-    }
-
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
     ///
     /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])

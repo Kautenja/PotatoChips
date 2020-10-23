@@ -251,12 +251,8 @@ struct Operator {
     /// release stage
     uint8_t eg_sel_rr = 0;
 
-    /// SSG-EG waveform
-    uint8_t ssg = 0;
     /// whether SSG-EG is enabled
     bool ssg_enabled = false;
-    /// SSG-EG negated output
-    uint8_t ssgn = 0;
 
  public:
     /// whether the gate for the envelope generator is open
@@ -289,7 +285,6 @@ struct Operator {
         set_sr(0);
         set_rr(0);
         set_ssg_enabled(false);
-        set_ssg_mode(0);
     }
 
     // -----------------------------------------------------------------------
@@ -309,7 +304,6 @@ struct Operator {
         if (is_gate_open) {  // reset the phase and set envelope to attack
             // reset the phase if preventing clicks has not been enabled
             if (!prevent_clicks) phase = 0;
-            ssgn = (ssg & SSG_INV) >> 1;
             env_stage = ATTACK;
         } else {  // set the envelope to the release stage
             if (env_stage != SILENT) env_stage = RELEASE;
@@ -423,116 +417,11 @@ struct Operator {
         return KSR != old_KSR;
     }
 
-
     /// @brief set whether the SSG mode is enabled or not
     ///
     /// @param enabled true to enable SSG mode, false to disable it
     ///
-    inline void set_ssg_enabled(bool enabled = false) {
-        if (ssg_enabled == enabled) return;
-        ssg_enabled = enabled;
-        // recalculate EG output
-        if (ssg_enabled && (ssgn ^ (ssg & SSG_INV)) && (env_stage > RELEASE))
-            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-        else
-            vol_out = (uint32_t) volume + tl;
-    }
-
-    /// Bit-mask for the various SSG modes
-    enum SSG_Modes {
-        SSG_HOLD = 0x01,
-        SSG_ALT =   0x02,
-        SSG_INV =   0x04
-    };
-
-    // TODO: fix why some modes aren't working right.
-    /// @brief set the SSG register to a new value.
-    ///
-    /// @param value the value for the looping envelope generator register (SSG)
-    /// @details
-    ///
-    /// The mode can be any of the following:
-    ///
-    /// Table: SSG-EG LFO Patterns
-    /// | At | Al | H | LFO Pattern |
-    /// |:---|:---|:--|:------------|
-    /// | 0  | 0  | 0 |  \\\\       |
-    /// |    |    |   |             |
-    /// | 0  | 0  | 1 |  \___       |
-    /// |    |    |   |             |
-    /// | 0  | 1  | 0 |  \/\/       |
-    /// |    |    |   |             |
-    /// |    |    |   |   ___       |
-    /// | 0  | 1  | 1 |  \          |
-    /// |    |    |   |             |
-    /// | 1  | 0  | 0 |  ////       |
-    /// |    |    |   |             |
-    /// |    |    |   |   ___       |
-    /// | 1  | 0  | 1 |  /          |
-    /// |    |    |   |             |
-    /// | 1  | 1  | 0 |  /\/\       |
-    /// |    |    |   |             |
-    /// | 1  | 1  | 1 |  /___       |
-    /// |    |    |   |             |
-    ///
-    /// The shapes are generated using Attack, Decay and Sustain phases.
-    ///
-    /// Each single character in the diagrams above represents this whole
-    /// sequence:
-    ///
-    /// - when KEY-ON = 1, normal Attack phase is generated (*without* any
-    ///   difference when compared to normal mode),
-    ///
-    /// - later, when envelope level reaches minimum level (max volume),
-    ///   the EG switches to Decay phase (which works with bigger steps
-    ///   when compared to normal mode - see below),
-    ///
-    /// - later when envelope level passes the SL level,
-    ///   the EG swithes to Sustain phase (which works with bigger steps
-    ///   when compared to normal mode - see below),
-    ///
-    /// - finally when envelope level reaches maximum level (min volume),
-    ///   the EG switches to Attack phase again (depends on actual waveform).
-    ///
-    /// Important is that when switch to Attack phase occurs, the phase counter
-    /// of that operator will be zeroed-out (as in normal KEY-ON) but not always.
-    /// (I haven't found the rule for that - perhaps only when the output
-    /// level is low)
-    ///
-    /// The difference (when compared to normal Envelope Generator mode) is
-    /// that the resolution in Decay and Sustain phases is 4 times lower;
-    /// this results in only 256 steps instead of normal 1024.
-    /// In other words:
-    /// when SSG-EG is disabled, the step inside of the EG is one,
-    /// when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
-    ///
-    /// Times between the level changes are the same in both modes.
-    ///
-    /// Important:
-    /// Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
-    /// it is the same in both SSG and no-SSG modes, with this exception:
-    ///
-    /// when the SSG-EG is enabled and is generating raising levels
-    /// (when the EG output is inverted) the SL will be found at wrong level!!!
-    /// For example, when SL=02:
-    ///     0 -6 = -6dB in non-inverted EG output
-    ///     96-6 = -90dB in inverted EG output
-    /// Which means that EG compares its level to SL as usual, and that the
-    /// output is simply inverted after all.
-    ///
-    /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
-    /// That is not necessary, but then EG will be generating Attack phase.
-    ///
-    inline void set_ssg_mode(uint8_t value = 0) {
-        value = value & 7;
-        if (ssg == value) return;
-        ssg = value;
-        // recalculate EG output
-        if (ssg_enabled && (ssgn ^ (ssg & SSG_INV)) && (env_stage > RELEASE))
-            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-        else
-            vol_out = (uint32_t) volume + tl;
-    }
+    inline void set_ssg_enabled(bool enabled = false) { ssg_enabled = enabled; }
 
     /// @brief set the rate multiplier to a new value.
     ///
@@ -576,34 +465,17 @@ struct Operator {
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
         if (ssg_enabled && volume >= 0x200 && env_stage > RELEASE) {
-            if (ssg & SSG_HOLD) {  // bit 0 = hold SSG-EG
-                // set inversion flag
-                if (ssg & SSG_ALT) ssgn = SSG_INV;
-                // force attenuation level during decay phases
-                if ((env_stage != ATTACK) && !(ssgn ^ (ssg & SSG_INV)))
-                    volume = MAX_ATT_INDEX;
-            } else {  // loop SSG-EG
-                // toggle output inversion flag or reset Phase Generator
-                if (ssg & SSG_ALT)
-                    ssgn ^= SSG_INV;
-                else
-                    phase = 0;
-                // same as Key ON
-                if (env_stage != ATTACK) {
-                    if (ar + ksr < 32 + 62) {  // attacking
-                        env_stage = (volume <= MIN_ATT_INDEX) ?
-                            ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
-                    } else {  // Attack Rate @ max -> jump to next stage
-                        volume = MIN_ATT_INDEX;
-                        env_stage = (sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY;
-                    }
+            // phase = 0;
+            // same as Key ON
+            if (env_stage != ATTACK) {
+                if (ar + ksr < 32 + 62) {  // attacking
+                    env_stage = (volume <= MIN_ATT_INDEX) ?
+                        ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
+                } else {  // Attack Rate @ max -> jump to next stage
+                    volume = MIN_ATT_INDEX;
+                    env_stage = (sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY;
                 }
             }
-            // recalculate EG output
-            if (ssgn ^ (ssg & SSG_INV))
-                vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-            else
-                vol_out = (uint32_t) volume + tl;
         }
     }
 
@@ -612,7 +484,6 @@ struct Operator {
     /// @param eg_cnt the counter for the envelope generator
     ///
     inline void update_envelope_generator(uint32_t eg_cnt) {
-        unsigned int swap_flag = 0;
         switch (env_stage) {
         case SILENT:  // not running
             break;
@@ -638,21 +509,11 @@ struct Operator {
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
                         volume = MAX_ATT_INDEX;
-                        if (ssg & SSG_HOLD) {  // bit 0 = hold
-                            if (ssgn & SSG_HOLD) {  // have we swapped once ???
-                                // yes, so do nothing, just hold current level
-                            } else {  // bit 1 = alternate
-                                swap_flag = (ssg & SSG_ALT) | 1;
-                            }
-                        } else {  // same as KEY-ON operation
-                            // restart of the Phase Generator should be here
-                            phase = 0;
-                            // stage -> Attack
-                            volume = 511;
-                            env_stage = ATTACK;
-                            // bit 1 = alternate
-                            swap_flag = (ssg & SSG_ALT);
-                        }
+                        // restart of the Phase Generator should be here
+                        phase = 0;
+                        // stage -> Attack
+                        volume = 511;
+                        env_stage = ATTACK;
                     }
                 } else {
                     volume += ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
@@ -676,15 +537,7 @@ struct Operator {
         }
         // get the output volume from the slot
         unsigned int out = static_cast<uint32_t>(volume);
-        // negate output (changes come from alternate bit, init comes from
-        // attack bit)
-        if (ssg_enabled && (ssgn & SSG_ALT) && (env_stage > RELEASE))
-            out ^= MAX_ATT_INDEX;
-        // we need to store the result here because we are going to change
-        // ssgn in next instruction
         vol_out = out + tl;
-        // reverse oprtr inversion flag
-        ssgn ^= swap_flag;
     }
 
     /// @brief Update phase increment and envelope generator

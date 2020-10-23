@@ -19,11 +19,8 @@
 #include "widget/indexed_frame_display.hpp"
 
 // TODO: potential features
-// outputs for each operator
-// envelope generator outputs
 // individual operator frequency
 // individual operator triggering
-// LFO output
 // option to prevent clicks in context menu
 
 // ---------------------------------------------------------------------------
@@ -81,7 +78,6 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_AM,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(PARAM_SSG_MODE,   YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
     };
 
@@ -106,7 +102,6 @@ struct Chip2612 : rack::Module {
         ENUMS(INPUT_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_AM,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_SSG_MODE,   YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_INPUTS
     };
 
@@ -146,7 +141,6 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_RS         + i, 0, 3,   0,  opName + " Rate Scaling");
             configParam(PARAM_AM         + i, 0, 1,   0,  opName + " Amplitude Modulation");
             configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope Enable");
-            configParam(PARAM_SSG_MODE   + i, 0, 7,   0,  opName + " Looping Envelope Mode");
         }
         // reset the emulator
         onSampleRateChange();
@@ -208,7 +202,6 @@ struct Chip2612 : rack::Module {
             apu[channel].set_rate_scale   (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
             apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
-            apu[channel].set_ssg_mode     (op, getParam(channel, PARAM_SSG_MODE   + op, INPUT_SSG_MODE   + op, 7  ));
             apu[channel].set_frequency    (op, frequency);
             apu[channel].set_gate         (op, is_gate_open);
         }
@@ -305,7 +298,7 @@ struct Chip2612Widget : ModuleWidget {
             // the X & Y offsets for the operator bank
             auto offsetX = 450 * (i % (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 12; parameter++) {
+            for (unsigned parameter = 0; parameter < 11; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * YamahaYM2612::Voice4Op::NUM_OPERATORS;
                 auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset);

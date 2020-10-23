@@ -289,21 +289,13 @@ struct Chip2612Widget : ModuleWidget {
             Vec(110, 70)
         ));
         // Algorithm
-        auto algo = createParam<Rogan3PWhite>(Vec(10, 116),  module, Chip2612::PARAM_AL);
-        algo->snap = true;
-        addParam(algo);
+        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, Chip2612::PARAM_AL));
         // Feedback
-        auto feedback = createParam<Rogan3PWhite>(Vec(77, 116),  module, Chip2612::PARAM_FB);
-        feedback->snap = true;
-        addParam(feedback);
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, Chip2612::PARAM_FB));
         // LFO
-        auto lfo = createParam<Rogan3PWhite>(Vec(10, 187), module, Chip2612::PARAM_LFO);
-        lfo->snap = true;
-        addParam(lfo);
+        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, Chip2612::PARAM_LFO));
         // Saturation
-        auto saturation = createParam<Rogan3PWhite>(Vec(77, 187), module, Chip2612::PARAM_SATURATION);
-        saturation->snap = true;
-        addParam(saturation);
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, Chip2612::PARAM_SATURATION));
         // Saturation Indicator
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, Chip2612::VU_LIGHTS + 0));
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, Chip2612::VU_LIGHTS + 1));
@@ -326,9 +318,7 @@ struct Chip2612Widget : ModuleWidget {
             for (unsigned parameter = 0; parameter < 12; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * YamahaYM2612::Voice4Op::NUM_OPERATORS;
-                auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset);
-                param->snap = true;
-                addParam(param);
+                addParam(createSnapParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset));
                 addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_AR + offset));
             }
         }

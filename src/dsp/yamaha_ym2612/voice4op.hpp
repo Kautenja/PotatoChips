@@ -36,22 +36,16 @@ struct Voice4Op {
  private:
     /// general state
     OperatorContext state;
-    /// fnum, blk : adjusted to sample rate
-    uint32_t fc = 0;
-    /// current blk / fnum value for this slot
-    uint32_t block_fnum = 0;
-    /// key code :
-    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
+    /// four operators
+    Operator operators[NUM_OPERATORS];
+
+    /// a flag determining whether the phase increment needs to be updated
+    bool update_phase_increment = false;
 
     /// the currently selected algorithm
     uint8_t algorithm = 0;
     /// feedback shift
     uint8_t feedback = 0;
-
-    /// amplitude modulation sensitivity (AMS)
-    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
-    /// phase modulation sensitivity (PMS)
-    int32_t pms = 0;
 
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
@@ -76,19 +70,13 @@ struct Voice4Op {
     int32_t audio_output = 0;
 
  public:
-    /// four operators
-    Operator operators[NUM_OPERATORS];
-
-    /// a flag determining whether the phase increment needs to be updated
-    bool update_phase_increment = false;
-
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
     ///
     /// @param sample_rate the rate to draw samples from the emulator at
     /// @param clock_rate the underlying clock rate of the system
     ///
-    Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
-        state.set_sample_rate(sample_rate, clock_rate);
+    explicit Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
+        set_sample_rate(sample_rate, clock_rate);
         reset();
     }
 
@@ -111,11 +99,6 @@ struct Voice4Op {
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
-        pms = 0;
-        ams = LFO_AMS_DEPTH_SHIFT[0];
-        fc = 0;
-        kcode = FREQUENCY_KEYCODE_TABLE[0];
-        block_fnum = 0;
         set_algorithm(0);
         update_phase_increment = true;
     }
@@ -232,7 +215,7 @@ struct Voice4Op {
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
     inline void set_am_sensitivity(uint8_t value) {
-        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
+        state.set_am_sensitivity(value);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -240,49 +223,29 @@ struct Voice4Op {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void set_fm_sensitivity(uint8_t value) {
-        pms = (value & 7) * 32;
-    }
-
-    // TODO: change frequency to allow independent operator frequencies
-    /// @brief Set the frequency of the voice.
-    ///
-    /// @param frequency the frequency value measured in Hz
-    ///
-    inline void set_frequency(float frequency) {
-        // Shift the frequency to the base octave and calculate the octave to
-        // play. The base octave is defined as a 10-bit number in [0, 1023].
-        int octave = 2;
-        for (; frequency >= 1024; octave++) frequency /= 2;
-        // TODO: why is this arbitrary shift necessary to tune to C4?
-        // NOTE: shift calculated by producing C4 note from a ground truth
-        //       oscillator and comparing the output from YM2612 via division:
-        //       1.458166333006277
-        frequency = frequency / 1.458;
-        // cast the shifted frequency to a 16-bit container
-        const uint16_t freq16bit = frequency;
-
-        // key-scale code
-        kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
-        // phase increment counter
-        uint32_t old_fc = fc;
-        fc = state.fnum_table[freq16bit * 2] >> (7 - octave);
-        // store fnum in clear form for LFO PM calculations
-        block_fnum = (octave << 11) | freq16bit;
-        // update the phase increment if the frequency changed
-        update_phase_increment |= old_fc != fc;
+        state.set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------
     // MARK: Operator Parameter Settings
     // -----------------------------------------------------------------------
 
+    /// @brief Set the frequency of the voice.
+    ///
+    /// @param frequency the frequency value measured in Hz
+    ///
+    inline void set_frequency(uint8_t op_index, float frequency) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_frequency(state, frequency);
+    }
+
     /// @brief Set the gate for the given voice.
     ///
     /// @param op_index the operator to set the gate of of (in [0, 3])
     /// @param is_open true if the gate is open, false otherwise
+    /// @param prevent_clicks true to prevent clicks from note re-triggers
     ///
-    inline void set_gate(uint8_t op_index, bool is_open) {
-        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open);
+    inline void set_gate(uint8_t op_index, bool is_open, bool prevent_clicks = false) {
+        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open, prevent_clicks);
     }
 
     /// @brief Set whether SSG envelopes are enabled for the given operator.
@@ -292,16 +255,6 @@ struct Voice4Op {
     ///
     inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
         operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
-    }
-
-    // TODO: fix why some modes aren't working right.
-    /// @brief Set the SSG-envelope mode for the given operator.
-    ///
-    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
-    /// @param mode the mode for the looping generator to run in (in [0, 7])
-    ///
-    inline void set_ssg_mode(uint8_t op_index, uint8_t mode) {
-        operators[OPERATOR_INDEXES[op_index]].set_ssg_mode(mode);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -406,7 +359,7 @@ struct Voice4Op {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fnum_max, fc, kcode);
+                oprtr.refresh_phase_and_envelope(state.fnum_max);
             update_phase_increment = false;
         }
         // clear the audio output
@@ -417,14 +370,12 @@ struct Voice4Op {
         // -------------------------------------------------------------------
         // calculate operator outputs
         // -------------------------------------------------------------------
-        // get the amount of amplitude modulation for the voice
-        const uint32_t AM = state.lfo_AM_step >> ams;
         // reset the algorithm outputs to 0
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2
         *mem_connect = mem_value;
         // Operator 1
-        unsigned envelope = operators[Op1].get_envelope(AM);;
+        unsigned envelope = operators[Op1].get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
         int32_t feedback_carrier = op1_out[0] + op1_out[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
@@ -444,35 +395,22 @@ struct Voice4Op {
             op1_out[1] = 0;
         }
         // Operator 3
-        envelope = operators[Op3].get_envelope(AM);;
+        envelope = operators[Op3].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op3] += operators[Op3].calculate_output(envelope, m2 << 15);
         // Operator 2
-        envelope = operators[Op2].get_envelope(AM);
+        envelope = operators[Op2].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op2] += operators[Op2].calculate_output(envelope, c1 << 15);
         // Operator 4
-        envelope = operators[Op4].get_envelope(AM);
+        envelope = operators[Op4].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op4] += operators[Op4].calculate_output(envelope, c2 << 15);
         // store current MEM
         mem_value = mem;
         // update phase counters AFTER output calculations
-        const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
-        if (pms && lfo_fnum_offset) {  // update the phase using the LFO
-            uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
-            const uint8_t blk = (fnum & 0x7000) >> 12;
-            fnum = fnum & 0xfff;
-            for (Operator& oprtr : operators)
-                oprtr.update_phase_using_lfo(
-                    state,
-                    state.fnum_table[fnum] >> (7 - blk),
-                    (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
-                );
-        } else {  // no LFO phase modulation
-            for (Operator& oprtr : operators) oprtr.update_phase();
-        }
+        for (Operator& oprtr : operators)
+            oprtr.update_phase_counters(state);
         // -------------------------------------------------------------------
         // advance LFO & envelope generator
         // -------------------------------------------------------------------
@@ -487,10 +425,10 @@ struct Voice4Op {
         // -------------------------------------------------------------------
         // clipping
         // -------------------------------------------------------------------
-        if (audio_output > Operator::OUTPUT_MAX)
-            audio_output = Operator::OUTPUT_MAX;
-        else if (audio_output < Operator::OUTPUT_MIN)
-            audio_output = Operator::OUTPUT_MIN;
+        // if (audio_output > Operator::OUTPUT_MAX)
+        //     audio_output = Operator::OUTPUT_MAX;
+        // else if (audio_output < Operator::OUTPUT_MIN)
+        //     audio_output = Operator::OUTPUT_MIN;
 
         return audio_output;
     }

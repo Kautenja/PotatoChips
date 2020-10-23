@@ -63,6 +63,11 @@ struct OperatorContext {
     /// current LFO PM step
     uint32_t lfo_PM_step = 0;
 
+    /// phase modulation sensitivity (PMS)
+    int32_t pms = 0;
+    /// amplitude modulation sensitivity (AMS)
+    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
+
     /// @brief Reset the operator state to it's initial values.
     inline void reset() {
         eg_timer = 0;
@@ -71,6 +76,8 @@ struct OperatorContext {
         lfo_cnt = 0;
         lfo_AM_step = 126;
         lfo_PM_step = 0;
+        pms = 0;
+        ams = LFO_AMS_DEPTH_SHIFT[0];
         set_lfo(0);
     }
 
@@ -145,6 +152,22 @@ struct OperatorContext {
         lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void set_fm_sensitivity(uint8_t value) {
+        pms = (value & 7) * 32;
+    }
+
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t value) {
+        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
+    }
+
     /// @brief Advance LFO to next sample.
     inline void advance_lfo() {
         if (lfo_timer_overflow) {  // LFO enabled
@@ -167,6 +190,13 @@ struct OperatorContext {
             }
         }
     }
+
+    /// @brief Return the amount of amplitude modulation.
+    ///
+    /// @returns the amount of AM for the operator based on the AM sensitivity
+    /// and current LFO value
+    ///
+    inline uint32_t get_AM() const { return lfo_AM_step >> ams; }
 };
 
 /// @brief A single FM operator
@@ -211,6 +241,13 @@ struct Operator {
     /// key scale rate :kcode>>(3-KSR)
     uint8_t ksr = 0;
 
+    /// fnum, blk : adjusted to sample rate
+    uint32_t fc = 0;
+    /// current blk / fnum value for this slot
+    uint32_t block_fnum = 0;
+    /// key code :
+    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
+
     /// The stages of the envelope generator.
     enum EnvelopeStage {
         /// the silent/off stage, i.e., 0 output
@@ -244,12 +281,8 @@ struct Operator {
     /// release stage
     uint8_t eg_sel_rr = 0;
 
-    /// SSG-EG waveform
-    uint8_t ssg = 0;
     /// whether SSG-EG is enabled
     bool ssg_enabled = false;
-    /// SSG-EG negated output
-    uint8_t ssgn = 0;
 
  public:
     /// whether the gate for the envelope generator is open
@@ -269,6 +302,9 @@ struct Operator {
         vol_out = MAX_ATT_INDEX;
         DT = state.dt_table[0];
         mul = 1;
+        fc = 0;
+        kcode = FREQUENCY_KEYCODE_TABLE[0];
+        block_fnum = 0;
         is_gate_open = false;
         is_amplitude_mod_on = false;
         set_rs(0);
@@ -279,13 +315,15 @@ struct Operator {
         set_sr(0);
         set_rr(0);
         set_ssg_enabled(false);
-        set_ssg_mode(0);
     }
 
     // -----------------------------------------------------------------------
     // MARK: Parameter Setters
     // -----------------------------------------------------------------------
 
+    // TODO: why when setting prevent_click to true, randomizing a patch, and
+    // then resetting the patch, do some poly voices stay locked at a high
+    // attenuation level?
     /// @brief Set the key-on flag for the given operator.
     ///
     /// @param is_gate_open true if the gate is open, false otherwise
@@ -299,11 +337,39 @@ struct Operator {
         if (is_gate_open) {  // reset the phase and set envelope to attack
             // reset the phase if preventing clicks has not been enabled
             if (!prevent_clicks) phase = 0;
-            ssgn = (ssg & 0x04) >> 1;
             env_stage = ATTACK;
         } else {  // set the envelope to the release stage
             if (env_stage != SILENT) env_stage = RELEASE;
         }
+    }
+
+    /// @brief Set the frequency of the voice.
+    ///
+    /// @param frequency the frequency value measured in Hz
+    /// @returns true if the new frequency differs from the old frequency
+    ///
+    inline bool set_frequency(OperatorContext& state, float frequency) {
+        // Shift the frequency to the base octave and calculate the octave to
+        // play. The base octave is defined as a 10-bit number in [0, 1023].
+        int octave = 2;
+        for (; frequency >= 1024; octave++) frequency /= 2;
+        // TODO: why is this arbitrary shift necessary to tune to C4?
+        // NOTE: shift calculated by producing C4 note from a ground truth
+        //       oscillator and comparing the output from YM2612 via division:
+        //       1.458166333006277
+        frequency = frequency / 1.458;
+        // cast the shifted frequency to a 16-bit container
+        const uint16_t freq16bit = frequency;
+
+        // key-scale code
+        kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
+        // phase increment counter
+        uint32_t old_fc = fc;
+        fc = state.fnum_table[freq16bit * 2] >> (7 - octave);
+        // store fnum in clear form for LFO PM calculations
+        block_fnum = (octave << 11) | freq16bit;
+        // update the phase increment if the frequency changed
+        return old_fc != fc;
     }
 
     /// @brief Set the 5-bit attack rate.
@@ -384,108 +450,11 @@ struct Operator {
         return KSR != old_KSR;
     }
 
-
     /// @brief set whether the SSG mode is enabled or not
     ///
     /// @param enabled true to enable SSG mode, false to disable it
     ///
-    inline void set_ssg_enabled(bool enabled = false) {
-        if (ssg_enabled == enabled) return;
-        ssg_enabled = enabled;
-        // recalculate EG output
-        if (ssg_enabled && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
-            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-        else
-            vol_out = (uint32_t) volume + tl;
-    }
-
-    /// @brief set the SSG register to a new value.
-    ///
-    /// @param value the value for the looping envelope generator register (SSG)
-    /// @details
-    ///
-    /// The mode can be any of the following:
-    ///
-    /// Table: SSG-EG LFO Patterns
-    /// | At | Al | H | LFO Pattern |
-    /// |:---|:---|:--|:------------|
-    /// | 0  | 0  | 0 |  \\\\       |
-    /// |    |    |   |             |
-    /// | 0  | 0  | 1 |  \___       |
-    /// |    |    |   |             |
-    /// | 0  | 1  | 0 |  \/\/       |
-    /// |    |    |   |             |
-    /// |    |    |   |   ___       |
-    /// | 0  | 1  | 1 |  \          |
-    /// |    |    |   |             |
-    /// | 1  | 0  | 0 |  ////       |
-    /// |    |    |   |             |
-    /// |    |    |   |   ___       |
-    /// | 1  | 0  | 1 |  /          |
-    /// |    |    |   |             |
-    /// | 1  | 1  | 0 |  /\/\       |
-    /// |    |    |   |             |
-    /// | 1  | 1  | 1 |  /___       |
-    /// |    |    |   |             |
-    ///
-    /// The shapes are generated using Attack, Decay and Sustain phases.
-    ///
-    /// Each single character in the diagrams above represents this whole
-    /// sequence:
-    ///
-    /// - when KEY-ON = 1, normal Attack phase is generated (*without* any
-    ///   difference when compared to normal mode),
-    ///
-    /// - later, when envelope level reaches minimum level (max volume),
-    ///   the EG switches to Decay phase (which works with bigger steps
-    ///   when compared to normal mode - see below),
-    ///
-    /// - later when envelope level passes the SL level,
-    ///   the EG swithes to Sustain phase (which works with bigger steps
-    ///   when compared to normal mode - see below),
-    ///
-    /// - finally when envelope level reaches maximum level (min volume),
-    ///   the EG switches to Attack phase again (depends on actual waveform).
-    ///
-    /// Important is that when switch to Attack phase occurs, the phase counter
-    /// of that operator will be zeroed-out (as in normal KEY-ON) but not always.
-    /// (I haven't found the rule for that - perhaps only when the output
-    /// level is low)
-    ///
-    /// The difference (when compared to normal Envelope Generator mode) is
-    /// that the resolution in Decay and Sustain phases is 4 times lower;
-    /// this results in only 256 steps instead of normal 1024.
-    /// In other words:
-    /// when SSG-EG is disabled, the step inside of the EG is one,
-    /// when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
-    ///
-    /// Times between the level changes are the same in both modes.
-    ///
-    /// Important:
-    /// Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
-    /// it is the same in both SSG and no-SSG modes, with this exception:
-    ///
-    /// when the SSG-EG is enabled and is generating raising levels
-    /// (when the EG output is inverted) the SL will be found at wrong level!!!
-    /// For example, when SL=02:
-    ///     0 -6 = -6dB in non-inverted EG output
-    ///     96-6 = -90dB in inverted EG output
-    /// Which means that EG compares its level to SL as usual, and that the
-    /// output is simply inverted after all.
-    ///
-    /// The Yamaha's manuals say that AR should be set to 0x1f (max speed).
-    /// That is not necessary, but then EG will be generating Attack phase.
-    ///
-    inline void set_ssg_mode(uint8_t value = 0) {
-        value = value & 7;
-        if (ssg == value) return;
-        ssg = value;
-        // recalculate EG output
-        if (ssg_enabled && (ssgn ^ (ssg & 0x04)) && (env_stage > RELEASE))
-            vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-        else
-            vol_out = (uint32_t) volume + tl;
-    }
+    inline void set_ssg_enabled(bool enabled = false) { ssg_enabled = enabled; }
 
     /// @brief set the rate multiplier to a new value.
     ///
@@ -528,35 +497,18 @@ struct Operator {
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
-        if (ssg_enabled && (volume >= 0x200) && (env_stage > RELEASE)) {
-            if (ssg & 0x01) {  // bit 0 = hold SSG-EG
-                // set inversion flag
-                if (ssg & 0x02) ssgn = 4;
-                // force attenuation level during decay phases
-                if ((env_stage != ATTACK) && !(ssgn ^ (ssg & 0x04)))
-                    volume = MAX_ATT_INDEX;
-            } else {  // loop SSG-EG
-                // toggle output inversion flag or reset Phase Generator
-                if (ssg & 0x02)
-                    ssgn ^= 4;
-                else
-                    phase = 0;
-                // same as Key ON
-                if (env_stage != ATTACK) {
-                    if ((ar + ksr) < 32 + 62) {  // attacking
-                        env_stage = (volume <= MIN_ATT_INDEX) ?
-                            ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
-                    } else {  // Attack Rate @ max -> jump to next stage
-                        volume = MIN_ATT_INDEX;
-                        env_stage = (sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY;
-                    }
+        if (ssg_enabled && volume >= 0x200 && env_stage > RELEASE) {
+            phase = 0;
+            // same as Key ON
+            if (env_stage != ATTACK) {
+                if (ar + ksr < 32 + 62) {  // attacking
+                    env_stage = (volume <= MIN_ATT_INDEX) ?
+                        ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
+                } else {  // Attack Rate @ max -> jump to next stage
+                    volume = MIN_ATT_INDEX;
+                    env_stage = (sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY;
                 }
             }
-            // recalculate EG output
-            if (ssgn ^ (ssg & 0x04))
-                vol_out = ((uint32_t) (0x200 - volume) & MAX_ATT_INDEX) + tl;
-            else
-                vol_out = (uint32_t) volume + tl;
         }
     }
 
@@ -565,7 +517,6 @@ struct Operator {
     /// @param eg_cnt the counter for the envelope generator
     ///
     inline void update_envelope_generator(uint32_t eg_cnt) {
-        unsigned int swap_flag = 0;
         switch (env_stage) {
         case SILENT:  // not running
             break;
@@ -579,45 +530,22 @@ struct Operator {
             }
             break;
         case DECAY:  // decay stage
-            if (ssg_enabled) {  // SSG EG type envelope selected
-                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
-                    if (volume >= static_cast<int32_t>(sl))
-                        env_stage = SUSTAIN;
-                }
-            } else {
-                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
-                    if (volume >= static_cast<int32_t>(sl))
-                        env_stage = SUSTAIN;
-                }
+            if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
+                volume += (ssg_enabled ? 4 : 1) * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                if (volume >= static_cast<int32_t>(sl))
+                    env_stage = SUSTAIN;
             }
             break;
         case SUSTAIN:  // sustain stage
-            if (ssg_enabled) {  // SSG EG type envelope selected
-                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+            if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                if (ssg_enabled) {  // SSG EG type envelope selected
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
+                        phase = 0;
                         volume = MAX_ATT_INDEX;
-                        if (ssg & 0x01) {  // bit 0 = hold
-                            if (ssgn & 1) {  // have we swapped once ???
-                                // yes, so do nothing, just hold current level
-                            } else {  // bit 1 = alternate
-                                swap_flag = (ssg & 0x02) | 1;
-                            }
-                        } else {  // same as KEY-ON operation
-                            // restart of the Phase Generator should be here
-                            phase = 0;
-                            // stage -> Attack
-                            volume = 511;
-                            env_stage = ATTACK;
-                            // bit 1 = alternate
-                            swap_flag = (ssg & 0x02);
-                        }
+                        env_stage = ATTACK;
                     }
-                }
-            } else {
-                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                } else {
                     volume += ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= MAX_ATT_INDEX) {
                         volume = MAX_ATT_INDEX;
@@ -639,26 +567,16 @@ struct Operator {
         }
         // get the output volume from the slot
         unsigned int out = static_cast<uint32_t>(volume);
-        // negate output (changes come from alternate bit, init comes from
-        // attack bit)
-        if (ssg_enabled && (ssgn & 2) && (env_stage > RELEASE))
-            out ^= MAX_ATT_INDEX;
-        // we need to store the result here because we are going to change
-        // ssgn in next instruction
         vol_out = out + tl;
-        // reverse oprtr inversion flag
-        ssgn ^= swap_flag;
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_phase_and_envelope(uint32_t fnum_max, int fc, int kc) {
-        fc += DT[kc];
-        // detects frequency overflow (credits to Nemesis)
-        if (fc < 0) fc += fnum_max;
+    inline void refresh_phase_and_envelope(uint32_t fnum_max) {
+        fc += DT[kcode];
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;
-        if (ksr != kc >> KSR) {
-            ksr = kc >> KSR;
+        if (ksr != kcode >> KSR) {
+            ksr = kcode >> KSR;
             // calculate envelope generator rates
             if ((ar + ksr) < 32 + 62) {
                 eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
@@ -680,19 +598,20 @@ struct Operator {
 
     /// @brief Get the envelope volume based on amplitude modulation level.
     ///
-    /// @param amplitude_modulation the amount of amplitude modulation to apply
+    /// @param state the context the operator is running in
     /// @details
-    /// `amplitude_modulation` is only applied to the envelope if
+    /// `state.get_AM()` is only applied to the envelope if
     /// `this->is_amplitude_mod_on` is set to `true`.
     ///
-    inline uint32_t get_envelope(uint32_t amplitude_modulation) const {
-        return vol_out + is_amplitude_mod_on * amplitude_modulation;
+    inline uint32_t get_envelope(const OperatorContext& state) const {
+        return vol_out + is_amplitude_mod_on * state.get_AM();
     }
 
     /// @brief Return the value of operator (1) given envelope and PM.
     ///
     /// @param env the value of the operator's envelope (after AM is applied)
-    /// @param pm the amount of phase modulation for the operator
+    /// @param pm the amount of phase modulation for the operator, i.e., based
+    /// on feedback, or another operator's output
     /// @details
     /// the `pm` parameter for operators 2, 3, and 4 (BUT NOT 1) should be
     /// shifted left by 15 bits before being passed in. Operator 1 should be
@@ -706,24 +625,26 @@ struct Operator {
         return TL_TABLE[p];
     }
 
-    /// @brief Update the phase of the operator (without the LFO).
-    inline void update_phase() { phase += phase_increment; }
-
-    /// @briefUpdate the phase of the operator using the LFO
+    /// @brief Update the phase of the operator.
     ///
-    /// @param state the global context the operator is working in
-    /// @param phase_increment_counter TODO
-    /// @param keyscale_code TODO
+    /// @param state the context the operator is running in
     ///
-    inline void update_phase_using_lfo(
-        const OperatorContext& state,
-        int phase_increment_counter,
-        int keyscale_code
-    ) {
-        // detects frequency overflow (credits to Nemesis)
-        int finc = phase_increment_counter + DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        phase += (finc * mul) >> 1;
+    inline void update_phase_counters(const OperatorContext& state) {
+        const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + state.pms + state.lfo_PM_step];
+        if (state.pms && lfo_fnum_offset) {  // update the phase using the LFO
+            uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
+            const uint8_t blk = (fnum & 0x7000) >> 12;
+            fnum = fnum & 0xfff;
+            const int phase_increment_counter = state.fnum_table[fnum] >> (7 - blk);
+            const int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
+            // detects frequency overflow (credits to Nemesis)
+            int finc = phase_increment_counter + DT[keyscale_code];
+            if (finc < 0) finc += state.fnum_max;
+            phase += (finc * mul) >> 1;
+        } else {  // no LFO phase modulation
+            phase += phase_increment;
+        }
     }
 };
 

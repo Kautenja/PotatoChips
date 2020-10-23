@@ -84,7 +84,7 @@ static constexpr unsigned TL_TABLE_LENGTH = 13 * 2 * TL_RESOLUTION_LENGTH;
 /// The total level amplitude table for the envelope generator
 static int TL_TABLE[TL_TABLE_LENGTH];
 
-/// The level at which the envelope becomes quiet, i.e., goes to 0
+/// The level at which the envelope becomes quiet
 static constexpr int ENV_QUIET = TL_TABLE_LENGTH >> 3;
 
 /// the maximal size of an unsigned sine table index

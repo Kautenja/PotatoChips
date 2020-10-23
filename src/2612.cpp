@@ -22,6 +22,7 @@
 // TODO: individual operator triggering
 // TODO: option to prevent clicks in context menu
 // TODO: level indicator to show clipping amount
+// TODO: trim pots for inputs
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -40,6 +41,9 @@ struct Chip2612 : rack::Module {
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
+
+    dsp::VuMeter2 vuMeter;
+    dsp::ClockDivider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///
@@ -112,7 +116,10 @@ struct Chip2612 : rack::Module {
     };
 
     /// the indexes of lights on the module
-    enum LightIds { NUM_LIGHTS };
+    enum LightIds {
+        ENUMS(VU_LIGHTS, 6),
+        NUM_LIGHTS
+    };
 
     /// the current FM algorithm
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -146,6 +153,8 @@ struct Chip2612 : rack::Module {
         onSampleRateChange();
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
+        lightDivider.setDivision(512);
+
     }
 
     /// @brief Respond to the change of sample rate in the engine.
@@ -229,8 +238,26 @@ struct Chip2612 : rack::Module {
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
-            const auto sample = static_cast<float>(apu[channel].step()) / (1 << 13);
+            int16_t audio_output = apu[channel].step();
+            // update the VU meter before clipping to more accurately detect it
+            vuMeter.process(args.sampleTime, audio_output / static_cast<float>(1 << 13));
+            // clip the audio output to 14-bits
+            if (audio_output > YamahaYM2612::Operator::OUTPUT_MAX)
+                audio_output = YamahaYM2612::Operator::OUTPUT_MAX;
+            else if (audio_output < YamahaYM2612::Operator::OUTPUT_MIN)
+                audio_output = YamahaYM2612::Operator::OUTPUT_MIN;
+            // convert the clipped audio to a floating point sample and set
+            // the output voltage for the channel
+            const auto sample = audio_output / static_cast<float>(1 << 13);
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
+        }
+        if (lightDivider.process()) {
+            lights[VU_LIGHTS + 0].setBrightness(vuMeter.getBrightness(0, 0));
+            lights[VU_LIGHTS + 1].setBrightness(vuMeter.getBrightness(-3, 0));
+            lights[VU_LIGHTS + 2].setBrightness(vuMeter.getBrightness(-6, -3));
+            lights[VU_LIGHTS + 3].setBrightness(vuMeter.getBrightness(-12, -6));
+            lights[VU_LIGHTS + 4].setBrightness(vuMeter.getBrightness(-24, -12));
+            lights[VU_LIGHTS + 5].setBrightness(vuMeter.getBrightness(-36, -24));
         }
     }
 };
@@ -308,6 +335,13 @@ struct Chip2612Widget : ModuleWidget {
         }
         // left + right master outputs
         addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER));
+
+        addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.7, 34.758)), module, Chip2612::VU_LIGHTS + 0));
+        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 39.884)), module, Chip2612::VU_LIGHTS + 1));
+        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 45.009)), module, Chip2612::VU_LIGHTS + 2));
+        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 50.134)), module, Chip2612::VU_LIGHTS + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 55.259)), module, Chip2612::VU_LIGHTS + 4));
+        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 60.384)), module, Chip2612::VU_LIGHTS + 5));
     }
 };
 

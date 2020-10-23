@@ -425,10 +425,10 @@ struct Voice4Op {
         // -------------------------------------------------------------------
         // clipping
         // -------------------------------------------------------------------
-        if (audio_output > Operator::OUTPUT_MAX)
-            audio_output = Operator::OUTPUT_MAX;
-        else if (audio_output < Operator::OUTPUT_MIN)
-            audio_output = Operator::OUTPUT_MIN;
+        // if (audio_output > Operator::OUTPUT_MAX)
+        //     audio_output = Operator::OUTPUT_MAX;
+        // else if (audio_output < Operator::OUTPUT_MIN)
+        //     audio_output = Operator::OUTPUT_MIN;
 
         return audio_output;
     }

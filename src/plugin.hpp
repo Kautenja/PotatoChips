@@ -48,4 +48,18 @@ extern rack::Model *modelChipVRC6;
 extern rack::Model *modelChipS_SMP_Blank;
 extern rack::Model *model2612_Blank;
 
+/// @brief Create a parameter that snaps to integer values.
+///
+/// @tparam P the type of the parameter to initialize
+/// @tparam Args the type of arguments to pass to the `createParam` function
+/// @tparam args the arguments to pass to the `createParam` function
+/// @returns a pointer to the freshly allocated parameter
+///
+template<typename P, typename... Args>
+inline ParamWidget* createSnapParam(Args... args) {
+    auto param = createParam<P>(args...);
+    param->snap = true;
+    return param;
+}
+
 #endif  // PLUGIN_HPP

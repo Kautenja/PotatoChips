@@ -188,10 +188,11 @@ struct Chip2612 : rack::Module {
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
             apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
             apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            // apu[channel].set_rate_scale    (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            // apu[channel].set_ssg_enabled   (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
             apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 4  ));
+            // SSG and rate scale
+            apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
+            apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
             // Compute the frequency from the pitch parameter and input.
             pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
             apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f)));

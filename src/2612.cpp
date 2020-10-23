@@ -277,9 +277,9 @@ struct Chip2612Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Frequency, Pitch, Gate, and Retrigger controls
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
-            addInput(createInput<PJ301MPort>(Vec(16,  84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
-            addInput(createInput<PJ301MPort>(Vec(61,  84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
-            addInput(createInput<PJ301MPort>(Vec(106, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
+            addInput(createInput<PJ301MPort>(Vec(15, 84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
+            addInput(createInput<PJ301MPort>(Vec(50, 84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
+            addInput(createInput<PJ301MPort>(Vec(85, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
         }
 
         // algorithm display

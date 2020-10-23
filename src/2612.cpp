@@ -203,7 +203,7 @@ struct Chip2612 : rack::Module {
             apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_frequency    (op, frequency);
-            apu[channel].set_gate         (op, is_gate_open, true);
+            apu[channel].set_gate         (op, is_gate_open);
         }
 
     }

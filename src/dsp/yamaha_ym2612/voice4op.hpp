@@ -234,18 +234,17 @@ struct Voice4Op {
         pms = (value & 7) * 32;
     }
 
+    // -----------------------------------------------------------------------
+    // MARK: Operator Parameter Settings
+    // -----------------------------------------------------------------------
+
     /// @brief Set the frequency of the voice.
     ///
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void set_frequency(float frequency) {
-        for (Operator& oprtr : operators)
-            update_phase_increment |= oprtr.set_frequency(state, frequency);
+    inline void set_frequency(uint8_t op_index, float frequency) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_frequency(state, frequency);
     }
-
-    // -----------------------------------------------------------------------
-    // MARK: Operator Parameter Settings
-    // -----------------------------------------------------------------------
 
     /// @brief Set the gate for the given voice.
     ///

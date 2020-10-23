@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "default",
+          "deviceName": "hw:Sanskrit 6th,0",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -31,7 +31,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.450000048
+          "value": 1.0
         },
         {
           "id": 1,
@@ -93,35 +93,35 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 6.0
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 4,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 5,
-          "value": 31.0
+          "value": 10.0
         },
         {
           "id": 6,
-          "value": 31.0
+          "value": 8.0
         },
         {
           "id": 7,
-          "value": 31.0
+          "value": 14.0
         },
         {
           "id": 8,
-          "value": 31.0
+          "value": 9.0
         },
         {
           "id": 9,
@@ -141,39 +141,39 @@
         },
         {
           "id": 13,
-          "value": 0.0
+          "value": 8.0
         },
         {
           "id": 14,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 15,
-          "value": 0.0
+          "value": 11.0
         },
         {
           "id": 16,
-          "value": 0.0
+          "value": 9.0
         },
         {
           "id": 17,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 18,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 19,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 20,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 21,
-          "value": 0.0
+          "value": 14.0
         },
         {
           "id": 22,
@@ -185,23 +185,23 @@
         },
         {
           "id": 24,
-          "value": 0.0
+          "value": 6.0
         },
         {
           "id": 25,
-          "value": 15.0
+          "value": 7.0
         },
         {
           "id": 26,
-          "value": 15.0
+          "value": 4.0
         },
         {
           "id": 27,
-          "value": 15.0
+          "value": 4.0
         },
         {
           "id": 28,
-          "value": 15.0
+          "value": 5.0
         },
         {
           "id": 29,
@@ -253,7 +253,7 @@
         },
         {
           "id": 41,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 42,
@@ -483,20 +483,20 @@
       "color": "#c9b70e"
     },
     {
-      "id": 1324,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
       "id": 1210,
       "outputModuleId": 142,
       "outputId": 0,
       "inputModuleId": 2,
       "inputId": 2,
       "color": "#0986ad"
+    },
+    {
+      "id": 1328,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 0,
+      "color": "#0c8e15"
     }
   ]
 }

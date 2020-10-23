@@ -18,8 +18,6 @@
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
-// TODO: individual operator frequency
-// TODO: individual operator triggering
 // TODO: option to prevent clicks in context menu
 // TODO: trim pots for inputs
 

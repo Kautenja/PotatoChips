@@ -264,7 +264,6 @@ struct Voice4Op {
         operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
     }
 
-    // TODO: fix why some modes aren't working right.
     /// @brief Set the SSG-envelope mode for the given operator.
     ///
     /// @param op_index the operator to set the SSG-EG register of (in [0, 3])

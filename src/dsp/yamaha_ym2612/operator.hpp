@@ -438,6 +438,7 @@ struct Operator {
             vol_out = (uint32_t) volume + tl;
     }
 
+    // TODO: fix why some modes aren't working right.
     /// @brief set the SSG register to a new value.
     ///
     /// @param value the value for the looping envelope generator register (SSG)

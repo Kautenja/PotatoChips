@@ -63,7 +63,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 152,
+      "rightModuleId": 159,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -290,22 +290,6 @@
         {
           "id": 50,
           "value": 0.0
-        },
-        {
-          "id": 51,
-          "value": 0.0
-        },
-        {
-          "id": 52,
-          "value": 0.0
-        },
-        {
-          "id": 53,
-          "value": 0.0
-        },
-        {
-          "id": 54,
-          "value": 0.0
         }
       ],
       "pos": [
@@ -333,10 +317,10 @@
       "version": "1.8.0",
       "model": "2612_Blank1",
       "params": [],
-      "leftModuleId": 5,
-      "rightModuleId": 156,
+      "bypass": true,
+      "leftModuleId": 162,
       "pos": [
-        8,
+        21,
         0
       ]
     },
@@ -352,7 +336,7 @@
         },
         {
           "id": 1,
-          "value": 0.5
+          "value": 0.385500133
         },
         {
           "id": 2,
@@ -432,43 +416,58 @@
       ]
     },
     {
-      "id": 156,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "LFO",
+      "id": 159,
+      "plugin": "Bogaudio",
+      "version": "1.1.34",
+      "model": "Bogaudio-Reftone",
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 9.0
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 4.0
         },
         {
           "id": 2,
-          "value": -1.45699978
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 0.5
-        },
-        {
-          "id": 6,
-          "value": 0.0
+          "value": 0.00297000003
         }
       ],
-      "leftModuleId": 152,
+      "bypass": true,
+      "leftModuleId": 5,
+      "rightModuleId": 161,
+      "data": {},
       "pos": [
-        40,
+        8,
+        0
+      ]
+    },
+    {
+      "id": 161,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "bypass": true,
+      "leftModuleId": 159,
+      "rightModuleId": 162,
+      "pos": [
+        11,
+        0
+      ]
+    },
+    {
+      "id": 162,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "bypass": true,
+      "leftModuleId": 161,
+      "rightModuleId": 152,
+      "pos": [
+        16,
         0
       ]
     }
@@ -499,8 +498,16 @@
       "color": "#0986ad"
     },
     {
-      "id": 1320,
+      "id": 1390,
       "outputModuleId": 142,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1320,
+      "outputModuleId": 154,
       "outputId": 0,
       "inputModuleId": 155,
       "inputId": 0,
@@ -508,42 +515,50 @@
     },
     {
       "id": 1316,
-      "outputModuleId": 142,
+      "outputModuleId": 150,
       "outputId": 0,
       "inputModuleId": 154,
       "inputId": 0,
       "color": "#0986ad"
     },
     {
-      "id": 1331,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 142,
-      "inputId": 8,
-      "color": "#c91847"
-    },
-    {
-      "id": 1366,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1367,
+      "id": 1399,
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
       "inputId": 4,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1400,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 142,
+      "inputId": 8,
       "color": "#c9b70e"
     },
     {
-      "id": 1368,
+      "id": 1401,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 161,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 1402,
       "outputModuleId": 142,
       "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 1,
+      "inputModuleId": 162,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1404,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 0,
       "color": "#0c8e15"
     }
   ]

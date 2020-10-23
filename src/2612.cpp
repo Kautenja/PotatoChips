@@ -21,7 +21,6 @@
 // TODO: individual operator frequency
 // TODO: individual operator triggering
 // TODO: option to prevent clicks in context menu
-// TODO: level indicator to show clipping amount
 // TODO: trim pots for inputs
 
 // ---------------------------------------------------------------------------
@@ -35,9 +34,9 @@ struct Chip2612 : rack::Module {
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];
+    dsp::BooleanTrigger gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrig_triggers[PORT_MAX_CHANNELS];
+    rack::dsp::BooleanTrigger retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
@@ -87,9 +86,9 @@ struct Chip2612 : rack::Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        INPUT_PITCH,
-        INPUT_GATE,
-        INPUT_RETRIG,
+        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_GATE,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice4Op::NUM_OPERATORS),
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
@@ -174,30 +173,15 @@ struct Chip2612 : rack::Module {
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
         apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
-        // iterate over each oscillator on the chip
-        float pitch = 0;
-        float gate = 0;
-        float retrig = 0;
         // set the global parameters
         apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
         apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
         apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
-        // Compute the frequency from the pitch parameter and input.
-        pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
-        const auto frequency = dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f));
-        // process the gate trigger, high at 2V
-        gate = inputs[INPUT_GATE].getNormalVoltage(gate, channel);
-        gate_triggers[channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-        // process the retrig trigger, high at 2V
-        retrig = inputs[INPUT_RETRIG].getNormalVoltage(retrig, channel);
-        const auto trigger = retrig_triggers[channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
-        // use the exclusive or of the gate and retrigger. This ensures that
-        // when either gate or trigger alone is high, the gate is open,
-        // but when neither or both are high, the gate is closed. This
-        // causes the gate to get shut for a sample when re-triggering an
-        // already gated voice
-        const auto is_gate_open = trigger ^ gate_triggers[channel].state;
+        // normal pitch gate and re-trigger
+        float pitch = 0;
+        float gate = 0;
+        float retrig = 0;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate  (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
@@ -211,8 +195,21 @@ struct Chip2612 : rack::Module {
             apu[channel].set_rate_scale   (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
             apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
-            apu[channel].set_frequency    (op, frequency);
-            apu[channel].set_gate         (op, is_gate_open);
+            // Compute the frequency from the pitch parameter and input.
+            pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
+            apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f)));
+            // process the gate trigger, high at 2V
+            gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
+            gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+            // process the retrig trigger, high at 2V
+            retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
+            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
+            // use the exclusive or of the gate and retrigger. This ensures that
+            // when either gate or trigger alone is high, the gate is open,
+            // but when neither or both are high, the gate is closed. This
+            // causes the gate to get shut for a sample when re-triggering an
+            // already gated voice
+            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].state);
         }
 
     }
@@ -280,10 +277,13 @@ struct Chip2612Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // voice inputs (pitch and gate)
-        addInput(createInput<PJ301MPort>(Vec(16, 84), module, Chip2612::INPUT_PITCH));
-        addInput(createInput<PJ301MPort>(Vec(61, 84), module, Chip2612::INPUT_GATE));
-        addInput(createInput<PJ301MPort>(Vec(106, 84), module, Chip2612::INPUT_RETRIG));
+        // Frequency, Pitch, Gate, and Retrigger controls
+        for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
+            addInput(createInput<PJ301MPort>(Vec(16,  84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
+            addInput(createInput<PJ301MPort>(Vec(61,  84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
+            addInput(createInput<PJ301MPort>(Vec(106, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
+        }
+
         // algorithm display
         addChild(new IndexedFrameDisplay(
             [&]() {

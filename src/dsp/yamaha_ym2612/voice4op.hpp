@@ -42,9 +42,6 @@ struct Voice4Op {
     /// feedback shift
     uint8_t feedback = 0;
 
-    /// amplitude modulation sensitivity (AMS)
-    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
-
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
 
@@ -103,7 +100,6 @@ struct Voice4Op {
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
-        ams = LFO_AMS_DEPTH_SHIFT[0];
         set_algorithm(0);
         update_phase_increment = true;
     }
@@ -220,7 +216,7 @@ struct Voice4Op {
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
     inline void set_am_sensitivity(uint8_t value) {
-        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
+        state.set_am_sensitivity(value);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -376,7 +372,7 @@ struct Voice4Op {
         // calculate operator outputs
         // -------------------------------------------------------------------
         // get the amount of amplitude modulation for the voice
-        const uint32_t AM = state.lfo_AM_step >> ams;
+        const uint32_t AM = state.get_AM();
         // reset the algorithm outputs to 0
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2

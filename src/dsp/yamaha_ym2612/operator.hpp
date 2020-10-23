@@ -65,6 +65,8 @@ struct OperatorContext {
 
     /// phase modulation sensitivity (PMS)
     int32_t pms = 0;
+    /// amplitude modulation sensitivity (AMS)
+    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
 
     /// @brief Reset the operator state to it's initial values.
     inline void reset() {
@@ -75,6 +77,7 @@ struct OperatorContext {
         lfo_AM_step = 126;
         lfo_PM_step = 0;
         pms = 0;
+        ams = LFO_AMS_DEPTH_SHIFT[0];
         set_lfo(0);
     }
 
@@ -157,6 +160,14 @@ struct OperatorContext {
         pms = (value & 7) * 32;
     }
 
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t value) {
+        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
+    }
+
     /// @brief Advance LFO to next sample.
     inline void advance_lfo() {
         if (lfo_timer_overflow) {  // LFO enabled
@@ -179,6 +190,13 @@ struct OperatorContext {
             }
         }
     }
+
+    /// @brief Return the amount of amplitude modulation.
+    ///
+    /// @returns the amount of AM for the operator based on the AM sensitivity
+    /// and current LFO value
+    ///
+    inline uint32_t get_AM() const { return lfo_AM_step >> ams; }
 };
 
 /// @brief A single FM operator

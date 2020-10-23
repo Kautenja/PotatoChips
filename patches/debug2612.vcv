@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "hw:Sanskrit 6th,0",
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -205,7 +205,7 @@
         },
         {
           "id": 29,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 30,

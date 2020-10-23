@@ -211,6 +211,13 @@ struct Operator {
     /// key scale rate :kcode>>(3-KSR)
     uint8_t ksr = 0;
 
+    /// fnum, blk : adjusted to sample rate
+    uint32_t fc = 0;
+    /// current blk / fnum value for this slot
+    uint32_t block_fnum = 0;
+    /// key code :
+    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
+
     /// The stages of the envelope generator.
     enum EnvelopeStage {
         /// the silent/off stage, i.e., 0 output
@@ -269,6 +276,9 @@ struct Operator {
         vol_out = MAX_ATT_INDEX;
         DT = state.dt_table[0];
         mul = 1;
+        fc = 0;
+        kcode = FREQUENCY_KEYCODE_TABLE[0];
+        block_fnum = 0;
         is_gate_open = false;
         is_amplitude_mod_on = false;
         set_rs(0);
@@ -304,6 +314,35 @@ struct Operator {
         } else {  // set the envelope to the release stage
             if (env_stage != SILENT) env_stage = RELEASE;
         }
+    }
+
+    /// @brief Set the frequency of the voice.
+    ///
+    /// @param frequency the frequency value measured in Hz
+    /// @returns true if the new frequency differs from the old frequency
+    ///
+    inline bool set_frequency(OperatorContext& state, float frequency) {
+        // Shift the frequency to the base octave and calculate the octave to
+        // play. The base octave is defined as a 10-bit number in [0, 1023].
+        int octave = 2;
+        for (; frequency >= 1024; octave++) frequency /= 2;
+        // TODO: why is this arbitrary shift necessary to tune to C4?
+        // NOTE: shift calculated by producing C4 note from a ground truth
+        //       oscillator and comparing the output from YM2612 via division:
+        //       1.458166333006277
+        frequency = frequency / 1.458;
+        // cast the shifted frequency to a 16-bit container
+        const uint16_t freq16bit = frequency;
+
+        // key-scale code
+        kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
+        // phase increment counter
+        uint32_t old_fc = fc;
+        fc = state.fnum_table[freq16bit * 2] >> (7 - octave);
+        // store fnum in clear form for LFO PM calculations
+        block_fnum = (octave << 11) | freq16bit;
+        // update the phase increment if the frequency changed
+        return old_fc != fc;
     }
 
     /// @brief Set the 5-bit attack rate.
@@ -651,14 +690,14 @@ struct Operator {
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_phase_and_envelope(uint32_t fnum_max, int fc, int kc) {
-        fc += DT[kc];
+    inline void refresh_phase_and_envelope(uint32_t fnum_max) {
+        fc += DT[kcode];
         // detects frequency overflow (credits to Nemesis)
         if (fc < 0) fc += fnum_max;
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;
-        if (ksr != kc >> KSR) {
-            ksr = kc >> KSR;
+        if (ksr != kcode >> KSR) {
+            ksr = kcode >> KSR;
             // calculate envelope generator rates
             if ((ar + ksr) < 32 + 62) {
                 eg_sh_ar = ENV_RATE_SHIFT[ar + ksr];
@@ -706,9 +745,6 @@ struct Operator {
         return TL_TABLE[p];
     }
 
-    /// @brief Update the phase of the operator (without the LFO).
-    inline void update_phase() { phase += phase_increment; }
-
     /// @briefUpdate the phase of the operator using the LFO
     ///
     /// @param state the global context the operator is working in
@@ -724,6 +760,23 @@ struct Operator {
         int finc = phase_increment_counter + DT[keyscale_code];
         if (finc < 0) finc += state.fnum_max;
         phase += (finc * mul) >> 1;
+    }
+
+    inline void update_phase_counters(const OperatorContext& state, uint8_t pms) {
+        const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
+        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        if (pms && lfo_fnum_offset) {  // update the phase using the LFO
+            uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
+            const uint8_t blk = (fnum & 0x7000) >> 12;
+            fnum = fnum & 0xfff;
+            update_phase_using_lfo(
+                state,
+                state.fnum_table[fnum] >> (7 - blk),
+                (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
+            );
+        } else {  // no LFO phase modulation
+            phase += phase_increment;
+        }
     }
 };
 

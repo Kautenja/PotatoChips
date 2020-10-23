@@ -36,12 +36,6 @@ struct Voice4Op {
  private:
     /// general state
     OperatorContext state;
-    /// fnum, blk : adjusted to sample rate
-    uint32_t fc = 0;
-    /// current blk / fnum value for this slot
-    uint32_t block_fnum = 0;
-    /// key code :
-    uint8_t kcode = FREQUENCY_KEYCODE_TABLE[0];
 
     /// the currently selected algorithm
     uint8_t algorithm = 0;
@@ -113,9 +107,6 @@ struct Voice4Op {
         mem_value = 0;
         pms = 0;
         ams = LFO_AMS_DEPTH_SHIFT[0];
-        fc = 0;
-        kcode = FREQUENCY_KEYCODE_TABLE[0];
-        block_fnum = 0;
         set_algorithm(0);
         update_phase_increment = true;
     }
@@ -243,33 +234,13 @@ struct Voice4Op {
         pms = (value & 7) * 32;
     }
 
-    // TODO: change frequency to allow independent operator frequencies
     /// @brief Set the frequency of the voice.
     ///
     /// @param frequency the frequency value measured in Hz
     ///
     inline void set_frequency(float frequency) {
-        // Shift the frequency to the base octave and calculate the octave to
-        // play. The base octave is defined as a 10-bit number in [0, 1023].
-        int octave = 2;
-        for (; frequency >= 1024; octave++) frequency /= 2;
-        // TODO: why is this arbitrary shift necessary to tune to C4?
-        // NOTE: shift calculated by producing C4 note from a ground truth
-        //       oscillator and comparing the output from YM2612 via division:
-        //       1.458166333006277
-        frequency = frequency / 1.458;
-        // cast the shifted frequency to a 16-bit container
-        const uint16_t freq16bit = frequency;
-
-        // key-scale code
-        kcode = (octave << 2) | FREQUENCY_KEYCODE_TABLE[(freq16bit >> 7) & 0xf];
-        // phase increment counter
-        uint32_t old_fc = fc;
-        fc = state.fnum_table[freq16bit * 2] >> (7 - octave);
-        // store fnum in clear form for LFO PM calculations
-        block_fnum = (octave << 11) | freq16bit;
-        // update the phase increment if the frequency changed
-        update_phase_increment |= old_fc != fc;
+        for (Operator& oprtr : operators)
+            update_phase_increment |= oprtr.set_frequency(state, frequency);
     }
 
     // -----------------------------------------------------------------------
@@ -406,7 +377,7 @@ struct Voice4Op {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fnum_max, fc, kcode);
+                oprtr.refresh_phase_and_envelope(state.fnum_max);
             update_phase_increment = false;
         }
         // clear the audio output
@@ -458,21 +429,8 @@ struct Voice4Op {
         // store current MEM
         mem_value = mem;
         // update phase counters AFTER output calculations
-        const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
-        if (pms && lfo_fnum_offset) {  // update the phase using the LFO
-            uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
-            const uint8_t blk = (fnum & 0x7000) >> 12;
-            fnum = fnum & 0xfff;
-            for (Operator& oprtr : operators)
-                oprtr.update_phase_using_lfo(
-                    state,
-                    state.fnum_table[fnum] >> (7 - blk),
-                    (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
-                );
-        } else {  // no LFO phase modulation
-            for (Operator& oprtr : operators) oprtr.update_phase();
-        }
+        for (Operator& oprtr : operators)
+            oprtr.update_phase_counters(state, pms);
         // -------------------------------------------------------------------
         // advance LFO & envelope generator
         // -------------------------------------------------------------------

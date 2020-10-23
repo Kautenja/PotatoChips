@@ -211,8 +211,7 @@ struct Chip2612 : rack::Module {
         // Compute the frequency from the pitch parameter and input. low
         // range of -4 octaves, high range of 6 octaves
         pitch = inputs[INPUT_PITCH].getNormalVoltage(pitch, channel);
-        apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -4.f, 6.f)));
-
+        apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f)));
     }
 
     /// @brief Process a sample.

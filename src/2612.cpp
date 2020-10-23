@@ -238,12 +238,25 @@ struct Chip2612 : rack::Module {
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
         }
         if (lightDivider.process()) {
-            lights[VU_LIGHTS + 0].setBrightness(vuMeter.getBrightness(0, 0));
-            lights[VU_LIGHTS + 1].setBrightness(vuMeter.getBrightness(-3, 0));
-            lights[VU_LIGHTS + 2].setBrightness(vuMeter.getBrightness(-6, -3));
-            lights[VU_LIGHTS + 3].setBrightness(vuMeter.getBrightness(-12, -6));
-            lights[VU_LIGHTS + 4].setBrightness(vuMeter.getBrightness(-24, -12));
-            lights[VU_LIGHTS + 5].setBrightness(vuMeter.getBrightness(-36, -24));
+            // lights[VU_LIGHTS].setBrightness(vuMeter.getBrightness(0, 0));
+            // for (unsigned i = 1; i < 6; i++) {
+            //     float b = vuMeter.getBrightness(-3.f * (i + 1), -3.f * i);
+            //     lights[VU_LIGHTS + i].setBrightness(b);
+            // }
+
+            // lights[VU_LIGHTS + 0].setBrightness(vuMeter.getBrightness(0, 0));
+            // lights[VU_LIGHTS + 1].setBrightness(vuMeter.getBrightness(-3, 0));
+            // lights[VU_LIGHTS + 2].setBrightness(vuMeter.getBrightness(-6, -3));
+            // lights[VU_LIGHTS + 3].setBrightness(vuMeter.getBrightness(-12, -6));
+            // lights[VU_LIGHTS + 4].setBrightness(vuMeter.getBrightness(-24, -12));
+            // lights[VU_LIGHTS + 5].setBrightness(vuMeter.getBrightness(-36, -24));
+
+            lights[VU_LIGHTS + 0].setBrightness(vuMeter.getBrightness(3, 6));
+            lights[VU_LIGHTS + 1].setBrightness(vuMeter.getBrightness(0, 3));
+            lights[VU_LIGHTS + 2].setBrightness(vuMeter.getBrightness(-3, 0));
+            lights[VU_LIGHTS + 3].setBrightness(vuMeter.getBrightness(-6, -3));
+            lights[VU_LIGHTS + 4].setBrightness(vuMeter.getBrightness(-12, -6));
+            lights[VU_LIGHTS + 5].setBrightness(vuMeter.getBrightness(-24, -12));
         }
     }
 };
@@ -316,9 +329,9 @@ struct Chip2612Widget : ModuleWidget {
         addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER));
 
         addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.7, 34.758)), module, Chip2612::VU_LIGHTS + 0));
-        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 39.884)), module, Chip2612::VU_LIGHTS + 1));
-        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 45.009)), module, Chip2612::VU_LIGHTS + 2));
-        addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 50.134)), module, Chip2612::VU_LIGHTS + 3));
+        addChild(createLightCentered<MediumLight<RedLight>>(mm2px(Vec(6.7, 39.884)), module, Chip2612::VU_LIGHTS + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 45.009)), module, Chip2612::VU_LIGHTS + 2));
+        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 50.134)), module, Chip2612::VU_LIGHTS + 3));
         addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 55.259)), module, Chip2612::VU_LIGHTS + 4));
         addChild(createLightCentered<MediumLight<GreenLight>>(mm2px(Vec(6.7, 60.384)), module, Chip2612::VU_LIGHTS + 5));
     }

@@ -371,14 +371,12 @@ struct Voice4Op {
         // -------------------------------------------------------------------
         // calculate operator outputs
         // -------------------------------------------------------------------
-        // get the amount of amplitude modulation for the voice
-        const uint32_t AM = state.get_AM();
         // reset the algorithm outputs to 0
         m2 = c1 = c2 = mem = 0;
         // restore delayed sample (MEM) value to m2 or c2
         *mem_connect = mem_value;
         // Operator 1
-        unsigned envelope = operators[Op1].get_envelope(AM);;
+        unsigned envelope = operators[Op1].get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
         int32_t feedback_carrier = op1_out[0] + op1_out[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
@@ -398,15 +396,15 @@ struct Voice4Op {
             op1_out[1] = 0;
         }
         // Operator 3
-        envelope = operators[Op3].get_envelope(AM);;
+        envelope = operators[Op3].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op3] += operators[Op3].calculate_output(envelope, m2 << 15);
         // Operator 2
-        envelope = operators[Op2].get_envelope(AM);
+        envelope = operators[Op2].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op2] += operators[Op2].calculate_output(envelope, c1 << 15);
         // Operator 4
-        envelope = operators[Op4].get_envelope(AM);
+        envelope = operators[Op4].get_envelope(state);
         if (envelope < ENV_QUIET)
             *connections[Op4] += operators[Op4].calculate_output(envelope, c2 << 15);
         // store current MEM

@@ -598,19 +598,20 @@ struct Operator {
 
     /// @brief Get the envelope volume based on amplitude modulation level.
     ///
-    /// @param amplitude_modulation the amount of amplitude modulation to apply
+    /// @param state the context the operator is running in
     /// @details
-    /// `amplitude_modulation` is only applied to the envelope if
+    /// `state.get_AM()` is only applied to the envelope if
     /// `this->is_amplitude_mod_on` is set to `true`.
     ///
-    inline uint32_t get_envelope(uint32_t amplitude_modulation) const {
-        return vol_out + is_amplitude_mod_on * amplitude_modulation;
+    inline uint32_t get_envelope(const OperatorContext& state) const {
+        return vol_out + is_amplitude_mod_on * state.get_AM();
     }
 
     /// @brief Return the value of operator (1) given envelope and PM.
     ///
     /// @param env the value of the operator's envelope (after AM is applied)
-    /// @param pm the amount of phase modulation for the operator
+    /// @param pm the amount of phase modulation for the operator, i.e., based
+    /// on feedback, or another operator's output
     /// @details
     /// the `pm` parameter for operators 2, 3, and 4 (BUT NOT 1) should be
     /// shifted left by 15 bits before being passed in. Operator 1 should be

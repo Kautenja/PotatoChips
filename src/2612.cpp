@@ -136,9 +136,9 @@ struct Chip2612 : rack::Module {
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
             configParam(PARAM_AR         + i, 1, 31,  31, opName + " Attack Rate");
-            configParam(PARAM_TL         + i, 0, 70,  0,  opName + " Total Level");
+            configParam(PARAM_TL         + i, 0, 70,  70, opName + " Total Level");
             configParam(PARAM_D1         + i, 0, 31,  0,  opName + " 1st Decay Rate");
-            configParam(PARAM_SL         + i, 0, 15,  0,  opName + " Sustain Level");
+            configParam(PARAM_SL         + i, 0, 15,  15, opName + " Sustain Level");
             configParam(PARAM_D2         + i, 0, 31,  0,  opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i, 0, 15,  15, opName + " Release Rate");
             configParam(PARAM_MUL        + i, 0, 15,  1,  opName + " Multiplier");
@@ -182,9 +182,9 @@ struct Chip2612 : rack::Module {
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level   (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].set_total_level   (op, 70 - getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
             apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].set_sustain_level (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
             apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
             apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));

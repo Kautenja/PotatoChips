@@ -692,8 +692,6 @@ struct Operator {
     /// @brief Update phase increment and envelope generator
     inline void refresh_phase_and_envelope(uint32_t fnum_max) {
         fc += DT[kcode];
-        // detects frequency overflow (credits to Nemesis)
-        if (fc < 0) fc += fnum_max;
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;
         if (ksr != kcode >> KSR) {
@@ -745,23 +743,11 @@ struct Operator {
         return TL_TABLE[p];
     }
 
-    /// @briefUpdate the phase of the operator using the LFO
+    /// @brief Update the phase of the operator.
     ///
-    /// @param state the global context the operator is working in
-    /// @param phase_increment_counter TODO
-    /// @param keyscale_code TODO
+    /// @param state the context the operator is running in
+    /// @param pms the amount of pitch modulation to apply
     ///
-    inline void update_phase_using_lfo(
-        const OperatorContext& state,
-        int phase_increment_counter,
-        int keyscale_code
-    ) {
-        // detects frequency overflow (credits to Nemesis)
-        int finc = phase_increment_counter + DT[keyscale_code];
-        if (finc < 0) finc += state.fnum_max;
-        phase += (finc * mul) >> 1;
-    }
-
     inline void update_phase_counters(const OperatorContext& state, uint8_t pms) {
         const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
         const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
@@ -769,11 +755,12 @@ struct Operator {
             uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
             const uint8_t blk = (fnum & 0x7000) >> 12;
             fnum = fnum & 0xfff;
-            update_phase_using_lfo(
-                state,
-                state.fnum_table[fnum] >> (7 - blk),
-                (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8]
-            );
+            const int phase_increment_counter = state.fnum_table[fnum] >> (7 - blk);
+            const int keyscale_code = (blk << 2) | FREQUENCY_KEYCODE_TABLE[fnum >> 8];
+            // detects frequency overflow (credits to Nemesis)
+            int finc = phase_increment_counter + DT[keyscale_code];
+            if (finc < 0) finc += state.fnum_max;
+            phase += (finc * mul) >> 1;
         } else {  // no LFO phase modulation
             phase += phase_increment;
         }

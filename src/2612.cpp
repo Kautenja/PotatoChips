@@ -39,7 +39,9 @@ struct Chip2612 : rack::Module {
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
 
+    /// a VU meter for measuring the output audio level from the emulator
     dsp::VuMeter2 vuMeter;
+    /// a light divider for updating the LEDs every 512 processing steps
     dsp::ClockDivider lightDivider;
 
     /// Return the binary value for the given parameter.

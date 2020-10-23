@@ -465,7 +465,7 @@ struct Operator {
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
         if (ssg_enabled && volume >= 0x200 && env_stage > RELEASE) {
-            // phase = 0;
+            phase = 0;
             // same as Key ON
             if (env_stage != ATTACK) {
                 if (ar + ksr < 32 + 62) {  // attacking
@@ -508,11 +508,8 @@ struct Operator {
                 if (ssg_enabled) {  // SSG EG type envelope selected
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
-                        volume = MAX_ATT_INDEX;
-                        // restart of the Phase Generator should be here
                         phase = 0;
-                        // stage -> Attack
-                        volume = 511;
+                        volume = MAX_ATT_INDEX;
                         env_stage = ATTACK;
                     }
                 } else {

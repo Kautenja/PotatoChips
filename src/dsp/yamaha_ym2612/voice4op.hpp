@@ -250,9 +250,10 @@ struct Voice4Op {
     ///
     /// @param op_index the operator to set the gate of of (in [0, 3])
     /// @param is_open true if the gate is open, false otherwise
+    /// @param prevent_clicks true to prevent clicks from note re-triggers
     ///
-    inline void set_gate(uint8_t op_index, bool is_open) {
-        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open);
+    inline void set_gate(uint8_t op_index, bool is_open, bool prevent_clicks = false) {
+        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open, prevent_clicks);
     }
 
     /// @brief Set whether SSG envelopes are enabled for the given operator.

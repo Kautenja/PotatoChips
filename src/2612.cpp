@@ -18,10 +18,10 @@
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
-// TODO: potential features
-// individual operator frequency
-// individual operator triggering
-// option to prevent clicks in context menu
+// TODO: individual operator frequency
+// TODO: individual operator triggering
+// TODO: option to prevent clicks in context menu
+// TODO: level indicator to show clipping amount
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -203,7 +203,7 @@ struct Chip2612 : rack::Module {
             apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
             apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_frequency    (op, frequency);
-            apu[channel].set_gate         (op, is_gate_open);
+            apu[channel].set_gate         (op, is_gate_open, true);
         }
 
     }
@@ -232,7 +232,6 @@ struct Chip2612 : rack::Module {
             const auto sample = static_cast<float>(apu[channel].step()) / (1 << 13);
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
         }
-        // TODO: clipping indicator
     }
 };
 

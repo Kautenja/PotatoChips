@@ -76,7 +76,7 @@ struct Voice4Op {
     /// @param clock_rate the underlying clock rate of the system
     ///
     explicit Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
-        state.set_sample_rate(sample_rate, clock_rate);
+        set_sample_rate(sample_rate, clock_rate);
         reset();
     }
 

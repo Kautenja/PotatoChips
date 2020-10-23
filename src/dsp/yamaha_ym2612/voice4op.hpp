@@ -210,22 +210,6 @@ struct Voice4Op {
     ///
     inline void set_lfo(uint8_t value) { state.set_lfo(value); }
 
-    /// @brief Set the AM sensitivity (AMS) register for the given voice.
-    ///
-    /// @param value the amount of amplitude modulation (AM) sensitivity
-    ///
-    inline void set_am_sensitivity(uint8_t value) {
-        state.set_am_sensitivity(value);
-    }
-
-    /// @brief Set the FM sensitivity (FMS) register for the given voice.
-    ///
-    /// @param value the amount of frequency modulation (FM) sensitivity
-    ///
-    inline void set_fm_sensitivity(uint8_t value) {
-        state.set_fm_sensitivity(value);
-    }
-
     // -----------------------------------------------------------------------
     // MARK: Operator Parameter Settings
     // -----------------------------------------------------------------------
@@ -246,15 +230,6 @@ struct Voice4Op {
     ///
     inline void set_gate(uint8_t op_index, bool is_open, bool prevent_clicks = false) {
         operators[OPERATOR_INDEXES[op_index]].set_gate(is_open, prevent_clicks);
-    }
-
-    /// @brief Set whether SSG envelopes are enabled for the given operator.
-    ///
-    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
-    /// @param is_on whether the looping envelope generator should be turned on
-    ///
-    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
-        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -338,13 +313,29 @@ struct Voice4Op {
         update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
     }
 
-    /// @brief Set the amplitude modulation (AM) register for the given voice and operator.
+    /// @brief Set whether SSG envelopes are enabled for the given operator.
     ///
-    /// @param op_index the operator to set the amplitude modulation (AM) register of (in [0, 3])
-    /// @param value the true to enable amplitude modulation from the LFO, false to disable it
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
+    /// @param is_on whether the looping envelope generator should be turned on
     ///
-    inline void set_am_enabled(uint8_t op_index, bool value) {
-        operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
+    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
+        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
+    }
+
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_am_sensitivity(value);
+    }
+
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void set_fm_sensitivity(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------

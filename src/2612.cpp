@@ -66,8 +66,6 @@ struct Chip2612 : rack::Module {
         PARAM_AL,
         PARAM_FB,
         PARAM_LFO,
-        PARAM_AMS,
-        PARAM_FMS,
         ENUMS(PARAM_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
@@ -79,6 +77,8 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_AM,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
     };
 
@@ -90,8 +90,6 @@ struct Chip2612 : rack::Module {
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
-        INPUT_AMS,
-        INPUT_FMS,
         ENUMS(INPUT_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
@@ -103,6 +101,8 @@ struct Chip2612 : rack::Module {
         ENUMS(INPUT_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_AM,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_INPUTS
     };
 
@@ -128,8 +128,6 @@ struct Chip2612 : rack::Module {
         configParam(PARAM_AL,  0, 7, 7, "Algorithm");
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
-        configParam(PARAM_AMS, 0, 3, 0, "Amplitude modulation sensitivity");
-        configParam(PARAM_FMS, 0, 7, 0, "Frequency modulation sensitivity");
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
@@ -145,6 +143,8 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_RS         + i, 0, 3,   0,  opName + " Rate Scaling");
             configParam(PARAM_AM         + i, 0, 1,   0,  opName + " Amplitude Modulation");
             configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope Enable");
+            configParam(PARAM_AMS        + i, 0, 3,   0,  opName + " Amplitude modulation sensitivity");
+            configParam(PARAM_FMS        + i, 0, 7,   0,  opName + " Frequency modulation sensitivity");
         }
         // reset the emulator
         onSampleRateChange();
@@ -174,25 +174,24 @@ struct Chip2612 : rack::Module {
         // set the global parameters
         apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].set_am_sensitivity(getParam(channel, PARAM_AMS, INPUT_AMS, 3));
-        apu[channel].set_fm_sensitivity(getParam(channel, PARAM_FMS, INPUT_FMS, 7));
         // normal pitch gate and re-trigger
         float pitch = 0;
         float gate = 0;
         float retrig = 0;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
-            apu[channel].set_attack_rate  (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level  (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
-            apu[channel].set_decay_rate   (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].set_sustain_level(op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
-            apu[channel].set_sustain_rate (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].set_release_rate (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].set_multiplier   (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].set_detune       (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
-            apu[channel].set_rate_scale   (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].set_am_enabled   (op, getParam(channel, PARAM_AM         + op, INPUT_AM         + op, 1  ));
-            apu[channel].set_ssg_enabled  (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
+            apu[channel].set_total_level   (op, getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
+            apu[channel].set_sustain_level (op, getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
+            apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
+            apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
+            apu[channel].set_detune        (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
+            apu[channel].set_rate_scale    (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            apu[channel].set_ssg_enabled   (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
+            apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 4  ));
             // Compute the frequency from the pitch parameter and input.
             pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
             apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f)));
@@ -307,22 +306,12 @@ struct Chip2612Widget : ModuleWidget {
         lfo->snap = true;
         addParam(lfo);
         addInput(createInput<PJ301MPort>( Vec(124, 226),  module, Chip2612::INPUT_LFO));
-        // Amplitude Modulation Sensitivity
-        auto ams = createParam<Rogan2PWhite>(Vec(187, 279), module, Chip2612::PARAM_AMS);
-        ams->snap = true;
-        addParam(ams);
-        addInput(createInput<PJ301MPort>(  Vec(124, 282), module, Chip2612::INPUT_AMS));
-        // Frequency Modulation Sensitivity
-        auto fms = createParam<Rogan2PWhite>(Vec(187, 335), module, Chip2612::PARAM_FMS);
-        fms->snap = true;
-        addParam(fms);
-        addInput(createInput<PJ301MPort>(  Vec(124, 338), module, Chip2612::INPUT_FMS));
         // operator parameters and inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             // the X & Y offsets for the operator bank
             auto offsetX = 450 * (i % (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 11; parameter++) {
+            for (unsigned parameter = 0; parameter < 13; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * YamahaYM2612::Voice4Op::NUM_OPERATORS;
                 auto param = createParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset);

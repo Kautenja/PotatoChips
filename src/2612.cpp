@@ -75,36 +75,39 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_SL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_D2,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_RR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(PARAM_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(PARAM_DET,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
         ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(PARAM_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
+        ENUMS(PARAM_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_GATE,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice4Op::NUM_OPERATORS),
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
         INPUT_SATURATION,
+        ENUMS(INPUT_GATE,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
         ENUMS(INPUT_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_SL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D2,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_RR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_DET,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
         ENUMS(INPUT_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
+        ENUMS(INPUT_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_INPUTS
     };
 
@@ -141,7 +144,6 @@ struct Chip2612 : rack::Module {
             configParam(PARAM_D2         + i, 0, 31,  0,  opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i, 0, 15,  15, opName + " Release Rate");
             configParam(PARAM_MUL        + i, 0, 15,  1,  opName + " Multiplier");
-            configParam(PARAM_DET        + i, 0, 7,   4,  opName + " Detune");
             configParam(PARAM_RS         + i, 0, 3,   0,  opName + " Rate Scaling");
             configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope Enable");
             configParam(PARAM_AMS        + i, 0, 3,   0,  opName + " Amplitude modulation sensitivity");
@@ -188,7 +190,6 @@ struct Chip2612 : rack::Module {
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
             apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
             apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].set_detune        (op, getParam(channel, PARAM_DET        + op, INPUT_DET        + op, 7  ));
             apu[channel].set_rate_scale    (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
             apu[channel].set_ssg_enabled   (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
@@ -309,7 +310,7 @@ struct Chip2612Widget : ModuleWidget {
             // the X & Y offsets for the operator bank
             auto offsetX = 450 * (i % (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 12; parameter++) {
+            for (unsigned parameter = 0; parameter < 11; parameter++) {
                 // the parameter & input offset
                 auto offset = i + parameter * YamahaYM2612::Voice4Op::NUM_OPERATORS;
                 addParam(createSnapParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset));

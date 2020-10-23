@@ -68,6 +68,7 @@ struct Chip2612 : rack::Module {
         PARAM_AL,
         PARAM_FB,
         PARAM_LFO,
+        PARAM_SATURATION,
         ENUMS(PARAM_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
@@ -91,6 +92,7 @@ struct Chip2612 : rack::Module {
         INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
+        INPUT_SATURATION,
         ENUMS(INPUT_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
@@ -108,7 +110,7 @@ struct Chip2612 : rack::Module {
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        OUTPUT_MASTER,
+        ENUMS(OUTPUT_MASTER, 2),
         NUM_OUTPUTS
     };
 
@@ -263,7 +265,7 @@ struct Chip2612Widget : ModuleWidget {
     ///
     explicit Chip2612Widget(Chip2612 *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/2612.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
@@ -283,24 +285,39 @@ struct Chip2612Widget : ModuleWidget {
             },
             "res/2612algorithms/",
             YamahaYM2612::Voice4Op::NUM_ALGORITHMS,
-            Vec(115, 20),
+            Vec(10, 20),
             Vec(110, 70)
         ));
         // Algorithm
-        auto algo = createParam<Rogan3PBlue>(Vec(115, 113),  module, Chip2612::PARAM_AL);
+        auto algo = createParam<Rogan3PWhite>(Vec(10, 116),  module, Chip2612::PARAM_AL);
         algo->snap = true;
         addParam(algo);
-        addInput(createInput<PJ301MPort>( Vec(124, 171),  module, Chip2612::INPUT_AL));
         // Feedback
-        auto feedback = createParam<Rogan3PBlue>(Vec(182, 113),  module, Chip2612::PARAM_FB);
+        auto feedback = createParam<Rogan3PWhite>(Vec(77, 116),  module, Chip2612::PARAM_FB);
         feedback->snap = true;
         addParam(feedback);
-        addInput(createInput<PJ301MPort>( Vec(191, 171),  module, Chip2612::INPUT_FB));
         // LFO
-        auto lfo = createParam<Rogan2PWhite>(Vec(187, 223), module, Chip2612::PARAM_LFO);
+        auto lfo = createParam<Rogan3PWhite>(Vec(10, 187), module, Chip2612::PARAM_LFO);
         lfo->snap = true;
         addParam(lfo);
-        addInput(createInput<PJ301MPort>( Vec(124, 226),  module, Chip2612::INPUT_LFO));
+        // Saturation
+        auto saturation = createParam<Rogan3PWhite>(Vec(77, 187), module, Chip2612::PARAM_SATURATION);
+        saturation->snap = true;
+        addParam(saturation);
+        // Saturation Indicator
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, Chip2612::VU_LIGHTS + 0));
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, Chip2612::VU_LIGHTS + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, Chip2612::VU_LIGHTS + 2));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, Chip2612::VU_LIGHTS + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, Chip2612::VU_LIGHTS + 4));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, Chip2612::VU_LIGHTS + 5));
+        // Ports
+        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, Chip2612::INPUT_AL));
+        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, Chip2612::INPUT_FB));
+        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, Chip2612::INPUT_LFO));
+        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, Chip2612::INPUT_SATURATION));
+        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, Chip2612::OUTPUT_MASTER + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, Chip2612::OUTPUT_MASTER + 1));
         // operator parameters and inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             // the X & Y offsets for the operator bank
@@ -315,15 +332,6 @@ struct Chip2612Widget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_AR + offset));
             }
         }
-        // left + right master outputs
-        addOutput(createOutput<PJ301MPort>(Vec(26, 325), module, Chip2612::OUTPUT_MASTER));
-
-        addChild(createLightCentered<MediumLight<RedLight>>(   mm2px(Vec(6.7, 34.758)), module, Chip2612::VU_LIGHTS + 0));
-        addChild(createLightCentered<MediumLight<RedLight>>(   mm2px(Vec(6.7, 39.884)), module, Chip2612::VU_LIGHTS + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 45.009)), module, Chip2612::VU_LIGHTS + 2));
-        addChild(createLightCentered<MediumLight<YellowLight>>(mm2px(Vec(6.7, 50.134)), module, Chip2612::VU_LIGHTS + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>>( mm2px(Vec(6.7, 55.259)), module, Chip2612::VU_LIGHTS + 4));
-        addChild(createLightCentered<MediumLight<GreenLight>>( mm2px(Vec(6.7, 60.384)), module, Chip2612::VU_LIGHTS + 5));
     }
 };
 

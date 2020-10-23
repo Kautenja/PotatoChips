@@ -36,6 +36,11 @@ struct Voice4Op {
  private:
     /// general state
     OperatorContext state;
+    /// four operators
+    Operator operators[NUM_OPERATORS];
+
+    /// a flag determining whether the phase increment needs to be updated
+    bool update_phase_increment = false;
 
     /// the currently selected algorithm
     uint8_t algorithm = 0;
@@ -65,18 +70,12 @@ struct Voice4Op {
     int32_t audio_output = 0;
 
  public:
-    /// four operators
-    Operator operators[NUM_OPERATORS];
-
-    /// a flag determining whether the phase increment needs to be updated
-    bool update_phase_increment = false;
-
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
     ///
     /// @param sample_rate the rate to draw samples from the emulator at
     /// @param clock_rate the underlying clock rate of the system
     ///
-    Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
+    explicit Voice4Op(float sample_rate = 44100, float clock_rate = 768000) {
         state.set_sample_rate(sample_rate, clock_rate);
         reset();
     }

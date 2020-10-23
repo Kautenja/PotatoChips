@@ -44,8 +44,6 @@ struct Voice4Op {
 
     /// amplitude modulation sensitivity (AMS)
     uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
-    /// phase modulation sensitivity (PMS)
-    int32_t pms = 0;
 
     /// operator 1 output for feedback
     int32_t op1_out[2] = {0, 0};
@@ -105,7 +103,6 @@ struct Voice4Op {
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
-        pms = 0;
         ams = LFO_AMS_DEPTH_SHIFT[0];
         set_algorithm(0);
         update_phase_increment = true;
@@ -231,7 +228,7 @@ struct Voice4Op {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void set_fm_sensitivity(uint8_t value) {
-        pms = (value & 7) * 32;
+        state.set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------
@@ -420,7 +417,7 @@ struct Voice4Op {
         mem_value = mem;
         // update phase counters AFTER output calculations
         for (Operator& oprtr : operators)
-            oprtr.update_phase_counters(state, pms);
+            oprtr.update_phase_counters(state);
         // -------------------------------------------------------------------
         // advance LFO & envelope generator
         // -------------------------------------------------------------------

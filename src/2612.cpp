@@ -76,12 +76,13 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_D2,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_RR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
 
-        ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
+        ENUMS(PARAM_FREQ,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
+
+        ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
     };
 
@@ -91,20 +92,17 @@ struct Chip2612 : rack::Module {
         INPUT_FB,
         INPUT_LFO,
         INPUT_SATURATION,
-        ENUMS(INPUT_GATE,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
+        // Row 1
         ENUMS(INPUT_AR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_TL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D1,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_SL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_D2,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_RR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
-        ENUMS(INPUT_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-        ENUMS(INPUT_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
+        // Row 2
+        ENUMS(INPUT_GATE,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice4Op::NUM_OPERATORS),
+        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(INPUT_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
@@ -190,8 +188,8 @@ struct Chip2612 : rack::Module {
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
             apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
             apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].set_rate_scale    (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
-            apu[channel].set_ssg_enabled   (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
+            // apu[channel].set_rate_scale    (op, getParam(channel, PARAM_RS         + op, INPUT_RS         + op, 3  ));
+            // apu[channel].set_ssg_enabled   (op, getParam(channel, PARAM_SSG_ENABLE + op, INPUT_SSG_ENABLE + op, 1  ));
             apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
             apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 4  ));
             // Compute the frequency from the pitch parameter and input.
@@ -277,7 +275,7 @@ struct Chip2612Widget : ModuleWidget {
             [&]() {
                 return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
             },
-            "res/2612algorithms/",
+            "res/BossFight_algorithms/",
             YamahaYM2612::Voice4Op::NUM_ALGORITHMS,
             Vec(10, 20),
             Vec(110, 70)
@@ -303,18 +301,28 @@ struct Chip2612Widget : ModuleWidget {
         addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, Chip2612::OUTPUT_MASTER + 1));
         // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
-            // Frequency, Pitch, Gate, and Retrigger controls
-            addInput(createInput<PJ301MPort>(Vec(15, 84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
-            addInput(createInput<PJ301MPort>(Vec(50, 84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
-            addInput(createInput<PJ301MPort>(Vec(85, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
-            // the X & Y offsets for the operator bank
-            auto offsetX = 450 * (i % (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
-            auto offsetY = 175 * (i / (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
-            for (unsigned parameter = 0; parameter < 11; parameter++) {
-                // the parameter & input offset
-                auto offset = i + parameter * YamahaYM2612::Voice4Op::NUM_OPERATORS;
-                addParam(createSnapParam<BefacoSlidePot>(Vec(248 + offsetX + 34 * parameter, 25 + offsetY), module, Chip2612::PARAM_AR + offset));
-                addInput(createInput<PJ301MPort>(Vec(244 + offsetX + 34 * parameter, 160 + offsetY), module, Chip2612::INPUT_AR + offset));
+            auto offset = i * 210;
+            // ADSR
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, Chip2612::PARAM_AR + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, Chip2612::PARAM_TL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, Chip2612::PARAM_D1 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, Chip2612::PARAM_SL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, Chip2612::PARAM_D2 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, Chip2612::PARAM_RR + i));
+            // Looping ADSR, Key Scaling
+            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, Chip2612::PARAM_SSG_ENABLE + i));
+            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, Chip2612::PARAM_RS + i));
+            // Frequency and modulation
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, Chip2612::PARAM_FREQ + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, Chip2612::PARAM_MUL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, Chip2612::PARAM_AMS + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, Chip2612::PARAM_FMS + i));
+            // Input Ports
+            const auto op_offset = 210 * i;
+            for (unsigned j = 0; j < 6; j++) {
+                const auto x = 140 + op_offset + j * 35;
+                addInput(createInput<PJ301MPort>(Vec(x, 295), module, Chip2612::INPUT_AR + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 339), module, Chip2612::INPUT_GATE + 4 * j + i));
             }
         }
     }

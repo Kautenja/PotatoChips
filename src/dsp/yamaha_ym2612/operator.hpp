@@ -575,7 +575,7 @@ struct Operator {
         // as the attenuation has been forced to MAX and output invert flag is
         // not used. If an Attack Phase is programmed, inversion can occur on
         // each sample.
-        if (ssg_enabled && (volume >= 0x200) && (env_stage > RELEASE)) {
+        if (ssg_enabled && volume >= 0x200 && env_stage > RELEASE) {
             if (ssg & SSG_HOLD) {  // bit 0 = hold SSG-EG
                 // set inversion flag
                 if (ssg & SSG_ALT) ssgn = SSG_INV;
@@ -590,7 +590,7 @@ struct Operator {
                     phase = 0;
                 // same as Key ON
                 if (env_stage != ATTACK) {
-                    if ((ar + ksr) < 32 + 62) {  // attacking
+                    if (ar + ksr < 32 + 62) {  // attacking
                         env_stage = (volume <= MIN_ATT_INDEX) ?
                             ((sl == MIN_ATT_INDEX) ? SUSTAIN : DECAY) : ATTACK;
                     } else {  // Attack Rate @ max -> jump to next stage
@@ -633,8 +633,8 @@ struct Operator {
             }
             break;
         case SUSTAIN:  // sustain stage
-            if (ssg_enabled) {  // SSG EG type envelope selected
-                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+            if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                if (ssg_enabled) {  // SSG EG type envelope selected
                     volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= ENV_QUIET) {
                         volume = MAX_ATT_INDEX;
@@ -654,9 +654,7 @@ struct Operator {
                             swap_flag = (ssg & SSG_ALT);
                         }
                     }
-                }
-            } else {
-                if (!(eg_cnt & ((1 << eg_sh_d2r) - 1))) {
+                } else {
                     volume += ENV_INCREMENT_TABLE[eg_sel_d2r + ((eg_cnt >> eg_sh_d2r) & 7)];
                     if (volume >= MAX_ATT_INDEX) {
                         volume = MAX_ATT_INDEX;

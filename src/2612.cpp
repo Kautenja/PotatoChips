@@ -266,19 +266,12 @@ struct Chip2612Widget : ModuleWidget {
     explicit Chip2612Widget(Chip2612 *module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
-        // panel screws
+        // Panel Screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Frequency, Pitch, Gate, and Retrigger controls
-        for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
-            addInput(createInput<PJ301MPort>(Vec(15, 84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
-            addInput(createInput<PJ301MPort>(Vec(50, 84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
-            addInput(createInput<PJ301MPort>(Vec(85, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
-        }
-
-        // algorithm display
+        // Algorithm Display
         addChild(new IndexedFrameDisplay(
             [&]() {
                 return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
@@ -288,13 +281,10 @@ struct Chip2612Widget : ModuleWidget {
             Vec(10, 20),
             Vec(110, 70)
         ));
-        // Algorithm
+        // Algorithm, Feedback, LFO, Saturation
         addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, Chip2612::PARAM_AL));
-        // Feedback
         addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, Chip2612::PARAM_FB));
-        // LFO
         addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, Chip2612::PARAM_LFO));
-        // Saturation
         addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, Chip2612::PARAM_SATURATION));
         // Saturation Indicator
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, Chip2612::VU_LIGHTS + 0));
@@ -303,15 +293,19 @@ struct Chip2612Widget : ModuleWidget {
         addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, Chip2612::VU_LIGHTS + 3));
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, Chip2612::VU_LIGHTS + 4));
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, Chip2612::VU_LIGHTS + 5));
-        // Ports
+        // Global Ports
         addInput(createInput<PJ301MPort>  (Vec(63, 249), module, Chip2612::INPUT_AL));
         addInput(createInput<PJ301MPort>  (Vec(98, 249), module, Chip2612::INPUT_FB));
         addInput(createInput<PJ301MPort>  (Vec(63, 293), module, Chip2612::INPUT_LFO));
         addInput(createInput<PJ301MPort>  (Vec(98, 293), module, Chip2612::INPUT_SATURATION));
         addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, Chip2612::OUTPUT_MASTER + 0));
         addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, Chip2612::OUTPUT_MASTER + 1));
-        // operator parameters and inputs
+        // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
+            // Frequency, Pitch, Gate, and Retrigger controls
+            addInput(createInput<PJ301MPort>(Vec(15, 84 + 42 * i), module, Chip2612::INPUT_PITCH  + i));
+            addInput(createInput<PJ301MPort>(Vec(50, 84 + 42 * i), module, Chip2612::INPUT_GATE   + i));
+            addInput(createInput<PJ301MPort>(Vec(85, 84 + 42 * i), module, Chip2612::INPUT_RETRIG + i));
             // the X & Y offsets for the operator bank
             auto offsetX = 450 * (i % (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));
             auto offsetY = 175 * (i / (YamahaYM2612::Voice4Op::NUM_OPERATORS / 2));

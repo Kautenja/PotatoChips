@@ -626,18 +626,10 @@ struct Operator {
             }
             break;
         case DECAY:  // decay stage
-            if (ssg_enabled) {  // SSG EG type envelope selected
-                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += 4 * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
-                    if (volume >= static_cast<int32_t>(sl))
-                        env_stage = SUSTAIN;
-                }
-            } else {
-                if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
-                    volume += ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
-                    if (volume >= static_cast<int32_t>(sl))
-                        env_stage = SUSTAIN;
-                }
+            if (!(eg_cnt & ((1 << eg_sh_d1r) - 1))) {
+                volume += (ssg_enabled ? 4 : 1) * ENV_INCREMENT_TABLE[eg_sel_d1r + ((eg_cnt >> eg_sh_d1r) & 7)];
+                if (volume >= static_cast<int32_t>(sl))
+                    env_stage = SUSTAIN;
             }
             break;
         case SUSTAIN:  // sustain stage

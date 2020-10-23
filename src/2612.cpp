@@ -229,17 +229,12 @@ struct Chip2612 : rack::Module {
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
-            int16_t audio_output = apu[channel].step();
+            const int16_t audio_output = apu[channel].step();
             // update the VU meter before clipping to more accurately detect it
             vuMeter.process(args.sampleTime, audio_output / static_cast<float>(1 << 13));
-            // clip the audio output to 14-bits
-            if (audio_output > YamahaYM2612::Operator::OUTPUT_MAX)
-                audio_output = YamahaYM2612::Operator::OUTPUT_MAX;
-            else if (audio_output < YamahaYM2612::Operator::OUTPUT_MIN)
-                audio_output = YamahaYM2612::Operator::OUTPUT_MIN;
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
-            const auto sample = audio_output / static_cast<float>(1 << 13);
+            const auto sample = YamahaYM2612::Voice4Op::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
         }
         if (lightDivider.process()) {

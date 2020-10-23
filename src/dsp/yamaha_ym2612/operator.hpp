@@ -158,7 +158,7 @@ struct OperatorContext {
                 lfo_cnt = (lfo_cnt + 1) & 127;
                 // triangle (inverted)
                 // AM: from 126 to 0 step -2, 0 to 126 step +2
-                if (lfo_cnt<64)
+                if (lfo_cnt < 64)
                     lfo_AM_step = (lfo_cnt ^ 63) << 1;
                 else
                     lfo_AM_step = (lfo_cnt & 63) << 1;
@@ -171,12 +171,6 @@ struct OperatorContext {
 
 /// @brief A single FM operator
 struct Operator {
- public:
-    /// the maximal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MAX = 8191;
-    /// the minimal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MIN = -8192;
-
  private:
     /// attack rate
     uint32_t ar = 0;
@@ -560,7 +554,7 @@ struct Operator {
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_phase_and_envelope(uint32_t fnum_max) {
+    inline void refresh_phase_and_envelope() {
         fc += DT[kcode];
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;

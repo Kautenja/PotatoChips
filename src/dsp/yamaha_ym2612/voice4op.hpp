@@ -33,6 +33,24 @@ struct Voice4Op {
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
+    /// the maximal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MAX = 8191;
+    /// the minimal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MIN = -8192;
+
+    /// @brief clip the given sample to 14 bits.
+    ///
+    /// @param sample the sample to clip to 14 bits
+    /// @returns the sample after clipping to 14 bits
+    ///
+    static inline int16_t clip(int16_t sample) {
+        if (sample > OUTPUT_MAX)
+            return OUTPUT_MAX;
+        else if (sample < OUTPUT_MIN)
+            return OUTPUT_MIN;
+        return sample;
+    }
+
  private:
     /// general state
     OperatorContext state;
@@ -350,7 +368,7 @@ struct Voice4Op {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fnum_max);
+                oprtr.refresh_phase_and_envelope();
             update_phase_increment = false;
         }
         // clear the audio output
@@ -413,13 +431,6 @@ struct Voice4Op {
             for (Operator& oprtr : operators)
                 oprtr.update_envelope_generator(state.eg_cnt);
         }
-        // -------------------------------------------------------------------
-        // clipping
-        // -------------------------------------------------------------------
-        // if (audio_output > Operator::OUTPUT_MAX)
-        //     audio_output = Operator::OUTPUT_MAX;
-        // else if (audio_output < Operator::OUTPUT_MIN)
-        //     audio_output = Operator::OUTPUT_MIN;
 
         return audio_output;
     }

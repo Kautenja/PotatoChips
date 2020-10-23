@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp_common.hpp"
+#include "dsp/sony_s_dsp/common.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 

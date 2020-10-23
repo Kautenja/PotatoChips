@@ -15,7 +15,7 @@
 
 #include <limits>
 #include "plugin.hpp"
-#include "dsp/sony_s_dsp_adsr.hpp"
+#include "dsp/sony_s_dsp/adsr.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

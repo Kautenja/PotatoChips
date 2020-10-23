@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/sony_s_dsp_echo.hpp"
+#include "dsp/sony_s_dsp/echo.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

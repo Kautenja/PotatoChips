@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/sony_s_dsp_gaussian.hpp"
+#include "dsp/sony_s_dsp/gaussian_filter.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

@@ -1,4 +1,4 @@
-// Test cases for the Sony S-DSP Echo emulator.
+// Test cases for the Sony S-DSP BRR sampler emulator.
 //
 // Copyright (c) 2020 Christian Kauten
 //
@@ -21,14 +21,14 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp_echo.hpp"
+#include "dsp/sony_s_dsp/brr.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_Echo
+// MARK: sizeof Sony_S_DSP_BRR
 // ---------------------------------------------------------------------------
 
-// TEST_CASE("Sony_S_DSP_Echo should be 16 bytes") {
-//     REQUIRE(16 == sizeof(Sony_S_DSP_Echo));
-// }
+TEST_CASE("Sony_S_DSP_BRR should be 4 bytes") {
+    REQUIRE(32 == sizeof(Sony_S_DSP_BRR));
+}

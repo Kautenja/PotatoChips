@@ -18,7 +18,7 @@
 #ifndef DSP_SONY_S_DSP_BRR_HPP_
 #define DSP_SONY_S_DSP_BRR_HPP_
 
-#include "sony_s_dsp_common.hpp"
+#include "common.hpp"
 
 /// @brief An emulation of the BRR sample playback engine from the Sony S-DSP.
 class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {

@@ -18,8 +18,8 @@
 #ifndef DSP_SONY_S_DSP_HPP_
 #define DSP_SONY_S_DSP_HPP_
 
-#include "exceptions.hpp"
-#include "sony_s_dsp_common.hpp"
+#include "../exceptions.hpp"
+#include "common.hpp"
 #include <cstring>
 
 /// @brief Sony S-DSP chip emulator.

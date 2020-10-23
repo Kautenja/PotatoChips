@@ -1,4 +1,4 @@
-// Test cases for the Sony S-DSP ADSR emulator.
+// Test cases for the Sony S-DSP emulator.
 //
 // Copyright (c) 2020 Christian Kauten
 //
@@ -21,14 +21,25 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp_gaussian.hpp"
+#include "dsp/sony_s_dsp/sony_s_dsp.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_Gaussian
+// MARK: Sony_S_DSP::GlobalData
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_Gaussian should be 16 bytes") {
-    REQUIRE(16 == sizeof(Sony_S_DSP_Gaussian));
+TEST_CASE("Sony_S_DSP::GlobalData should be the size of NUM_REGISTERS") {
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS == sizeof(Sony_S_DSP::GlobalData));
 }
+
+// ---------------------------------------------------------------------------
+// MARK: Sony_S_DSP::RawVoice
+// ---------------------------------------------------------------------------
+
+TEST_CASE("Sony_S_DSP::RawVoice should be NUM_REGISTERS / VOICE_COUNT bytes") {
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS / Sony_S_DSP::VOICE_COUNT == sizeof(Sony_S_DSP::RawVoice));
+    Sony_S_DSP::RawVoice voices[Sony_S_DSP::VOICE_COUNT];
+    REQUIRE(Sony_S_DSP::NUM_REGISTERS == sizeof(voices));
+}
+

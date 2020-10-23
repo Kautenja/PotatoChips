@@ -21,14 +21,14 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp_adsr.hpp"
+#include "dsp/sony_s_dsp/gaussian_filter.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_ADSR
+// MARK: sizeof Sony_S_DSP_Gaussian
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_ADSR should be 8 bytes") {
-    REQUIRE(8 == sizeof(Sony_S_DSP_ADSR));
+TEST_CASE("Sony_S_DSP_Gaussian should be 16 bytes") {
+    REQUIRE(16 == sizeof(Sony_S_DSP_Gaussian));
 }

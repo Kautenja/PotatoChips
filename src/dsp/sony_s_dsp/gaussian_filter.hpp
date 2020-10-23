@@ -18,7 +18,7 @@
 #ifndef DSP_SONY_S_DSP_GAUSSIAN_HPP_
 #define DSP_SONY_S_DSP_GAUSSIAN_HPP_
 
-#include "sony_s_dsp_common.hpp"
+#include "common.hpp"
 
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 /// @details

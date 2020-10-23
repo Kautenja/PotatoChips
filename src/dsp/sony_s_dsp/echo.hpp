@@ -19,7 +19,7 @@
 #define DSP_SONY_S_DSP_ECHO_HPP_
 
 #include <cstring>
-#include "sony_s_dsp_common.hpp"
+#include "common.hpp"
 
 /// @brief An emulation of the echo effect from the Sony S-DSP.
 class Sony_S_DSP_Echo {

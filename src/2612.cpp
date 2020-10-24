@@ -131,21 +131,23 @@ struct Chip2612 : rack::Module {
         configParam(PARAM_AL,  0, 7, 7, "Algorithm");
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
+        configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
             // 70 cause the operator to drop below usable levels
-            configParam(PARAM_AR         + i, 1, 31,  31, opName + " Attack Rate");
-            configParam(PARAM_TL         + i, 0, 70,  70, opName + " Total Level");
-            configParam(PARAM_D1         + i, 0, 31,  0,  opName + " 1st Decay Rate");
-            configParam(PARAM_SL         + i, 0, 15,  15, opName + " Sustain Level");
-            configParam(PARAM_D2         + i, 0, 31,  0,  opName + " 2nd Decay Rate");
-            configParam(PARAM_RR         + i, 0, 15,  15, opName + " Release Rate");
-            configParam(PARAM_MUL        + i, 0, 15,  1,  opName + " Multiplier");
-            configParam(PARAM_RS         + i, 0, 3,   0,  opName + " Rate Scaling");
-            configParam(PARAM_SSG_ENABLE + i, 0, 1,   0,  opName + " Looping Envelope Enable");
-            configParam(PARAM_AMS        + i, 0, 3,   0,  opName + " Amplitude modulation sensitivity");
-            configParam(PARAM_FMS        + i, 0, 7,   0,  opName + " Frequency modulation sensitivity");
+            configParam(PARAM_FREQ       + i, -5.f, 5.f, 0.f, opName + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_AR         + i,  1,    31,  31, opName + " Attack Rate");
+            configParam(PARAM_TL         + i,  0,   100, 100, opName + " Total Level");
+            configParam(PARAM_D1         + i,  0,    31,   0, opName + " 1st Decay Rate");
+            configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
+            configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
+            configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
+            configParam(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier");
+            configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
+            configParam(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope Enable");
+            configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
+            configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
         }
         // reset the emulator
         onSampleRateChange();
@@ -160,6 +162,18 @@ struct Chip2612 : rack::Module {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
             apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    /// @brief Return the value of the mix parameter from the panel.
+    ///
+    /// @returns the 8-bit saturation value
+    ///
+    inline int32_t getSaturation(unsigned channel) {
+        const float param = params[PARAM_SATURATION].getValue();
+        const float cv = inputs[INPUT_SATURATION].getPolyVoltage(channel) / 10.f;
+        const float mod = std::numeric_limits<int8_t>::max() * cv;
+        static constexpr float MAX = std::numeric_limits<int8_t>::max();
+        return clamp(param + mod, 0.f, MAX);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -182,7 +196,7 @@ struct Chip2612 : rack::Module {
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level   (op, 70 - getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 70 ));
+            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 100 ));
             apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
             apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
@@ -194,8 +208,9 @@ struct Chip2612 : rack::Module {
             apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
             // Compute the frequency from the pitch parameter and input.
+            float frequency = params[PARAM_FREQ + op].getValue();
             pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-            apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(pitch, -6.5f, 6.5f)));
+            apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
             gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
@@ -233,13 +248,14 @@ struct Chip2612 : rack::Module {
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
-            const int16_t audio_output = apu[channel].step();
+            const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
             // update the VU meter before clipping to more accurately detect it
             vuMeter.process(args.sampleTime, audio_output / static_cast<float>(1 << 13));
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Voice4Op::clip(audio_output) / static_cast<float>(1 << 13);
-            outputs[OUTPUT_MASTER].setVoltage(5.f * sample, channel);
+            outputs[OUTPUT_MASTER + 0].setVoltage(5.f * sample, channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(5.f * sample, channel);
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
@@ -314,7 +330,7 @@ struct Chip2612Widget : ModuleWidget {
             addParam(createParam<CKSS>(Vec(216 + offset, 203), module, Chip2612::PARAM_SSG_ENABLE + i));
             addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, Chip2612::PARAM_RS + i));
             // Frequency and modulation
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, Chip2612::PARAM_FREQ + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, Chip2612::PARAM_FREQ + i));
             addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, Chip2612::PARAM_MUL + i));
             addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, Chip2612::PARAM_AMS + i));
             addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, Chip2612::PARAM_FMS + i));

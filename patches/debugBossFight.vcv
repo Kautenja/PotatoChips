@@ -558,14 +558,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 1413,
-      "outputModuleId": 142,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#c91847"
-    },
-    {
       "id": 1414,
       "outputModuleId": 142,
       "outputId": 0,

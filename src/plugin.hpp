@@ -29,7 +29,7 @@ extern rack::Plugin* plugin_instance;
 // pointers to each module in the plug-in
 
 extern rack::Model *modelChip106;
-extern rack::Model *modelChip2612;
+extern rack::Model *modelBossFight;
 extern rack::Model *modelChip2A03;
 extern rack::Model *modelChipAY_3_8910;
 extern rack::Model *modelChipFME7;

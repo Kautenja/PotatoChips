@@ -25,7 +25,7 @@ Plugin* plugin_instance;
 void init(Plugin* instance) {
     plugin_instance = instance;
     instance->addModel(modelChip106);
-    instance->addModel(modelChip2612);
+    instance->addModel(modelBossFight);
     instance->addModel(modelChip2A03);
     instance->addModel(modelChipAY_3_8910);
     instance->addModel(modelChipFME7);

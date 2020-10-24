@@ -20,6 +20,8 @@
 #ifndef DSP_YAMAHA_YM2612_VOICE4OP_HPP_
 #define DSP_YAMAHA_YM2612_VOICE4OP_HPP_
 
+// TODO: remove detune
+
 #include "operator.hpp"
 
 /// @brief Yamaha YM2612 emulation components.
@@ -32,6 +34,24 @@ struct Voice4Op {
     static constexpr unsigned NUM_OPERATORS = 4;
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
+
+    /// the maximal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MAX = 8191;
+    /// the minimal value that an operator can output (signed 14-bit)
+    static constexpr int32_t OUTPUT_MIN = -8192;
+
+    /// @brief clip the given sample to 14 bits.
+    ///
+    /// @param sample the sample to clip to 14 bits
+    /// @returns the sample after clipping to 14 bits
+    ///
+    static inline int16_t clip(int16_t sample) {
+        if (sample > OUTPUT_MAX)
+            return OUTPUT_MAX;
+        else if (sample < OUTPUT_MIN)
+            return OUTPUT_MIN;
+        return sample;
+    }
 
  private:
     /// general state
@@ -210,22 +230,6 @@ struct Voice4Op {
     ///
     inline void set_lfo(uint8_t value) { state.set_lfo(value); }
 
-    /// @brief Set the AM sensitivity (AMS) register for the given voice.
-    ///
-    /// @param value the amount of amplitude modulation (AM) sensitivity
-    ///
-    inline void set_am_sensitivity(uint8_t value) {
-        state.set_am_sensitivity(value);
-    }
-
-    /// @brief Set the FM sensitivity (FMS) register for the given voice.
-    ///
-    /// @param value the amount of frequency modulation (FM) sensitivity
-    ///
-    inline void set_fm_sensitivity(uint8_t value) {
-        state.set_fm_sensitivity(value);
-    }
-
     // -----------------------------------------------------------------------
     // MARK: Operator Parameter Settings
     // -----------------------------------------------------------------------
@@ -246,15 +250,6 @@ struct Voice4Op {
     ///
     inline void set_gate(uint8_t op_index, bool is_open, bool prevent_clicks = false) {
         operators[OPERATOR_INDEXES[op_index]].set_gate(is_open, prevent_clicks);
-    }
-
-    /// @brief Set whether SSG envelopes are enabled for the given operator.
-    ///
-    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
-    /// @param is_on whether the looping envelope generator should be turned on
-    ///
-    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
-        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -338,13 +333,29 @@ struct Voice4Op {
         update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
     }
 
-    /// @brief Set the amplitude modulation (AM) register for the given voice and operator.
+    /// @brief Set whether SSG envelopes are enabled for the given operator.
     ///
-    /// @param op_index the operator to set the amplitude modulation (AM) register of (in [0, 3])
-    /// @param value the true to enable amplitude modulation from the LFO, false to disable it
+    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
+    /// @param is_on whether the looping envelope generator should be turned on
     ///
-    inline void set_am_enabled(uint8_t op_index, bool value) {
-        operators[OPERATOR_INDEXES[op_index]].is_amplitude_mod_on = value;
+    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
+        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
+    }
+
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_am_sensitivity(value);
+    }
+
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void set_fm_sensitivity(uint8_t op_index, uint8_t value) {
+        operators[OPERATOR_INDEXES[op_index]].set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------
@@ -359,7 +370,7 @@ struct Voice4Op {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope(state.fnum_max);
+                oprtr.refresh_phase_and_envelope();
             update_phase_increment = false;
         }
         // clear the audio output
@@ -422,13 +433,6 @@ struct Voice4Op {
             for (Operator& oprtr : operators)
                 oprtr.update_envelope_generator(state.eg_cnt);
         }
-        // -------------------------------------------------------------------
-        // clipping
-        // -------------------------------------------------------------------
-        // if (audio_output > Operator::OUTPUT_MAX)
-        //     audio_output = Operator::OUTPUT_MAX;
-        // else if (audio_output < Operator::OUTPUT_MIN)
-        //     audio_output = Operator::OUTPUT_MIN;
 
         return audio_output;
     }

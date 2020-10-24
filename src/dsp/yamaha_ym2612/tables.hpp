@@ -36,8 +36,6 @@ enum FixedPointBits {
     ENV_BITS = 10,
     /// the number of bits for addressing the sine table
     SIN_BITS = 10,
-    /// 16.16 fixed point (timers calculations)
-    TIMER_SH = 16,
     /// 16.16 fixed point (frequency calculations)
     FREQ_SH  = 16,
     /// 16.16 fixed point (envelope generator timing)

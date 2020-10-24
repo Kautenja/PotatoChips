@@ -20,6 +20,8 @@
 #ifndef DSP_YAMAHA_YM2612_OPERATOR_HPP_
 #define DSP_YAMAHA_YM2612_OPERATOR_HPP_
 
+// TODO: remove detune
+
 #include "../exceptions.hpp"
 #include "tables.hpp"
 
@@ -63,11 +65,6 @@ struct OperatorContext {
     /// current LFO PM step
     uint32_t lfo_PM_step = 0;
 
-    /// phase modulation sensitivity (PMS)
-    int32_t pms = 0;
-    /// amplitude modulation sensitivity (AMS)
-    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
-
     /// @brief Reset the operator state to it's initial values.
     inline void reset() {
         eg_timer = 0;
@@ -76,8 +73,6 @@ struct OperatorContext {
         lfo_cnt = 0;
         lfo_AM_step = 126;
         lfo_PM_step = 0;
-        pms = 0;
-        ams = LFO_AMS_DEPTH_SHIFT[0];
         set_lfo(0);
     }
 
@@ -152,22 +147,6 @@ struct OperatorContext {
         lfo_timer_overflow = LFO_SAMPLES_PER_STEP[value & 7] << LFO_SH;
     }
 
-    /// @brief Set the FM sensitivity (FMS) register for the given voice.
-    ///
-    /// @param value the amount of frequency modulation (FM) sensitivity
-    ///
-    inline void set_fm_sensitivity(uint8_t value) {
-        pms = (value & 7) * 32;
-    }
-
-    /// @brief Set the AM sensitivity (AMS) register for the given voice.
-    ///
-    /// @param value the amount of amplitude modulation (AM) sensitivity
-    ///
-    inline void set_am_sensitivity(uint8_t value) {
-        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
-    }
-
     /// @brief Advance LFO to next sample.
     inline void advance_lfo() {
         if (lfo_timer_overflow) {  // LFO enabled
@@ -181,7 +160,7 @@ struct OperatorContext {
                 lfo_cnt = (lfo_cnt + 1) & 127;
                 // triangle (inverted)
                 // AM: from 126 to 0 step -2, 0 to 126 step +2
-                if (lfo_cnt<64)
+                if (lfo_cnt < 64)
                     lfo_AM_step = (lfo_cnt ^ 63) << 1;
                 else
                     lfo_AM_step = (lfo_cnt & 63) << 1;
@@ -190,23 +169,10 @@ struct OperatorContext {
             }
         }
     }
-
-    /// @brief Return the amount of amplitude modulation.
-    ///
-    /// @returns the amount of AM for the operator based on the AM sensitivity
-    /// and current LFO value
-    ///
-    inline uint32_t get_AM() const { return lfo_AM_step >> ams; }
 };
 
 /// @brief A single FM operator
 struct Operator {
- public:
-    /// the maximal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MAX = 8191;
-    /// the minimal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MIN = -8192;
-
  private:
     /// attack rate
     uint32_t ar = 0;
@@ -230,11 +196,15 @@ struct Operator {
     uint32_t phase = 0;
     /// phase step
     int32_t phase_increment = -1;
+    /// phase modulation sensitivity (PMS)
+    int32_t pms = 0;
 
     /// envelope counter
     int32_t volume = 0;
     /// current output from EG circuit (without AM from LFO)
     uint32_t vol_out = 0;
+    /// amplitude modulation sensitivity (AMS)
+    uint8_t ams = LFO_AMS_DEPTH_SHIFT[0];
 
     /// key scale rate :3-KSR
     uint8_t KSR = 0;
@@ -287,8 +257,6 @@ struct Operator {
  public:
     /// whether the gate for the envelope generator is open
     bool is_gate_open = false;
-    /// whether amplitude modulation is enabled for the operator
-    bool is_amplitude_mod_on = false;
 
     /// @brief Reset the operator to its initial / default value.
     ///
@@ -306,7 +274,8 @@ struct Operator {
         kcode = FREQUENCY_KEYCODE_TABLE[0];
         block_fnum = 0;
         is_gate_open = false;
-        is_amplitude_mod_on = false;
+        pms = 0;
+        ams = LFO_AMS_DEPTH_SHIFT[0];
         set_rs(0);
         set_ar(0);
         set_tl(0);
@@ -315,6 +284,22 @@ struct Operator {
         set_sr(0);
         set_rr(0);
         set_ssg_enabled(false);
+    }
+
+    /// @brief Set the FM sensitivity (FMS) register for the given voice.
+    ///
+    /// @param value the amount of frequency modulation (FM) sensitivity
+    ///
+    inline void set_fm_sensitivity(uint8_t value) {
+        pms = (value & 7) * 32;
+    }
+
+    /// @brief Set the AM sensitivity (AMS) register for the given voice.
+    ///
+    /// @param value the amount of amplitude modulation (AM) sensitivity
+    ///
+    inline void set_am_sensitivity(uint8_t value) {
+        ams = LFO_AMS_DEPTH_SHIFT[value & 3];
     }
 
     // -----------------------------------------------------------------------
@@ -571,7 +556,7 @@ struct Operator {
     }
 
     /// @brief Update phase increment and envelope generator
-    inline void refresh_phase_and_envelope(uint32_t fnum_max) {
+    inline void refresh_phase_and_envelope() {
         fc += DT[kcode];
         // (frequency) phase increment counter
         phase_increment = (fc * mul) >> 1;
@@ -599,12 +584,9 @@ struct Operator {
     /// @brief Get the envelope volume based on amplitude modulation level.
     ///
     /// @param state the context the operator is running in
-    /// @details
-    /// `state.get_AM()` is only applied to the envelope if
-    /// `this->is_amplitude_mod_on` is set to `true`.
     ///
     inline uint32_t get_envelope(const OperatorContext& state) const {
-        return vol_out + is_amplitude_mod_on * state.get_AM();
+        return vol_out + (state.lfo_AM_step >> ams);
     }
 
     /// @brief Return the value of operator (1) given envelope and PM.
@@ -631,8 +613,8 @@ struct Operator {
     ///
     inline void update_phase_counters(const OperatorContext& state) {
         const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + state.pms + state.lfo_PM_step];
-        if (state.pms && lfo_fnum_offset) {  // update the phase using the LFO
+        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        if (pms && lfo_fnum_offset) {  // update the phase using the LFO
             uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
             const uint8_t blk = (fnum & 0x7000) >> 12;
             fnum = fnum & 0xfff;

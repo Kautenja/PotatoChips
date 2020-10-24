@@ -1,5 +1,4 @@
 \documentclass[12pt,letter]{article}
-\usepackage[margin=1in]{geometry}
 \usepackage[moduleName={Boss Fight}]{KautenjaDSP}
 % import a debugging package to show the margin boxes
 % \usepackage{showframe}
@@ -19,9 +18,7 @@
 
 \section*{Overview}
 
-Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Mega Drive and Sega Genesis.
-
-Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612 chip, in addition to some hacks, omissions, and re-envisioned features, namely,
+Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Mega Drive and Sega Genesis. Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks, omissions, and re-envisioned features, namely,
 \begin{itemize}
   \item \textbf{16-bit Audio:} It's 8 bits better than the previous generation of chips! This is marketing! We're actually lying though -- the YM2612 produced a \textit{14-bit} PCM stream, and so does BossFight. You're not getting those 2 bits back; go cry about it.
   \item \textbf{4-Operator FM Synthesis:} Full panel and CV control over the parameters for each of the four operators including envelopes, multipliers, rate scalings, tunings, gates, and LFO modulations.

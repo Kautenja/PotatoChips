@@ -116,10 +116,9 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 
 Boss Fight is an emulation and re-envisioning of the Yamaha
 [Yamaha YM2612][YM2612] audio processing unit from the
-[Sega Mega Drive & Sega Genesis][SegaMD].
-
-Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612
-chip, in addition to some hacks, omissions, and re-envisioned features, namely,
+[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
+functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
+omissions, and re-envisioned features, namely,
 
 <p align="center">
 <img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">

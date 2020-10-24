@@ -24,7 +24,7 @@
     {
       "slug": "2612",
       "name": "Boss Fight",
-      "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Master System and Sega Mega Drive.",
+      "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive and Sega Genesis.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Boss_Fight.pdf",
       "tags": [
         "Noise",
@@ -35,7 +35,7 @@
     },
     {
       "slug": "2612_Blank1",
-      "name": "Boss Fight Envelope Generator Blank",
+      "name": "Boss Fight Envelope Generator (Blank)",
       "description": "A blank panel with an illustration of the envelope generator from Boss Fight.",
       "tags": [
         "Blank"

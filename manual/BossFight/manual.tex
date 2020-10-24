@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,letter]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage[moduleName={Boss Fight}]{KautenjaDSP}
 % import a debugging package to show the margin boxes
@@ -17,7 +17,7 @@
 % MARK: Overview
 % -------------------
 
-\section{Overview}
+\section*{Overview}
 
 Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Mega Drive and Sega Genesis.
 
@@ -43,7 +43,7 @@ Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612 ch
 % -------------------
 
 \clearpage
-\section{Panel Layout}
+\section*{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
@@ -118,6 +118,29 @@ Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612 ch
 \label{fig:envelope-generator}
 \includegraphics[width=\maxwidth{\textwidth}]{envelope}
 \end{figure}
+
+\clearpage
+\section*{Data Sheet}
+
+\begin{table}[!htp]
+\begin{tabular}{|l|l|}
+\hline
+Type             & Oscillator / Synth voice \\
+\hline
+Size             & 66 HP Eurorack           \\
+\hline
+Depth            & NA                       \\
+\hline
+Power            & NA                       \\ % 2 x 5 Eurorack
+\hline
+$+12V$ draw (mA) & 0 mA                     \\
+\hline
+$-12V$ draw (mA) & 0 mA                     \\
+\hline
+$+5V$ draw (mA)  & 0 mA                     \\
+\hline
+\end{tabular}
+\end{table}
 
 % -------------------
 % MARK: References

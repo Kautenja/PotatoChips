@@ -19,16 +19,24 @@
 
 \section{Overview}
 
-2612 is an emulation of the Yamaha YM2612 audio processing unit from the Sega Master System and Sega Genesis for VCV Rack. The YM2612 is a 4-operator FM synthesis chip with 6 voices of polyphony.
+BossFight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Master System and Sega Genesis.
 
-2612 provides the key features of the Yamaha YM2612 chip, namely,
+BossFight provides many of the key features of the Yamaha YM2612 chip, in addition to some hacks, omissions, and re-envisioned features, namely,
 \begin{itemize}
-  \item \textbf{16-bit:} 8 bits better than the previous generation of chips!
-  \item \textbf{6 Voice Polyphony:} 6 independent synthesis voices with independent V/OCT and Gate inputs (summed into a single mix output).
-  \item \textbf{4-Operator FM Synthesis:} Full control over the FM-synthesis parameters for each of the four operators including: envelopes, multiplier, rate scale, tuning, and amplitude modulation.
-  \item \textbf{8 FM Algorithms:} 8 different arrangements of the four operators.
-  \item \textbf{Stereo Outputs:} Output from the left and right channels on the chip.
+  \item \textbf{16-bit Audio:} It's 8 bits better than the previous generation of chips! This is marketing! We're actually lying though -- the YM2612 produced a \textit{14-bit} PCM stream, and so does BossFight. You're not getting those 2 bits back; go cry about it.
+  \item \textbf{4-Operator FM Synthesis:} Full panel and CV control over the parameters for each of the four operators including envelopes, multipliers, rate scalings, tunings, gates, and LFO modulations.
+  \item \textbf{8 FM Algorithms:} 8 different arrangements of the four operators following the original chip implementation.
+  \item \textbf{Operator 1 Feedback:} Feedback into operator one for interesting timbres or total wave destruction.
+  \item \textbf{Individual Operator Frequencies:} Control the frequency of each operator to produce weird, harsh, and trashed noises.
+  \item \textbf{Looping Envelopes:} Transform the one-shot envelope generators of individual operators into looping AD envelopes.
+  \item \textbf{Aliasing Control:} The YM2612 hard clips the output signal when it gets too loud. This is both a musically useful effect for introducing high-order harmonics, as well as aliasing. Nyquist lied to you, aliasing is your friend. However, if you are not a fan of clipping and aliasing, aliasing control allows you to attenuate the output signal from the chip \textit{before} it passes through the hard clipper to prevent fully saturating the 14-bit PCM stream.
+  \item \textbf{VU Meter:} A VU meter tracks how hot the signal from BossFight is getting and makes it easy to visualize how much clipping is occurring.
+  \item \textbf{Low-Frequency Oscillator:} A shared low-frequency oscillator controls amplitude modulation and frequency modulation of each operator.
+  \item \textbf{Mono Output:} The original YM2612 was stereo, but only because it had six channels of synthesis. Boss Fight is a monophonic voice so there is no built-in stereo processing.
+  \item \textbf{Semi-Modular Normalization:} Inputs are normalled forward across the operators to reduce the amount of patch cables for setting up simple patches quickly.
 \end{itemize}
+
+% $0dB$ denotes full saturation of the 14-bit PCM stream. The VU meter tracks up to $+3dB$ to provide visual feedback for how much output clipping is occurring.
 
 % -------------------
 % MARK: Panel Layout

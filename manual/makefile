@@ -8,10 +8,6 @@ m106: build
 	make -C 106
 	cp 106/build/manual.pdf build/106.pdf
 
-m2612: build
-	make -C 2612
-	cp 2612/build/manual.pdf build/2612.pdf
-
 m2A03: build
 	make -C 2A03
 	cp 2A03/build/manual.pdf build/2A03.pdf
@@ -19,6 +15,10 @@ m2A03: build
 mAY38910: build
 	make -C AY-3-8910
 	cp AY-3-8910/build/manual.pdf build/AY-3-8910.pdf
+
+mBossFight: build
+	make -C BossFight
+	cp BossFight/build/manual.pdf build/BossFight.pdf
 
 mFME7: build
 	make -C FME7
@@ -56,4 +56,4 @@ mSSMPGauss: build
 	make -C S_SMP_Gauss
 	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
 
-manual: m106 m2612 m2A03 mAY38910 mFME7 mGBS mPOKEY mSCC mSN76489 mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss
+manual: m106 m2A03 mAY38910 mBossFight mFME7 mGBS mPOKEY mSCC mSN76489 mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss

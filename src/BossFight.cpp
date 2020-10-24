@@ -24,10 +24,10 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Yamaha YM2612 chip emulator module.
-struct Chip2612 : rack::Module {
+/// A Eurorack module based on the Yamaha YM2612.
+struct BossFight : rack::Module {
  private:
-    /// the YM2612 chip emulator
+    /// a YM2612 chip emulator
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
@@ -121,8 +121,8 @@ struct Chip2612 : rack::Module {
     /// the current FM algorithm
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-    /// Initialize a new Yamaha YM2612 module.
-    Chip2612() {
+    /// Initialize a new Boss Fight module.
+    BossFight() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
         configParam(PARAM_AL,  0, 7, 7, "Algorithm");
@@ -269,13 +269,13 @@ struct Chip2612 : rack::Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for 2612.
-struct Chip2612Widget : ModuleWidget {
+/// The panel widget for BossFight.
+struct BossFightWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit Chip2612Widget(Chip2612 *module) {
+    explicit BossFightWidget(BossFight *module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
         // Panel Screws
@@ -286,7 +286,7 @@ struct Chip2612Widget : ModuleWidget {
         // Algorithm Display
         addChild(new IndexedFrameDisplay(
             [&]() {
-                return this->module ? reinterpret_cast<Chip2612*>(this->module)->algorithm[0] : 0;
+                return this->module ? reinterpret_cast<BossFight*>(this->module)->algorithm[0] : 0;
             },
             "res/BossFight_algorithms/",
             YamahaYM2612::Voice4Op::NUM_ALGORITHMS,
@@ -294,51 +294,51 @@ struct Chip2612Widget : ModuleWidget {
             Vec(110, 70)
         ));
         // Algorithm, Feedback, LFO, Saturation
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, Chip2612::PARAM_AL));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, Chip2612::PARAM_FB));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, Chip2612::PARAM_LFO));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, Chip2612::PARAM_SATURATION));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, BossFight::PARAM_AL));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, BossFight::PARAM_FB));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, BossFight::PARAM_LFO));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, BossFight::PARAM_SATURATION));
         // Saturation Indicator
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, Chip2612::VU_LIGHTS + 0));
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, Chip2612::VU_LIGHTS + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, Chip2612::VU_LIGHTS + 2));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, Chip2612::VU_LIGHTS + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, Chip2612::VU_LIGHTS + 4));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, Chip2612::VU_LIGHTS + 5));
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, BossFight::VU_LIGHTS + 0));
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, BossFight::VU_LIGHTS + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, BossFight::VU_LIGHTS + 2));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, BossFight::VU_LIGHTS + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, BossFight::VU_LIGHTS + 4));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, BossFight::VU_LIGHTS + 5));
         // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, Chip2612::INPUT_AL));
-        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, Chip2612::INPUT_FB));
-        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, Chip2612::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, Chip2612::INPUT_SATURATION));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, Chip2612::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, Chip2612::OUTPUT_MASTER + 1));
+        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
+        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
+        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
+        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
+        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
         // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             auto offset = i * 210;
             // ADSR
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, Chip2612::PARAM_AR + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, Chip2612::PARAM_TL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, Chip2612::PARAM_D1 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, Chip2612::PARAM_SL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, Chip2612::PARAM_D2 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, Chip2612::PARAM_RR + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, BossFight::PARAM_AR + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, BossFight::PARAM_TL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, BossFight::PARAM_D1 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, BossFight::PARAM_SL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, BossFight::PARAM_D2 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, BossFight::PARAM_RR + i));
             // Looping ADSR, Key Scaling
-            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, Chip2612::PARAM_SSG_ENABLE + i));
-            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, Chip2612::PARAM_RS + i));
+            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, BossFight::PARAM_SSG_ENABLE + i));
+            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, BossFight::PARAM_RS + i));
             // Frequency and modulation
-            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, Chip2612::PARAM_FREQ + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, Chip2612::PARAM_MUL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, Chip2612::PARAM_AMS + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, Chip2612::PARAM_FMS + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, BossFight::PARAM_FREQ + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, BossFight::PARAM_MUL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, BossFight::PARAM_AMS + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, BossFight::PARAM_FMS + i));
             // Input Ports
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {
                 const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, Chip2612::INPUT_AR + 4 * j + i));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, Chip2612::INPUT_GATE + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
             }
         }
     }
 };
 
-Model *modelChip2612 = createModel<Chip2612, Chip2612Widget>("2612");
+Model *modelBossFight = createModel<BossFight, BossFightWidget>("2612");

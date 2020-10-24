@@ -1,6 +1,6 @@
 \documentclass[12pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage[moduleName=2612]{KautenjaDSP}
+\usepackage[moduleName={Boss Fight}]{KautenjaDSP}
 % import a debugging package to show the margin boxes
 % \usepackage{showframe}
 % set the graphics path to the img directory
@@ -19,9 +19,9 @@
 
 \section{Overview}
 
-BossFight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Master System and Sega Genesis.
+Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Mega Drive and Sega Genesis.
 
-BossFight provides many of the key features of the Yamaha YM2612 chip, in addition to some hacks, omissions, and re-envisioned features, namely,
+Boss Fight provides the key functionality of the 3rd channel of Yamaha YM2612 chip, in addition to some hacks, omissions, and re-envisioned features, namely,
 \begin{itemize}
   \item \textbf{16-bit Audio:} It's 8 bits better than the previous generation of chips! This is marketing! We're actually lying though -- the YM2612 produced a \textit{14-bit} PCM stream, and so does BossFight. You're not getting those 2 bits back; go cry about it.
   \item \textbf{4-Operator FM Synthesis:} Full panel and CV control over the parameters for each of the four operators including envelopes, multipliers, rate scalings, tunings, gates, and LFO modulations.
@@ -31,7 +31,7 @@ BossFight provides many of the key features of the Yamaha YM2612 chip, in additi
   \item \textbf{Looping Envelopes:} Transform the one-shot envelope generators of individual operators into looping AD envelopes.
   \item \textbf{Aliasing Control:} The YM2612 hard clips the output signal when it gets too loud. This is both a musically useful effect for introducing high-order harmonics, as well as aliasing. Nyquist lied to you, aliasing is your friend. However, if you are not a fan of clipping and aliasing, aliasing control allows you to attenuate the output signal from the chip \textit{before} it passes through the hard clipper to prevent fully saturating the 14-bit PCM stream.
   \item \textbf{VU Meter:} A VU meter tracks how hot the signal from BossFight is getting and makes it easy to visualize how much clipping is occurring.
-  \item \textbf{Low-Frequency Oscillator:} A shared low-frequency oscillator controls amplitude modulation and frequency modulation of each operator.
+  \item \textbf{Low-Frequency Oscillator:} A shared low-frequency sine oscillator controls amplitude modulation and frequency modulation of each operator.
   \item \textbf{Mono Output:} The original YM2612 was stereo, but only because it had six channels of synthesis. Boss Fight is a monophonic voice so there is no built-in stereo processing.
   \item \textbf{Semi-Modular Normalization:} Inputs are normalled forward across the operators to reduce the amount of patch cables for setting up simple patches quickly.
 \end{itemize}

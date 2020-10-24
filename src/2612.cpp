@@ -74,12 +74,10 @@ struct Chip2612 : rack::Module {
         ENUMS(PARAM_SL,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_D2,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_RR,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
         ENUMS(PARAM_FREQ,       YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_MUL,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_AMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_FMS,        YamahaYM2612::Voice4Op::NUM_OPERATORS),
-
         ENUMS(PARAM_RS,         YamahaYM2612::Voice4Op::NUM_OPERATORS),
         ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice4Op::NUM_OPERATORS),
         NUM_PARAMS
@@ -195,9 +193,9 @@ struct Chip2612 : rack::Module {
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL         + op, INPUT_TL         + op, 100 ));
+            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL   + op, INPUT_TL         + op, 100));
             apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL         + op, INPUT_SL         + op, 15 ));
+            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL    + op, INPUT_SL         + op, 15 ));
             apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
             apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
             apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
@@ -223,7 +221,6 @@ struct Chip2612 : rack::Module {
             // already gated voice
             apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].state);
         }
-
     }
 
     /// @brief Process a sample.

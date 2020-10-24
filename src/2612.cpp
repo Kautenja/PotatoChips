@@ -19,7 +19,6 @@
 #include "widget/indexed_frame_display.hpp"
 
 // TODO: option to prevent clicks in context menu
-// TODO: trim pots for inputs
 
 // ---------------------------------------------------------------------------
 // MARK: Module

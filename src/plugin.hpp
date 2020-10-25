@@ -27,9 +27,7 @@ static constexpr uint32_t CLOCK_RATE = 768000;
 extern rack::Plugin* plugin_instance;
 
 // pointers to each module in the plug-in
-
 extern rack::Model *modelChip106;
-extern rack::Model *modelBossFight;
 extern rack::Model *modelChip2A03;
 extern rack::Model *modelChipAY_3_8910;
 extern rack::Model *modelChipFME7;
@@ -41,9 +39,11 @@ extern rack::Model *modelChipS_SMP_BRR;
 extern rack::Model *modelChipS_SMP_Echo;
 extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;
-extern rack::Model *modelChipSN76489;
 extern rack::Model *modelChipTurboGrafx16;
 extern rack::Model *modelChipVRC6;
+extern rack::Model *modelBossFight;
+extern rack::Model *modelMegaTone;
+
 // blanks
 extern rack::Model *modelChipS_SMP_Blank;
 extern rack::Model *model2612_Blank;

@@ -25,7 +25,6 @@ Plugin* plugin_instance;
 void init(Plugin* instance) {
     plugin_instance = instance;
     instance->addModel(modelChip106);
-    instance->addModel(modelBossFight);
     instance->addModel(modelChip2A03);
     instance->addModel(modelChipAY_3_8910);
     instance->addModel(modelChipFME7);
@@ -37,9 +36,11 @@ void init(Plugin* instance) {
     instance->addModel(modelChipS_SMP_Echo);
     instance->addModel(modelChipS_SMP_Gauss);
     instance->addModel(modelChipSCC);
-    instance->addModel(modelChipSN76489);
     instance->addModel(modelChipTurboGrafx16);
     instance->addModel(modelChipVRC6);
+    instance->addModel(modelBossFight);
+    instance->addModel(modelMegaTone);
+
     // blanks
     instance->addModel(modelChipS_SMP_Blank);
     instance->addModel(model2612_Blank);

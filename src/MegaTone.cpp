@@ -1,4 +1,4 @@
-// A Texas Instruments SN76489 Chip module.
+// A Eurorack module based on a Texas Instruments SN76489 chip emulation.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,8 +21,8 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Texas Instruments SN76489 chip emulator module.
-struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
+/// @brief A Texas Instruments SN76489 chip emulator module.
+struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  private:
     /// whether to update the noise control (based on LFSR update)
     bool update_noise_control[PORT_MAX_CHANNELS];
@@ -61,8 +61,8 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         NUM_LIGHTS
     };
 
-    /// Initialize a new SN76489 Chip module.
-    ChipSN76489() : ChipModule<TexasInstrumentsSN76489>() {
+    /// @brief Initialize a new SN76489 Chip module.
+    MegaTone() : ChipModule<TexasInstrumentsSN76489>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE) {
@@ -81,7 +81,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
     }
 
  protected:
-    /// Get the 10-bit frequency parameter for the given pulse voice.
+    /// @brief Get the 10-bit frequency parameter for the given pulse voice.
     ///
     /// @param voice the voice to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
@@ -106,7 +106,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
-    /// Return the period of the noise voice from the panel controls.
+    /// @brief Return the period of the noise voice from the panel controls.
     ///
     /// @param channel the polyphonic channel to return the noise period for
     /// @returns the period for the noise voice with given channel
@@ -124,7 +124,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
-    /// Return the volume level from the panel controls.
+    /// @brief Return the volume level from the panel controls.
     ///
     /// @param voice the voice to return the volume level of
     /// @param channel the polyphonic channel to return the volume for
@@ -145,7 +145,7 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
         return MAX - rack::clamp(level, MIN, MAX);
     }
 
-    /// Return a 10V signed sample from the APU.
+    /// @brief Return a 10V signed sample from the APU.
     ///
     /// @param voice the voice to get the audio sample for
     /// @param channel the polyphonic channel to return the audio output for
@@ -213,13 +213,13 @@ struct ChipSN76489 : ChipModule<TexasInstrumentsSN76489> {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for SN76489.
-struct ChipSN76489Widget : ModuleWidget {
+/// @brief The panel widget for the Mega Tone module.
+struct MegaToneWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipSN76489Widget(ChipSN76489 *module) {
+    explicit MegaToneWidget(MegaTone *module) {
         setModule(module);
         static constexpr auto panel = "res/MegaTone.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -231,27 +231,27 @@ struct ChipSN76489Widget : ModuleWidget {
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 49),  module, ChipSN76489::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 49),  module, MegaTone::PARAM_FREQ        + i);
             if (i == TexasInstrumentsSN76489::NOISE)
                 freq->snap = true;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 88),  module, ChipSN76489::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 88),  module, MegaTone::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 138), module, ChipSN76489::INPUT_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 138), module, MegaTone::INPUT_FM          + i));
             if (i < TexasInstrumentsSN76489::NOISE)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 183), module, ChipSN76489::PARAM_FM_ATT      + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 183), module, MegaTone::PARAM_FM_ATT      + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 181), module, ChipSN76489::PARAM_FM_ATT              + i));
+                addParam(createParam<CKSS>(    Vec(120, 181), module, MegaTone::PARAM_FM_ATT              + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 232), module, ChipSN76489::PARAM_LEVEL       + i);
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 232), module, MegaTone::PARAM_LEVEL       + i);
             level->snap = true;
             addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 272), module, ChipSN76489::INPUT_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 272), module, MegaTone::INPUT_LEVEL       + i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipSN76489::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, MegaTone::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelChipSN76489 = createModel<ChipSN76489, ChipSN76489Widget>("SN76489");
+Model *modelMegaTone = createModel<MegaTone, MegaToneWidget>("SN76489");

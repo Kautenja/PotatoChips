@@ -97,7 +97,12 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + voice].getValue();
         pitch += inputs[INPUT_VOCT + voice].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + voice].getPolyVoltage(channel) / 5.f;
+        // apply the attenuverter
+        const auto att = params[PARAM_FM_ATT + voice].getValue();
+        if (inputs[INPUT_FM + voice].isConnected())
+            pitch += att * inputs[INPUT_FM + voice].getPolyVoltage(channel) / 5.f;
+        else
+            pitch += att;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);

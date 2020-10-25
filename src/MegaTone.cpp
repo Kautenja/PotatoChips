@@ -219,9 +219,15 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     ///
     inline void processLights(const ProcessArgs &args, unsigned channels) final {
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT; voice++) {
-            // set the lights in RGB order
-            lights[voice * 3 + 0].setBrightness(vuMeter[voice].getBrightness(0, 6));
-            lights[voice * 3 + 1].setBrightness(vuMeter[voice].getBrightness(-12, 0));
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
             lights[voice * 3 + 2].setBrightness(0);
         }
     }

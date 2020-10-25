@@ -106,18 +106,12 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // pitch += inputs[INPUT_VOCT + voice].getVoltage(channel);
         // get the attenuverter parameter value
         const auto att = params[PARAM_FM_ATT + voice].getValue();
-
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 0V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
         const auto normalMod = voice ? inputs[INPUT_FM + voice - 1].getVoltage(channel) : 5.f;
         const auto mod = inputs[INPUT_FM + voice].getNormalVoltage(normalMod, channel);
         inputs[INPUT_FM + voice].setVoltage(mod, channel);
-
-        // // get the input to the modulation port. Normal to a value of 1 to allow
-        // // the parameter to act as a fine tune knob when nothing is patched
-        // const auto mod = inputs[INPUT_FM + voice].getNormalVoltage(5.f, channel) / 5.f;
-
         pitch += att * mod;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);

@@ -34,47 +34,50 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::TONE_COUNT),
         PARAM_NOISE_PERIOD,
-        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::TONE_COUNT),
         PARAM_LFSR,
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(INPUT_VOCT, TexasInstrumentsSN76489::TONE_COUNT),
         INPUT_NOISE_PERIOD,
-        ENUMS(INPUT_FM, TexasInstrumentsSN76489::OSC_COUNT - 1),
+        ENUMS(INPUT_FM, TexasInstrumentsSN76489::TONE_COUNT),
         INPUT_LFSR,
         ENUMS(INPUT_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_LIGHTS
     };
 
-    /// @brief Initialize a new SN76489 Chip module.
+    /// @brief Initialize a new Mega Tone module.
     MegaTone() : ChipModule<TexasInstrumentsSN76489>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
-            if (i < TexasInstrumentsSN76489::NOISE) {
+            if (i < TexasInstrumentsSN76489::NOISE) {  // tone generator
                 configParam(PARAM_FREQ   + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
-                configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " FM Attenuator");
-            } else {
-                configParam(PARAM_FREQ   + i, 0, 3, 0, "Noise Period", "");
-                configParam(PARAM_FM_ATT + i, 0, 1, 0, "LFSR", "");
+                configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " Fine Tune / FM Attenuverter");
+                configParam(PARAM_LEVEL  + i,  0,   15,    7,   "Tone " + std::to_string(i + 1) + " Volume / Amplifier Attenuator");
+            } else {  // noise generator
+                configParam(PARAM_FREQ   + i, 0,  3, 0, "Noise Mode");
+                configParam(PARAM_FM_ATT + i, 0,  1, 0, "LFSR");
+                configParam(PARAM_LEVEL  + i, 0, 15, 7, "Noise Volume / Amplifier Attenuator");
             }
-            configParam(PARAM_LEVEL + i, 0, 15, 7, "Voice " + std::to_string(i + 1) + " Level");
         }
-        // configParam(PARAM_LFSR, 0, 1, 1, "LFSR Polarity", "");
         // setup the control register values
         memset(update_noise_control, true, sizeof update_noise_control);
         memset(noise_period, 0, sizeof noise_period);
@@ -190,7 +193,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // ---------------------------------------------------------------
         // pulse voice (3)
         // ---------------------------------------------------------------
-        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT - 1; voice++) {
+        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++) {
             // 10-bit frequency
             auto freq = getFrequency(voice, channel);
             uint8_t lo = 0b00001111 & freq;
@@ -259,7 +262,7 @@ struct MegaToneWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 88),  module, MegaTone::INPUT_VOCT        + i));
             // FM / LFSR
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 138), module, MegaTone::INPUT_FM          + i));
-            if (i < TexasInstrumentsSN76489::NOISE)
+            if (i < TexasInstrumentsSN76489::TONE_COUNT)
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 183), module, MegaTone::PARAM_FM_ATT      + i));
             else
                 addParam(createParam<CKSS>(    Vec(120, 181), module, MegaTone::PARAM_FM_ATT              + i));

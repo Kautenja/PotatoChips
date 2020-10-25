@@ -25,13 +25,19 @@ class TexasInstrumentsSN76489 {
  public:
     /// the number of oscillators on the chip
     static constexpr int OSC_COUNT = 4;
+    /// the number of tone generators (pulse waveform generators) on the chip
+    static constexpr int TONE_COUNT = OSC_COUNT - 1;
 
-    /// the indexes of the channels on the chip
+    /// the indexes of the voices on the chip
     enum Channel {
-        PULSE0,
-        PULSE1,
-        PULSE2,
-        NOISE
+        /// the index of the first tone generator voice
+        TONE0 = 0,
+        /// the index of the second tone generator voice
+        TONE1 = 1,
+        /// the index of the third tone generator voice
+        TONE2 = 2,
+        /// the index of the noise generator voice
+        NOISE = 3
     };
 
     /// the registers on the SN76489
@@ -62,8 +68,8 @@ class TexasInstrumentsSN76489 {
         N_1024   = 0b01,
         /// N / 2048
         N_2048   = 0b10,
-        /// Tone Generator #3 Output
-        N_TONE_3 = 0b11
+        /// 3rd Tone Generator Output (index 2)
+        N_TONE_2 = 0b11
     };
 
     /// the FB bit in the Noise control register
@@ -74,22 +80,18 @@ class TexasInstrumentsSN76489 {
     struct Oscillator {
         /// the output buffer to write samples to
         BLIPBuffer* output = 0;
-        /// TODO:
+        /// a delay before opening the oscillator's amplifier
         int delay = 0;
         /// the value of the waveform amplitude at the last sample
         int last_amp = 0;
         /// the output volume from the synthesizer
         int volume = 0;
 
-        /// Reset the oscillator to its initial state.
-        inline void reset() {
-            delay = 0;
-            last_amp = 0;
-            volume = 0;
-        }
+        /// @brief Reset the oscillator to its initial state.
+        inline void reset() { delay = last_amp = volume = 0; }
     };
 
-    /// a pulse oscillator on the chip
+    /// @brief A pulse oscillator on the chip
     struct Pulse : Oscillator {
         /// the period of the oscillator
         int period = 0;
@@ -99,14 +101,10 @@ class TexasInstrumentsSN76489 {
         typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
         const Synth* synth;
 
-        /// Reset the oscillator to its initial state.
-        inline void reset() {
-            period = 0;
-            phase = 0;
-            Oscillator::reset();
-        }
+        /// @brief Reset the oscillator to its initial state.
+        inline void reset() { period = phase = 0; Oscillator::reset(); }
 
-        /// Run the oscillator from time until end_time.
+        /// @brief Run the oscillator from time until end_time.
         void run(blip_time_t time, blip_time_t end_time) {
             if (!volume || period <= 128) {
                 // ignore 16kHz and higher
@@ -150,7 +148,7 @@ class TexasInstrumentsSN76489 {
         }
     };
 
-    /// a noise oscillator on the chip
+    /// @brief A noise oscillator on the chip
     struct Noise : Oscillator {
         /// the possible noise periods
         static const int noise_periods[3];
@@ -164,7 +162,7 @@ class TexasInstrumentsSN76489 {
         typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
 
-        /// Reset the oscillator to its initial state.
+        /// @brief Reset the oscillator to its initial state.
         inline void reset() {
             period = &noise_periods[0];
             shifter = 0x8000;
@@ -172,7 +170,7 @@ class TexasInstrumentsSN76489 {
             Oscillator::reset();
         }
 
-        /// Run the oscillator from time until end_time.
+        /// @brief Run the oscillator from time until end_time.
         void run(blip_time_t time, blip_time_t end_time) {
             int amp = volume;
             if (shifter & 1)
@@ -239,7 +237,7 @@ class TexasInstrumentsSN76489 {
     /// the value of the white noise
     unsigned looped_feedback = 0;
 
-    /// Run the oscillators until the given end time.
+    /// @brief Run the oscillators until the given end time.
     ///
     /// @param end_time the time to run the oscillators until
     ///
@@ -255,10 +253,16 @@ class TexasInstrumentsSN76489 {
         }
     }
 
-    /// Disable the copy constructor.
-    TexasInstrumentsSN76489(const TexasInstrumentsSN76489&);
+    /// @brief Disable the copy constructor.
+    ///
+    /// @param copy the instance to copy
+    ///
+    TexasInstrumentsSN76489(const TexasInstrumentsSN76489& copy);
 
-    /// Disable the assignment operator
+    /// @brief Disable the assignment operator.
+    ///
+    /// @param copy the instance to copy
+    ///
     TexasInstrumentsSN76489& operator=(const TexasInstrumentsSN76489&);
 
  public:
@@ -274,17 +278,17 @@ class TexasInstrumentsSN76489 {
     /// @brief Assign single oscillator output to buffer. If buffer is NULL,
     /// silences the given oscillator.
     ///
-    /// @param channel the index of the oscillator to set the output for
+    /// @param voice_idx the index of the oscillator to set the output for
     /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     /// @details
     /// If buffer is NULL, the specified oscillator is muted and emulation
     /// accuracy is reduced.
     ///
-    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
-        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
-            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
-        oscs[channel]->output = buffer;
+    inline void set_output(unsigned voice_idx, BLIPBuffer* buffer) {
+        if (voice_idx >= OSC_COUNT)  // make sure the voice index is within bounds
+            throw ChannelOutOfBoundsException(voice_idx, OSC_COUNT);
+        oscs[voice_idx]->output = buffer;
     }
 
     /// @brief Assign all oscillator outputs to specified buffer. If buffer
@@ -293,8 +297,7 @@ class TexasInstrumentsSN76489 {
     /// @param buffer the single buffer to output the all the voices to
     ///
     inline void set_output(BLIPBuffer* buffer) {
-        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
-            set_output(channel, buffer);
+        for (unsigned i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
     }
 
     /// @brief Set the volume level of all oscillators.

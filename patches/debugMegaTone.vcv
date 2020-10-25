@@ -296,7 +296,7 @@
         },
         {
           "id": 2,
-          "value": 0.787499905
+          "value": 0.0
         },
         {
           "id": 3,
@@ -316,15 +316,15 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 10,
@@ -412,17 +412,6 @@
         46,
         0
       ]
-    },
-    {
-      "id": 164,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "pos": [
-        68,
-        1
-      ]
     }
   ],
   "cables": [
@@ -489,14 +478,6 @@
       "inputModuleId": 2,
       "inputId": 3,
       "color": "#c91847"
-    },
-    {
-      "id": 1304,
-      "outputModuleId": 135,
-      "outputId": 0,
-      "inputModuleId": 76,
-      "inputId": 11,
-      "color": "#0986ad"
     },
     {
       "id": 1297,
@@ -579,11 +560,11 @@
       "color": "#0986ad"
     },
     {
-      "id": 1422,
-      "outputModuleId": 76,
-      "outputId": 3,
-      "inputModuleId": 164,
-      "inputId": 0,
+      "id": 1304,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 76,
+      "inputId": 11,
       "color": "#0986ad"
     }
   ]

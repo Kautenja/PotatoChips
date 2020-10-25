@@ -66,6 +66,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
 
     /// @brief Initialize a new Mega Tone module.
     MegaTone() : ChipModule<TexasInstrumentsSN76489>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE) {  // tone generator

@@ -103,9 +103,16 @@ struct ChipModule : rack::engine::Module {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and set the output port
             for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
-                const auto output = buffers[channel][osc].read_sample_5V();
+                auto output = buffers[channel][osc].read_sample_5V();
+                if (normal_outputs) {  // mix outputs from previous voices
+                    auto shouldNormal = osc && !outputs[osc - 1].isConnected();
+                    auto lastOutput = shouldNormal ? outputs[osc - 1].getVoltage(channel) : 0.f;
+                    output += lastOutput;
+                }
+                // update the VU meter with the un-clipped signal
                 vuMeter[osc].process(args.sampleTime, output / 5.f);
-                outputs[osc].setVoltage(output, channel);
+                // hard clip the output
+                outputs[osc].setVoltage(math::clamp(output, -5.f, 5.f), channel);
             }
         }
         // process lights using the overridden function
@@ -113,6 +120,9 @@ struct ChipModule : rack::engine::Module {
     }
 
  protected:
+    /// whether the outputs should be normalled together into a mixer
+    bool normal_outputs = false;
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

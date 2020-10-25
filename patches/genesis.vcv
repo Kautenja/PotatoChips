@@ -501,7 +501,7 @@
       ],
       "rightModuleId": 167,
       "data": {
-        "stepIndex": 7,
+        "stepIndex": 5,
         "lastPressIndex": 0,
         "isRunning": true,
         "direction": -1,
@@ -673,7 +673,7 @@
       ],
       "leftModuleId": 166,
       "data": {
-        "stepIndex": 2,
+        "stepIndex": 7,
         "lastPressIndex": 4,
         "isRunning": true,
         "direction": 1,

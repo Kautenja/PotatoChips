@@ -161,8 +161,6 @@ omissions, and re-envisioned features, namely,
 
 See the [Manual][BossFight] for more information about the features of this module.
 
-[YM2612]: https://en.wikipedia.org/wiki/Yamaha_YM2612
-[SegaMD]: https://en.wikipedia.org/wiki/Sega_Genesis
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 
 <!-- ------------------------------------------------------------ -->
@@ -222,6 +220,36 @@ generator with a wave-table synthesizer.
 See the [Manual][GBS] for more information about the features of this module.
 
 [GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Mega Tone -->
+<!-- ------------------------------------------------------------ -->
+
+## Mega Tone
+
+Mega Tone is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
+processing unit from the [Sega Master System][SegaMasterSystem],
+[Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
+pulse waveform generators and an LFSR-based noise generator that selects
+between pitched white-noise and static periodic noise.
+
+<p align="center">
+<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
+</p>
+
+### Features
+
+-   **Triple pulse wave generator:** Triple 8-bit pulse waves with _50%_ duty
+    cycle and 10-bit frequency parameter
+-   **Noise generator:** Generate either white-noise or periodic noise at one
+    of four shift rates: _N/512_, _N/1024_, _N/2048_, or the output of tone
+    generator 3
+-   **4-bit Level Control:** 4-bit level control over each channel with
+    mixer sliders and CV inputs
+
+See the [Manual][MegaTone] for more information about the features of this module.
+
+[MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: POKEY -->
@@ -448,36 +476,6 @@ See the [Manual][SCC] for more information about the features of this module.
 -->
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: SN76489 -->
-<!-- ------------------------------------------------------------ -->
-## SN76489
-
-SN76489 is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
-processing unit from the [Sega Master System][SegaMasterSystem] for VCV Rack.
-The SN76489 chip contains three pulse waveform generators and a noise generator
-that selects between white-noise and periodic noise (LFSR).
-
-<p align="center">
-<img alt="SN76489" src="manual/SN76489/img/SN76489-Module.svg">
-</p>
-
-### Features
-
--   **Triple pulse wave generator:** Triple 8-bit pulse waves with _50%_ duty
-    cycle and 10-bit frequency parameter
--   **Noise generator:** Generate either white-noise or periodic noise at one
-    of four shift rates: _N/512_, _N/1024_, _N/2048_, or the output of tone
-    generator 3
--   **4-bit Level Control:** 4-bit level control over each channel with
-    mixer sliders and CV inputs
-
-See the [Manual][SN76489] for more information about the features of this module.
-
-[SegaMasterSystem]: https://en.wikipedia.org/wiki/Master_System
-[TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
-[SN76489]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SN76489.pdf
-
-<!-- ------------------------------------------------------------ -->
 <!-- MARK: TurboGrafx16 -->
 <!-- ------------------------------------------------------------ -->
 
@@ -527,3 +525,16 @@ pulse wave generators, and a quantized saw wave generator.
 See the [Manual][VRC6] for more information about the features of this module.
 
 [VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
+
+
+
+
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Links -->
+<!-- ------------------------------------------------------------ -->
+
+[SegaMD]: https://en.wikipedia.org/wiki/Sega_Genesis
+[SegaMasterSystem]: https://en.wikipedia.org/wiki/Master_System
+[TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
+[YM2612]: https://en.wikipedia.org/wiki/Yamaha_YM2612

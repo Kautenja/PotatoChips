@@ -16,7 +16,7 @@
 % MARK: Overview
 % -------------------
 
-\section{Overview}
+\section*{Overview}
 
 Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit from the Sega Master System, Sega Mega Drive, and Sega Genesis. The SN76489 chip contains three pulse waveform generators and an LFSR-based noise generator that selects between pitched white-noise and static periodic noise. Mega Tone provides the key features of the SN76489 chip, namely,
 \begin{itemize}
@@ -29,14 +29,14 @@ Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit
 % MARK: Panel Layout
 % -------------------
 
-\section{Panel Layout}
+\section*{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
 \includegraphics[width=0.4\textwidth]{MegaTone-Manual}
 \end{figure}
 
-\subsection{Pitch}
+\subsection*{1{\quad}Pitch}
 
 The trimpot controls the coarse frequency of the three oscillators. Frequency
 is quantized to a 10-bit value for the tone generators, which is particularly
@@ -44,7 +44,7 @@ noticeable in the very low/high registers. The ports provide and exponential
 ($V$/Octave) inputs for controlling the pitch of the pulse waveform
 generators.
 
-\subsection{Noise Frequency}
+\subsection*{2{\quad}Noise Frequency}
 
 The noise generator can be set to one of four settings. The first setting
 produces pitched white noise based on the frequency of tone generator 3. The
@@ -54,19 +54,19 @@ clock rate, which is something like $3579545Hz$ on the Sega consoles. The input
 port provides voltage control over the noise frequency setting where each
 discrete setting is allocated $2.5$ Volts of input range.
 
-\subsection{Linear Frequency Modulation}
+\subsection*{3{\quad}Linear Frequency Modulation}
 
 The input port provides linear frequency modulation to the corresponding tone
 generator. The trimpot can be used as an attenuverter to attenuate / polarize
 the incoming signal.
 
-\subsection{LFSR}
+\subsection*{4{\quad}LFSR}
 
 When the switch is pointing up, the noise generator produces periodic noise.
 When pointing down, pitched white noise is generated. The input port acts like
 a gate that goes high at $2V$ and inverts the value of the LFSR switch.
 
-\subsection{Amplifier}
+\subsection*{5{\quad}Amplifier}
 
 When no input is connected, the trimpot controls the level from $0\%$ to
 $100\%$ with 4-bit resolution. When an input is patched to the port, the
@@ -74,7 +74,7 @@ trimpot acts like an attenuator that scales the CV control over the volume
 level. Because the amplifier has 4-bit control, the envelope of the oscillator
 will sound quantized when used with and external envelope generator.
 
-\subsection{Outputs}
+\subsection*{6{\quad}Outputs}
 
 Each voice produces an output signal of at most ${\approx}10V_{pp}$ when the
 amplifier is maxed out. The oscillator cannot be overdriven to produce

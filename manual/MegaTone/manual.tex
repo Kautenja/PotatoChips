@@ -29,24 +29,83 @@ Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit
 % MARK: Panel Layout
 % -------------------
 
-\clearpage
 \section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{MegaTone-Manual}
+\includegraphics[width=0.4\textwidth]{MegaTone-Manual}
 \end{figure}
 
-\begin{enumerate}
-  \item Coarse frequency control over the four oscillators. Frequency is quantized to a 10-bit value for the tone generators.
-  \item $V$/Octave inputs for pulse waveform generators.
-  \item linear CV frequency modulation for pulse waveform generators.
-  \item LFSR switch. When pointing up, periodic noise is generated. When pointing down, pitched white noise is generated.
-  \item CV LFSR gate, high at $2V$. Holds the LFSR generator as long as the input voltage is $>2V$. Inverts when LFSR switch is high.
-  \item Noise generator shift rate. Select between one of four shift rates: the output of tone generator 3, $N / 512$, $N / 1024$, or $N / 2048$.
-  \item Volume. Coarse amplitude control over the oscillators using the 4-bit amplifier. When no input is connected, the slider controls the level from $0\%$ to $100\%$. When an input is connected, the slider acts as an attenuator.
-  \item Channel outputs, ${\approx}10V_{pp}$.
-\end{enumerate}
+\subsection{Pitch}
+
+The trimpot controls the coarse frequency of the three oscillators. Frequency
+is quantized to a 10-bit value for the tone generators, which is particularly
+noticeable in the very low/high registers. The ports provide and exponential
+($V$/Octave) inputs for controlling the pitch of the pulse waveform
+generators.
+
+\subsection{Noise Frequency}
+
+The noise generator can be set to one of four settings. The first setting
+produces pitched white noise based on the frequency of tone generator 3. The
+remaining three settings produce a static pitched white noised at rates of
+$\frac{N}{2048}$, $\frac{N}{1024}$, $\frac{N}{512}$ where $N$ is the reference
+clock rate, which is something like $3579545Hz$ on the Sega consoles. The input
+port provides voltage control over the noise frequency setting where each
+discrete setting is allocated $2.5$ Volts of input range.
+
+\subsection{Linear Frequency Modulation}
+
+The input port provides linear frequency modulation to the corresponding tone
+generator. The trimpot can be used as an attenuverter to attenuate / polarize
+the incoming signal.
+
+\subsection{LFSR}
+
+When the switch is pointing up, the noise generator produces periodic noise.
+When pointing down, pitched white noise is generated. The input port acts like
+a gate that goes high at $2V$ and inverts the value of the LFSR switch.
+
+\subsection{Amplifier}
+
+When no input is connected, the trimpot controls the level from $0\%$ to
+$100\%$ with 4-bit resolution. When an input is patched to the port, the
+trimpot acts like an attenuator that scales the CV control over the volume
+level. Because the amplifier has 4-bit control, the envelope of the oscillator
+will sound quantized when used with and external envelope generator.
+
+\subsection{Outputs}
+
+Each voice produces an output signal of at most ${\approx}10V_{pp}$ when the
+amplifier is maxed out. The oscillator cannot be overdriven to produce
+clipping, distortion, or aliasing.
+
+% -------------------
+% MARK: Data Sheet
+% -------------------
+
+\clearpage
+\section*{Data Sheet}
+
+\begin{table}[!htp]
+\begin{tabular}{|l|l|}
+\hline
+Type             & Oscillator / Noise Generator  \\
+\hline
+Size             & 10 HP Eurorack           \\
+\hline
+Depth            & NA                       \\
+\hline
+Power            & NA                       \\ % 2 x 5 Eurorack
+\hline
+$+12V$ draw (mA) & 0 mA                     \\
+\hline
+$-12V$ draw (mA) & 0 mA                     \\
+\hline
+$+5V$ draw (mA)  & 0 mA                     \\
+\hline
+\end{tabular}
+\end{table}
 
 % -------------------
 % MARK: References

@@ -184,8 +184,10 @@
     -   individual operator sensitivity to LFO-based FM and AM
     -   VU Meter to monitor levels / clipping / aliasing
     -   invert sustain level and total level controls to be more intuitive
--   new panel designs:
-    -   SN76489
+-   updates to SN76489 (rev2 branded as "Mega Tone")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
 -   new blank panels:
     -   illustration of Sony S-SMP IC
     -   illustration of envelope generation from Yamaha YM2612

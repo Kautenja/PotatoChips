@@ -239,13 +239,14 @@ between pitched white-noise and static periodic noise.
 
 ### Features
 
--   **Triple pulse wave generator:** Triple 8-bit pulse waves with _50%_ duty
+-   **Triple Pulse Waveform Generator** Three 8-bit pulse waves with _50%_ duty
     cycle and 10-bit frequency parameter
--   **Noise generator:** Generate either white-noise or periodic noise at one
-    of four shift rates: _N/512_, _N/1024_, _N/2048_, or the output of tone
-    generator 3
--   **4-bit Level Control:** 4-bit level control over each channel with
-    mixer sliders and CV inputs
+-   **Noise Generator** Generate either pitched white-noise based on the
+    frequency of oscillator three, or static periodic noise at one of three
+    shift frequencies: _N / 2048_, _N / 1024_, _N / 512_ where _N_ is the
+    reference clock rate (which is something like _3579545Hz_).
+-   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
+    oscillator with mixer sliders and CV inputs
 
 See the [Manual][MegaTone] for more information about the features of this module.
 

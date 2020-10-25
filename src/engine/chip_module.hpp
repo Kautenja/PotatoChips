@@ -42,6 +42,23 @@ struct ChipModule : rack::engine::Module {
     /// a VU meter for measuring the output audio level from the emulator
     dsp::VuMeter2 vuMeter[ChipEmulator::OSC_COUNT];
 
+    /// whether the outputs should be normalled together into a mix
+    bool normal_outputs = false;
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
+
+    /// @brief Process the lights on the module.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channels the number of active polyphonic channels
+    ///
+    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
+
  public:
     /// @brief Initialize a new Chip module.
     ChipModule() {
@@ -118,24 +135,6 @@ struct ChipModule : rack::engine::Module {
         // process lights using the overridden function
         if (lightDivider.process()) processLights(args, channels);
     }
-
- protected:
-    /// whether the outputs should be normalled together into a mixer
-    bool normal_outputs = false;
-
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
-    ///
-    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
-
-    /// @brief Process the lights on the module.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channels the number of active polyphonic channels
-    ///
-    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
 };
 
 #endif  // ENGINE_CHIP_MODULE_HPP_

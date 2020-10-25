@@ -110,7 +110,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // get the attenuverter parameter value
         const auto att = params[PARAM_FM_ATT + voice].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
         const auto normalMod = voice ? inputs[INPUT_FM + voice - 1].getVoltage(channel) : 5.f;
         const auto mod = inputs[INPUT_FM + voice].getNormalVoltage(normalMod, channel);
@@ -156,7 +156,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + voice].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
         const auto normal = voice ? inputs[INPUT_LEVEL + voice - 1].getVoltage(channel) : 10.f;
         const auto voltage = inputs[INPUT_LEVEL + voice].getNormalVoltage(normal, channel);

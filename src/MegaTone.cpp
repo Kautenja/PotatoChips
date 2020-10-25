@@ -116,7 +116,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         const auto normalMod = voice ? inputs[INPUT_FM + voice - 1].getVoltage(channel) : 5.f;
         const auto mod = inputs[INPUT_FM + voice].getNormalVoltage(normalMod, channel);
         inputs[INPUT_FM + voice].setVoltage(mod, channel);
-        pitch += att * (mod / 5.f);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);

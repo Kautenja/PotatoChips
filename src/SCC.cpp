@@ -272,7 +272,7 @@ struct ChipSCC : Module {
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
-            const auto sample = buf[i].read_sample_10V();
+            const auto sample = buf[i].read_sample_5V();
             outputs[i].setVoltage(sample);
         }
     }

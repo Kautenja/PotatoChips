@@ -60,7 +60,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHTS_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
+        ENUMS(LIGHTS_LEVEL, 3 * TexasInstrumentsSN76489::OSC_COUNT),
         NUM_LIGHTS
     };
 
@@ -169,20 +169,6 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         return MAX - rack::clamp(level, MIN, MAX);
     }
 
-    /// @brief Return a 10V signed sample from the APU.
-    ///
-    /// @param voice the voice to get the audio sample for
-    /// @param channel the polyphonic channel to return the audio output for
-    ///
-    inline float getAudioOut(unsigned voice, unsigned channel) {
-        // the peak to peak output of the voltage
-        static constexpr float Vpp = 10.f;
-        // the amount of voltage per increment of 16-bit fidelity volume
-        static constexpr float divisor = std::numeric_limits<int16_t>::max();
-        // convert the 16-bit sample to 10Vpp floating point
-        return Vpp * buffers[channel][voice].read_sample() / divisor;
-    }
-
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -230,7 +216,14 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT; voice++) {
+            // set the lights in RGB order
+            lights[voice * 3 + 0].setBrightness(vuMeter[voice].getBrightness(0, 6));
+            lights[voice * 3 + 1].setBrightness(vuMeter[voice].getBrightness(-12, 0));
+            lights[voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -270,6 +263,7 @@ struct MegaToneWidget : ModuleWidget {
             auto level = createParam<Trimpot>( Vec(12 + 35 * i, 232), module, MegaTone::PARAM_LEVEL       + i);
             level->snap = true;
             addParam(level);
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 257), module, MegaTone::LIGHTS_LEVEL + 3 * i));
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 272), module, MegaTone::INPUT_LEVEL       + i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, MegaTone::OUTPUT_OSCILLATOR + i));

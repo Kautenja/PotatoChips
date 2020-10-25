@@ -200,10 +200,10 @@ class BLIPBuffer {
 
     /// @brief Return the output sample from the buffer as a voltage.
     ///
-    /// @returns the sample \f$\in [-10, 10]V\f$
+    /// @returns the sample \f$\in [-5, 5]V\f$ without clipping
     ///
-    inline float read_sample_10V() {
-        return 10.f * read_sample() / std::numeric_limits<blip_sample_t>::max();
+    inline float read_sample_5V() {
+        return 5.f * read_sample() / std::numeric_limits<blip_sample_t>::max();
     }
 };
 

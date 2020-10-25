@@ -39,6 +39,9 @@ struct ChipModule : rack::engine::Module {
     /// a clock divider for running LED updates slower than audio rate
     rack::dsp::ClockDivider lightDivider;
 
+    /// a VU meter for measuring the output audio level from the emulator
+    dsp::VuMeter2 vuMeter[ChipEmulator::OSC_COUNT];
+
  public:
     /// @brief Initialize a new Chip module.
     ChipModule() {
@@ -99,8 +102,11 @@ struct ChipModule : rack::engine::Module {
             // end the frame on the engine
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and set the output port
-            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
-                outputs[osc].setVoltage(buffers[channel][osc].read_sample_10V(), channel);
+            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
+                const auto output = buffers[channel][osc].read_sample_5V();
+                vuMeter[osc].process(args.sampleTime, output / 5.f);
+                outputs[osc].setVoltage(output, channel);
+            }
         }
         // process lights using the overridden function
         if (lightDivider.process()) processLights(args, channels);

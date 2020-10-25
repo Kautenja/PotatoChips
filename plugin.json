@@ -181,9 +181,9 @@
     },
     {
       "slug": "SN76489",
-      "name": "SN76489",
-      "description": "An emulation of the Texas Instruments SN76489 chip from the Sega Master System and Sega Mega Drive.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/sn76489.pdf",
+      "name": "Mega Tone",
+      "description": "An emulation of the Texas Instruments SN76489 chip from the Sega Master System, Sega Mega Drive, and Sega Genesis.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf",
       "tags": [
         "Noise",
         "Oscillator",

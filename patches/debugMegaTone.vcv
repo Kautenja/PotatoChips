@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -8,6 +8,7 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
+      "rightModuleId": 163,
       "data": {
         "audio": {
           "driver": 5,
@@ -295,7 +296,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 0.787499905
         },
         {
           "id": 3,
@@ -319,7 +320,7 @@
         },
         {
           "id": 8,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 9,
@@ -331,7 +332,7 @@
         },
         {
           "id": 11,
-          "value": 0.0
+          "value": 7.0
         }
       ],
       "leftModuleId": 135,
@@ -369,6 +370,58 @@
       "pos": [
         8,
         0
+      ]
+    },
+    {
+      "id": 163,
+      "plugin": "Bogaudio",
+      "version": "1.1.35",
+      "model": "Bogaudio-Analyzer",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 1,
+      "data": {
+        "frequency_plot": "log",
+        "amplitude_plot": "decibels_80"
+      },
+      "pos": [
+        46,
+        0
+      ]
+    },
+    {
+      "id": 164,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "CountingHertz",
+      "params": [],
+      "pos": [
+        68,
+        1
       ]
     }
   ],
@@ -411,14 +464,6 @@
       "outputId": 0,
       "inputModuleId": 76,
       "inputId": 2,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1295,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 76,
-      "inputId": 3,
       "color": "#c9b70e"
     },
     {
@@ -491,6 +536,54 @@
       "outputId": 0,
       "inputModuleId": 76,
       "inputId": 8,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1415,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 7,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1418,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 8,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1419,
+      "outputModuleId": 2,
+      "outputId": 3,
+      "inputModuleId": 9,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1420,
+      "outputModuleId": 2,
+      "outputId": 4,
+      "inputModuleId": 10,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 1421,
+      "outputModuleId": 76,
+      "outputId": 3,
+      "inputModuleId": 163,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1422,
+      "outputModuleId": 76,
+      "outputId": 3,
+      "inputModuleId": 164,
+      "inputId": 0,
       "color": "#0986ad"
     }
   ]

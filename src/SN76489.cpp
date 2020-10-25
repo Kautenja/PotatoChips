@@ -221,7 +221,7 @@ struct ChipSN76489Widget : ModuleWidget {
     ///
     explicit ChipSN76489Widget(ChipSN76489 *module) {
         setModule(module);
-        static constexpr auto panel = "res/SN76489.svg";
+        static constexpr auto panel = "res/MegaTone.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

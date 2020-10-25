@@ -28,6 +28,10 @@ mGBS: build
 	make -C GBS
 	cp GBS/build/manual.pdf build/GBS.pdf
 
+mMegaTone: build
+	make -C MegaTone
+	cp MegaTone/build/manual.pdf build/MegaTone.pdf
+
 mPOKEY: build
 	make -C POKEY
 	cp POKEY/build/manual.pdf build/POKEY.pdf
@@ -35,10 +39,6 @@ mPOKEY: build
 mSCC: build
 	make -C SCC
 	cp SCC/build/manual.pdf build/SCC.pdf
-
-mSN76489: build
-	make -C SN76489
-	cp SN76489/build/manual.pdf build/SN76489.pdf
 
 mTurboGrafx16: build
 	make -C TurboGrafx16
@@ -56,4 +56,4 @@ mSSMPGauss: build
 	make -C S_SMP_Gauss
 	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
 
-manual: m106 m2A03 mAY38910 mBossFight mFME7 mGBS mPOKEY mSCC mSN76489 mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss
+manual: m106 m2A03 mAY38910 mBossFight mFME7 mGBS mMegaTone mPOKEY mSCC mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss

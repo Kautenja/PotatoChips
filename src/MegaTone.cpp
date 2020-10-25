@@ -107,7 +107,6 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         const auto pitchCV = inputs[INPUT_VOCT + voice].getNormalVoltage(normalPitch, channel);
         inputs[INPUT_VOCT + voice].setVoltage(pitchCV, channel);
         pitch += pitchCV;
-        // pitch += inputs[INPUT_VOCT + voice].getVoltage(channel);
         // get the attenuverter parameter value
         const auto att = params[PARAM_FM_ATT + voice].getValue();
         // get the normalled input voltage based on the voice index. Voice 0

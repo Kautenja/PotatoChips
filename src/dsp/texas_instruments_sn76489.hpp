@@ -23,7 +23,7 @@
 /// Texas Instruments SN76489 chip emulator.
 class TexasInstrumentsSN76489 {
  public:
-    /// the number of oscillators on the chip
+    /// the number of voices on the chip
     static constexpr int OSC_COUNT = 4;
     /// the number of tone generators (pulse waveform generators) on the chip
     static constexpr int TONE_COUNT = OSC_COUNT - 1;
@@ -141,7 +141,7 @@ class TexasInstrumentsSN76489 {
                         time += period;
                         phase ^= 1;
                     } while (time < end_time);
-                    this->last_amp = phase ? volume : -volume;
+                    last_amp = phase ? volume : -volume;
                 }
             }
             delay = time - end_time;
@@ -173,42 +173,31 @@ class TexasInstrumentsSN76489 {
         /// @brief Run the oscillator from time until end_time.
         void run(blip_time_t time, blip_time_t end_time) {
             int amp = volume;
-            if (shifter & 1)
-                amp = -amp;
+            if (shifter & 1) amp = -amp;
 
-            {
-                int delta = amp - last_amp;
-                if (delta) {
-                    last_amp = amp;
-                    synth.offset(time, delta, output);
-                }
+            int deltaAmp = amp - last_amp;
+            if (deltaAmp) {
+                last_amp = amp;
+                synth.offset(time, deltaAmp, output);
             }
 
             time += delay;
-            if (!volume)
-                time = end_time;
+            if (!volume) time = end_time;
 
             if (time < end_time) {
-                BLIPBuffer* const output = this->output;
-                unsigned shifter = this->shifter;
                 int delta = amp * 2;
-                int period = *this->period * 2;
-                if (!period)
-                    period = 16;
-
+                int currentPeriod = *period * 2;
+                if (!currentPeriod) currentPeriod = 16;
                 do {
                     int changed = shifter + 1;
                     shifter = (feedback & -(shifter & 1)) ^ (shifter >> 1);
-                    if (changed & 2) // true if bits 0 and 1 differ
-                    {
+                    if (changed & 2) {  // true if bits 0 and 1 differ
                         delta = -delta;
                         synth.offset(time, delta, output);
                     }
-                    time += period;
+                    time += currentPeriod;
                 } while (time < end_time);
-
-                this->shifter = shifter;
-                this->last_amp = delta >> 1;
+                last_amp = delta >> 1;
             }
             delay = time - end_time;
         }
@@ -220,15 +209,15 @@ class TexasInstrumentsSN76489 {
     Pulse::Synth square_synth;
     /// the noise generator
     Noise noise;
-    /// The oscillators on the chip
-    Oscillator* oscs[OSC_COUNT] {
+    /// The voices on the chip
+    Oscillator* voices[OSC_COUNT] {
         &pulses[0],
         &pulses[1],
         &pulses[2],
         &noise
     };
 
-    /// the last time the oscillators were updated
+    /// the last time the voices were updated
     blip_time_t last_time = 0;
     /// the value of the latch register
     int latch = 0;
@@ -237,20 +226,20 @@ class TexasInstrumentsSN76489 {
     /// the value of the white noise
     unsigned looped_feedback = 0;
 
-    /// @brief Run the oscillators until the given end time.
+    /// @brief Run the voices until the given end time.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param end_time the time to run the voices until
     ///
     void run_until(blip_time_t end_time) {
-        if (end_time < last_time)
+        if (end_time < last_time) {  // time went backwards
             throw Exception("end_time must be >= last_time");
-        if (end_time > last_time) {  // run oscillators if time is different
+        } else if (end_time > last_time) {  // time moved forwards
             if (pulses[0].output) pulses[0].run(last_time, end_time);
             if (pulses[1].output) pulses[1].run(last_time, end_time);
             if (pulses[2].output) pulses[2].run(last_time, end_time);
-            if (noise.output)      noise.run(last_time, end_time);
+            if (noise.output)     noise.run(last_time, end_time);
             last_time = end_time;
-        }
+        }  // else time has not changed
     }
 
     /// @brief Disable the copy constructor.
@@ -288,11 +277,11 @@ class TexasInstrumentsSN76489 {
     inline void set_output(unsigned voice_idx, BLIPBuffer* buffer) {
         if (voice_idx >= OSC_COUNT)  // make sure the voice index is within bounds
             throw ChannelOutOfBoundsException(voice_idx, OSC_COUNT);
-        oscs[voice_idx]->output = buffer;
+        voices[voice_idx]->output = buffer;
     }
 
     /// @brief Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
+    /// is NULL, silences all voices.
     ///
     /// @param buffer the single buffer to output the all the voices to
     ///
@@ -300,7 +289,7 @@ class TexasInstrumentsSN76489 {
         for (unsigned i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
     }
 
-    /// @brief Set the volume level of all oscillators.
+    /// @brief Set the volume level of all voices.
     ///
     /// @param level the value to set the volume level to, where \f$1.0\f$ is
     /// full volume. Can be overdriven past \f$1.0\f$.
@@ -320,7 +309,7 @@ class TexasInstrumentsSN76489 {
         noise.synth.set_treble_eq(equalizer);
     }
 
-    /// @brief Reset oscillators and internal state.
+    /// @brief Reset voices and internal state.
     ///
     /// @param feedback TODO:
     /// @param noise_width TODO:
@@ -340,7 +329,7 @@ class TexasInstrumentsSN76489 {
             noise_feedback = (noise_feedback << 1) | (feedback & 1);
             feedback >>= 1;
         }
-        // reset the oscillators
+        // reset the voices
         pulses[0].reset();
         pulses[1].reset();
         pulses[2].reset();
@@ -362,7 +351,7 @@ class TexasInstrumentsSN76489 {
         // get the index of the register
         int index = (latch >> 5) & 3;
         if (latch & 0x10) {  // volume
-            oscs[index]->volume = volumes[data & 15];
+            voices[index]->volume = volumes[data & 15];
         } else if (index < 3) {  // pulse frequency
             Pulse& sq = pulses[index];
             if (data & 0x80)
@@ -380,10 +369,10 @@ class TexasInstrumentsSN76489 {
         }
     }
 
-    /// @brief Run all oscillators up to specified time, end current frame,
+    /// @brief Run all voices up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param end_time the time to run the voices until
     ///
     inline void end_frame(blip_time_t end_time) {
         if (end_time > last_time) run_until(end_time);

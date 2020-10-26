@@ -138,12 +138,15 @@ class TexasInstrumentsSN76489 {
         /// The synthesizer for generating samples from this oscillator
         typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
+        /// whether the LFSR is on
+        bool is_periodic = false;
 
         /// @brief Reset the oscillator to its initial state.
         inline void reset() {
             period = &noise_periods[0];
             shifter = 0x8000;
             feedback = 0x9000;
+            is_periodic = false;
             Oscillator::reset();
         }
 
@@ -325,16 +328,22 @@ class TexasInstrumentsSN76489 {
     /// @brief Set the noise mode to a new value.
     ///
     /// @param value the value to set the volume to \f$\in [0, 4]\f$
-    /// @param feedback true to enable the linear feedback shift register (LFSR)
+    /// @param is_periodic true to enable the linear feedback shift register (LFSR)
     /// @param reset true to reset the feedback register and shifter to default
     ///
-    inline void set_noise(uint8_t value, bool feedback, bool reset = true) {
-        int select = value & 3;
+    inline void set_noise(uint8_t value, bool is_periodic, bool reset = true) {
+        // cache the old values to detect changes
         auto old_period = noise.period;
-        noise.period = select < 3 ? &Noise::noise_periods[select] : &pulses[2].period;
-        // return if not resetting and the value hasn't changed
-        if (!reset && old_period == noise.period) return;
-        noise.feedback = feedback ? noise_feedback : looped_feedback;
+        auto old_is_periodic = noise.is_periodic;
+        // update the parameters in the noise structure
+        noise.period = (value & 3) < 3 ?
+            &Noise::noise_periods[value & 3] : &pulses[2].period;
+        noise.is_periodic = is_periodic;
+        // return if not resetting and the values haven't changed
+        if (!reset && old_period == noise.period && old_is_periodic == is_periodic)
+            return;
+        // reset the feed register and shifter
+        noise.feedback = is_periodic ? noise_feedback : looped_feedback;
         noise.shifter = 0x8000;
     }
 

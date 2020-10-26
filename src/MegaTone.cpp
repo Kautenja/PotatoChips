@@ -24,10 +24,6 @@
 /// @brief A Texas Instruments SN76489 chip emulator module.
 struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  private:
-    /// whether to update the noise control (based on LFSR update)
-    bool update_noise_control[PORT_MAX_CHANNELS];
-    /// the current noise period
-    uint8_t noise_period[PORT_MAX_CHANNELS];
     /// a Schmitt Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
 
@@ -79,9 +75,6 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
                 configParam(PARAM_LEVEL  + i, 0, 15, 7, "Noise Volume / Amplifier Attenuator");
             }
         }
-        // setup the control register values
-        memset(update_noise_control, true, sizeof update_noise_control);
-        memset(noise_period, 0, sizeof noise_period);
     }
 
  protected:
@@ -175,28 +168,14 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // ---------------------------------------------------------------
-        // pulse voice (3)
-        // ---------------------------------------------------------------
+        // tone generators (3)
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++) {
             apu[channel].set_frequency(voice, getFrequency(voice, channel));
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
         }
-        // ---------------------------------------------------------------
-        // noise voice
-        // ---------------------------------------------------------------
-        // 2-bit noise period
-        auto period = getNoisePeriod(channel);
-        // determine the state of the LFSR switch
-        bool is_lfsr = !(params[PARAM_LFSR].getValue() - lfsr[channel].state);
-        // update noise registers if a variable has changed
-        if (period != noise_period[channel] or update_noise_control[channel] != is_lfsr) {
-            apu[channel].set_noise(period, is_lfsr);
-            noise_period[channel] = period;
-            update_noise_control[channel] = is_lfsr;
-        }
-        // set the 4-bit attenuation value
+        // noise generator
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].state), false);
         apu[channel].set_amplifier_level(TexasInstrumentsSN76489::NOISE, getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }
 

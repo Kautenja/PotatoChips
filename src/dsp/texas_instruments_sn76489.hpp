@@ -326,13 +326,14 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param value the value to set the volume to \f$\in [0, 4]\f$
     /// @param feedback true to enable the linear feedback shift register (LFSR)
+    /// @param reset true to reset the feedback register and shifter to default
     ///
-    inline void set_noise(uint8_t value, bool feedback) {
+    inline void set_noise(uint8_t value, bool feedback, bool reset = true) {
         int select = value & 3;
-        if (select < 3)
-            noise.period = &Noise::noise_periods[select];
-        else
-            noise.period = &pulses[2].period;
+        auto old_period = noise.period;
+        noise.period = select < 3 ? &Noise::noise_periods[select] : &pulses[2].period;
+        // return if not resetting and the value hasn't changed
+        if (!reset && old_period == noise.period) return;
         noise.feedback = feedback ? noise_feedback : looped_feedback;
         noise.shifter = 0x8000;
     }

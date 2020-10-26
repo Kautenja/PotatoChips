@@ -7,7 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 2,
+      "leftModuleId": 165,
       "rightModuleId": 163,
       "data": {
         "audio": {
@@ -20,7 +20,7 @@
         }
       },
       "pos": [
-        36,
+        41,
         0
       ]
     },
@@ -52,7 +52,7 @@
         }
       ],
       "leftModuleId": 76,
-      "rightModuleId": 1,
+      "rightModuleId": 165,
       "pos": [
         26,
         0
@@ -321,15 +321,15 @@
         },
         {
           "id": 8,
-          "value": 15.0
+          "value": 7.0
         },
         {
           "id": 9,
-          "value": 15.0
+          "value": 7.0
         },
         {
           "id": 10,
-          "value": 15.0
+          "value": 7.0
         },
         {
           "id": 11,
@@ -351,7 +351,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.5
+          "value": 0.600499868
         },
         {
           "id": 1,
@@ -363,7 +363,7 @@
         },
         {
           "id": 3,
-          "value": 0.33949998
+          "value": 0.662
         }
       ],
       "leftModuleId": 5,
@@ -410,7 +410,7 @@
         "amplitude_plot": "decibels_80"
       },
       "pos": [
-        46,
+        51,
         0
       ]
     },
@@ -430,7 +430,7 @@
         },
         {
           "id": 2,
-          "value": 4.03299761
+          "value": -8.0
         },
         {
           "id": 3,
@@ -453,6 +453,37 @@
       "pos": [
         52,
         1
+      ]
+    },
+    {
+      "id": 165,
+      "plugin": "VCV-Recorder",
+      "version": "1.1.0",
+      "model": "Recorder",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 2,
+      "rightModuleId": 1,
+      "data": {
+        "format": "wav",
+        "path": "",
+        "incrementPath": true,
+        "sampleRate": 96000,
+        "depth": 16,
+        "bitRate": 256000,
+        "videoBitRate": 2048000
+      },
+      "pos": [
+        36,
+        0
       ]
     }
   ],
@@ -562,28 +593,28 @@
       "color": "#c91847"
     },
     {
-      "id": 1446,
-      "outputModuleId": 164,
-      "outputId": 3,
-      "inputModuleId": 76,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1438,
-      "outputModuleId": 76,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#c9b70e"
-    },
-    {
       "id": 1447,
       "outputModuleId": 135,
       "outputId": 0,
       "inputModuleId": 76,
       "inputId": 8,
       "color": "#0986ad"
+    },
+    {
+      "id": 1446,
+      "outputModuleId": 164,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 6,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1448,
+      "outputModuleId": 76,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

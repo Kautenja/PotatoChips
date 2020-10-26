@@ -336,20 +336,21 @@ class TexasInstrumentsSN76489 {
         noise.reset();
     }
 
-    // void setFrequency(unsigned voice, uint8_t value) {
-    //     Pulse& sq = pulses[voice];
-    //     if (value & 0x80)
-    //         sq.period = (sq.period & 0xFF00) | (value << 4 & 0x00FF);
-    //     else
-    //         sq.period = (sq.period & 0x00FF) | (value << 8 & 0x3F00);
-    // }
+    /// @brief Set the frequency to a new value.
+    ///
+    /// @param voice the index of the tone generator to set the volume of
+    /// @param value the 10-bit frequency to set the tone generator to
+    ///
+    inline void set_frequency(unsigned voice, uint16_t value) {
+        pulses[voice].period = (value & 0x3FFF) << 4;
+    }
 
-    /// @brief Set the volume to a new value.
+    /// @brief Set the noise mode to a new value.
     ///
     /// @param value the value to set the volume to \f$\in [0, 4]\f$
     /// @param feedback true to enable the linear feedback shift register (LFSR)
     ///
-    void setNoise(uint8_t value, bool feedback) {
+    inline void set_noise(uint8_t value, bool feedback) {
         int select = value & 3;
         if (select < 3)
             noise.period = &Noise::noise_periods[select];
@@ -364,43 +365,10 @@ class TexasInstrumentsSN76489 {
     /// @param voice the index of the voice to set the volume of
     /// @param value the value to set the volume to \f$\in [0, 15]\f$
     ///
-    void setVolume(unsigned voice, uint8_t value) {
+    inline void set_amplifier_level(unsigned voice, uint8_t value) {
         static constexpr unsigned char volumes[16] =
             {64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0};
         voices[voice]->volume = volumes[value & 15];
-    }
-
-    // TODO: update with address / latch separated from data port
-    /// @brief Write to the data port.
-    ///
-    /// @param data the byte to write to the data port
-    ///
-    void write(uint8_t data) {
-        // the possible volume values
-        static constexpr unsigned char volumes[16] = {
-            64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
-        };
-        // set the latch if the MSB is high
-        if (data & 0x80) latch = data;
-        // get the index of the register
-        int index = (latch >> 5) & 3;
-        if (latch & 0x10) {  // volume
-            voices[index]->volume = volumes[data & 15];
-        } else if (index < 3) {  // pulse frequency
-            Pulse& sq = pulses[index];
-            if (data & 0x80)
-                sq.period = (sq.period & 0xFF00) | (data << 4 & 0x00FF);
-            else
-                sq.period = (sq.period & 0x00FF) | (data << 8 & 0x3F00);
-        } else {  // noise
-            int select = data & 3;
-            if (select < 3)
-                noise.period = &Noise::noise_periods[select];
-            else
-                noise.period = &pulses[2].period;
-            noise.feedback = (data & 0x04) ? noise_feedback : looped_feedback;
-            noise.shifter = 0x8000;
-        }
     }
 
     /// @brief Run all voices up to specified time, end current frame,

@@ -188,7 +188,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
             apu[channel].write((TexasInstrumentsSN76489::TONE_0_FREQUENCY + offset) | lo);
             apu[channel].write(hi);
             // 4-bit attenuation
-            apu[channel].write((TexasInstrumentsSN76489::TONE_0_ATTENUATION + offset) | getVolume(voice, channel));
+            apu[channel].setVolume(voice, getVolume(voice, channel));
         }
         // ---------------------------------------------------------------
         // noise voice
@@ -199,16 +199,12 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         bool is_lfsr = !(params[PARAM_LFSR].getValue() - lfsr[channel].state);
         // update noise registers if a variable has changed
         if (period != noise_period[channel] or update_noise_control[channel] != is_lfsr) {
-            apu[channel].write(
-                TexasInstrumentsSN76489::NOISE_CONTROL |
-                (0b00000011 & period) |
-                is_lfsr * TexasInstrumentsSN76489::NOISE_FEEDBACK
-            );
+            apu[channel].setNoise(period, is_lfsr);
             noise_period[channel] = period;
             update_noise_control[channel] = is_lfsr;
         }
         // set the 4-bit attenuation value
-        apu[channel].write(TexasInstrumentsSN76489::NOISE_ATTENUATION | getVolume(TexasInstrumentsSN76489::NOISE, channel));
+        apu[channel].setVolume(TexasInstrumentsSN76489::NOISE, getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }
 
     /// @brief Process the lights on the module.

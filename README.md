@@ -247,6 +247,8 @@ between pitched white-noise and static periodic noise.
     reference clock rate (which is something like _3579545Hz_).
 -   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
     oscillator with mixer sliders and CV inputs
+-   **Channel Mixer:** Mix the voices together internally with hard clipping
+    and aliasing.
 
 See the [Manual][MegaTone] for more information about the features of this module.
 

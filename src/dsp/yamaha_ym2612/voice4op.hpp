@@ -20,8 +20,6 @@
 #ifndef DSP_YAMAHA_YM2612_VOICE4OP_HPP_
 #define DSP_YAMAHA_YM2612_VOICE4OP_HPP_
 
-// TODO: remove detune
-
 #include "operator.hpp"
 
 /// @brief Yamaha YM2612 emulation components.

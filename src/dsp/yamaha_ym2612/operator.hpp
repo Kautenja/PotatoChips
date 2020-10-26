@@ -20,8 +20,6 @@
 #ifndef DSP_YAMAHA_YM2612_OPERATOR_HPP_
 #define DSP_YAMAHA_YM2612_OPERATOR_HPP_
 
-// TODO: remove detune
-
 #include "../exceptions.hpp"
 #include "tables.hpp"
 

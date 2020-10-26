@@ -254,23 +254,23 @@ struct MegaToneWidget : ModuleWidget {
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 49),  module, MegaTone::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, MegaTone::PARAM_FREQ        + i);
             if (i == TexasInstrumentsSN76489::NOISE)
                 freq->snap = true;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 88),  module, MegaTone::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, MegaTone::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 138), module, MegaTone::INPUT_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, MegaTone::INPUT_FM          + i));
             if (i < TexasInstrumentsSN76489::TONE_COUNT)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 183), module, MegaTone::PARAM_FM_ATT      + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, MegaTone::PARAM_FM_ATT      + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 181), module, MegaTone::PARAM_FM_ATT              + i));
+                addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM_ATT              + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 232), module, MegaTone::PARAM_LEVEL       + i);
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i);
             level->snap = true;
             addParam(level);
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 257), module, MegaTone::LIGHTS_LEVEL + 3 * i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 272), module, MegaTone::INPUT_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, MegaTone::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, MegaTone::LIGHTS_LEVEL + 3 * i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, MegaTone::OUTPUT_OSCILLATOR + i));
         }

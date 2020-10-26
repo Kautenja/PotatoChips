@@ -127,7 +127,7 @@ struct ChipModule : rack::engine::Module {
                     output += lastOutput;
                 }
                 // update the VU meter with the un-clipped signal
-                vuMeter[osc].process(args.sampleTime, output / 5.f);
+                vuMeter[osc].process(args.sampleTime / channels, output / 5.f);
                 // hard clip the output
                 outputs[osc].setVoltage(math::clamp(output, -5.f, 5.f), channel);
             }

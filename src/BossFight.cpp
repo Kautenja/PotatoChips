@@ -1,4 +1,4 @@
-// A Yamaha YM2612 Chip module.
+// A Eurorack module based on a Yamaha YM2612 chip emulation.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify

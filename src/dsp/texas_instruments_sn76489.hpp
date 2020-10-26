@@ -29,7 +29,7 @@ class TexasInstrumentsSN76489 {
     static constexpr int TONE_COUNT = OSC_COUNT - 1;
 
     /// the indexes of the voices on the chip
-    enum Channel {
+    enum Voice {
         /// the index of the first tone generator voice
         TONE0 = 0,
         /// the index of the second tone generator voice
@@ -38,26 +38,6 @@ class TexasInstrumentsSN76489 {
         TONE2 = 2,
         /// the index of the noise generator voice
         NOISE = 3
-    };
-
-    /// the registers on the SN76489
-    enum Register : uint8_t {
-        /// the frequency register for pulse generator 0
-        TONE_0_FREQUENCY   = 0b10000000,
-        /// the attenuation register for pulse generator 0
-        TONE_0_ATTENUATION = 0b10010000,
-        /// the frequency register for pulse generator 1
-        TONE_1_FREQUENCY   = 0b10100000,
-        /// the attenuation register for pulse generator 1
-        TONE_1_ATTENUATION = 0b10110000,
-        /// the frequency register for pulse generator 2
-        TONE_2_FREQUENCY   = 0b11000000,
-        /// the attenuation register for pulse generator 2
-        TONE_2_ATTENUATION = 0b11010000,
-        /// the control register for the noise generator
-        NOISE_CONTROL      = 0b11100000,
-        /// the attenuation register for noise generator
-        NOISE_ATTENUATION  = 0b11110000
     };
 
     /// the values for the linear feedback shift register to take.
@@ -71,9 +51,6 @@ class TexasInstrumentsSN76489 {
         /// 3rd Tone Generator Output (index 2)
         N_TONE_2 = 0b11
     };
-
-    /// the FB bit in the Noise control register
-    static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
 
  private:
     /// an abstract base oscillator class for the chip

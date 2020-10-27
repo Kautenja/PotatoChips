@@ -59,7 +59,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
             auto name = "Tone " + std::string(1, static_cast<char>(65 + oscillator));
             configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
             configParam(INPUT_FM    + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
-            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f,  0.8f, name + " Level",     "%",   0.f, 100.f       );
+            configParam(PARAM_LEVEL + oscillator,   0,   15,    7,    name + " Level");
         }
     }
 
@@ -113,20 +113,23 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     ///
     inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
+        static constexpr float MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 15;
+        static constexpr float MAX = 15;
         // get the level from the parameter knob
-        auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            param *= 2 * cv;
-        }
-        // return the 8-bit level clamped within legal limits
-        return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
+        auto level = params[PARAM_LEVEL + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto mod = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_LEVEL + oscillator].setVoltage(mod, channel);
+        // apply the control mod to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        level = roundf(level * mod / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return rack::clamp(level, MIN, MAX);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -194,7 +197,7 @@ struct ChipFME7Widget : ModuleWidget {
             addParam(createParam<Trimpot>(       Vec(18,  65  + 111 * i), module, ChipFME7::PARAM_FM       + i));
             addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + 111 * i), module, ChipFME7::PARAM_FREQ     + i));
             addInput(createInput<PJ301MPort>(    Vec(152, 35  + 111 * i), module, ChipFME7::INPUT_LEVEL    + i));
-            addParam(createParam<BefacoSlidePot>(Vec(179, 21  + 111 * i), module, ChipFME7::PARAM_LEVEL    + i));
+            addParam(createSnapParam<BefacoSlidePot>(Vec(179, 21  + 111 * i), module, ChipFME7::PARAM_LEVEL    + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(150, 90 + 111 * i), module, ChipFME7::LIGHTS_LEVEL + 3 * i));
             addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + 111 * i), module, ChipFME7::OUTPUT_OSCILLATOR + i));
         }

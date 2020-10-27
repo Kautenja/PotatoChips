@@ -204,7 +204,7 @@
       "slug": "VRC6",
       "name": "Escalator",
       "description": "An emulation of the Konami VRC6 chip from Nintendo Entertainment System (NES) cartridges.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Escalator.pdf",
       "tags": [
         "Oscillator",
         "Polyphonic"

@@ -471,7 +471,7 @@ See the [Manual][WaveCreativeModulator] for more information about the features 
 audio processing unit.
 
 <p align="center">
-<img alt="Grafx Turbillator" src="manual/GrafxTurbillator/img/GrafxTurbillator-Module.svg">
+<img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/TURBO_GRAFX_16-Module.svg">
 </p>
 
 ### Features

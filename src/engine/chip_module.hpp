@@ -127,7 +127,7 @@ struct ChipModule : rack::engine::Module {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and set the output port
             for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
-                auto output = buffers[channel][osc].read_sample_5V();
+                auto output = buffers[channel][osc].read_sample(5.f);
                 if (normal_outputs) {  // mix outputs from previous voices
                     auto shouldNormal = osc && !outputs[osc - 1].isConnected();
                     auto lastOutput = shouldNormal ? outputs[osc - 1].getVoltage(channel) : 0.f;

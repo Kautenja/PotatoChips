@@ -153,13 +153,6 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
 
-    /// @brief Return the size of the buffer.
-    ///
-    /// @returns the size of the buffer (TODO: units?)
-    ///
-    __attribute__((deprecated))
-    inline uint32_t get_size() const { return 1; }
-
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
     ///
@@ -171,12 +164,18 @@ class BLIPBuffer {
         return time * factor;
     }
 
-    /// @brief Return the output sample from the buffer as a voltage.
+    /// @brief Return a scaled floating point output sample from the buffer.
     ///
-    /// @returns the sample \f$\in [-5, 5]V\f$ without clipping
+    /// @param scale the scale factor to use instead of unit scale of 1
     ///
-    inline float read_sample_5V() {
-        // get the sample from the accumulator (don't clip it though)
+    /// @returns the sample \f$\in [-1, 1]\f$ without clipping, i.e.,
+    /// \f$\pm 1\f$ is \f$0db\f$.
+    /// @details
+    /// Calls to this function advance the sample accumulator
+    ///
+    inline float read_sample(float scale = 1.f) {
+        // get the sample from the accumulator (don't clip it though). cast
+        // it as a float for later calculation.
         float sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
         sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
@@ -184,7 +183,9 @@ class BLIPBuffer {
         auto remain = count + BLIP_WIDEST_IMPULSE;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
-        return 5.f * sample / std::numeric_limits<blip_sample_t>::max();
+        // scale the sample by the scale factor and the binary code space for
+        // the digital signal to produce a floating point value
+        return scale * sample / std::numeric_limits<blip_sample_t>::max();
     }
 };
 
@@ -495,7 +496,9 @@ class BLIPSynthesizer {
         int delta,
         BLIPBuffer* blip_buffer
     ) const {
-        if (!((time >> BLIP_BUFFER_ACCURACY) < blip_buffer->get_size()))
+        // TODO: remove. the "1" used to be a call to blip_buffer->get_size()
+        // that is now static. This likely no longer needs to be checked
+        if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
         blip_long* BLIP_RESTRICT buffer = blip_buffer->buffer + (time >> BLIP_BUFFER_ACCURACY);

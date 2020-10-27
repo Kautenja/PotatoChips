@@ -289,7 +289,7 @@ struct ChipTurboGrafx16 : Module {
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (int i = 0; i < NECTurboGrafx16::OSC_COUNT; i++) {
-            const auto sample = buf[i].read_sample_5V();
+            const auto sample = buf[i].read_sample(5.f);
             outputs[i].setVoltage(sample);
         }
     }

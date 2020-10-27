@@ -14,7 +14,7 @@
     {
       "slug": "106",
       "name": "106",
-      "description": "An emulation of the Namco 106 wavetable chip from certain Nintendo Entertainment System (NES) cartridges.",
+      "description": "An emulation of the Namco 106 wavetable chip from Nintendo Entertainment System (NES) cartridges.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf",
       "tags": [
         "Oscillator",
@@ -85,9 +85,9 @@
     },
     {
       "slug": "POKEY",
-      "name": "POKEY",
+      "name": "Troglocillator",
       "description": "An emulation of the Atari POKEY chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Troglocilator.pdf",
       "tags": [
         "Noise",
         "Oscillator",
@@ -202,8 +202,8 @@
     },
     {
       "slug": "VRC6",
-      "name": "VRC6",
-      "description": "An emulation of the Konami VRC6 chip from certain Nintendo Entertainment System (NES) cartridges.",
+      "name": "Escalator",
+      "description": "An emulation of the Konami VRC6 chip from Nintendo Entertainment System (NES) cartridges.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf",
       "tags": [
         "Oscillator",

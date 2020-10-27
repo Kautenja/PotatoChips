@@ -36,7 +36,7 @@ void init(Plugin* instance) {
     instance->addModel(modelChipS_SMP_Gauss);
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipTurboGrafx16);
-    instance->addModel(modelChipVRC6);
+    instance->addModel(modelEscalator);
     instance->addModel(modelGleeokillator);
     instance->addModel(modelBossFight);
     instance->addModel(modelMegaTone);

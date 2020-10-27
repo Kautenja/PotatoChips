@@ -39,7 +39,7 @@ extern rack::Model *modelChipS_SMP_Echo;
 extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipTurboGrafx16;
-extern rack::Model *modelChipVRC6;
+extern rack::Model *modelEscalator;
 extern rack::Model *modelGleeokillator;
 extern rack::Model *modelBossFight;
 extern rack::Model *modelMegaTone;

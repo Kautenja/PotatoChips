@@ -200,11 +200,11 @@
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 5,
@@ -212,11 +212,11 @@
         },
         {
           "id": 6,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 7,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 8,
@@ -281,14 +281,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 833,
-      "outputModuleId": 133,
-      "outputId": 2,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0c8e15"
-    },
-    {
       "id": 835,
       "outputModuleId": 5,
       "outputId": 0,
@@ -297,11 +289,27 @@
       "color": "#0986ad"
     },
     {
-      "id": 836,
+      "id": 866,
+      "outputModuleId": 133,
+      "outputId": 2,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 867,
       "outputModuleId": 132,
       "outputId": 0,
-      "inputModuleId": 133,
-      "inputId": 8,
+      "inputModuleId": 2,
+      "inputId": 5,
+      "color": "#c91847"
+    },
+    {
+      "id": 869,
+      "outputModuleId": 133,
+      "outputId": 2,
+      "inputModuleId": 71,
+      "inputId": 0,
       "color": "#c9b70e"
     }
   ]

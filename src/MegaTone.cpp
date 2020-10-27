@@ -190,12 +190,12 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
             auto brightness = vuMeter[voice].getBrightness(-12, 3);
             // set the red light based on total brightness and
             // brightness from 0dB to 3dB
-            lights[voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
             // set the red light based on inverted total brightness and
             // brightness from -12dB to 0dB
-            lights[voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
             // set the blue light to off
-            lights[voice * 3 + 2].setBrightness(0);
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
         }
     }
 };

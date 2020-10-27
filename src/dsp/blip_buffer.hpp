@@ -67,8 +67,6 @@ static constexpr uint8_t BLIP_SAMPLE_BITS = 30;
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
  private:
-    /// the size of the buffer
-    uint32_t buffer_size = 0;
     /// The sample rate to generate samples from the buffer at
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
@@ -90,20 +88,12 @@ class BLIPBuffer {
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
+    // TODO: move to private / protected
     /// the buffer of samples in the BLIP buffer
-    blip_time_t* buffer = 0;
+    blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) * sizeof(blip_time_t)];
 
-    /// Initialize a new BLIP Buffer.
-    BLIPBuffer() {
-        static constexpr int size = 1;
-        void* buffer_ = realloc(buffer, (size + BLIP_WIDEST_IMPULSE) * sizeof *buffer);
-        if (!buffer_) throw Exception("out of memory for buffer size");
-        buffer = static_cast<blip_time_t*>(buffer_);
-        buffer_size = size;
-    }
-
-    /// Destroy an existing BLIP Buffer.
-    ~BLIPBuffer() { free(buffer); }
+    /// @brief Initialize a new BLIP Buffer.
+    BLIPBuffer() { memset(buffer, 0, sizeof buffer); }
 
     /// @brief Set the output sample rate and clock rate.
     ///
@@ -167,7 +157,8 @@ class BLIPBuffer {
     ///
     /// @returns the size of the buffer (TODO: units?)
     ///
-    inline uint32_t get_size() const { return buffer_size; }
+    __attribute__((deprecated))
+    inline uint32_t get_size() const { return 1; }
 
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.

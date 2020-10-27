@@ -27,6 +27,7 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
+        ENUMS(PARAM_FM, KonamiVRC6::OSC_COUNT),
         ENUMS(PARAM_PW, KonamiVRC6::OSC_COUNT - 1),  // pulse wave only
         ENUMS(PARAM_LEVEL, KonamiVRC6::OSC_COUNT),
         NUM_PARAMS
@@ -46,20 +47,25 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     };
     /// the indexes of lights on the module
     enum LightIds {
+        ENUMS(LIGHTS_LEVEL, 3 * KonamiVRC6::OSC_COUNT),
         NUM_LIGHTS
     };
 
     /// @brief Initialize a new VRC6 Chip module.
     ChipVRC6() : ChipModule<KonamiVRC6>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1,  -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",        " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2,  -2.5f, 2.5f, 0.f,  "Saw Frequency",            " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_PW + 0,     0,    7,    4,    "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_PW + 1,     0,    7,    4,    "Pulse 1 Duty Cycle"                                               );
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f,  0.8f, "Pulse 1 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f,  0.8f, "Pulse 2 Level",            "%",   0.f,                100.f       );
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f,  0.5f, "Saw Level / Quantization", "%",   0.f,                100.f       );
+        configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1,  -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2,  -2.5f, 2.5f, 0.f,  "Saw Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FM   + 0,  -1.f,  1.f,  0.f,  "Pulse 1 FM");
+        configParam(PARAM_FM   + 1,  -1.f,  1.f,  0.f,  "Pulse 2 FM");
+        configParam(PARAM_FM   + 2,  -1.f,  1.f,  0.f,  "Saw FM");
+        configParam(PARAM_PW + 0,     0,    7,    7,    "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1,     0,    7,    7,    "Pulse 1 Duty Cycle");
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f,  0.8f, "Pulse 1 Level", "%", 0.f, 100.f);
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f,  0.8f, "Pulse 2 Level", "%", 0.f, 100.f);
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f,  0.5f, "Saw Level", "%", 0.f, 100.f);
     }
 
  protected:
@@ -172,7 +178,20 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < KonamiVRC6::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -205,6 +224,7 @@ struct ChipVRC6Widget : ModuleWidget {
             addInput(createInput<PJ301MPort>(    Vec(18, 104  + i * 111), module, ChipVRC6::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(180, 21  + i * 111), module, ChipVRC6::PARAM_LEVEL    + i));
             addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(130, 100 + i * 111), module, ChipVRC6::LIGHTS_LEVEL + 3 * i));
         }
         int i = 2;
         addInput(createInput<PJ301MPort>(    Vec(18,  322), module, ChipVRC6::INPUT_VOCT     + i));
@@ -213,6 +233,7 @@ struct ChipVRC6Widget : ModuleWidget {
         addInput(createInput<PJ301MPort>(    Vec(152, 257), module, ChipVRC6::INPUT_LEVEL    + i));
         addParam(createParam<BefacoSlidePot>(Vec(180, 21  + i * 111), module, ChipVRC6::PARAM_LEVEL    + i));
         addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
+        addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(130, 100 + i * 111), module, ChipVRC6::LIGHTS_LEVEL + 3 * i));
     }
 };
 

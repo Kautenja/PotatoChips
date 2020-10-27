@@ -263,6 +263,32 @@ filters, and noise generators / distortion effects.
 See the [Manual][POKEY] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: Escillator -->
+<!-- ------------------------------------------------------------ -->
+
+## Escillator
+
+**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
+chip contains two pulse wave generators, and a quantized saw wave generator.
+
+<p align="center">
+<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
+</p>
+
+### Features
+
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
+    cycles: _6.25%_, _12.5%_, _18.75%_, _25%_, _31.25%_, _37.5%_, _43.75%_, and
+    _50%_
+-   **Quantized saw wave generator:** Generate NES style saw wave with variable
+    quantization including the overflow bug in the VRC6
+-   **Amplitude modulation:** Manual and CV control over the individual voice
+    levels
+
+See the [Manual][VRC6] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(ADSR) -->
 <!-- ------------------------------------------------------------ -->
 
@@ -454,32 +480,6 @@ TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
 
 See the [Manual][TurboGrafx16] for more information about the features of this module.
 -->
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Escillator -->
-<!-- ------------------------------------------------------------ -->
-
-## Escillator
-
-**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
-processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
-chip contains two pulse wave generators, and a quantized saw wave generator.
-
-<p align="center">
-<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
-</p>
-
-### Features
-
--   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
-    cycles: _6.25%_, _12.5%_, _18.75%_, _25%_, _31.25%_, _37.5%_, _43.75%_, and
-    _50%_
--   **Quantized saw wave generator:** Generate NES style saw wave with variable
-    quantization including the overflow bug in the VRC6
--   **Amplitude modulation:** Manual and CV control over the individual voice
-    levels
-
-See the [Manual][VRC6] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->

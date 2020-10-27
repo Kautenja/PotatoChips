@@ -21,6 +21,10 @@
 #include "exceptions.hpp"
 
 /// @brief SunSoft FME7 chip emulator.
+/// @details
+/// This was designed to emulate the game "Gimmick!", which did not use the
+/// envelope or noise features of the chip. As such, these features are not
+/// currently implemented
 class SunSoftFME7 {
  public:
     /// the number of oscillators on the chip

@@ -17,6 +17,8 @@
 #include "engine/chip_module.hpp"
 #include "dsp/ricoh_2a03.hpp"
 
+// TODO: discrete DMC sampler module
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

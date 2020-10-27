@@ -20,6 +20,9 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
+// TODO: hard sync phase reset using:
+// ((Pulse*) osc)->phase = Pulse::PHASE_RANGE - 1;
+
 /// @brief A Ricoh 2A03 sound chip emulator.
 class Ricoh2A03 {
  public:
@@ -177,11 +180,11 @@ class Ricoh2A03 {
         /// TODO:
         enum { shift_mask = 0x07 };
         /// TODO:
-        enum { phase_range = 8 };
+        enum { PHASE_RANGE = 8 };
         /// the current phase of the oscillator
-        int phase;
+        int phase = Pulse::PHASE_RANGE - 1;
         /// TODO:
-        int sweep_delay;
+        int sweep_delay = 0;
 
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
         typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> Synth;
@@ -234,7 +237,7 @@ class Ricoh2A03 {
                 if (time < end_time) {
                     // maintain proper phase
                     int count = (end_time - time + timer_period - 1) / timer_period;
-                    phase = (phase + count) & (phase_range - 1);
+                    phase = (phase + count) & (PHASE_RANGE - 1);
                     time += static_cast<blip_time_t>(count * timer_period);
                 }
             } else {
@@ -261,7 +264,7 @@ class Ricoh2A03 {
                     int phase = this->phase;
 
                     do {
-                        phase = (phase + 1) & (phase_range - 1);
+                        phase = (phase + 1) & (PHASE_RANGE - 1);
                         if (phase == 0 || phase == duty) {
                             delta = -delta;
                             synth->offset(time, delta, output);
@@ -276,25 +279,29 @@ class Ricoh2A03 {
             delay = time - end_time;
         }
 
-        /// Reset the oscillator to its initial state.
+        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
+        inline void reset_phase() { phase = PHASE_RANGE - 1; }
+
+        /// @brief Reset the oscillator to uniform and default state.
         inline void reset() {
             sweep_delay = 0;
+            reset_phase();
             Envelope::reset();
         }
     };
 
     /// The quantized triangle wave oscillator from the NES.
     struct Triangle : Oscillator {
-        enum { phase_range = 16 };
+        enum { PHASE_RANGE = 16 };
         int phase;
         int linear_counter;
         /// the BLIP synthesizer for the oscillator
         BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
 
+        /// @brief Calculate the amplitude of the oscillator waveform
         inline int calc_amp() const {
-            int amp = phase_range - phase;
-            if (amp < 0)
-                amp = phase - (phase_range + 1);
+            int amp = PHASE_RANGE - phase;
+            if (amp < 0) amp = phase - (PHASE_RANGE + 1);
             return amp;
         }
 
@@ -317,14 +324,14 @@ class Ricoh2A03 {
 
                 int phase = this->phase;
                 int volume = 1;
-                if (phase > phase_range) {
-                    phase -= phase_range;
+                if (phase > PHASE_RANGE) {
+                    phase -= PHASE_RANGE;
                     volume = -volume;
                 }
 
                 do {
                     if (--phase == 0) {
-                        phase = phase_range;
+                        phase = PHASE_RANGE;
                         volume = -volume;
                     } else {
                         synth.offset(time, volume, output);
@@ -333,7 +340,7 @@ class Ricoh2A03 {
                     time += timer_period;
                 } while (time < end_time);
 
-                if (volume < 0) phase += phase_range;
+                if (volume < 0) phase += PHASE_RANGE;
                 this->phase = phase;
                 last_amp = calc_amp();
             }
@@ -350,9 +357,13 @@ class Ricoh2A03 {
                 reg_written[3] = false;
         }
 
+        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
+        inline void reset_phase() { phase = PHASE_RANGE; }
+
+        /// @brief Reset the oscillator to uniform and default state.
         inline void reset() {
             linear_counter = 0;
-            phase = phase_range;
+            reset_phase();
             Oscillator::reset();
         }
     };
@@ -396,11 +407,10 @@ class Ricoh2A03 {
                     BLIPBuffer* const output = this->output;
 
                     // using re-sampled time avoids conversion in synth.offset()
-                    auto rperiod = output->resampled_time(period);
+                    const auto rperiod = output->resampled_time(period);
                     auto rtime = output->resampled_time(time);
 
-                    int noise = this->noise;
-                    int delta = amp * 2 - volume;
+                    int currentDelta = amp * 2 - volume;
                     const int tap = (regs[2] & mode_flag ? 8 : 13);
 
                     do {
@@ -409,16 +419,15 @@ class Ricoh2A03 {
 
                         if ((noise + 1) & 2) {
                             // bits 0 and 1 of noise differ
-                            delta = -delta;
-                            synth.offset_resampled(rtime, delta, output);
+                            currentDelta = -currentDelta;
+                            synth.offset_resampled(rtime, currentDelta, output);
                         }
 
                         rtime += rperiod;
                         noise = (feedback & 0x4000) | (noise >> 1);
                     } while (time < end_time);
 
-                    last_amp = (delta + volume) >> 1;
-                    this->noise = noise;
+                    last_amp = (currentDelta + volume) >> 1;
                 }
             }
             delay = time - end_time;
@@ -444,8 +453,9 @@ class Ricoh2A03 {
 
     /// has been run until this time in current frame
     blip_time_t last_time;
-    /// TODO: document
-    int frame_period;
+
+    /// TODO: document NTSC FRAME_PERIOD
+    const int FRAME_PERIOD = 7458;  // PAL is 8314 (but not exactly)
     /// cycles until frame counter runs next
     int frame_delay;
     /// current frame (0-3)
@@ -485,7 +495,7 @@ class Ricoh2A03 {
             if (time == end_time) break;
 
             // take frame-specific actions
-            frame_delay = frame_period;
+            frame_delay = FRAME_PERIOD;
             switch (frame++) {
                 case 0:  // fall through
                 case 2:
@@ -507,7 +517,7 @@ class Ricoh2A03 {
                     frame = 0;
                     // frame 3 is almost twice as long in mode 1
                     if (frame_mode & 0x80)
-                        frame_delay += frame_period - 6;
+                        frame_delay += FRAME_PERIOD - 6;
                     break;
             }
             // clock envelopes and linear counter every frame
@@ -582,13 +592,7 @@ class Ricoh2A03 {
     }
 
     /// @brief Reset internal frame counter, registers, and all oscillators.
-    ///
-    /// @param pal_timing Use PAL timing if pal_timing is true, otherwise NTSC
-    ///
-    inline void reset(bool pal_timing = false) {
-        // TODO: time pal frame periods exactly
-        frame_period = pal_timing ? 8314 : 7458;
-
+    inline void reset() {
         pulse0.reset();
         pulse1.reset();
         triangle.reset();
@@ -626,41 +630,28 @@ class Ricoh2A03 {
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         // run the emulator up to the given time
         run_until(time);
-        if (address < 0x4010) {  // synthesize registers
+        if (address < 0x4010) {  // synthesizer registers
             // Write to channel
             int osc_index = (address - ADDR_START) >> 2;
             Oscillator* osc = oscs[osc_index];
             int reg = address & 3;
             osc->regs[reg] = data;
             osc->reg_written[reg] = true;
-            /*if (osc_index == 4) {
-                // handle DMC specially
-            } else */if (reg == 3) {
-                // load length counter
-                if ((osc_enables >> osc_index) & 1)
-                    osc->length_counter = length_table[(data >> 3) & 0x1f];
-                // reset square phase
-                // DISABLED TO HACK SQUARE OSCILLATOR for VCV Rack
-                // if (osc_index < 2)
-                //     ((Pulse*) osc)->phase = Pulse::phase_range - 1;
-            }
-        } else if (address == 0x4015) {
-            // Channel enables
+            if (reg == 3 && ((osc_enables >> osc_index) & 1)) // load length counter
+                osc->length_counter = length_table[(data >> 3) & 0x1f];
+        } else if (address == 0x4015) {  // Channel enables
             for (int i = OSC_COUNT; i--;) {
-                if (!((data >> i) & 1))
-                    oscs[i]->length_counter = 0;
+                if (!((data >> i) & 1)) oscs[i]->length_counter = 0;
             }
             osc_enables = data;
-        } else if (address == 0x4017) {
-            // Frame mode
+        } else if (address == 0x4017) {  // Frame mode
             frame_mode = data;
             // mode 1
             frame_delay = (frame_delay & 1);
             frame = 0;
-            if (!(data & 0x80)) {
-                // mode 0
+            if (!(data & 0x80)) {  // mode 0
                 frame = 1;
-                frame_delay += frame_period;
+                frame_delay += FRAME_PERIOD;
             }
         }
     }

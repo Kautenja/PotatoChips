@@ -180,30 +180,20 @@ class BLIPBuffer {
         return time * factor;
     }
 
-    /// @brief Return the output sample from the buffer.
+    /// @brief Return the output sample from the buffer as a voltage.
     ///
-    /// @returns the sample
+    /// @returns the sample \f$\in [-5, 5]V\f$ without clipping
     ///
-    blip_sample_t read_sample() {
-        // get the sample from the accumulator
-        blip_long sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
-        if (static_cast<blip_sample_t>(sample) != sample)
-            sample = std::numeric_limits<blip_sample_t>::max() - (sample >> 24);
+    inline float read_sample_5V() {
+        // get the sample from the accumulator (don't clip it though)
+        float sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
         sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
         auto remain = count + BLIP_WIDEST_IMPULSE;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
-        return sample;
-    }
-
-    /// @brief Return the output sample from the buffer as a voltage.
-    ///
-    /// @returns the sample \f$\in [-5, 5]V\f$ without clipping
-    ///
-    inline float read_sample_5V() {
-        return 5.f * read_sample() / static_cast<float>(std::numeric_limits<blip_sample_t>::max());
+        return 5.f * sample / std::numeric_limits<blip_sample_t>::max();
     }
 };
 

@@ -278,8 +278,7 @@ class KonamiVRC6 {
         last_time = 0;
         for (unsigned i = 0; i < OSC_COUNT; i++) {
             Oscillator& osc = oscs[i];
-            for (unsigned j = 0; j < REG_COUNT; j++)
-                osc.regs[j] = 0;
+            memset(osc.regs, 0, sizeof osc.regs);
             osc.delay = 0;
             osc.last_amp = 0;
             osc.phase = 1;

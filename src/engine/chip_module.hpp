@@ -40,7 +40,7 @@ struct ChipModule : rack::engine::Module {
     rack::dsp::ClockDivider lightDivider;
 
     /// a VU meter for measuring the output audio level from the emulator
-    dsp::VuMeter2 vuMeter[ChipEmulator::OSC_COUNT];
+    rack::dsp::VuMeter2 vuMeter[ChipEmulator::OSC_COUNT];
 
     /// whether the outputs should be normalled together into a mix
     bool normal_outputs = false;

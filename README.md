@@ -26,7 +26,7 @@ generator, and a noise generator. The original chip featured a DMC loader for
 playing samples that has been omitted in this emulation.
 
 <p align="center">
-<img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
+<img alt="Buzzy Beetle" src="manual/2A03/img/2A03-Module.svg">
 </p>
 
 ### Features
@@ -55,7 +55,7 @@ samples. This module uses a bank of five 32-sample wave-tables to act as the
 waveform for all eight channels.
 
 <p align="center">
-<img alt="106" src="manual/106/img/106-Module.svg">
+<img alt="Name Corp Octal Wave Generator" src="manual/106/img/106-Module.svg">
 </p>
 
 ### Features
@@ -84,7 +84,7 @@ chip contains three pulse wave generators, a noise generator, and an envelope
 generator. Only the pulse wave generators are implemented currently.
 
 <p align="center">
-<img alt="FME7" src="manual/FME7/img/FME7-Module.svg">
+<img alt="Gleeokillator" src="manual/FME7/img/FME7-Module.svg">
 </p>
 
 ### Features
@@ -105,7 +105,7 @@ processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
 chip contains two pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
+<img alt="Escillator" src="manual/VRC6/img/VRC6-Module.svg">
 </p>
 
 ### Features
@@ -133,7 +133,7 @@ unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
 generator with a wave-table synthesizer.
 
 <p align="center">
-<img alt="GBS" src="manual/GBS/img/GBS-Module.svg">
+<img alt="Pallet Town Waves System" src="manual/GBS/img/GBS-Module.svg">
 </p>
 
 ### Features
@@ -290,7 +290,7 @@ See the [Manual][S_SMP_Gauss] for more information about the features of this mo
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
 
- ## S-SMP _(Coming Soon!)_
+## S-SMP _(Coming Soon!)_
 
 S-SMP is an emulation of the Sony S-SMP audio processing unit from the
 [Super Nintendo Entertainment System (SNES)][SNES].
@@ -390,7 +390,7 @@ between pitched white-noise and static periodic noise.
 See the [Manual][MegaTone] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: AY-3-8910 -->
+<!-- MARK: Jairasullator -->
 <!-- ------------------------------------------------------------ -->
 
 ## Jairasullator
@@ -400,7 +400,7 @@ audio processing unit. The AY-3-8910 features three pulse waveform generators
 and a noise generator that is shared between the channels.
 
 <p align="center">
-<img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
+<img alt="Jairasullator" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
 </p>
 
 ### Features
@@ -424,7 +424,7 @@ variety of bonus controls, including extended frequency ranges, high-pass
 filters, and noise generators / distortion effects.
 
 <p align="center">
-<img alt="POKEY" src="manual/POKEY/img/POKEY-Module.svg">
+<img alt="Troglocillator" src="manual/POKEY/img/POKEY-Module.svg">
 </p>
 
 ### Features
@@ -448,37 +448,35 @@ See the [Manual][POKEY] for more information about the features of this module.
 <!-- MARK: SCC -->
 <!-- ------------------------------------------------------------ -->
 
-<!--
-## SCC _(Coming Soon!)_
+## Wave Creative Modulator _(Coming Soon!)_
 
-SCC is an emulation of the Konami SCC audio processing unit.
+**Wave Creative Modulator** is an emulation of the
+[Konami Sound Creative Chip (SCC)][KonamiSCC] audio processing unit.
 
 <p align="center">
-<img alt="SCC" src="manual/SCC/img/SCC-Module.svg">
+<img alt="Wave Creative Modulator" src="manual/SCC/img/SCC-Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][SCC] for more information about the features of this module.
--->
+See the [Manual][WaveCreativeModulator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: TurboGrafx16 -->
+<!-- MARK: Grafx Turbillator -->
 <!-- ------------------------------------------------------------ -->
 
-<!--
-## TurboGrafx16 _(Coming Soon!)_
+## Grafx Turbillator _(Coming Soon!)_
 
-TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
+**Grafx Turbillator** is an emulation of the [NEC TurboGrafx16][NECTurboGrafx16]
+audio processing unit.
 
 <p align="center">
-<img alt="TurboGrafx16" src="manual/TurboGrafx16/img/TURBO_GRAFX_16-Module.svg">
+<img alt="Grafx Turbillator" src="manual/GrafxTurbillator/img/GrafxTurbillator-Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][TurboGrafx16] for more information about the features of this module.
--->
+See the [Manual][GrafxTurbillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->
@@ -504,22 +502,24 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 
 [AtariPOKEY]: https://en.wikipedia.org/wiki/POKEY
 [GI_AY_3_8910]: http://map.grauw.nl/resources/sound/generalinstrument_ay-3-8910.pdf
+[KonamiSCC]: http://bifi.msxnet.org/msxnet/tech/scc.html
+[NECTurboGrafx16]:https://en.wikipedia.org/wiki/TurboGrafx-16
 
 <!-- Manuals -->
 
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 [2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
-[AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
-[BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 [FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 [GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
-[MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
-[POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
 [S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
 [S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
 [S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
-[SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
-[TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
-[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
+[BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
+[MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
+[AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
+[POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+[WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
+[GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Namco 106 chip emulator module.
-struct Chip106 : ChipModule<Namco106> {
+struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
  private:
     /// the number of active oscillators on the chip
     unsigned num_oscillators[PORT_MAX_CHANNELS];
@@ -71,7 +71,7 @@ struct Chip106 : ChipModule<Namco106> {
     uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
     /// @brief Initialize a new 106 Chip module.
-    Chip106() : ChipModule<Namco106>() {
+    NameCorpOctalWaveGenerator() : ChipModule<Namco106>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_NUM_OSCILLATORS,      1, Namco106::OSC_COUNT, 4, "Active Channels");
         configParam(PARAM_NUM_OSCILLATORS_ATT, -1, 1,                   0, "Active Channels Attenuverter");
@@ -316,12 +316,12 @@ struct Chip106 : ChipModule<Namco106> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for 106.
-struct Chip106Widget : ModuleWidget {
+struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit Chip106Widget(Chip106 *module) {
+    explicit NameCorpOctalWaveGeneratorWidget(NameCorpOctalWaveGenerator *module) {
         setModule(module);
         static constexpr auto panel = "res/106.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -331,7 +331,7 @@ struct Chip106Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[Chip106::NUM_WAVEFORMS] = {
+        static constexpr NVGcolor colors[NameCorpOctalWaveGenerator::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -339,7 +339,7 @@ struct Chip106Widget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         /// the default wave-table for each page of the wave-table editor
-        static constexpr uint8_t* wavetables[Chip106::NUM_WAVEFORMS] = {
+        static constexpr uint8_t* wavetables[NameCorpOctalWaveGenerator::NUM_WAVEFORMS] = {
             SINE,
             PW5,
             RAMP_UP,
@@ -349,14 +349,14 @@ struct Chip106Widget : ModuleWidget {
         // Add wave-table editors. If the module is displaying in/being
         // rendered for the library, the module will be null and a dummy
         // waveform is displayed
-        for (int waveform = 0; waveform < Chip106::NUM_WAVEFORMS; waveform++) {
+        for (int waveform = 0; waveform < NameCorpOctalWaveGenerator::NUM_WAVEFORMS; waveform++) {
             // get the wave-table buffer for this editor
             uint8_t* wavetable = module ? &module->wavetable[waveform][0] : &wavetables[waveform][0];
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer
-                Chip106::SAMPLES_PER_WAVETABLE,  // wave-table length
-                Chip106::BIT_DEPTH,              // waveform bit depth
+                NameCorpOctalWaveGenerator::SAMPLES_PER_WAVETABLE,  // wave-table length
+                NameCorpOctalWaveGenerator::BIT_DEPTH,              // waveform bit depth
                 Vec(10, 26 + 67 * waveform),     // position
                 Vec(135, 60),                    // size
                 colors[waveform]                 // line fill color
@@ -365,25 +365,25 @@ struct Chip106Widget : ModuleWidget {
             addChild(table_editor);
         }
         // oscillator select
-        addParam(createParam<Rogan3PWhite>(Vec(156, 42), module, Chip106::PARAM_NUM_OSCILLATORS));
-        addParam(createParam<Trimpot>(Vec(168, 110), module, Chip106::PARAM_NUM_OSCILLATORS_ATT));
-        addInput(createInput<PJ301MPort>(Vec(165, 153), module, Chip106::INPUT_NUM_OSCILLATORS));
+        addParam(createParam<Rogan3PWhite>(Vec(156, 42), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS));
+        addParam(createParam<Trimpot>(Vec(168, 110), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS_ATT));
+        addInput(createInput<PJ301MPort>(Vec(165, 153), module, NameCorpOctalWaveGenerator::INPUT_NUM_OSCILLATORS));
         // wave-table morph
-        addParam(createParam<Rogan3PWhite>(Vec(156, 214), module, Chip106::PARAM_WAVETABLE));
-        addParam(createParam<Trimpot>(Vec(168, 282), module, Chip106::PARAM_WAVETABLE_ATT));
-        addInput(createInput<PJ301MPort>(Vec(165, 325), module, Chip106::INPUT_WAVETABLE));
+        addParam(createParam<Rogan3PWhite>(Vec(156, 214), module, NameCorpOctalWaveGenerator::PARAM_WAVETABLE));
+        addParam(createParam<Trimpot>(Vec(168, 282), module, NameCorpOctalWaveGenerator::PARAM_WAVETABLE_ATT));
+        addInput(createInput<PJ301MPort>(Vec(165, 325), module, NameCorpOctalWaveGenerator::INPUT_WAVETABLE));
         // individual oscillator controls
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, Chip106::INPUT_VOCT + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, Chip106::INPUT_FM + i      ));
-            addParam(createParam<Rogan2PWhite>( Vec(275, 35 + i * 41), module, Chip106::PARAM_FREQ + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, Chip106::INPUT_VOLUME + i  ));
-            addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, Chip106::PARAM_VOLUME + i  ));
-            addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, Chip106::OUTPUT_OSCILLATOR + i));
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, Chip106::LIGHT_CHANNEL + 3 * i));
+            addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
+            addParam(createParam<Rogan2PWhite>( Vec(275, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
+            addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
+            addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelChip106 = createModel<Chip106, Chip106Widget>("106");
+Model *modelNameCorpOctalWaveGenerator = createModel<NameCorpOctalWaveGenerator, NameCorpOctalWaveGeneratorWidget>("106");

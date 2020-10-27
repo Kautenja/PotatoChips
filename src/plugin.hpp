@@ -28,17 +28,8 @@ extern rack::Plugin* plugin_instance;
 
 // pointers to each module in the plug-in
 
-// rev1
-extern rack::Model *modelChip106;
-extern rack::Model *modelChipS_SMP;
-extern rack::Model *modelChipS_SMP_ADSR;
-extern rack::Model *modelChipS_SMP_BRR;
-extern rack::Model *modelChipS_SMP_Echo;
-extern rack::Model *modelChipS_SMP_Gauss;
-extern rack::Model *modelChipSCC;
-extern rack::Model *modelChipTurboGrafx16;
-
-// rev2
+// current releases
+extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelBuzzyBeetle;
 extern rack::Model *modelPalletTownWavesSystem;
@@ -51,6 +42,15 @@ extern rack::Model *modelMegaTone;
 // blanks
 extern rack::Model *modelChipS_SMP_Blank;
 extern rack::Model *model2612_Blank;
+
+// beta versions / WIPs
+extern rack::Model *modelChipS_SMP;
+extern rack::Model *modelChipS_SMP_ADSR;
+extern rack::Model *modelChipS_SMP_BRR;
+extern rack::Model *modelChipS_SMP_Echo;
+extern rack::Model *modelChipS_SMP_Gauss;
+extern rack::Model *modelChipSCC;
+extern rack::Model *modelChipTurboGrafx16;
 
 /// @brief Create a parameter that snaps to integer values.
 ///

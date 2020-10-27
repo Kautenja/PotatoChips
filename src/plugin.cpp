@@ -24,17 +24,8 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
-    // rev1
-    instance->addModel(modelChip106);
-    instance->addModel(modelChipS_SMP);
-    instance->addModel(modelChipS_SMP_ADSR);
-    instance->addModel(modelChipS_SMP_BRR);
-    instance->addModel(modelChipS_SMP_Echo);
-    instance->addModel(modelChipS_SMP_Gauss);
-    instance->addModel(modelChipSCC);
-    instance->addModel(modelChipTurboGrafx16);
-
-    // rev2
+    // current releases
+    instance->addModel(modelNameCorpOctalWaveGenerator);
     instance->addModel(modelJairasullator);
     instance->addModel(modelBuzzyBeetle);
     instance->addModel(modelPalletTownWavesSystem);
@@ -43,8 +34,15 @@ void init(Plugin* instance) {
     instance->addModel(modelGleeokillator);
     instance->addModel(modelBossFight);
     instance->addModel(modelMegaTone);
-
     // blanks
     instance->addModel(modelChipS_SMP_Blank);
     instance->addModel(model2612_Blank);
+    // beta versions / WIPs
+    instance->addModel(modelChipS_SMP);
+    instance->addModel(modelChipS_SMP_ADSR);
+    instance->addModel(modelChipS_SMP_BRR);
+    instance->addModel(modelChipS_SMP_Echo);
+    instance->addModel(modelChipS_SMP_Gauss);
+    instance->addModel(modelChipSCC);
+    instance->addModel(modelChipTurboGrafx16);
 }

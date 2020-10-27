@@ -65,7 +65,7 @@
       "params": [],
       "rightModuleId": 70,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -290,11 +290,19 @@
       "color": "#c91847"
     },
     {
+      "id": 841,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 70,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
       "id": 833,
       "outputModuleId": 132,
       "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 5,
+      "inputModuleId": 70,
+      "inputId": 8,
       "color": "#c91847"
     }
   ]

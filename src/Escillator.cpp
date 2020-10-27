@@ -23,7 +23,6 @@
 
 /// A Konami VRC6 chip emulator module.
 struct Escillator : ChipModule<KonamiVRC6> {
- public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
@@ -32,6 +31,7 @@ struct Escillator : ChipModule<KonamiVRC6> {
         ENUMS(PARAM_LEVEL, KonamiVRC6::OSC_COUNT),
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, KonamiVRC6::OSC_COUNT),
@@ -40,11 +40,13 @@ struct Escillator : ChipModule<KonamiVRC6> {
         ENUMS(INPUT_LEVEL, KonamiVRC6::OSC_COUNT),
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, KonamiVRC6::OSC_COUNT),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, 3 * KonamiVRC6::OSC_COUNT),
@@ -55,17 +57,17 @@ struct Escillator : ChipModule<KonamiVRC6> {
     Escillator() : ChipModule<KonamiVRC6>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1,  -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2,  -2.5f, 2.5f, 0.f,  "Saw Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FM   + 0,  -1.f,  1.f,  0.f,  "Pulse 1 FM");
-        configParam(PARAM_FM   + 1,  -1.f,  1.f,  0.f,  "Pulse 2 FM");
-        configParam(PARAM_FM   + 2,  -1.f,  1.f,  0.f,  "Saw FM");
-        configParam(PARAM_PW + 0,     0,    7,    7,    "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1,     0,    7,    7,    "Pulse 1 Duty Cycle");
-        configParam(PARAM_LEVEL + 0,  0,   15,   12,    "Pulse 1 Level");
-        configParam(PARAM_LEVEL + 1,  0,   15,   12,    "Pulse 2 Level");
-        configParam(PARAM_LEVEL + 2,  0,   63,   32,    "Saw Level");
+        configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1,  -2.5f, 2.5f, 0.f, "Pulse 2 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2,  -2.5f, 2.5f, 0.f, "Saw Frequency",     " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FM   + 0,  -1.f,  1.f,  0.f, "Pulse 1 FM");
+        configParam(PARAM_FM   + 1,  -1.f,  1.f,  0.f, "Pulse 2 FM");
+        configParam(PARAM_FM   + 2,  -1.f,  1.f,  0.f, "Saw FM");
+        configParam(PARAM_PW + 0,     0,    7,    7,   "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1,     0,    7,    7,   "Pulse 1 Duty Cycle");
+        configParam(PARAM_LEVEL + 0,  0,   15,   12,   "Pulse 1 Level");
+        configParam(PARAM_LEVEL + 1,  0,   15,   12,   "Pulse 2 Level");
+        configParam(PARAM_LEVEL + 2,  0,   63,   32,   "Saw Level");
     }
 
  protected:
@@ -236,20 +238,21 @@ struct EscillatorWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Escillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Escillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Escillator::PARAM_FREQ  + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Escillator::INPUT_VOCT  + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Escillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Escillator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Escillator::INPUT_FM    + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Escillator::PARAM_FM    + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Escillator::PARAM_LEVEL       + i);
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Escillator::PARAM_LEVEL + i);
             level->snap = true;
             addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Escillator::INPUT_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Escillator::INPUT_LEVEL + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Escillator::LIGHTS_LEVEL + 3 * i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Escillator::OUTPUT_OSCILLATOR + i));
         }
+        // Pulse Width
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
             addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Escillator::PARAM_PW + i));
             addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Escillator::INPUT_PW + i));
@@ -258,4 +261,4 @@ struct EscillatorWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-Model *modelEscillator = createModel<Escillator, EscillatorWidget>("VRC6");
+rack::Model *modelEscillator = createModel<Escillator, EscillatorWidget>("VRC6");

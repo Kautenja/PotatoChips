@@ -50,14 +50,14 @@ struct ChipModule : rack::engine::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    virtual void processCV(const ProcessArgs &args, unsigned channel) = 0;
+    virtual void processCV(const rack::engine::Module::ProcessArgs &args, unsigned channel) = 0;
 
     /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(const ProcessArgs &args, unsigned channels) = 0;
+    virtual void processLights(const rack::engine::Module::ProcessArgs &args, unsigned channels) = 0;
 
  public:
     /// @brief Initialize a new Chip module.
@@ -107,7 +107,7 @@ struct ChipModule : rack::engine::Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) final {
+    void process(const rack::engine::Module::ProcessArgs &args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

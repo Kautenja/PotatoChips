@@ -203,7 +203,7 @@ class BLIPBuffer {
     /// @returns the sample \f$\in [-5, 5]V\f$ without clipping
     ///
     inline float read_sample_5V() {
-        return 5.f * read_sample() / std::numeric_limits<blip_sample_t>::max();
+        return 5.f * read_sample() / static_cast<float>(std::numeric_limits<blip_sample_t>::max());
     }
 };
 

@@ -251,7 +251,7 @@ struct ChipVRC6Widget : ModuleWidget {
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
         }
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
-            addParam(createSnapParam<RoundSmallBlackKnob>(Vec(146, 35 + i * 111), module, ChipVRC6::PARAM_PW + i));
+            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, ChipVRC6::PARAM_PW + i));
             addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, ChipVRC6::INPUT_PW + i));
         }
     }

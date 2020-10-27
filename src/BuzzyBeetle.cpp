@@ -18,6 +18,7 @@
 #include "dsp/ricoh_2a03.hpp"
 
 // TODO: discrete DMC sampler module
+// TODO: volume control for the triangle waveform
 // TODO: hard sync for triangle and pulse waveforms
 
 // ---------------------------------------------------------------------------
@@ -255,20 +256,14 @@ struct BuzzyBeetleWidget : ModuleWidget {
                 addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, BuzzyBeetle::PARAM_VOLUME + i, BuzzyBeetle::LIGHTS_VOLUME + i));
                 addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, BuzzyBeetle::INPUT_VOLUME + i));
             } else {  // noise
-                auto param = createParam<Rogan2PWhite>( Vec(53, 305), module, BuzzyBeetle::PARAM_FREQ + i);
-                param->snap = true;
-                addParam(param);
+                addParam(createSnapParam<Rogan2PWhite>( Vec(53, 305), module, BuzzyBeetle::PARAM_FREQ + i));
             }
         }
         // PW 0
-        auto pw0 = createParam<RoundSmallBlackKnob>(Vec(167, 205), module, BuzzyBeetle::PARAM_PW + 0);
-        pw0->snap = true;
-        addParam(pw0);
+        addParam(createSnapParam<RoundSmallBlackKnob>(Vec(167, 205), module, BuzzyBeetle::PARAM_PW + 0));
         addInput(createInput<PJ301MPort>(Vec(134, 206),  module, BuzzyBeetle::INPUT_PW + 0));
         // PW 1
-        auto pw1 = createParam<RoundSmallBlackKnob>(Vec(107, 293), module, BuzzyBeetle::PARAM_PW + 1);
-        pw1->snap = true;
-        addParam(pw1);
+        addParam(createSnapParam<RoundSmallBlackKnob>(Vec(107, 293), module, BuzzyBeetle::PARAM_PW + 1));
         addInput(createInput<PJ301MPort>(Vec(106, 328),  module, BuzzyBeetle::INPUT_PW + 1));
         // LFSR switch
         addInput(createInput<PJ301MPort>(Vec(24, 284), module, BuzzyBeetle::INPUT_LFSR));

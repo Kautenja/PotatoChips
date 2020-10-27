@@ -61,7 +61,7 @@ struct ChipModule : rack::engine::Module {
 
  public:
     /// @brief Initialize a new Chip module.
-    ChipModule() {
+    ChipModule(float volume = 3.f) {
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
@@ -70,8 +70,7 @@ struct ChipModule : rack::engine::Module {
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
             for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
                 apu[channel].set_output(osc, &buffers[channel][osc]);
-            // volume of 3 produces a 5V (10Vpp) signal from all voices
-            apu[channel].set_volume(3.f);
+            apu[channel].set_volume(volume);
         }
         // update the sample rate on the engine
         onSampleRateChange();

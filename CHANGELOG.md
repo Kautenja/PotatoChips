@@ -155,6 +155,8 @@
 
 ## 1.8.0 (TBD)
 
+-   fix issue where some modules would generate a "pop"/"click"/"impulse" on
+    start up: 2A03, GBS, VRC6, FME7, POKEY, Ay-3-8910, 106, SN76489
 -   fixes and updates to 2612 (rev2 branded as "Boss Fight")
     -   code optimizations
     -   updated panel layout
@@ -188,6 +190,8 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to 2A03 (rev2 branded as "Buzzy Beetle")
+    -   **hard sync input**
+    -   **amplifier for steppy triangle wave**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -195,6 +199,7 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to AY-3-8910 (rev2 branded as "Jairasullator")
+    -   **internal envelope / LFO (full synthesizer voice)**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -246,3 +251,8 @@
 -   new blank panels:
     -   illustration of Sony S-SMP IC
     -   illustration of envelope generation from Yamaha YM2612
+
+## 1.10.0 (TBD)
+
+-   new module: NES(DMC)
+    -   DMC sampler from the Ricoh 2A03 audio processing chip

@@ -32,7 +32,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     enum ParamIds {
         ENUMS(PARAM_FREQ, TexasInstrumentsSN76489::TONE_COUNT),
         PARAM_NOISE_PERIOD,
-        ENUMS(PARAM_FM_ATT, TexasInstrumentsSN76489::TONE_COUNT),
+        ENUMS(PARAM_FM, TexasInstrumentsSN76489::TONE_COUNT),
         PARAM_LFSR,
         ENUMS(PARAM_LEVEL, TexasInstrumentsSN76489::OSC_COUNT),
         NUM_PARAMS
@@ -67,11 +67,11 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             if (i < TexasInstrumentsSN76489::NOISE) {  // tone generator
                 configParam(PARAM_FREQ   + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
-                configParam(PARAM_FM_ATT + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " Fine Tune / FM Attenuverter");
+                configParam(PARAM_FM     + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " Fine Tune / FM Attenuverter");
                 configParam(PARAM_LEVEL  + i,  0,   15,    7,   "Tone " + std::to_string(i + 1) + " Volume / Amplifier Attenuator");
             } else {  // noise generator
                 configParam(PARAM_FREQ   + i, 0,  3, 0, "Noise Mode");
-                configParam(PARAM_FM_ATT + i, 0,  1, 0, "LFSR");
+                configParam(PARAM_FM     + i, 0,  1, 0, "LFSR");
                 configParam(PARAM_LEVEL  + i, 0, 15, 7, "Noise Volume / Amplifier Attenuator");
             }
         }
@@ -101,7 +101,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         inputs[INPUT_VOCT + voice].setVoltage(pitchCV, channel);
         pitch += pitchCV;
         // get the attenuverter parameter value
-        const auto att = params[PARAM_FM_ATT + voice].getValue();
+        const auto att = params[PARAM_FM + voice].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 5V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
@@ -230,9 +230,9 @@ struct MegaToneWidget : ModuleWidget {
             // FM / LFSR
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, MegaTone::INPUT_FM          + i));
             if (i < TexasInstrumentsSN76489::TONE_COUNT)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, MegaTone::PARAM_FM_ATT      + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, MegaTone::PARAM_FM          + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM_ATT              + i));
+                addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM                  + i));
             // Level
             auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i);
             level->snap = true;

@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Konami VRC6 chip emulator module.
-struct Escalator : ChipModule<KonamiVRC6> {
+struct Escillator : ChipModule<KonamiVRC6> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -52,7 +52,7 @@ struct Escalator : ChipModule<KonamiVRC6> {
     };
 
     /// @brief Initialize a new VRC6 Chip module.
-    Escalator() : ChipModule<KonamiVRC6>() {
+    Escillator() : ChipModule<KonamiVRC6>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -220,12 +220,12 @@ struct Escalator : ChipModule<KonamiVRC6> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for VRC6.
-struct EscalatorWidget : ModuleWidget {
+struct EscillatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit EscalatorWidget(Escalator *module) {
+    explicit EscillatorWidget(Escillator *module) {
         setModule(module);
         static constexpr auto panel = "res/VRC6.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -236,26 +236,26 @@ struct EscalatorWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Escalator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Escalator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Escillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Escillator::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Escalator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Escalator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Escillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Escillator::PARAM_FM          + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Escalator::PARAM_LEVEL       + i);
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Escillator::PARAM_LEVEL       + i);
             level->snap = true;
             addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Escalator::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Escalator::LIGHTS_LEVEL + 3 * i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Escillator::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Escillator::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Escalator::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Escillator::OUTPUT_OSCILLATOR + i));
         }
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
-            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Escalator::PARAM_PW + i));
-            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Escalator::INPUT_PW + i));
+            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Escillator::PARAM_PW + i));
+            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Escillator::INPUT_PW + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelEscalator = createModel<Escalator, EscalatorWidget>("VRC6");
+Model *modelEscillator = createModel<Escillator, EscillatorWidget>("VRC6");

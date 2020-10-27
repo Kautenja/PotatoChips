@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Atari POKEY chip emulator module.
-struct ChipPOKEY : ChipModule<AtariPOKEY> {
+struct Troglocillator : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
     dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
@@ -57,7 +57,7 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
     };
 
     /// @brief Initialize a new POKEY Chip module.
-    ChipPOKEY() : ChipModule<AtariPOKEY>() {
+    Troglocillator() : ChipModule<AtariPOKEY>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
             configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -196,12 +196,12 @@ struct ChipPOKEY : ChipModule<AtariPOKEY> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for POKEY.
-struct ChipPOKEYWidget : ModuleWidget {
+struct TroglocillatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipPOKEYWidget(ChipPOKEY *module) {
+    explicit TroglocillatorWidget(Troglocillator *module) {
         setModule(module);
         static constexpr auto panel = "res/POKEY.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -214,25 +214,25 @@ struct ChipPOKEYWidget : ModuleWidget {
         static constexpr float VERT_SEP = 85.f;
         // oscillator control
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(19,  73 + i * VERT_SEP), module, ChipPOKEY::INPUT_VOCT + i));
-            addInput(createInput<PJ301MPort>(    Vec(19,  38 + i * VERT_SEP), module, ChipPOKEY::INPUT_FM + i));
-            addParam(createParam<Rogan5PSGray>(  Vec(46,  39 + i * VERT_SEP), module, ChipPOKEY::PARAM_FREQ + i));
-            auto noise = createParam<Rogan1PRed>(Vec(109, 25 + i * VERT_SEP), module, ChipPOKEY::PARAM_NOISE + i);
+            addInput(createInput<PJ301MPort>(    Vec(19,  73 + i * VERT_SEP), module, Troglocillator::INPUT_VOCT + i));
+            addInput(createInput<PJ301MPort>(    Vec(19,  38 + i * VERT_SEP), module, Troglocillator::INPUT_FM + i));
+            addParam(createParam<Rogan5PSGray>(  Vec(46,  39 + i * VERT_SEP), module, Troglocillator::PARAM_FREQ + i));
+            auto noise = createParam<Rogan1PRed>(Vec(109, 25 + i * VERT_SEP), module, Troglocillator::PARAM_NOISE + i);
             noise->snap = true;
             addParam(noise);
-            addInput(createInput<PJ301MPort>(    Vec(116, 73 + i * VERT_SEP), module, ChipPOKEY::INPUT_NOISE + i));
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, ChipPOKEY::PARAM_LEVEL + i, ChipPOKEY::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(    Vec(172, 28 + i * VERT_SEP), module, ChipPOKEY::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, ChipPOKEY::OUTPUT_OSCILLATOR + i));
+            addInput(createInput<PJ301MPort>(    Vec(116, 73 + i * VERT_SEP), module, Troglocillator::INPUT_NOISE + i));
+            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, Troglocillator::PARAM_LEVEL + i, Troglocillator::LIGHTS_LEVEL + i));
+            addInput(createInput<PJ301MPort>(    Vec(172, 28 + i * VERT_SEP), module, Troglocillator::INPUT_LEVEL + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, Troglocillator::OUTPUT_OSCILLATOR + i));
         }
         // global control
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {
             if (i == 3 or i == 4) continue;  // ignore 16-bit
-            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, ChipPOKEY::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, ChipPOKEY::INPUT_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, Troglocillator::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, Troglocillator::INPUT_CONTROL + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelChipPOKEY = createModel<ChipPOKEY, ChipPOKEYWidget>("POKEY");
+Model *modelTroglocillator = createModel<Troglocillator, TroglocillatorWidget>("POKEY");

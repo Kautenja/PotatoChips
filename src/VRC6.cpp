@@ -137,18 +137,6 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel, uint8_t max_level) {
-        // // get the level from the parameter knob
-        // auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // // apply the control voltage to the level
-        // if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-        //     auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-        //     cv = rack::clamp(cv, 0.f, 1.f);
-        //     cv = roundf(100.f * cv) / 100.f;
-        //     param *= 2 * cv;
-        // }
-        // // get the 8-bit level clamped within legal limits
-        // return rack::clamp(max_level * param, 0.f, static_cast<float>(max_level));
-
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
@@ -229,13 +217,20 @@ struct ChipVRC6Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(18,  69  + i * 111), module, ChipVRC6::INPUT_VOCT     + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  34  + i * 111), module, ChipVRC6::INPUT_FM       + i));
-            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, ChipVRC6::PARAM_FREQ     + i));
-            addInput(createInput<PJ301MPort>(    Vec(18, 104  + i * 111), module, ChipVRC6::INPUT_LEVEL    + i));
-            addParam(createSnapParam<BefacoSlidePot>(Vec(180, 21  + i * 111), module, ChipVRC6::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + i * 111), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(130, 100 + i * 111), module, ChipVRC6::LIGHTS_LEVEL + 3 * i));
+            // Frequency
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, ChipVRC6::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, ChipVRC6::INPUT_VOCT        + i));
+            // FM
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, ChipVRC6::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, ChipVRC6::PARAM_FM          + i));
+            // Level
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, ChipVRC6::PARAM_LEVEL       + i);
+            level->snap = true;
+            addParam(level);
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, ChipVRC6::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, ChipVRC6::LIGHTS_LEVEL + 3 * i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, ChipVRC6::OUTPUT_OSCILLATOR + i));
         }
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
             addParam(createSnapParam<RoundSmallBlackKnob>(Vec(146, 35 + i * 111), module, ChipVRC6::PARAM_PW + i));

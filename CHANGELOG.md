@@ -155,6 +155,77 @@
 
 ## 1.8.0 (TBD)
 
+-   fixes and updates to 2612 (rev2 branded as "Boss Fight")
+    -   code optimizations
+    -   updated panel layout
+    -   saturation / aliasing control
+    -   individual operator retrigger input for envelope generators
+    -   individual operator triggers, gates, VOCT, and frequency knobs
+    -   individual operator looping AD envelope generator
+    -   individual operator sensitivity to LFO-based FM and AM
+    -   VU Meter to monitor levels / clipping / aliasing
+    -   invert sustain level and total level controls to be more intuitive
+-   updates to SN76489 (rev2 branded as "Mega Tone")
+    -   code optimizations
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to FME7 (rev2 branded as "Gleeokillator")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to VRC6 (rev2 branded as "Escillator")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to 2A03 (rev2 branded as "Buzzy Beetle")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to AY-3-8910 (rev2 branded as "Jairasullator")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to POKEY (rev2 branded as "Troglocillator")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to 106 (rev2 branded as "Name Corp Octal Wave Generator")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to GBS (rev2 branded as "Pallet Town Waves System")
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   header-only DSP library
+
+## 1.9.0 (TBD)
+
 -   new module: S-SMP(Echo)
     -   echo effect from the SNES (16-bit PCM @ 32kHz)
         -   Gaussian filter removed
@@ -172,23 +243,6 @@
     -   Attack, Decay, Sustain, and Release stages
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player
--   new module: S-SMP(Blank)
-    -   a blank panel with an illustration of the S-SMP audio processing chip
--   fixes and updates to 2612 (rev2 branded as "Boss Fight")
-    -   code optimizations
-    -   updated panel layout
-    -   saturation / aliasing control
-    -   individual operator retrigger input for envelope generators
-    -   individual operator triggers, gates, VOCT, and frequency knobs
-    -   individual operator looping AD envelope generator
-    -   individual operator sensitivity to LFO-based FM and AM
-    -   VU Meter to monitor levels / clipping / aliasing
-    -   invert sustain level and total level controls to be more intuitive
--   updates to SN76489 (rev2 branded as "Mega Tone")
-    -   new panel design
-    -   attenuverter for frequency modulation that acts as fine frequency
-        control when nothing is patched
 -   new blank panels:
     -   illustration of Sony S-SMP IC
     -   illustration of envelope generation from Yamaha YM2612
--   header-only DSP library

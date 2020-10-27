@@ -95,6 +95,11 @@ class Ricoh2A03 {
     };
 
  private:
+    enum {
+        /// TODO: document NTSC FRAME_PERIOD. PAL is 8314 (but not exactly)
+        FRAME_PERIOD = 7458
+    };
+
     /// An abstract base type for NES oscillators.
     struct Oscillator {
         /// the registers for the oscillator
@@ -258,22 +263,16 @@ class Ricoh2A03 {
 
                 time += delay;
                 if (time < end_time) {
-                    BLIPBuffer* const output = this->output;
-                    const auto synth = this->synth;
-                    int delta = amp * 2 - volume;
-                    int phase = this->phase;
-
+                    int currentDelta = amp * 2 - volume;
                     do {
                         phase = (phase + 1) & (PHASE_RANGE - 1);
                         if (phase == 0 || phase == duty) {
-                            delta = -delta;
-                            synth->offset(time, delta, output);
+                            currentDelta = -currentDelta;
+                            synth->offset(time, currentDelta, output);
                         }
                         time += timer_period;
                     } while (time < end_time);
-
-                    last_amp = (delta + volume) >> 1;
-                    this->phase = phase;
+                    last_amp = (currentDelta + volume) >> 1;
                 }
             }
             delay = time - end_time;
@@ -320,9 +319,6 @@ class Ricoh2A03 {
             if (length_counter == 0 || linear_counter == 0 || timer_period < 3) {
                 time = end_time;
             } else if (time < end_time) {
-                BLIPBuffer* const output = this->output;
-
-                int phase = this->phase;
                 int volume = 1;
                 if (phase > PHASE_RANGE) {
                     phase -= PHASE_RANGE;
@@ -341,7 +337,6 @@ class Ricoh2A03 {
                 } while (time < end_time);
 
                 if (volume < 0) phase += PHASE_RANGE;
-                this->phase = phase;
                 last_amp = calc_amp();
             }
             delay = time - end_time;
@@ -404,8 +399,6 @@ class Ricoh2A03 {
                         noise = (feedback & 0x4000) | (noise >> 1);
                     }
                 } else {
-                    BLIPBuffer* const output = this->output;
-
                     // using re-sampled time avoids conversion in synth.offset()
                     const auto rperiod = output->resampled_time(period);
                     auto rtime = output->resampled_time(time);
@@ -454,8 +447,6 @@ class Ricoh2A03 {
     /// has been run until this time in current frame
     blip_time_t last_time;
 
-    /// TODO: document NTSC FRAME_PERIOD
-    const int FRAME_PERIOD = 7458;  // PAL is 8314 (but not exactly)
     /// cycles until frame counter runs next
     int frame_delay;
     /// current frame (0-3)

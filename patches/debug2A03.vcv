@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -11,16 +11,16 @@
       "rightModuleId": 68,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "hw:Sanskrit 6th,0",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
-          "blockSize": 512
+          "blockSize": 2048
         }
       },
       "pos": [
-        40,
+        42,
         0
       ]
     },
@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.251188636
+          "value": 1.0
         },
         {
           "id": 1,
@@ -54,7 +54,7 @@
       "leftModuleId": 133,
       "rightModuleId": 1,
       "pos": [
-        30,
+        32,
         0
       ]
     },
@@ -66,26 +66,26 @@
       "params": [],
       "rightModuleId": 59,
       "data": {
-        "channels": 8,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
           "channel": -1
         }
       },
       "pos": [
-        0,
+        2,
         0
       ]
     },
     {
       "id": 59,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.3",
+      "version": "1.8.0",
       "model": "2A03",
       "params": [
         {
@@ -128,7 +128,7 @@
       "leftModuleId": 34,
       "rightModuleId": 133,
       "pos": [
-        8,
+        10,
         0
       ]
     },
@@ -177,7 +177,7 @@
         "external": 0
       },
       "pos": [
-        0,
+        2,
         1
       ]
     },
@@ -227,7 +227,7 @@
         "external": 0
       },
       "pos": [
-        13,
+        15,
         1
       ]
     },
@@ -277,7 +277,7 @@
         "external": 0
       },
       "pos": [
-        26,
+        28,
         1
       ]
     },
@@ -326,7 +326,7 @@
         "external": 0
       },
       "pos": [
-        39,
+        41,
         1
       ]
     },
@@ -339,26 +339,27 @@
       "leftModuleId": 1,
       "rightModuleId": 69,
       "pos": [
-        50,
+        52,
         0
       ]
     },
     {
       "id": 69,
       "plugin": "Bogaudio",
-      "version": "1.1.31",
+      "version": "1.1.34",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "leftModuleId": 68,
       "data": {
+        "frequency_plot": "log",
         "range": 0.0,
-        "range_db": 80.0,
+        "amplitude_plot": "decibels_80",
         "smooth": 0.25,
         "quality": "good",
         "window": "kaiser"
       },
       "pos": [
-        55,
+        57,
         0
       ]
     },
@@ -388,8 +389,27 @@
       "leftModuleId": 59,
       "rightModuleId": 2,
       "pos": [
-        22,
+        24,
         0
+      ]
+    },
+    {
+      "id": 134,
+      "plugin": "Bogaudio",
+      "version": "1.1.34",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "data": {
+        "frequency_plot": "log",
+        "range": 0.0,
+        "amplitude_plot": "decibels_80",
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        0,
+        2
       ]
     }
   ],
@@ -515,30 +535,6 @@
       "color": "#c91847"
     },
     {
-      "id": 783,
-      "outputModuleId": 34,
-      "outputId": 4,
-      "inputModuleId": 59,
-      "inputId": 6,
-      "color": "#c91847"
-    },
-    {
-      "id": 784,
-      "outputModuleId": 34,
-      "outputId": 4,
-      "inputModuleId": 59,
-      "inputId": 5,
-      "color": "#0986ad"
-    },
-    {
-      "id": 785,
-      "outputModuleId": 34,
-      "outputId": 4,
-      "inputModuleId": 59,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
       "id": 817,
       "outputModuleId": 133,
       "outputId": 0,
@@ -577,6 +573,14 @@
       "inputModuleId": 2,
       "inputId": 7,
       "color": "#c91847"
+    },
+    {
+      "id": 822,
+      "outputModuleId": 59,
+      "outputId": 2,
+      "inputModuleId": 134,
+      "inputId": 0,
+      "color": "#0c8e15"
     }
   ]
 }

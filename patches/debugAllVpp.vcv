@@ -1,0 +1,2389 @@
+{
+  "version": "1.dev.476a49b",
+  "modules": [
+    {
+      "id": 7,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 135,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        65,
+        0
+      ]
+    },
+    {
+      "id": 135,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "106",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 15.0
+        },
+        {
+          "id": 11,
+          "value": 15.0
+        },
+        {
+          "id": 12,
+          "value": 15.0
+        },
+        {
+          "id": 13,
+          "value": 15.0
+        },
+        {
+          "id": 14,
+          "value": 15.0
+        },
+        {
+          "id": 15,
+          "value": 15.0
+        },
+        {
+          "id": 16,
+          "value": 4.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 1.0
+        },
+        {
+          "id": 19,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 7,
+      "data": {
+        "wavetable0": [
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          14,
+          15,
+          15,
+          15,
+          14,
+          14,
+          13,
+          12,
+          10,
+          9,
+          8,
+          6,
+          5,
+          3,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "wavetable1": [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wavetable2": [
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
+          7,
+          7,
+          8,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          12,
+          12,
+          13,
+          13,
+          14,
+          14,
+          15
+        ],
+        "wavetable3": [
+          8,
+          6,
+          9,
+          8,
+          11,
+          10,
+          13,
+          12,
+          15,
+          12,
+          13,
+          10,
+          11,
+          8,
+          9,
+          6,
+          8,
+          5,
+          6,
+          3,
+          4,
+          1,
+          2,
+          0,
+          0,
+          0,
+          2,
+          1,
+          4,
+          3,
+          6,
+          5
+        ],
+        "wavetable4": [
+          15,
+          15,
+          14,
+          14,
+          13,
+          13,
+          12,
+          12,
+          11,
+          11,
+          10,
+          10,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      "pos": [
+        36,
+        0
+      ]
+    },
+    {
+      "id": 136,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "AY_3_8910",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 1.0
+        },
+        {
+          "id": 6,
+          "value": 1.0
+        },
+        {
+          "id": 7,
+          "value": 1.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 137,
+      "pos": [
+        23,
+        1
+      ]
+    },
+    {
+      "id": 137,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 136,
+      "rightModuleId": 167,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        39,
+        1
+      ]
+    },
+    {
+      "id": 138,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 139,
+      "rightModuleId": 160,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        26,
+        2
+      ]
+    },
+    {
+      "id": 139,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "2A03",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 7.0
+        },
+        {
+          "id": 4,
+          "value": 2.0
+        },
+        {
+          "id": 5,
+          "value": 2.0
+        },
+        {
+          "id": 6,
+          "value": 1.0
+        },
+        {
+          "id": 7,
+          "value": 1.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 138,
+      "pos": [
+        12,
+        2
+      ]
+    },
+    {
+      "id": 140,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "GBS",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 2.0
+        },
+        {
+          "id": 5,
+          "value": 2.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        },
+        {
+          "id": 9,
+          "value": 1.0
+        },
+        {
+          "id": 10,
+          "value": 1.0
+        },
+        {
+          "id": 11,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 163,
+      "data": {
+        "wavetable0": [
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          14,
+          15,
+          15,
+          15,
+          14,
+          14,
+          13,
+          12,
+          10,
+          9,
+          8,
+          6,
+          5,
+          3,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "wavetable1": [
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wavetable2": [
+          0,
+          0,
+          1,
+          1,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
+          7,
+          7,
+          8,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          12,
+          12,
+          13,
+          13,
+          14,
+          14,
+          15
+        ],
+        "wavetable3": [
+          8,
+          6,
+          9,
+          8,
+          11,
+          10,
+          13,
+          12,
+          15,
+          12,
+          13,
+          10,
+          11,
+          8,
+          9,
+          6,
+          8,
+          5,
+          6,
+          3,
+          4,
+          1,
+          2,
+          0,
+          0,
+          0,
+          2,
+          1,
+          4,
+          3,
+          6,
+          5
+        ],
+        "wavetable4": [
+          15,
+          15,
+          14,
+          14,
+          13,
+          13,
+          12,
+          12,
+          11,
+          11,
+          10,
+          10,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      "pos": [
+        0,
+        3
+      ]
+    },
+    {
+      "id": 141,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "POKEY",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 7.0
+        },
+        {
+          "id": 5,
+          "value": 7.0
+        },
+        {
+          "id": 6,
+          "value": 7.0
+        },
+        {
+          "id": 7,
+          "value": 7.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        },
+        {
+          "id": 9,
+          "value": 1.0
+        },
+        {
+          "id": 10,
+          "value": 1.0
+        },
+        {
+          "id": 11,
+          "value": 1.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 0.0
+        },
+        {
+          "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        },
+        {
+          "id": 16,
+          "value": 0.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 0.0
+        },
+        {
+          "id": 19,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 146,
+      "pos": [
+        79,
+        0
+      ]
+    },
+    {
+      "id": 142,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "VRC6",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 7.0
+        },
+        {
+          "id": 7,
+          "value": 7.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 32.0
+        }
+      ],
+      "rightModuleId": 145,
+      "pos": [
+        79,
+        1
+      ]
+    },
+    {
+      "id": 143,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "FME7",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 15.0
+        },
+        {
+          "id": 7,
+          "value": 15.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        }
+      ],
+      "rightModuleId": 149,
+      "pos": [
+        79,
+        2
+      ]
+    },
+    {
+      "id": 144,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "SN76489",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 15.0
+        },
+        {
+          "id": 11,
+          "value": 15.0
+        }
+      ],
+      "rightModuleId": 148,
+      "pos": [
+        79,
+        3
+      ]
+    },
+    {
+      "id": 145,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 142,
+      "rightModuleId": 150,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        93,
+        1
+      ]
+    },
+    {
+      "id": 146,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 141,
+      "rightModuleId": 157,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        97,
+        0
+      ]
+    },
+    {
+      "id": 147,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 149,
+      "rightModuleId": 155,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        109,
+        2
+      ]
+    },
+    {
+      "id": 148,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 144,
+      "rightModuleId": 152,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        89,
+        3
+      ]
+    },
+    {
+      "id": 149,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "Notes",
+      "params": [],
+      "leftModuleId": 143,
+      "rightModuleId": 147,
+      "text": "The FME7 is a hot sound source that is supposed to clip on single channels.",
+      "pos": [
+        93,
+        2
+      ]
+    },
+    {
+      "id": 150,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 145,
+      "rightModuleId": 151,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        106,
+        1
+      ]
+    },
+    {
+      "id": 151,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 150,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        119,
+        1
+      ]
+    },
+    {
+      "id": 152,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 148,
+      "rightModuleId": 153,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        102,
+        3
+      ]
+    },
+    {
+      "id": 153,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 152,
+      "rightModuleId": 154,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        115,
+        3
+      ]
+    },
+    {
+      "id": 154,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 153,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        128,
+        3
+      ]
+    },
+    {
+      "id": 155,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 147,
+      "rightModuleId": 156,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        122,
+        2
+      ]
+    },
+    {
+      "id": 156,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 155,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        135,
+        2
+      ]
+    },
+    {
+      "id": 157,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 146,
+      "rightModuleId": 158,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        110,
+        0
+      ]
+    },
+    {
+      "id": 158,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 157,
+      "rightModuleId": 159,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        123,
+        0
+      ]
+    },
+    {
+      "id": 159,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 158,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        136,
+        0
+      ]
+    },
+    {
+      "id": 160,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 138,
+      "rightModuleId": 161,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        39,
+        2
+      ]
+    },
+    {
+      "id": 161,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 160,
+      "rightModuleId": 162,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        52,
+        2
+      ]
+    },
+    {
+      "id": 162,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 161,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        65,
+        2
+      ]
+    },
+    {
+      "id": 163,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 140,
+      "rightModuleId": 164,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        26,
+        3
+      ]
+    },
+    {
+      "id": 164,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 163,
+      "rightModuleId": 165,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        39,
+        3
+      ]
+    },
+    {
+      "id": 165,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 164,
+      "rightModuleId": 166,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        52,
+        3
+      ]
+    },
+    {
+      "id": 166,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 165,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        65,
+        3
+      ]
+    },
+    {
+      "id": 167,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 137,
+      "rightModuleId": 168,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        52,
+        1
+      ]
+    },
+    {
+      "id": 168,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 167,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        65,
+        1
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 833,
+      "outputModuleId": 135,
+      "outputId": 7,
+      "inputModuleId": 7,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 834,
+      "outputModuleId": 136,
+      "outputId": 0,
+      "inputModuleId": 137,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 835,
+      "outputModuleId": 139,
+      "outputId": 0,
+      "inputModuleId": 138,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 836,
+      "outputModuleId": 144,
+      "outputId": 0,
+      "inputModuleId": 148,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 837,
+      "outputModuleId": 143,
+      "outputId": 0,
+      "inputModuleId": 147,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 838,
+      "outputModuleId": 142,
+      "outputId": 0,
+      "inputModuleId": 145,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 839,
+      "outputModuleId": 142,
+      "outputId": 1,
+      "inputModuleId": 150,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 840,
+      "outputModuleId": 142,
+      "outputId": 2,
+      "inputModuleId": 151,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 841,
+      "outputModuleId": 144,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 842,
+      "outputModuleId": 144,
+      "outputId": 2,
+      "inputModuleId": 153,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 843,
+      "outputModuleId": 144,
+      "outputId": 3,
+      "inputModuleId": 154,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 844,
+      "outputModuleId": 143,
+      "outputId": 1,
+      "inputModuleId": 155,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 845,
+      "outputModuleId": 143,
+      "outputId": 2,
+      "inputModuleId": 156,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 846,
+      "outputModuleId": 141,
+      "outputId": 0,
+      "inputModuleId": 146,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 847,
+      "outputModuleId": 141,
+      "outputId": 1,
+      "inputModuleId": 157,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 848,
+      "outputModuleId": 141,
+      "outputId": 2,
+      "inputModuleId": 158,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 849,
+      "outputModuleId": 141,
+      "outputId": 3,
+      "inputModuleId": 159,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 850,
+      "outputModuleId": 139,
+      "outputId": 1,
+      "inputModuleId": 160,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 852,
+      "outputModuleId": 139,
+      "outputId": 3,
+      "inputModuleId": 162,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 851,
+      "outputModuleId": 139,
+      "outputId": 2,
+      "inputModuleId": 161,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 853,
+      "outputModuleId": 140,
+      "outputId": 0,
+      "inputModuleId": 163,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 854,
+      "outputModuleId": 140,
+      "outputId": 1,
+      "inputModuleId": 164,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 855,
+      "outputModuleId": 140,
+      "outputId": 2,
+      "inputModuleId": 165,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 856,
+      "outputModuleId": 140,
+      "outputId": 3,
+      "inputModuleId": 166,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 857,
+      "outputModuleId": 136,
+      "outputId": 1,
+      "inputModuleId": 167,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 858,
+      "outputModuleId": 136,
+      "outputId": 2,
+      "inputModuleId": 168,
+      "inputId": 0,
+      "color": "#c91847"
+    }
+  ]
+}

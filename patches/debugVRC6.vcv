@@ -297,12 +297,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 834,
+      "id": 836,
       "outputModuleId": 132,
       "outputId": 0,
       "inputModuleId": 133,
       "inputId": 8,
-      "color": "#c91847"
+      "color": "#c9b70e"
     }
   ]
 }

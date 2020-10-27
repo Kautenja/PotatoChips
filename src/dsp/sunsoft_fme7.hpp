@@ -63,13 +63,13 @@ class SunSoftFME7 {
         /// the envelope register for pulse channel B
         PULSE_B_ENV  = 0x09,
         /// the envelope register for pulse channel C
-        PULSE_C_ENV  = 0x0A,
+        PULSE_C_ENV  = 0x0A
         /// the low 8 bits of the envelope frequency register
-        ENV_LO       = 0x0B,
+        // ENV_LO       = 0x0B,  // not implemented
         /// the high 4 bits of the envelope frequency register
-        ENV_HI       = 0x0C,
+        // ENV_HI       = 0x0C,  // not implemented
         /// the envelope reset register
-        ENV_RESET    = 0x0D,
+        // ENV_RESET    = 0x0D,  // not implemented
         // IO_PORT_A    = 0x0E,  // unused
         // IO_PORT_B    = 0x0F   // unused
     };
@@ -113,7 +113,6 @@ class SunSoftFME7 {
             return;
 
         for (unsigned index = 0; index < OSC_COUNT; index++) {
-            // int mode = regs[7] >> index;
             int vol_mode = regs[010 + index];
             int volume = AMP_TABLE[vol_mode & 0x0F];
 

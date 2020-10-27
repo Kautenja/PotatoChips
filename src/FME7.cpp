@@ -27,6 +27,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, SunSoftFME7::OSC_COUNT),
+        ENUMS(PARAM_FM, SunSoftFME7::OSC_COUNT),
         ENUMS(PARAM_LEVEL, SunSoftFME7::OSC_COUNT),
         NUM_PARAMS
     };
@@ -55,9 +56,10 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // get the oscillator name starting with ACII code 65 (A)
-            auto name = std::string(1, static_cast<char>(65 + oscillator));
-            configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f, "Pulse " + name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f, 0.8f, "Pulse " + name + " Level",     "%",   0.f, 100.f       );
+            auto name = "Tone " + std::string(1, static_cast<char>(65 + oscillator));
+            configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
+            configParam(INPUT_FM    + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
+            configParam(PARAM_LEVEL + oscillator,   0.f,  1.f,  0.8f, name + " Level",     "%",   0.f, 100.f       );
         }
     }
 
@@ -77,8 +79,22 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
@@ -175,6 +191,7 @@ struct ChipFME7Widget : ModuleWidget {
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(    Vec(18,  100 + 111 * i), module, ChipFME7::INPUT_VOCT     + i));
             addInput(createInput<PJ301MPort>(    Vec(18,  27  + 111 * i), module, ChipFME7::INPUT_FM       + i));
+            addParam(createParam<Trimpot>(       Vec(18,  65  + 111 * i), module, ChipFME7::PARAM_FM       + i));
             addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + 111 * i), module, ChipFME7::PARAM_FREQ     + i));
             addInput(createInput<PJ301MPort>(    Vec(152, 35  + 111 * i), module, ChipFME7::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(179, 21  + 111 * i), module, ChipFME7::PARAM_LEVEL    + i));

@@ -19,14 +19,12 @@ They're just so addicting!
 
 ## Name Corp Octal Wave Generator
 
-**Name Corp Octal Wave Generator** is an emulation of the
-[Namco 106](https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no)
-audio processing unit from the
-[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-for VCV Rack. The Namco 106 chip contains eight channels of wave-table
-synthesis and 128 bytes of operational RAM. The wave-tables are 4-bit
-and can be as long as 63 samples. This module uses a bank of five
-32-sample wave-tables to act as the waveform for all eight channels.
+**Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
+audio processing unit from the [Nintendo Entertainment System (NES)][NES].
+The Namco 106 chip contains eight channels of wave-table synthesis and 128
+bytes of operational RAM. The wave-tables are 4-bit and can be as long as 63
+samples. This module uses a bank of five 32-sample wave-tables to act as the
+waveform for all eight channels.
 
 <p align="center">
 <img alt="106" src="manual/106/img/106-Module.svg">
@@ -46,22 +44,17 @@ and can be as long as 63 samples. This module uses a bank of five
 
 See the [Manual][106] for more information about the features of this module.
 
-[106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Buzzy Beetle -->
 <!-- ------------------------------------------------------------ -->
 
 ## Buzzy Beetle
 
-**Buzzy Beetle** is an emulation of the
-[Ricoh 2A03](https://wiki.nesdev.com/w/index.php/2A03)
-audio processing unit from the
-[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-for VCV Rack. The 2A03 chip contains two pulse wave
-generators, a quantized triangle wave generator, and a noise generator. The
-original chip featured a DMC loader for playing samples that has been omitted
-in this emulation.
+**Buzzy Beetle** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES].
+The 2A03 chip contains two pulse wave generators, a quantized triangle wave
+generator, and a noise generator. The original chip featured a DMC loader for
+playing samples that has been omitted in this emulation.
 
 <p align="center">
 <img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
@@ -79,19 +72,15 @@ in this emulation.
 
 See the [Manual][2A03] for more information about the features of this module.
 
-[2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: AY-3-8910 -->
 <!-- ------------------------------------------------------------ -->
 
 ## Jairasullator
 
-**Jairasullator** is an emulation of the
-[General Instrument AY-3-8910](http://map.grauw.nl/resources/sound/generalinstrument_ay-3-8910.pdf)
-audio processing
-unit. The AY-3-8910 features three pulse waveform generators and a noise
-generator that is shared between the channels.
+**Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
+audio processing unit. The AY-3-8910 features three pulse waveform generators
+and a noise generator that is shared between the channels.
 
 <p align="center">
 <img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
@@ -105,8 +94,6 @@ generator that is shared between the channels.
 -   **Tone/Noise control:** CV and switch to control tone and noise for each channel
 
 See the [Manual][AY_3_8910] for more information about the features of this module.
-
-[AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Boss Fight -->
@@ -161,21 +148,16 @@ omissions, and re-envisioned features, namely,
 
 See the [Manual][BossFight] for more information about the features of this module.
 
-[BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
 ## Gleeokillator
 
-**Gleeokillator** is an emulation of the
-[Sunsoft FME7](https://wiki.nesdev.com/w/index.php/Sunsoft_5B_audio)
-audio processing unit from the
-[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-for VCV Rack. The FME7 chip contains three
-pulse wave generators, a noise generator, and an envelope generator. Only the
-pulse wave generators are implemented currently.
+**Gleeokillator** is an emulation of the [Sunsoft FME7][SunsoftFME7] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES]. The FME7
+chip contains three pulse wave generators, a noise generator, and an envelope
+generator. Only the pulse wave generators are implemented currently.
 
 <p align="center">
 <img alt="FME7" src="manual/FME7/img/FME7-Module.svg">
@@ -187,8 +169,6 @@ pulse wave generators are implemented currently.
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
 See the [Manual][FME7] for more information about the features of this module.
-
-[FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Pallet Town Waves System -->
@@ -218,8 +198,6 @@ generator with a wave-table synthesizer.
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
 See the [Manual][GBS] for more information about the features of this module.
-
-[GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Mega Tone -->
@@ -252,20 +230,16 @@ between pitched white-noise and static periodic noise.
 
 See the [Manual][MegaTone] for more information about the features of this module.
 
-[MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Troglocillator -->
 <!-- ------------------------------------------------------------ -->
 
 ## Troglocillator
 
-**Troglocillator** is an emulation of the
-[Atari POKEY](https://en.wikipedia.org/wiki/POKEY)
-audio processing unit. The POKEY
-produces four pulse waveforms, but contains a variety of bonus controls,
-including extended frequency ranges, high-pass filters, and noise generators /
-distortion effects.
+**Troglocillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
+processing unit. The POKEY produces four pulse waveforms, but contains a
+variety of bonus controls, including extended frequency ranges, high-pass
+filters, and noise generators / distortion effects.
 
 <p align="center">
 <img alt="POKEY" src="manual/POKEY/img/POKEY-Module.svg">
@@ -288,8 +262,6 @@ distortion effects.
 
 See the [Manual][POKEY] for more information about the features of this module.
 
-[POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(ADSR) -->
 <!-- ------------------------------------------------------------ -->
@@ -297,12 +269,11 @@ See the [Manual][POKEY] for more information about the features of this module.
 ## S-SMP(ADSR)
 
 S-SMP(ADSR) is an emulation of the ADSR from the Sony S-SMP audio processing
-unit in the
-[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The envelope generator has three stages, (1) an attack stage that ramps up
-linearly to the total level, (2) a decay stage that ramps down exponentially
-to a sustain level, and (3) a sustain/release stage that ramps down
-exponentially from the sustain level to zero.
+unit in the [Super Nintendo Entertainment System (SNES)][SNES]. The envelope
+generator has three stages, (1) an attack stage that ramps up linearly to the
+total level, (2) a decay stage that ramps down exponentially to a sustain
+level, and (3) a sustain/release stage that ramps down exponentially from the
+sustain level to zero.
 
 S-SMP(ADSR) provides the key features of the ADSR envelope generator of the
 S-SMP chip, namely,
@@ -323,8 +294,6 @@ S-SMP chip, namely,
 
 See the [Manual][S_SMP_ADSR] for more information about the features of this module.
 
-[S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(BRR) -->
 <!-- ------------------------------------------------------------ -->
@@ -333,9 +302,9 @@ See the [Manual][S_SMP_ADSR] for more information about the features of this mod
 
 S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
 engine from the Sony S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The sample playback engine has a compression ratio of _32:9_ over standard
-16-bit PCM, and includes a reconstruction filter.
+[Super Nintendo Entertainment System (SNES)][SNES]. The sample playback engine
+has a compression ratio of _32:9_ over standard 16-bit PCM, and includes a
+reconstruction filter.
 
 S-SMP(BRR) provides the key features of the BRR sample playback engine of the
 S-SMP chip, namely,
@@ -355,8 +324,6 @@ S-SMP chip, namely,
 
 See the [Manual][S_SMP_BRR] for more information about the features of this module.
 
-[S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(Echo) -->
 <!-- ------------------------------------------------------------ -->
@@ -364,13 +331,12 @@ See the [Manual][S_SMP_BRR] for more information about the features of this modu
 ## S-SMP(Echo)
 
 S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP
-sound chip on the
-[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The Echo effect of the S-SMP chip has _15_ different delay levels of _16ms_
-each, a _64KB_ echo buffer, an 8-tap FIR filter for shaping the sound of the
-echo, parameterized feedback, and parameterized dry / wet mix level. The echo
-buffer is stereo, although the echo parameters and coefficients of the FIR
-filter are the same for both channels.
+sound chip on the [Super Nintendo Entertainment System (SNES)][SNES].The Echo
+effect of the S-SMP chip has _15_ different delay levels of _16ms_ each, a
+_64KB_ echo buffer, an 8-tap FIR filter for shaping the sound of the echo,
+parameterized feedback, and parameterized dry / wet mix level. The echo buffer
+is stereo, although the echo parameters and coefficients of the FIR filter are
+the same for both channels.
 
 S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
 namely,
@@ -400,20 +366,18 @@ namely,
 
 See the [Manual][S_SMP_Echo] for more information about the features of this module.
 
-[S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP-Gauss -->
 <!-- ------------------------------------------------------------ -->
 
 ## S-SMP(Gauss)
 
-S-SMP(Gauss) is an emulation of the BRR filter & Gaussian filter from the Sony
-S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
-The four BRR filter modes were applied to BRR sample blocks on the SNES and the
-Gaussian filter was applied to output audio and removed high-frequency content
-from the signal.
+S-SMP(Gauss) is an emulation of the BRR filter & Gaussian interpolation filter
+from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
+were applied to BRR sample blocks on the SNES and the Gaussian interpolation
+filter was applied to output audio and removed high-frequency content from the
+signal.
 
 S-SMP(Gauss) provides the key features of the BRR filter and Gaussian filter
 of the S-SMP chip, namely,
@@ -435,8 +399,6 @@ of the S-SMP chip, namely,
 
 See the [Manual][S_SMP_Gauss] for more information about the features of this module.
 
-[S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
@@ -444,7 +406,7 @@ See the [Manual][S_SMP_Gauss] for more information about the features of this mo
 <!-- ## S-SMP _(Coming Soon!)_
 
 S-SMP is an emulation of the Sony S-SMP audio processing unit from the
-[Super Nintendo Entertainment System (SNES)](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System).
+[Super Nintendo Entertainment System (SNES)][SNES].
 The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
 the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 
@@ -455,8 +417,7 @@ the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 ### Features
 
 See the [Manual][S_SMP] for more information about the features of this module.
-
-[S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf -->
+-->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->
@@ -474,8 +435,6 @@ SCC is an emulation of the Konami SCC audio processing unit.
 ### Features
 
 See the [Manual][SCC] for more information about the features of this module.
-
-[SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
 -->
 
 <!-- ------------------------------------------------------------ -->
@@ -494,8 +453,6 @@ TurboGrafx16 is an emulation of the NEC TurboGrafx16 audio processing unit.
 ### Features
 
 See the [Manual][TurboGrafx16] for more information about the features of this module.
-
-[TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
 -->
 
 <!-- ------------------------------------------------------------ -->
@@ -504,12 +461,9 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 
 ## Escillator
 
-**Escillator** is an emulation of the
-[Konami VRC6](https://wiki.nesdev.com/w/index.php/VRC6_audio)
-audio processing unit from the
-[Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-for VCV Rack. The VRC6 chip contains two
-pulse wave generators, and a quantized saw wave generator.
+**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
+chip contains two pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
 <img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
@@ -527,17 +481,46 @@ pulse wave generators, and a quantized saw wave generator.
 
 See the [Manual][VRC6] for more information about the features of this module.
 
-[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
-
-
-
-
-
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->
 <!-- ------------------------------------------------------------ -->
+
+<!-- Nintendo -->
+
+[SunsoftFME7]: https://wiki.nesdev.com/w/index.php/Sunsoft_5B_audio
+[Ricoh2A03]: https://wiki.nesdev.com/w/index.php/2A03
+[KonamiVRC6]: https://wiki.nesdev.com/w/index.php/VRC6_audio
+[Namco106]: https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no
+[NES]: https://en.wikipedia.org/wiki/Nintendo_Entertainment_System
+[SNES]: https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System
+
+<!-- Sega -->
 
 [SegaMD]: https://en.wikipedia.org/wiki/Sega_Genesis
 [SegaMasterSystem]: https://en.wikipedia.org/wiki/Master_System
 [TI-SN76489]: https://en.wikipedia.org/wiki/Texas_Instruments_SN76489
 [YM2612]: https://en.wikipedia.org/wiki/Yamaha_YM2612
+
+<!-- Arcade -->
+
+[AtariPOKEY]: https://en.wikipedia.org/wiki/POKEY
+[GI_AY_3_8910]: http://map.grauw.nl/resources/sound/generalinstrument_ay-3-8910.pdf
+
+<!-- Manuals -->
+
+[106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
+[2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
+[AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
+[BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
+[FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
+[GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
+[MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
+[POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+[S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
+[S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
+[S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
+[S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
+[S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
+[SCC]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf
+[TurboGrafx16]: https://github.com/Kautenja/PotatoChips/releases/latest/download/TurboGrafx16.pdf
+[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf

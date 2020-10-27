@@ -142,11 +142,11 @@
         },
         {
           "id": 1,
-          "value": 0.688499987
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": -0.782999992
+          "value": 0.0
         },
         {
           "id": 3,
@@ -162,15 +162,15 @@
         },
         {
           "id": 6,
-          "value": 15.0
+          "value": 7.0
         },
         {
           "id": 7,
-          "value": 13.0
+          "value": 7.0
         },
         {
           "id": 8,
-          "value": 12.0
+          "value": 7.0
         }
       ],
       "leftModuleId": 5,
@@ -339,6 +339,14 @@
       "inputModuleId": 64,
       "inputId": 0,
       "color": "#c9b70e"
+    },
+    {
+      "id": 841,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 64,
+      "inputId": 6,
+      "color": "#0c8e15"
     }
   ]
 }

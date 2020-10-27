@@ -14,6 +14,34 @@ They're just so addicting!
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: Buzzy Beetle -->
+<!-- ------------------------------------------------------------ -->
+
+## Buzzy Beetle
+
+**Buzzy Beetle** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES].
+The 2A03 chip contains two pulse wave generators, a quantized triangle wave
+generator, and a noise generator. The original chip featured a DMC loader for
+playing samples that has been omitted in this emulation.
+
+<p align="center">
+<img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
+</p>
+
+### Features
+
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with four duty
+    cycles: _12.5%_, _25%_, _50%_, and _75%_
+-   **Quantized triangle wave generator:** Generate NES style triangle wave
+    with 16 steps of quantization
+-   **Noise generator:** generate pseudo-random numbers at 16 different
+    frequencies
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
+
+See the [Manual][2A03] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: Name Corp Octal Wave Generator -->
 <!-- ------------------------------------------------------------ -->
 
@@ -45,110 +73,6 @@ waveform for all eight channels.
 See the [Manual][106] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Buzzy Beetle -->
-<!-- ------------------------------------------------------------ -->
-
-## Buzzy Beetle
-
-**Buzzy Beetle** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
-processing unit from the [Nintendo Entertainment System (NES)][NES].
-The 2A03 chip contains two pulse wave generators, a quantized triangle wave
-generator, and a noise generator. The original chip featured a DMC loader for
-playing samples that has been omitted in this emulation.
-
-<p align="center">
-<img alt="2A03" src="manual/2A03/img/2A03-Module.svg">
-</p>
-
-### Features
-
--   **Dual pulse wave generator:** Dual 8-bit pulse waves with four duty
-    cycles: _12.5%_, _25%_, _50%_, and _75%_
--   **Quantized triangle wave generator:** Generate NES style triangle wave
-    with 16 steps of quantization
--   **Noise generator:** generate pseudo-random numbers at 16 different
-    frequencies
--   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
-
-See the [Manual][2A03] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: AY-3-8910 -->
-<!-- ------------------------------------------------------------ -->
-
-## Jairasullator
-
-**Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
-audio processing unit. The AY-3-8910 features three pulse waveform generators
-and a noise generator that is shared between the channels.
-
-<p align="center">
-<img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
-</p>
-
-### Features
-
--   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
--   **Amplitude modulation:** Manual and CV control over the individual voice levels
--   **White noise:** Generate noise using the frequency knob for channel 3
--   **Tone/Noise control:** CV and switch to control tone and noise for each channel
-
-See the [Manual][AY_3_8910] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Boss Fight -->
-<!-- ------------------------------------------------------------ -->
-
-## Boss Fight
-
-**Boss Fight** is an emulation and re-envisioning of the Yamaha
-[Yamaha YM2612][YM2612] audio processing unit from the
-[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
-functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
-omissions, and re-envisioned features, namely,
-
-<p align="center">
-<img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">
-</p>
-
-### Features
-
--   **16-bit Audio** It's 8 bits better than the previous generation of chips!
-    This is marketing! We're actually lying though -- the YM2612 produced a
-    _14-bit_ PCM stream, and so does BossFight. You're not getting those 2 bits
-    back; go cry about it.
--   **4-Operator FM Synthesis** Full panel and CV control over the parameters
-    for each of the four operators including envelopes, multipliers, rate
-    scalings, tunings, gates, and LFO modulations.
--   **8 FM Algorithms** 8 different arrangements of the four operators
-    following the original chip implementation.
--   **Operator 1 Feedback** Feedback into operator one for interesting timbres
-    or total wave destruction.
--   **Individual Operator Frequencies** Control the frequency of each operator
-    to produce weird, harsh, and trashed noises.
--   **Looping Envelopes** Transform the one-shot envelope generators of
-    individual operators into looping AD envelopes.
--   **Aliasing Control** The YM2612 hard clips the output signal when it gets
-    too loud. This is both a musically useful effect for introducing high-order
-    harmonics, as well as aliasing. Nyquist lied to you, aliasing is your
-    friend. However, if you are not a fan of clipping and aliasing, aliasing
-    control allows you to attenuate the output signal from the chip _before_
-    it passes through the hard clipper to prevent fully saturating the 14-bit
-    PCM stream.
--   **VU Meter** A VU meter tracks how hot the signal from BossFight is getting
-    and makes it easy to visualize how much clipping is occurring.
--   **Low-Frequency Oscillator** A shared low-frequency sine oscillator
-    controls amplitude modulation and frequency modulation of each operator.
--   **Mono Output** The original YM2612 was stereo, but only because it had
-    six channels of synthesis. Boss Fight is a monophonic voice so there is no
-    built-in stereo processing.
--   **Semi-Modular Normalization** Inputs are normalled forward across the
-    operators to reduce the amount of patch cables for setting up simple
-    patches quickly.
-
-See the [Manual][BossFight] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
 <!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
@@ -169,6 +93,32 @@ generator. Only the pulse wave generators are implemented currently.
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
 See the [Manual][FME7] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Escillator -->
+<!-- ------------------------------------------------------------ -->
+
+## Escillator
+
+**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
+processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
+chip contains two pulse wave generators, and a quantized saw wave generator.
+
+<p align="center">
+<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
+</p>
+
+### Features
+
+-   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
+    cycles: _6.25%_, _12.5%_, _18.75%_, _25%_, _31.25%_, _37.5%_, _43.75%_, and
+    _50%_
+-   **Quantized saw wave generator:** Generate NES style saw wave with variable
+    quantization including the overflow bug in the VRC6
+-   **Amplitude modulation:** Manual and CV control over the individual voice
+    levels
+
+See the [Manual][VRC6] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Pallet Town Waves System -->
@@ -198,95 +148,6 @@ generator with a wave-table synthesizer.
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
 See the [Manual][GBS] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Mega Tone -->
-<!-- ------------------------------------------------------------ -->
-
-## Mega Tone
-
-**Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
-processing unit from the [Sega Master System][SegaMasterSystem],
-[Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
-pulse waveform generators and an LFSR-based noise generator that selects
-between pitched white-noise and static periodic noise.
-
-<p align="center">
-<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
-</p>
-
-### Features
-
--   **Triple Pulse Waveform Generator** Three 8-bit pulse waves with _50%_ duty
-    cycle and 10-bit frequency parameter
--   **Noise Generator** Generate either pitched white-noise based on the
-    frequency of oscillator three, or static periodic noise at one of three
-    shift frequencies: _N / 2048_, _N / 1024_, _N / 512_ where _N_ is the
-    reference clock rate (which is something like _3579545Hz_).
--   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
-    oscillator with mixer sliders and CV inputs
--   **Channel Mixer:** Mix the voices together internally with hard clipping
-    and aliasing.
-
-See the [Manual][MegaTone] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Troglocillator -->
-<!-- ------------------------------------------------------------ -->
-
-## Troglocillator
-
-**Troglocillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
-processing unit. The POKEY produces four pulse waveforms, but contains a
-variety of bonus controls, including extended frequency ranges, high-pass
-filters, and noise generators / distortion effects.
-
-<p align="center">
-<img alt="POKEY" src="manual/POKEY/img/POKEY-Module.svg">
-</p>
-
-### Features
-
--   **Quad pulse wave generator:** Four pulse waves with 8-bit frequency value
-    and _50%_ pulse width
--   **Low-frequency mode:** Change base clock of the chip from
-    _64 KHz_ to _15 KHz_
--   **High-frequency mode:** Change base clock of channels 1 and 3 from
-    _64 KHz_ to _1.79 MHz_
--   **High-pass filter:** High-pass filter channel 1 using channel 3 as a clock
-    or high-pass channel 2 using channel 4 as a clock
--   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
--   **Noise/Distortion generator:** generate per-channel pseudo-random numbers
-    at 15 different frequencies as a distortion source
--   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
-
-See the [Manual][POKEY] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Escillator -->
-<!-- ------------------------------------------------------------ -->
-
-## Escillator
-
-**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
-processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
-chip contains two pulse wave generators, and a quantized saw wave generator.
-
-<p align="center">
-<img alt="VRC6" src="manual/VRC6/img/VRC6-Module.svg">
-</p>
-
-### Features
-
--   **Dual pulse wave generator:** Dual 8-bit pulse waves with eight duty
-    cycles: _6.25%_, _12.5%_, _18.75%_, _25%_, _31.25%_, _37.5%_, _43.75%_, and
-    _50%_
--   **Quantized saw wave generator:** Generate NES style saw wave with variable
-    quantization including the overflow bug in the VRC6
--   **Amplitude modulation:** Manual and CV control over the individual voice
-    levels
-
-See the [Manual][VRC6] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(ADSR) -->
@@ -429,7 +290,7 @@ See the [Manual][S_SMP_Gauss] for more information about the features of this mo
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
 
-<!-- ## S-SMP _(Coming Soon!)_
+ ## S-SMP _(Coming Soon!)_
 
 S-SMP is an emulation of the Sony S-SMP audio processing unit from the
 [Super Nintendo Entertainment System (SNES)][SNES].
@@ -443,7 +304,145 @@ the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 ### Features
 
 See the [Manual][S_SMP] for more information about the features of this module.
--->
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Boss Fight -->
+<!-- ------------------------------------------------------------ -->
+
+## Boss Fight
+
+**Boss Fight** is an emulation and re-envisioning of the Yamaha
+[Yamaha YM2612][YM2612] audio processing unit from the
+[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
+functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
+omissions, and re-envisioned features, namely,
+
+<p align="center">
+<img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">
+</p>
+
+### Features
+
+-   **16-bit Audio** It's 8 bits better than the previous generation of chips!
+    This is marketing! We're actually lying though -- the YM2612 produced a
+    _14-bit_ PCM stream, and so does BossFight. You're not getting those 2 bits
+    back; go cry about it.
+-   **4-Operator FM Synthesis** Full panel and CV control over the parameters
+    for each of the four operators including envelopes, multipliers, rate
+    scalings, tunings, gates, and LFO modulations.
+-   **8 FM Algorithms** 8 different arrangements of the four operators
+    following the original chip implementation.
+-   **Operator 1 Feedback** Feedback into operator one for interesting timbres
+    or total wave destruction.
+-   **Individual Operator Frequencies** Control the frequency of each operator
+    to produce weird, harsh, and trashed noises.
+-   **Looping Envelopes** Transform the one-shot envelope generators of
+    individual operators into looping AD envelopes.
+-   **Aliasing Control** The YM2612 hard clips the output signal when it gets
+    too loud. This is both a musically useful effect for introducing high-order
+    harmonics, as well as aliasing. Nyquist lied to you, aliasing is your
+    friend. However, if you are not a fan of clipping and aliasing, aliasing
+    control allows you to attenuate the output signal from the chip _before_
+    it passes through the hard clipper to prevent fully saturating the 14-bit
+    PCM stream.
+-   **VU Meter** A VU meter tracks how hot the signal from BossFight is getting
+    and makes it easy to visualize how much clipping is occurring.
+-   **Low-Frequency Oscillator** A shared low-frequency sine oscillator
+    controls amplitude modulation and frequency modulation of each operator.
+-   **Mono Output** The original YM2612 was stereo, but only because it had
+    six channels of synthesis. Boss Fight is a monophonic voice so there is no
+    built-in stereo processing.
+-   **Semi-Modular Normalization** Inputs are normalled forward across the
+    operators to reduce the amount of patch cables for setting up simple
+    patches quickly.
+
+See the [Manual][BossFight] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Mega Tone -->
+<!-- ------------------------------------------------------------ -->
+
+## Mega Tone
+
+**Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
+processing unit from the [Sega Master System][SegaMasterSystem],
+[Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
+pulse waveform generators and an LFSR-based noise generator that selects
+between pitched white-noise and static periodic noise.
+
+<p align="center">
+<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
+</p>
+
+### Features
+
+-   **Triple Pulse Waveform Generator** Three 8-bit pulse waves with _50%_ duty
+    cycle and 10-bit frequency parameter
+-   **Noise Generator** Generate either pitched white-noise based on the
+    frequency of oscillator three, or static periodic noise at one of three
+    shift frequencies: _N / 2048_, _N / 1024_, _N / 512_ where _N_ is the
+    reference clock rate (which is something like _3579545Hz_).
+-   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
+    oscillator with mixer sliders and CV inputs
+-   **Channel Mixer:** Mix the voices together internally with hard clipping
+    and aliasing.
+
+See the [Manual][MegaTone] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: AY-3-8910 -->
+<!-- ------------------------------------------------------------ -->
+
+## Jairasullator
+
+**Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
+audio processing unit. The AY-3-8910 features three pulse waveform generators
+and a noise generator that is shared between the channels.
+
+<p align="center">
+<img alt="AY-3-8910" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
+</p>
+
+### Features
+
+-   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
+-   **Amplitude modulation:** Manual and CV control over the individual voice levels
+-   **White noise:** Generate noise using the frequency knob for channel 3
+-   **Tone/Noise control:** CV and switch to control tone and noise for each channel
+
+See the [Manual][AY_3_8910] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Troglocillator -->
+<!-- ------------------------------------------------------------ -->
+
+## Troglocillator
+
+**Troglocillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
+processing unit. The POKEY produces four pulse waveforms, but contains a
+variety of bonus controls, including extended frequency ranges, high-pass
+filters, and noise generators / distortion effects.
+
+<p align="center">
+<img alt="POKEY" src="manual/POKEY/img/POKEY-Module.svg">
+</p>
+
+### Features
+
+-   **Quad pulse wave generator:** Four pulse waves with 8-bit frequency value
+    and _50%_ pulse width
+-   **Low-frequency mode:** Change base clock of the chip from
+    _64 KHz_ to _15 KHz_
+-   **High-frequency mode:** Change base clock of channels 1 and 3 from
+    _64 KHz_ to _1.79 MHz_
+-   **High-pass filter:** High-pass filter channel 1 using channel 3 as a clock
+    or high-pass channel 2 using channel 4 as a clock
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
+-   **Noise/Distortion generator:** generate per-channel pseudo-random numbers
+    at 15 different frequencies as a distortion source
+-   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
+
+See the [Manual][POKEY] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->

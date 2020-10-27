@@ -74,9 +74,9 @@
     },
     {
       "slug": "GBS",
-      "name": "GBS",
+      "name": "Pallet Town Waves System",
       "description": "An emulation of the Nintendo Gameboy Sound System chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf",
       "tags": [
         "Noise",
         "Oscillator",

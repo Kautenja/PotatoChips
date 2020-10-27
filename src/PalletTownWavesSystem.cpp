@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Nintendo GBS chip emulator module.
-struct ChipGBS : ChipModule<NintendoGBS> {
+struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port
     dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
@@ -73,7 +73,7 @@ struct ChipGBS : ChipModule<NintendoGBS> {
     uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
     /// @brief Initialize a new GBS Chip module.
-    ChipGBS() : ChipModule<NintendoGBS>() {
+    PalletTownWavesSystem() : ChipModule<NintendoGBS>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -2.5f, 2.5f, 0.f, "Pulse 2 Frequency", " Hz", 2, dsp::FREQ_C4);
@@ -377,12 +377,12 @@ struct ChipGBS : ChipModule<NintendoGBS> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for GBS.
-struct ChipGBSWidget : ModuleWidget {
+struct PalletTownWavesSystemWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipGBSWidget(ChipGBS *module) {
+    explicit PalletTownWavesSystemWidget(PalletTownWavesSystem *module) {
         setModule(module);
         static constexpr auto panel = "res/GBS.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -392,7 +392,7 @@ struct ChipGBSWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
-        static constexpr NVGcolor colors[ChipGBS::NUM_WAVEFORMS] = {
+        static constexpr NVGcolor colors[PalletTownWavesSystem::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
             {{{0.f, 1.f, 0.f, 1.f}}},  // green
             {{{0.f, 0.f, 1.f, 1.f}}},  // blue
@@ -400,7 +400,7 @@ struct ChipGBSWidget : ModuleWidget {
             {{{1.f, 1.f, 1.f, 1.f}}}   // white
         };
         /// the default wave-table for each page of the wave-table editor
-        static constexpr uint8_t* wavetables[ChipGBS::NUM_WAVEFORMS] = {
+        static constexpr uint8_t* wavetables[PalletTownWavesSystem::NUM_WAVEFORMS] = {
             SINE,
             PW5,
             RAMP_UP,
@@ -408,7 +408,7 @@ struct ChipGBSWidget : ModuleWidget {
             RAMP_DOWN
         };
         // add wave-table editors
-        for (int wave = 0; wave < ChipGBS::NUM_WAVEFORMS; wave++) {
+        for (int wave = 0; wave < PalletTownWavesSystem::NUM_WAVEFORMS; wave++) {
             // get the wave-table buffer for this editor. if the module is
             // displaying in/being rendered for the library, the module will
             // be null and a dummy waveform is displayed
@@ -416,8 +416,8 @@ struct ChipGBSWidget : ModuleWidget {
             // setup a table editor for the buffer
             auto table_editor = new WaveTableEditor<uint8_t>(
                 wavetable,                       // wave-table buffer
-                ChipGBS::SAMPLES_PER_WAVETABLE,  // wave-table length
-                ChipGBS::BIT_DEPTH,              // waveform bit depth
+                PalletTownWavesSystem::SAMPLES_PER_WAVETABLE,  // wave-table length
+                PalletTownWavesSystem::BIT_DEPTH,              // waveform bit depth
                 Vec(18, 26 + 67 * wave),         // position
                 Vec(135, 60),                    // size
                 colors[wave]                     // line fill color
@@ -428,28 +428,28 @@ struct ChipGBSWidget : ModuleWidget {
         // oscillator components
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
             if (i < NintendoGBS::NOISE) {
-                addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, ChipGBS::INPUT_VOCT     + i));
-                addInput(createInput<PJ301MPort>(             Vec(169, 26 + 85 * i), module, ChipGBS::INPUT_FM       + i));
-                addParam(createParam<BefacoBigKnob>(          Vec(202, 25 + 85 * i), module, ChipGBS::PARAM_FREQ     + i));
-                auto param = createParam<RoundSmallBlackKnob>(Vec(289, 38 + 85 * i), module, ChipGBS::PARAM_PW       + i);
+                addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, PalletTownWavesSystem::INPUT_VOCT     + i));
+                addInput(createInput<PJ301MPort>(             Vec(169, 26 + 85 * i), module, PalletTownWavesSystem::INPUT_FM       + i));
+                addParam(createParam<BefacoBigKnob>(          Vec(202, 25 + 85 * i), module, PalletTownWavesSystem::PARAM_FREQ     + i));
+                auto param = createParam<RoundSmallBlackKnob>(Vec(289, 38 + 85 * i), module, PalletTownWavesSystem::PARAM_PW       + i);
                 if (i < NintendoGBS::WAVETABLE) param->snap = true;
                 addParam(param);
-                addInput(createInput<PJ301MPort>(             Vec(288, 73 + 85 * i), module, ChipGBS::INPUT_PW       + i));
+                addInput(createInput<PJ301MPort>(             Vec(288, 73 + 85 * i), module, PalletTownWavesSystem::INPUT_PW       + i));
             }
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(316, 24 + 85 * i),  module, ChipGBS::PARAM_LEVEL + i, ChipGBS::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(                 Vec(346, 26 + 85 * i), module, ChipGBS::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, ChipGBS::OUTPUT_OSCILLATOR + i));
+            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(316, 24 + 85 * i),  module, PalletTownWavesSystem::PARAM_LEVEL + i, PalletTownWavesSystem::LIGHTS_LEVEL + i));
+            addInput(createInput<PJ301MPort>(                 Vec(346, 26 + 85 * i), module, PalletTownWavesSystem::INPUT_LEVEL + i));
+            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
         }
         // noise period
-        auto param = createParam<Rogan3PWhite>(Vec(202, 298), module, ChipGBS::PARAM_NOISE_PERIOD);
+        auto param = createParam<Rogan3PWhite>(Vec(202, 298), module, PalletTownWavesSystem::PARAM_NOISE_PERIOD);
         param->snap = true;
         addParam(param);
-        addInput(createInput<PJ301MPort>(Vec(169, 329), module, ChipGBS::INPUT_NOISE_PERIOD));
+        addInput(createInput<PJ301MPort>(Vec(169, 329), module, PalletTownWavesSystem::INPUT_NOISE_PERIOD));
         // LFSR switch
-        addParam(createParam<CKSS>(Vec(280, 281), module, ChipGBS::PARAM_LFSR));
-        addInput(createInput<PJ301MPort>(Vec(258, 329), module, ChipGBS::INPUT_LFSR));
+        addParam(createParam<CKSS>(Vec(280, 281), module, PalletTownWavesSystem::PARAM_LFSR));
+        addInput(createInput<PJ301MPort>(Vec(258, 329), module, PalletTownWavesSystem::INPUT_LFSR));
     }
 };
 
 /// the global instance of the model
-Model *modelChipGBS = createModel<ChipGBS, ChipGBSWidget>("GBS");
+Model *modelPalletTownWavesSystem = createModel<PalletTownWavesSystem, PalletTownWavesSystemWidget>("GBS");

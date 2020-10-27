@@ -14,12 +14,12 @@ They're just so addicting!
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: 106 -->
+<!-- MARK: Name Corp Octal Wave Generator -->
 <!-- ------------------------------------------------------------ -->
 
-## 106
+## Name Corp Octal Wave Generator
 
-106 is an emulation of the
+**Name Corp Octal Wave Generator** is an emulation of the
 [Namco 106](https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no)
 audio processing unit from the
 [Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
@@ -49,12 +49,12 @@ See the [Manual][106] for more information about the features of this module.
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: 2A03 -->
+<!-- MARK: Buzzy Beetle -->
 <!-- ------------------------------------------------------------ -->
 
-## 2A03
+## Buzzy Beetle
 
-2A03 is an emulation of the
+**Buzzy Beetle** is an emulation of the
 [Ricoh 2A03](https://wiki.nesdev.com/w/index.php/2A03)
 audio processing unit from the
 [Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
@@ -85,9 +85,9 @@ See the [Manual][2A03] for more information about the features of this module.
 <!-- MARK: AY-3-8910 -->
 <!-- ------------------------------------------------------------ -->
 
-## AY-3-8910
+## Jairasullator
 
-AY-3-8910 is an emulation of the
+**Jairasullator** is an emulation of the
 [General Instrument AY-3-8910](http://map.grauw.nl/resources/sound/generalinstrument_ay-3-8910.pdf)
 audio processing
 unit. The AY-3-8910 features three pulse waveform generators and a noise
@@ -114,7 +114,7 @@ See the [Manual][AY_3_8910] for more information about the features of this modu
 
 ## Boss Fight
 
-Boss Fight is an emulation and re-envisioning of the Yamaha
+**Boss Fight** is an emulation and re-envisioning of the Yamaha
 [Yamaha YM2612][YM2612] audio processing unit from the
 [Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
 functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
@@ -164,12 +164,12 @@ See the [Manual][BossFight] for more information about the features of this modu
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: FME7 -->
+<!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
-## FME7
+## Gleeokillator
 
-FME7 is an emulation of the
+**Gleeokillator** is an emulation of the
 [Sunsoft FME7](https://wiki.nesdev.com/w/index.php/Sunsoft_5B_audio)
 audio processing unit from the
 [Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
@@ -191,12 +191,12 @@ See the [Manual][FME7] for more information about the features of this module.
 [FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: GBS -->
+<!-- MARK: Pallet Town Waves System -->
 <!-- ------------------------------------------------------------ -->
 
-## GBS
+## Pallet Town Waves System
 
-GBS is an emulation of the
+**Pallet Town Waves System** is an emulation of the
 [Nintendo GameBoy Sound System (GBS)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
 audio processing
 unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
@@ -227,7 +227,7 @@ See the [Manual][GBS] for more information about the features of this module.
 
 ## Mega Tone
 
-Mega Tone is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
+**Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
 processing unit from the [Sega Master System][SegaMasterSystem],
 [Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
 pulse waveform generators and an LFSR-based noise generator that selects
@@ -255,12 +255,12 @@ See the [Manual][MegaTone] for more information about the features of this modul
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: POKEY -->
+<!-- MARK: Troglocillator -->
 <!-- ------------------------------------------------------------ -->
 
-## POKEY
+## Troglocillator
 
-POKEY is an emulation of the
+**Troglocillator** is an emulation of the
 [Atari POKEY](https://en.wikipedia.org/wiki/POKEY)
 audio processing unit. The POKEY
 produces four pulse waveforms, but contains a variety of bonus controls,
@@ -499,12 +499,12 @@ See the [Manual][TurboGrafx16] for more information about the features of this m
 -->
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: VRC6 -->
+<!-- MARK: Escillator -->
 <!-- ------------------------------------------------------------ -->
 
-## VRC6
+## Escillator
 
-VRC6 is an emulation of the
+**Escillator** is an emulation of the
 [Konami VRC6](https://wiki.nesdev.com/w/index.php/VRC6_audio)
 audio processing unit from the
 [Nintendo Entertainment System (NES)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)

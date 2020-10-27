@@ -43,10 +43,14 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
         NUM_OUTPUTS
     };
     /// the indexes of lights on the module
-    enum LightIds { NUM_LIGHTS };
+    enum LightIds {
+        ENUMS(LIGHTS_LEVEL, 3 * SunSoftFME7::OSC_COUNT),
+        NUM_LIGHTS
+    };
 
     /// @brief Initialize a new FME7 Chip module.
     ChipFME7() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
@@ -133,7 +137,20 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < SunSoftFME7::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -161,6 +178,7 @@ struct ChipFME7Widget : ModuleWidget {
             addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + 111 * i), module, ChipFME7::PARAM_FREQ     + i));
             addInput(createInput<PJ301MPort>(    Vec(152, 35  + 111 * i), module, ChipFME7::INPUT_LEVEL    + i));
             addParam(createParam<BefacoSlidePot>(Vec(179, 21  + 111 * i), module, ChipFME7::PARAM_LEVEL    + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(150, 90 + 111 * i), module, ChipFME7::LIGHTS_LEVEL + 3 * i));
             addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + 111 * i), module, ChipFME7::OUTPUT_OSCILLATOR + i));
         }
     }

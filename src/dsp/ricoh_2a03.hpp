@@ -20,9 +20,6 @@
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
-// TODO: hard sync phase reset using:
-// ((Pulse*) osc)->phase = Pulse::PHASE_RANGE - 1;
-
 /// @brief A Ricoh 2A03 sound chip emulator.
 class Ricoh2A03 {
  public:
@@ -597,6 +594,27 @@ class Ricoh2A03 {
         // initialize sq1, sq2, tri, and noise, not DMC
         for (uint16_t addr = ADDR_START; addr <= 0x4009; addr++)
             write(addr, (addr & 3) ? 0x00 : 0x10);
+    }
+
+    /// @brief Reset the phase of the given oscillator by index.
+    ///
+    /// @param osc_index the index of the oscillator to reset the phase of.
+    /// 0=Pulse1, 1=Pulse2, 2=Triangle.
+    ///
+    inline void reset_phase(unsigned osc_index) {
+        switch(osc_index) {
+        case 0:
+            pulse0.reset_phase();
+            break;
+        case 1:
+            pulse1.reset_phase();
+            break;
+        case 2:
+            triangle.reset_phase();
+            break;
+        default:
+            throw Exception("osc_index must be in {0, 1, 2}!");
+        }
     }
 
     /// @brief Write to data to a register.

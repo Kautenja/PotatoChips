@@ -30,7 +30,6 @@ extern rack::Plugin* plugin_instance;
 extern rack::Model *modelChip106;
 extern rack::Model *modelChip2A03;
 extern rack::Model *modelChipAY_3_8910;
-extern rack::Model *modelChipFME7;
 extern rack::Model *modelChipGBS;
 extern rack::Model *modelChipPOKEY;
 extern rack::Model *modelChipS_SMP;
@@ -41,6 +40,7 @@ extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipTurboGrafx16;
 extern rack::Model *modelChipVRC6;
+extern rack::Model *modelGleeokillator;
 extern rack::Model *modelBossFight;
 extern rack::Model *modelMegaTone;
 

@@ -64,9 +64,9 @@
     },
     {
       "slug": "FME7",
-      "name": "FME7",
-      "description": "An emulation of the Sunsoft FME-7 chip from certain Nintendo Entertainment System (NES) cartridges.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf",
+      "name": "Gleeokillator",
+      "description": "An emulation of the Sunsoft FME-7 chip from Nintendo Entertainment System (NES) cartridges.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Gleeokillator.pdf",
       "tags": [
         "Oscillator",
         "Polyphonic"

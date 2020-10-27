@@ -21,8 +21,8 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A SunSoft FME7 chip emulator module.
-struct ChipFME7 : ChipModule<SunSoftFME7> {
+/// @brief A SunSoft FME7 chip emulator module.
+struct Gleeokillator : ChipModule<SunSoftFME7> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -50,7 +50,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
     };
 
     /// @brief Initialize a new FME7 Chip module.
-    ChipFME7() {
+    Gleeokillator() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // set the output buffer for each individual voice
@@ -147,7 +147,7 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
             uint8_t hi = (freq & 0b0000111100000000) >> 8;
             apu[channel].write(SunSoftFME7::PULSE_A_HI + (oscillator << 1), hi);
             // level
-            apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, getVolume(oscillator, channel));
+            apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, 0x10 | getVolume(oscillator, channel));
         }
     }
 
@@ -176,13 +176,13 @@ struct ChipFME7 : ChipModule<SunSoftFME7> {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for FME7.
-struct ChipFME7Widget : ModuleWidget {
+/// The panel widget for Gleeokillator.
+struct GleeokillatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipFME7Widget(ChipFME7 *module) {
+    explicit GleeokillatorWidget(Gleeokillator *module) {
         setModule(module);
         static constexpr auto panel = "res/FME7.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -192,17 +192,23 @@ struct ChipFME7Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(18,  100 + 111 * i), module, ChipFME7::INPUT_VOCT     + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  27  + 111 * i), module, ChipFME7::INPUT_FM       + i));
-            addParam(createParam<Trimpot>(       Vec(18,  65  + 111 * i), module, ChipFME7::PARAM_FM       + i));
-            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + 111 * i), module, ChipFME7::PARAM_FREQ     + i));
-            addInput(createInput<PJ301MPort>(    Vec(152, 35  + 111 * i), module, ChipFME7::INPUT_LEVEL    + i));
-            addParam(createSnapParam<BefacoSlidePot>(Vec(179, 21  + 111 * i), module, ChipFME7::PARAM_LEVEL    + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(150, 90 + 111 * i), module, ChipFME7::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(  Vec(150, 100 + 111 * i), module, ChipFME7::OUTPUT_OSCILLATOR + i));
+            // Frequency
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Gleeokillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Gleeokillator::INPUT_VOCT        + i));
+            // FM
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Gleeokillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Gleeokillator::PARAM_FM          + i));
+            // Level
+            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Gleeokillator::PARAM_LEVEL       + i);
+            level->snap = true;
+            addParam(level);
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Gleeokillator::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Gleeokillator::LIGHTS_LEVEL + 3 * i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Gleeokillator::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelChipFME7 = createModel<ChipFME7, ChipFME7Widget>("FME7");
+Model *modelGleeokillator = createModel<Gleeokillator, GleeokillatorWidget>("FME7");

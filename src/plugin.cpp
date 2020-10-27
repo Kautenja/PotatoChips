@@ -27,7 +27,6 @@ void init(Plugin* instance) {
     instance->addModel(modelChip106);
     instance->addModel(modelChip2A03);
     instance->addModel(modelChipAY_3_8910);
-    instance->addModel(modelChipFME7);
     instance->addModel(modelChipGBS);
     instance->addModel(modelChipPOKEY);
     instance->addModel(modelChipS_SMP);
@@ -38,6 +37,7 @@ void init(Plugin* instance) {
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipTurboGrafx16);
     instance->addModel(modelChipVRC6);
+    instance->addModel(modelGleeokillator);
     instance->addModel(modelBossFight);
     instance->addModel(modelMegaTone);
 

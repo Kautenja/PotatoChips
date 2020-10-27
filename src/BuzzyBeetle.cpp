@@ -18,6 +18,7 @@
 #include "dsp/ricoh_2a03.hpp"
 
 // TODO: discrete DMC sampler module
+// TODO: hard sync for triangle and pulse waveforms
 
 // ---------------------------------------------------------------------------
 // MARK: Module

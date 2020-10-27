@@ -54,7 +54,7 @@ struct Escillator : ChipModule<KonamiVRC6> {
     };
 
     /// @brief Initialize a new VRC6 Chip module.
-    Escillator() : ChipModule<KonamiVRC6>() {
+    Escillator() : ChipModule<KonamiVRC6>(5.f) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);

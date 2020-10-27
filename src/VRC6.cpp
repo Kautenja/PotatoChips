@@ -94,8 +94,22 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
     ) {
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
@@ -119,11 +133,15 @@ struct ChipVRC6 : ChipModule<KonamiVRC6> {
         static constexpr float PW_MAX = 0b00000111;
         if (oscillator == KonamiVRC6::SAW) return 0;  // no PW for saw wave
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + oscillator].getValue();
-        // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 2.f;
+        auto param = params[PARAM_PW + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        uint8_t pw = rack::clamp(param + mod, PW_MIN, PW_MAX);
         // shift the pulse width over into the high 4 bits
         return pw << 4;
     }

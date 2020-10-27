@@ -24,9 +24,8 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
+    // rev1
     instance->addModel(modelChip106);
-    instance->addModel(modelChip2A03);
-    instance->addModel(modelChipAY_3_8910);
     instance->addModel(modelChipS_SMP);
     instance->addModel(modelChipS_SMP_ADSR);
     instance->addModel(modelChipS_SMP_BRR);
@@ -34,6 +33,10 @@ void init(Plugin* instance) {
     instance->addModel(modelChipS_SMP_Gauss);
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipTurboGrafx16);
+
+    // rev2
+    instance->addModel(modelJairasullator);
+    instance->addModel(modelBuzzyBeetle);
     instance->addModel(modelPalletTownWavesSystem);
     instance->addModel(modelTroglocillator);
     instance->addModel(modelEscillator);

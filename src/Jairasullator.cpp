@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A General Instrument AY-3-8910 chip emulator module.
-struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
+struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
  private:
     /// triggers for handling inputs to the tone and noise enable switches
     rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
@@ -54,7 +54,7 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
     enum LightIds { NUM_LIGHTS };
 
     /// @brief Initialize a new FME7 Chip module.
-    ChipAY_3_8910() : ChipModule<GeneralInstrumentAy_3_8910>() {
+    Jairasullator() : ChipModule<GeneralInstrumentAy_3_8910>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
@@ -216,12 +216,12 @@ struct ChipAY_3_8910 : ChipModule<GeneralInstrumentAy_3_8910> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for AY-3-8910.
-struct ChipAY_3_8910Widget : ModuleWidget {
+struct JairasullatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipAY_3_8910Widget(ChipAY_3_8910 *module) {
+    explicit JairasullatorWidget(Jairasullator *module) {
         setModule(module);
         static constexpr auto panel = "res/AY_3_8910.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -231,19 +231,19 @@ struct ChipAY_3_8910Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111), module, ChipAY_3_8910::INPUT_FM       + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, ChipAY_3_8910::INPUT_VOCT     + i));
-            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, ChipAY_3_8910::PARAM_FREQ     + i));
-            addParam(createParam<CKSS>(          Vec(144, 29  + i * 111), module, ChipAY_3_8910::PARAM_TONE     + i));
-            addInput(createInput<PJ301MPort>(    Vec(147, 53  + i * 111), module, ChipAY_3_8910::INPUT_TONE     + i));
-            addParam(createParam<CKSS>(          Vec(138, 105 + i * 111), module, ChipAY_3_8910::PARAM_NOISE    + i));
-            addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, ChipAY_3_8910::INPUT_NOISE    + i));
-            addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111), module, ChipAY_3_8910::INPUT_LEVEL    + i));
-            addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111), module, ChipAY_3_8910::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, ChipAY_3_8910::OUTPUT_OSCILLATOR + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111), module, Jairasullator::INPUT_FM       + i));
+            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, Jairasullator::INPUT_VOCT     + i));
+            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, Jairasullator::PARAM_FREQ     + i));
+            addParam(createParam<CKSS>(          Vec(144, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
+            addInput(createInput<PJ301MPort>(    Vec(147, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
+            addParam(createParam<CKSS>(          Vec(138, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
+            addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
+            addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111), module, Jairasullator::INPUT_LEVEL    + i));
+            addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111), module, Jairasullator::PARAM_LEVEL    + i));
+            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, Jairasullator::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelChipAY_3_8910 = createModel<ChipAY_3_8910, ChipAY_3_8910Widget>("AY_3_8910");
+Model *modelJairasullator = createModel<Jairasullator, JairasullatorWidget>("AY_3_8910");

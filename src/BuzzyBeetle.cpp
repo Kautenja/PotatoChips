@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Ricoh 2A03 chip emulator module.
-struct Chip2A03 : ChipModule<Ricoh2A03> {
+struct BuzzyBeetle : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
@@ -56,7 +56,7 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
     };
 
     /// @brief Initialize a new 2A03 Chip module.
-    Chip2A03() : ChipModule<Ricoh2A03>() {
+    BuzzyBeetle() : ChipModule<Ricoh2A03>() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2,   dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2,   dsp::FREQ_C4);
@@ -228,12 +228,12 @@ struct Chip2A03 : ChipModule<Ricoh2A03> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for 2A03.
-struct Chip2A03Widget : ModuleWidget {
+struct BuzzyBeetleWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit Chip2A03Widget(Chip2A03 *module) {
+    explicit BuzzyBeetleWidget(BuzzyBeetle *module) {
         setModule(module);
         static constexpr auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -243,34 +243,34 @@ struct Chip2A03Widget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, Chip2A03::INPUT_VOCT + i));
-            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, Chip2A03::OUTPUT_OSCILLATOR + i));
+            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, BuzzyBeetle::INPUT_VOCT + i));
+            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, BuzzyBeetle::OUTPUT_OSCILLATOR + i));
             if (i < 3) {  // pulse 1, pulse 2, & triangle
-                addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, Chip2A03::INPUT_FM + i));
-                addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, Chip2A03::PARAM_FREQ + i));
+                addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
+                addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
                 auto y = i == 2 ? 3 : i;
-                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, Chip2A03::PARAM_VOLUME + i, Chip2A03::LIGHTS_VOLUME + i));
-                addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, Chip2A03::INPUT_VOLUME + i));
+                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, BuzzyBeetle::PARAM_VOLUME + i, BuzzyBeetle::LIGHTS_VOLUME + i));
+                addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, BuzzyBeetle::INPUT_VOLUME + i));
             } else {  // noise
-                auto param = createParam<Rogan2PWhite>( Vec(53, 305), module, Chip2A03::PARAM_FREQ + i);
+                auto param = createParam<Rogan2PWhite>( Vec(53, 305), module, BuzzyBeetle::PARAM_FREQ + i);
                 param->snap = true;
                 addParam(param);
             }
         }
         // PW 0
-        auto pw0 = createParam<RoundSmallBlackKnob>(Vec(167, 205), module, Chip2A03::PARAM_PW + 0);
+        auto pw0 = createParam<RoundSmallBlackKnob>(Vec(167, 205), module, BuzzyBeetle::PARAM_PW + 0);
         pw0->snap = true;
         addParam(pw0);
-        addInput(createInput<PJ301MPort>(Vec(134, 206),  module, Chip2A03::INPUT_PW + 0));
+        addInput(createInput<PJ301MPort>(Vec(134, 206),  module, BuzzyBeetle::INPUT_PW + 0));
         // PW 1
-        auto pw1 = createParam<RoundSmallBlackKnob>(Vec(107, 293), module, Chip2A03::PARAM_PW + 1);
+        auto pw1 = createParam<RoundSmallBlackKnob>(Vec(107, 293), module, BuzzyBeetle::PARAM_PW + 1);
         pw1->snap = true;
         addParam(pw1);
-        addInput(createInput<PJ301MPort>(Vec(106, 328),  module, Chip2A03::INPUT_PW + 1));
+        addInput(createInput<PJ301MPort>(Vec(106, 328),  module, BuzzyBeetle::INPUT_PW + 1));
         // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(24, 284), module, Chip2A03::INPUT_LFSR));
+        addInput(createInput<PJ301MPort>(Vec(24, 284), module, BuzzyBeetle::INPUT_LFSR));
     }
 };
 
 /// the global instance of the model
-Model *modelChip2A03 = createModel<Chip2A03, Chip2A03Widget>("2A03");
+Model *modelBuzzyBeetle = createModel<BuzzyBeetle, BuzzyBeetleWidget>("2A03");

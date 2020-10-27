@@ -43,9 +43,9 @@
     },
     {
       "slug": "2A03",
-      "name": "2A03",
+      "name": "Buzzy Beetle",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/BuzzyBeetle.pdf",
       "tags": [
         "Noise",
         "Oscillator",
@@ -54,9 +54,9 @@
     },
     {
       "slug": "AY_3_8910",
-      "name": "AY-3-8910",
+      "name": "Jairasullator",
       "description": "An emulation of the General Instrument AY-3-8910 chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf",
       "tags": [
         "Oscillator",
         "Polyphonic"

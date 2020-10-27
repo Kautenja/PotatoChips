@@ -173,9 +173,20 @@ class SunSoftFME7 {
  public:
     /// Initialize a new SunSoft FME7 chip emulator.
     SunSoftFME7() {
+        reset();
         set_output(NULL);
         set_volume();
-        reset();
+    }
+
+    /// @brief Reset internal state, registers, and all oscillators.
+    inline void reset() {
+        memset(regs, 0, sizeof regs);
+        last_time = 0;
+        for (unsigned i = 0; i < OSC_COUNT; i++) {
+            oscs[i].last_amp = 0;
+            phases[i] = false;
+            delays[i] = 0;
+        }
     }
 
     /// @brief Assign single oscillator output to buffer. If buffer is NULL,
@@ -217,14 +228,6 @@ class SunSoftFME7 {
         synth.set_treble_eq(equalizer);
     }
 
-    /// @brief Reset internal state, registers, and all oscillators.
-    inline void reset() {
-        memset(regs, 0, sizeof regs);
-        last_time = 0;
-        for (unsigned i = 0; i < OSC_COUNT; i++)
-            oscs[i].last_amp = 0;
-    }
-
     /// @brief Write data to the chip port.
     ///
     /// @param address the byte to write to the latch port
@@ -235,9 +238,7 @@ class SunSoftFME7 {
     ///
     inline void write(uint8_t address, uint8_t data) {
         static constexpr blip_time_t time = 0;
-        // make sure the given address is legal. the minimal address is zero,
-        // so just check the maximal address
-        if (/*address < ADDR_START or*/ address > ADDR_END)
+        if (address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         run_until(time);
         regs[address] = data;

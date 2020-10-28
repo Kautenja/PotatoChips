@@ -19,6 +19,7 @@
 
 // TODO: envelope control
 // TODO: discrete noise frequency control
+// TODO: oscillator sync? (not feature of chip, but can be done)
 
 // ---------------------------------------------------------------------------
 // MARK: Module

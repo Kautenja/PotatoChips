@@ -34,11 +34,13 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        // ENUMS(PARAM_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, GeneralInstrumentAy_3_8910::OSC_COUNT),
@@ -48,24 +50,31 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         ENUMS(INPUT_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, GeneralInstrumentAy_3_8910::OSC_COUNT),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
-    enum LightIds { NUM_LIGHTS };
+    enum LightIds {
+        ENUMS(LIGHTS_LEVEL, 3 * GeneralInstrumentAy_3_8910::OSC_COUNT),
+        NUM_LIGHTS
+    };
 
     /// @brief Initialize a new FME7 Chip module.
     Jairasullator() : ChipModule<GeneralInstrumentAy_3_8910>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
-            auto channel_name = std::string(1, static_cast<char>(65 + oscillator));
-            configParam(PARAM_FREQ  + oscillator, -5.f,   5.f, 0.f,  "Pulse " + channel_name + " Frequency",     " Hz", 2,   dsp::FREQ_C4);
-            configParam(PARAM_LEVEL + oscillator,  0.f,   1.f, 0.9f, "Pulse " + channel_name + " Level",         "%",   0.f, 100.f       );
-            configParam(PARAM_TONE  + oscillator,  0,     1,   1,    "Pulse " + channel_name + " Tone Enabled",  "");
-            configParam(PARAM_NOISE + oscillator,  0,     1,   0,    "Pulse " + channel_name + " Noise Enabled", "");
+            auto channel_name = "Pulse " + std::string(1, static_cast<char>(65 + oscillator));
+            configParam(PARAM_FREQ  + oscillator, -5.f,   5.f, 0.f,  channel_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            // configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, channel_name + " FM");
+            configParam(PARAM_LEVEL + oscillator,  0,    15,  10,    channel_name + " Level");
+            configParam(PARAM_TONE  + oscillator,  0,     1,   1,    channel_name + " Tone Enabled",  "");
+            configParam(PARAM_NOISE + oscillator,  0,     1,   0,    channel_name + " Noise Enabled", "");
         }
     }
 
@@ -102,21 +111,38 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit level value in an 8-bit container
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
-        // the minimal value for the volume width register
-        static constexpr float LEVEL_MIN = 0;
-        // the maximal value for the volume width register
-        static constexpr float LEVEL_MAX = 15;
+        // // the minimal value for the volume width register
+        // static constexpr float LEVEL_MIN = 0;
+        // // the maximal value for the volume width register
+        // static constexpr float LEVEL_MAX = 15;
+        // // get the level from the parameter knob
+        // auto param = params[PARAM_LEVEL + oscillator].getValue();
+        // // apply the control voltage to the attenuation
+        // if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+        //     auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
+        //     cv = rack::clamp(cv, 0.f, 1.f);
+        //     cv = roundf(100.f * cv) / 100.f;
+        //     param *= 2 * cv;
+        // }
+        // // get the 8-bit level clamped within legal limits
+        // return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
+
         // get the level from the parameter knob
-        auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            param *= 2 * cv;
-        }
-        // get the 8-bit level clamped within legal limits
-        return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
+        auto level = params[PARAM_LEVEL + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
+        // apply the control voltage to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        level = roundf(level * voltage / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        // // the maximal value for the volume width register
+        static constexpr float MAX = 15;
+        return rack::clamp(level, 0.f, MAX);
     }
 
     /// @brief Return the noise period.
@@ -211,14 +237,27 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < GeneralInstrumentAy_3_8910::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for AY-3-8910.
+/// The panel widget for Jairasullator.
 struct JairasullatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
@@ -229,21 +268,28 @@ struct JairasullatorWidget : ModuleWidget {
         static constexpr auto panel = "res/AY_3_8910.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(18,  27  + i * 111), module, Jairasullator::INPUT_FM       + i));
-            addInput(createInput<PJ301MPort>(    Vec(18,  100 + i * 111), module, Jairasullator::INPUT_VOCT     + i));
-            addParam(createParam<Rogan6PSWhite>( Vec(47,  29  + i * 111), module, Jairasullator::PARAM_FREQ     + i));
+            // Frequency
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Jairasullator::PARAM_FREQ  + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Jairasullator::INPUT_VOCT  + i));
+            // FM
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Jairasullator::INPUT_FM    + i));
+            // addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Jairasullator::PARAM_FM    + i));
+            // Level
+            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, Jairasullator::PARAM_LEVEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Jairasullator::INPUT_LEVEL + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Jairasullator::LIGHTS_LEVEL + 3 * i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
+            // noise modes
             addParam(createParam<CKSS>(          Vec(144, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
             addInput(createInput<PJ301MPort>(    Vec(147, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
             addParam(createParam<CKSS>(          Vec(138, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
             addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
-            addInput(createInput<PJ301MPort>(    Vec(182, 35  + i * 111), module, Jairasullator::INPUT_LEVEL    + i));
-            addParam(createParam<BefacoSlidePot>(Vec(211, 21  + i * 111), module, Jairasullator::PARAM_LEVEL    + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(180, 100 + i * 111), module, Jairasullator::OUTPUT_OSCILLATOR + i));
         }
     }
 };

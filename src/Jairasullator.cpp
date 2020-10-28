@@ -69,13 +69,23 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
             // get the channel name starting with ACII code 65 (A)
-            auto channel_name = "Pulse " + std::string(1, static_cast<char>(65 + oscillator));
-            configParam(PARAM_FREQ  + oscillator, -5.f,   5.f, 0.f,  channel_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, channel_name + " FM");
-            configParam(PARAM_LEVEL + oscillator,  0,    15,  10,    channel_name + " Level");
-            configParam(PARAM_TONE  + oscillator,  0,     1,   1,    channel_name + " Tone Enabled",  "");
-            configParam(PARAM_NOISE + oscillator,  0,     1,   0,    channel_name + " Noise Enabled", "");
+            auto name = "Pulse " + std::string(1, static_cast<char>(65 + oscillator));
+            configParam(PARAM_FREQ  + oscillator, -5.f,   5.f,  0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, name + " FM");
+            configParam(PARAM_LEVEL + oscillator,  0,    15,   10,   name + " Level");
+            configParam(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone Enabled",  "");
+            configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled", "");
         }
+        // for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+        //     // envelope period (TODO: fix envelope in engine)
+        //     apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
+        //     apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
+        //     // envelope shape bits (TODO: fix envelope in engine)
+        //     apu[channel].write(
+        //         GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
+        //         GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_CONTINUE
+        //     );
+        // }
     }
 
  protected:
@@ -213,6 +223,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             auto hi = (freq & 0b0000111100000000) >> 8;
             apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + offset, hi);
             // volume
+            // auto level = 0b00010000 | getLevel(oscillator, channel);
             auto level = getLevel(oscillator, channel);
             apu[channel].write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + oscillator, level);
         }
@@ -220,14 +231,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         apu[channel].write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise(channel));
         // set the 6-channel boolean mixer (tone and noise for each channel)
         apu[channel].write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer(channel));
-        // envelope period (TODO: fix envelope in engine)
-        // apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
-        // apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
-        // envelope shape bits (TODO: fix envelope in engine)
-        // apu[channel].write(
-        //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
-        //     GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_NONE
-        // );
     }
 
     /// @brief Process the lights on the module.

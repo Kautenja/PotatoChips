@@ -543,6 +543,18 @@ class GeneralInstrumentAy_3_8910 {
         regs[PERIOD_ENVELOPE_LO] = value & 0xff;
     }
 
+    inline void set_noise_period(uint8_t value) {
+        regs[NOISE_PERIOD] = value;
+    }
+
+    inline void set_channel_enables(uint8_t value) {
+        regs[CHANNEL_ENABLES] = value;
+    }
+
+    inline void set_volume(unsigned osc_index, uint8_t value) {
+
+    }
+
     /// @brief Write to data to a register.
     ///
     /// @param address the address of the register to write

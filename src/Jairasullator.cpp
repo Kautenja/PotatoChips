@@ -224,9 +224,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             apu[channel].write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + oscillator, level);
         }
         // set the 5-bit noise value based on the channel 3 parameter
-        apu[channel].write(GeneralInstrumentAy_3_8910::NOISE_PERIOD, getNoise(channel));
+        apu[channel].set_noise_period(getNoise(channel));
         // set the 6-channel boolean mixer (tone and noise for each channel)
-        apu[channel].write(GeneralInstrumentAy_3_8910::CHANNEL_ENABLES, getMixer(channel));
+        apu[channel].set_channel_enables(getMixer(channel));
     }
 
     /// @brief Process the lights on the module.

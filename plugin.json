@@ -58,8 +58,10 @@
       "description": "An emulation of the General Instrument AY-3-8910 chip.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf",
       "tags": [
+        "Noise",
         "Oscillator",
-        "Polyphonic"
+        "Polyphonic",
+        "Synth voice"
       ]
     },
     {

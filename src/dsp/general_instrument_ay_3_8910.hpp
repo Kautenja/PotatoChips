@@ -151,7 +151,16 @@ class GeneralInstrumentAy_3_8910 {
     /// the tone off flag bit
     static constexpr int TONE_OFF     = 0x01;
 
-    /// the oscillators on the chip (three pulse waveform generators)
+    /// the registers on the chip
+    uint8_t regs[NUM_REGISTERS];
+
+    /// the last time the oscillators were updated
+    blip_time_t last_time = 0;
+
+    /// the synthesizer shared by the 5 oscillator channels
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+
+    /// @brief An oscillators on the chip (A pulse waveform generator).
     struct Oscillator {
         /// the period of the oscillator
         blip_time_t period = 0;
@@ -162,24 +171,32 @@ class GeneralInstrumentAy_3_8910 {
         /// the current phase of the oscillator
         int16_t phase = 0;
         /// the buffer the oscillator writes samples to
-        BLIPBuffer* output;
-    } oscs[OSC_COUNT];
-    /// the synthesizer shared by the 5 oscillator channels
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
-    /// the last time the oscillators were updated
-    blip_time_t last_time = 0;
-    /// the registers on the chip
-    uint8_t regs[NUM_REGISTERS];
+        BLIPBuffer* output = nullptr;
 
-    /// the noise generator on the chip
+        /// @brief Reset the oscillator state to its initial condition.
+        /// @details
+        /// This does not reset any existing output buffer for the oscillator.
+        inline void reset() {
+            period = PERIOD_FACTOR;
+            delay = last_amp = phase = 0;
+        }
+    } oscs[OSC_COUNT];
+
+    /// The noise generator on the chip
     struct {
         /// TODO:
         blip_time_t delay = 0;
         /// the linear feedback shift register for generating noise values
         uint32_t lfsr = 1;
+
+        /// @brief Reset the noise generator state to its initial condition.
+        inline void reset() {
+            delay = 0;
+            lfsr = 1;
+        }
     } noise;
 
-    /// the envelope generator on the chip
+    /// The envelope generator on the chip
     struct {
         /// TODO:
         blip_time_t delay = 0;
@@ -189,48 +206,14 @@ class GeneralInstrumentAy_3_8910 {
         int pos = 0;
         /// values already passed through volume table
         uint8_t modes[8][48];
-    } env;
 
-    /// Write to the data port.
-    ///
-    /// @param addr the address to write the data to
-    /// @param data the data to write to the given address
-    ///
-    void _write(uint16_t addr, uint8_t data) {
-        // make sure the given address is legal
-        if (addr > ADDR_END)
-            throw AddressSpaceException<uint16_t>(addr, 0, ADDR_END);
-        if (addr == 13) {  // envelope mode
-            if (!(data & 8)) // convert modes 0-7 to proper equivalents
-                data = (data & 4) ? 15 : 9;
-            env.wave = env.modes[data - 7];
-            env.pos = -48;
-            // will get set to envelope period in run_until()
-            env.delay = 0;
+        /// @brief Reset the envelope generator state to its initial condition.
+        inline void reset() {
+            delay = 0;
+            wave = modes[2];
+            pos = -48;
         }
-        regs[addr] = data;
-        // handle period changes accurately
-        // get the oscillator index by dividing by 2. there are two registers
-        // for each oscillator to represent the 12-bit period across a 16-bit
-        // value (with 4 unused bits)
-        unsigned i = addr >> 1;
-        if (i < OSC_COUNT) {  // i refers to i'th oscillator's period registers
-            // get the period from the two registers. the first register
-            // contains the low 8 bits and the second register contains the
-            // high 4 bits
-            blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
-            // multiply by PERIOD_FACTOR to calculate the internal period value
-            period <<= PERIOD_SHIFTS;
-            // if the period is zero, set to the minimal value of PERIOD_FACTOR
-            if (!period) period = PERIOD_FACTOR;
-            // adjust time of next timer expiration based on change in period
-            Oscillator& osc = oscs[i];
-            if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
-            osc.period = period;
-        }
-        // TODO: same as above for envelope timer, and it also has a divide by
-        // two after it
-    }
+    } env;
 
     /// Run the oscillators until the given end time.
     ///
@@ -521,20 +504,17 @@ class GeneralInstrumentAy_3_8910 {
     }
 
     /// @brief Reset internal state, registers, and all oscillators.
+    /// @details
+    /// This does not reset any existing output buffer for the emulator.
+    ///
     inline void reset() {
-        last_time   = 0;
-        noise.delay = 0;
-        noise.lfsr  = 1;
-        for (unsigned i = 0; i < OSC_COUNT; i++) {
-            Oscillator* osc = &oscs[i];
-            osc->period   = PERIOD_FACTOR;
-            osc->delay    = 0;
-            osc->last_amp = 0;
-            osc->phase    = 0;
-        }
         memset(regs, 0, sizeof regs);
         regs[CHANNEL_ENABLES] = 0xFF;
-        _write(13, 0);
+        last_time = 0;
+        // reset the oscillators, noise generator, and envelope
+        for (Oscillator& osc : oscs) osc.reset();
+        noise.reset();
+        env.reset();
     }
 
     /// @brief Write to data to a register.
@@ -543,9 +523,39 @@ class GeneralInstrumentAy_3_8910 {
     /// @param data the data to write to the register
     ///
     inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
-        run_until(time);
-        _write(address, data);
+        // make sure the given address is legal
+        if (address > ADDR_END)
+            throw AddressSpaceException<uint16_t>(address, 0, ADDR_END);
+        if (address == ENVELOPE_SHAPE) {  // envelope mode
+            if (!(data & 8)) // convert modes 0-7 to proper equivalents
+                data = (data & 4) ? 15 : 9;
+            env.wave = env.modes[data - 7];
+            env.pos = -48;
+            // will get set to envelope period in run_until()
+            env.delay = 0;
+        }
+        regs[address] = data;
+        // handle period changes accurately
+        // get the oscillator index by dividing by 2. there are two registers
+        // for each oscillator to represent the 12-bit period across a 16-bit
+        // value (with 4 unused bits)
+        unsigned i = address >> 1;
+        if (i < OSC_COUNT) {  // i refers to i'th oscillator's period registers
+            // get the period from the two registers. the first register
+            // contains the low 8 bits and the second register contains the
+            // high 4 bits
+            blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
+            // multiply by PERIOD_FACTOR to calculate the internal period value
+            period <<= PERIOD_SHIFTS;
+            // if the period is zero, set to the minimal value of PERIOD_FACTOR
+            if (!period) period = PERIOD_FACTOR;
+            // adjust time of next timer expiration based on change in period
+            Oscillator& osc = oscs[i];
+            if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
+            osc.period = period;
+        }
+        // TODO: same as above for envelope timer, and it also has a divide by
+        // two after it
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,

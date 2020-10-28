@@ -263,7 +263,7 @@
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 4,
@@ -271,19 +271,19 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 6,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 7,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 8,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 9,
@@ -333,11 +333,11 @@
         },
         {
           "id": 2,
-          "value": 0.5
+          "value": 1.0
         },
         {
           "id": 3,
-          "value": 0.5
+          "value": 0.666499972
         }
       ],
       "leftModuleId": 16,
@@ -455,6 +455,14 @@
       "outputId": 0,
       "inputModuleId": 16,
       "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 842,
+      "outputModuleId": 135,
+      "outputId": 0,
+      "inputModuleId": 16,
+      "inputId": 6,
       "color": "#c91847"
     }
   ]

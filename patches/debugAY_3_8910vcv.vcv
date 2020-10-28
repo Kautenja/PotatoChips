@@ -32,7 +32,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.251188636
         },
         {
           "id": 1,
@@ -263,38 +263,50 @@
         },
         {
           "id": 3,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 4,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 5,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 6,
-          "value": 1.0
+          "value": 10.0
         },
         {
           "id": 7,
-          "value": 1.0
+          "value": 10.0
         },
         {
           "id": 8,
-          "value": 1.0
+          "value": 10.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 10,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 11,
+          "value": 1.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 0.0
+        },
+        {
+          "id": 14,
           "value": 0.0
         }
       ],
@@ -436,6 +448,14 @@
       "inputModuleId": 136,
       "inputId": 0,
       "color": "#c9b70e"
+    },
+    {
+      "id": 838,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 16,
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

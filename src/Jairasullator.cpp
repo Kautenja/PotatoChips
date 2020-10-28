@@ -18,7 +18,7 @@
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
 // TODO: envelope control
-// TODO: discrete noise frequency control?
+// TODO: discrete noise frequency control
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -34,7 +34,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        // ENUMS(PARAM_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
@@ -63,7 +63,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         NUM_LIGHTS
     };
 
-    /// @brief Initialize a new FME7 Chip module.
+    /// @brief Initialize a new Jairasullator module.
     Jairasullator() : ChipModule<GeneralInstrumentAy_3_8910>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -71,7 +71,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             // get the channel name starting with ACII code 65 (A)
             auto channel_name = "Pulse " + std::string(1, static_cast<char>(65 + oscillator));
             configParam(PARAM_FREQ  + oscillator, -5.f,   5.f, 0.f,  channel_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            // configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, channel_name + " FM");
+            configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, channel_name + " FM");
             configParam(PARAM_LEVEL + oscillator,  0,    15,  10,    channel_name + " Level");
             configParam(PARAM_TONE  + oscillator,  0,     1,   1,    channel_name + " Tone Enabled",  "");
             configParam(PARAM_NOISE + oscillator,  0,     1,   0,    channel_name + " Noise Enabled", "");
@@ -94,8 +94,22 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         static constexpr auto CLOCK_DIVISION = 32;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
@@ -111,22 +125,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit level value in an 8-bit container
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
-        // // the minimal value for the volume width register
-        // static constexpr float LEVEL_MIN = 0;
-        // // the maximal value for the volume width register
-        // static constexpr float LEVEL_MAX = 15;
-        // // get the level from the parameter knob
-        // auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // // apply the control voltage to the attenuation
-        // if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-        //     auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-        //     cv = rack::clamp(cv, 0.f, 1.f);
-        //     cv = roundf(100.f * cv) / 100.f;
-        //     param *= 2 * cv;
-        // }
-        // // get the 8-bit level clamped within legal limits
-        // return rack::clamp(LEVEL_MAX * param, LEVEL_MIN, LEVEL_MAX);
-
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
@@ -163,9 +161,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // pitch in [-5, 5], so translate to a simple [0, 1] scale.
         auto param = (0.5f + params[PARAM_FREQ + oscillator].getValue() / 10.f);
         // 5V scale for V/OCT input
-        param += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel) / 5.f;
+        param += inputs[INPUT_VOCT + oscillator].getVoltage(channel) / 5.f;
         // 10V scale for mod input
-        param += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 10.f;
+        param += inputs[INPUT_FM + oscillator].getVoltage(channel) / 10.f;
         // clamp the parameter within its legal limits
         param = rack::clamp(param, 0.f, 1.f);
         // get the 5-bit noise period clamped within legal limits. invert the
@@ -189,7 +187,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned i = 0; i < 2 * GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // clamp the input within [0, 10]. this allows bipolar signals to
             // be interpreted as unipolar signals for the trigger input
-            auto cv = math::clamp(inputs[INPUT_TONE + i].getPolyVoltage(channel), 0.f, 10.f);
+            auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
             mixerTriggers[i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
             bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[i].state;
@@ -257,7 +255,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for Jairasullator.
+/// @brief The panel widget for Jairasullator.
 struct JairasullatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
@@ -278,18 +276,18 @@ struct JairasullatorWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Jairasullator::INPUT_VOCT  + i));
             // FM
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Jairasullator::INPUT_FM    + i));
-            // addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Jairasullator::PARAM_FM    + i));
+            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Jairasullator::PARAM_FM    + i));
             // Level
             addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, Jairasullator::PARAM_LEVEL + i));
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Jairasullator::INPUT_LEVEL + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Jairasullator::LIGHTS_LEVEL + 3 * i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
-            // noise modes
-            addParam(createParam<CKSS>(          Vec(144, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
-            addInput(createInput<PJ301MPort>(    Vec(147, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
-            addParam(createParam<CKSS>(          Vec(138, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
-            addInput(createInput<PJ301MPort>(    Vec(175, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
+            // Noise Modes
+            addParam(createParam<CKSS>(        Vec(144, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
+            addInput(createInput<PJ301MPort>(  Vec(147, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
+            addParam(createParam<CKSS>(        Vec(138, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
+            addInput(createInput<PJ301MPort>(  Vec(175, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
         }
     }
 };

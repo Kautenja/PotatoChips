@@ -31,12 +31,10 @@ class GeneralInstrumentAy_3_8910 {
  public:
     /// the number of oscillators on the chip
     static constexpr unsigned OSC_COUNT = 3;
-    /// the first address of the RAM space
-    static constexpr uint16_t ADDR_START = 0;
     /// the last address of the RAM space
     static constexpr uint16_t ADDR_END   = 16;
     /// the number of registers on the chip
-    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
+    static constexpr uint16_t NUM_REGISTERS = ADDR_END;
 
     /// the indexes of the channels on the chip
     enum Channel {
@@ -105,21 +103,40 @@ class GeneralInstrumentAy_3_8910 {
 
     /// symbolic flags for the ENVELOPE_SHAPE register
     enum EnvelopeShapeFlag {
-        /// no envelope shape
-        ENVELOPE_SHAPE_NONE      = 0b0000,
-        /// TODO:
+        /// the bit mask to enable envelope hold function
         ENVELOPE_SHAPE_HOLD      = 0b0001,
-        /// TODO:
+        /// the bit mask to enable envelope alternate function
         ENVELOPE_SHAPE_ALTERNATE = 0b0010,
-        /// TODO:
+        /// the bit mask to enable envelope attack function
         ENVELOPE_SHAPE_ATTACK    = 0b0100,
-        /// TODO:
+        /// the bit mask to enable envelope continue function
         ENVELOPE_SHAPE_CONTINUE  = 0b1000,
     };
 
  private:
     /// the range of the amplifier on the chip
     static constexpr uint8_t AMP_RANGE = 255;
+
+    /// @brief Return the amplitude for the given discrete index.
+    ///
+    /// @param index the index of the amplitude level to return
+    /// @returns the volume level for the given index
+    ///
+    static inline uint8_t get_ampltiude(unsigned index) {
+        // With channels tied together and 1K resistor to ground (as
+        // datasheet recommends), output nearly matches logarithmic curve as
+        // claimed. Approx. 1.5 dB per step.
+        static constexpr uint8_t AMP_TABLE[16] = {
+        #define ENTRY(n) uint8_t (n * AMP_RANGE + 0.5)
+            ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
+            ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
+            ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
+            ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
+        #undef ENTRY
+        };
+        return AMP_TABLE[index];
+    }
+
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
     /// the number of bits to shift for faster multiplying / dividing by
@@ -128,14 +145,6 @@ class GeneralInstrumentAy_3_8910 {
     /// Tones above this frequency are treated as disabled tone at half volume.
     /// Power of two is more efficient (avoids division).
     static constexpr unsigned INAUDIBLE_FREQ = 16384;
-
-    /// With channels tied together and 1K resistor to ground (as datasheet
-    /// recommends), output nearly matches logarithmic curve as claimed. Approx.
-    /// 1.5 dB per step.
-    static const uint8_t AMP_TABLE[16];
-
-    /// TODO:
-    static const uint8_t MODES[8];
 
     /// the noise off flag bit
     static constexpr int NOISE_OFF    = 0x08;
@@ -174,7 +183,7 @@ class GeneralInstrumentAy_3_8910 {
     struct {
         /// TODO:
         blip_time_t delay = 0;
-        /// TODO:
+        /// a pointer to the envelop waveform
         uint8_t const* wave = nullptr;
         /// the position in the waveform
         int pos = 0;
@@ -188,10 +197,9 @@ class GeneralInstrumentAy_3_8910 {
     /// @param data the data to write to the given address
     ///
     void _write(uint16_t addr, uint8_t data) {
-        // make sure the given address is legal (only need to check upper bound
-        // because the lower bound is 0 and addr is unsigned)
-        if (/*addr < ADDR_START or*/ addr > ADDR_END)
-            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
+        // make sure the given address is legal
+        if (addr > ADDR_END)
+            throw AddressSpaceException<uint16_t>(addr, 0, ADDR_END);
         if (addr == 13) {  // envelope mode
             if (!(data & 8)) // convert modes 0-7 to proper equivalents
                 data = (data & 4) ? 15 : 9;
@@ -273,7 +281,7 @@ class GeneralInstrumentAy_3_8910 {
             blip_time_t start_time = last_time;
             blip_time_t end_time   = final_end_time;
             int const vol_mode = regs[0x08 + index];
-            int volume = AMP_TABLE[vol_mode & 0x0F] >> half_vol;
+            int volume = get_ampltiude(vol_mode & 0x0F) >> half_vol;
             int osc_env_pos = env.pos;
             if (vol_mode & 0x10) {
                 volume = env.wave[osc_env_pos] >> half_vol;
@@ -438,6 +446,18 @@ class GeneralInstrumentAy_3_8910 {
  public:
     /// Initialize a new General Instrument AY-3-8910.
     GeneralInstrumentAy_3_8910() {
+        static constexpr uint8_t MODES[8] = {
+        #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
+            MODE(1,0, 1,0, 1,0),
+            MODE(1,0, 0,0, 0,0),
+            MODE(1,0, 0,1, 1,0),
+            MODE(1,0, 1,1, 1,1),
+            MODE(0,1, 0,1, 0,1),
+            MODE(0,1, 1,1, 1,1),
+            MODE(0,1, 1,0, 0,1),
+            MODE(0,1, 0,0, 0,0),
+        #undef MODE
+        };
         // build full table of the upper 8 envelope waveforms
         for (int m = 8; m--;) {
             uint8_t* out = env.modes[m];
@@ -448,13 +468,13 @@ class GeneralInstrumentAy_3_8910 {
                 int step = end - amp;
                 amp *= 15;
                 for (int y = 16; --y >= 0;) {
-                    *out++ = AMP_TABLE[amp];
+                    *out++ = get_ampltiude(amp);
                     amp += step;
                 }
                 flags >>= 2;
             }
         }
-
+        // reset internal state
         set_output(NULL);
         set_volume();
         reset();
@@ -537,32 +557,6 @@ class GeneralInstrumentAy_3_8910 {
         run_until(time);
         last_time -= time;
     }
-};
-
-/// With channels tied together and 1K resistor to ground (as datasheet
-/// recommends), output nearly matches logarithmic curve as claimed. Approx.
-/// 1.5 dB per step.
-const uint8_t GeneralInstrumentAy_3_8910::AMP_TABLE[16] = {
-#define ENTRY(n) uint8_t (n * AMP_RANGE + 0.5)
-    ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
-    ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
-    ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
-    ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
-#undef ENTRY
-};
-
-/// TODO:
-const uint8_t GeneralInstrumentAy_3_8910::MODES[8] = {
-#define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
-    MODE(1,0, 1,0, 1,0),
-    MODE(1,0, 0,0, 0,0),
-    MODE(1,0, 0,1, 1,0),
-    MODE(1,0, 1,1, 1,1),
-    MODE(0,1, 0,1, 0,1),
-    MODE(0,1, 1,1, 1,1),
-    MODE(0,1, 1,0, 0,1),
-    MODE(0,1, 0,0, 0,0),
-#undef MODE
 };
 
 #endif  // DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_

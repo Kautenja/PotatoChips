@@ -79,14 +79,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled", "");
         }
         // for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-        //     // envelope period (TODO: fix envelope in engine)
-        //     apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_LO, 0b10101011);
-        //     apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_ENVELOPE_HI, 0b00000011);
-        //     // envelope shape bits (TODO: fix envelope in engine)
-        //     apu[channel].write(
-        //         GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE,
-        //         GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_CONTINUE
-        //     );
+        //     apu[channel].set_envelope_period(0b0000001110101011);
+        //     apu[channel].set_envelope_mode(GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_CONTINUE);
         // }
     }
 

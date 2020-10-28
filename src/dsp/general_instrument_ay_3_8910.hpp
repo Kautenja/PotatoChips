@@ -517,6 +517,32 @@ class GeneralInstrumentAy_3_8910 {
         env.reset();
     }
 
+    /// @brief Set the envelope mode to a new value.
+    ///
+    /// @param value the mode to set the envelope to
+    /// @details
+    /// This has the effect of resetting the envelope's phase.
+    ///
+    inline void set_envelope_mode(uint8_t value) {
+        if (!(value & 8)) // convert modes 0-7 to proper equivalents
+            value = (value & 4) ? 15 : 9;
+        env.wave = env.modes[value - 7];
+        env.pos = -48;
+        // will get set to envelope period in run_until()
+        env.delay = 0;
+        regs[ENVELOPE_SHAPE] = value;
+    }
+
+    /// @brief Set the envelope period to a new value.
+    ///
+    /// @param value the period with which the envelope should repeat
+    ///
+    inline void set_envelope_period(uint16_t value) {
+        // set the 8-bit registers
+        regs[PERIOD_ENVELOPE_HI] = value >> 8;
+        regs[PERIOD_ENVELOPE_LO] = value & 0xff;
+    }
+
     /// @brief Write to data to a register.
     ///
     /// @param address the address of the register to write
@@ -526,14 +552,6 @@ class GeneralInstrumentAy_3_8910 {
         // make sure the given address is legal
         if (address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, 0, ADDR_END);
-        if (address == ENVELOPE_SHAPE) {  // envelope mode
-            if (!(data & 8)) // convert modes 0-7 to proper equivalents
-                data = (data & 4) ? 15 : 9;
-            env.wave = env.modes[data - 7];
-            env.pos = -48;
-            // will get set to envelope period in run_until()
-            env.delay = 0;
-        }
         regs[address] = data;
         // handle period changes accurately
         // get the oscillator index by dividing by 2. there are two registers

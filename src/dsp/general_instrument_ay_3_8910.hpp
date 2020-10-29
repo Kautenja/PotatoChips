@@ -534,7 +534,7 @@ class GeneralInstrumentAy_3_8910 {
     /// @param value the period with which the envelope should repeat
     ///
     inline void set_envelope_period(uint16_t value) {
-        // set the 8-bit registers
+        // set the 8-bit registers from the 16-bit frequency
         regs[PERIOD_ENVELOPE_HI] = value >> 8;
         regs[PERIOD_ENVELOPE_LO] = value & 0xff;
     }
@@ -545,7 +545,8 @@ class GeneralInstrumentAy_3_8910 {
     /// \f$\in [0, 31]\f$
     ///
     inline void set_noise_period(uint8_t value) {
-        regs[NOISE_PERIOD] = value;
+        // value is in the first 5 bits
+        regs[NOISE_PERIOD] = 0x1f & value;
     }
 
     /// @brief Set the channel enable register to a new value.
@@ -553,7 +554,8 @@ class GeneralInstrumentAy_3_8910 {
     /// @param value the bitmask for the channel enable register
     ///
     inline void set_channel_enables(uint8_t value) {
-        regs[CHANNEL_ENABLES] = value;
+        // value is a bitmask with 6 bits
+        regs[CHANNEL_ENABLES] = 0x3f & value;
     }
 
     /// @brief Set the oscillator volume to a new value.
@@ -564,6 +566,7 @@ class GeneralInstrumentAy_3_8910 {
     /// envelope generator
     ///
     inline void set_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
+        // the value is in the first four bits. the fifth enables the EG
         value = (value & 0xf) | (envelope * 0x10);
         regs[VOLUME_CH_A + osc_index] = value;
     }
@@ -574,7 +577,9 @@ class GeneralInstrumentAy_3_8910 {
     /// @param value the 12 bit frequency value for the oscillator
     ///
     inline void set_frequency(unsigned osc_index, uint16_t value) {
+        // get the register offset of the oscillator (iterate in pairs)
         const auto offset = osc_index << 1;
+        // set the 12-bit frequency
         regs[PERIOD_CH_A_LO + offset] = value & 0xff;
         regs[PERIOD_CH_A_HI + offset] = (value >> 8) & 0xf;
         // get the period from the two registers. the first register

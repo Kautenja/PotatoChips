@@ -210,22 +210,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
-            // 2 frequency registers per voice, shift over by 1 instead of
-            // multiplying
-            auto offset = oscillator << 1;
-            auto freq = getFrequency(oscillator, channel);
-            auto lo =  freq & 0b0000000011111111;
-            apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_LO + offset, lo);
-            auto hi = (freq & 0b0000111100000000) >> 8;
-            apu[channel].write(GeneralInstrumentAy_3_8910::PERIOD_CH_A_HI + offset, hi);
-            // volume
-            // auto level = 0b00010000 | getLevel(oscillator, channel);
-            auto level = getLevel(oscillator, channel);
-            apu[channel].write(GeneralInstrumentAy_3_8910::VOLUME_CH_A + oscillator, level);
+            apu[channel].set_frequency(oscillator, getFrequency(oscillator, channel));
+            apu[channel].set_volume(oscillator, getLevel(oscillator, channel));
         }
-        // set the 5-bit noise value based on the channel 3 parameter
         apu[channel].set_noise_period(getNoise(channel));
-        // set the 6-channel boolean mixer (tone and noise for each channel)
         apu[channel].set_channel_enables(getMixer(channel));
     }
 

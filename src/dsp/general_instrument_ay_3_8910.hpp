@@ -531,6 +531,8 @@ class GeneralInstrumentAy_3_8910 {
         // will get set to envelope period in run_until()
         env.delay = 0;
         regs[ENVELOPE_SHAPE] = value;
+        // TODO: same as [set_frequency] for envelope timer, and it also has a
+        // divide by two after it
     }
 
     /// @brief Set the envelope period to a new value.
@@ -543,49 +545,56 @@ class GeneralInstrumentAy_3_8910 {
         regs[PERIOD_ENVELOPE_LO] = value & 0xff;
     }
 
+    /// @brief Set the noise period to a new value.
+    ///
+    /// @param value the period with which the noise generator should repeat
+    /// \f$\in [0, 31]\f$
+    ///
     inline void set_noise_period(uint8_t value) {
         regs[NOISE_PERIOD] = value;
     }
 
+    /// @brief Set the channel enable register to a new value.
+    ///
+    /// @param value the bitmask for the channel enable register
+    ///
     inline void set_channel_enables(uint8_t value) {
         regs[CHANNEL_ENABLES] = value;
     }
 
-    inline void set_volume(unsigned osc_index, uint8_t value) {
-
+    /// @brief Set the oscillator volume to a new value.
+    ///
+    /// @param osc_index the index of the oscillator to set the volume of
+    /// @param value the volume level \f$\in [0, 15]\f$
+    /// @param envelope whether the oscillator should be attenuated by the
+    /// envelope generator
+    ///
+    inline void set_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
+        value = (value & 0xf) | (envelope * PERIOD_CH_ENVELOPE_ON);
+        regs[VOLUME_CH_A + osc_index] = value;
     }
 
-    /// @brief Write to data to a register.
+    /// @brief Set the oscillator volume to a new value.
     ///
-    /// @param address the address of the register to write
-    /// @param data the data to write to the register
+    /// @param osc_index the index of the oscillator to set the volume of
+    /// @param value the 12 bit frequency value for the oscillator
     ///
-    inline void write(uint16_t address, uint8_t data) {
-        // make sure the given address is legal
-        if (address > ADDR_END)
-            throw AddressSpaceException<uint16_t>(address, 0, ADDR_END);
-        regs[address] = data;
-        // handle period changes accurately
-        // get the oscillator index by dividing by 2. there are two registers
-        // for each oscillator to represent the 12-bit period across a 16-bit
-        // value (with 4 unused bits)
-        unsigned i = address >> 1;
-        if (i < OSC_COUNT) {  // i refers to i'th oscillator's period registers
-            // get the period from the two registers. the first register
-            // contains the low 8 bits and the second register contains the
-            // high 4 bits
-            blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
-            // multiply by PERIOD_FACTOR to calculate the internal period value
-            period <<= PERIOD_SHIFTS;
-            // if the period is zero, set to the minimal value of PERIOD_FACTOR
-            if (!period) period = PERIOD_FACTOR;
-            // adjust time of next timer expiration based on change in period
-            Oscillator& osc = oscs[i];
-            if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
-            osc.period = period;
-        }
-        // TODO: same as above for envelope timer, and it also has a divide by
-        // two after it
+    inline void set_frequency(unsigned osc_index, uint16_t value) {
+        const auto offset = osc_index << 1;
+        regs[PERIOD_CH_A_LO + offset] = value & 0xff;
+        regs[PERIOD_CH_A_HI + offset] = (value >> 8) & 0xf;
+        // get the period from the two registers. the first register
+        // contains the low 8 bits and the second register contains the
+        // high 4 bits
+        blip_time_t period = ((regs[offset + 1] & 0x0F) << 8) | regs[offset];
+        // multiply by PERIOD_FACTOR to calculate the internal period value
+        period <<= PERIOD_SHIFTS;
+        // if the period is zero, set to the minimal value of PERIOD_FACTOR
+        if (!period) period = PERIOD_FACTOR;
+        // adjust time of next timer expiration based on change in period
+        Oscillator& osc = oscs[osc_index];
+        if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
+        osc.period = period;
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,

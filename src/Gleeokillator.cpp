@@ -184,28 +184,26 @@ struct GleeokillatorWidget : ModuleWidget {
     ///
     explicit GleeokillatorWidget(Gleeokillator *module) {
         setModule(module);
-        static constexpr auto panel = "res/FME7.svg";
+        static constexpr auto panel = "res/Gleeokillator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Gleeokillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Gleeokillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 45),  module, Gleeokillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 85),  module, Gleeokillator::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Gleeokillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Gleeokillator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 129), module, Gleeokillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 173), module, Gleeokillator::PARAM_FM          + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Gleeokillator::PARAM_LEVEL       + i);
-            level->snap = true;
-            addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Gleeokillator::INPUT_LEVEL       + i));
+            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 221), module, Gleeokillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 263), module, Gleeokillator::INPUT_LEVEL       + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Gleeokillator::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Gleeokillator::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Gleeokillator::OUTPUT_OSCILLATOR + i));
         }
     }
 };

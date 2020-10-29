@@ -162,28 +162,18 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the period for the noise oscillator
-    /// @details
-    /// Returns a frequency based on the knob for oscillator 3 (index 2)
     ///
     inline uint8_t getNoise(unsigned channel) {
-        // use the frequency control knob from oscillator index 2
-        static constexpr unsigned oscillator = 2;
-        // the minimal value for the noise frequency register to produce sound
-        static constexpr float FREQ_MIN = 0;
-        // the maximal value for the noise frequency register
-        static constexpr float FREQ_MAX = 31;
-        // get the parameter value from the UI knob. the knob represents
-        // pitch in [-5, 5], so translate to a simple [0, 1] scale.
-        auto param = (0.5f + params[PARAM_FREQ + oscillator].getValue() / 10.f);
-        // 5V scale for V/OCT input
-        param += inputs[INPUT_VOCT + oscillator].getVoltage(channel) / 5.f;
-        // 10V scale for mod input
-        param += inputs[INPUT_FM + oscillator].getVoltage(channel) / 10.f;
-        // clamp the parameter within its legal limits
-        param = rack::clamp(param, 0.f, 1.f);
-        // get the 5-bit noise period clamped within legal limits. invert the
-        // value about the maximal to match directionality of oscillator frequency
-        return FREQ_MAX - rack::clamp(FREQ_MAX * param, FREQ_MIN, FREQ_MAX);
+        // the maximal value for the frequency register
+        static constexpr float MAX = 31;
+        // get the attenuation from the parameter knob
+        const float param = params[PARAM_NOISE_PERIOD].getValue();
+        // apply the control voltage to the attenuation.
+        const float cv = inputs[INPUT_NOISE_PERIOD].getNormalVoltage(0.f, channel);
+        // scale such that [0,7]V controls the full range of the parameter
+        const float mod = rescale(cv, 0.f, 7.f, 0.f, MAX);
+        // invert the parameter so larger values have higher frequencies
+        return MAX - rack::clamp(floorf(param + mod), 0.f, MAX);
     }
 
     /// @brief Return the mixer byte.
@@ -290,6 +280,7 @@ struct JairasullatorWidget : ModuleWidget {
             addParam(createParam<CKSS>(Vec(205, 110 + i * 111), module, Jairasullator::PARAM_ENVELOPE + i));
         }
         // Noise Period
+        addInput(createInput<PJ301MPort>(Vec(180, 40), module, Jairasullator::INPUT_NOISE_PERIOD));
         addParam(createSnapParam<Trimpot>(Vec(200, 40), module, Jairasullator::PARAM_NOISE_PERIOD));
         // Envelope Period & Mode
         addParam(createParam<Trimpot>(Vec(200, 60), module, Jairasullator::PARAM_ENVELOPE_PERIOD));

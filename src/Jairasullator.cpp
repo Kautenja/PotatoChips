@@ -78,10 +78,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone Enabled",  "");
             configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled", "");
         }
-        // for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-        //     apu[channel].set_envelope_period(0b0000001110101011);
-        //     apu[channel].set_envelope_mode(GeneralInstrumentAy_3_8910::ENVELOPE_SHAPE_CONTINUE);
-        // }
     }
 
  protected:
@@ -214,6 +210,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             apu[channel].set_volume(oscillator, getLevel(oscillator, channel));
         }
         apu[channel].set_noise_period(getNoise(channel));
+        apu[channel].set_envelope_period(0b0000001110101011);
+        apu[channel].set_envelope_mode(GeneralInstrumentAy_3_8910::CONTINUE);
         apu[channel].set_channel_enables(getMixer(channel));
     }
 

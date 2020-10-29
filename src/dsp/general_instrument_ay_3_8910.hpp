@@ -31,10 +31,6 @@ class GeneralInstrumentAy_3_8910 {
  public:
     /// the number of oscillators on the chip
     static constexpr unsigned OSC_COUNT = 3;
-    /// the last address of the RAM space
-    static constexpr uint16_t ADDR_END   = 16;
-    /// the number of registers on the chip
-    static constexpr uint16_t NUM_REGISTERS = ADDR_END;
 
     /// the indexes of the channels on the chip
     enum Channel {
@@ -42,6 +38,22 @@ class GeneralInstrumentAy_3_8910 {
         PULSE1,
         PULSE2
     };
+
+    /// symbolic flags for the ENVELOPE_SHAPE register
+    enum EnvelopeShape {
+        /// the bit mask to enable envelope hold function
+        HOLD      = 0b0001,
+        /// the bit mask to enable envelope alternate function
+        ALTERNATE = 0b0010,
+        /// the bit mask to enable envelope attack function
+        ATTACK    = 0b0100,
+        /// the bit mask to enable envelope continue function
+        CONTINUE  = 0b1000,
+    };
+
+ private:
+    /// the number of registers on the chip
+    static constexpr uint16_t NUM_REGISTERS = 16;
 
     /// the registers on the chip
     enum Register : uint16_t {
@@ -77,43 +89,26 @@ class GeneralInstrumentAy_3_8910 {
         // IO_PORT_B   // unused
     };
 
-    /// @brief the flag bit for turning on the envelope for a channel's
-    /// VOLUME_CH_# register
-    static constexpr int PERIOD_CH_ENVELOPE_ON = 0b00010000;
+    // /// symbolic flags for enabling channels using the mixer register
+    // enum ChannelEnableFlag {
+    //     /// turn on all channels
+    //     CHANNEL_ENABLE_ALL_ON      = 0b00000000,
+    //     /// turn off channel A tone
+    //     CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
+    //     /// turn off channel B tone
+    //     CHANNEL_ENABLE_TONE_B_OFF  = 0b00000010,
+    //     /// turn off channel C tone
+    //     CHANNEL_ENABLE_TONE_C_OFF  = 0b00000100,
+    //     /// turn off channel A noise
+    //     CHANNEL_ENABLE_NOISE_A_OFF = 0b00001000,
+    //     /// turn off channel B noise
+    //     CHANNEL_ENABLE_NOISE_B_OFF = 0b00010000,
+    //     /// turn off channel C noise
+    //     CHANNEL_ENABLE_NOISE_C_OFF = 0b00100000,
+    //     // CHANNEL_ENABLE_PORT_A_OFF  = 0b01000000,  // unused
+    //     // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
+    // };
 
-    /// symbolic flags for enabling channels using the mixer register
-    enum ChannelEnableFlag {
-        /// turn on all channels
-        CHANNEL_ENABLE_ALL_ON      = 0b00000000,
-        /// turn off channel A tone
-        CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
-        /// turn off channel B tone
-        CHANNEL_ENABLE_TONE_B_OFF  = 0b00000010,
-        /// turn off channel C tone
-        CHANNEL_ENABLE_TONE_C_OFF  = 0b00000100,
-        /// turn off channel A noise
-        CHANNEL_ENABLE_NOISE_A_OFF = 0b00001000,
-        /// turn off channel B noise
-        CHANNEL_ENABLE_NOISE_B_OFF = 0b00010000,
-        /// turn off channel C noise
-        CHANNEL_ENABLE_NOISE_C_OFF = 0b00100000,
-        // CHANNEL_ENABLE_PORT_A_OFF  = 0b01000000,  // unused
-        // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
-    };
-
-    /// symbolic flags for the ENVELOPE_SHAPE register
-    enum EnvelopeShapeFlag {
-        /// the bit mask to enable envelope hold function
-        ENVELOPE_SHAPE_HOLD      = 0b0001,
-        /// the bit mask to enable envelope alternate function
-        ENVELOPE_SHAPE_ALTERNATE = 0b0010,
-        /// the bit mask to enable envelope attack function
-        ENVELOPE_SHAPE_ATTACK    = 0b0100,
-        /// the bit mask to enable envelope continue function
-        ENVELOPE_SHAPE_CONTINUE  = 0b1000,
-    };
-
- private:
     /// the range of the amplifier on the chip
     static constexpr uint8_t AMP_RANGE = 255;
 
@@ -524,15 +519,15 @@ class GeneralInstrumentAy_3_8910 {
     /// This has the effect of resetting the envelope's phase.
     ///
     inline void set_envelope_mode(uint8_t value) {
-        if (!(value & 8)) // convert modes 0-7 to proper equivalents
+        if (!(value & 8))  // convert modes 0-7 to proper equivalents
             value = (value & 4) ? 15 : 9;
         env.wave = env.modes[value - 7];
-        env.pos = -48;
-        // will get set to envelope period in run_until()
-        env.delay = 0;
-        regs[ENVELOPE_SHAPE] = value;
-        // TODO: same as [set_frequency] for envelope timer, and it also has a
-        // divide by two after it
+        if (regs[ENVELOPE_SHAPE] != value) {  // check for change in mode
+            regs[ENVELOPE_SHAPE] = value;
+            env.pos = -48;
+            // will get set to envelope period in run_until()
+            env.delay = 0;
+        }
     }
 
     /// @brief Set the envelope period to a new value.
@@ -570,7 +565,7 @@ class GeneralInstrumentAy_3_8910 {
     /// envelope generator
     ///
     inline void set_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
-        value = (value & 0xf) | (envelope * PERIOD_CH_ENVELOPE_ON);
+        value = (value & 0xf) | (envelope * 0x10);
         regs[VOLUME_CH_A + osc_index] = value;
     }
 

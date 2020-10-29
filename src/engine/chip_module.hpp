@@ -21,6 +21,8 @@
 #ifndef ENGINE_CHIP_MODULE_HPP_
 #define ENGINE_CHIP_MODULE_HPP_
 
+// TODO: move BLIP Buffer inside the emulator class instead of using it here
+
 /// @brief An abstract chip emulator module.
 /// @tparam ChipEmulator the class of the chip emulator
 /// @details All ports are assumed to be polyphonic. I.e., all inputs ports

@@ -23,6 +23,8 @@
 // TODO: replace noise switches with single switch between noise and tone
 // TODO: envelope generator trigger / LFO reset
 // TODO: document both modes off (4-bit dac based on amp port!)
+// TODO: -   freq knob to input gain for DAC mode
+// TODO: -   mod knob to DC offset for DAC mode
 
 // ---------------------------------------------------------------------------
 // MARK: Module

@@ -442,14 +442,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 834,
-      "outputModuleId": 16,
-      "outputId": 2,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
       "id": 837,
       "outputModuleId": 16,
       "outputId": 2,
@@ -466,20 +458,20 @@
       "color": "#c91847"
     },
     {
-      "id": 839,
-      "outputModuleId": 135,
-      "outputId": 0,
+      "id": 834,
+      "outputModuleId": 16,
+      "outputId": 2,
       "inputModuleId": 2,
-      "inputId": 6,
-      "color": "#0c8e15"
+      "inputId": 1,
+      "color": "#c91847"
     },
     {
-      "id": 846,
+      "id": 852,
       "outputModuleId": 135,
       "outputId": 0,
       "inputModuleId": 16,
       "inputId": 6,
-      "color": "#0986ad"
+      "color": "#c9b70e"
     }
   ]
 }

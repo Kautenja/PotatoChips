@@ -1,1 +1,0 @@
-The [Blargg audio libraries](https://github.com/amhndu/SimpleNES) are adapted for this project under the GNU L-GPL-2.1 license.

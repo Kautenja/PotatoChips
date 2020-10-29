@@ -200,6 +200,7 @@
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to AY-3-8910 (rev2 branded as "Jairasullator")
     -   **internal envelope / LFO (full synthesizer voice)**
+    -   **discrete noise period control**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched

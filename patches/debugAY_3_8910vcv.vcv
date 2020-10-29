@@ -271,7 +271,7 @@
         },
         {
           "id": 5,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 6,
@@ -307,6 +307,30 @@
         },
         {
           "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        },
+        {
+          "id": 16,
+          "value": 0.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 0.0
+        },
+        {
+          "id": 19,
+          "value": 0.0
+        },
+        {
+          "id": 20,
           "value": 0.0
         }
       ],
@@ -450,15 +474,15 @@
       "color": "#c9b70e"
     },
     {
-      "id": 843,
+      "id": 838,
       "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 16,
       "inputId": 0,
-      "color": "#c9b70e"
+      "color": "#c91847"
     },
     {
-      "id": 844,
+      "id": 839,
       "outputModuleId": 135,
       "outputId": 0,
       "inputModuleId": 16,

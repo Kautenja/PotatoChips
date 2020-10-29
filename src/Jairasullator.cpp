@@ -36,21 +36,29 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_FREQ,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        PARAM_NOISE_PERIOD,
+        PARAM_ENVELOPE_PERIOD,
+        PARAM_ENVELOPE_MODE,
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_FM, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_LEVEL, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_TONE, GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_NOISE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_VOCT,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        INPUT_NOISE_PERIOD,
+        INPUT_ENVELOPE_PERIOD,
+        INPUT_ENVELOPE_MODE,
         NUM_INPUTS
     };
 
@@ -76,9 +84,13 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_FREQ  + oscillator, -5.f,   5.f,  0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, name + " FM");
             configParam(PARAM_LEVEL + oscillator,  0,    15,   10,   name + " Level");
-            configParam(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone Enabled",  "");
-            configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled", "");
+            configParam(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone Enabled");
+            configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled");
+            configParam(PARAM_ENVELOPE + oscillator,  0,     1,    0,   name + " Envelope Enabled");
         }
+        configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
+        configParam(PARAM_ENVELOPE_PERIOD, -5, 5, 0, "Envelope Period");
+        configParam(PARAM_ENVELOPE_MODE, 0, 7, 0, "Envelope Mode");
     }
 
  protected:
@@ -269,12 +281,19 @@ struct JairasullatorWidget : ModuleWidget {
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Jairasullator::LIGHTS_LEVEL + 3 * i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
-            // Noise Modes
-            addParam(createParam<CKSS>(        Vec(144, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
-            addInput(createInput<PJ301MPort>(  Vec(147, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
-            addParam(createParam<CKSS>(        Vec(138, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
-            addInput(createInput<PJ301MPort>(  Vec(175, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
+            // Output Modes
+            addParam(createParam<CKSS>(        Vec(124, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
+            addInput(createInput<PJ301MPort>(  Vec(127, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
+            addParam(createParam<CKSS>(        Vec(118, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
+            addInput(createInput<PJ301MPort>(  Vec(155, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
+            // Envelope Enables
+            addParam(createParam<CKSS>(Vec(205, 110 + i * 111), module, Jairasullator::PARAM_ENVELOPE + i));
         }
+        // Noise Period
+        addParam(createSnapParam<Trimpot>(Vec(200, 40), module, Jairasullator::PARAM_NOISE_PERIOD));
+        // Envelope Period & Mode
+        addParam(createParam<Trimpot>(Vec(200, 60), module, Jairasullator::PARAM_ENVELOPE_PERIOD));
+        addParam(createSnapParam<Trimpot>(Vec(200, 80), module, Jairasullator::PARAM_ENVELOPE_MODE));
     }
 };
 

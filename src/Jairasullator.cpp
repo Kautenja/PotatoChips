@@ -92,8 +92,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_ENVELOPE + oscillator,  0,     1,    0,   name + " Envelope Enabled");
         }
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
-        configParam(PARAM_ENVELOPE_PERIOD, -5, 5, 0, "Envelope Period");
-        configParam(PARAM_ENVELOPE_MODE, 0, 7, 0, "Envelope Mode");
+        configParam(PARAM_ENVELOPE_PERIOD, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
+        configParam(PARAM_ENVELOPE_MODE, 0, 15, 8, "Envelope Mode");
         // TODO: change amplifier level to accept audio rate. maybe condition
         // on when dac mode is active (i.e., neither tone nor noise are active).
         // this can then be removed
@@ -113,7 +113,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // the maximal value for the frequency register
         static constexpr float FREQ12BIT_MAX = 4095;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 32;
+        static constexpr auto CLOCK_DIVISION = 2 * 16;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
@@ -174,8 +174,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns true if the oscillator has the envelope generator enabled
     ///
     inline bool isEnvelopeOn(unsigned oscillator, unsigned channel) {
-        // TODO: implement
-        return false;
+        return params[PARAM_ENVELOPE + oscillator].getValue();
     }
 
     /// @brief Return the noise period.
@@ -202,8 +201,38 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 16-bit envelope period from parameters and CV inputs
     ///
     inline uint16_t getEnvelopePeriod(unsigned channel) {
-        // TODO: implement
-        return 0b0000001110101011;
+        // the minimal value for the frequency register to produce sound
+        static constexpr float FREQ16BIT_MIN = 1;
+        // the maximal value for the frequency register
+        static constexpr float FREQ16BIT_MAX = 0xffff;
+        // the clock division of the oscillator relative to the CPU
+        static constexpr auto CLOCK_DIVISION = 2 * 256;
+        // get the pitch from the parameter and control voltage
+        float pitch = params[PARAM_ENVELOPE_PERIOD].getValue();
+
+        // // get the normalled input voltage based on the voice index. Voice 0
+        // // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // // voltage afterward to propagate the normalling chain forward.
+        // const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        // const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        // inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        // pitch += pitchCV;
+        // // get the attenuverter parameter value
+        // const auto att = params[PARAM_FM + oscillator].getValue();
+        // // get the normalled input voltage based on the voice index. Voice 0
+        // // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // // voltage afterward to propagate the normalling chain forward.
+        // const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        // const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        // inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        // pitch += att * mod / 5.f;
+
+        // convert the pitch to frequency based on standard exponential scale
+        float freq = 1 * powf(2.0, pitch);
+        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // convert the frequency to 12-bit
+        freq = buffers[channel][0].get_clock_rate() / (CLOCK_DIVISION * freq);
+        return rack::clamp(freq, FREQ16BIT_MIN, FREQ16BIT_MAX);
     }
 
     /// @brief Return the envelope mode.
@@ -212,8 +241,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit envelope mode from parameters and CV inputs
     ///
     inline uint8_t getEnvelopeMode(unsigned channel) {
-        // TODO: implement
-        return GeneralInstrumentAy_3_8910::CONTINUE;
+        return params[PARAM_ENVELOPE_MODE].getValue();
     }
 
     /// @brief Return the mixer byte.

@@ -565,9 +565,9 @@ class GeneralInstrumentAy_3_8910 {
     /// @param envelope whether the oscillator should be attenuated by the
     /// envelope generator
     ///
-    inline void set_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
+    inline void set_voice_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
         // the value is in the first four bits. the fifth enables the EG
-        value = (value & 0xf) | (envelope * 0x10);
+        value = (envelope * 0x10) | (value & 0xf);
         regs[VOLUME_CH_A + osc_index] = value;
     }
 

@@ -22,6 +22,7 @@
 // TODO: oscillator sync? (not feature of chip, but can be done)
 // TODO: replace noise switches with single switch between noise and tone
 // TODO: envelope generator trigger / LFO reset
+// TODO: document both modes off (4-bit dac based on amp port!)
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -91,6 +92,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_PERIOD, -5, 5, 0, "Envelope Period");
         configParam(PARAM_ENVELOPE_MODE, 0, 7, 0, "Envelope Mode");
+        // TODO: change amplifier level to accept audio rate. maybe condition
+        // on when dac mode is active (i.e., neither tone nor noise are active).
+        // this can then be removed
+        cvDivider.setDivision(1);
     }
 
  protected:
@@ -158,12 +163,25 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         return rack::clamp(level, 0.f, MAX);
     }
 
+    /// @brief Return whether the given oscillator has the envelope enabled.
+    ///
+    /// @param channel the polyphonic channel to return the envelope enabled
+    /// parameter of
+    /// @param oscillator the index of the oscillator to return the envelope
+    /// enabled parameter of
+    /// @returns true if the oscillator has the envelope generator enabled
+    ///
+    inline bool isEnvelopeOn(unsigned oscillator, unsigned channel) {
+        // TODO: implement
+        return false;
+    }
+
     /// @brief Return the noise period.
     ///
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the period for the noise oscillator
     ///
-    inline uint8_t getNoise(unsigned channel) {
+    inline uint8_t getNoisePeriod(unsigned channel) {
         // the maximal value for the frequency register
         static constexpr float MAX = 31;
         // get the attenuation from the parameter knob
@@ -176,10 +194,30 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         return MAX - rack::clamp(floorf(param + mod), 0.f, MAX);
     }
 
+    /// @brief Return the envelope period.
+    ///
+    /// @param channel the polyphonic channel to return the envelope period for
+    /// @returns the 16-bit envelope period from parameters and CV inputs
+    ///
+    inline uint16_t getEnvelopePeriod(unsigned channel) {
+        // TODO: implement
+        return 0b0000001110101011;
+    }
+
+    /// @brief Return the envelope mode.
+    ///
+    /// @param channel the polyphonic channel to return the envelope mode for
+    /// @returns the 4-bit envelope mode from parameters and CV inputs
+    ///
+    inline uint8_t getEnvelopeMode(unsigned channel) {
+        // TODO: implement
+        return GeneralInstrumentAy_3_8910::CONTINUE;
+    }
+
     /// @brief Return the mixer byte.
     ///
     /// @param channel the polyphonic channel to return the frequency for
-    /// @returns the 8-bit mixer byte from parameters and CV inputs
+    /// @returns the 6-bit mixer byte from parameters and CV inputs
     ///
     inline uint8_t getMixer(unsigned channel) {
         uint8_t mixerByte = 0;
@@ -208,13 +246,13 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {
-            apu[channel].set_frequency(oscillator, getFrequency(oscillator, channel));
-            apu[channel].set_volume(oscillator, getLevel(oscillator, channel));
+        for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
+            apu[channel].set_frequency(osc, getFrequency(osc, channel));
+            apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
         }
-        apu[channel].set_noise_period(getNoise(channel));
-        apu[channel].set_envelope_period(0b0000001110101011);
-        apu[channel].set_envelope_mode(GeneralInstrumentAy_3_8910::CONTINUE);
+        apu[channel].set_noise_period(getNoisePeriod(channel));
+        apu[channel].set_envelope_period(getEnvelopePeriod(channel));
+        apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
     }
 

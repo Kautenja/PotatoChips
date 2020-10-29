@@ -21,6 +21,7 @@
 // TODO: discrete noise frequency control
 // TODO: oscillator sync? (not feature of chip, but can be done)
 // TODO: replace noise switches with single switch between noise and tone
+// TODO: envelope generator trigger / LFO reset
 
 // ---------------------------------------------------------------------------
 // MARK: Module

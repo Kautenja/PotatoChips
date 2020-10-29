@@ -34,9 +34,27 @@ class GeneralInstrumentAy_3_8910 {
 
     /// the indexes of the channels on the chip
     enum Channel {
-        PULSE0,
-        PULSE1,
-        PULSE2
+        PULSE0 = 0,
+        PULSE1 = 1,
+        PULSE2 = 2
+    };
+
+    /// symbolic flags for enabling channels using the mixer register
+    enum ChannelEnable {
+        /// turn on all channels
+        ALL_ON      = 0b00000000,
+        /// turn off channel A tone
+        TONE_A_OFF  = 0b00000001,
+        /// turn off channel B tone
+        TONE_B_OFF  = 0b00000010,
+        /// turn off channel C tone
+        TONE_C_OFF  = 0b00000100,
+        /// turn off channel A noise
+        NOISE_A_OFF = 0b00001000,
+        /// turn off channel B noise
+        NOISE_B_OFF = 0b00010000,
+        /// turn off channel C noise
+        NOISE_C_OFF = 0b00100000,
     };
 
     /// symbolic flags for the ENVELOPE_SHAPE register
@@ -52,9 +70,11 @@ class GeneralInstrumentAy_3_8910 {
     };
 
  private:
+    // TODO: remove
     /// the number of registers on the chip
     static constexpr uint16_t NUM_REGISTERS = 16;
 
+    // TODO: remove
     /// the registers on the chip
     enum Register : uint16_t {
         /// the low 8 bits of the 12 bit frequency for channel A
@@ -85,29 +105,7 @@ class GeneralInstrumentAy_3_8910 {
         PERIOD_ENVELOPE_HI,
         /// the shape of the envelope
         ENVELOPE_SHAPE,
-        // IO_PORT_A,  // unused
-        // IO_PORT_B   // unused
     };
-
-    // /// symbolic flags for enabling channels using the mixer register
-    // enum ChannelEnableFlag {
-    //     /// turn on all channels
-    //     CHANNEL_ENABLE_ALL_ON      = 0b00000000,
-    //     /// turn off channel A tone
-    //     CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
-    //     /// turn off channel B tone
-    //     CHANNEL_ENABLE_TONE_B_OFF  = 0b00000010,
-    //     /// turn off channel C tone
-    //     CHANNEL_ENABLE_TONE_C_OFF  = 0b00000100,
-    //     /// turn off channel A noise
-    //     CHANNEL_ENABLE_NOISE_A_OFF = 0b00001000,
-    //     /// turn off channel B noise
-    //     CHANNEL_ENABLE_NOISE_B_OFF = 0b00010000,
-    //     /// turn off channel C noise
-    //     CHANNEL_ENABLE_NOISE_C_OFF = 0b00100000,
-    //     // CHANNEL_ENABLE_PORT_A_OFF  = 0b01000000,  // unused
-    //     // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
-    // };
 
     /// the range of the amplifier on the chip
     static constexpr uint8_t AMP_RANGE = 255;
@@ -146,6 +144,7 @@ class GeneralInstrumentAy_3_8910 {
     /// the tone off flag bit
     static constexpr int TONE_OFF     = 0x01;
 
+    // TODO: remove
     /// the registers on the chip
     uint8_t regs[NUM_REGISTERS];
 

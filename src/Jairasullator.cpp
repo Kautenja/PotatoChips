@@ -32,11 +32,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// triggers for handling inputs to the tone and noise enable switches
     rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
-    /// triggers for handling gate inputs to the sync port
-    rack::dsp::SchmittTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT];
-
-    /// triggers for handling gate inputs to the envelope trigger / sync port
-    rack::dsp::SchmittTrigger envSyncTrigger;
+    /// triggers for handling inputs to the sync ports and the envelope trig
+    rack::dsp::SchmittTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -273,28 +270,45 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         return mixerByte;
     }
 
+    /// @brief Return the hard sync boolean for given index.
+    ///
+    /// @param index the index of the oscillator to get the hard sync flag of
+    /// @param channel the polyphonic channel of the engine to use
+    /// @returns true if the voice with given index is being hard synced by an
+    /// external input on this frame
+    /// @details
+    /// Index 3 returns the value of the envelope generators sync input
+    ///
+    inline bool getHardSync(unsigned index, unsigned channel) {
+        // get the normalled input from the last voice's port
+        const auto normal = inputs[INPUT_RESET + index - 1].getVoltage(channel);
+        // get the input to this port, defaulting to the normalled input
+        const auto sync = inputs[INPUT_RESET + index].getNormalVoltage(normal, channel);
+        // reset the voltage on this port for the next voice to normal to
+        inputs[INPUT_RESET + index].setVoltage(sync, channel);
+        // process the sync trigger and return the result
+        return syncTriggers[index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        // oscillators (processed in order for port normalling)
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             apu[channel].set_frequency(osc, getFrequency(osc, channel));
             apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
-            // get the input to the oscillator sync port
-            const auto sync = inputs[INPUT_RESET + osc].getVoltage(channel);
-            if (syncTriggers[osc].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
-                apu[channel].reset_phase(osc);
+            if (getHardSync(osc, channel)) apu[channel].reset_phase(osc);
         }
-        apu[channel].set_noise_period(getNoisePeriod(channel));
-        apu[channel].set_envelope_period(getEnvelopePeriod(channel));
+        // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
-        // get the input to the envelope sync port
-        const auto envSync = inputs[INPUT_ENVELOPE_RESET].getVoltage(channel);
-        if (envSyncTrigger.process(rescale(envSync, 0.f, 2.f, 0.f, 1.f)))
-            apu[channel].reset_envelope_phase();
+        if (getHardSync(3, channel)) apu[channel].reset_envelope_phase();
+        // noise
+        apu[channel].set_noise_period(getNoisePeriod(channel));
+        apu[channel].set_envelope_period(getEnvelopePeriod(channel));
     }
 
     /// @brief Process the lights on the module.

@@ -17,6 +17,7 @@
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
+// TODO: setup INPUT_ENVELOPE
 // TODO: context menu for switching between envelope modes
 // TODO: document both modes off (4-bit dac based on amp port!)
 // TODO: -   freq knob to input gain for DAC mode

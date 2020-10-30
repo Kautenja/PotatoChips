@@ -174,6 +174,9 @@ class GeneralInstrumentAy_3_8910 {
             period = PERIOD_FACTOR;
             delay = last_amp = phase = 0;
         }
+
+        /// @brief Reset the oscillator's phase to 0.
+        inline void reset_phase() { phase = 0; }
     } oscs[OSC_COUNT];
 
     /// The noise generator on the chip
@@ -207,6 +210,9 @@ class GeneralInstrumentAy_3_8910 {
             wave = modes[2];
             pos = -48;
         }
+
+        /// @brief Reset the oscillator's phase to 0.
+        inline void reset_phase() { pos = -48; }
     } env;
 
     /// Run the oscillators until the given end time.
@@ -529,6 +535,9 @@ class GeneralInstrumentAy_3_8910 {
         }
     }
 
+    /// @brief Reset the phase of the envelope generator.
+    inline void reset_envelope_phase() { env.reset_phase(); }
+
     /// @brief Set the envelope period to a new value.
     ///
     /// @param value the period with which the envelope should repeat
@@ -595,6 +604,9 @@ class GeneralInstrumentAy_3_8910 {
         if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
         osc.period = period;
     }
+
+    /// @brief Reset the phase of the envelope generator.
+    inline void reset_phase(unsigned index) { oscs[index].reset_phase(); }
 
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.

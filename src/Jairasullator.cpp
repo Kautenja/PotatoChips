@@ -35,6 +35,12 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// triggers for handling inputs to the tone and noise enable switches
     rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
+    /// triggers for handling gate inputs to the sync port
+    rack::dsp::BooleanTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT];
+
+    /// triggers for handling gate inputs to the envelope trigger / sync port
+    rack::dsp::BooleanTrigger envSyncTrigger;
+
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -63,6 +69,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         ENUMS(INPUT_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_NOISE_PERIOD,
         INPUT_ENVELOPE_MODE,
+        ENUMS(INPUT_RESET, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        INPUT_ENVELOPE_RESET,
         NUM_INPUTS
     };
 
@@ -277,11 +285,19 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             apu[channel].set_frequency(osc, getFrequency(osc, channel));
             apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
+            // get the input to the oscillator sync port
+            const auto sync = inputs[INPUT_RESET + osc].getVoltage(channel);
+            if (syncTriggers[osc].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
+                apu[channel].reset_phase(osc);
         }
         apu[channel].set_noise_period(getNoisePeriod(channel));
         apu[channel].set_envelope_period(getEnvelopePeriod(channel));
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
+        // get the input to the envelope sync port
+        const auto envSync = inputs[INPUT_ENVELOPE_RESET].getVoltage(channel);
+        if (envSyncTrigger.process(rescale(envSync, 0.f, 2.f, 0.f, 1.f)))
+            apu[channel].reset_envelope_phase();
     }
 
     /// @brief Process the lights on the module.
@@ -337,6 +353,8 @@ struct JairasullatorWidget : ModuleWidget {
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Jairasullator::LIGHTS_LEVEL + 3 * i));
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
+            // Hard Sync
+            addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 350), module, Jairasullator::INPUT_RESET + i));
             // Output Modes
             addParam(createParam<CKSS>(        Vec(120, 20  + i * 111), module, Jairasullator::PARAM_TONE     + i));
             addInput(createInput<PJ301MPort>(  Vec(120, 40  + i * 111), module, Jairasullator::INPUT_TONE     + i));
@@ -357,6 +375,8 @@ struct JairasullatorWidget : ModuleWidget {
         // Envelope / LFO Frequency Mod
         addInput(createInput<PJ301MPort>(Vec(160, 190), module, Jairasullator::INPUT_ENVELOPE_FM));
         addParam(createParam<Trimpot>(Vec(200, 190), module, Jairasullator::PARAM_ENVELOPE_FM));
+        // Envelope Reset / Hard Sync
+        addInput(createInput<PJ301MPort>(Vec(180, 170), module, Jairasullator::INPUT_ENVELOPE_RESET));
     }
 };
 

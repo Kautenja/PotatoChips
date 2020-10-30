@@ -117,6 +117,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         envMode = 0;
     }
 
+    inline void onRandomize() override { envMode = random::u32() % 7; }
+
     /// @brief Return a JSON representation of this module's state
     ///
     /// @returns a new JSON object with this object's serialized state data

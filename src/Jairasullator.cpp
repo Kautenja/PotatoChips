@@ -117,6 +117,25 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         envMode = 0;
     }
 
+    /// @brief Return a JSON representation of this module's state
+    ///
+    /// @returns a new JSON object with this object's serialized state data
+    ///
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_object_set_new(rootJ, "envMode", json_integer(envMode));
+        return rootJ;
+    }
+
+    /// @brief Return the object to the given serialized state.
+    ///
+    /// @returns a JSON object with object serialized state data to restore
+    ///
+    void dataFromJson(json_t* rootJ) override {
+        json_t* envModeObject = json_object_get(rootJ, "envMode");
+        if (envModeObject) envMode = json_integer_value(envModeObject);
+    }
+
  protected:
     /// @brief Return the frequency for the given channel.
     ///

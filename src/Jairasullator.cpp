@@ -45,7 +45,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         ENUMS(PARAM_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_NOISE_PERIOD,
-        PARAM_ENVELOPE_PERIOD,
+        PARAM_ENVELOPE_FREQ,
+        PARAM_ENVELOPE_FM,
         PARAM_ENVELOPE_MODE,
         NUM_PARAMS
     };
@@ -59,7 +60,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         ENUMS(INPUT_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_NOISE_PERIOD,
-        INPUT_ENVELOPE_PERIOD,
+        INPUT_ENVELOPE_VOCT,
+        INPUT_ENVELOPE_FM,
         INPUT_ENVELOPE_MODE,
         NUM_INPUTS
     };
@@ -91,7 +93,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_ENVELOPE + oscillator,  0,     1,    0,   name + " Envelope Enabled");
         }
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
-        configParam(PARAM_ENVELOPE_PERIOD, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
+        configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
+        configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
         configParam(PARAM_ENVELOPE_MODE, 0, 15, 8, "Envelope Mode");
         // TODO: change amplifier level to accept audio rate. maybe condition
         // on when dac mode is active (i.e., neither tone nor noise are active).
@@ -207,24 +210,26 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // the clock division of the oscillator relative to the CPU
         static constexpr auto CLOCK_DIVISION = 2 * 256;
         // get the pitch from the parameter and control voltage
-        float pitch = params[PARAM_ENVELOPE_PERIOD].getValue();
+        float pitch = params[PARAM_ENVELOPE_FREQ].getValue();
 
-        // // get the normalled input voltage based on the voice index. Voice 0
-        // // has no prior voltage, and is thus normalled to 0V. Reset this port's
-        // // voltage afterward to propagate the normalling chain forward.
-        // const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
-        // const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
-        // inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
-        // pitch += pitchCV;
-        // // get the attenuverter parameter value
-        // const auto att = params[PARAM_FM + oscillator].getValue();
-        // // get the normalled input voltage based on the voice index. Voice 0
-        // // has no prior voltage, and is thus normalled to 5V. Reset this port's
-        // // voltage afterward to propagate the normalling chain forward.
-        // const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
-        // const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
-        // inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
-        // pitch += att * mod / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        // const auto normalPitch = inputs[INPUT_ENVELOPE_VOCT - 1].getVoltage(channel) : 0.f;
+        // const auto pitchCV = inputs[INPUT_ENVELOPE_VOCT].getNormalVoltage(normalPitch, channel);
+        const auto pitchCV = inputs[INPUT_ENVELOPE_VOCT].getVoltage(channel);
+        // inputs[INPUT_ENVELOPE_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_ENVELOPE_FM].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        // const auto normalMod = inputs[PARAM_ENVELOPE_FM - 1].getVoltage(channel) : 5.f;
+        // const auto mod = inputs[PARAM_ENVELOPE_FM].getNormalVoltage(normalMod, channel);
+        const auto mod = inputs[PARAM_ENVELOPE_FM].getNormalVoltage(5.f, channel);
+        // inputs[PARAM_ENVELOPE_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
 
         // convert the pitch to frequency based on standard exponential scale
         float freq = 1 * powf(2.0, pitch);
@@ -339,19 +344,25 @@ struct JairasullatorWidget : ModuleWidget {
             // Output
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
             // Output Modes
-            addParam(createParam<CKSS>(        Vec(124, 29  + i * 111), module, Jairasullator::PARAM_TONE     + i));
-            addInput(createInput<PJ301MPort>(  Vec(127, 53  + i * 111), module, Jairasullator::INPUT_TONE     + i));
-            addParam(createParam<CKSS>(        Vec(118, 105 + i * 111), module, Jairasullator::PARAM_NOISE    + i));
-            addInput(createInput<PJ301MPort>(  Vec(155, 65  + i * 111), module, Jairasullator::INPUT_NOISE    + i));
+            addParam(createParam<CKSS>(        Vec(120, 20  + i * 111), module, Jairasullator::PARAM_TONE     + i));
+            addInput(createInput<PJ301MPort>(  Vec(120, 40  + i * 111), module, Jairasullator::INPUT_TONE     + i));
+            addParam(createParam<CKSS>(        Vec(120, 80  + i * 111), module, Jairasullator::PARAM_NOISE    + i));
+            addInput(createInput<PJ301MPort>(  Vec(120, 100 + i * 111), module, Jairasullator::INPUT_NOISE    + i));
             // Envelope Enables
             addParam(createParam<CKSS>(Vec(205, 110 + i * 111), module, Jairasullator::PARAM_ENVELOPE + i));
         }
         // Noise Period
-        addInput(createInput<PJ301MPort>(Vec(180, 40), module, Jairasullator::INPUT_NOISE_PERIOD));
-        addParam(createSnapParam<Trimpot>(Vec(200, 40), module, Jairasullator::PARAM_NOISE_PERIOD));
-        // Envelope Period & Mode
-        addParam(createParam<Trimpot>(Vec(200, 60), module, Jairasullator::PARAM_ENVELOPE_PERIOD));
-        addParam(createSnapParam<Trimpot>(Vec(200, 80), module, Jairasullator::PARAM_ENVELOPE_MODE));
+        addInput(createInput<PJ301MPort>(Vec(180, 20), module, Jairasullator::INPUT_NOISE_PERIOD));
+        addParam(createSnapParam<Trimpot>(Vec(200, 20), module, Jairasullator::PARAM_NOISE_PERIOD));
+        // Envelope Mode
+        addInput(createInput<PJ301MPort>(Vec(180, 60), module, Jairasullator::INPUT_ENVELOPE_MODE));
+        addParam(createSnapParam<Trimpot>(Vec(200, 60), module, Jairasullator::PARAM_ENVELOPE_MODE));
+        // Envelope / LFO Frequency
+        addInput(createInput<PJ301MPort>(Vec(160, 150), module, Jairasullator::INPUT_ENVELOPE_VOCT));
+        addParam(createParam<Trimpot>(Vec(200, 150), module, Jairasullator::PARAM_ENVELOPE_FREQ));
+        // Envelope / LFO Frequency Mod
+        addInput(createInput<PJ301MPort>(Vec(160, 190), module, Jairasullator::INPUT_ENVELOPE_FM));
+        addParam(createParam<Trimpot>(Vec(200, 190), module, Jairasullator::PARAM_ENVELOPE_FM));
     }
 };
 

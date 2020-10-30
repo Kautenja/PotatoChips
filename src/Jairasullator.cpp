@@ -36,10 +36,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling gate inputs to the sync port
-    rack::dsp::BooleanTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT];
+    rack::dsp::SchmittTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling gate inputs to the envelope trigger / sync port
-    rack::dsp::BooleanTrigger envSyncTrigger;
+    rack::dsp::SchmittTrigger envSyncTrigger;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -103,7 +103,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
-        configParam(PARAM_ENVELOPE_MODE, 0, 15, 8, "Envelope Mode");
+        configParam(PARAM_ENVELOPE_MODE, 8, 15, 8, "Envelope Mode");
         // TODO: change amplifier level to accept audio rate. maybe condition
         // on when dac mode is active (i.e., neither tone nor noise are active).
         // this can then be removed

@@ -17,9 +17,6 @@
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
-// TODO: oscillator sync? (not feature of chip, but can be done)
-// TODO: replace noise switches with single switch between noise and tone
-// TODO: envelope generator trigger / LFO reset
 // TODO: document both modes off (4-bit dac based on amp port!)
 // TODO: -   freq knob to input gain for DAC mode
 // TODO: -   mod knob to DC offset for DAC mode

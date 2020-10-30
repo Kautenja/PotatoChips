@@ -221,7 +221,7 @@
         }
       ],
       "leftModuleId": 8,
-      "rightModuleId": 136,
+      "rightModuleId": 138,
       "data": {
         "lissajous": 0,
         "external": 0
@@ -263,7 +263,7 @@
         },
         {
           "id": 3,
-          "value": 5.70849419
+          "value": 0.474003136
         },
         {
           "id": 4,
@@ -271,39 +271,39 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.7741695e-7
         },
         {
           "id": 8,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 9,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 10,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 11,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 12,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 13,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 14,
@@ -323,19 +323,19 @@
         },
         {
           "id": 18,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 19,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 20,
-          "value": 0.0
+          "value": 31.0
         },
         {
           "id": 21,
-          "value": 8.0
+          "value": 9.0
         }
       ],
       "leftModuleId": 5,
@@ -381,7 +381,6 @@
       "version": "1.1.34",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
-      "leftModuleId": 9,
       "data": {
         "frequency_plot": "log",
         "range": 0.0,
@@ -390,6 +389,47 @@
         "quality": "good",
         "window": "kaiser"
       },
+      "pos": [
+        11,
+        2
+      ]
+    },
+    {
+      "id": 138,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "LFO",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 5.92300081
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.5
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 9,
       "pos": [
         39,
         1
@@ -478,12 +518,28 @@
       "color": "#c9b70e"
     },
     {
-      "id": 838,
+      "id": 842,
       "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 16,
       "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 846,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 16,
+      "inputId": 25,
       "color": "#c91847"
+    },
+    {
+      "id": 844,
+      "outputModuleId": 138,
+      "outputId": 3,
+      "inputModuleId": 16,
+      "inputId": 22,
+      "color": "#c9b70e"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.476a49b",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -11,8 +11,8 @@
       "rightModuleId": 11,
       "data": {
         "audio": {
-          "driver": 1,
-          "deviceName": "hw:Sanskrit 6th,0",
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -263,7 +263,7 @@
         },
         {
           "id": 3,
-          "value": 0.474003136
+          "value": -0.424999893
         },
         {
           "id": 4,
@@ -381,7 +381,7 @@
     {
       "id": 136,
       "plugin": "Bogaudio",
-      "version": "1.1.34",
+      "version": "1.1.35",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "data": {
@@ -465,22 +465,6 @@
       "color": "#c91847"
     },
     {
-      "id": 286,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 287,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 305,
       "outputModuleId": 2,
       "outputId": 1,
@@ -543,6 +527,22 @@
       "inputModuleId": 16,
       "inputId": 22,
       "color": "#c9b70e"
+    },
+    {
+      "id": 286,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 287,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

@@ -39,7 +39,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     uint8_t envMode = 0;
 
     /// a trigger for handling presses to the change mode button
-    rack::dsp::SchmittTrigger envModeTigger;
+    rack::dsp::SchmittTrigger envModeTrigger;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -318,6 +318,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             if (getReset(osc, channel)) apu[channel].reset_phase(osc);
         }
         // envelope (processed after oscillators for port normalling)
+        if (envModeTrigger.process(params[PARAM_ENVELOPE_MODE_BUTTON].getValue()))
+            envMode = (envMode + 1) % 8;
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
         if (getReset(3, channel)) apu[channel].reset_envelope_phase();
@@ -343,6 +345,14 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
             // set the blue light to off
             lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+            // set the envelope mode light in RGB order
+            auto deltaTime = args.sampleTime * lightDivider.getDivision();
+            bool red = envMode & 0x4;
+            lights[LIGHTS_ENV_MODE + 0].setSmoothBrightness(red, deltaTime);
+            bool green = envMode & 0x2;
+            lights[LIGHTS_ENV_MODE + 1].setSmoothBrightness(green, deltaTime);
+            bool blue = envMode & 0x1;
+            lights[LIGHTS_ENV_MODE + 2].setSmoothBrightness(blue, deltaTime);
         }
     }
 };
@@ -396,7 +406,7 @@ struct JairasullatorWidget : ModuleWidget {
         // Envelope / LFO Frequency
         addParam(createParam<Trimpot>(Vec(222, 47), module, Jairasullator::PARAM_ENVELOPE_FREQ));
         addInput(createInput<PJ301MPort>(Vec(220, 86), module, Jairasullator::INPUT_ENVELOPE_VOCT));
-        // Envelope / LFO Frequency Mod
+        // Envelope / LFO Frequency Mod (NOTE: DISABLED)
         // addInput(createInput<PJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_ENVELOPE_FM));
         // addParam(createParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_ENVELOPE_FM));
         // Noise Period
@@ -405,7 +415,6 @@ struct JairasullatorWidget : ModuleWidget {
         // Envelope Mode
         addParam(createSnapParam<Trimpot>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE));
         // addInput(createInput<PJ301MPort>(Vec(220, 60), module, Jairasullator::INPUT_ENVELOPE_MODE));
-
         addParam(createParam<TL1105>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE_BUTTON));
         addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(227, 272), module, Jairasullator::LIGHTS_ENV_MODE));
         // Envelope Reset / Hard Sync

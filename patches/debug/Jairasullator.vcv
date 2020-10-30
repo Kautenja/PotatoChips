@@ -336,6 +336,10 @@
         {
           "id": 21,
           "value": 9.0
+        },
+        {
+          "id": 22,
+          "value": 0.0
         }
       ],
       "leftModuleId": 5,

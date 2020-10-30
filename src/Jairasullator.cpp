@@ -279,7 +279,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @details
     /// Index 3 returns the value of the envelope generators sync input
     ///
-    inline bool getHardSync(unsigned index, unsigned channel) {
+    inline bool getReset(unsigned index, unsigned channel) {
         // get the normalled input from the last voice's port
         const auto normal = inputs[INPUT_RESET + index - 1].getVoltage(channel);
         // get the input to this port, defaulting to the normalled input
@@ -300,12 +300,12 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             apu[channel].set_frequency(osc, getFrequency(osc, channel));
             apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
-            if (getHardSync(osc, channel)) apu[channel].reset_phase(osc);
+            if (getReset(osc, channel)) apu[channel].reset_phase(osc);
         }
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
-        if (getHardSync(3, channel)) apu[channel].reset_envelope_phase();
+        if (getReset(3, channel)) apu[channel].reset_envelope_phase();
         // noise
         apu[channel].set_noise_period(getNoisePeriod(channel));
         apu[channel].set_envelope_period(getEnvelopePeriod(channel));

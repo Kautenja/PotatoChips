@@ -54,7 +54,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         ENUMS(PARAM_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_NOISE_PERIOD,
         PARAM_ENVELOPE_MODE,
-        PARAM_ENVELOPE_MODE_BUTTON,
         NUM_PARAMS
     };
 
@@ -105,8 +104,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
-        configParam(PARAM_ENVELOPE_MODE, 8, 15, 8, "Envelope Mode");
-        configParam(PARAM_ENVELOPE_MODE_BUTTON, 0, 1, 0, "Envelope Mode");
+        configParam(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
         // TODO: change amplifier level to accept audio rate. maybe condition
         // on when dac mode is active (i.e., neither tone nor noise are active).
         // this can then be removed
@@ -256,7 +254,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit envelope mode from parameters and CV inputs
     ///
     inline uint8_t getEnvelopeMode(unsigned channel) {
-        return params[PARAM_ENVELOPE_MODE].getValue();
+        if (envModeTrigger.process(params[PARAM_ENVELOPE_MODE].getValue()))
+            envMode = (envMode + 1) % 8;
+        return 0x8 | envMode;
     }
 
     /// @brief Return the mixer byte.
@@ -318,8 +318,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             if (getReset(osc, channel)) apu[channel].reset_phase(osc);
         }
         // envelope (processed after oscillators for port normalling)
-        if (envModeTrigger.process(params[PARAM_ENVELOPE_MODE_BUTTON].getValue()))
-            envMode = (envMode + 1) % 8;
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         apu[channel].set_channel_enables(getMixer(channel));
         if (getReset(3, channel)) apu[channel].reset_envelope_phase();
@@ -413,9 +411,7 @@ struct JairasullatorWidget : ModuleWidget {
         addInput(createInput<PJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_NOISE_PERIOD));
         addParam(createSnapParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_NOISE_PERIOD));
         // Envelope Mode
-        addParam(createSnapParam<Trimpot>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE));
-        // addInput(createInput<PJ301MPort>(Vec(220, 60), module, Jairasullator::INPUT_ENVELOPE_MODE));
-        addParam(createParam<TL1105>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE_BUTTON));
+        addParam(createParam<TL1105>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE));
         addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(227, 272), module, Jairasullator::LIGHTS_ENV_MODE));
         // Envelope Reset / Hard Sync
         addInput(createInput<PJ301MPort>(Vec(220, 316), module, Jairasullator::INPUT_ENVELOPE_RESET));

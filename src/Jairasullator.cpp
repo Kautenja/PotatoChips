@@ -17,7 +17,6 @@
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
-// TODO: envelope control
 // TODO: oscillator sync? (not feature of chip, but can be done)
 // TODO: replace noise switches with single switch between noise and tone
 // TODO: envelope generator trigger / LFO reset

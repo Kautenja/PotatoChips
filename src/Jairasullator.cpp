@@ -18,7 +18,6 @@
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
 // TODO: envelope control
-// TODO: discrete noise frequency control
 // TODO: oscillator sync? (not feature of chip, but can be done)
 // TODO: replace noise switches with single switch between noise and tone
 // TODO: envelope generator trigger / LFO reset
@@ -79,7 +78,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     };
 
     /// @brief Initialize a new Jairasullator module.
-    Jairasullator() : ChipModule<GeneralInstrumentAy_3_8910>() {
+    Jairasullator() : ChipModule<GeneralInstrumentAy_3_8910>(2.5) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned oscillator = 0; oscillator < GeneralInstrumentAy_3_8910::OSC_COUNT; oscillator++) {

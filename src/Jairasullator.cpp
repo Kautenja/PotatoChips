@@ -39,14 +39,14 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        PARAM_ENVELOPE_FREQ,
         ENUMS(PARAM_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        PARAM_ENVELOPE_FM,
         ENUMS(PARAM_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_NOISE_PERIOD,
-        PARAM_ENVELOPE_FREQ,
-        PARAM_ENVELOPE_FM,
         PARAM_ENVELOPE_MODE,
         NUM_PARAMS
     };
@@ -54,14 +54,14 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        INPUT_ENVELOPE_VOCT,
         ENUMS(INPUT_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        INPUT_ENVELOPE_FM,
         ENUMS(INPUT_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_ENVELOPE, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_NOISE_PERIOD,
-        INPUT_ENVELOPE_VOCT,
-        INPUT_ENVELOPE_FM,
         INPUT_ENVELOPE_MODE,
         NUM_INPUTS
     };
@@ -211,26 +211,20 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         static constexpr auto CLOCK_DIVISION = 2 * 256;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_ENVELOPE_FREQ].getValue();
-
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 0V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        // const auto normalPitch = inputs[INPUT_ENVELOPE_VOCT - 1].getVoltage(channel) : 0.f;
-        // const auto pitchCV = inputs[INPUT_ENVELOPE_VOCT].getNormalVoltage(normalPitch, channel);
-        const auto pitchCV = inputs[INPUT_ENVELOPE_VOCT].getVoltage(channel);
-        // inputs[INPUT_ENVELOPE_VOCT + oscillator].setVoltage(pitchCV, channel);
+        const auto normalPitch = inputs[INPUT_ENVELOPE_VOCT - 1].getVoltage(channel);
+        const auto pitchCV = inputs[INPUT_ENVELOPE_VOCT].getNormalVoltage(normalPitch, channel);
         pitch += pitchCV;
         // get the attenuverter parameter value
         const auto att = params[PARAM_ENVELOPE_FM].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 5V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        // const auto normalMod = inputs[PARAM_ENVELOPE_FM - 1].getVoltage(channel) : 5.f;
-        // const auto mod = inputs[PARAM_ENVELOPE_FM].getNormalVoltage(normalMod, channel);
-        const auto mod = inputs[PARAM_ENVELOPE_FM].getNormalVoltage(5.f, channel);
-        // inputs[PARAM_ENVELOPE_FM + oscillator].setVoltage(mod, channel);
+        const auto normalMod = inputs[INPUT_ENVELOPE_FM - 1].getVoltage(channel);
+        const auto mod = inputs[INPUT_ENVELOPE_FM].getNormalVoltage(normalMod, channel);
         pitch += att * mod / 5.f;
-
         // convert the pitch to frequency based on standard exponential scale
         float freq = 1 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);

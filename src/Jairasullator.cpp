@@ -344,7 +344,7 @@ struct JairasullatorWidget : ModuleWidget {
     ///
     explicit JairasullatorWidget(Jairasullator *module) {
         setModule(module);
-        static constexpr auto panel = "res/AY_3_8910.svg";
+        static constexpr auto panel = "res/Jairasullator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));

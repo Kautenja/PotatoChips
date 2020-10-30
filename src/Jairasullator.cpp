@@ -342,6 +342,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        apu[channel].set_channel_enables(getMixer(channel));
         // oscillators (processed in order for port normalling)
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             apu[channel].set_frequency(osc, getFrequency(osc, channel));
@@ -350,7 +351,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         }
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
-        apu[channel].set_channel_enables(getMixer(channel));
         if (getReset(3, channel)) apu[channel].reset_envelope_phase();
         // noise
         apu[channel].set_noise_period(getNoisePeriod(channel));

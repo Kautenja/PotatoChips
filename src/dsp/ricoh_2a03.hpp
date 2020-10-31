@@ -24,6 +24,7 @@
 /// @details
 /// Emulation inaccuracies:
 /// -   the phase of the pulse generators ARE NOT reset when changing period
+/// -   the DMC channel has been removed
 ///
 class Ricoh2A03 {
  public:

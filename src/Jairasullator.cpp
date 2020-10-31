@@ -17,7 +17,6 @@
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
-// TODO: polarizer and amplifier for DAC mode inputs
 // TODO: draw normals on panel
 // TODO: context menu for switching between envelope modes
 // TODO: document both modes off (4-bit dac based on amp port!)
@@ -187,18 +186,26 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit level value in an 8-bit container
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
-        if (apu[channel].is_dac_enabled(oscillator)) {
-            // TODO: amplify input and add offset control
-            // TODO: use VOCT as offset control
-            // TODO: use mod as scale/amplifier controlg
-        }
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 10V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
         const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
-        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        if (apu[channel].is_dac_enabled(oscillator)) {
+            // NOTE: voltage will be normalled by a previous call to getFrequency
+            // get the offset control from the frequency input
+            auto offset = rescale(params[PARAM_FREQ + oscillator].getValue(), -5.f, 5.f, 0.f, 5.f);
+            offset += inputs[INPUT_VOCT + oscillator].getVoltage(channel) / 2.f;
+            // get the scale control from the FM input
+            auto scale = rescale(params[PARAM_FM + oscillator].getValue(), -1.f, 1.f, 0.f, 2.f);
+            scale += -1 + inputs[INPUT_FM + oscillator].getVoltage(channel) / 5.f;
+            // apply the scaling and offset to the voltage before normalling
+            voltage = scale * (offset + voltage);
+        }
+        // normal the voltage forward in the chain by resetting the voltage
+        // for this oscillator's level input
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
@@ -363,6 +370,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // oscillators (processed in order for port normalling)
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             if (getReset(osc, channel)) apu[channel].reset_phase(osc);
+            // get frequency before level to normal voltage for the bias and
+            // amplifier feature of the DAC mode
             apu[channel].set_frequency(osc, getFrequency(osc, channel));
             apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
         }

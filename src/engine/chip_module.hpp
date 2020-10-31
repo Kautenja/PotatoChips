@@ -112,9 +112,8 @@ struct ChipModule : rack::engine::Module {
         cvDivider.reset();
         lightDivider.reset();
         // reset the audio processing unit for all poly channels
-        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
+        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
             apu[channel].reset();
-        }
     }
 
     /// @brief Process a sample.
@@ -135,9 +134,10 @@ struct ChipModule : rack::engine::Module {
         for (unsigned channel = 0; channel < channels; channel++)
             processAudio(args, channel);
         // process the CV inputs to the chip using the overridden function
-        if (cvDivider.process())
+        if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);
+        }
         // process audio samples on the chip engine.
         for (unsigned channel = 0; channel < channels; channel++) {
             // end the frame on the engine

@@ -187,6 +187,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit level value in an 8-bit container
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
+        if (apu[channel].is_dac_enabled(oscillator)) {
+            // TODO: amplify input and add offset control
+        }
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0

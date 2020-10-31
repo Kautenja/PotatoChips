@@ -8,7 +8,6 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 2,
-      "rightModuleId": 11,
       "data": {
         "audio": {
           "driver": 5,
@@ -232,18 +231,6 @@
       ]
     },
     {
-      "id": 11,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "leftModuleId": 1,
-      "pos": [
-        53,
-        0
-      ]
-    },
-    {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.0",
@@ -251,7 +238,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": -0.670000315
         },
         {
           "id": 1,
@@ -465,14 +452,6 @@
       "color": "#c91847"
     },
     {
-      "id": 305,
-      "outputModuleId": 2,
-      "outputId": 1,
-      "inputModuleId": 11,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 830,
       "outputModuleId": 5,
       "outputId": 1,
@@ -519,14 +498,6 @@
       "inputModuleId": 16,
       "inputId": 25,
       "color": "#c91847"
-    },
-    {
-      "id": 844,
-      "outputModuleId": 138,
-      "outputId": 3,
-      "inputModuleId": 16,
-      "inputId": 22,
-      "color": "#c9b70e"
     },
     {
       "id": 286,

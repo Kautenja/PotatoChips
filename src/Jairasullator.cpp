@@ -189,6 +189,8 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
         if (apu[channel].is_dac_enabled(oscillator)) {
             // TODO: amplify input and add offset control
+            // TODO: use VOCT as offset control
+            // TODO: use mod as scale/amplifier controlg
         }
         // get the level from the parameter knob
         auto level = params[PARAM_LEVEL + oscillator].getValue();

@@ -47,6 +47,13 @@ struct ChipModule : rack::engine::Module {
     /// whether the outputs should be normalled together into a mix
     bool normal_outputs = false;
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    virtual void processAudio(const rack::engine::Module::ProcessArgs &args, unsigned channel) { };
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -119,6 +126,8 @@ struct ChipModule : rack::engine::Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process the CV inputs to the chip using the overridden function
+        for (unsigned channel = 0; channel < channels; channel++)
+            processAudio(args, channel);
         if (cvDivider.process())
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);

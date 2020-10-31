@@ -109,10 +109,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
         configParam(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
-        // TODO: change amplifier level to accept audio rate. maybe condition
-        // on when dac mode is active (i.e., neither tone nor noise are active).
-        // this can then be removed
-        cvDivider.setDivision(1);
     }
 
     /// @brief Respond to the module being reset by the engine.
@@ -343,18 +339,21 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
         apu[channel].set_channel_enables(getMixer(channel));
-        // oscillators (processed in order for port normalling)
-        for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
-            apu[channel].set_frequency(osc, getFrequency(osc, channel));
-            apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
-            if (getReset(osc, channel)) apu[channel].reset_phase(osc);
-        }
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
-        if (getReset(3, channel)) apu[channel].reset_envelope_phase();
         // noise
         apu[channel].set_noise_period(getNoisePeriod(channel));
         apu[channel].set_envelope_period(getEnvelopePeriod(channel));
+    }
+
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+        // oscillators (processed in order for port normalling)
+        for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
+            if (getReset(osc, channel)) apu[channel].reset_phase(osc);
+            apu[channel].set_frequency(osc, getFrequency(osc, channel));
+            apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
+        }
+        if (getReset(3, channel)) apu[channel].reset_envelope_phase();
     }
 
     /// @brief Process the lights on the module.

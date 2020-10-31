@@ -567,6 +567,30 @@ class GeneralInstrumentAy_3_8910 {
         regs[CHANNEL_ENABLES] = 0x3f & value;
     }
 
+    /// @brief Return true if the tone is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if tone is enabled
+    ///
+    inline bool is_tone_enabled(unsigned osc_index) const {
+        return !(regs[CHANNEL_ENABLES] & (0b00000001 << osc_index));
+    }
+
+    /// @brief Return true if the noise is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if noise is enabled
+    ///
+    inline bool is_noise_enabled(unsigned osc_index) const {
+        return !(regs[CHANNEL_ENABLES] & (0b00001000 << osc_index));
+    }
+
+    /// @brief Return true if the DAC is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if the DAC is enabled
+    ///
+    inline bool is_dac_enabled(unsigned osc_index) const {
+        return !is_tone_enabled(osc_index) && !is_noise_enabled(osc_index);
+    }
+
     /// @brief Set the oscillator volume to a new value.
     ///
     /// @param osc_index the index of the oscillator to set the volume of

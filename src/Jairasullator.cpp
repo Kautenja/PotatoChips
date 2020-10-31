@@ -18,7 +18,6 @@
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
 // TODO: draw normals on panel
-// TODO: context menu for switching between envelope modes
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -36,22 +35,22 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// triggers for handling inputs to the sync ports and the envelope trig
     rack::dsp::SchmittTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
-    /// the mode the envelope generator is in
-    uint8_t envMode = 0;
-
     /// a trigger for handling presses to the change mode button
     rack::dsp::SchmittTrigger envModeTrigger;
 
  public:
+    /// the mode the envelope generator is in
+    uint8_t envMode = 0;
+
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_FREQ,        GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_ENVELOPE_FREQ,
-        ENUMS(PARAM_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_FM,          GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_ENVELOPE_FM,
-        ENUMS(PARAM_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(PARAM_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_LEVEL,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_TONE,        GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(PARAM_NOISE,       GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(PARAM_ENVELOPE_ON, GeneralInstrumentAy_3_8910::OSC_COUNT),
         PARAM_NOISE_PERIOD,
         PARAM_ENVELOPE_MODE,
@@ -60,17 +59,17 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,     GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_VOCT,        GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_ENVELOPE_VOCT,
-        ENUMS(INPUT_FM,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_FM,          GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_ENVELOPE_FM,
-        ENUMS(INPUT_LEVEL,    GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_TONE,     GeneralInstrumentAy_3_8910::OSC_COUNT),
-        ENUMS(INPUT_NOISE,    GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_LEVEL,       GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_TONE,        GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_NOISE,       GeneralInstrumentAy_3_8910::OSC_COUNT),
         ENUMS(INPUT_ENVELOPE_ON, GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_NOISE_PERIOD,
         INPUT_ENVELOPE_MODE,
-        ENUMS(INPUT_RESET, GeneralInstrumentAy_3_8910::OSC_COUNT),
+        ENUMS(INPUT_RESET,       GeneralInstrumentAy_3_8910::OSC_COUNT),
         INPUT_ENVELOPE_RESET,
         NUM_INPUTS
     };
@@ -479,6 +478,48 @@ struct JairasullatorWidget : ModuleWidget {
         // Envelope Reset / Hard Sync
         addInput(createInput<PJ301MPort>(Vec(220, 316), module, Jairasullator::INPUT_ENVELOPE_RESET));
     }
+
+    void appendContextMenu(Menu* menu) override {
+        // get a pointer to the module
+        Jairasullator* const module = dynamic_cast<Jairasullator*>(this->module);
+
+        /// a structure for holding changes to the model items
+        struct EnvelopeModeItem : MenuItem {
+            /// the module to update
+            Jairasullator* module;
+
+            /// the currently selected envelope mode
+            int envMode;
+
+            /// Response to an action update to this item
+            void onAction(const event::Action& e) override {
+                module->envMode = envMode;
+            }
+        };
+
+        // string representations of the envelope modes
+        static const std::string LABELS[8] = {
+            "/_____",
+            "\\_____",
+            "/-----",
+            "\\-----",
+            "//////",
+            "\\\\\\\\\\\\",
+            "/\\/\\/\\",
+            "\\/\\/\\/"
+        };
+
+        // add the envelope mode selection item to the menu
+        menu->addChild(new MenuSeparator);
+        menu->addChild(createMenuLabel("Envelope Modes"));
+        for (int i = 0; i < 8; i++) {
+            auto item = createMenuItem<EnvelopeModeItem>(LABELS[i], CHECKMARK(module->envMode == i));
+            item->module = module;
+            item->envMode = i;
+            menu->addChild(item);
+        }
+    }
+
 };
 
 /// the global instance of the model

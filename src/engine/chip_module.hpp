@@ -47,6 +47,9 @@ struct ChipModule : rack::engine::Module {
     /// whether the outputs should be normalled together into a mix
     bool normal_outputs = false;
 
+    // MARK: Processing Life-cycle
+
+    // TODO: make pure virtual
     /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -70,7 +73,10 @@ struct ChipModule : rack::engine::Module {
 
  public:
     /// @brief Initialize a new Chip module.
-    ChipModule(float volume = 3.f) {
+    ///
+    /// @param volume the volume level to set the APUs to
+    ///
+    explicit ChipModule(float volume = 3.f) {
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);

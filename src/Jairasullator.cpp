@@ -292,7 +292,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param channel the polyphonic channel to return the frequency for
     /// @returns the 6-bit mixer byte from parameters and CV inputs
     ///
-    inline uint8_t getMixer(unsigned channel) {
+    inline uint8_t getChannelEnables(unsigned channel) {
         uint8_t mixerByte = 0;
         // iterate over the oscillators to set the mixer tone and noise flags.
         // there is a set of 3 flags for both tone and noise. start with
@@ -354,7 +354,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        apu[channel].set_channel_enables(getMixer(channel));
+        apu[channel].set_channel_enables(getChannelEnables(channel));
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
         // noise

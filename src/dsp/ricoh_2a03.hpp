@@ -21,6 +21,10 @@
 #include "exceptions.hpp"
 
 /// @brief A Ricoh 2A03 sound chip emulator.
+/// @details
+/// Emulation inaccuracies:
+/// -   the phase of the pulse generators ARE NOT reset when changing period
+///
 class Ricoh2A03 {
  public:
     /// the number of oscillators on the chip

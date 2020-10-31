@@ -50,7 +50,7 @@ struct ChipModule : rack::engine::Module {
     /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
+    /// @param channel the polyphonic channel to process the audio inputs to
     ///
     virtual void processAudio(const rack::engine::Module::ProcessArgs &args, unsigned channel) { };
 
@@ -125,9 +125,10 @@ struct ChipModule : rack::engine::Module {
         // set the number of polyphony channels for output ports
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
-        // process the CV inputs to the chip using the overridden function
+        // process the audio inputs to the chip using the overridden function
         for (unsigned channel = 0; channel < channels; channel++)
             processAudio(args, channel);
+        // process the CV inputs to the chip using the overridden function
         if (cvDivider.process())
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);

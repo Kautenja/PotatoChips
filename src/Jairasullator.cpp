@@ -332,6 +332,21 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         return syncTriggers[index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
     }
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the audio inputs to
+    ///
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+        // oscillators (processed in order for port normalling)
+        for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
+            if (getReset(osc, channel)) apu[channel].reset_phase(osc);
+            apu[channel].set_frequency(osc, getFrequency(osc, channel));
+            apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
+        }
+        if (getReset(3, channel)) apu[channel].reset_envelope_phase();
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -344,16 +359,6 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // noise
         apu[channel].set_noise_period(getNoisePeriod(channel));
         apu[channel].set_envelope_period(getEnvelopePeriod(channel));
-    }
-
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
-        // oscillators (processed in order for port normalling)
-        for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
-            if (getReset(osc, channel)) apu[channel].reset_phase(osc);
-            apu[channel].set_frequency(osc, getFrequency(osc, channel));
-            apu[channel].set_voice_volume(osc, getLevel(osc, channel), isEnvelopeOn(osc, channel));
-        }
-        if (getReset(3, channel)) apu[channel].reset_envelope_phase();
     }
 
     /// @brief Process the lights on the module.

@@ -80,8 +80,7 @@ struct ChipModule : rack::engine::Module {
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
-        // set the output buffer for each individual voice on each polyphonic
-        // channel
+        // set the output buffer for each individual voice on each poly channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
             for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
                 apu[channel].set_output(osc, &buffers[channel][osc]);
@@ -100,9 +99,8 @@ struct ChipModule : rack::engine::Module {
         lightDivider.reset();
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++) {
-            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
+            for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++)
                 buffers[channel][osc].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
-            }
         }
     }
 

@@ -289,8 +289,8 @@ struct PotillatorWidget : ModuleWidget {
         }
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
             if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
-            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, Potillator::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, Potillator::INPUT_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(160, 33 + i * (VERT_SEP / 2)), module, Potillator::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(180, 32 + i * (VERT_SEP / 2)), module, Potillator::INPUT_CONTROL + i));
         }
     }
 };

@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        57,
+        53,
         0
       ]
     },
@@ -53,7 +53,7 @@
       "leftModuleId": 7,
       "rightModuleId": 1,
       "pos": [
-        47,
+        43,
         0
       ]
     },
@@ -120,13 +120,14 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 6,
       "rightModuleId": 2,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        34,
+        30,
         0
       ]
     },
@@ -234,6 +235,7 @@
         }
       ],
       "leftModuleId": 13,
+      "rightModuleId": 7,
       "pos": [
         16,
         0

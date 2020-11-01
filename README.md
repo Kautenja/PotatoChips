@@ -362,7 +362,7 @@ See the [Manual][BossFight] for more information about the features of this modu
 <!-- MARK: Mega Tone -->
 <!-- ------------------------------------------------------------ -->
 
-## Mega Tone
+<img alt="Mega Tone Logo" src="manual/MegaTone/img/MegaTone-Logo.svg">
 
 **Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
 processing unit from the [Sega Master System][SegaMasterSystem],

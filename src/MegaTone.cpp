@@ -223,8 +223,7 @@ struct MegaToneWidget : ModuleWidget {
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
             auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, MegaTone::PARAM_FREQ        + i);
-            if (i == TexasInstrumentsSN76489::NOISE)
-                freq->snap = true;
+            freq->snap = i == TexasInstrumentsSN76489::NOISE;
             addParam(freq);
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, MegaTone::INPUT_VOCT        + i));
             // FM / LFSR
@@ -234,9 +233,7 @@ struct MegaToneWidget : ModuleWidget {
             else
                 addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM                  + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i);
-            level->snap = true;
-            addParam(level);
+            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i));
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, MegaTone::INPUT_LEVEL       + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, MegaTone::LIGHTS_LEVEL + 3 * i));
             // Output

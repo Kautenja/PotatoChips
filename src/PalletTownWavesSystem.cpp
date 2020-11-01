@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Nintendo GBS chip emulator module.
+/// A Nintendo GameBoy Sound System chip emulator module.
 struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port

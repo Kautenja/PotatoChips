@@ -55,7 +55,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     };
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHTS_VOLUME, 3),
+        ENUMS(LIGHTS_LEVEL, 3 * Ricoh2A03::OSC_COUNT),
         NUM_LIGHTS
     };
 
@@ -240,7 +240,20 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < Ricoh2A03::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -269,7 +282,7 @@ struct BuzzyBeetleWidget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
                 addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
                 auto y = i == 2 ? 3 : i;
-                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, BuzzyBeetle::PARAM_VOLUME + i, BuzzyBeetle::LIGHTS_VOLUME + i));
+                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, BuzzyBeetle::PARAM_VOLUME + i, BuzzyBeetle::LIGHTS_LEVEL + i));
                 addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, BuzzyBeetle::INPUT_VOLUME + i));
             } else {  // noise
                 addParam(createSnapParam<Rogan2PWhite>( Vec(53, 305), module, BuzzyBeetle::PARAM_FREQ + i));

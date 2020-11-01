@@ -458,11 +458,9 @@ class AtariPOKEY {
     /// @param data the data to write to the given address
     ///
     inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
         // make sure the given address is legal
         if (address < ADDR_START or address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        run_until(time);
         unsigned i = (address ^ 0xD200) >> 1;
         if (i < OSC_COUNT) {
             oscs[i].regs[address & 1] = data;
@@ -473,14 +471,10 @@ class AtariPOKEY {
             oscs[1].delay = 0;
             oscs[2].delay = 0;
             oscs[3].delay = 0;
+        } else if (address == 0xD20F) {
+            // TODO: are polynomials reset in this case?
+            // if ((data & 3) == 0) polym_pos = 0;
         }
-        /*
-        // TODO: are polynomials reset in this case?
-        else if (address == 0xD20F) {
-            if ((data & 3) == 0)
-                polym_pos = 0;
-        }
-        */
     }
 
     /// Run all oscillators up to specified time, end current frame, then

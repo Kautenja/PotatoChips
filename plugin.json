@@ -90,9 +90,9 @@
     },
     {
       "slug": "POKEY",
-      "name": "Troglocillator",
+      "name": "Pot Integrated Oscillator",
       "description": "An emulation of the Atari POKEY chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Troglocilator.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/PotIntegratedOscillator.pdf",
       "tags": [
         "Noise",
         "Oscillator",

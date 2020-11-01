@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Atari POKEY chip emulator module.
-struct Troglocillator : ChipModule<AtariPOKEY> {
+struct PotIntegratedOscillator : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
     dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
@@ -61,7 +61,7 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     };
 
     /// @brief Initialize a new POKEY Chip module.
-    Troglocillator() : ChipModule<AtariPOKEY>() {
+    PotIntegratedOscillator() : ChipModule<AtariPOKEY>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
@@ -254,12 +254,12 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for POKEY.
-struct TroglocillatorWidget : ModuleWidget {
+struct PotIntegratedOscillatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit TroglocillatorWidget(Troglocillator *module) {
+    explicit PotIntegratedOscillatorWidget(PotIntegratedOscillator *module) {
         setModule(module);
         static constexpr auto panel = "res/POKEY.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -272,28 +272,28 @@ struct TroglocillatorWidget : ModuleWidget {
         static constexpr float VERT_SEP = 85.f;
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // oscillator control
             // Frequency
-            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 45),  module, Troglocillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 85),  module, Troglocillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 45),  module, PotIntegratedOscillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 85),  module, PotIntegratedOscillator::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 129), module, Troglocillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 173), module, Troglocillator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 129), module, PotIntegratedOscillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 173), module, PotIntegratedOscillator::PARAM_FM          + i));
             // Noise
-            addParam(createSnapParam<Rogan1PRed>(Vec(139, 25 + i * VERT_SEP), module, Troglocillator::PARAM_NOISE + i));
-            addInput(createInput<PJ301MPort>(    Vec(146, 73 + i * VERT_SEP), module, Troglocillator::INPUT_NOISE + i));
+            addParam(createSnapParam<Rogan1PRed>(Vec(139, 25 + i * VERT_SEP), module, PotIntegratedOscillator::PARAM_NOISE + i));
+            addInput(createInput<PJ301MPort>(    Vec(146, 73 + i * VERT_SEP), module, PotIntegratedOscillator::INPUT_NOISE + i));
             // Level
-            addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 221), module, Troglocillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>( Vec(13 + 35 * i, 263), module, Troglocillator::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Troglocillator::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 221), module, PotIntegratedOscillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>( Vec(13 + 35 * i, 263), module, PotIntegratedOscillator::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, PotIntegratedOscillator::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Troglocillator::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, PotIntegratedOscillator::OUTPUT_OSCILLATOR + i));
         }
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
             if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
-            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, Troglocillator::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, Troglocillator::INPUT_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, PotIntegratedOscillator::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, PotIntegratedOscillator::INPUT_CONTROL + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelTroglocillator = rack::createModel<Troglocillator, TroglocillatorWidget>("POKEY");
+rack::Model *modelPotIntegratedOscillator = rack::createModel<PotIntegratedOscillator, PotIntegratedOscillatorWidget>("POKEY");

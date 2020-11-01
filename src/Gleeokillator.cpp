@@ -132,12 +132,13 @@ struct Gleeokillator : ChipModule<SunSoftFME7> {
         return rack::clamp(level, MIN, MAX);
     }
 
-    /// @brief Process the CV inputs for the given channel.
+
+    /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
+    /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // frequency. there are two frequency registers per voice.
             // shift the index left 1 instead of multiplying by 2
@@ -146,6 +147,16 @@ struct Gleeokillator : ChipModule<SunSoftFME7> {
             apu[channel].write(SunSoftFME7::PULSE_A_LO + (oscillator << 1), lo);
             uint8_t hi = (freq & 0b0000111100000000) >> 8;
             apu[channel].write(SunSoftFME7::PULSE_A_HI + (oscillator << 1), hi);
+        }
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // level
             apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, 0x10 | getVolume(oscillator, channel));
         }

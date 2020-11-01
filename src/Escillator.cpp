@@ -173,15 +173,14 @@ struct Escillator : ChipModule<KonamiVRC6> {
         return rack::clamp(level, 0.f, static_cast<float>(max_level));
     }
 
-    /// @brief Process the CV inputs for the given channel.
+    /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
+    /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
-        static constexpr float max_level[KonamiVRC6::OSC_COUNT] =      {15, 15, 63};
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // frequency (max frequency is same for pulses and saw, 4095)
             uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], 4095, clock_division[oscillator]);
@@ -190,6 +189,17 @@ struct Escillator : ChipModule<KonamiVRC6> {
             hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
             apu[channel].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * oscillator, lo);
             apu[channel].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * oscillator, hi);
+        }
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        static constexpr float max_level[KonamiVRC6::OSC_COUNT] = {15, 15, 63};
+        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // level
             uint8_t level = getPW(oscillator, channel) | getLevel(oscillator, channel, max_level[oscillator]);
             apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * oscillator, level);

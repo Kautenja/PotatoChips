@@ -76,9 +76,9 @@ See the [Manual][106] for more information about the features of this module.
 <!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
-<p align="center">
+<h2 align="center">
 <img alt="Gleeokillator Logo" src="manual/Gleeokillator/img/Gleeokillator-Logo.svg">
-</p>
+</h2>
 
 **Gleeokillator** is an emulation of the [Sunsoft FME7][SunsoftFME7] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES]. The FME7
@@ -311,9 +311,9 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 <!-- MARK: Boss Fight -->
 <!-- ------------------------------------------------------------ -->
 
-<p align="center">
+<h2 align="center">
 <img alt="Boss Fight Logo" src="manual/BossFight/img/BossFight-Logo.svg">
-</p>
+</h2>
 
 **Boss Fight** is an emulation and re-envisioning of the Yamaha
 [Yamaha YM2612][YM2612] audio processing unit from the
@@ -366,9 +366,9 @@ See the [Manual][BossFight] for more information about the features of this modu
 <!-- MARK: Mega Tone -->
 <!-- ------------------------------------------------------------ -->
 
-<p align="center">
+<h2 align="center">
 <img alt="Mega Tone Logo" src="manual/MegaTone/img/MegaTone-Logo.svg">
-</p>
+</h2>
 
 **Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
 processing unit from the [Sega Master System][SegaMasterSystem],
@@ -399,9 +399,9 @@ See the [Manual][MegaTone] for more information about the features of this modul
 <!-- MARK: Jairasullator -->
 <!-- ------------------------------------------------------------ -->
 
-<p align="center">
+<h2 align="center">
 <img alt="Jairasullator Logo" src="manual/Jairasullator/img/Jairasullator-Logo.svg">
-</p>
+</h2>
 
 **Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
 audio processing unit. The AY-3-8910 features three pulse waveform generators
@@ -425,9 +425,9 @@ See the [Manual][Jairasullator] for more information about the features of this 
 <!-- ------------------------------------------------------------ -->
 
 
-<p align="center">
+<h2 align="center">
 <img alt="Potillator Logo" src="manual/Potillator/img/Potillator-Logo.svg">
-</p>
+</h2>
 
 **Potillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
 processing unit. The POKEY produces four pulse waveforms, but contains a

@@ -65,16 +65,16 @@ struct Potillator : ChipModule<AtariPOKEY> {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            auto name = "Channel " + std::to_string(i + 1);
+            auto name = "Voice " + std::to_string(i + 1);
             configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_FM    + i, -1.f,  1.f,  0.f, name + " FM");
             configParam(PARAM_NOISE + i,  0,    7,    7,   name + " Noise");
-            configParam(PARAM_LEVEL + i,  0,   15,   10,   name + " Level");
+            configParam(PARAM_LEVEL + i,  0,   15,    7,   name + " Level");
         }
         // control register controls
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
-        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Channel 2 from Channel 4", "");
-        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Channel 1 from Channel 3", "");
+        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Voice 2 from Voice 4", "");
+        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Voice 1 from Voice 3", "");
         // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");  // ignore 16-bit
         // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");  // ignore 16-bit
         configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
@@ -269,28 +269,29 @@ struct PotillatorWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the vertical spacing between the same component on different oscillators
-        static constexpr float VERT_SEP = 85.f;
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // oscillator control
             // Frequency
-            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 45),  module, Potillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 85),  module, Potillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 31),  module, Potillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 70),  module, Potillator::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 129), module, Potillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 173), module, Potillator::PARAM_FM          + i));
-            // Noise
-            addParam(createSnapParam<Rogan1PRed>(Vec(139, 25 + i * VERT_SEP), module, Potillator::PARAM_NOISE + i));
-            addInput(createInput<PJ301MPort>(    Vec(146, 73 + i * VERT_SEP), module, Potillator::INPUT_NOISE + i));
+            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 98), module, Potillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 143), module, Potillator::PARAM_FM          + i));
             // Level
-            addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 221), module, Potillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>( Vec(13 + 35 * i, 263), module, Potillator::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Potillator::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 169), module, Potillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 209), module, Potillator::INPUT_LEVEL       + i));
+            // Noise
+            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 241), module, Potillator::PARAM_NOISE + i));
+            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 281), module, Potillator::INPUT_NOISE + i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Potillator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(30 + 35 * i, 319), module, Potillator::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(11 + 35 * i, 324), module, Potillator::OUTPUT_OSCILLATOR + i));
         }
+        float offset = 0;
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
             if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
-            addParam(createParam<CKSS>(Vec(160, 33 + i * (VERT_SEP / 2)), module, Potillator::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(180, 32 + i * (VERT_SEP / 2)), module, Potillator::INPUT_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(152, 45 + offset), module, Potillator::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(175, 44 + offset), module, Potillator::INPUT_CONTROL + i));
+            offset += 56;
         }
     }
 };

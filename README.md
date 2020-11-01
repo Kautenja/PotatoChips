@@ -84,7 +84,7 @@ chip contains three pulse wave generators, a noise generator, and an envelope
 generator. Only the pulse wave generators are implemented currently.
 
 <p align="center">
-<img alt="Gleeokillator" src="manual/FME7/img/FME7-Module.svg">
+<img alt="Gleeokillator" src="manual/Gleeokillator/img/Gleeokillator-Module.svg">
 </p>
 
 ### Features
@@ -92,7 +92,7 @@ generator. Only the pulse wave generators are implemented currently.
 -   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
-See the [Manual][FME7] for more information about the features of this module.
+See the [Manual][Gleeokillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Escillator -->
@@ -400,7 +400,7 @@ audio processing unit. The AY-3-8910 features three pulse waveform generators
 and a noise generator that is shared between the channels.
 
 <p align="center">
-<img alt="Jairasullator" src="manual/AY-3-8910/img/AY_3_8910-Module.svg">
+<img alt="Jairasullator" src="manual/Jairasullator/img/Jairasullator-Module.svg">
 </p>
 
 ### Features
@@ -410,7 +410,7 @@ and a noise generator that is shared between the channels.
 -   **White noise:** Generate noise using the frequency knob for channel 3
 -   **Tone/Noise control:** CV and switch to control tone and noise for each channel
 
-See the [Manual][AY_3_8910] for more information about the features of this module.
+See the [Manual][Jairasullator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Troglocillator -->
@@ -509,7 +509,7 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 
 [106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
 [2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
-[FME7]: https://github.com/Kautenja/PotatoChips/releases/latest/download/FME7.pdf
+[Gleeokillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Gleeokillator.pdf
 [GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
 [VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
@@ -519,7 +519,7 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
-[AY_3_8910]: https://github.com/Kautenja/PotatoChips/releases/latest/download/AY_3_8910.pdf
+[Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
 [POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 [WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
 [GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

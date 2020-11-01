@@ -464,13 +464,13 @@ See the [Manual][POKEY] for more information about the features of this module.
 **Wave Creative Modulator** is an emulation of the
 [Konami Sound Creative Chip (SCC)][KonamiSCC] audio processing unit.
 
-<p align="center">
+<!-- <p align="center">
 <img alt="Wave Creative Modulator" src="manual/SCC/img/SCC-Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][WaveCreativeModulator] for more information about the features of this module.
+See the [Manual][WaveCreativeModulator] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Grafx Turbillator -->
@@ -481,13 +481,13 @@ See the [Manual][WaveCreativeModulator] for more information about the features 
 **Grafx Turbillator** is an emulation of the [NEC TurboGrafx16][NECTurboGrafx16]
 audio processing unit.
 
-<p align="center">
+<!-- <p align="center">
 <img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/TURBO_GRAFX_16-Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][GrafxTurbillator] for more information about the features of this module.
+See the [Manual][GrafxTurbillator] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->

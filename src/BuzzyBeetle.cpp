@@ -175,22 +175,16 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
     }
 
-    /// @brief Process the CV inputs for the given channel.
+    /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
+    /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         // ---------------------------------------------------------------
         // pulse oscillator (2)
         // ---------------------------------------------------------------
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-            // set the pulse width of the pulse wave (high 3 bits) and set
-            // the volume (low 4 bits). the 5th bit controls the envelope,
-            // high sets constant volume.
-            auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
-            apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
             // write the frequency to the low and high registers
             // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
             //   produce an offset between registers based on oscillator index
@@ -207,6 +201,28 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
         apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
         apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        // ---------------------------------------------------------------
+        // pulse oscillator (2)
+        // ---------------------------------------------------------------
+        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
+            // set the pulse width of the pulse wave (high 3 bits) and set
+            // the volume (low 4 bits). the 5th bit controls the envelope,
+            // high sets constant volume.
+            auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
+            apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
+        }
+        // ---------------------------------------------------------------
+        // triangle oscillator
+        // ---------------------------------------------------------------
         // write the linear register to enable the oscillator
         apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
         // ---------------------------------------------------------------

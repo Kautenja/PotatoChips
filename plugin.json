@@ -59,12 +59,12 @@
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf",
       "tags": [
         "Distortion",
-        "Effect",
         "Low-frequency Oscillator",
         "Noise",
         "Oscillator",
         "Polyphonic",
-        "Synth voice"
+        "Synth voice",
+        "Voltage-controlled Amplifier"
       ]
     },
     {

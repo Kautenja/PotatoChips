@@ -76,7 +76,7 @@ See the [Manual][106] for more information about the features of this module.
 <!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
-## Gleeokillator
+<img alt="Gleeokillator Logo" src="manual/Gleeokillator/img/Gleeokillator-Logo.svg">
 
 **Gleeokillator** is an emulation of the [Sunsoft FME7][SunsoftFME7] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES]. The FME7
@@ -309,7 +309,7 @@ See the [Manual][S_SMP] for more information about the features of this module.
 <!-- MARK: Boss Fight -->
 <!-- ------------------------------------------------------------ -->
 
-## Boss Fight
+<img alt="Boss Fight Logo" src="manual/BossFight/img/BossFight-Logo.svg">
 
 **Boss Fight** is an emulation and re-envisioning of the Yamaha
 [Yamaha YM2612][YM2612] audio processing unit from the
@@ -393,7 +393,7 @@ See the [Manual][MegaTone] for more information about the features of this modul
 <!-- MARK: Jairasullator -->
 <!-- ------------------------------------------------------------ -->
 
-## Jairasullator
+<img alt="Jairasullator Logo" src="manual/Jairasullator/img/Jairasullator-Logo.svg">
 
 **Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
 audio processing unit. The AY-3-8910 features three pulse waveform generators

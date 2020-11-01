@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        49,
+        44,
         0
       ]
     },
@@ -50,10 +50,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 11,
+      "leftModuleId": 6,
       "rightModuleId": 1,
       "pos": [
-        39,
+        34,
         0
       ]
     },
@@ -71,8 +71,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
           "channel": -1
         }
       },
@@ -270,7 +270,6 @@
         }
       ],
       "leftModuleId": 9,
-      "rightModuleId": 12,
       "data": {
         "lissajous": 0,
         "external": 0
@@ -281,41 +280,9 @@
       ]
     },
     {
-      "id": 11,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "leftModuleId": 6,
-      "rightModuleId": 2,
-      "pos": [
-        34,
-        0
-      ]
-    },
-    {
-      "id": 12,
-      "plugin": "Bogaudio",
-      "version": "1.1.31",
-      "model": "Bogaudio-AnalyzerXL",
-      "params": [],
-      "leftModuleId": 10,
-      "data": {
-        "range": 0.0,
-        "range_db": 80.0,
-        "smooth": 0.25,
-        "quality": "good",
-        "window": "kaiser"
-      },
-      "pos": [
-        52,
-        1
-      ]
-    },
-    {
       "id": 6,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.2",
+      "version": "1.8.0",
       "model": "POKEY",
       "params": [
         {
@@ -400,7 +367,7 @@
         }
       ],
       "leftModuleId": 13,
-      "rightModuleId": 11,
+      "rightModuleId": 2,
       "pos": [
         16,
         0
@@ -541,22 +508,6 @@
       "inputModuleId": 2,
       "inputId": 2,
       "color": "#0c8e15"
-    },
-    {
-      "id": 293,
-      "outputModuleId": 6,
-      "outputId": 0,
-      "inputModuleId": 12,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 292,
-      "outputModuleId": 6,
-      "outputId": 0,
-      "inputModuleId": 11,
-      "inputId": 0,
-      "color": "#c91847"
     },
     {
       "id": 278,

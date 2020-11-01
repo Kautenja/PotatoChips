@@ -31,11 +31,13 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, AtariPOKEY::OSC_COUNT),
+        ENUMS(PARAM_FM, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_NOISE, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_LEVEL, AtariPOKEY::OSC_COUNT),
         ENUMS(PARAM_CONTROL, AtariPOKEY::CTL_FLAGS),
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
         ENUMS(INPUT_VOCT, AtariPOKEY::OSC_COUNT),
@@ -45,24 +47,29 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
         ENUMS(INPUT_CONTROL, AtariPOKEY::CTL_FLAGS),
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, AtariPOKEY::OSC_COUNT),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHTS_LEVEL, AtariPOKEY::OSC_COUNT),
+        ENUMS(LIGHTS_LEVEL, 3 * AtariPOKEY::OSC_COUNT),
         NUM_LIGHTS
     };
 
     /// @brief Initialize a new POKEY Chip module.
     Troglocillator() : ChipModule<AtariPOKEY>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, "Channel " + std::to_string(i + 1) + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-            configParam(PARAM_NOISE + i,  0,    7,   7,    "Channel " + std::to_string(i + 1) + " Noise"                                             );
-            configParam(PARAM_LEVEL + i,  0,    1,   0.5,  "Channel " + std::to_string(i + 1) + " Level",     "%",   0,                  100         );
+            auto name = "Channel " + std::to_string(i + 1);
+            configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+            configParam(PARAM_FM    + i, -1.f,  1.f,  0.f, name + " FM");
+            configParam(PARAM_NOISE + i,  0,    7,    7,   name + " Noise");
+            configParam(PARAM_LEVEL + i,  0,   15,   10,   name + " Level");
         }
         // control register controls
         configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
@@ -76,6 +83,7 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     }
 
  protected:
+    // TODO: the oscillator is not tracking VOCT accurately
     /// @brief Return the frequency for the given oscillator.
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -84,21 +92,36 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     ///
     inline uint8_t getFrequency(unsigned oscillator, unsigned channel) {
         // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ8BIT_MIN = 2;
+        static constexpr float MIN = 2;
         // the maximal value for the frequency register
-        static constexpr float FREQ8BIT_MAX = 0xFF;
+        static constexpr float MAX = 0xFF;
         // the clock division of the oscillator relative to the CPU
-        static constexpr auto CLOCK_DIVISION = 56;
+        static constexpr auto CLOCK_DIVISION = 58;
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
+        // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // calculate the frequency based on the clock division
-        freq = (buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq)) - 1;
-        return rack::clamp(freq, FREQ8BIT_MIN, FREQ8BIT_MAX);
+        // convert the frequency to 12-bit
+        freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
+        return rack::clamp(freq, MIN, MAX);
     }
 
     /// @brief Return the noise for the given oscillator.
@@ -108,20 +131,24 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     /// @returns the 3-bit noise value from parameters and CV inputs
     ///
     inline uint8_t getNoise(unsigned oscillator, unsigned channel) {
-        // the minimal value for the noise register
-        static constexpr float NOISE_MIN = 0;
-        // the maximal value for the noise register
-        static constexpr float NOISE_MAX = 7;
+        // the minimal value for the volume width register
+        static constexpr float MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float MAX = 7;
         // get the noise from the parameter knob
-        auto noiseParam = params[PARAM_NOISE + oscillator].getValue();
-        // apply the control voltage to the level
-        if (inputs[INPUT_NOISE + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_NOISE + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = 1.f - rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            noiseParam *= 2 * cv;
-        }
-        return rack::clamp(noiseParam, NOISE_MIN, NOISE_MAX);
+        auto param = params[PARAM_NOISE + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_NOISE + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto mod = inputs[INPUT_NOISE + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_NOISE + oscillator].setVoltage(mod, channel);
+        // apply the control mod to the parameter. no adjustment is necessary
+        // because the parameter lies on [0, 7]V naturally
+        param += mod;
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return rack::clamp(param, MIN, MAX);
     }
 
     /// @brief Return the level for the given oscillator.
@@ -131,20 +158,24 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     /// @returns the 4-bit level value from parameters and CV inputs
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
-        // the minimal value for the volume register
-        static constexpr float ATT_MIN = 0;
-        // the maximal value for the volume register
-        static constexpr float ATT_MAX = 15;
+        // the minimal value for the volume width register
+        static constexpr float MIN = 0;
+        // the maximal value for the volume width register
+        static constexpr float MAX = 15;
         // get the level from the parameter knob
-        auto levelParam = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the level
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel);
-            cv = rack::clamp(cv / 10.f, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            levelParam *= 2 * cv;
-        }
-        return rack::clamp(ATT_MAX * levelParam, ATT_MIN, ATT_MAX);
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto mod = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_LEVEL + oscillator].setVoltage(mod, channel);
+        // apply the control mod to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        param = roundf(param * mod / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return rack::clamp(param, MIN, MAX);
     }
 
     /// @brief Return the control byte.
@@ -188,7 +219,20 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < AtariPOKEY::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -206,28 +250,31 @@ struct TroglocillatorWidget : ModuleWidget {
         static constexpr auto panel = "res/POKEY.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the vertical spacing between the same component on different oscillators
         static constexpr float VERT_SEP = 85.f;
-        // oscillator control
-        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(    Vec(19,  73 + i * VERT_SEP), module, Troglocillator::INPUT_VOCT + i));
-            addInput(createInput<PJ301MPort>(    Vec(19,  38 + i * VERT_SEP), module, Troglocillator::INPUT_FM + i));
-            addParam(createParam<Rogan5PSGray>(  Vec(46,  39 + i * VERT_SEP), module, Troglocillator::PARAM_FREQ + i));
-            auto noise = createParam<Rogan1PRed>(Vec(109, 25 + i * VERT_SEP), module, Troglocillator::PARAM_NOISE + i);
-            noise->snap = true;
-            addParam(noise);
-            addInput(createInput<PJ301MPort>(    Vec(116, 73 + i * VERT_SEP), module, Troglocillator::INPUT_NOISE + i));
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(144, 24 + i * VERT_SEP),  module, Troglocillator::PARAM_LEVEL + i, Troglocillator::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(    Vec(172, 28 + i * VERT_SEP), module, Troglocillator::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(  Vec(175, 74 + i * VERT_SEP), module, Troglocillator::OUTPUT_OSCILLATOR + i));
+        for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // oscillator control
+            // Frequency
+            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 45),  module, Troglocillator::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 85),  module, Troglocillator::INPUT_VOCT        + i));
+            // FM
+            addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 129), module, Troglocillator::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(   Vec(15 + 35 * i, 173), module, Troglocillator::PARAM_FM          + i));
+            // Noise
+            addParam(createSnapParam<Rogan1PRed>(Vec(139, 25 + i * VERT_SEP), module, Troglocillator::PARAM_NOISE + i));
+            addInput(createInput<PJ301MPort>(    Vec(146, 73 + i * VERT_SEP), module, Troglocillator::INPUT_NOISE + i));
+            // Level
+            addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 221), module, Troglocillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>( Vec(13 + 35 * i, 263), module, Troglocillator::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Troglocillator::LIGHTS_LEVEL + 3 * i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Troglocillator::OUTPUT_OSCILLATOR + i));
         }
-        // global control
-        for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {
-            if (i == 3 or i == 4) continue;  // ignore 16-bit
+        for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
+            if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
             addParam(createParam<CKSS>(Vec(213, 33 + i * (VERT_SEP / 2)), module, Troglocillator::PARAM_CONTROL + i));
             addInput(createInput<PJ301MPort>(Vec(236, 32 + i * (VERT_SEP / 2)), module, Troglocillator::INPUT_CONTROL + i));
         }
@@ -235,4 +282,4 @@ struct TroglocillatorWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-Model *modelTroglocillator = createModel<Troglocillator, TroglocillatorWidget>("POKEY");
+rack::Model *modelTroglocillator = rack::createModel<Troglocillator, TroglocillatorWidget>("POKEY");

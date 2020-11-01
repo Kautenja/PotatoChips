@@ -47,6 +47,9 @@ struct ChipModule : rack::engine::Module {
     /// whether the outputs should be normalled together into a mix
     bool normal_outputs = false;
 
+    /// whether the outputs should be hard clipped
+    bool hard_clip = true;
+
     // MARK: Processing Life-cycle
 
     // TODO: make pure virtual
@@ -151,7 +154,8 @@ struct ChipModule : rack::engine::Module {
                 // update the VU meter with the un-clipped signal
                 vuMeter[osc].process(args.sampleTime / channels, output / 5.f);
                 // hard clip the output
-                outputs[osc].setVoltage(math::clamp(output, -5.f, 5.f), channel);
+                if (hard_clip) output = math::clamp(output, -5.f, 5.f);
+                outputs[osc].setVoltage(output, channel);
             }
         }
         // process lights using the overridden function

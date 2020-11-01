@@ -17,8 +17,6 @@
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 
-// TODO: draw normals on panel
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

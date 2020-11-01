@@ -29,7 +29,7 @@ void init(Plugin* instance) {
     instance->addModel(modelJairasullator);
     instance->addModel(modelBuzzyBeetle);
     instance->addModel(modelPalletTownWavesSystem);
-    instance->addModel(modelPotIntegratedOscillator);
+    instance->addModel(modelPotillator);
     instance->addModel(modelEscillator);
     instance->addModel(modelGleeokillator);
     instance->addModel(modelBossFight);

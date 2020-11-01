@@ -120,7 +120,6 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 6,
       "rightModuleId": 2,
       "data": {
         "lissajous": 0,
@@ -235,7 +234,6 @@
         }
       ],
       "leftModuleId": 13,
-      "rightModuleId": 7,
       "pos": [
         16,
         0

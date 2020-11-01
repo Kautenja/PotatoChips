@@ -33,7 +33,7 @@ extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelBuzzyBeetle;
 extern rack::Model *modelPalletTownWavesSystem;
-extern rack::Model *modelPotIntegratedOscillator;
+extern rack::Model *modelPotillator;
 extern rack::Model *modelEscillator;
 extern rack::Model *modelGleeokillator;
 extern rack::Model *modelBossFight;

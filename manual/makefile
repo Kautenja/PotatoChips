@@ -32,9 +32,9 @@ mMegaTone: build
 	make -C MegaTone
 	cp MegaTone/build/manual.pdf build/MegaTone.pdf
 
-mPOKEY: build
-	make -C POKEY
-	cp POKEY/build/manual.pdf build/POKEY.pdf
+mPotillator: build
+	make -C Potillator
+	cp Potillator/build/manual.pdf build/Potillator.pdf
 
 mSCC: build
 	make -C SCC
@@ -56,4 +56,4 @@ mSSMPGauss: build
 	make -C S_SMP_Gauss
 	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
 
-manual: m106 m2A03 mJairasullator mBossFight mGleeokillator mGBS mMegaTone mPOKEY mSCC mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss
+manual: m106 m2A03 mJairasullator mBossFight mGleeokillator mGBS mMegaTone mPotillator mSCC mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss

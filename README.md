@@ -413,18 +413,18 @@ and a noise generator that is shared between the channels.
 See the [Manual][Jairasullator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Troglocillator -->
+<!-- MARK: Potillator -->
 <!-- ------------------------------------------------------------ -->
 
-## Troglocillator
+<img alt="Potillator Logo" src="manual/Potillator/img/Potillator-Logo.svg">
 
-**Troglocillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
+**Potillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
 processing unit. The POKEY produces four pulse waveforms, but contains a
 variety of bonus controls, including extended frequency ranges, high-pass
 filters, and noise generators / distortion effects.
 
 <p align="center">
-<img alt="Troglocillator" src="manual/POKEY/img/POKEY-Module.svg">
+<img alt="Potillator Module" src="manual/Potillator/img/Potillator-Module.svg">
 </p>
 
 ### Features

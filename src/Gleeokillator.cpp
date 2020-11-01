@@ -132,7 +132,6 @@ struct Gleeokillator : ChipModule<SunSoftFME7> {
         return rack::clamp(level, MIN, MAX);
     }
 
-
     /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

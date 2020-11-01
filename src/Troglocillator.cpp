@@ -196,6 +196,21 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
         return controlByte;
     }
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the audio inputs to
+    ///
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+        for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
+            // there are 2 registers per oscillator, multiply first
+            // oscillator by 2 to produce an offset between registers
+            // based on oscillator index. the 3 noise bit occupy the MSB
+            // of the control register
+            apu[channel].write(AtariPOKEY::AUDF1 + AtariPOKEY::REGS_PER_VOICE * oscillator, getFrequency(oscillator, channel));
+        }
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -207,7 +222,6 @@ struct Troglocillator : ChipModule<AtariPOKEY> {
             // oscillator by 2 to produce an offset between registers
             // based on oscillator index. the 3 noise bit occupy the MSB
             // of the control register
-            apu[channel].write(AtariPOKEY::AUDF1 + AtariPOKEY::REGS_PER_VOICE * oscillator, getFrequency(oscillator, channel));
             apu[channel].write(AtariPOKEY::AUDC1 + AtariPOKEY::REGS_PER_VOICE * oscillator, (getNoise(oscillator, channel) << 5) | getLevel(oscillator, channel));
         }
         // write the control byte to the chip

@@ -187,6 +187,15 @@ class AtariPOKEY {
         blip_time_t period = 0;
         /// the output buffer the oscillator writes samples to
         BLIPBuffer* output = nullptr;
+
+        /// @brief Reset the oscillator to its initial state.
+        ///
+        /// @details
+        /// This function will not overwrite the current output buffer.
+        ///
+        inline void reset() {
+            regs[0] = regs[1] = phase = invert = last_amp = delay = period = 0;
+        }
     } oscs[OSC_COUNT];
 
     /// the synthesizer implementation for computing samples
@@ -448,8 +457,7 @@ class AtariPOKEY {
         poly4_pos = 0;
         polym_pos = 0;
         control = 0;
-        for (unsigned i = 0; i < OSC_COUNT; i++)
-            memset(&oscs[i], 0, offsetof(Oscillator, output));
+        for (Oscillator& osc : oscs) osc.reset();
     }
 
     /// @brief Write data to register with given address.

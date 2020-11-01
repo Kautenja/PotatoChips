@@ -299,13 +299,13 @@ S-SMP is an emulation of the Sony S-SMP audio processing unit from the
 The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
 the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 
-<p align="center">
+<!-- <p align="center">
 <img alt="S-SMP" src="manual/S_SMP/img/S_SMP-Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP] for more information about the features of this module.
+See the [Manual][S_SMP] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Boss Fight -->

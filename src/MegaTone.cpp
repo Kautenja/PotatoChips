@@ -162,6 +162,17 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         return MAX - rack::clamp(level, MIN, MAX);
     }
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the audio inputs to
+    ///
+    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+        // tone generators (3)
+        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
+            apu[channel].set_frequency(voice, getFrequency(voice, channel));
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -169,10 +180,8 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     ///
     void processCV(const ProcessArgs &args, unsigned channel) final {
         // tone generators (3)
-        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++) {
-            apu[channel].set_frequency(voice, getFrequency(voice, channel));
+        for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
-        }
         // noise generator
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].state), false);

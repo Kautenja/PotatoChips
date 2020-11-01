@@ -499,19 +499,19 @@ struct JairasullatorWidget : ModuleWidget {
 
         // string representations of the envelope modes
         static const std::string LABELS[8] = {
-            "/_____",
-            "\\_____",
-            "/-----",
-            "\\-----",
-            "//////",
-            "\\\\\\\\\\\\",
-            "/\\/\\/\\",
-            "\\/\\/\\/"
+            "/_____ (Attack)",
+            "\\_____ (Decay)",
+            "/----- (Attack & Max)",
+            "\\----- (Decay & Max)",
+            "////// (Attack LFO)",
+            "\\\\\\\\\\\\ (Decay LFO)",
+            "/\\/\\/\\ (Attack-Decay LFO)",
+            "\\/\\/\\/ (Decay-Attack LFO)"
         };
 
         // add the envelope mode selection item to the menu
         menu->addChild(new MenuSeparator);
-        menu->addChild(createMenuLabel("Envelope Modes"));
+        menu->addChild(createMenuLabel("Envelope Mode"));
         for (int i = 0; i < 8; i++) {
             auto item = createMenuItem<EnvelopeModeItem>(LABELS[i], CHECKMARK(module->envMode == i));
             item->module = module;

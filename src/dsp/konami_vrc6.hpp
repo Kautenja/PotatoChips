@@ -78,22 +78,35 @@ class KonamiVRC6 {
 
         /// the internal registers for the oscillator
         uint8_t regs[REG_COUNT];
-        /// the output buffer to write samples to
-        BLIPBuffer* output;
         /// TODO: document
-        int delay;
+        int delay = 0;
         /// the last amplitude value output from the synthesizer
-        int last_amp;
+        int last_amp = 0;
         /// the phase of the waveform
-        int phase;
+        int phase = 1;
         /// the amplitude of the waveform, only used by the saw waveform
-        int amp;
+        int amp = 0;
+        /// the output buffer to write samples to
+        BLIPBuffer* output = nullptr;
 
         /// Return the period of the waveform.
         inline uint16_t period() const {
             // turn the low and high period registers into the 12-bit period
             // value
             return (((regs[PERIOD_HIGH] & 0x0f) << 8) | regs[PERIOD_LOW]) + 1;
+        }
+
+        /// @brief Reset the oscillator to it's initial state.
+        ///
+        /// @details
+        /// This will not overwrite the output buffer for the oscillator.
+        ///
+        inline void reset() {
+            memset(regs, 0, sizeof regs);
+            delay = 0;
+            last_amp = 0;
+            phase = 1;
+            amp = 0;
         }
     };
 
@@ -276,14 +289,7 @@ class KonamiVRC6 {
     /// @brief Reset internal frame counter, registers, and all oscillators.
     inline void reset() {
         last_time = 0;
-        for (unsigned i = 0; i < OSC_COUNT; i++) {
-            Oscillator& osc = oscs[i];
-            memset(osc.regs, 0, sizeof osc.regs);
-            osc.delay = 0;
-            osc.last_amp = 0;
-            osc.phase = 1;
-            osc.amp = 0;
-        }
+        for (Oscillator& osc : oscs) osc.reset();
     }
 
     /// @brief Write a value to the given oscillator's register.

@@ -25,13 +25,13 @@
 struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
  private:
     /// triggers for handling inputs to the tone and noise enable switches
-    rack::dsp::BooleanTrigger mixerTriggers[2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+    rack::dsp::BooleanTrigger mixerTriggers[PORT_MAX_CHANNELS][2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the envelope enable switches
-    rack::dsp::BooleanTrigger envTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT];
+    rack::dsp::BooleanTrigger envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the sync ports and the envelope trig
-    rack::dsp::SchmittTrigger syncTriggers[GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
+    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
     /// a trigger for handling presses to the change mode button
     rack::dsp::SchmittTrigger envModeTrigger;
@@ -223,9 +223,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // clamp the input within [0, 10]. this allows bipolar signals to
         // be interpreted as unipolar signals for the trigger input
         auto cv = math::clamp(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
-        envTriggers[osc].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+        envTriggers[channel][osc].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
         // return the state of the switch based on the parameter and trig input
-        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[osc].state;
+        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].state;
     }
 
     /// @brief Return the noise period.
@@ -326,9 +326,9 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             // clamp the input within [0, 10]. this allows bipolar signals to
             // be interpreted as unipolar signals for the trigger input
             auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
-            mixerTriggers[i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+            mixerTriggers[channel][i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
-            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[i].state;
+            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].state;
             // invert the state to indicate "OFF" semantics instead of "ON"
             mixerByte |= !toneState << i;
         }
@@ -352,7 +352,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // reset the voltage on this port for the next voice to normal to
         inputs[INPUT_RESET + index].setVoltage(sync, channel);
         // process the sync trigger and return the result
-        return syncTriggers[index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
+        return syncTriggers[channel][index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
     }
 
     /// @brief Process the audio rate inputs for the given channel.

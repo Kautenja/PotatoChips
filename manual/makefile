@@ -4,9 +4,9 @@ all: manual
 build:
 	mkdir -p build
 
-m106: build
-	make -C 106
-	cp 106/build/manual.pdf build/106.pdf
+mNameCorpOctalWaveGenerator: build
+	make -C NameCorpOctalWaveGenerator
+	cp NameCorpOctalWaveGenerator/build/manual.pdf build/NameCorpOctalWaveGenerator.pdf
 
 mTerracillator: build
 	make -C Terracillator
@@ -24,9 +24,9 @@ mGleeokillator: build
 	make -C Gleeokillator
 	cp Gleeokillator/build/manual.pdf build/Gleeokillator.pdf
 
-mGBS: build
-	make -C GBS
-	cp GBS/build/manual.pdf build/GBS.pdf
+mPalletTownWavesSystem: build
+	make -C PalletTownWavesSystem
+	cp PalletTownWavesSystem/build/manual.pdf build/PalletTownWavesSystem.pdf
 
 mMegaTone: build
 	make -C MegaTone
@@ -44,9 +44,9 @@ mTurboGrafx16: build
 	make -C TurboGrafx16
 	cp TurboGrafx16/build/manual.pdf build/TurboGrafx16.pdf
 
-mVRC6: build
-	make -C VRC6
-	cp VRC6/build/manual.pdf build/VRC6.pdf
+mEscillator: build
+	make -C Escillator
+	cp Escillator/build/manual.pdf build/Escillator.pdf
 
 mSSMPEcho: build
 	make -C S_SMP_Echo
@@ -56,4 +56,4 @@ mSSMPGauss: build
 	make -C S_SMP_Gauss
 	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
 
-manual: m106 mTerracillator mJairasullator mBossFight mGleeokillator mGBS mMegaTone mPotillator mSCC mTurboGrafx16 mVRC6 mSSMPEcho mSSMPGauss
+manual: mNameCorpOctalWaveGenerator mTerracillator mJairasullator mBossFight mGleeokillator mPalletTownWavesSystem mMegaTone mPotillator mSCC mTurboGrafx16 mEscillator mSSMPEcho mSSMPGauss

@@ -14,19 +14,21 @@ They're just so addicting!
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Buzzy Beetle -->
+<!-- MARK: Terracillator -->
 <!-- ------------------------------------------------------------ -->
 
-## Buzzy Beetle
+<h2 align="center">
+<img alt="Terracillator Logo" src="manual/Terracillator/img/Terracillator-Logo.svg">
+</h2>
 
-**Buzzy Beetle** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
+**Terracillator** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES].
 The 2A03 chip contains two pulse wave generators, a quantized triangle wave
 generator, and a noise generator. The original chip featured a DMC loader for
 playing samples that has been omitted in this emulation.
 
 <p align="center">
-<img alt="Buzzy Beetle" src="manual/2A03/img/2A03-Module.svg">
+<img alt="Terracillator" src="manual/Terracillator/img/Terracillator-Module.svg">
 </p>
 
 ### Features
@@ -39,13 +41,15 @@ playing samples that has been omitted in this emulation.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual][2A03] for more information about the features of this module.
+See the [Manual][Terracillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Name Corp Octal Wave Generator -->
 <!-- ------------------------------------------------------------ -->
 
-## Name Corp Octal Wave Generator
+<h2 align="center">
+<img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Logo.svg">
+</h2>
 
 **Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
 audio processing unit from the [Nintendo Entertainment System (NES)][NES].
@@ -55,7 +59,7 @@ samples. This module uses a bank of five 32-sample wave-tables to act as the
 waveform for all eight channels.
 
 <p align="center">
-<img alt="Name Corp Octal Wave Generator" src="manual/106/img/106-Module.svg">
+<img alt="Name Corp Octal Wave Generator" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Module.svg">
 </p>
 
 ### Features
@@ -70,7 +74,7 @@ waveform for all eight channels.
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.
 
-See the [Manual][106] for more information about the features of this module.
+See the [Manual][NameCorpOctalWaveGenerator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Gleeokillator -->
@@ -100,14 +104,16 @@ See the [Manual][Gleeokillator] for more information about the features of this 
 <!-- MARK: Escillator -->
 <!-- ------------------------------------------------------------ -->
 
-## Escillator
+<h2 align="center">
+<img alt="Escillator Logo" src="manual/Escillator/img/Escillator-Logo.svg">
+</h2>
 
 **Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
 chip contains two pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="Escillator" src="manual/VRC6/img/VRC6-Module.svg">
+<img alt="Escillator" src="manual/Escillator/img/Escillator-Module.svg">
 </p>
 
 ### Features
@@ -120,13 +126,15 @@ chip contains two pulse wave generators, and a quantized saw wave generator.
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
-See the [Manual][VRC6] for more information about the features of this module.
+See the [Manual][Escillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Pallet Town Waves System -->
 <!-- ------------------------------------------------------------ -->
 
-## Pallet Town Waves System
+<h2 align="center">
+<img alt="Pallet Town Waves System Logo" src="manual/PalletTownWavesSystem/img/PalletTownWavesSystem-Logo.svg">
+</h2>
 
 **Pallet Town Waves System** is an emulation of the
 [Nintendo GameBoy Sound System (GBS)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
@@ -135,7 +143,7 @@ unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
 generator with a wave-table synthesizer.
 
 <p align="center">
-<img alt="Pallet Town Waves System" src="manual/GBS/img/GBS-Module.svg">
+<img alt="Pallet Town Waves System" src="manual/PalletTownWavesSystem/img/PalletTownWavesSystem-Module.svg">
 </p>
 
 ### Features
@@ -149,7 +157,7 @@ generator with a wave-table synthesizer.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual][GBS] for more information about the features of this module.
+See the [Manual][PalletTownWavesSystem] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(ADSR) -->
@@ -453,7 +461,7 @@ filters, and noise generators / distortion effects.
     at 15 different frequencies as a distortion source
 -   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
 
-See the [Manual][POKEY] for more information about the features of this module.
+See the [Manual][Potillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: SCC -->
@@ -518,11 +526,11 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 
 <!-- Manuals -->
 
-[106]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
-[2A03]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
+[NameCorpOctalWaveGenerator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
+[Terracillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
 [Gleeokillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Gleeokillator.pdf
-[GBS]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
-[VRC6]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
+[PalletTownWavesSystem]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
+[Escillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
 [S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
 [S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
@@ -531,6 +539,6 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 [Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
-[POKEY]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+[Potillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
 [WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
 [GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

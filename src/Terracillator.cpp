@@ -312,7 +312,7 @@ struct TerracillatorWidget : ModuleWidget {
     ///
     explicit TerracillatorWidget(Terracillator *module) {
         setModule(module);
-        static constexpr auto panel = "res/2A03.svg";
+        static constexpr auto panel = "res/Terracillator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

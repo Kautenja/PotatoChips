@@ -44,39 +44,6 @@ playing samples that has been omitted in this emulation.
 See the [Manual][Terracillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Name Corp Octal Wave Generator -->
-<!-- ------------------------------------------------------------ -->
-
-<h2 align="center">
-<img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Logo.svg">
-</h2>
-
-**Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
-audio processing unit from the [Nintendo Entertainment System (NES)][NES].
-The Namco 106 chip contains eight channels of wave-table synthesis and 128
-bytes of operational RAM. The wave-tables are 4-bit and can be as long as 63
-samples. This module uses a bank of five 32-sample wave-tables to act as the
-waveform for all eight channels.
-
-<p align="center">
-<img alt="Name Corp Octal Wave Generator" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Module.svg">
-</p>
-
-### Features
-
--   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
-    of 4 bits and table size of 32 samples
--   **Waveform morph:** 5 banks of wave-tables to morph between using 32-bit
-    floating point linear interpolation (not very retro, but it sounds nice)
--   **Frequency control:** 18-bit frequency control with linear frequency modulation
--   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
--   **Namco 106 compute limitation:** activating each additional channel (up
-    to 8) reduces the amount of compute available for all channels. This causes
-    all channels to drop in frequency when additional channels are activated.
-
-See the [Manual][NameCorpOctalWaveGenerator] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
 <!-- MARK: Gleeokillator -->
 <!-- ------------------------------------------------------------ -->
 
@@ -127,6 +94,99 @@ chip contains two pulse wave generators, and a quantized saw wave generator.
     levels
 
 See the [Manual][Escillator] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Jairasullator -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Jairasullator Logo" src="manual/Jairasullator/img/Jairasullator-Logo.svg">
+</h2>
+
+**Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
+audio processing unit. The AY-3-8910 features three pulse waveform generators
+and a noise generator that is shared between the channels.
+
+<p align="center">
+<img alt="Jairasullator" src="manual/Jairasullator/img/Jairasullator-Module.svg">
+</p>
+
+### Features
+
+-   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
+-   **Amplitude modulation:** Manual and CV control over the individual voice levels
+-   **White noise:** Generate noise using the frequency knob for channel 3
+-   **Tone/Noise control:** CV and switch to control tone and noise for each channel
+
+See the [Manual][Jairasullator] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Potillator -->
+<!-- ------------------------------------------------------------ -->
+
+
+<h2 align="center">
+<img alt="Potillator Logo" src="manual/Potillator/img/Potillator-Logo.svg">
+</h2>
+
+**Potillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
+processing unit. The POKEY produces four pulse waveforms, but contains a
+variety of bonus controls, including extended frequency ranges, high-pass
+filters, and noise generators / distortion effects.
+
+<p align="center">
+<img alt="Potillator" src="manual/Potillator/img/Potillator-Module.svg">
+</p>
+
+### Features
+
+-   **Quad pulse wave generator:** Four pulse waves with 8-bit frequency value
+    and _50%_ pulse width
+-   **Low-frequency mode:** Change base clock of the chip from
+    _64 KHz_ to _15 KHz_
+-   **High-frequency mode:** Change base clock of channels 1 and 3 from
+    _64 KHz_ to _1.79 MHz_
+-   **High-pass filter:** High-pass filter channel 1 using channel 3 as a clock
+    or high-pass channel 2 using channel 4 as a clock
+-   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
+-   **Noise/Distortion generator:** generate per-channel pseudo-random numbers
+    at 15 different frequencies as a distortion source
+-   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
+
+See the [Manual][Potillator] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Name Corp Octal Wave Generator -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Logo.svg">
+</h2>
+
+**Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
+audio processing unit from the [Nintendo Entertainment System (NES)][NES].
+The Namco 106 chip contains eight channels of wave-table synthesis and 128
+bytes of operational RAM. The wave-tables are 4-bit and can be as long as 63
+samples. This module uses a bank of five 32-sample wave-tables to act as the
+waveform for all eight channels.
+
+<p align="center">
+<img alt="Name Corp Octal Wave Generator" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Module.svg">
+</p>
+
+### Features
+
+-   **Wave-table synthesis:** 8 channels of wave-table synthesis with bit depth
+    of 4 bits and table size of 32 samples
+-   **Waveform morph:** 5 banks of wave-tables to morph between using 32-bit
+    floating point linear interpolation (not very retro, but it sounds nice)
+-   **Frequency control:** 18-bit frequency control with linear frequency modulation
+-   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
+-   **Namco 106 compute limitation:** activating each additional channel (up
+    to 8) reduces the amount of compute available for all channels. This causes
+    all channels to drop in frequency when additional channels are activated.
+
+See the [Manual][NameCorpOctalWaveGenerator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Pallet Town Waves System -->
@@ -404,67 +464,7 @@ between pitched white-noise and static periodic noise.
 See the [Manual][MegaTone] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Jairasullator -->
-<!-- ------------------------------------------------------------ -->
-
-<h2 align="center">
-<img alt="Jairasullator Logo" src="manual/Jairasullator/img/Jairasullator-Logo.svg">
-</h2>
-
-**Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
-audio processing unit. The AY-3-8910 features three pulse waveform generators
-and a noise generator that is shared between the channels.
-
-<p align="center">
-<img alt="Jairasullator" src="manual/Jairasullator/img/Jairasullator-Module.svg">
-</p>
-
-### Features
-
--   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
--   **Amplitude modulation:** Manual and CV control over the individual voice levels
--   **White noise:** Generate noise using the frequency knob for channel 3
--   **Tone/Noise control:** CV and switch to control tone and noise for each channel
-
-See the [Manual][Jairasullator] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Potillator -->
-<!-- ------------------------------------------------------------ -->
-
-
-<h2 align="center">
-<img alt="Potillator Logo" src="manual/Potillator/img/Potillator-Logo.svg">
-</h2>
-
-**Potillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
-processing unit. The POKEY produces four pulse waveforms, but contains a
-variety of bonus controls, including extended frequency ranges, high-pass
-filters, and noise generators / distortion effects.
-
-<p align="center">
-<img alt="Potillator" src="manual/Potillator/img/Potillator-Module.svg">
-</p>
-
-### Features
-
--   **Quad pulse wave generator:** Four pulse waves with 8-bit frequency value
-    and _50%_ pulse width
--   **Low-frequency mode:** Change base clock of the chip from
-    _64 KHz_ to _15 KHz_
--   **High-frequency mode:** Change base clock of channels 1 and 3 from
-    _64 KHz_ to _1.79 MHz_
--   **High-pass filter:** High-pass filter channel 1 using channel 3 as a clock
-    or high-pass channel 2 using channel 4 as a clock
--   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
--   **Noise/Distortion generator:** generate per-channel pseudo-random numbers
-    at 15 different frequencies as a distortion source
--   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
-
-See the [Manual][Potillator] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: SCC -->
+<!-- MARK: Wave Creative Modulator -->
 <!-- ------------------------------------------------------------ -->
 
 ## Wave Creative Modulator _(Coming Soon!)_

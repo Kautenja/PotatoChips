@@ -8,7 +8,6 @@
       "model": "AudioInterface",
       "params": [],
       "leftModuleId": 7,
-      "rightModuleId": 134,
       "data": {
         "audio": {
           "driver": 5,
@@ -219,47 +218,6 @@
         16,
         0
       ]
-    },
-    {
-      "id": 134,
-      "plugin": "Bogaudio",
-      "version": "1.1.35",
-      "model": "Bogaudio-Analyzer",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.5
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 1.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 1,
-      "data": {
-        "frequency_plot": "log",
-        "amplitude_plot": "decibels_80"
-      },
-      "pos": [
-        57,
-        0
-      ]
     }
   ],
   "cables": [
@@ -272,28 +230,12 @@
       "color": "#0986ad"
     },
     {
-      "id": 194,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 832,
       "outputModuleId": 2,
       "outputId": 1,
       "inputModuleId": 7,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 872,
-      "outputModuleId": 2,
-      "outputId": 1,
-      "inputModuleId": 134,
-      "inputId": 0,
-      "color": "#0c8e15"
     },
     {
       "id": 873,
@@ -342,6 +284,14 @@
       "inputModuleId": 133,
       "inputId": 8,
       "color": "#c9b70e"
+    },
+    {
+      "id": 879,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
     }
   ]
 }

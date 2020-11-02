@@ -433,6 +433,10 @@ class Ricoh2A03 {
             noise = 1 << 14;
             Envelope::reset();
         }
+
+        inline void reset_noise() {
+            noise = 1 << 14;
+        }
     };
 
     /// the channel 0 pulse wave generator
@@ -618,7 +622,7 @@ class Ricoh2A03 {
             triangle.reset_phase();
             break;
         default:
-            throw Exception("osc_index must be in {0, 1, 2}!");
+            noise.reset_noise();
         }
     }
 

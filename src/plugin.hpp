@@ -29,15 +29,15 @@ extern rack::Plugin* plugin_instance;
 // pointers to each module in the plug-in
 
 // current releases
-extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelJairasullator;
-extern rack::Model *modelBuzzyBeetle;
-extern rack::Model *modelPalletTownWavesSystem;
+extern rack::Model *modelTerracillator;
 extern rack::Model *modelPotillator;
 extern rack::Model *modelEscillator;
 extern rack::Model *modelGleeokillator;
-extern rack::Model *modelBossFight;
+extern rack::Model *modelNameCorpOctalWaveGenerator;
+extern rack::Model *modelPalletTownWavesSystem;
 extern rack::Model *modelMegaTone;
+extern rack::Model *modelBossFight;
 
 // blanks
 extern rack::Model *modelChipS_SMP_Blank;

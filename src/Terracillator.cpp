@@ -26,7 +26,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Ricoh 2A03 chip emulator module.
-struct BuzzyBeetle : ChipModule<Ricoh2A03> {
+struct Terracillator : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
@@ -67,7 +67,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     };
 
     /// @brief Initialize a new 2A03 Chip module.
-    BuzzyBeetle() : ChipModule<Ricoh2A03>(6.f) {
+    Terracillator() : ChipModule<Ricoh2A03>(6.f) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
@@ -305,12 +305,12 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for 2A03.
-struct BuzzyBeetleWidget : ModuleWidget {
+struct TerracillatorWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit BuzzyBeetleWidget(BuzzyBeetle *module) {
+    explicit TerracillatorWidget(Terracillator *module) {
         setModule(module);
         static constexpr auto panel = "res/2A03.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -321,30 +321,30 @@ struct BuzzyBeetleWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, BuzzyBeetle::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, Terracillator::PARAM_FREQ        + i);
             freq->snap = i == 3;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, BuzzyBeetle::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Terracillator::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, BuzzyBeetle::INPUT_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Terracillator::INPUT_FM          + i));
             if (i < 3)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, BuzzyBeetle::PARAM_FM          + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, Terracillator::PARAM_FM          + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 173), module, BuzzyBeetle::PARAM_FM                  + i));
+                addParam(createParam<CKSS>(    Vec(120, 173), module, Terracillator::PARAM_FM                  + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, BuzzyBeetle::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, BuzzyBeetle::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, BuzzyBeetle::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, Terracillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Terracillator::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Terracillator::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, BuzzyBeetle::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Terracillator::OUTPUT_OSCILLATOR + i));
         }
         // Pulse Width
         for (unsigned i = 0; i < 2; i++) {
-            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, BuzzyBeetle::PARAM_PW + i));
-            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, BuzzyBeetle::INPUT_PW + i));
+            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Terracillator::PARAM_PW + i));
+            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Terracillator::INPUT_PW + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelBuzzyBeetle = createModel<BuzzyBeetle, BuzzyBeetleWidget>("2A03");
+Model *modelTerracillator = createModel<Terracillator, TerracillatorWidget>("2A03");

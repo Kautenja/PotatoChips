@@ -25,15 +25,15 @@ Plugin* plugin_instance;
 void init(Plugin* instance) {
     plugin_instance = instance;
     // current releases
-    instance->addModel(modelNameCorpOctalWaveGenerator);
     instance->addModel(modelJairasullator);
-    instance->addModel(modelBuzzyBeetle);
-    instance->addModel(modelPalletTownWavesSystem);
+    instance->addModel(modelTerracillator);
     instance->addModel(modelPotillator);
     instance->addModel(modelEscillator);
     instance->addModel(modelGleeokillator);
-    instance->addModel(modelBossFight);
+    instance->addModel(modelNameCorpOctalWaveGenerator);
+    instance->addModel(modelPalletTownWavesSystem);
     instance->addModel(modelMegaTone);
+    instance->addModel(modelBossFight);
     // blanks
     instance->addModel(modelChipS_SMP_Blank);
     instance->addModel(model2612_Blank);

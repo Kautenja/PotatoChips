@@ -70,23 +70,28 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     BuzzyBeetle() : ChipModule<Ricoh2A03>(6.f) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2,   -2.5f, 2.5f, 0.f,  "Triangle Frequency", " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD,    0,    15,   7,    "Noise Period");
-
-        configParam(PARAM_FM + 0, -1.f, 1.f, 0.f, "Pulse 1 FM");
-        configParam(PARAM_FM + 1, -1.f, 1.f, 0.f, "Pulse 2 FM");
-        configParam(PARAM_FM + 2, -1.f, 1.f, 0.f, "Triangle FM");
-        configParam(PARAM_LFSR, 0, 1, 0, "Noise LFSR");
-
-        configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
-
-        configParam(PARAM_LEVEL + 0, 0, 15, 10, "Pulse 1 Volume");
-        configParam(PARAM_LEVEL + 1, 0, 15, 10, "Pulse 2 Volume");
-        configParam(PARAM_LEVEL + 2, 0, 15, 10, "Triangle Volume");
-        configParam(PARAM_LEVEL + 3, 0, 15, 10, "Noise Volume");
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
+            // get the name of the channel
+            std::string name;
+            switch (i) {
+                case 0:
+                case 1: name = "Pulse " + std::to_string(i + 1); break;
+                case 2: name = "Triangle"; break;
+                case 3: name = "Noise"; break;
+            }
+            if (i < 2) {  // only pulse channels have duty cycle
+                configParam(PARAM_PW + i, 0, 3, 2, name + " Duty Cycle");
+            }
+            if (i < 3) {  // only pulse and triangle channels have frequency
+                configParam(PARAM_FREQ + i,   -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+                configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + " FM");
+            } else {  // noise channel has a period and LFSR setting
+                configParam(PARAM_NOISE_PERIOD, 0, 15, 7, "Noise Period");
+                configParam(PARAM_LFSR, 0, 1, 0, "Noise LFSR");
+            }
+            // all channels have a volume setting
+            configParam(PARAM_LEVEL + i, 0, 15, 10, name + " Volume");
+        }
     }
 
  protected:

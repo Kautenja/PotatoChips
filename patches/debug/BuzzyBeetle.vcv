@@ -121,15 +121,15 @@
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 10,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 11,
@@ -250,44 +250,44 @@
       "color": "#0986ad"
     },
     {
-      "id": 170,
-      "outputModuleId": 59,
-      "outputId": 3,
+      "id": 834,
+      "outputModuleId": 2,
+      "outputId": 1,
       "inputModuleId": 67,
       "inputId": 0,
-      "color": "#c9b70e"
+      "color": "#0986ad"
     },
     {
-      "id": 820,
-      "outputModuleId": 34,
-      "outputId": 1,
-      "inputModuleId": 133,
-      "inputId": 4,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 827,
-      "outputModuleId": 34,
-      "outputId": 0,
-      "inputModuleId": 59,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 831,
-      "outputModuleId": 133,
-      "outputId": 0,
-      "inputModuleId": 59,
-      "inputId": 8,
-      "color": "#c91847"
-    },
-    {
-      "id": 833,
+      "id": 835,
       "outputModuleId": 59,
       "outputId": 3,
       "inputModuleId": 2,
       "inputId": 1,
-      "color": "#0c8e15"
+      "color": "#0986ad"
+    },
+    {
+      "id": 836,
+      "outputModuleId": 34,
+      "outputId": 0,
+      "inputModuleId": 59,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 837,
+      "outputModuleId": 34,
+      "outputId": 1,
+      "inputModuleId": 133,
+      "inputId": 4,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 838,
+      "outputModuleId": 133,
+      "outputId": 0,
+      "inputModuleId": 59,
+      "inputId": 8,
+      "color": "#c9b70e"
     }
   ]
 }

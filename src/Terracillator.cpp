@@ -51,6 +51,7 @@ struct Terracillator : ChipModule<Ricoh2A03> {
         INPUT_LFSR,
         ENUMS(INPUT_LEVEL, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_PW, 2),
+        INPUT_SYNC,
         NUM_INPUTS
     };
 
@@ -95,6 +96,9 @@ struct Terracillator : ChipModule<Ricoh2A03> {
     }
 
  protected:
+    /// trigger for handling inputs to the sync port for the saw wave
+    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS];
+
     /// @brief Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -242,6 +246,10 @@ struct Terracillator : ChipModule<Ricoh2A03> {
         uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
         apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
         apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+        // sync input
+        const float sync = inputs[INPUT_SYNC].getVoltage(channel);
+        if (syncTriggers[channel].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
+            apu[channel].reset_phase(2);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -315,33 +323,35 @@ struct TerracillatorWidget : ModuleWidget {
         static constexpr auto panel = "res/Terracillator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, Terracillator::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 32),  module, Terracillator::PARAM_FREQ        + i);
             freq->snap = i == 3;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Terracillator::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 71),  module, Terracillator::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Terracillator::INPUT_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 99), module, Terracillator::INPUT_FM          + i));
             if (i < 3)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, Terracillator::PARAM_FM          + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 144), module, Terracillator::PARAM_FM          + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 173), module, Terracillator::PARAM_FM                  + i));
+                addParam(createParam<CKSS>(    Vec(120, 141), module, Terracillator::PARAM_FM                  + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, Terracillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Terracillator::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Terracillator::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, Terracillator::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, Terracillator::INPUT_LEVEL       + i));
+            // Pulse Width / Sync
+            if (i < 2) {
+                addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 241), module, Terracillator::PARAM_PW + i));
+                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, Terracillator::INPUT_PW + i));
+            } else if (i == 2) {
+                addInput(createInput<PJ301MPort>(Vec(12 + 35 * i, 264), module, Terracillator::INPUT_SYNC));
+            }
             // Output
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(29 + 35 * i, 319), module, Terracillator::LIGHTS_LEVEL + 3 * i));
             addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Terracillator::OUTPUT_OSCILLATOR + i));
-        }
-        // Pulse Width
-        for (unsigned i = 0; i < 2; i++) {
-            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Terracillator::PARAM_PW + i));
-            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Terracillator::INPUT_PW + i));
         }
     }
 };

@@ -108,6 +108,9 @@ class KonamiVRC6 {
             phase = 1;
             amp = 0;
         }
+
+        /// @brief Reset the phase of the oscillator.
+        inline void reset_phase() { phase = 1; }
     };
 
     /// the oscillators on the chip
@@ -291,6 +294,9 @@ class KonamiVRC6 {
         last_time = 0;
         for (Oscillator& osc : oscs) osc.reset();
     }
+
+    /// @brief Reset the phase for the given oscillator.
+    inline void reset_phase(unsigned osc) { oscs[osc].reset_phase(); }
 
     /// @brief Write a value to the given oscillator's register.
     ///

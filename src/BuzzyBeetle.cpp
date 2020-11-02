@@ -34,8 +34,10 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ,  Ricoh2A03::OSC_COUNT),
-        ENUMS(PARAM_FM,    Ricoh2A03::OSC_COUNT),
+        ENUMS(PARAM_FREQ,  Ricoh2A03::OSC_COUNT - 1),
+        PARAM_NOISE_PERIOD,
+        ENUMS(PARAM_FM,    Ricoh2A03::OSC_COUNT - 1),
+        PARAM_LFSR,
         ENUMS(PARAM_LEVEL, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
         NUM_PARAMS
@@ -43,11 +45,12 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT,  Ricoh2A03::OSC_COUNT),
-        ENUMS(INPUT_FM,    Ricoh2A03::OSC_COUNT),
+        ENUMS(INPUT_VOCT,  Ricoh2A03::OSC_COUNT - 1),
+        INPUT_NOISE_PERIOD,
+        ENUMS(INPUT_FM,    Ricoh2A03::OSC_COUNT - 1),
+        INPUT_LFSR,
         ENUMS(INPUT_LEVEL, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_PW, 2),
-        INPUT_LFSR,
         NUM_INPUTS
     };
 
@@ -70,12 +73,12 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2,   -2.5f, 2.5f, 0.f,  "Triangle Frequency", " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,    0,    15,   7,    "Noise Period");
+        configParam(PARAM_NOISE_PERIOD,    0,    15,   7,    "Noise Period");
 
         configParam(PARAM_FM + 0, -1.f, 1.f, 0.f, "Pulse 1 FM");
         configParam(PARAM_FM + 1, -1.f, 1.f, 0.f, "Pulse 2 FM");
         configParam(PARAM_FM + 2, -1.f, 1.f, 0.f, "Triangle FM");
-        configParam(PARAM_FM + 3, -1.f, 1.f, 0.f, "Noise PM");
+        configParam(PARAM_LFSR, 0, 1, 0, "Noise LFSR");
 
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
@@ -171,10 +174,10 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         // the maximal value for the frequency register
         static constexpr float FREQ_MAX = 15;
         // get the attenuation from the parameter knob
-        float freq = params[PARAM_FREQ + 3].getValue();
+        float freq = params[PARAM_NOISE_PERIOD].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOCT + 3].isConnected())
-            freq += inputs[INPUT_VOCT + 3].getPolyVoltage(channel) / 2.f;
+        if (inputs[INPUT_NOISE_PERIOD].isConnected())
+            freq += inputs[INPUT_NOISE_PERIOD].getPolyVoltage(channel) / 2.f;
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
@@ -242,7 +245,8 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
         // ---------------------------------------------------------------
         // pulse oscillator (2)
         // ---------------------------------------------------------------
@@ -261,7 +265,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         // ---------------------------------------------------------------
         // noise oscillator
         // ---------------------------------------------------------------
-        apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
+        apu[channel].write(Ricoh2A03::NOISE_LO, (is_lfsr << 7) | getNoisePeriod(channel));
         apu[channel].write(Ricoh2A03::NOISE_HI, 0);
         // get volume for triangle to normal voltages
         auto volumeTriangle = getVolume(2, channel);
@@ -311,22 +315,29 @@ struct BuzzyBeetleWidget : ModuleWidget {
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, BuzzyBeetle::INPUT_VOCT + i));
-            addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, BuzzyBeetle::OUTPUT_OSCILLATOR + i));
-            addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
-            addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
-            addParam(createParam<Trimpot>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FM + i));
-            addParam(createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(136, 23 + i * 85),  module, BuzzyBeetle::PARAM_LEVEL + i, BuzzyBeetle::LIGHTS_LEVEL + 3 * i));
-            addInput(createInput<PJ301MPort>(Vec(166, 26 + i * 85),  module, BuzzyBeetle::INPUT_LEVEL + i));
+            // Frequency / Noise Period
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, BuzzyBeetle::PARAM_FREQ        + i);
+            freq->snap = i == 3;
+            addParam(freq);
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, BuzzyBeetle::INPUT_VOCT        + i));
+            // FM / LFSR
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, BuzzyBeetle::INPUT_FM          + i));
+            if (i < 3)
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, BuzzyBeetle::PARAM_FM          + i));
+            else
+                addParam(createParam<CKSS>(    Vec(120, 173), module, BuzzyBeetle::PARAM_FM                  + i));
+            // Level
+            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, BuzzyBeetle::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, BuzzyBeetle::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, BuzzyBeetle::LIGHTS_LEVEL + 3 * i));
+            // Output
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, BuzzyBeetle::OUTPUT_OSCILLATOR + i));
         }
-        // PW 0
-        addParam(createSnapParam<RoundSmallBlackKnob>(Vec(167, 205), module, BuzzyBeetle::PARAM_PW + 0));
-        addInput(createInput<PJ301MPort>(Vec(134, 206),  module, BuzzyBeetle::INPUT_PW + 0));
-        // PW 1
-        addParam(createSnapParam<RoundSmallBlackKnob>(Vec(107, 293), module, BuzzyBeetle::PARAM_PW + 1));
-        addInput(createInput<PJ301MPort>(Vec(106, 328),  module, BuzzyBeetle::INPUT_PW + 1));
-        // LFSR switch
-        addInput(createInput<PJ301MPort>(Vec(24, 284), module, BuzzyBeetle::INPUT_LFSR));
+        // Pulse Width
+        for (unsigned i = 0; i < 2; i++) {
+            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, BuzzyBeetle::PARAM_PW + i));
+            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, BuzzyBeetle::INPUT_PW + i));
+        }
     }
 };
 

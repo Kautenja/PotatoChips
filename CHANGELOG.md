@@ -168,6 +168,7 @@
     -   VU Meter to monitor levels / clipping / aliasing
     -   invert sustain level and total level controls to be more intuitive
 -   updates to SN76489 (rev2 branded as "Mega Tone")
+    -   **audio rate FM**
     -   code optimizations
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
@@ -176,6 +177,7 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to FME7 (rev2 branded as "Gleeokillator")
+    -   **audio rate FM**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -183,15 +185,19 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to VRC6 (rev2 branded as "Escillator")
+    -   **audio rate FM**
+    -   **sync input for saw wave generator**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   updates to 2A03 (rev2 branded as "Buzzy Beetle")
+-   updates to 2A03 (rev2 branded as "Terracillator")
     -   **hard sync input**
-    -   **amplifier for steppy triangle wave**
+    -   **amplifier for steppy triangle generator**
+    -   **sync input for steppy triangle generator and noise generator**
+    -   **audio rate FM**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -201,6 +207,8 @@
 -   updates to AY-3-8910 (rev2 branded as "Jairasullator")
     -   **internal envelope / LFO (full synthesizer voice)**
     -   **discrete noise period control**
+    -   **audio rate FM**
+    -   **offet and scale parameters in DAC mode**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -208,6 +216,7 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to POKEY (rev2 branded as "Troglocillator")
+    -   **audio rate FM**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched

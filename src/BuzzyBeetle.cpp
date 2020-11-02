@@ -76,12 +76,13 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         configParam(PARAM_FM + 2, -1.f, 1.f, 0.f, "Triangle FM");
         configParam(PARAM_FM + 3, -1.f, 1.f, 0.f, "Noise PM");
 
-        configParam(PARAM_PW + 0,      0,    3,    2,    "Pulse 1 Duty Cycle");
-        configParam(PARAM_PW + 1,      0,    3,    2,    "Pulse 2 Duty Cycle");
-        configParam(PARAM_LEVEL + 0,  0.f,  1.f,  0.9f, "Pulse 1 Volume");
-        configParam(PARAM_LEVEL + 1,  0.f,  1.f,  0.9f, "Pulse 2 Volume");
-        configParam(PARAM_LEVEL + 2,  0.f,  1.f,  0.9f, "Triangle Volume");
-        configParam(PARAM_LEVEL + 3,  0.f,  1.f,  0.9f, "Noise Volume");
+        configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
+        configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
+
+        configParam(PARAM_LEVEL + 0, 0, 15, 10, "Pulse 1 Volume");
+        configParam(PARAM_LEVEL + 1, 0, 15, 10, "Pulse 2 Volume");
+        configParam(PARAM_LEVEL + 2, 0, 15, 10, "Triangle Volume");
+        configParam(PARAM_LEVEL + 3, 0, 15, 10, "Noise Volume");
     }
 
  protected:
@@ -186,21 +187,40 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     /// volume control.
     ///
     inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
+        // // the minimal value for the volume width register
+        // static constexpr float VOLUME_MIN = 0;
+        // // the maximal value for the volume width register
+        // static constexpr float VOLUME_MAX = 15;
+        // // get the attenuation from the parameter knob
+        // auto param = params[PARAM_LEVEL + oscillator].getValue();
+        // // apply the control voltage to the attenuation
+        // if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+        //     auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
+        //     cv = rack::clamp(cv, 0.f, 1.f);
+        //     cv = roundf(100.f * cv) / 100.f;
+        //     param *= 2 * cv;
+        // }
+        // // get the 8-bit volume clamped within legal limits
+        // return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
+
         // the minimal value for the volume width register
-        static constexpr float VOLUME_MIN = 0;
+        static constexpr float MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float VOLUME_MAX = 15;
-        // get the attenuation from the parameter knob
-        auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            param *= 2 * cv;
-        }
-        // get the 8-bit volume clamped within legal limits
-        return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
+        static constexpr float MAX = 15;
+        // get the level from the parameter knob
+        auto level = params[PARAM_LEVEL + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
+        // apply the control voltage to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        level = roundf(level * voltage / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return rack::clamp(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -258,6 +278,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         // ---------------------------------------------------------------
         apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
         apu[channel].write(Ricoh2A03::NOISE_HI, 0);
+        auto volumeTriangle = getVolume(2, channel);
         apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
         // enable all four oscillators
         apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);

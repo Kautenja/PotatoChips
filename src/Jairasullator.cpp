@@ -288,6 +288,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @returns the 4-bit envelope mode from parameters and CV inputs
     ///
     inline uint8_t getEnvelopeMode(unsigned channel) {
+        // TODO: don't process this in a channel-wise processing block
         // detect presses to the trigger and cycle the mode
         if (envModeTrigger.process(params[PARAM_ENVELOPE_MODE].getValue()))
             envMode = (envMode + 1) % 8;

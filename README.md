@@ -156,6 +156,94 @@ filters, and noise generators / distortion effects.
 See the [Manual][Potillator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: Mega Tone -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Mega Tone Logo" src="manual/MegaTone/img/MegaTone-Logo.svg">
+</h2>
+
+**Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
+processing unit from the [Sega Master System][SegaMasterSystem],
+[Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
+pulse waveform generators and an LFSR-based noise generator that selects
+between pitched white-noise and static periodic noise.
+
+<p align="center">
+<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
+</p>
+
+### Features
+
+-   **Triple Pulse Waveform Generator** Three 8-bit pulse waves with _50%_ duty
+    cycle and 10-bit frequency parameter
+-   **Noise Generator** Generate either pitched white-noise based on the
+    frequency of oscillator three, or static periodic noise at one of three
+    shift frequencies: _N / 2048_, _N / 1024_, _N / 512_ where _N_ is the
+    reference clock rate (which is something like _3579545Hz_).
+-   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
+    oscillator with mixer sliders and CV inputs
+-   **Channel Mixer:** Mix the voices together internally with hard clipping
+    and aliasing.
+
+See the [Manual][MegaTone] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Boss Fight -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Boss Fight Logo" src="manual/BossFight/img/BossFight-Logo.svg">
+</h2>
+
+**Boss Fight** is an emulation and re-envisioning of the Yamaha
+[Yamaha YM2612][YM2612] audio processing unit from the
+[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
+functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
+omissions, and re-envisioned features, namely,
+
+<p align="center">
+<img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">
+</p>
+
+### Features
+
+-   **16-bit Audio** It's 8 bits better than the previous generation of chips!
+    This is marketing! We're actually lying though -- the YM2612 produced a
+    _14-bit_ PCM stream, and so does BossFight. You're not getting those 2 bits
+    back; go cry about it.
+-   **4-Operator FM Synthesis** Full panel and CV control over the parameters
+    for each of the four operators including envelopes, multipliers, rate
+    scalings, tunings, gates, and LFO modulations.
+-   **8 FM Algorithms** 8 different arrangements of the four operators
+    following the original chip implementation.
+-   **Operator 1 Feedback** Feedback into operator one for interesting timbres
+    or total wave destruction.
+-   **Individual Operator Frequencies** Control the frequency of each operator
+    to produce weird, harsh, and trashed noises.
+-   **Looping Envelopes** Transform the one-shot envelope generators of
+    individual operators into looping AD envelopes.
+-   **Aliasing Control** The YM2612 hard clips the output signal when it gets
+    too loud. This is both a musically useful effect for introducing high-order
+    harmonics, as well as aliasing. Nyquist lied to you, aliasing is your
+    friend. However, if you are not a fan of clipping and aliasing, aliasing
+    control allows you to attenuate the output signal from the chip _before_
+    it passes through the hard clipper to prevent fully saturating the 14-bit
+    PCM stream.
+-   **VU Meter** A VU meter tracks how hot the signal from BossFight is getting
+    and makes it easy to visualize how much clipping is occurring.
+-   **Low-Frequency Oscillator** A shared low-frequency sine oscillator
+    controls amplitude modulation and frequency modulation of each operator.
+-   **Mono Output** The original YM2612 was stereo, but only because it had
+    six channels of synthesis. Boss Fight is a monophonic voice so there is no
+    built-in stereo processing.
+-   **Semi-Modular Normalization** Inputs are normalled forward across the
+    operators to reduce the amount of patch cables for setting up simple
+    patches quickly.
+
+See the [Manual][BossFight] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: Name Corp Octal Wave Generator -->
 <!-- ------------------------------------------------------------ -->
 
@@ -374,94 +462,6 @@ the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 ### Features
 
 See the [Manual][S_SMP] for more information about the features of this module. -->
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Boss Fight -->
-<!-- ------------------------------------------------------------ -->
-
-<h2 align="center">
-<img alt="Boss Fight Logo" src="manual/BossFight/img/BossFight-Logo.svg">
-</h2>
-
-**Boss Fight** is an emulation and re-envisioning of the Yamaha
-[Yamaha YM2612][YM2612] audio processing unit from the
-[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
-functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
-omissions, and re-envisioned features, namely,
-
-<p align="center">
-<img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">
-</p>
-
-### Features
-
--   **16-bit Audio** It's 8 bits better than the previous generation of chips!
-    This is marketing! We're actually lying though -- the YM2612 produced a
-    _14-bit_ PCM stream, and so does BossFight. You're not getting those 2 bits
-    back; go cry about it.
--   **4-Operator FM Synthesis** Full panel and CV control over the parameters
-    for each of the four operators including envelopes, multipliers, rate
-    scalings, tunings, gates, and LFO modulations.
--   **8 FM Algorithms** 8 different arrangements of the four operators
-    following the original chip implementation.
--   **Operator 1 Feedback** Feedback into operator one for interesting timbres
-    or total wave destruction.
--   **Individual Operator Frequencies** Control the frequency of each operator
-    to produce weird, harsh, and trashed noises.
--   **Looping Envelopes** Transform the one-shot envelope generators of
-    individual operators into looping AD envelopes.
--   **Aliasing Control** The YM2612 hard clips the output signal when it gets
-    too loud. This is both a musically useful effect for introducing high-order
-    harmonics, as well as aliasing. Nyquist lied to you, aliasing is your
-    friend. However, if you are not a fan of clipping and aliasing, aliasing
-    control allows you to attenuate the output signal from the chip _before_
-    it passes through the hard clipper to prevent fully saturating the 14-bit
-    PCM stream.
--   **VU Meter** A VU meter tracks how hot the signal from BossFight is getting
-    and makes it easy to visualize how much clipping is occurring.
--   **Low-Frequency Oscillator** A shared low-frequency sine oscillator
-    controls amplitude modulation and frequency modulation of each operator.
--   **Mono Output** The original YM2612 was stereo, but only because it had
-    six channels of synthesis. Boss Fight is a monophonic voice so there is no
-    built-in stereo processing.
--   **Semi-Modular Normalization** Inputs are normalled forward across the
-    operators to reduce the amount of patch cables for setting up simple
-    patches quickly.
-
-See the [Manual][BossFight] for more information about the features of this module.
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Mega Tone -->
-<!-- ------------------------------------------------------------ -->
-
-<h2 align="center">
-<img alt="Mega Tone Logo" src="manual/MegaTone/img/MegaTone-Logo.svg">
-</h2>
-
-**Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
-processing unit from the [Sega Master System][SegaMasterSystem],
-[Sega Mega Drive, and Sega Genesis][SegaMD]. The SN76489 chip contains three
-pulse waveform generators and an LFSR-based noise generator that selects
-between pitched white-noise and static periodic noise.
-
-<p align="center">
-<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
-</p>
-
-### Features
-
--   **Triple Pulse Waveform Generator** Three 8-bit pulse waves with _50%_ duty
-    cycle and 10-bit frequency parameter
--   **Noise Generator** Generate either pitched white-noise based on the
-    frequency of oscillator three, or static periodic noise at one of three
-    shift frequencies: _N / 2048_, _N / 1024_, _N / 512_ where _N_ is the
-    reference clock rate (which is something like _3579545Hz_).
--   **4-bit Amplifier** A 4-bit amplifier controls the output level of each
-    oscillator with mixer sliders and CV inputs
--   **Channel Mixer:** Mix the voices together internally with hard clipping
-    and aliasing.
-
-See the [Manual][MegaTone] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Wave Creative Modulator -->

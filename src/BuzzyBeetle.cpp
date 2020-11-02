@@ -188,22 +188,6 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     /// volume control.
     ///
     inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
-        // // the minimal value for the volume width register
-        // static constexpr float VOLUME_MIN = 0;
-        // // the maximal value for the volume width register
-        // static constexpr float VOLUME_MAX = 15;
-        // // get the attenuation from the parameter knob
-        // auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // // apply the control voltage to the attenuation
-        // if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-        //     auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-        //     cv = rack::clamp(cv, 0.f, 1.f);
-        //     cv = roundf(100.f * cv) / 100.f;
-        //     param *= 2 * cv;
-        // }
-        // // get the 8-bit volume clamped within legal limits
-        // return rack::clamp(VOLUME_MAX * param, VOLUME_MIN, VOLUME_MAX);
-
         // the minimal value for the volume width register
         static constexpr float MIN = 0;
         // the maximal value for the volume width register

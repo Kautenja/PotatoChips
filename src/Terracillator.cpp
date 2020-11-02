@@ -17,9 +17,7 @@
 #include "engine/chip_module.hpp"
 #include "dsp/ricoh_2a03.hpp"
 
-// TODO: discrete DMC sampler module
 // TODO: volume control for the triangle waveform
-// TODO: hard sync for triangle and pulse waveforms
 
 // ---------------------------------------------------------------------------
 // MARK: Module

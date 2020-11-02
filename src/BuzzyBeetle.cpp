@@ -65,6 +65,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
 
     /// @brief Initialize a new 2A03 Chip module.
     BuzzyBeetle() : ChipModule<Ricoh2A03>(6.f) {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2, dsp::FREQ_C4);
@@ -278,6 +279,7 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         // ---------------------------------------------------------------
         apu[channel].write(Ricoh2A03::NOISE_LO, (lfsr[channel].isHigh() << 7) | getNoisePeriod(channel));
         apu[channel].write(Ricoh2A03::NOISE_HI, 0);
+        // get volume for triangle to normal voltages
         auto volumeTriangle = getVolume(2, channel);
         apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
         // enable all four oscillators
@@ -330,7 +332,7 @@ struct BuzzyBeetleWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
             addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
             addParam(createParam<Trimpot>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FM + i));
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + i * 85),  module, BuzzyBeetle::PARAM_LEVEL + i, BuzzyBeetle::LIGHTS_LEVEL + i));
+            addParam(createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(136, 23 + i * 85),  module, BuzzyBeetle::PARAM_LEVEL + i, BuzzyBeetle::LIGHTS_LEVEL + 3 * i));
             addInput(createInput<PJ301MPort>(Vec(166, 26 + i * 85),  module, BuzzyBeetle::INPUT_LEVEL + i));
         }
         // PW 0

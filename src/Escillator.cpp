@@ -38,6 +38,7 @@ struct Escillator : ChipModule<KonamiVRC6> {
         ENUMS(INPUT_FM, KonamiVRC6::OSC_COUNT),
         ENUMS(INPUT_PW, KonamiVRC6::OSC_COUNT - 1),  // pulse wave only
         ENUMS(INPUT_LEVEL, KonamiVRC6::OSC_COUNT),
+        INPUT_SYNC,
         NUM_INPUTS
     };
 
@@ -71,6 +72,9 @@ struct Escillator : ChipModule<KonamiVRC6> {
     }
 
  protected:
+    /// trigger for handling inputs to the sync port for the saw wave
+    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS];
+
     /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -181,6 +185,9 @@ struct Escillator : ChipModule<KonamiVRC6> {
     inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
+        const float sync = inputs[INPUT_SYNC].getVoltage(channel);
+        if (syncTriggers[channel].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
+            apu[channel].reset_phase(2);
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // frequency (max frequency is same for pulses and saw, 4095)
             uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], 4095, clock_division[oscillator]);
@@ -239,33 +246,32 @@ struct EscillatorWidget : ModuleWidget {
     ///
     explicit EscillatorWidget(Escillator *module) {
         setModule(module);
-        static constexpr auto panel = "res/VRC6.svg";
+        static constexpr auto panel = "res/Escillator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 45),  module, Escillator::PARAM_FREQ  + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, Escillator::INPUT_VOCT  + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 32),  module, Escillator::PARAM_FREQ  + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 71),  module, Escillator::INPUT_VOCT  + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, Escillator::INPUT_FM    + i));
-            addParam(createParam<Trimpot>(     Vec(12 + 35 * i, 173), module, Escillator::PARAM_FM    + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 99), module, Escillator::INPUT_FM    + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 144), module, Escillator::PARAM_FM    + i));
             // Level
-            auto level = createParam<Trimpot>( Vec(12 + 35 * i, 221), module, Escillator::PARAM_LEVEL + i);
-            level->snap = true;
-            addParam(level);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, Escillator::INPUT_LEVEL + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Escillator::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 170), module, Escillator::PARAM_LEVEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 210), module, Escillator::INPUT_LEVEL + i));
+            if (i < 2) {  // pulse width for tone generator
+                addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 241), module, Escillator::PARAM_PW + i));
+                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 281), module, Escillator::INPUT_PW + i));
+            } else {  // sync for saw wave
+                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 264), module, Escillator::INPUT_SYNC));
+            }
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Escillator::OUTPUT_OSCILLATOR + i));
-        }
-        // Pulse Width
-        for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT - 1; i++) {
-            addParam(createSnapParam<Trimpot>(Vec(146, 35 + i * 111), module, Escillator::PARAM_PW + i));
-            addInput(createInput<PJ301MPort>(Vec(145, 70 + i * 111), module, Escillator::INPUT_PW + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(32 + 35 * i, 319), module, Escillator::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Escillator::OUTPUT_OSCILLATOR + i));
         }
     }
 };

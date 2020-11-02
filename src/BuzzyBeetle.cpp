@@ -146,11 +146,16 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         // the maximal value for the pulse width register
         static constexpr float PW_MAX = 3;
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + oscillator].getValue();
-        // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 3.f;
+        auto param = params[PARAM_PW + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
 

@@ -428,12 +428,13 @@ class Ricoh2A03 {
             delay = time - end_time;
         }
 
-        /// Reset the oscillator to its initial state.
+        /// @brief Reset the oscillator to its initial state.
         inline void reset() {
             noise = 1 << 14;
             Envelope::reset();
         }
 
+        /// @brief Reset the LFSR.
         inline void reset_noise() {
             noise = 1 << 14;
         }
@@ -611,18 +612,11 @@ class Ricoh2A03 {
     /// 0=Pulse1, 1=Pulse2, 2=Triangle.
     ///
     inline void reset_phase(unsigned osc_index) {
-        switch(osc_index) {
-        case 0:
-            pulse0.reset_phase();
-            break;
-        case 1:
-            pulse1.reset_phase();
-            break;
-        case 2:
-            triangle.reset_phase();
-            break;
-        default:
-            noise.reset_noise();
+        switch (osc_index) {
+            case 0: pulse0.reset_phase();   break;
+            case 1: pulse1.reset_phase();   break;
+            case 2: triangle.reset_phase(); break;
+            case 3: noise.reset_noise();    break;
         }
     }
 

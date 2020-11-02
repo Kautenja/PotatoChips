@@ -34,25 +34,29 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ, Ricoh2A03::OSC_COUNT),
+        ENUMS(PARAM_FREQ,  Ricoh2A03::OSC_COUNT),
+        ENUMS(PARAM_FM,    Ricoh2A03::OSC_COUNT),
+        ENUMS(PARAM_LEVEL, Ricoh2A03::OSC_COUNT),
         ENUMS(PARAM_PW, 2),
-        ENUMS(PARAM_VOLUME, 3),
         NUM_PARAMS
     };
+
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT, Ricoh2A03::OSC_COUNT),
-        ENUMS(INPUT_FM, 3),
-        ENUMS(INPUT_VOLUME, 3),
+        ENUMS(INPUT_VOCT,  Ricoh2A03::OSC_COUNT),
+        ENUMS(INPUT_FM,    Ricoh2A03::OSC_COUNT),
+        ENUMS(INPUT_LEVEL, Ricoh2A03::OSC_COUNT),
         ENUMS(INPUT_PW, 2),
         INPUT_LFSR,
         NUM_INPUTS
     };
+
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_OSCILLATOR, Ricoh2A03::OSC_COUNT),
         NUM_OUTPUTS
     };
+
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHTS_LEVEL, 3 * Ricoh2A03::OSC_COUNT),
@@ -62,15 +66,22 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     /// @brief Initialize a new 2A03 Chip module.
     BuzzyBeetle() : ChipModule<Ricoh2A03>(6.f) {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2,   dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2,   dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 2,   -2.5f, 2.5f, 0.f,  "Triangle Frequency", " Hz", 2,   dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 3,    0,    15,   7,    "Noise Period",       "",    0,   1,             -15);
+        configParam(PARAM_FREQ + 0,   -2.5f, 2.5f, 0.f,  "Pulse 1 Frequency",  " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1,   -2.5f, 2.5f, 0.f,  "Pulse 2 Frequency",  " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 2,   -2.5f, 2.5f, 0.f,  "Triangle Frequency", " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 3,    0,    15,   7,    "Noise Period");
+
+        configParam(PARAM_FM + 0, -1.f, 1.f, 0.f, "Pulse 1 FM");
+        configParam(PARAM_FM + 1, -1.f, 1.f, 0.f, "Pulse 2 FM");
+        configParam(PARAM_FM + 2, -1.f, 1.f, 0.f, "Triangle FM");
+        configParam(PARAM_FM + 3, -1.f, 1.f, 0.f, "Noise PM");
+
         configParam(PARAM_PW + 0,      0,    3,    2,    "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1,      0,    3,    2,    "Pulse 2 Duty Cycle");
-        configParam(PARAM_VOLUME + 0,  0.f,  1.f,  0.9f, "Pulse 1 Volume",     "%",   0.f, 100.f);
-        configParam(PARAM_VOLUME + 1,  0.f,  1.f,  0.9f, "Pulse 2 Volume",     "%",   0.f, 100.f);
-        configParam(PARAM_VOLUME + 2,  0.f,  1.f,  0.9f, "Noise Volume",       "%",   0.f, 100.f);
+        configParam(PARAM_LEVEL + 0,  0.f,  1.f,  0.9f, "Pulse 1 Volume");
+        configParam(PARAM_LEVEL + 1,  0.f,  1.f,  0.9f, "Pulse 2 Volume");
+        configParam(PARAM_LEVEL + 2,  0.f,  1.f,  0.9f, "Triangle Volume");
+        configParam(PARAM_LEVEL + 3,  0.f,  1.f,  0.9f, "Noise Volume");
     }
 
  protected:
@@ -99,8 +110,22 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
     ) {
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
@@ -160,13 +185,11 @@ struct BuzzyBeetle : ChipModule<Ricoh2A03> {
         static constexpr float VOLUME_MIN = 0;
         // the maximal value for the volume width register
         static constexpr float VOLUME_MAX = 15;
-        // decrement the noise oscillator
-        if (oscillator == 3) oscillator -= 1;
         // get the attenuation from the parameter knob
-        auto param = params[PARAM_VOLUME + oscillator].getValue();
+        auto param = params[PARAM_LEVEL + oscillator].getValue();
         // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOLUME + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_VOLUME + oscillator].getPolyVoltage(channel) / 10.f;
+        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
+            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
             cv = rack::clamp(cv, 0.f, 1.f);
             cv = roundf(100.f * cv) / 100.f;
             param *= 2 * cv;
@@ -278,15 +301,11 @@ struct BuzzyBeetleWidget : ModuleWidget {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(19, 75 + i * 85),  module, BuzzyBeetle::INPUT_VOCT + i));
             addOutput(createOutput<PJ301MPort>(Vec(166, 74 + i * 85),  module, BuzzyBeetle::OUTPUT_OSCILLATOR + i));
-            if (i < 3) {  // pulse 1, pulse 2, & triangle
-                addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
-                addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
-                auto y = i == 2 ? 3 : i;
-                addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + y * 85),  module, BuzzyBeetle::PARAM_VOLUME + i, BuzzyBeetle::LIGHTS_LEVEL + i));
-                addInput(createInput<PJ301MPort>(Vec(166, 26 + y * 85),  module, BuzzyBeetle::INPUT_VOLUME + i));
-            } else {  // noise
-                addParam(createSnapParam<Rogan2PWhite>( Vec(53, 305), module, BuzzyBeetle::PARAM_FREQ + i));
-            }
+            addInput(createInput<PJ301MPort>(Vec(19, 26 + i * 85),  module, BuzzyBeetle::INPUT_FM + i));
+            addParam(createParam<BefacoBigKnob>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FREQ + i));
+            addParam(createParam<Trimpot>(Vec(52, 25 + i * 85),  module, BuzzyBeetle::PARAM_FM + i));
+            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(136, 23 + i * 85),  module, BuzzyBeetle::PARAM_LEVEL + i, BuzzyBeetle::LIGHTS_LEVEL + i));
+            addInput(createInput<PJ301MPort>(Vec(166, 26 + i * 85),  module, BuzzyBeetle::INPUT_LEVEL + i));
         }
         // PW 0
         addParam(createSnapParam<RoundSmallBlackKnob>(Vec(167, 205), module, BuzzyBeetle::PARAM_PW + 0));

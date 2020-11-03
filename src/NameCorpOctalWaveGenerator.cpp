@@ -317,20 +317,17 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// @param channels the number of active polyphonic channels
     ///
     inline void processLights(const ProcessArgs &args, unsigned channels) final {
-        float brightness[Namco106::OSC_COUNT] = {};
-        // accumulate brightness for all the channels
-        for (unsigned channel = 0; channel < channels; channel++) {
-            for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
-                brightness[oscillator] = brightness[oscillator] + (oscillator < num_oscillators[channel]);
-            }
-        }
         // set the lights based on the accumulated brightness
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+            // accumulate brightness for all the channels
+            float brightness = 0.f;
+            for (unsigned channel = 0; channel < channels; channel++)
+                brightness = brightness + (oscillator < num_oscillators[channel]);
             const auto light = LIGHT_CHANNEL + 3 * (Namco106::OSC_COUNT - oscillator - 1);
             // get the brightness level for the oscillator.  Because the
             // signal is boolean, the root mean square will have no effect.
             // Instead, the average over the channels is used as brightness
-            auto level = brightness[oscillator] / channels;
+            auto level = brightness / channels;
             // set the light colors in BGR order.
             lights[light + 2].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
             // if there is more than one channel running (polyphonic), set

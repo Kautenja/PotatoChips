@@ -227,6 +227,15 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
         return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
     }
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the audio inputs to
+    ///
+    virtual void processAudio(const ProcessArgs &args, unsigned channel) {
+
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

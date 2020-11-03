@@ -52,13 +52,12 @@ struct ChipModule : rack::engine::Module {
 
     // MARK: Processing Life-cycle
 
-    // TODO: make pure virtual
     /// @brief Process the audio rate inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const rack::engine::Module::ProcessArgs &args, unsigned channel) { };
+    virtual void processAudio(const rack::engine::Module::ProcessArgs &args, unsigned channel) = 0;
 
     /// @brief Process the CV inputs for the given channel.
     ///

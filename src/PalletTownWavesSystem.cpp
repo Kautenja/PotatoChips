@@ -270,6 +270,15 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         return volume << 4;
     }
 
+    /// @brief Process the audio rate inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the audio inputs to
+    ///
+    virtual void processAudio(const ProcessArgs &args, unsigned channel) {
+
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)

@@ -58,6 +58,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// the indexes of lights on the module
     enum LightIds {
         ENUMS(LIGHT_CHANNEL, 3 * Namco106::OSC_COUNT),
+        ENUMS(LIGHT_LEVEL, 3 * Namco106::OSC_COUNT),
         NUM_LIGHTS
     };
 
@@ -254,15 +255,6 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
     virtual void processAudio(const ProcessArgs &args, unsigned channel) {
-
-    }
-
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
-    ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) override {
         // write waveform data to the chip's RAM based on the position in
         // the wave-table
         auto position = getWavetablePosition(channel);
@@ -285,8 +277,6 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
             // combine the two nibbles into a byte for the RAM
             apu[channel].write(i, (nibbleHi << 4) | nibbleLo);
         }
-        // get the number of active oscillators from the panel
-        num_oscillators[channel] = getActiveOscillators(channel);
         // set the frequency for all oscillators on the chip
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
             // extract the low, medium, and high frequency register values
@@ -300,6 +290,19 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
             // WAVEFORM LENGTH + FREQUENCY HIGH
             uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
             apu[channel].write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * oscillator, hig);
+        }
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) override {
+        // get the number of active oscillators from the panel
+        num_oscillators[channel] = getActiveOscillators(channel);
+        // set the frequency for all oscillators on the chip
+        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
             // WAVE ADDRESS
             apu[channel].write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * oscillator, 0);
             // VOLUME (and oscillator selection on oscillator 8, this has
@@ -337,6 +340,19 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
             if (channels > 1) level *= 0;
             lights[light + 1].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
             lights[light + 0].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
+        }
+
+        for (unsigned voice = 0; voice < Namco106::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHT_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHT_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHT_LEVEL + voice * 3 + 2].setBrightness(0);
         }
     }
 };
@@ -395,7 +411,7 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
             addChild(table_editor);
         }
         // oscillator select
-        addParam(createParam<Rogan3PWhite>(Vec(156, 42), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(156, 42), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS));
         addParam(createParam<Trimpot>(Vec(168, 110), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS_ATT));
         addInput(createInput<PJ301MPort>(Vec(165, 153), module, NameCorpOctalWaveGenerator::INPUT_NUM_OSCILLATORS));
         // wave-table morph
@@ -411,7 +427,8 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
             addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
             addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(205, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_LEVEL + 3 * i));
         }
     }
 };

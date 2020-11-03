@@ -33,6 +33,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
+        ENUMS(PARAM_FM, Namco106::OSC_COUNT),
         ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
         PARAM_NUM_OSCILLATORS,
         PARAM_NUM_OSCILLATORS_ATT,
@@ -72,6 +73,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
 
     /// @brief Initialize a new 106 Chip module.
     NameCorpOctalWaveGenerator() : ChipModule<Namco106>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_NUM_OSCILLATORS,      1, Namco106::OSC_COUNT, 4, "Active Channels");
         configParam(PARAM_NUM_OSCILLATORS_ATT, -1, 1,                   0, "Active Channels Attenuverter");
@@ -79,9 +81,10 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
         for (unsigned osc = 0; osc < Namco106::OSC_COUNT; osc++) {
-            auto osc_name = std::to_string(osc + 1);
-            configParam(PARAM_FREQ + osc,  -2.5f, 2.5f,  0.f, "Channel " + osc_name + " Frequency",  " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_VOLUME + osc, 0,    15,   15,   "Channel " + osc_name + " Volume",     "%",   0, 100.f / 15.f);
+            auto osc_name = "Channel " + std::to_string(osc + 1);
+            configParam(PARAM_FREQ + osc,  -2.5f, 2.5f,  0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FM + osc,  -1.f,  1.f,   0.f, osc_name + " FM");
+            configParam(PARAM_VOLUME + osc, 0,    15,   15,   osc_name + " Volume");
         }
         memset(num_oscillators, 1, sizeof num_oscillators);
         resetWavetable();
@@ -184,10 +187,25 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// the value of the knob and any CV modulation.
     ///
     inline uint32_t getFrequency(unsigned oscillator, unsigned channel) {
-        // get the frequency of the oscillator from the parameter and CVs
+        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
+        // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
@@ -211,20 +229,23 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     ///
     inline uint8_t getVolume(unsigned oscillator, unsigned channel) {
         // the minimal value for the volume width register
-        static constexpr float VOLUME_MIN = 0;
+        static constexpr float MIN = 0;
         // the maximal value for the volume width register
-        static constexpr float VOLUME_MAX = 15;
-        // get the volume from the parameter knob
-        auto param = params[PARAM_VOLUME + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_VOLUME + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_VOLUME + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            param *= 2 * cv;
-        }
-        // get the 8-bit volume clamped within legal limits
-        return rack::clamp(param, VOLUME_MIN, VOLUME_MAX);
+        static constexpr float MAX = 15;
+        // get the level from the parameter knob
+        auto level = params[PARAM_VOLUME + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_VOLUME + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto voltage = inputs[INPUT_VOLUME + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_VOLUME + oscillator].setVoltage(voltage, channel);
+        // apply the control voltage to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        level = roundf(level * voltage / 10.f);
+        // get the 8-bit attenuation by inverting the level and clipping
+        // to the legal bounds of the parameter
+        return rack::clamp(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -385,6 +406,7 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
+            addParam(createParam<Trimpot>(  Vec(257, 40 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
             addParam(createParam<Rogan2PWhite>( Vec(275, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
             addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
             addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));

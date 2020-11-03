@@ -19,6 +19,7 @@
 #include "widget/indexed_frame_display.hpp"
 
 // TODO: option to prevent clicks in context menu
+// TODO: audio rate modulation
 
 // ---------------------------------------------------------------------------
 // MARK: Module

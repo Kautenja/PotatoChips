@@ -93,7 +93,7 @@
         },
         {
           "id": 1,
-          "value": 0.587499857
+          "value": 0.0
         },
         {
           "id": 2,
@@ -101,7 +101,7 @@
         },
         {
           "id": 3,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 4,
@@ -113,7 +113,7 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 7,
@@ -129,23 +129,23 @@
         },
         {
           "id": 10,
-          "value": 2.0
+          "value": 5.0
         },
         {
           "id": 11,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 12,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 13,
-          "value": 1.0
+          "value": 3.0
         },
         {
           "id": 14,
-          "value": 1.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 137,
@@ -224,28 +224,28 @@
           0,
           1,
           1,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
-          9,
+          2,
+          2,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          6,
+          6,
           7,
           7,
-          7,
-          7,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          8,
+          8,
+          8,
+          9,
+          9,
+          10,
+          10,
+          11,
+          11,
+          12,
           12,
           13,
           13,
@@ -293,33 +293,33 @@
           14,
           14,
           13,
-          0,
-          0,
-          1,
-          1,
-          1,
-          3,
-          3,
-          6,
-          4,
-          4,
-          4,
-          3,
-          3,
-          12,
+          13,
           12,
           12,
           11,
+          11,
           10,
+          10,
+          9,
+          9,
+          8,
+          8,
+          7,
+          7,
+          7,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
           3,
           3,
-          3,
-          3,
-          3,
-          13,
-          13,
-          14,
-          14
+          2,
+          2,
+          1,
+          1,
+          0
         ]
       },
       "pos": [
@@ -385,7 +385,7 @@
       "params": [
         {
           "id": 0,
-          "value": 0.654500008
+          "value": 0.5
         },
         {
           "id": 1,
@@ -393,11 +393,11 @@
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.5
         },
         {
           "id": 3,
-          "value": 0.669499993
+          "value": 0.5
         }
       ],
       "leftModuleId": 5,
@@ -409,14 +409,6 @@
     }
   ],
   "cables": [
-    {
-      "id": 746,
-      "outputModuleId": 48,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 4,
-      "color": "#0c8e15"
-    },
     {
       "id": 747,
       "outputModuleId": 2,
@@ -432,22 +424,6 @@
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#0986ad"
-    },
-    {
-      "id": 752,
-      "outputModuleId": 48,
-      "outputId": 3,
-      "inputModuleId": 51,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 757,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 48,
-      "inputId": 0,
-      "color": "#c91847"
     },
     {
       "id": 837,
@@ -466,12 +442,28 @@
       "color": "#0c8e15"
     },
     {
-      "id": 858,
-      "outputModuleId": 137,
+      "id": 746,
+      "outputModuleId": 48,
+      "outputId": 3,
+      "inputModuleId": 2,
+      "inputId": 4,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 860,
+      "outputModuleId": 48,
+      "outputId": 3,
+      "inputModuleId": 51,
+      "inputId": 0,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 757,
+      "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 48,
-      "inputId": 11,
-      "color": "#0c8e15"
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

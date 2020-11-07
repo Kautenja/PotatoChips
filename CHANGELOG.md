@@ -224,6 +224,7 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to 106 (rev2 branded as "Name Corp Octal Wave Generator")
+    -   **undo/redo support for wavetable edits**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched
@@ -231,6 +232,7 @@
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to GBS (rev2 branded as "Pallet Town Waves System")
+    -   **undo/redo support for wavetable edits**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched

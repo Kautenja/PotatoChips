@@ -77,6 +77,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
 
     /// @brief Initialize a new GBS Chip module.
     PalletTownWavesSystem() : ChipModule<NintendoGBS>() {
+        normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0, -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -2.5f, 2.5f, 0.f, "Pulse 2 Frequency", " Hz", 2, dsp::FREQ_C4);

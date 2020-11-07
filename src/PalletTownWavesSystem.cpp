@@ -19,8 +19,6 @@
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
 
-// TODO: wave channel outputs a "pop" when reset is held
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

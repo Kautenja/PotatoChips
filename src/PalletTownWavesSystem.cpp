@@ -231,7 +231,9 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         auto param = params[PARAM_WAVETABLE].getValue();
         // auto att = params[PARAM_WAVETABLE_ATT].getValue();
         // get the CV as 1V per wave-table
-        auto cv = inputs[INPUT_WAVETABLE].getPolyVoltage(channel) / 2.f;
+        auto normalMod = inputs[INPUT_WAVETABLE - 1].getVoltage(channel);
+        // rescale from a 7V range to the parameter space in [-5, 5]
+        auto cv = rescale(inputs[INPUT_WAVETABLE].getNormalVoltage(normalMod, channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
         return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
     }
@@ -250,7 +252,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         float freq = params[PARAM_NOISE_PERIOD].getValue();
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
-            freq += inputs[INPUT_NOISE_PERIOD].getPolyVoltage(channel) / 2.f;
+            freq += inputs[INPUT_NOISE_PERIOD].getVoltage(channel) / 2.f;
         return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
@@ -311,34 +313,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
             0x80 | ((freq & 0b0000011100000000) >> 8)
         );
-    }
-
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
-    ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // turn on the power
-        apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
-        // set the global volume
-        apu[channel].write(NintendoGBS::STEREO_ENABLES, 0b11111111);
-        apu[channel].write(NintendoGBS::STEREO_VOLUME, 0b11111111);
-        // ---------------------------------------------------------------
-        // pulse
-        // ---------------------------------------------------------------
-        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-            // pulse width of the pulse wave (high 2 bits)
-            apu[channel].write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * oscillator, getPulseWidth(oscillator, channel));
-            // volume of the pulse wave, envelope add mode on
-            apu[channel].write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * oscillator, getVolume(oscillator, channel, 15));
-        }
-        // ---------------------------------------------------------------
-        // wave
-        // ---------------------------------------------------------------
-        apu[channel].write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
-        apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, getVolume(NintendoGBS::WAVETABLE, channel, 3));
+        // WAVE-TABLE
         // get the index of the wave-table from the panel
         auto position = getWavetablePosition(channel);
         // calculate the address of the base waveform in the table
@@ -368,6 +343,34 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             // combine the two samples into a single byte for the RAM
             apu[channel].write(NintendoGBS::WAVE_TABLE_VALUES + i, (nibbleHi << 4) | nibbleLo);
         }
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        // turn on the power
+        apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
+        // set the global volume
+        apu[channel].write(NintendoGBS::STEREO_ENABLES, 0b11111111);
+        apu[channel].write(NintendoGBS::STEREO_VOLUME, 0b11111111);
+        // ---------------------------------------------------------------
+        // pulse
+        // ---------------------------------------------------------------
+        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
+            // pulse width of the pulse wave (high 2 bits)
+            apu[channel].write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * oscillator, getPulseWidth(oscillator, channel));
+            // volume of the pulse wave, envelope add mode on
+            apu[channel].write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * oscillator, getVolume(oscillator, channel, 15));
+        }
+        // ---------------------------------------------------------------
+        // wave
+        // ---------------------------------------------------------------
+        apu[channel].write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
+        apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, getVolume(NintendoGBS::WAVETABLE, channel, 3));
         // ---------------------------------------------------------------
         // noise
         // ---------------------------------------------------------------

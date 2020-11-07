@@ -175,7 +175,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
         auto param = params[PARAM_WAVETABLE].getValue();
         auto att = params[PARAM_WAVETABLE_ATT].getValue();
         // get the CV as 1V per wave-table
-        auto cv = inputs[INPUT_WAVETABLE].getPolyVoltage(channel) / 2.f;
+        auto cv = rescale(inputs[INPUT_WAVETABLE].getVoltage(channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
         return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
     }

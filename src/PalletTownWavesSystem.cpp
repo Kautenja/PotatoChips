@@ -275,7 +275,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) {
+    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
 
     }
 

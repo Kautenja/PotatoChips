@@ -254,7 +254,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) {
+    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
         // write waveform data to the chip's RAM based on the position in
         // the wave-table
         auto position = getWavetablePosition(channel);
@@ -402,7 +402,9 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
                 NameCorpOctalWaveGenerator::BIT_DEPTH,              // waveform bit depth
                 Vec(10, 26 + 68 * waveform),     // position
                 Vec(135, 60),                    // size
-                colors[waveform]                 // line fill color
+                colors[waveform],                 // line fill color
+                {{{0, 0, 0, 1}}},
+                {{{0, 0, 0, 1}}}
             );
             // add the table editor to the module
             addChild(table_editor);

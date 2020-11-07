@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        59,
+        71,
         0
       ]
     },
@@ -53,7 +53,7 @@
       "leftModuleId": 51,
       "rightModuleId": 1,
       "pos": [
-        49,
+        61,
         0
       ]
     },
@@ -82,10 +82,90 @@
       ]
     },
     {
-      "id": 48,
+      "id": 51,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 147,
+      "rightModuleId": 2,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        48,
+        0
+      ]
+    },
+    {
+      "id": 137,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.5
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 0.5
+        },
+        {
+          "id": 3,
+          "value": 0.5
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 147,
+      "pos": [
+        8,
+        0
+      ]
+    },
+    {
+      "id": 147,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.0",
-      "model": "GBS",
+      "model": "106",
       "params": [
         {
           "id": 0,
@@ -113,7 +193,7 @@
         },
         {
           "id": 6,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 7,
@@ -121,15 +201,15 @@
         },
         {
           "id": 8,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 10,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 11,
@@ -141,10 +221,62 @@
         },
         {
           "id": 13,
-          "value": 3.0
+          "value": 0.0
         },
         {
           "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        },
+        {
+          "id": 16,
+          "value": 15.0
+        },
+        {
+          "id": 17,
+          "value": 15.0
+        },
+        {
+          "id": 18,
+          "value": 15.0
+        },
+        {
+          "id": 19,
+          "value": 15.0
+        },
+        {
+          "id": 20,
+          "value": 15.0
+        },
+        {
+          "id": 21,
+          "value": 15.0
+        },
+        {
+          "id": 22,
+          "value": 15.0
+        },
+        {
+          "id": 23,
+          "value": 15.0
+        },
+        {
+          "id": 24,
+          "value": 4.0
+        },
+        {
+          "id": 25,
+          "value": 0.0
+        },
+        {
+          "id": 26,
+          "value": 1.0
+        },
+        {
+          "id": 27,
           "value": 0.0
         }
       ],
@@ -326,86 +458,6 @@
         16,
         0
       ]
-    },
-    {
-      "id": 51,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Scope",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 14.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 48,
-      "rightModuleId": 2,
-      "data": {
-        "lissajous": 0,
-        "external": 0
-      },
-      "pos": [
-        36,
-        0
-      ]
-    },
-    {
-      "id": 137,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "ADSR",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.5
-        },
-        {
-          "id": 1,
-          "value": 0.5
-        },
-        {
-          "id": 2,
-          "value": 0.5
-        },
-        {
-          "id": 3,
-          "value": 0.5
-        }
-      ],
-      "leftModuleId": 5,
-      "rightModuleId": 48,
-      "pos": [
-        8,
-        0
-      ]
     }
   ],
   "cables": [
@@ -442,28 +494,28 @@
       "color": "#0c8e15"
     },
     {
-      "id": 746,
-      "outputModuleId": 48,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 4,
-      "color": "#0c8e15"
+      "id": 757,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 147,
+      "inputId": 0,
+      "color": "#c91847"
     },
     {
       "id": 860,
-      "outputModuleId": 48,
-      "outputId": 3,
+      "outputModuleId": 147,
+      "outputId": 7,
       "inputModuleId": 51,
       "inputId": 0,
       "color": "#0c8e15"
     },
     {
-      "id": 757,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 48,
-      "inputId": 0,
-      "color": "#c91847"
+      "id": 746,
+      "outputModuleId": 147,
+      "outputId": 7,
+      "inputModuleId": 2,
+      "inputId": 4,
+      "color": "#0c8e15"
     }
   ]
 }

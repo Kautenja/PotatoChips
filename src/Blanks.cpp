@@ -57,13 +57,13 @@ struct BlankWidget : ModuleWidget {
 };
 
 extern constexpr char const blank1[] = "res/S-SMP-Chip.svg";
-rack::Model *modelChipS_SMP_Blank = createModel<
+rack::Model *modelChipS_SMP_Blank1 = createModel<
     BlankModule,
     BlankWidget<blank1, ScrewStyle::All, ScrewSilver>
 >("S_SMP_Blank1");
 
-extern constexpr char const blank2[] = "res/2612-Envelope.svg";
-rack::Model *model2612_Blank = createModel<
+extern constexpr char const blank2[] = "res/BossFight-Envelope.svg";
+rack::Model *modelBossFight_Blank1 = createModel<
     BlankModule,
     BlankWidget<blank2, ScrewStyle::All, ScrewBlack>
 >("2612_Blank1");

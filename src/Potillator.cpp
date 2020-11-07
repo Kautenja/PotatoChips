@@ -72,14 +72,14 @@ struct Potillator : ChipModule<AtariPOKEY> {
             configParam(PARAM_LEVEL + i,  0,   15,    7,   name + " Level");
         }
         // control register controls
-        configParam(PARAM_CONTROL + 0, 0, 1, 0, "Frequency Division", "");
-        configParam(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Voice 2 from Voice 4", "");
-        configParam(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Voice 1 from Voice 3", "");
-        // configParam(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3", "");  // ignore 16-bit
-        // configParam(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2", "");  // ignore 16-bit
-        configParam(PARAM_CONTROL + 5, 0, 1, 0, "Ch. 3 Base Frequency", "");
-        configParam(PARAM_CONTROL + 6, 0, 1, 0, "Ch. 1 Base Frequency", "");
-        configParam(PARAM_CONTROL + 7, 0, 1, 0, "LFSR", "");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 0, 0, 1, 0, "Low Frequency");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Voice 2 from Voice 4");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Voice 1 from Voice 3");
+        // configParam<BooleanParamQuantity>(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3");  // ignore 16-bit
+        // configParam<BooleanParamQuantity>(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2");  // ignore 16-bit
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 5, 0, 1, 0, "Voice 3 High Frequency");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 6, 0, 1, 0, "Voice 1 High Frequency");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 7, 0, 1, 0, "Linear Feedback Shift Register");
     }
 
  protected:

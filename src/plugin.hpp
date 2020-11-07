@@ -14,6 +14,7 @@
 //
 
 #include "rack.hpp"
+#include "components.hpp"
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
@@ -40,8 +41,8 @@ extern rack::Model *modelMegaTone;
 extern rack::Model *modelBossFight;
 
 // blanks
-extern rack::Model *modelChipS_SMP_Blank;
-extern rack::Model *model2612_Blank;
+extern rack::Model *modelChipS_SMP_Blank1;
+extern rack::Model *modelBossFight_Blank1;
 
 // beta versions / WIPs
 extern rack::Model *modelChipS_SMP;
@@ -51,19 +52,5 @@ extern rack::Model *modelChipS_SMP_Echo;
 extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipTurboGrafx16;
-
-/// @brief Create a parameter that snaps to integer values.
-///
-/// @tparam P the type of the parameter to initialize
-/// @tparam Args the type of arguments to pass to the `createParam` function
-/// @tparam args the arguments to pass to the `createParam` function
-/// @returns a pointer to the freshly allocated parameter
-///
-template<typename P, typename... Args>
-inline ParamWidget* createSnapParam(Args... args) {
-    auto param = createParam<P>(args...);
-    param->snap = true;
-    return param;
-}
 
 #endif  // PLUGIN_HPP

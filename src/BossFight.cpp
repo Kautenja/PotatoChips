@@ -143,9 +143,9 @@ struct BossFight : rack::Module {
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
             configParam(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier");
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
-            configParam(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope Enable");
             configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
             configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
+            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope");
         }
         // reset the emulator
         onSampleRateChange();

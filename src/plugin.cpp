@@ -35,8 +35,8 @@ void init(Plugin* instance) {
     instance->addModel(modelMegaTone);
     instance->addModel(modelBossFight);
     // blanks
-    instance->addModel(modelChipS_SMP_Blank);
-    instance->addModel(model2612_Blank);
+    instance->addModel(modelChipS_SMP_Blank1);
+    instance->addModel(modelBossFight_Blank1);
     // beta versions / WIPs
     instance->addModel(modelChipS_SMP);
     instance->addModel(modelChipS_SMP_ADSR);

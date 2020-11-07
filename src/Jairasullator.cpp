@@ -95,14 +95,14 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_FREQ  + oscillator, -5.f,   5.f,  0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, name + " FM");
             configParam(PARAM_LEVEL + oscillator,  0,    15,   10,   name + " Level");
-            configParam(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone Enabled");
-            configParam(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise Enabled");
-            configParam(PARAM_ENVELOPE_ON + oscillator,  0,     1,    0,   name + " Envelope Enabled");
+            configParam<BooleanParamQuantity>(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone");
+            configParam<BooleanParamQuantity>(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise");
+            configParam<BooleanParamQuantity>(PARAM_ENVELOPE_ON + oscillator,  0,     1,    0,   name + " Envelope");
         }
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
-        configParam(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
+        configParam<TriggerParamQuantity>(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
     }
 
     /// @brief Respond to the module being reset by the engine.

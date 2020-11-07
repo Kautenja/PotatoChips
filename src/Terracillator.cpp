@@ -86,7 +86,7 @@ struct Terracillator : ChipModule<Ricoh2A03> {
                 configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + " FM");
             } else {  // noise channel has a period and LFSR setting
                 configParam(PARAM_NOISE_PERIOD, 0, 15, 7, "Noise Period");
-                configParam(PARAM_LFSR, 0, 1, 0, "Noise LFSR");
+                configParam<BooleanParamQuantity>(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
             }
             // all channels have a volume setting
             configParam(PARAM_LEVEL + i, 0, 15, 10, name + " Volume");

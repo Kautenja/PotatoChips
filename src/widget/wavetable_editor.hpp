@@ -200,10 +200,17 @@ struct WaveTableEditor : rack::LightWidget {
     void onDragEnd(const rack::event::DragEnd &e) override {
         // consume the event to prevent it from propagating
         e.consume(this);
+        if (!drag_state.is_pressed) return;
         // disable the drag state and commit the action
         drag_state.is_pressed = false;
         action->copy_after();
-        if (action->is_diff()) APP->history->push(action);
+        if (action->is_diff()) {  // the action has a change
+            // add the action to the global undo/redo history
+            APP->history->push(action);
+            // clear the pointer to the action since it's no longer delegated
+            // to this wavetable editor
+            action = nullptr;
+        }
     }
 
     /// @brief Draw the display on the main context.

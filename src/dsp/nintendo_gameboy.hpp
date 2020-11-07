@@ -124,6 +124,7 @@ class NintendoGBS {
         inline void reset() {
             delay = 0;
             last_amp = 0;
+            volume = 0;
             length = 0;
             output_select = 3;
             output = outputs[output_select];
@@ -145,8 +146,8 @@ class NintendoGBS {
         int env_delay;
 
         inline void reset() {
-            env_delay = 0;
             Oscillator::reset();
+            env_delay = 0;
         }
 
         void clock_envelope() {
@@ -192,10 +193,10 @@ class NintendoGBS {
         int phase;
 
         inline void reset() {
+            Envelope::reset();
             phase = 0;
             sweep_freq = 0;
             sweep_delay = 0;
-            Envelope::reset();
         }
 
         void clock_sweep() {
@@ -271,7 +272,12 @@ class NintendoGBS {
     struct Noise : Envelope {
         typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth const* synth;
-        unsigned bits;
+        unsigned bits = 1;
+
+        inline void reset() {
+            Envelope::reset();
+            bits = 1;
+        }
 
         void run(blip_time_t time, blip_time_t end_time, int playing) {
             int amp = volume & playing;
@@ -327,6 +333,12 @@ class NintendoGBS {
         int wave_pos;
         enum { wave_size = 32 };
         uint8_t wave[wave_size];
+
+        inline void reset() {
+            Oscillator::reset();
+            wave_pos = 0;
+            memset(wave, 0, sizeof wave);
+        }
 
         inline void write_register(int reg, int data) {
             switch (reg) {
@@ -639,8 +651,6 @@ class NintendoGBS {
         pulse2.reset();
         wave.reset();
         noise.reset();
-        noise.bits = 1;
-        wave.wave_pos = 0;
 
         // avoid click at beginning
         regs[STEREO_VOLUME - ADDR_START] = 0x77;

@@ -124,6 +124,9 @@ struct WaveTableEditor : rack::LightWidget {
         setSize(size);
     }
 
+    /// @brief Delete the wavetable editor.
+    ~WaveTableEditor() { if (action != nullptr) delete action; }
+
     /// the active action to commit to history
     WaveTableAction<Wavetable>* action = nullptr;
 

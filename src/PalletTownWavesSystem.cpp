@@ -171,20 +171,45 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @returns the 11 bit frequency value from the panel
     ///
     inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
-        // the minimal value for the frequency register to produce sound
-        static constexpr float FREQ_MIN = 8;
-        // the maximal value for the frequency register
-        static constexpr float FREQ_MAX = 2035;
+        // // the minimal value for the frequency register to produce sound
+        // static constexpr float FREQ_MIN = 8;
+        // // the maximal value for the frequency register
+        // static constexpr float FREQ_MAX = 2035;
+        // // get the pitch from the parameter and control voltage
+        // float pitch = params[PARAM_FREQ + oscillator].getValue();
+        // pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
+        // pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // // convert the pitch to frequency based on standard exponential scale
+        // float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+        // freq = rack::clamp(freq, 0.0f, 20000.0f);
+        // // convert the frequency to an 11-bit value
+        // freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
+        // return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 0V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
+        pitch += pitchCV;
+        // get the attenuverter parameter value
+        const auto att = params[PARAM_FM + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
+        pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
-        return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
+        return rack::clamp(freq, 8.f, 2035.f);
     }
 
     /// @brief Get the PW for the given oscillator

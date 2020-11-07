@@ -15,20 +15,64 @@
 
 #include "rack.hpp"
 #include <cstdint>
+#include <algorithm>
 
 #ifndef WIDGETS_WAVETABLE_EDITOR_HPP_
 #define WIDGETS_WAVETABLE_EDITOR_HPP_
+
+/// @brief An action for an update to a wavetable.
+template<typename Wavetable>
+struct WaveTableAction : rack::history::Action {
+ private:
+    /// the vector containing the waveform
+    Wavetable* const waveform;
+    /// the length of the wave-table to edit
+    const uint32_t length;
+    /// the waveform before the edit
+    Wavetable* before;
+    /// the waveform after the edit
+    Wavetable* after;
+
+ public:
+    /// @brief Initialize a new wavetable update action.
+    explicit WaveTableAction(Wavetable* waveform_, uint32_t length_) :
+        rack::history::Action(),
+        waveform(waveform_),
+        length(length_) {
+        name = "KautenjaDSP WaveTableEditorAction";
+        before = new Wavetable[length];
+        after = new Wavetable[length];
+    }
+
+    /// @brief Delete the action.
+    ~WaveTableAction() { delete[] before; delete[] after; }
+
+    /// @brief copy the waveform into the before buffer.
+    inline void copy_before() { std::copy(waveform, waveform + length, before); }
+
+    /// @brief copy the waveform into the after buffer.
+    inline void copy_after() { std::copy(waveform, waveform + length, after); }
+
+    /// @brief Return true if the action is a commit-able update.
+    inline bool is_diff() { return std::memcmp(before, after, length); }
+
+    /// @brief De-commit the action.
+    inline void undo() final { std::copy(before, before + length, waveform); }
+
+    /// @brief Commit the action.
+    inline void redo() final { std::copy(after, after + length, waveform); }
+};
 
 /// A widget that displays / edits a wave-table.
 template<typename Wavetable>
 struct WaveTableEditor : rack::LightWidget {
  private:
     /// the vector containing the waveform
-    Wavetable* waveform;
+    Wavetable* const waveform;
     /// the length of the wave-table to edit
-    uint32_t length;
+    const uint32_t length;
     /// the bit depth of the waveform
-    uint64_t bit_depth;
+    const uint64_t bit_depth;
     /// the fill color for the widget
     NVGcolor fill;
     /// the background color for the widget
@@ -78,6 +122,9 @@ struct WaveTableEditor : rack::LightWidget {
         setSize(size);
     }
 
+    /// the active action to commit to history
+    WaveTableAction<Wavetable>* action = nullptr;
+
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {
         // consume the event to prevent it from propagating
@@ -103,8 +150,18 @@ struct WaveTableEditor : rack::LightWidget {
         y = rack::math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
+        // if the action is a press copy the waveform before updating
+        if (e.action == GLFW_PRESS) {
+            action = new WaveTableAction<Wavetable>(waveform, length);
+            action->copy_before();
+        }
         // update the waveform
         waveform[index] = value;
+        // if the action is a release, commit the action to the history
+        if (e.action == GLFW_RELEASE) {
+            action->copy_after();
+            if (action->is_diff()) APP->history->push(action);
+        }
     }
 
     /// Respond to drag move event on this widget.

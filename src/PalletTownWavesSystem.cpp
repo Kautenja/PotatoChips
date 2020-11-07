@@ -19,6 +19,8 @@
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
 
+// TODO: wave channel outputs a "pop" when reset is held
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -34,9 +36,10 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     enum ParamIds {
         ENUMS(PARAM_FREQ, 3),
         PARAM_NOISE_PERIOD,
+        ENUMS(PARAM_FM, 3),
+        PARAM_LFSR,
         ENUMS(PARAM_PW, 2),
         PARAM_WAVETABLE,
-        PARAM_LFSR,
         ENUMS(PARAM_LEVEL, NintendoGBS::OSC_COUNT),
         NUM_PARAMS
     };
@@ -45,9 +48,9 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         ENUMS(INPUT_VOCT, 3),
         INPUT_NOISE_PERIOD,
         ENUMS(INPUT_FM, 3),
+        INPUT_LFSR,
         ENUMS(INPUT_PW, 2),
         INPUT_WAVETABLE,
-        INPUT_LFSR,
         ENUMS(INPUT_LEVEL, NintendoGBS::OSC_COUNT),
         NUM_INPUTS
     };
@@ -58,7 +61,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     };
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHTS_LEVEL, NintendoGBS::OSC_COUNT),
+        ENUMS(LIGHTS_LEVEL, 3 * NintendoGBS::OSC_COUNT),
         NUM_LIGHTS
     };
 
@@ -78,15 +81,18 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         configParam(PARAM_FREQ + 0, -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -2.5f, 2.5f, 0.f, "Pulse 2 Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 2, -2.5f, 2.5f, 0.f, "Wave Frequency",    " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_NOISE_PERIOD, 0, 7, 0, "Noise Period", "", 0, 1, -7);
+        configParam(PARAM_FM + 0, -1.f, 1.f, 0.f, "Pulse 1 FM");
+        configParam(PARAM_FM + 1, -1.f, 1.f, 0.f, "Pulse 2 FM");
+        configParam(PARAM_FM + 2, -1.f, 1.f, 0.f, "Wave FM");
+        configParam(PARAM_NOISE_PERIOD, 0, 7, 0, "Noise Period");
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
         configParam(PARAM_WAVETABLE, 0, NUM_WAVEFORMS, 0, "Waveform morph");
         configParam(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
-        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 1.0f, "Pulse 1 Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume", "%", 0, 100);
-        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume", "%", 0, 100);
+        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 1.0f, "Pulse 1 Volume");
+        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume");
+        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume");
+        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume");
         resetWavetable();
     }
 
@@ -378,7 +384,20 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final { }
+    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+        for (unsigned voice = 0; voice < NintendoGBS::OSC_COUNT; voice++) {
+            // get the global brightness scale from -12 to 3
+            auto brightness = vuMeter[voice].getBrightness(-12, 3);
+            // set the red light based on total brightness and
+            // brightness from 0dB to 3dB
+            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
+            // set the red light based on inverted total brightness and
+            // brightness from -12dB to 0dB
+            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
+            // set the blue light to off
+            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
+        }
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -434,29 +453,34 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             // add the table editor to the module
             addChild(table_editor);
         }
-        // oscillator components
         for (unsigned i = 0; i < NintendoGBS::OSC_COUNT; i++) {
-            if (i < NintendoGBS::NOISE) {
-                addInput(createInput<PJ301MPort>(             Vec(169, 75 + 85 * i), module, PalletTownWavesSystem::INPUT_VOCT     + i));
-                addInput(createInput<PJ301MPort>(             Vec(169, 26 + 85 * i), module, PalletTownWavesSystem::INPUT_FM       + i));
-                addParam(createParam<BefacoBigKnob>(          Vec(202, 25 + 85 * i), module, PalletTownWavesSystem::PARAM_FREQ     + i));
-                auto param = createParam<RoundSmallBlackKnob>(Vec(289, 38 + 85 * i), module, PalletTownWavesSystem::PARAM_PW       + i);
-                if (i < NintendoGBS::WAVETABLE) param->snap = true;
-                addParam(param);
-                addInput(createInput<PJ301MPort>(             Vec(288, 73 + 85 * i), module, PalletTownWavesSystem::INPUT_PW       + i));
+            // Frequency / Noise Period
+            auto freq = createParam<Trimpot>(  Vec(162 + 35 * i, 32),  module, PalletTownWavesSystem::PARAM_FREQ        + i);
+            freq->snap = i == 3;
+            addParam(freq);
+            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 71),  module, PalletTownWavesSystem::INPUT_VOCT        + i));
+            // FM / LFSR
+            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 99), module, PalletTownWavesSystem::INPUT_FM          + i));
+            if (i < 3)
+                addParam(createParam<Trimpot>( Vec(162 + 35 * i, 144), module, PalletTownWavesSystem::PARAM_FM          + i));
+            else
+                addParam(createParam<CKSS>(    Vec(269, 141), module, PalletTownWavesSystem::PARAM_FM                  + i));
+            // Level
+            addParam(createSnapParam<Trimpot>( Vec(162 + 35 * i, 170), module, PalletTownWavesSystem::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
+            // PW
+            if (i < 3) {  // Pulse Width / Waveform
+                auto pw = createParam<Trimpot>(Vec(162 + 35 * i, 241), module, PalletTownWavesSystem::PARAM_PW + i);
+                pw->snap = i < 2;
+                addParam(pw);
+                addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 281), module, PalletTownWavesSystem::INPUT_PW + i));
+            } else {  // LFSR Reset
+                // addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 264), module, PalletTownWavesSystem::INPUT_PW + i));
             }
-            addParam(createLightParam<LEDLightSlider<GreenLight>>(Vec(316, 24 + 85 * i),  module, PalletTownWavesSystem::PARAM_LEVEL + i, PalletTownWavesSystem::LIGHTS_LEVEL + i));
-            addInput(createInput<PJ301MPort>(                 Vec(346, 26 + 85 * i), module, PalletTownWavesSystem::INPUT_LEVEL + i));
-            addOutput(createOutput<PJ301MPort>(               Vec(346, 74 + 85 * i), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
+            // Output
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(179 + 35 * i, 326), module, PalletTownWavesSystem::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(160 + 35 * i, 331), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
         }
-        // noise period
-        auto param = createParam<Rogan3PWhite>(Vec(202, 298), module, PalletTownWavesSystem::PARAM_NOISE_PERIOD);
-        param->snap = true;
-        addParam(param);
-        addInput(createInput<PJ301MPort>(Vec(169, 329), module, PalletTownWavesSystem::INPUT_NOISE_PERIOD));
-        // LFSR switch
-        addParam(createParam<CKSS>(Vec(280, 281), module, PalletTownWavesSystem::PARAM_LFSR));
-        addInput(createInput<PJ301MPort>(Vec(258, 329), module, PalletTownWavesSystem::INPUT_LFSR));
     }
 };
 

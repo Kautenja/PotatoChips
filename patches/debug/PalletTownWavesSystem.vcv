@@ -47,7 +47,7 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         }
       ],
       "rightModuleId": 53,
@@ -62,7 +62,6 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "leftModuleId": 139,
       "rightModuleId": 138,
       "data": {
         "channels": 4,
@@ -154,11 +153,11 @@
         },
         {
           "id": 4,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 5,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 6,
@@ -170,18 +169,30 @@
         },
         {
           "id": 8,
-          "value": 1.0
+          "value": 2.0
         },
         {
           "id": 9,
-          "value": 1.0
+          "value": 2.0
         },
         {
           "id": 10,
-          "value": 1.0
+          "value": 2.37500048
         },
         {
           "id": 11,
+          "value": 1.0
+        },
+        {
+          "id": 12,
+          "value": 1.0
+        },
+        {
+          "id": 13,
+          "value": 1.0
+        },
+        {
+          "id": 14,
           "value": 1.0
         }
       ],
@@ -623,23 +634,6 @@
         9,
         0
       ]
-    },
-    {
-      "id": 139,
-      "plugin": "ModularFungi",
-      "version": "1.1.4",
-      "model": "LightsOff",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.800000012
-        }
-      ],
-      "rightModuleId": 5,
-      "pos": [
-        0,
-        0
-      ]
     }
   ],
   "cables": [
@@ -778,14 +772,6 @@
       "inputModuleId": 54,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 774,
-      "outputModuleId": 5,
-      "outputId": 4,
-      "inputModuleId": 48,
-      "inputId": 6,
-      "color": "#0c8e15"
     },
     {
       "id": 833,

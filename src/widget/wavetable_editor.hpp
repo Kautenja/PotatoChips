@@ -90,6 +90,8 @@ struct WaveTableEditor : rack::LightWidget {
         /// the current position of the mouse pointer during the drag
         rack::Vec position = {0, 0};
     } drag_state;
+    /// the active action to commit to history
+    WaveTableAction<Wavetable>* action = nullptr;
 
  public:
     /// @brief Initialize a new wave-table editor widget.
@@ -126,9 +128,6 @@ struct WaveTableEditor : rack::LightWidget {
 
     /// @brief Delete the wavetable editor.
     ~WaveTableEditor() { if (action != nullptr) delete action; }
-
-    /// the active action to commit to history
-    WaveTableAction<Wavetable>* action = nullptr;
 
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {

@@ -20,7 +20,6 @@
 #include "widget/wavetable_editor.hpp"
 
 // TODO: wave channel outputs a "pop" when reset is held
-// TODO: wave channel doesn't track VOCT correctly
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -182,11 +181,6 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // TODO: why is the wave-table clocked at half rate? this is not
-        // documented anywhere that I can find; however, it makes sense that
-        // the wave oscillator would be an octave lower since the original
-        // triangle oscillator was intended for bass
-        if (oscillator == NintendoGBS::WAVETABLE) freq *= 2;
         freq = rack::clamp(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);

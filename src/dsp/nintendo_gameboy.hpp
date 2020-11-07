@@ -342,8 +342,8 @@ class NintendoGBS {
                 break;
             case 4:
                 if (data & trigger & regs[0]) {
-                    // NOTE: HACKED FOR VCV RACK TO PREVENT RESETTING ON
-                    // CERTAIN FREQUENCIES
+                    // NOTE: the actual chip resets the wave position, but this
+                    // is annoying when using as a synthesizer oscillator.
                     // wave_pos = 0;
                     enabled = true;
                     if (length == 0)

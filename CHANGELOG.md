@@ -233,6 +233,7 @@
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to GBS (rev2 branded as "Pallet Town Waves System")
     -   **undo/redo support for wavetable edits**
+    -   **fixed wave channel to track VOCT correctly**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched

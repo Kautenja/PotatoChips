@@ -19,6 +19,8 @@
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
 
+// TODO: normal PW into the wavetable input
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

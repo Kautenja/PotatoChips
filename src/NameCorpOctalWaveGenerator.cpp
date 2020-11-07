@@ -366,7 +366,7 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
     ///
     explicit NameCorpOctalWaveGeneratorWidget(NameCorpOctalWaveGenerator *module) {
         setModule(module);
-        static constexpr auto panel = "res/106.svg";
+        static constexpr auto panel = "res/NameCorpOctalWaveGenerator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));

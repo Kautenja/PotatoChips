@@ -369,10 +369,10 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         static constexpr auto panel = "res/NameCorpOctalWaveGenerator.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[NameCorpOctalWaveGenerator::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
@@ -400,7 +400,7 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
                 wavetable,                       // wave-table buffer
                 NameCorpOctalWaveGenerator::SAMPLES_PER_WAVETABLE,  // wave-table length
                 NameCorpOctalWaveGenerator::BIT_DEPTH,              // waveform bit depth
-                Vec(10, 26 + 67 * waveform),     // position
+                Vec(10, 26 + 68 * waveform),     // position
                 Vec(135, 60),                    // size
                 colors[waveform]                 // line fill color
             );
@@ -419,13 +419,13 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
-            addParam(createParam<Trimpot>(  Vec(257, 40 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
-            addParam(createParam<Rogan2PWhite>( Vec(275, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
-            addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
-            addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(205, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(415, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_LEVEL + 3 * i));
+            addParam(createParam<Trimpot>(     Vec(281, 40 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
+            addParam(createParam<Trimpot>(     Vec(321, 40 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
+            addInput(createInput<PJ301MPort>(  Vec(362, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
+            addParam(createParam<Trimpot>(     Vec(401, 40 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
+            addOutput(createOutput<PJ301MPort>(Vec(437, 40 + i * 41), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(431, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(460, 60 + i * 41), module, NameCorpOctalWaveGenerator::LIGHT_LEVEL + 3 * i));
         }
     }
 };

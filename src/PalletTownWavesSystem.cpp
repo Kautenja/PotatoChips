@@ -171,21 +171,6 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @returns the 11 bit frequency value from the panel
     ///
     inline uint16_t getFrequency(unsigned oscillator, unsigned channel) {
-        // // the minimal value for the frequency register to produce sound
-        // static constexpr float FREQ_MIN = 8;
-        // // the maximal value for the frequency register
-        // static constexpr float FREQ_MAX = 2035;
-        // // get the pitch from the parameter and control voltage
-        // float pitch = params[PARAM_FREQ + oscillator].getValue();
-        // pitch += inputs[INPUT_VOCT + oscillator].getPolyVoltage(channel);
-        // pitch += inputs[INPUT_FM + oscillator].getPolyVoltage(channel) / 5.f;
-        // // convert the pitch to frequency based on standard exponential scale
-        // float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        // freq = rack::clamp(freq, 0.0f, 20000.0f);
-        // // convert the frequency to an 11-bit value
-        // freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
-        // return rack::clamp(freq, FREQ_MIN, FREQ_MAX);
-
         // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
         // get the normalled input voltage based on the voice index. Voice 0
@@ -224,11 +209,16 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // the maximal value for the pulse width register
         static constexpr float PW_MAX = 3;
         // get the pulse width from the parameter knob
-        auto pwParam = params[PARAM_PW + oscillator].getValue();
-        // get the control voltage to the pulse width with 1V/step
-        auto pwCV = inputs[INPUT_PW + oscillator].getPolyVoltage(channel) / 3.f;
+        auto param = params[PARAM_PW + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 5V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getVoltage(channel) : 0.f;
+        const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
+        inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(pwParam + pwCV, PW_MIN, PW_MAX);
+        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
 
@@ -303,7 +293,24 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
     virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
-
+        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
+            // frequency
+            auto freq = getFrequency(oscillator, channel);
+            apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator,
+                         freq & 0b0000000011111111
+            );
+            apu[channel].write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * oscillator,
+                0x80 | ((freq & 0b0000011100000000) >> 8)
+            );
+        }
+        // frequency
+        auto freq = getFrequency(2, channel);
+        apu[channel].write(NintendoGBS::WAVE_FREQ_LO,
+                     freq & 0b0000000011111111
+        );
+        apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
+            0x80 | ((freq & 0b0000011100000000) >> 8)
+        );
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -326,28 +333,12 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             apu[channel].write(NintendoGBS::PULSE0_DUTY_LENGTH_LOAD + NintendoGBS::REGS_PER_VOICE * oscillator, getPulseWidth(oscillator, channel));
             // volume of the pulse wave, envelope add mode on
             apu[channel].write(NintendoGBS::PULSE0_START_VOLUME + NintendoGBS::REGS_PER_VOICE * oscillator, getVolume(oscillator, channel, 15));
-            // frequency
-            auto freq = getFrequency(oscillator, channel);
-            apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator,
-                         freq & 0b0000000011111111
-            );
-            apu[channel].write(NintendoGBS::PULSE0_TRIG_LENGTH_ENABLE_HI + NintendoGBS::REGS_PER_VOICE * oscillator,
-                0x80 | ((freq & 0b0000011100000000) >> 8)
-            );
         }
         // ---------------------------------------------------------------
         // wave
         // ---------------------------------------------------------------
         apu[channel].write(NintendoGBS::WAVE_DAC_POWER, 0b10000000);
         apu[channel].write(NintendoGBS::WAVE_VOLUME_CODE, getVolume(NintendoGBS::WAVETABLE, channel, 3));
-        // frequency
-        auto freq = getFrequency(2, channel);
-        apu[channel].write(NintendoGBS::WAVE_FREQ_LO,
-                     freq & 0b0000000011111111
-        );
-        apu[channel].write(NintendoGBS::WAVE_TRIG_LENGTH_ENABLE_FREQ_HI,
-            0x80 | ((freq & 0b0000011100000000) >> 8)
-        );
         // get the index of the wave-table from the panel
         auto position = getWavetablePosition(channel);
         // calculate the address of the base waveform in the table

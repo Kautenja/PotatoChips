@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -50,7 +50,6 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 48,
       "rightModuleId": 53,
       "pos": [
         51,
@@ -72,8 +71,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": 1,
-          "deviceName": "Arturia KeyStep 32",
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
           "channel": -1
         }
       },
@@ -134,7 +133,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.6.3",
+      "version": "1.8.0",
       "model": "GBS",
       "params": [
         {
@@ -163,7 +162,7 @@
         },
         {
           "id": 6,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 7,
@@ -187,7 +186,6 @@
         }
       ],
       "leftModuleId": 137,
-      "rightModuleId": 2,
       "data": {
         "wavetable0": [
           8,
@@ -292,38 +290,38 @@
           15
         ],
         "wavetable3": [
-          5,
-          4,
-          7,
-          7,
-          10,
+          8,
+          6,
           9,
-          12,
+          8,
+          11,
+          10,
+          13,
           12,
           15,
           12,
-          12,
-          9,
+          13,
           10,
-          7,
-          7,
-          4,
+          11,
+          8,
+          9,
+          6,
+          8,
           5,
+          6,
+          3,
+          4,
+          1,
           2,
-          3,
           0,
+          0,
+          0,
+          2,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
+          4,
           3,
-          2
+          6,
+          5
         ],
         "wavetable4": [
           15,
@@ -629,7 +627,7 @@
     {
       "id": 139,
       "plugin": "ModularFungi",
-      "version": "1.1.2",
+      "version": "1.1.4",
       "model": "LightsOff",
       "params": [
         {

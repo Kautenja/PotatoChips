@@ -393,7 +393,7 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
     ///
     explicit PalletTownWavesSystemWidget(PalletTownWavesSystem *module) {
         setModule(module);
-        static constexpr auto panel = "res/GBS.svg";
+        static constexpr auto panel = "res/PalletTownWavesSystem.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
@@ -427,8 +427,8 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
                 wavetable,                       // wave-table buffer
                 PalletTownWavesSystem::SAMPLES_PER_WAVETABLE,  // wave-table length
                 PalletTownWavesSystem::BIT_DEPTH,              // waveform bit depth
-                Vec(18, 26 + 67 * wave),         // position
-                Vec(135, 60),                    // size
+                Vec(11, 26 + 67 * wave),         // position
+                Vec(136, 60),                    // size
                 colors[wave]                     // line fill color
             );
             // add the table editor to the module

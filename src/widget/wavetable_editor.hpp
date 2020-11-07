@@ -159,15 +159,11 @@ struct WaveTableEditor : rack::LightWidget {
             action = new WaveTableAction<Wavetable>(waveform, length);
             action->copy_before();
         }
+        // update the waveform, we need to check if the button is pressed
+        // this could be a mouse up event from a click that started somewhere
+        // else
         if (drag_state.is_pressed) {
-            // update the waveform
             waveform[index] = value;
-            // if the action is a release, commit the action to the history
-            if (e.action == GLFW_RELEASE) {
-                drag_state.is_pressed = false;
-                action->copy_after();
-                if (action->is_diff()) APP->history->push(action);
-            }
         }
     }
 
@@ -192,6 +188,16 @@ struct WaveTableEditor : rack::LightWidget {
             (index ^= next_index), (next_index ^= index), (index ^= next_index);
         // update the waveform (use memset for SIMD; opposed to a loop)
         memset(waveform + index, value, next_index - index);
+    }
+
+    /// Respond to drag end event on this widget.
+    void onDragEnd(const rack::event::DragEnd &e) override {
+        // consume the event to prevent it from propagating
+        e.consume(this);
+        // disable the drag state and commit the action
+        drag_state.is_pressed = false;
+        action->copy_after();
+        if (action->is_diff()) APP->history->push(action);
     }
 
     /// @brief Draw the display on the main context.

@@ -192,7 +192,11 @@ struct WaveTableEditor : rack::LightWidget {
         memset(waveform + index, value, next_index - index);
     }
 
-    /// Respond to drag end event on this widget.
+    /// @brief Respond to drag end event on this widget.
+    /// @details
+    /// This allows detection of mouse-up events that occur both inside and
+    /// outside the widget to push the update onto the undo/redo history.
+    ///
     void onDragEnd(const rack::event::DragEnd &e) override {
         // consume the event to prevent it from propagating
         e.consume(this);

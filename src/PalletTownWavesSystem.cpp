@@ -90,10 +90,10 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
         configParam(PARAM_WAVETABLE, 0, NUM_WAVEFORMS, 0, "Waveform morph");
         configParam(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
-        configParam(PARAM_LEVEL + 0, 0.f, 1.f, 1.0f, "Pulse 1 Volume");
-        configParam(PARAM_LEVEL + 1, 0.f, 1.f, 1.0f, "Pulse 2 Volume");
-        configParam(PARAM_LEVEL + 2, 0.f, 1.f, 1.0f, "Wave Volume");
-        configParam(PARAM_LEVEL + 3, 0.f, 1.f, 1.0f, "Noise Volume");
+        configParam(PARAM_LEVEL + 0, 0, 15, 10, "Pulse 1 Volume");
+        configParam(PARAM_LEVEL + 1, 0, 15, 10, "Pulse 2 Volume");
+        configParam(PARAM_LEVEL + 2, 0, 3,  3,  "Wave Volume");
+        configParam(PARAM_LEVEL + 3, 0, 15, 10, "Noise Volume");
         resetWavetable();
     }
 
@@ -247,18 +247,18 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @returns the volume parameter for the given oscillator. This includes
     /// the value of the knob and any CV modulation.
     ///
-    inline uint8_t getVolume(unsigned oscillator, unsigned channel, uint8_t max_) {
-        // get the volume from the parameter knob
-        auto param = params[PARAM_LEVEL + oscillator].getValue();
-        // apply the control voltage to the attenuation
-        if (inputs[INPUT_LEVEL + oscillator].isConnected()) {
-            auto cv = inputs[INPUT_LEVEL + oscillator].getPolyVoltage(channel) / 10.f;
-            cv = rack::clamp(cv, 0.f, 1.f);
-            cv = roundf(100.f * cv) / 100.f;
-            param *= 2 * cv;
-        }
-        // get the 8-bit volume clamped within legal limits
-        uint8_t volume = rack::clamp(max_ * param, 0.f, static_cast<float>(max_));
+    inline uint8_t getVolume(unsigned oscillator, unsigned channel, uint8_t max) {
+        // get the level from the parameter knob
+        auto level = params[PARAM_LEVEL + oscillator].getValue();
+        // get the normalled input voltage based on the voice index. Voice 0
+        // has no prior voltage, and is thus normalled to 10V. Reset this port's
+        // voltage afterward to propagate the normalling chain forward.
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
+        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
+        // apply the control voltage to the level. Normal to a constant
+        // 10V source instead of checking if the cable is connected
+        uint8_t volume = rack::clamp(roundf(level * voltage / 10.f), 0.f, static_cast<float>(max));
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%

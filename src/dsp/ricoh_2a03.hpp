@@ -469,6 +469,22 @@ class Ricoh2A03 {
     /// a synthesizer shared by squares
     Pulse::Synth square_synth;
 
+    /// @brief Return the length table value for the given index
+    ///
+    /// @param index the index of the value to lookup
+    /// @returns the 8-bit value from the table at the given index
+    ///
+    static inline uint8_t get_length(unsigned index) {
+        /// The length table to lookup length values from registers
+        static constexpr uint8_t length_table[0x20] = {
+            0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
+            0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
+            0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
+            0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
+        };
+        return length_table[index];
+    }
+
     /// @brief Run emulator until specified time, so that any DMC memory reads
     /// can be accounted for (i.e. inserting CPU wait states).
     ///
@@ -640,17 +656,6 @@ class Ricoh2A03 {
         Oscillator* osc = oscs[osc_index];
         osc->regs[1] = value;
         osc->reg_written[1] = true;
-    }
-
-    inline uint8_t get_length(unsigned index) {
-        /// The length table to lookup length values from registers
-        static constexpr unsigned char length_table[0x20] = {
-            0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
-            0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
-            0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
-            0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
-        };
-        return length_table[index];
     }
 
     /// @brief Set the frequency parameter for the given oscillator.

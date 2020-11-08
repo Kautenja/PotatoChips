@@ -269,21 +269,21 @@ struct Terracillator : ChipModule<Ricoh2A03> {
             // the volume (low 4 bits). the 5th bit controls the envelope,
             // high sets constant volume.
             auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
-            apu[channel].write(Ricoh2A03::PULSE0_VOL + 4 * oscillator, volume);
+            apu[channel].set_volume(oscillator, volume);
         }
         // ---------------------------------------------------------------
         // triangle oscillator
         // ---------------------------------------------------------------
         // write the linear register to enable the oscillator
         apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+        // get volume for triangle to normal voltages
+        apu[channel].set_volume(2, 0b00010000 | getVolume(2, channel));
         // ---------------------------------------------------------------
         // noise oscillator
         // ---------------------------------------------------------------
         apu[channel].write(Ricoh2A03::NOISE_LO, (is_lfsr << 7) | getNoisePeriod(channel));
         apu[channel].write(Ricoh2A03::NOISE_HI, 0);
-        // get volume for triangle to normal voltages
-        auto volumeTriangle = getVolume(2, channel);
-        apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
+        apu[channel].set_volume(3, 0b00010000 | getVolume(3, channel));
     }
 
     /// @brief Process the lights on the module.

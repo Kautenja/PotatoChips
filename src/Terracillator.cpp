@@ -225,15 +225,15 @@ struct Terracillator : ChipModule<Ricoh2A03> {
     ///
     inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         // pulse generators
-        for (unsigned i = 0; i < 2; i++)
+        for (unsigned i = 0; i < Ricoh2A03::TRIANGLE; i++)
             apu[channel].set_frequency(i, getFrequency(i, channel, 8, 1023, 16));
         // triangle wave
-        apu[channel].set_frequency(2, getFrequency(2, channel, 2, 2047, 32));
-        // sync input
-        for (unsigned i = 0; i < 2; i++) {
+        apu[channel].set_frequency(Ricoh2A03::TRIANGLE, getFrequency(Ricoh2A03::TRIANGLE, channel, 2, 2047, 32));
+        // sync input (for triangle and noise oscillator)
+        for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT - Ricoh2A03::TRIANGLE; i++) {
             const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
             if (syncTriggers[channel][i].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
-                apu[channel].reset_phase(2 + i);
+                apu[channel].reset_phase(Ricoh2A03::TRIANGLE + i);
         }
     }
 
@@ -251,12 +251,12 @@ struct Terracillator : ChipModule<Ricoh2A03> {
             apu[channel].set_voice_volume(oscillator, volume);
         }
         // triangle wave
-        apu[channel].set_voice_volume(2, getVolume(2, channel));
+        apu[channel].set_voice_volume(Ricoh2A03::TRIANGLE, getVolume(Ricoh2A03::TRIANGLE, channel));
         // noise oscillator
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
-        apu[channel].set_voice_volume(3, getVolume(3, channel));
+        apu[channel].set_voice_volume(Ricoh2A03::NOISE, getVolume(Ricoh2A03::NOISE, channel));
     }
 
     /// @brief Process the lights on the module.

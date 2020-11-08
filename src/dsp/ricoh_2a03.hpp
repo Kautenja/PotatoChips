@@ -30,70 +30,13 @@ class Ricoh2A03 {
  public:
     /// the number of oscillators on the chip
     static constexpr unsigned OSC_COUNT = 4;
-    /// the first address of the RAM space
-    static constexpr uint16_t ADDR_START = 0x4000;
-    /// the last address of the RAM space
-    static constexpr uint16_t ADDR_END   = 0x4017;
-    /// the number of registers on the chip
-    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
     /// the indexes of the channels on the chip
     enum Channel {
-        PULSE0,
-        PULSE1,
-        TRIANGLE,
-        NOISE
-    };
-
-    /// the IO registers on the chip
-    enum Register : uint16_t {
-        /// the duty & 4-bit volume register for pulse waveform generator 0
-        PULSE0_VOL =      0x4000,
-        /// the sweep register for pulse waveform generator 0
-        PULSE0_SWEEP =    0x4001,
-        /// the frequency (low 8-bits) for pulse waveform generator 0
-        PULSE0_LO =       0x4002,
-        /// the frequency (high 3-bits) for pulse waveform generator 0
-        PULSE0_HI =       0x4003,
-        /// the duty & 4-bit volume register for pulse waveform generator 1
-        PULSE1_VOL =      0x4004,
-        /// the sweep register for pulse waveform generator 1
-        PULSE1_SWEEP =    0x4005,
-        /// the frequency (low 8-bits) for pulse waveform generator 1
-        PULSE1_LO =       0x4006,
-        /// the frequency (high 3-bits) for pulse waveform generator 1
-        PULSE1_HI =       0x4007,
-        /// the linear counter for the triangle waveform generator
-        TRIANGLE_LINEAR = 0x4008,
-        /// an unnecessary register that may be used for memory clearing loops
-        /// by application code (NES ROMs)
-        // APU_UNUSED1 =     0x4009,
-        /// the frequency (low 8-bits) for triangle waveform generator
-        TRIANGLE_LO =     0x400A,
-        /// the frequency (high 3-bits) for triangle waveform generator
-        TRIANGLE_HI =     0x400B,
-        /// the volume register for the noise generator
-        NOISE_VOL =       0x400C,
-        /// an unnecessary register that may be used for memory clearing loops
-        /// by application code (NES ROMs)
-        // APU_UNUSED2 =     0x400D,
-        /// period and waveform shape for the noise generator
-        NOISE_LO =        0x400E,
-        /// length counter value for the noise generator
-        NOISE_HI =        0x400F,
-        /// play mode and frequency for DMC samples
-        DMC_FREQ =        0x4010,
-        /// 7-bit DAC
-        DMC_RAW =         0x4011,
-        /// start of the DMC waveform
-        DMC_START =       0x4012,
-        /// length of the DMC waveform
-        DMC_LEN =         0x4013,
-        /// channel enables and status
-        SND_CHN =         0x4015,
-        JOY1 =            0x4016,
-        /// the status register
-        STATUS =          0x4017,
+        PULSE0   = 0,
+        PULSE1   = 1,
+        TRIANGLE = 2,
+        NOISE    = 3
     };
 
  private:

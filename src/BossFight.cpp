@@ -20,6 +20,7 @@
 
 // TODO: option to prevent clicks in context menu
 // TODO: audio rate modulation
+// TODO: option to copy operator parameters between operators?
 
 // ---------------------------------------------------------------------------
 // MARK: Module

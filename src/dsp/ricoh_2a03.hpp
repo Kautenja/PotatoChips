@@ -317,7 +317,7 @@ class Ricoh2A03 {
     /// The noise oscillator from the NES.
     struct Noise : Envelope {
         /// the output value from the noise oscillator
-        int noise;
+        int noise = 1 << 14;
         /// the BLIP synthesizer for the oscillator
         BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 15> synth;
 

@@ -82,16 +82,16 @@ class Ricoh2A03 {
         /// length counter value for the noise generator
         NOISE_HI =        0x400F,
         /// play mode and frequency for DMC samples
-        // DMC_FREQ =        0x4010,
+        DMC_FREQ =        0x4010,
         /// 7-bit DAC
-        // DMC_RAW =         0x4011,
+        DMC_RAW =         0x4011,
         /// start of the DMC waveform
-        // DMC_START =       0x4012,
+        DMC_START =       0x4012,
         /// length of the DMC waveform
-        // DMC_LEN =         0x4013,
+        DMC_LEN =         0x4013,
         /// channel enables and status
         SND_CHN =         0x4015,
-        // JOY1 =            0x4016,
+        JOY1 =            0x4016,
         /// the status register
         STATUS =          0x4017,
     };
@@ -599,8 +599,8 @@ class Ricoh2A03 {
         last_time = 0;
         osc_enables = 0;
         frame_delay = 1;
-        write(0x4017, 0x00);
-        write(0x4015, 0x00);
+        write(STATUS, 0x00);
+        write(SND_CHN, 0x00);
         // initialize sq1, sq2, tri, and noise, not DMC
         for (uint16_t addr = ADDR_START; addr <= 0x4009; addr++)
             write(addr, (addr & 3) ? 0x00 : 0x10);
@@ -642,7 +642,7 @@ class Ricoh2A03 {
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         // run the emulator up to the given time
         run_until(time);
-        if (address < 0x4010) {  // synthesizer registers
+        if (address < DMC_FREQ) {  // synthesizer registers
             // Write to channel
             int osc_index = (address - ADDR_START) >> 2;
             Oscillator* osc = oscs[osc_index];
@@ -651,12 +651,12 @@ class Ricoh2A03 {
             osc->reg_written[reg] = true;
             if (reg == 3 && ((osc_enables >> osc_index) & 1)) // load length counter
                 osc->length_counter = length_table[(data >> 3) & 0x1f];
-        } else if (address == 0x4015) {  // Channel enables
+        } else if (address == SND_CHN) {  // Channel enables
             for (int i = OSC_COUNT; i--;) {
                 if (!((data >> i) & 1)) oscs[i]->length_counter = 0;
             }
             osc_enables = data;
-        } else if (address == 0x4017) {  // Frame mode
+        } else if (address == STATUS) {  // Frame mode
             frame_mode = data;
             // mode 1
             frame_delay = (frame_delay & 1);

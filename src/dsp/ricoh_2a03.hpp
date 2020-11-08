@@ -464,8 +464,6 @@ class Ricoh2A03 {
     int frame_delay;
     /// current frame (0-3)
     int frame;
-    /// the channel enabled register
-    int osc_enables;
     /// TODO: document
     int frame_mode;
     /// a synthesizer shared by squares
@@ -604,12 +602,8 @@ class Ricoh2A03 {
         noise.reset();
         // reset instance variables
         last_time = 0;
-        osc_enables = 0;
         frame_delay = 1;
-        // TODO: remove functionality
         set_status(0);
-        set_sends(0x0F);
-        set_sweep(2, 0x7F);
     }
 
     /// @brief Reset the phase of the given oscillator by index.
@@ -672,16 +666,16 @@ class Ricoh2A03 {
         const auto hi = (value & 0b0000011100000000) >> 8;
         osc->regs[3] = hi;
         osc->reg_written[3] = true;
-        if ((osc_enables >> osc_index) & 1)  // load length counter
-            osc->length_counter = get_length((hi >> 3) & 0x1f);
+        // load length counter
+        osc->length_counter = get_length((hi >> 3) & 0x1f);
     }
 
     void set_noise_period(uint8_t value, bool is_lfsr, uint8_t length = 0) {
         Oscillator* osc = oscs[3];
         osc->regs[2] = (is_lfsr << 7) | value;
         osc->regs[3] = length;
-        if ((osc_enables >> 3) & 1)  // load length counter
-            osc->length_counter = get_length((length >> 3) & 0x1f);
+        // load length counter
+        osc->length_counter = get_length((length >> 3) & 0x1f);
     }
 
     void set_status(uint8_t value) {
@@ -693,14 +687,6 @@ class Ricoh2A03 {
             frame = 1;
             frame_delay += FRAME_PERIOD;
         }
-    }
-
-    /// TODO remove?
-    void set_sends(uint8_t value) {
-        for (int i = OSC_COUNT; i--;) {
-            if (!((value >> i) & 1)) oscs[i]->length_counter = 0;
-        }
-        osc_enables = value;
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,

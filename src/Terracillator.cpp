@@ -248,15 +248,15 @@ struct Terracillator : ChipModule<Ricoh2A03> {
             // set the pulse width of the pulse wave (high 3 bits) and set
             // the volume (low 4 bits).
             auto volume = getPulseWidth(oscillator, channel) | getVolume(oscillator, channel);
-            apu[channel].set_volume(oscillator, volume);
+            apu[channel].set_voice_volume(oscillator, volume);
         }
         // triangle wave
-        apu[channel].set_volume(2, getVolume(2, channel));
+        apu[channel].set_voice_volume(2, getVolume(2, channel));
         // noise oscillator
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
-        apu[channel].set_volume(3, getVolume(3, channel));
+        apu[channel].set_voice_volume(3, getVolume(3, channel));
     }
 
     /// @brief Process the lights on the module.

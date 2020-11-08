@@ -641,7 +641,7 @@ class Ricoh2A03 {
     /// @osc_index the index of the oscillator to set the volume of
     /// @param value the 8-bit level to set the oscillator to
     ///
-    inline void set_volume(unsigned osc_index, uint8_t value) {
+    inline void set_voice_volume(unsigned osc_index, uint8_t value) {
         Oscillator* osc = oscs[osc_index];
         osc->regs[0] = 0b00010000 | value;
         osc->reg_written[0] = true;

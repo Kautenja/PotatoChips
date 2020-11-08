@@ -15,9 +15,6 @@
 
 #include "plugin.hpp"
 
-/// @brief a dummy module structure for creating panel blanks.
-struct BlankModule : Module { };
-
 /// @brief the different configurations for placing screws on a panel
 enum ScrewStyle { None, All, TopLeft, TopRight };
 
@@ -31,7 +28,7 @@ struct BlankWidget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit BlankWidget(BlankModule *module) {
+    explicit BlankWidget(Module *module) {
         setModule(module);
         const std::string fileName(panelPath);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, fileName)));
@@ -57,13 +54,11 @@ struct BlankWidget : ModuleWidget {
 };
 
 extern constexpr char const blank1[] = "res/S-SMP-Chip.svg";
-rack::Model *modelChipS_SMP_Blank1 = createModel<
-    BlankModule,
+rack::Model *modelChipS_SMP_Blank1 = createModel<Module,
     BlankWidget<blank1, ScrewStyle::All, ScrewSilver>
 >("S_SMP_Blank1");
 
 extern constexpr char const blank2[] = "res/BossFight-Envelope.svg";
-rack::Model *modelBossFight_Blank1 = createModel<
-    BlankModule,
+rack::Model *modelBossFight_Blank1 = createModel<Module,
     BlankWidget<blank2, ScrewStyle::All, ScrewBlack>
 >("2612_Blank1");

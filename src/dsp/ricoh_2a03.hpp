@@ -117,23 +117,26 @@ class Ricoh2A03 {
         /// last amplitude oscillator was outputting
         int last_amp;
 
-        /// TODO:
-        inline void clock_length(int halt_mask) {
-            if (length_counter && !(regs[0] & halt_mask)) length_counter--;
-        }
-
-        /// Return the current period the oscillator is set to.
-        inline int period() const {
-            return (regs[3] & 7) * 0x100 + (regs[2] & 0xff);
-        }
-
-        /// Reset the oscillator to it initial state.
+        /// @brief Reset the oscillator to it initial state.
         inline void reset() {
+            regs[0] = regs[1] = regs[2] = regs[3];
+            reg_written[0] = reg_written[1] = reg_written[2] = reg_written[3];
+            length_counter = 0;
             delay = 0;
             last_amp = 0;
         }
 
-        /// Update the waveform for the oscillator with the given amplitude.
+        /// @brief TODO:
+        inline void clock_length(int halt_mask) {
+            if (length_counter && !(regs[0] & halt_mask)) length_counter--;
+        }
+
+        /// @brief Return the period of the oscillator.
+        inline int period() const {
+            return (regs[3] & 7) * 0x100 + (regs[2] & 0xff);
+        }
+
+        /// @brief Update the waveform for the oscillator with the given amplitude.
         ///
         /// @param amp the amplitude for the current sample
         /// @returns the change in amplitude between amp and the last set amplitude
@@ -151,6 +154,13 @@ class Ricoh2A03 {
         int envelope;
         /// TODO:
         int env_delay;
+
+        /// Reset the envelope to its default state
+        inline void reset() {
+            envelope = 0;
+            env_delay = 0;
+            Oscillator::reset();
+        }
 
         /// Clock the envelope.
         void clock_envelope() {
@@ -171,13 +181,6 @@ class Ricoh2A03 {
             return length_counter == 0 ?
                 0 : (regs[0] & 0x10) ? (regs[0] & 15) : envelope;
         }
-
-        /// Reset the envelope to its default state
-        inline void reset() {
-            envelope = 0;
-            env_delay = 0;
-            Oscillator::reset();
-        }
     };
 
     /// The square wave oscillator from the NES.
@@ -196,6 +199,16 @@ class Ricoh2A03 {
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
         typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> Synth;
         const Synth* synth;
+
+        /// @brief Reset the oscillator to uniform and default state.
+        inline void reset() {
+            sweep_delay = 0;
+            reset_phase();
+            Envelope::reset();
+        }
+
+        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
+        inline void reset_phase() { phase = PHASE_RANGE - 1; }
 
         void clock_sweep(int negative_adjust) {
             int sweep = regs[1];
@@ -279,25 +292,28 @@ class Ricoh2A03 {
             }
             delay = time - end_time;
         }
-
-        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
-        inline void reset_phase() { phase = PHASE_RANGE - 1; }
-
-        /// @brief Reset the oscillator to uniform and default state.
-        inline void reset() {
-            sweep_delay = 0;
-            reset_phase();
-            Envelope::reset();
-        }
     };
 
     /// The quantized triangle wave oscillator from the NES.
     struct Triangle : Oscillator {
+        /// the range of the oscillators phase counter
         enum { PHASE_RANGE = 16 };
-        int phase;
-        int linear_counter;
+        /// TODO:
+        int linear_counter = 0;
+        /// the current phase of the oscillator
+        int phase = PHASE_RANGE;
         /// the BLIP synthesizer for the oscillator
         BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
+
+        /// @brief Reset the oscillator to uniform and default state.
+        inline void reset() {
+            linear_counter = 0;
+            reset_phase();
+            Oscillator::reset();
+        }
+
+        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
+        inline void reset_phase() { phase = PHASE_RANGE; }
 
         /// @brief Calculate the amplitude of the oscillator waveform
         inline int calc_amp() const {
@@ -352,16 +368,6 @@ class Ricoh2A03 {
 
             if (!(regs[0] & 0x80))
                 reg_written[3] = false;
-        }
-
-        /// @brief Reset the phase of the oscillator. Can be used to hard sync.
-        inline void reset_phase() { phase = PHASE_RANGE; }
-
-        /// @brief Reset the oscillator to uniform and default state.
-        inline void reset() {
-            linear_counter = 0;
-            reset_phase();
-            Oscillator::reset();
         }
     };
 
@@ -600,14 +606,10 @@ class Ricoh2A03 {
         last_time = 0;
         osc_enables = 0;
         frame_delay = 1;
-        write(STATUS, 0x00);
-        // normal Ricoh start with channels off, but this will enable them all
-        write(SND_CHN, 0b00001111);
-        // initialize sq1, sq2, tri, and noise, not DMC
-        for (uint16_t addr = ADDR_START; addr <= 0x4009; addr++)
-            write(addr, (addr & 3) ? 0x00 : 0x10);
-        // TODO: remove? it was in the processCV function but seems unneeded.
-        write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
+        // TODO: remove functionality
+        set_status(0);
+        set_sends(0x0F);
+        set_sweep(2, 0x7F);
     }
 
     /// @brief Reset the phase of the given oscillator by index.
@@ -680,52 +682,25 @@ class Ricoh2A03 {
         osc->regs[3] = length;
         if ((osc_enables >> 3) & 1)  // load length counter
             osc->length_counter = get_length((length >> 3) & 0x1f);
-        // write(NOISE_LO, (is_lfsr << 7) | value);
-        // write(NOISE_HI, length);
     }
 
-    /// @brief Write to data to a register.
-    ///
-    /// @param address the address of the register to write in
-    /// `[0x4000, 0x4017]`, except `0x4014` and `0x4016`. See enum Register
-    /// for more details.
-    /// @param data the data to write to the register
-    ///
-    void write(uint16_t address, uint8_t data) {
-        /// The length table to lookup length values from registers
-        static constexpr unsigned char length_table[0x20] = {
-            0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
-            0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
-            0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
-            0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
-        };
-        // make sure the given address is legal
-        if (address < ADDR_START or address > ADDR_END)
-            throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        if (address < DMC_FREQ) {  // synthesizer registers
-            // Write to channel
-            int osc_index = (address - ADDR_START) >> 2;
-            Oscillator* osc = oscs[osc_index];
-            int reg = address & 3;
-            osc->regs[reg] = data;
-            osc->reg_written[reg] = true;
-            if (reg == 3 && ((osc_enables >> osc_index) & 1)) // load length counter
-                osc->length_counter = length_table[(data >> 3) & 0x1f];
-        } else if (address == SND_CHN) {  // Channel enables
-            for (int i = OSC_COUNT; i--;) {
-                if (!((data >> i) & 1)) oscs[i]->length_counter = 0;
-            }
-            osc_enables = data;
-        } else if (address == STATUS) {  // Frame mode
-            frame_mode = data;
-            // mode 1
-            frame_delay = (frame_delay & 1);
-            frame = 0;
-            if (!(data & 0x80)) {  // mode 0
-                frame = 1;
-                frame_delay += FRAME_PERIOD;
-            }
+    void set_status(uint8_t value) {
+        frame_mode = value;
+        // mode 1
+        frame_delay = (frame_delay & 1);
+        frame = 0;
+        if (!(value & 0x80)) {  // mode 0
+            frame = 1;
+            frame_delay += FRAME_PERIOD;
         }
+    }
+
+    /// TODO remove?
+    void set_sends(uint8_t value) {
+        for (int i = OSC_COUNT; i--;) {
+            if (!((value >> i) & 1)) oscs[i]->length_counter = 0;
+        }
+        osc_enables = value;
     }
 
     /// @brief Run all oscillators up to specified time, end current frame,

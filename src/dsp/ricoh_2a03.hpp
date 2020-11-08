@@ -591,16 +591,18 @@ class Ricoh2A03 {
 
     /// @brief Reset internal frame counter, registers, and all oscillators.
     inline void reset() {
+        // reset oscillators
         pulse0.reset();
         pulse1.reset();
         triangle.reset();
         noise.reset();
-
+        // reset instance variables
         last_time = 0;
         osc_enables = 0;
         frame_delay = 1;
         write(STATUS, 0x00);
-        write(SND_CHN, 0x00);
+        // normal Ricoh start with channels off, but this will enable them all
+        write(SND_CHN, 0b00001111);
         // initialize sq1, sq2, tri, and noise, not DMC
         for (uint16_t addr = ADDR_START; addr <= 0x4009; addr++)
             write(addr, (addr & 3) ? 0x00 : 0x10);
@@ -628,8 +630,6 @@ class Ricoh2A03 {
     /// @param data the data to write to the register
     ///
     void write(uint16_t address, uint8_t data) {
-        /// the number of elapsed CPU cycles to this write operation
-        static constexpr blip_time_t time = 0;
         /// The length table to lookup length values from registers
         static constexpr unsigned char length_table[0x20] = {
             0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
@@ -640,8 +640,6 @@ class Ricoh2A03 {
         // make sure the given address is legal
         if (address < ADDR_START or address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        // run the emulator up to the given time
-        run_until(time);
         if (address < DMC_FREQ) {  // synthesizer registers
             // Write to channel
             int osc_index = (address - ADDR_START) >> 2;

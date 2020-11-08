@@ -284,8 +284,6 @@ struct Terracillator : ChipModule<Ricoh2A03> {
         // get volume for triangle to normal voltages
         auto volumeTriangle = getVolume(2, channel);
         apu[channel].write(Ricoh2A03::NOISE_VOL, 0b00010000 | getVolume(3, channel));
-        // enable all four oscillators
-        apu[channel].write(Ricoh2A03::SND_CHN, 0b00001111);
     }
 
     /// @brief Process the lights on the module.

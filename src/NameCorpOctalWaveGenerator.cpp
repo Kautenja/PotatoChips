@@ -255,28 +255,6 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
     virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
-        // write waveform data to the chip's RAM based on the position in
-        // the wave-table
-        auto position = getWavetablePosition(channel);
-        // calculate the address of the base waveform in the table
-        int wavetable0 = floor(position);
-        // calculate the address of the next waveform in the table
-        int wavetable1 = ceil(position);
-        // calculate floating point offset between the base and next table
-        float interpolate = position - wavetable0;
-        for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
-            // get the first waveform data
-            auto nibbleLo0 = wavetable[wavetable0][2 * i];
-            auto nibbleHi0 = wavetable[wavetable0][2 * i + 1];
-            // get the second waveform data
-            auto nibbleLo1 = wavetable[wavetable1][2 * i];
-            auto nibbleHi1 = wavetable[wavetable1][2 * i + 1];
-            // floating point interpolation
-            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
-            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
-            // combine the two nibbles into a byte for the RAM
-            apu[channel].write(i, (nibbleHi << 4) | nibbleLo);
-        }
         // set the frequency for all oscillators on the chip
         for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
             // extract the low, medium, and high frequency register values
@@ -308,6 +286,28 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
             // VOLUME (and oscillator selection on oscillator 8, this has
             // no effect on other oscillators, so check logic is skipped)
             apu[channel].write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * oscillator, ((num_oscillators[channel] - 1) << 4) | getVolume(oscillator, channel));
+        }
+        // write waveform data to the chip's RAM based on the position in
+        // the wave-table
+        auto position = getWavetablePosition(channel);
+        // calculate the address of the base waveform in the table
+        int wavetable0 = floor(position);
+        // calculate the address of the next waveform in the table
+        int wavetable1 = ceil(position);
+        // calculate floating point offset between the base and next table
+        float interpolate = position - wavetable0;
+        for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
+            // get the first waveform data
+            auto nibbleLo0 = wavetable[wavetable0][2 * i];
+            auto nibbleHi0 = wavetable[wavetable0][2 * i + 1];
+            // get the second waveform data
+            auto nibbleLo1 = wavetable[wavetable1][2 * i];
+            auto nibbleHi1 = wavetable[wavetable1][2 * i + 1];
+            // floating point interpolation
+            uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
+            uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
+            // combine the two nibbles into a byte for the RAM
+            apu[channel].write(i, (nibbleHi << 4) | nibbleLo);
         }
     }
 

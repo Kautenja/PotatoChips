@@ -554,12 +554,7 @@ class Ricoh2A03 {
 
     /// @brief Reset internal frame counter, registers, and all oscillators.
     inline void reset() {
-        // reset oscillators
-        pulse0.reset();
-        pulse1.reset();
-        triangle.reset();
-        noise.reset();
-        // reset instance variables
+        for (Oscillator* osc : oscs) osc->reset();
         last_time = 0;
         frame_delay = 1;
         set_status(0);

@@ -22,6 +22,7 @@
 // TODO: explosion indicator for FIR filter
 // TODO: attenu-verters for FIR parameters
 // TODO: master blaster for all attenu-verters (supercell auxillary control)
+// TODO: horizontal sliders for the FIR parameters that function like Typhoon
 
 // ---------------------------------------------------------------------------
 // MARK: Module

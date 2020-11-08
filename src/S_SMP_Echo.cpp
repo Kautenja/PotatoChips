@@ -16,6 +16,14 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
+// TODO: option to prevent clicks in context menu
+// TODO: audio rate modulation
+// TODO: VU meters
+// TODO: bypass switch / rethink the wet/dry
+// TODO: explosion indicator for FIR filter
+// TODO: attenu-verters for FIR parameters
+// TODO: master blaster for all attenu-verters (supercell auxillary control)
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

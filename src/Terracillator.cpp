@@ -302,20 +302,22 @@ struct TerracillatorWidget : ModuleWidget {
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             // Frequency / Noise Period
             auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 32),  module, Terracillator::PARAM_FREQ        + i);
-            freq->snap = i == 3;
+            freq->snap = i == Ricoh2A03::NOISE;
             addParam(freq);
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 71),  module, Terracillator::INPUT_VOCT        + i));
             // FM / LFSR
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 99), module, Terracillator::INPUT_FM          + i));
-            if (i < 3)
+            if (i < Ricoh2A03::NOISE)
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 144), module, Terracillator::PARAM_FM          + i));
             else
                 addParam(createParam<CKSS>(    Vec(120, 141), module, Terracillator::PARAM_FM                  + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, Terracillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, Terracillator::INPUT_LEVEL       + i));
+            if (i != Ricoh2A03::TRIANGLE) {
+                addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, Terracillator::PARAM_LEVEL       + i));
+                addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, Terracillator::INPUT_LEVEL       + i));
+            }
             // Pulse Width / Sync
-            if (i < 2) {
+            if (i < Ricoh2A03::TRIANGLE) {
                 addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 241), module, Terracillator::PARAM_PW + i));
                 addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, Terracillator::INPUT_PW + i));
             } else {

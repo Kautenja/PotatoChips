@@ -17,6 +17,11 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
 
+// TODO: lights
+// - on sliders for CV levels
+// - on panel for stage indication
+// TODO: EOR / EOC outputs
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

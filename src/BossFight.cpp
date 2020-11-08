@@ -19,7 +19,6 @@
 #include "widget/indexed_frame_display.hpp"
 
 // TODO: option to prevent clicks in context menu
-// TODO: audio rate modulation
 // TODO: option to copy operator parameters between operators?
 
 // ---------------------------------------------------------------------------
@@ -189,7 +188,6 @@ struct BossFight : rack::Module {
         apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
         // normal pitch gate and re-trigger
-        float pitch = 0;
         float gate = 0;
         float retrig = 0;
         // set the operator parameters
@@ -206,10 +204,6 @@ struct BossFight : rack::Module {
             // SSG and rate scale
             apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
-            // Compute the frequency from the pitch parameter and input.
-            float frequency = params[PARAM_FREQ + op].getValue();
-            pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-            apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
             gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
@@ -243,6 +237,15 @@ struct BossFight : rack::Module {
         if (cvDivider.process())
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);
+        // set the operator parameters
+        float pitch = 0;
+        for (unsigned channel = 0; channel < channels; channel++) {
+            for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
+                float frequency = params[PARAM_FREQ + op].getValue();
+                pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
+                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
+            }
+        }
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample

@@ -224,33 +224,17 @@ struct Terracillator : ChipModule<Ricoh2A03> {
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
     inline void processAudio(const ProcessArgs &args, unsigned channel) final {
-        // ---------------------------------------------------------------
-        // pulse oscillator (2)
-        // ---------------------------------------------------------------
-        for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-            // write the frequency to the low and high registers
-            // - there are 4 registers per pulse oscillator, multiply oscillator by 4 to
-            //   produce an offset between registers based on oscillator index
-            uint16_t freq = getFrequency(oscillator, channel, 8, 1023, 16);
-            auto lo =  freq & 0b0000000011111111;
-            apu[channel].write(Ricoh2A03::PULSE0_LO + 4 * oscillator, lo);
-            auto hi = (freq & 0b0000011100000000) >> 8;
-            apu[channel].write(Ricoh2A03::PULSE0_HI + 4 * oscillator, hi);
-        }
-        // ---------------------------------------------------------------
-        // triangle oscillator
-        // ---------------------------------------------------------------
-        // write the frequency to the low and high registers
-        uint16_t freq = getFrequency(2, channel, 2, 2047, 32);
-        apu[channel].write(Ricoh2A03::TRIANGLE_LO,  freq & 0b0000000011111111);
-        apu[channel].write(Ricoh2A03::TRIANGLE_HI, (freq & 0b0000011100000000) >> 8);
+        // pulse generators
+        for (unsigned i = 0; i < 2; i++)
+            apu[channel].set_frequency(i, getFrequency(i, channel, 8, 1023, 16));
+        // triangle wave
+        apu[channel].set_frequency(2, getFrequency(2, channel, 2, 2047, 32));
         // sync input
         for (unsigned i = 0; i < 2; i++) {
             const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
             if (syncTriggers[channel][i].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
                 apu[channel].reset_phase(2 + i);
         }
-
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -259,31 +243,20 @@ struct Terracillator : ChipModule<Ricoh2A03> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
-        // ---------------------------------------------------------------
-        // pulse oscillator (2)
-        // ---------------------------------------------------------------
+        // pulse generators
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
             // set the pulse width of the pulse wave (high 3 bits) and set
-            // the volume (low 4 bits). the 5th bit controls the envelope,
-            // high sets constant volume.
-            auto volume = getPulseWidth(oscillator, channel) | 0b00010000 | getVolume(oscillator, channel);
+            // the volume (low 4 bits).
+            auto volume = getPulseWidth(oscillator, channel) | getVolume(oscillator, channel);
             apu[channel].set_volume(oscillator, volume);
         }
-        // ---------------------------------------------------------------
-        // triangle oscillator
-        // ---------------------------------------------------------------
-        // write the linear register to enable the oscillator
-        apu[channel].write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
-        // get volume for triangle to normal voltages
-        apu[channel].set_volume(2, 0b00010000 | getVolume(2, channel));
-        // ---------------------------------------------------------------
+        // triangle wave
+        apu[channel].set_volume(2, getVolume(2, channel));
         // noise oscillator
-        // ---------------------------------------------------------------
-        apu[channel].write(Ricoh2A03::NOISE_LO, (is_lfsr << 7) | getNoisePeriod(channel));
-        apu[channel].write(Ricoh2A03::NOISE_HI, 0);
-        apu[channel].set_volume(3, 0b00010000 | getVolume(3, channel));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
+        apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
+        apu[channel].set_volume(3, getVolume(3, channel));
     }
 
     /// @brief Process the lights on the module.

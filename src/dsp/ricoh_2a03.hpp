@@ -606,6 +606,8 @@ class Ricoh2A03 {
         // initialize sq1, sq2, tri, and noise, not DMC
         for (uint16_t addr = ADDR_START; addr <= 0x4009; addr++)
             write(addr, (addr & 3) ? 0x00 : 0x10);
+        // TODO: remove? it was in the processCV function but seems unneeded.
+        write(Ricoh2A03::TRIANGLE_LINEAR, 0b01111111);
     }
 
     /// @brief Reset the phase of the given oscillator by index.
@@ -626,10 +628,60 @@ class Ricoh2A03 {
     ///
     /// @osc_index the index of the oscillator to set the volume of
     /// @param value the 8-bit level to set the oscillator to
+    ///
     void set_volume(unsigned osc_index, uint8_t value) {
         Oscillator* osc = oscs[osc_index];
-        osc->regs[0] = value;
+        osc->regs[0] = 0b00010000 | value;
         osc->reg_written[0] = true;
+    }
+
+    /// @brief Set the sweep parameter for the given oscillator.
+    ///
+    /// @osc_index the index of the oscillator to set the sweep of
+    /// @param value the 8-bit sweep to set the oscillator to
+    ///
+    void set_sweep(unsigned osc_index, uint8_t value) {
+        Oscillator* osc = oscs[osc_index];
+        osc->regs[1] = value;
+        osc->reg_written[1] = true;
+    }
+
+    inline uint8_t get_length(unsigned index) {
+        /// The length table to lookup length values from registers
+        static constexpr unsigned char length_table[0x20] = {
+            0x0A, 0xFE, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06,
+            0xA0, 0x08, 0x3C, 0x0A, 0x0E, 0x0C, 0x1A, 0x0E,
+            0x0C, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16,
+            0xC0, 0x18, 0x48, 0x1A, 0x10, 0x1C, 0x20, 0x1E
+        };
+        return length_table[index];
+    }
+
+    /// @brief Set the frequency parameter for the given oscillator.
+    ///
+    /// @osc_index the index of the oscillator to set the frequency of
+    /// @param value the 11-bit frequency to set the oscillator to
+    ///
+    void set_frequency(unsigned osc_index, uint16_t value) {
+        Oscillator* osc = oscs[osc_index];
+        const auto lo =  value & 0b0000000011111111;
+        osc->regs[2] = lo;
+        osc->reg_written[2] = true;
+        const auto hi = (value & 0b0000011100000000) >> 8;
+        osc->regs[3] = hi;
+        osc->reg_written[3] = true;
+        if ((osc_enables >> osc_index) & 1)  // load length counter
+            osc->length_counter = get_length((hi >> 3) & 0x1f);
+    }
+
+    void set_noise_period(uint8_t value, bool is_lfsr, uint8_t length = 0) {
+        Oscillator* osc = oscs[3];
+        osc->regs[2] = (is_lfsr << 7) | value;
+        osc->regs[3] = length;
+        if ((osc_enables >> 3) & 1)  // load length counter
+            osc->length_counter = get_length((length >> 3) & 0x1f);
+        // write(NOISE_LO, (is_lfsr << 7) | value);
+        // write(NOISE_HI, length);
     }
 
     /// @brief Write to data to a register.

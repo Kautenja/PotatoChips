@@ -625,7 +625,7 @@ class Ricoh2A03 {
     /// @osc_index the index of the oscillator to set the volume of
     /// @param value the 8-bit level to set the oscillator to
     ///
-    void set_volume(unsigned osc_index, uint8_t value) {
+    inline void set_volume(unsigned osc_index, uint8_t value) {
         Oscillator* osc = oscs[osc_index];
         osc->regs[0] = 0b00010000 | value;
         osc->reg_written[0] = true;
@@ -636,7 +636,7 @@ class Ricoh2A03 {
     /// @osc_index the index of the oscillator to set the sweep of
     /// @param value the 8-bit sweep to set the oscillator to
     ///
-    void set_sweep(unsigned osc_index, uint8_t value) {
+    inline void set_sweep(unsigned osc_index, uint8_t value) {
         Oscillator* osc = oscs[osc_index];
         osc->regs[1] = value;
         osc->reg_written[1] = true;
@@ -658,7 +658,7 @@ class Ricoh2A03 {
     /// @osc_index the index of the oscillator to set the frequency of
     /// @param value the 11-bit frequency to set the oscillator to
     ///
-    void set_frequency(unsigned osc_index, uint16_t value) {
+    inline void set_frequency(unsigned osc_index, uint16_t value) {
         Oscillator* osc = oscs[osc_index];
         const auto lo =  value & 0b0000000011111111;
         osc->regs[2] = lo;
@@ -670,15 +670,25 @@ class Ricoh2A03 {
         osc->length_counter = get_length((hi >> 3) & 0x1f);
     }
 
-    void set_noise_period(uint8_t value, bool is_lfsr, uint8_t length = 0) {
+    /// @brief Set the noise oscillator parameters.
+    ///
+    /// @param period the value of the noise oscillator's period
+    /// @param is_lfsr true to enable the linear feedback shift register
+    /// @param length the index for loading the length counter for the osc
+    ///
+    inline void set_noise_period(uint8_t period, bool is_lfsr, uint8_t length = 0) {
         Oscillator* osc = oscs[3];
-        osc->regs[2] = (is_lfsr << 7) | value;
+        osc->regs[2] = (is_lfsr << 7) | period;
         osc->regs[3] = length;
         // load length counter
         osc->length_counter = get_length((length >> 3) & 0x1f);
     }
 
-    void set_status(uint8_t value) {
+    /// @brief Set the global status of the APU
+    ///
+    /// @param value the value to write to the status register
+    ///
+    inline void set_status(uint8_t value) {
         frame_mode = value;
         // mode 1
         frame_delay = (frame_delay & 1);

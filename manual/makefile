@@ -8,9 +8,9 @@ mNameCorpOctalWaveGenerator: build
 	make -C NameCorpOctalWaveGenerator
 	cp NameCorpOctalWaveGenerator/build/manual.pdf build/NameCorpOctalWaveGenerator.pdf
 
-mTerracillator: build
-	make -C Terracillator
-	cp Terracillator/build/manual.pdf build/Terracillator.pdf
+mInfiniteStairs: build
+	make -C InfiniteStairs
+	cp InfiniteStairs/build/manual.pdf build/InfiniteStairs.pdf
 
 mJairasullator: build
 	make -C Jairasullator
@@ -20,9 +20,9 @@ mBossFight: build
 	make -C BossFight
 	cp BossFight/build/manual.pdf build/BossFight.pdf
 
-mGleeokillator: build
-	make -C Gleeokillator
-	cp Gleeokillator/build/manual.pdf build/Gleeokillator.pdf
+mPulses: build
+	make -C Pulses
+	cp Pulses/build/manual.pdf build/Pulses.pdf
 
 mPalletTownWavesSystem: build
 	make -C PalletTownWavesSystem
@@ -32,9 +32,9 @@ mMegaTone: build
 	make -C MegaTone
 	cp MegaTone/build/manual.pdf build/MegaTone.pdf
 
-mPotillator: build
-	make -C Potillator
-	cp Potillator/build/manual.pdf build/Potillator.pdf
+mPotKeys: build
+	make -C PotKeys
+	cp PotKeys/build/manual.pdf build/PotKeys.pdf
 
 mSCC: build
 	make -C SCC
@@ -44,9 +44,9 @@ mTurboGrafx16: build
 	make -C TurboGrafx16
 	cp TurboGrafx16/build/manual.pdf build/TurboGrafx16.pdf
 
-mEscillator: build
-	make -C Escillator
-	cp Escillator/build/manual.pdf build/Escillator.pdf
+mStepSaw: build
+	make -C StepSaw
+	cp StepSaw/build/manual.pdf build/StepSaw.pdf
 
 mSSMPEcho: build
 	make -C S_SMP_Echo
@@ -56,4 +56,4 @@ mSSMPGauss: build
 	make -C S_SMP_Gauss
 	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
 
-manual: mNameCorpOctalWaveGenerator mTerracillator mJairasullator mBossFight mGleeokillator mPalletTownWavesSystem mMegaTone mPotillator mSCC mTurboGrafx16 mEscillator mSSMPEcho mSSMPGauss
+manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mSCC mTurboGrafx16 mStepSaw mSSMPEcho mSSMPGauss

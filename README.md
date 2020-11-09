@@ -14,21 +14,21 @@ They're just so addicting!
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Terracillator -->
+<!-- MARK: InfiniteStairs -->
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Terracillator Logo" src="manual/Terracillator/img/Terracillator-Logo.svg">
+<img alt="InfiniteStairs Logo" src="manual/InfiniteStairs/img/Logo.svg">
 </h2>
 
-**Terracillator** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
+**InfiniteStairs** is an emulation of the [Ricoh 2A03][Ricoh2A03] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES].
 The 2A03 chip contains two pulse wave generators, a quantized triangle wave
 generator, and a noise generator. The original chip featured a DMC loader for
 playing samples that has been omitted in this emulation.
 
 <p align="center">
-<img alt="Terracillator" src="manual/Terracillator/img/Terracillator-Module.svg">
+<img alt="InfiniteStairs" src="manual/InfiniteStairs/img/Module.svg">
 </p>
 
 ### Features
@@ -41,23 +41,23 @@ playing samples that has been omitted in this emulation.
     frequencies
 -   **Linear Feedback Shift Register (LFSR):** old-school 8-bit randomness!
 
-See the [Manual][Terracillator] for more information about the features of this module.
+See the [Manual][InfiniteStairs] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Gleeokillator -->
+<!-- MARK: Pulses -->
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Gleeokillator Logo" src="manual/Gleeokillator/img/Gleeokillator-Logo.svg">
+<img alt="Pulses Logo" src="manual/Pulses/img/Logo.svg">
 </h2>
 
-**Gleeokillator** is an emulation of the [Sunsoft FME7][SunsoftFME7] audio
+**Pulses** is an emulation of the [Sunsoft FME7][SunsoftFME7] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES]. The FME7
 chip contains three pulse wave generators, a noise generator, and an envelope
 generator. Only the pulse wave generators are implemented currently.
 
 <p align="center">
-<img alt="Gleeokillator" src="manual/Gleeokillator/img/Gleeokillator-Module.svg">
+<img alt="Pulses" src="manual/Pulses/img/Module.svg">
 </p>
 
 ### Features
@@ -65,22 +65,22 @@ generator. Only the pulse wave generators are implemented currently.
 -   **Triple pulse wave generator:** Triple 12-bit pulse waves with duty cycle of _50%_
 -   **Amplitude modulation:** Manual and CV control over the individual voice levels
 
-See the [Manual][Gleeokillator] for more information about the features of this module.
+See the [Manual][Pulses] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Escillator -->
+<!-- MARK: StepSaw -->
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Escillator Logo" src="manual/Escillator/img/Escillator-Logo.svg">
+<img alt="StepSaw Logo" src="manual/StepSaw/img/Logo.svg">
 </h2>
 
-**Escillator** is an emulation of the [Konami VRC6][KonamiVRC6] audio
+**StepSaw** is an emulation of the [Konami VRC6][KonamiVRC6] audio
 processing unit from the [Nintendo Entertainment System (NES)][NES]. The VRC6
 chip contains two pulse wave generators, and a quantized saw wave generator.
 
 <p align="center">
-<img alt="Escillator" src="manual/Escillator/img/Escillator-Module.svg">
+<img alt="StepSaw" src="manual/StepSaw/img/Module.svg">
 </p>
 
 ### Features
@@ -93,14 +93,14 @@ chip contains two pulse wave generators, and a quantized saw wave generator.
 -   **Amplitude modulation:** Manual and CV control over the individual voice
     levels
 
-See the [Manual][Escillator] for more information about the features of this module.
+See the [Manual][StepSaw] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Jairasullator -->
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Jairasullator Logo" src="manual/Jairasullator/img/Jairasullator-Logo.svg">
+<img alt="Jairasullator Logo" src="manual/Jairasullator/img/Logo.svg">
 </h2>
 
 **Jairasullator** is an emulation of the [General Instrument AY-3-8910][GI_AY_3_8910]
@@ -108,7 +108,7 @@ audio processing unit. The AY-3-8910 features three pulse waveform generators
 and a noise generator that is shared between the channels.
 
 <p align="center">
-<img alt="Jairasullator" src="manual/Jairasullator/img/Jairasullator-Module.svg">
+<img alt="Jairasullator" src="manual/Jairasullator/img/Module.svg">
 </p>
 
 ### Features
@@ -121,21 +121,21 @@ and a noise generator that is shared between the channels.
 See the [Manual][Jairasullator] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Potillator -->
+<!-- MARK: Pot Keys -->
 <!-- ------------------------------------------------------------ -->
 
 
 <h2 align="center">
-<img alt="Potillator Logo" src="manual/Potillator/img/Potillator-Logo.svg">
+<img alt="Pot Keys Logo" src="manual/PotKeys/img/Logo.svg">
 </h2>
 
-**Potillator** is an emulation of the [Atari POKEY][AtariPOKEY] audio
+**Pot Keys** is an emulation of the [Atari POKEY][AtariPOKEY] audio
 processing unit. The POKEY produces four pulse waveforms, but contains a
 variety of bonus controls, including extended frequency ranges, high-pass
 filters, and noise generators / distortion effects.
 
 <p align="center">
-<img alt="Potillator" src="manual/Potillator/img/Potillator-Module.svg">
+<img alt="Pot Keys" src="manual/PotKeys/img/Module.svg">
 </p>
 
 ### Features
@@ -153,14 +153,14 @@ filters, and noise generators / distortion effects.
     at 15 different frequencies as a distortion source
 -   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
 
-See the [Manual][Potillator] for more information about the features of this module.
+See the [Manual][PotKeys] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Mega Tone -->
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Mega Tone Logo" src="manual/MegaTone/img/MegaTone-Logo.svg">
+<img alt="Mega Tone Logo" src="manual/MegaTone/img/Logo.svg">
 </h2>
 
 **Mega Tone** is an emulation of the [Texas Instruments SN76489][TI-SN76489] audio
@@ -170,7 +170,7 @@ pulse waveform generators and an LFSR-based noise generator that selects
 between pitched white-noise and static periodic noise.
 
 <p align="center">
-<img alt="Mega Tone" src="manual/MegaTone/img/MegaTone-Module.svg">
+<img alt="Mega Tone" src="manual/MegaTone/img/Module.svg">
 </p>
 
 ### Features
@@ -193,7 +193,7 @@ See the [Manual][MegaTone] for more information about the features of this modul
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Boss Fight Logo" src="manual/BossFight/img/BossFight-Logo.svg">
+<img alt="Boss Fight Logo" src="manual/BossFight/img/Logo.svg">
 </h2>
 
 **Boss Fight** is an emulation and re-envisioning of the Yamaha
@@ -203,7 +203,7 @@ functionality of the 3rd channel of Yamaha YM2612, in addition to some hacks,
 omissions, and re-envisioned features, namely,
 
 <p align="center">
-<img alt="Boss Fight" src="manual/BossFight/img/BossFight-Module.svg">
+<img alt="Boss Fight" src="manual/BossFight/img/Module.svg">
 </p>
 
 ### Features
@@ -248,7 +248,7 @@ See the [Manual][BossFight] for more information about the features of this modu
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Logo.svg">
+<img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/Logo.svg">
 </h2>
 
 **Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
@@ -259,7 +259,7 @@ samples. This module uses a bank of five 32-sample wave-tables to act as the
 waveform for all eight channels.
 
 <p align="center">
-<img alt="Name Corp Octal Wave Generator" src="manual/NameCorpOctalWaveGenerator/img/NameCorpOctalWaveGenerator-Module.svg">
+<img alt="Name Corp Octal Wave Generator" src="manual/NameCorpOctalWaveGenerator/img/Module.svg">
 </p>
 
 ### Features
@@ -281,7 +281,7 @@ See the [Manual][NameCorpOctalWaveGenerator] for more information about the feat
 <!-- ------------------------------------------------------------ -->
 
 <h2 align="center">
-<img alt="Pallet Town Waves System Logo" src="manual/PalletTownWavesSystem/img/PalletTownWavesSystem-Logo.svg">
+<img alt="Pallet Town Waves System Logo" src="manual/PalletTownWavesSystem/img/Logo.svg">
 </h2>
 
 **Pallet Town Waves System** is an emulation of the
@@ -291,7 +291,7 @@ unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform
 generator with a wave-table synthesizer.
 
 <p align="center">
-<img alt="Pallet Town Waves System" src="manual/PalletTownWavesSystem/img/PalletTownWavesSystem-Module.svg">
+<img alt="Pallet Town Waves System" src="manual/PalletTownWavesSystem/img/Module.svg">
 </p>
 
 ### Features
@@ -332,7 +332,7 @@ S-SMP chip, namely,
     control voltages.
 
 <p align="center">
-<img alt="S-SMP(ADSR)" src="manual/S_SMP_ADSR/img/S-SMP-ADSR-Module.svg">
+<img alt="S-SMP(ADSR)" src="manual/S_SMP_ADSR/img/Module.svg">
 </p>
 
 ### Features
@@ -362,7 +362,7 @@ S-SMP chip, namely,
     bypass mode and three low-pass filter modes.
 
 <p align="center">
-<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/S-SMP-BRR-Module.svg">
+<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/Module.svg">
 </p>
 
 ### Features
@@ -404,7 +404,7 @@ namely,
     popular SNES games.
 
 <p align="center">
-<img alt="S-SMP(Echo)" src="manual/S_SMP_Echo/img/S-SMP-Echo-Module.svg">
+<img alt="S-SMP(Echo)" src="manual/S_SMP_Echo/img/Module.svg">
 </p>
 
 ### Features
@@ -437,7 +437,7 @@ of the S-SMP chip, namely,
     character that fans of SNES audio will find familiar.
 
 <p align="center">
-<img alt="S-SMP(Gauss)" src="manual/S_SMP_Gauss/img/S-SMP-Gauss-Module.svg">
+<img alt="S-SMP(Gauss)" src="manual/S_SMP_Gauss/img/Module.svg">
 </p>
 
 ### Features
@@ -456,7 +456,7 @@ The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
 the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 
 <!-- <p align="center">
-<img alt="S-SMP" src="manual/S_SMP/img/S_SMP-Module.svg">
+<img alt="S-SMP" src="manual/S_SMP/img/Module.svg">
 </p>
 
 ### Features
@@ -473,7 +473,7 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 [Konami Sound Creative Chip (SCC)][KonamiSCC] audio processing unit.
 
 <!-- <p align="center">
-<img alt="Wave Creative Modulator" src="manual/SCC/img/SCC-Module.svg">
+<img alt="Wave Creative Modulator" src="manual/SCC/img/Module.svg">
 </p>
 
 ### Features
@@ -490,7 +490,7 @@ See the [Manual][WaveCreativeModulator] for more information about the features 
 audio processing unit.
 
 <!-- <p align="center">
-<img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/TURBO_GRAFX_16-Module.svg">
+<img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/Module.svg">
 </p>
 
 ### Features
@@ -526,11 +526,11 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 
 <!-- Manuals -->
 
-[NameCorpOctalWaveGenerator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/106.pdf
-[Terracillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/2A03.pdf
-[Gleeokillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Gleeokillator.pdf
-[PalletTownWavesSystem]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GBS.pdf
-[Escillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/VRC6.pdf
+[NameCorpOctalWaveGenerator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf
+[InfiniteStairs]: https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf
+[Pulses]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf
+[PalletTownWavesSystem]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf
+[StepSaw]: https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
 [S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
 [S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
@@ -539,6 +539,6 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 [Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
-[Potillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/POKEY.pdf
+[PotKeys]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf
 [WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
 [GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

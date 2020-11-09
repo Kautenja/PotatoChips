@@ -179,6 +179,7 @@
     -   VU Meter to monitor levels / clipping / aliasing
 -   updates to FME7 (rev2 branded as "Pulses")
     -   **audio rate FM**
+    -   **changed default amplifier level to 10 instead of 7**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
         control when nothing is patched

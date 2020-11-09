@@ -16,7 +16,6 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
-// TODO: option to prevent clicks in context menu
 // TODO: VU meters
 // TODO: bypass switch / rethink the wet/dry
 // TODO: explosion indicator for FIR filter

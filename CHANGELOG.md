@@ -155,6 +155,7 @@
 
 ## 1.8.0 (TBD)
 
+-   header-only DSP library
 -   fix issue where some modules would generate a "pop"/"click"/"impulse" on
     start up: 2A03, GBS, VRC6, FME7, POKEY, Ay-3-8910, 106, SN76489
 -   fixes and updates to 2612 (rev2 branded as "Boss Fight")
@@ -176,7 +177,7 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   updates to FME7 (rev2 branded as "Gleeokillator")
+-   updates to FME7 (rev2 branded as "Pulses")
     -   **audio rate FM**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
@@ -184,7 +185,7 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   updates to VRC6 (rev2 branded as "Escillator")
+-   updates to VRC6 (rev2 branded as "Step Saw")
     -   **audio rate FM**
     -   **sync input for saw wave generator**
     -   new panel design
@@ -193,7 +194,7 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   updates to 2A03 (rev2 branded as "Terracillator")
+-   updates to 2A03 (rev2 branded as "Infinite Stairs")
     -   **hard sync input**
     -   **amplifier for steppy triangle generator**
     -   **sync input for steppy triangle generator and noise generator**
@@ -215,7 +216,7 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   updates to POKEY (rev2 branded as "Troglocillator")
+-   updates to POKEY (rev2 branded as "Pot Keys")
     -   **audio rate FM**
     -   new panel design
     -   attenuverter for frequency modulation that acts as fine frequency
@@ -240,7 +241,6 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
--   header-only DSP library
 
 ## 1.9.0 (TBD)
 

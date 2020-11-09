@@ -27,9 +27,9 @@ void init(Plugin* instance) {
     // current releases
     instance->addModel(modelJairasullator);
     instance->addModel(modelTerracillator);
-    instance->addModel(modelPotillator);
+    instance->addModel(modelPotKeys);
     instance->addModel(modelStepSaw);
-    instance->addModel(modelGleeokillator);
+    instance->addModel(modelPulses);
     instance->addModel(modelNameCorpOctalWaveGenerator);
     instance->addModel(modelPalletTownWavesSystem);
     instance->addModel(modelMegaTone);

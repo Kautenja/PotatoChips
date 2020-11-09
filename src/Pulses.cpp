@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// @brief A SunSoft FME7 chip emulator module.
-struct Gleeokillator : ChipModule<SunSoftFME7> {
+struct Pulses : ChipModule<SunSoftFME7> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -50,7 +50,7 @@ struct Gleeokillator : ChipModule<SunSoftFME7> {
     };
 
     /// @brief Initialize a new FME7 Chip module.
-    Gleeokillator() {
+    Pulses() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // set the output buffer for each individual voice
@@ -186,15 +186,15 @@ struct Gleeokillator : ChipModule<SunSoftFME7> {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for Gleeokillator.
-struct GleeokillatorWidget : ModuleWidget {
+/// The panel widget for Pulses.
+struct PulsesWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit GleeokillatorWidget(Gleeokillator *module) {
+    explicit PulsesWidget(Pulses *module) {
         setModule(module);
-        static constexpr auto panel = "res/Gleeokillator.svg";
+        static constexpr auto panel = "res/Pulses.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -203,20 +203,20 @@ struct GleeokillatorWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SunSoftFME7::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 45),  module, Gleeokillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 85),  module, Gleeokillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 45),  module, Pulses::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 85),  module, Pulses::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 129), module, Gleeokillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 173), module, Gleeokillator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 129), module, Pulses::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 173), module, Pulses::PARAM_FM          + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 221), module, Gleeokillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 263), module, Gleeokillator::INPUT_LEVEL       + i));
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Gleeokillator::LIGHTS_LEVEL + 3 * i));
+            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 221), module, Pulses::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 263), module, Pulses::INPUT_LEVEL       + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Pulses::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Gleeokillator::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Pulses::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelGleeokillator = createModel<Gleeokillator, GleeokillatorWidget>("FME7");
+Model *modelPulses = createModel<Pulses, PulsesWidget>("FME7");

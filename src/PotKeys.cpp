@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Atari POKEY chip emulator module.
-struct Potillator : ChipModule<AtariPOKEY> {
+struct PotKeys : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
     dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
@@ -61,7 +61,7 @@ struct Potillator : ChipModule<AtariPOKEY> {
     };
 
     /// @brief Initialize a new POKEY Chip module.
-    Potillator() : ChipModule<AtariPOKEY>() {
+    PotKeys() : ChipModule<AtariPOKEY>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
@@ -254,14 +254,14 @@ struct Potillator : ChipModule<AtariPOKEY> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for POKEY.
-struct PotillatorWidget : ModuleWidget {
+struct PotKeysWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit PotillatorWidget(Potillator *module) {
+    explicit PotKeysWidget(PotKeys *module) {
         setModule(module);
-        static constexpr auto panel = "res/Potillator.svg";
+        static constexpr auto panel = "res/PotKeys.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -271,30 +271,30 @@ struct PotillatorWidget : ModuleWidget {
         // the vertical spacing between the same component on different oscillators
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // oscillator control
             // Frequency
-            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 31),  module, Potillator::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 70),  module, Potillator::INPUT_VOCT        + i));
+            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 31),  module, PotKeys::PARAM_FREQ        + i));
+            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 70),  module, PotKeys::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 98), module, Potillator::INPUT_FM          + i));
-            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 143), module, Potillator::PARAM_FM          + i));
+            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 98), module, PotKeys::INPUT_FM          + i));
+            addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 143), module, PotKeys::PARAM_FM          + i));
             // Level
-            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 169), module, Potillator::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 209), module, Potillator::INPUT_LEVEL       + i));
+            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 169), module, PotKeys::PARAM_LEVEL       + i));
+            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 209), module, PotKeys::INPUT_LEVEL       + i));
             // Noise
-            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 241), module, Potillator::PARAM_NOISE + i));
-            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 281), module, Potillator::INPUT_NOISE + i));
+            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 241), module, PotKeys::PARAM_NOISE + i));
+            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 281), module, PotKeys::INPUT_NOISE + i));
             // Output
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(30 + 35 * i, 319), module, Potillator::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(11 + 35 * i, 324), module, Potillator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(30 + 35 * i, 319), module, PotKeys::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(11 + 35 * i, 324), module, PotKeys::OUTPUT_OSCILLATOR + i));
         }
         float offset = 0;
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
             if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
-            addParam(createParam<CKSS>(Vec(152, 45 + offset), module, Potillator::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(175, 44 + offset), module, Potillator::INPUT_CONTROL + i));
+            addParam(createParam<CKSS>(Vec(152, 45 + offset), module, PotKeys::PARAM_CONTROL + i));
+            addInput(createInput<PJ301MPort>(Vec(175, 44 + offset), module, PotKeys::INPUT_CONTROL + i));
             offset += 56;
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelPotillator = rack::createModel<Potillator, PotillatorWidget>("POKEY");
+rack::Model *modelPotKeys = rack::createModel<PotKeys, PotKeysWidget>("POKEY");

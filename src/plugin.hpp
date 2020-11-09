@@ -32,9 +32,9 @@ extern rack::Plugin* plugin_instance;
 // current releases
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelTerracillator;
-extern rack::Model *modelPotillator;
+extern rack::Model *modelPotKeys;
 extern rack::Model *modelStepSaw;
-extern rack::Model *modelGleeokillator;
+extern rack::Model *modelPulses;
 extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelPalletTownWavesSystem;
 extern rack::Model *modelMegaTone;

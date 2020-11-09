@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Konami VRC6 chip emulator module.
-struct Escillator : ChipModule<KonamiVRC6> {
+struct StepSaw : ChipModule<KonamiVRC6> {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         ENUMS(PARAM_FREQ, KonamiVRC6::OSC_COUNT),
@@ -55,7 +55,7 @@ struct Escillator : ChipModule<KonamiVRC6> {
     };
 
     /// @brief Initialize a new VRC6 Chip module.
-    Escillator() : ChipModule<KonamiVRC6>(5.f) {
+    StepSaw() : ChipModule<KonamiVRC6>(5.f) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FREQ + 0,  -2.5f, 2.5f, 0.f, "Pulse 1 Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -239,14 +239,14 @@ struct Escillator : ChipModule<KonamiVRC6> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for VRC6.
-struct EscillatorWidget : ModuleWidget {
+struct StepSawWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit EscillatorWidget(Escillator *module) {
+    explicit StepSawWidget(StepSaw *module) {
         setModule(module);
-        static constexpr auto panel = "res/Escillator.svg";
+        static constexpr auto panel = "res/StepSaw.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -255,26 +255,26 @@ struct EscillatorWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 32),  module, Escillator::PARAM_FREQ  + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 71),  module, Escillator::INPUT_VOCT  + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 32),  module, StepSaw::PARAM_FREQ  + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 71),  module, StepSaw::INPUT_VOCT  + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 99), module, Escillator::INPUT_FM    + i));
-            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 144), module, Escillator::PARAM_FM    + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 99), module, StepSaw::INPUT_FM    + i));
+            addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 144), module, StepSaw::PARAM_FM    + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 170), module, Escillator::PARAM_LEVEL + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 210), module, Escillator::INPUT_LEVEL + i));
+            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 170), module, StepSaw::PARAM_LEVEL + i));
+            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 210), module, StepSaw::INPUT_LEVEL + i));
             if (i < 2) {  // pulse width for tone generator
-                addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 241), module, Escillator::PARAM_PW + i));
-                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 281), module, Escillator::INPUT_PW + i));
+                addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 241), module, StepSaw::PARAM_PW + i));
+                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 281), module, StepSaw::INPUT_PW + i));
             } else {  // sync for saw wave
-                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 264), module, Escillator::INPUT_SYNC));
+                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 264), module, StepSaw::INPUT_SYNC));
             }
             // Output
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(32 + 35 * i, 319), module, Escillator::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, Escillator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(32 + 35 * i, 319), module, StepSaw::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, StepSaw::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelEscillator = createModel<Escillator, EscillatorWidget>("VRC6");
+rack::Model *modelStepSaw = createModel<StepSaw, StepSawWidget>("VRC6");

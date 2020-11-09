@@ -33,7 +33,7 @@ extern rack::Plugin* plugin_instance;
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelTerracillator;
 extern rack::Model *modelPotillator;
-extern rack::Model *modelEscillator;
+extern rack::Model *modelStepSaw;
 extern rack::Model *modelGleeokillator;
 extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelPalletTownWavesSystem;

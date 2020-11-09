@@ -207,9 +207,9 @@
     },
     {
       "slug": "VRC6",
-      "name": "Escillator",
+      "name": "StepSaw",
       "description": "An emulation of the Konami VRC6 chip from Nintendo Entertainment System (NES) cartridges.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Escillator.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf",
       "tags": [
         "Oscillator",
         "Polyphonic"

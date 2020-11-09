@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.eefe794",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        52,
+        83,
         0
       ]
     },
@@ -29,8 +29,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "leftModuleId": 160,
-      "rightModuleId": 152,
+      "rightModuleId": 159,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -44,8 +43,8 @@
         }
       },
       "pos": [
-        32,
-        1
+        0,
+        0
       ]
     },
     {
@@ -56,7 +55,7 @@
       "params": [
         {
           "id": 0,
-          "value": 17.0
+          "value": 31.0
         },
         {
           "id": 1,
@@ -72,7 +71,7 @@
         },
         {
           "id": 4,
-          "value": 92.0
+          "value": 127.0
         },
         {
           "id": 5,
@@ -103,125 +102,11 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 160,
+      "rightModuleId": 170,
       "pos": [
-        40,
-        1
-      ]
-    },
-    {
-      "id": 153,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "Oscilloscope",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 14.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        }
-      ],
-      "data": {
-        "lissajous": 0,
-        "external": 0
-      },
-      "pos": [
-        0,
-        2
-      ]
-    },
-    {
-      "id": 154,
-      "plugin": "Bogaudio",
-      "version": "1.1.34",
-      "model": "Bogaudio-AnalyzerXL",
-      "params": [],
-      "rightModuleId": 156,
-      "data": {
-        "range": 0.0,
-        "range_db": 80.0,
-        "smooth": 0.25,
-        "quality": "high",
-        "window": "kaiser"
-      },
-      "pos": [
-        0,
+        26,
         0
-      ]
-    },
-    {
-      "id": 155,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "Oscilloscope",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 14.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        }
-      ],
-      "data": {
-        "lissajous": 0,
-        "external": 0
-      },
-      "pos": [
-        0,
-        3
       ]
     },
     {
@@ -251,10 +136,10 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 154,
+      "leftModuleId": 171,
       "rightModuleId": 1,
       "pos": [
-        42,
+        73,
         0
       ]
     },
@@ -278,34 +163,54 @@
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 4,
-          "value": 2.0
+          "value": -1.0
         },
         {
           "id": 5,
-          "value": 2.0
+          "value": 1.0
         },
         {
           "id": 6,
-          "value": 0.299999684
+          "value": 0.0
         },
         {
           "id": 7,
-          "value": 0.304000199
+          "value": 0.0
         },
         {
           "id": 8,
-          "value": 0.899999976
+          "value": 5.0
+        },
+        {
+          "id": 9,
+          "value": 5.0
+        },
+        {
+          "id": 10,
+          "value": 10.0
+        },
+        {
+          "id": 11,
+          "value": 10.0
+        },
+        {
+          "id": 12,
+          "value": 2.0
+        },
+        {
+          "id": 13,
+          "value": 2.0
         }
       ],
-      "leftModuleId": 161,
+      "leftModuleId": 5,
       "rightModuleId": 160,
       "pos": [
-        10,
-        1
+        8,
+        0
       ]
     },
     {
@@ -332,33 +237,83 @@
         }
       ],
       "leftModuleId": 159,
-      "rightModuleId": 5,
+      "rightModuleId": 152,
       "pos": [
-        24,
-        1
+        18,
+        0
       ]
     },
     {
-      "id": 161,
+      "id": 170,
       "plugin": "Fundamental",
       "version": "1.4.0",
-      "model": "LFO",
+      "model": "Scope",
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": -1.26800025
+          "value": 0.0
         },
         {
           "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 152,
+      "rightModuleId": 171,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        40,
+        0
+      ]
+    },
+    {
+      "id": 171,
+      "plugin": "Bogaudio",
+      "version": "1.1.35",
+      "model": "Bogaudio-Analyzer",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
           "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
         },
         {
           "id": 4,
@@ -366,53 +321,22 @@
         },
         {
           "id": 5,
-          "value": 0.5
-        },
-        {
-          "id": 6,
-          "value": 1.0
+          "value": 0.0
         }
       ],
-      "rightModuleId": 159,
+      "leftModuleId": 170,
+      "rightModuleId": 156,
+      "data": {
+        "frequency_plot": "log",
+        "amplitude_plot": "decibels_80"
+      },
       "pos": [
-        0,
-        1
+        53,
+        0
       ]
     }
   ],
   "cables": [
-    {
-      "id": 7,
-      "outputModuleId": 152,
-      "outputId": 0,
-      "inputModuleId": 153,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 6,
-      "outputModuleId": 152,
-      "outputId": 1,
-      "inputModuleId": 155,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 10,
-      "outputModuleId": 152,
-      "outputId": 1,
-      "inputModuleId": 154,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 11,
-      "outputModuleId": 152,
-      "outputId": 0,
-      "inputModuleId": 154,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
     {
       "id": 12,
       "outputModuleId": 152,
@@ -430,27 +354,11 @@
       "color": "#c91847"
     },
     {
-      "id": 71,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 7,
-      "color": "#c9b70e"
-    },
-    {
       "id": 73,
       "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 159,
       "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 74,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 1,
       "color": "#c9b70e"
     },
     {
@@ -460,46 +368,6 @@
       "inputModuleId": 159,
       "inputId": 8,
       "color": "#c9b70e"
-    },
-    {
-      "id": 78,
-      "outputModuleId": 159,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 80,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 5,
-      "color": "#0986ad"
-    },
-    {
-      "id": 81,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 72,
-      "outputModuleId": 161,
-      "outputId": 3,
-      "inputModuleId": 160,
-      "inputId": 4,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 79,
-      "outputModuleId": 159,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 1,
-      "color": "#c91847"
     },
     {
       "id": 15,
@@ -518,12 +386,76 @@
       "color": "#0986ad"
     },
     {
+      "id": 155,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 160,
+      "inputId": 4,
+      "color": "#0986ad"
+    },
+    {
+      "id": 156,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 170,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 157,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 170,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 11,
+      "outputModuleId": 152,
+      "outputId": 0,
+      "inputModuleId": 171,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 10,
+      "outputModuleId": 152,
+      "outputId": 1,
+      "inputModuleId": 171,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
       "id": 82,
       "outputModuleId": 156,
       "outputId": 0,
-      "inputModuleId": 154,
+      "inputModuleId": 171,
       "inputId": 2,
       "color": "#0c8e15"
+    },
+    {
+      "id": 78,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 79,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 158,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 160,
+      "inputId": 5,
+      "color": "#0986ad"
     }
   ]
 }

@@ -59,7 +59,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
             auto name = "Tone " + std::string(1, static_cast<char>(65 + oscillator));
             configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
             configParam(INPUT_FM    + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
-            configParam(PARAM_LEVEL + oscillator,   0,   15,    7,    name + " Level");
+            configParam(PARAM_LEVEL + oscillator,   0,   15,    10,   name + " Level");
         }
     }
 

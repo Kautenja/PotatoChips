@@ -60,5 +60,5 @@ rack::Model *modelChipS_SMP_Blank1 = createModel<Module,
 
 extern constexpr char const blank2[] = "res/BossFight-Envelope.svg";
 rack::Model *modelBossFight_Blank1 = createModel<Module,
-    BlankWidget<blank2, ScrewStyle::All, ScrewBlack>
+    BlankWidget<blank2, ScrewStyle::All, ScrewSilver>
 >("2612_Blank1");

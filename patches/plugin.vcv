@@ -376,15 +376,15 @@
         },
         {
           "id": 6,
-          "value": 7.0
+          "value": 10.0
         },
         {
           "id": 7,
-          "value": 7.0
+          "value": 10.0
         },
         {
           "id": 8,
-          "value": 7.0
+          "value": 10.0
         }
       ],
       "leftModuleId": 141,
@@ -805,19 +805,19 @@
         },
         {
           "id": 11,
-          "value": 1.0
+          "value": 10.0
         },
         {
           "id": 12,
-          "value": 1.0
+          "value": 10.0
         },
         {
           "id": 13,
-          "value": 1.0
+          "value": 3.0
         },
         {
           "id": 14,
-          "value": 1.0
+          "value": 10.0
         }
       ],
       "rightModuleId": 143,

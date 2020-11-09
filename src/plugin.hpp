@@ -31,7 +31,7 @@ extern rack::Plugin* plugin_instance;
 
 // current releases
 extern rack::Model *modelJairasullator;
-extern rack::Model *modelTerracillator;
+extern rack::Model *modelInfiniteStairs;
 extern rack::Model *modelPotKeys;
 extern rack::Model *modelStepSaw;
 extern rack::Model *modelPulses;

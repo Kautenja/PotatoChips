@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Ricoh 2A03 chip emulator module.
-struct Terracillator : ChipModule<Ricoh2A03> {
+struct InfiniteStairs : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
@@ -66,7 +66,7 @@ struct Terracillator : ChipModule<Ricoh2A03> {
     };
 
     /// @brief Initialize a new 2A03 Chip module.
-    Terracillator() : ChipModule<Ricoh2A03>(6.f) {
+    InfiniteStairs() : ChipModule<Ricoh2A03>(6.f) {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
@@ -285,14 +285,14 @@ struct Terracillator : ChipModule<Ricoh2A03> {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for 2A03.
-struct TerracillatorWidget : ModuleWidget {
+struct InfiniteStairsWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit TerracillatorWidget(Terracillator *module) {
+    explicit InfiniteStairsWidget(InfiniteStairs *module) {
         setModule(module);
-        static constexpr auto panel = "res/Terracillator.svg";
+        static constexpr auto panel = "res/InfiniteStairs.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -301,34 +301,34 @@ struct TerracillatorWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             // Frequency / Noise Period
-            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 32),  module, Terracillator::PARAM_FREQ        + i);
+            auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 32),  module, InfiniteStairs::PARAM_FREQ        + i);
             freq->snap = i == Ricoh2A03::NOISE;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 71),  module, Terracillator::INPUT_VOCT        + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 71),  module, InfiniteStairs::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 99), module, Terracillator::INPUT_FM          + i));
+            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 99), module, InfiniteStairs::INPUT_FM          + i));
             if (i < Ricoh2A03::NOISE)
-                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 144), module, Terracillator::PARAM_FM          + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 144), module, InfiniteStairs::PARAM_FM          + i));
             else
-                addParam(createParam<CKSS>(    Vec(120, 141), module, Terracillator::PARAM_FM                  + i));
+                addParam(createParam<CKSS>(    Vec(120, 141), module, InfiniteStairs::PARAM_FM                  + i));
             // Level
             if (i != Ricoh2A03::TRIANGLE) {
-                addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, Terracillator::PARAM_LEVEL       + i));
-                addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, Terracillator::INPUT_LEVEL       + i));
+                addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, InfiniteStairs::PARAM_LEVEL       + i));
+                addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, InfiniteStairs::INPUT_LEVEL       + i));
             }
             // Pulse Width / Sync
             if (i < Ricoh2A03::TRIANGLE) {
-                addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 241), module, Terracillator::PARAM_PW + i));
-                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, Terracillator::INPUT_PW + i));
+                addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 241), module, InfiniteStairs::PARAM_PW + i));
+                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, InfiniteStairs::INPUT_PW + i));
             } else {
-                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 264), module, Terracillator::INPUT_PW + i));
+                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 264), module, InfiniteStairs::INPUT_PW + i));
             }
             // Output
-            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(29 + 35 * i, 319), module, Terracillator::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Terracillator::OUTPUT_OSCILLATOR + i));
+            addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(29 + 35 * i, 319), module, InfiniteStairs::LIGHTS_LEVEL + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, InfiniteStairs::OUTPUT_OSCILLATOR + i));
         }
     }
 };
 
 /// the global instance of the model
-Model *modelTerracillator = createModel<Terracillator, TerracillatorWidget>("2A03");
+Model *modelInfiniteStairs = createModel<InfiniteStairs, InfiniteStairsWidget>("2A03");

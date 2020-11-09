@@ -43,9 +43,9 @@
     },
     {
       "slug": "2A03",
-      "name": "Terracillator",
+      "name": "Infinite Stairs",
       "description": "An emulation of the Ricoh 2A03 chip from the Nintendo Entertainment System (NES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Terracillator.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf",
       "tags": [
         "Noise",
         "Oscillator",

@@ -26,7 +26,7 @@ void init(Plugin* instance) {
     plugin_instance = instance;
     // current releases
     instance->addModel(modelJairasullator);
-    instance->addModel(modelTerracillator);
+    instance->addModel(modelInfiniteStairs);
     instance->addModel(modelPotKeys);
     instance->addModel(modelStepSaw);
     instance->addModel(modelPulses);

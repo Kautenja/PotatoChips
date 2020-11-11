@@ -218,6 +218,54 @@
         16,
         0
       ]
+    },
+    {
+      "id": 134,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "FME7",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 10.0
+        },
+        {
+          "id": 7,
+          "value": 10.0
+        },
+        {
+          "id": 8,
+          "value": 10.0
+        }
+      ],
+      "pos": [
+        17,
+        1
+      ]
     }
   ],
   "cables": [

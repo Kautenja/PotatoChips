@@ -23,7 +23,7 @@ Step Saw is an emulation of the Konami VRC6 sound chip from the Nintendo Enterta
   \item \textbf{Dual pulse wave generator:} Dual pulse waves with 12-bit frequency value and eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $25\%$, $31.25\%$, $37.5\%$, $43.75\%$, and $50\%$
   \item \textbf{Quantized saw wave generator:} Stepped/quantized saw waveform with retro wave-folding distortion effect
   \item \textbf{4-bit Amplifier:} A 4-bit amplifier controls the output level of each oscillator with base/attenuator knobs and CV inputs
-  \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and intentional aliasing.
+  \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and intentional aliasing
 \end{itemize}
 
 % -------------------
@@ -60,7 +60,7 @@ The trimpot chooses between eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $2
 
 \subsection*{6{\quad}Outputs}
 
-Each voice produces an output signal of at most ${\approx}10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing \footnote{The saw waveform generator features a built-in wave-folder that does not introduce aliased frequencies when the amplifier is overdriven.}. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
+Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing \footnote{The saw waveform generator features a built-in wave-folder that does not introduce aliased frequencies when the amplifier is overdriven.}. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
 
 % -------------------
 % MARK: Data Sheet
@@ -74,7 +74,7 @@ Each voice produces an output signal of at most ${\approx}10V_{pp}$ when the amp
 \hline
 Type             & Oscillator               \\
 \hline
-Size             & 8  HP Eurorack           \\
+Size             & 8 HP Eurorack            \\
 \hline
 Depth            & NA                       \\
 \hline

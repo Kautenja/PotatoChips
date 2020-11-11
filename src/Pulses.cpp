@@ -56,7 +56,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
         // set the output buffer for each individual voice
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // get the oscillator name starting with ACII code 65 (A)
-            auto name = "Tone " + std::string(1, static_cast<char>(65 + oscillator));
+            auto name = "Tone " + std::string(oscillator + 1);
             configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
             configParam(INPUT_FM    + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
             configParam(PARAM_LEVEL + oscillator,   0,   15,    10,   name + " Level");

@@ -20,10 +20,10 @@
 
 Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit from the Sega Master System, Sega Mega Drive, and Sega Genesis. The SN76489 chip contains three pulse waveform generators and an LFSR-based noise generator that selects between pitched white-noise and static periodic noise. Mega Tone provides the key features of the SN76489 chip, namely,
 \begin{itemize}
-  \item \textbf{Triple Pulse Waveform Generator:} Three 8-bit pulse waves with $50\%$ duty cycle and 10-bit frequency parameter
+  \item \textbf{Triple Pulse Waveform Generator:} Three pulse waves with $50\%$ duty cycle and 10-bit frequency parameter
   \item \textbf{Noise Generator:} Generate either pitched white-noise based on the frequency of oscillator three, or static periodic noise at one of three shift frequencies: $\frac{N}{2048}$, $\frac{N}{1024}$, $\frac{N}{512}$ where $N$ is the reference clock rate (which is something like $3579545Hz$).
-  \item \textbf{4-bit Amplifier:} A 4-bit amplifier controls the output level of each oscillator with mixer sliders and CV inputs
-  \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and aliasing.
+  \item \textbf{4-bit Amplifier:} A 4-bit amplifier controls the output level of each oscillator with base/attenuator knobs and CV inputs
+  \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and intentional aliasing.
 \end{itemize}
 
 % -------------------
@@ -49,7 +49,7 @@ The noise generator can be set to one of four settings. The first setting produc
 \clearpage
 \subsection*{3{\quad}Tone Generator Frequency Modulation}
 
-When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given tone generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding tone generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3.
+When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given tone generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding tone generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, and support audio rates.
 
 \subsection*{4{\quad}LFSR}
 
@@ -57,7 +57,7 @@ When the switch is pointing up, the noise generator produces periodic noise. Whe
 
 \subsection*{5{\quad}Amplifier}
 
-When no input is connected, the trimpot controls the level from $0\%$ to $100\%$ with 4-bit resolution. When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, to Noise.
+When no input is connected, the trimpot controls the given tone generator volume level with 4-bit resolution (i.e., $\in [0, 15]$). When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, to Noise.
 
 \subsection*{6{\quad}Outputs}
 
@@ -86,6 +86,10 @@ $+12V$ draw (mA) & 0 mA                     \\
 $-12V$ draw (mA) & 0 mA                     \\
 \hline
 $+5V$ draw (mA)  & 0 mA                     \\
+\hline
+Sample Rate      & Programmable             \\
+\hline
+Bit Depth        & 16-bit                   \\
 \hline
 \end{tabular}
 \end{table}

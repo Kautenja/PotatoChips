@@ -15,7 +15,7 @@
 
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
-#include "dsp/namco_106.hpp"
+#include "dsp/namco_163.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
 
@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Namco 163 chip emulator module.
-struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
+struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
  private:
     /// the number of active oscillators on the chip
     unsigned num_oscillators[PORT_MAX_CHANNELS];
@@ -32,9 +32,9 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        ENUMS(PARAM_FREQ, Namco106::OSC_COUNT),
-        ENUMS(PARAM_FM, Namco106::OSC_COUNT),
-        ENUMS(PARAM_VOLUME, Namco106::OSC_COUNT),
+        ENUMS(PARAM_FREQ, Namco163::OSC_COUNT),
+        ENUMS(PARAM_FM, Namco163::OSC_COUNT),
+        ENUMS(PARAM_VOLUME, Namco163::OSC_COUNT),
         PARAM_NUM_OSCILLATORS,
         PARAM_NUM_OSCILLATORS_ATT,
         PARAM_WAVETABLE,
@@ -43,22 +43,22 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     };
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_VOCT, Namco106::OSC_COUNT),
-        ENUMS(INPUT_FM, Namco106::OSC_COUNT),
-        ENUMS(INPUT_VOLUME, Namco106::OSC_COUNT),
+        ENUMS(INPUT_VOCT, Namco163::OSC_COUNT),
+        ENUMS(INPUT_FM, Namco163::OSC_COUNT),
+        ENUMS(INPUT_VOLUME, Namco163::OSC_COUNT),
         INPUT_NUM_OSCILLATORS,
         INPUT_WAVETABLE,
         NUM_INPUTS
     };
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_OSCILLATOR, Namco106::OSC_COUNT),
+        ENUMS(OUTPUT_OSCILLATOR, Namco163::OSC_COUNT),
         NUM_OUTPUTS
     };
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHT_CHANNEL, 3 * Namco106::OSC_COUNT),
-        ENUMS(LIGHT_LEVEL, 3 * Namco106::OSC_COUNT),
+        ENUMS(LIGHT_CHANNEL, 3 * Namco163::OSC_COUNT),
+        ENUMS(LIGHT_LEVEL, 3 * Namco163::OSC_COUNT),
         NUM_LIGHTS
     };
 
@@ -73,15 +73,15 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
 
     /// @brief Initialize a new 106 Chip module.
-    NameCorpOctalWaveGenerator() : ChipModule<Namco106>() {
+    NameCorpOctalWaveGenerator() : ChipModule<Namco163>() {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_NUM_OSCILLATORS,      1, Namco106::OSC_COUNT, 4, "Active Channels");
+        configParam(PARAM_NUM_OSCILLATORS,      1, Namco163::OSC_COUNT, 4, "Active Channels");
         configParam(PARAM_NUM_OSCILLATORS_ATT, -1, 1,                   0, "Active Channels Attenuverter");
         configParam(PARAM_WAVETABLE,            1, NUM_WAVEFORMS,       1, "Waveform Morph");
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
-        for (unsigned osc = 0; osc < Namco106::OSC_COUNT; osc++) {
+        for (unsigned osc = 0; osc < Namco163::OSC_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
@@ -106,7 +106,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
 
     /// @brief Respond to the module being reset by the host environment.
     void onReset() final {
-        ChipModule<Namco106>::onReset();
+        ChipModule<Namco163>::onReset();
         resetWavetable();
     }
 
@@ -256,18 +256,18 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     ///
     virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
         // set the frequency for all oscillators on the chip
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+        for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // extract the low, medium, and high frequency register values
             auto freq = getFrequency(oscillator, channel);
             // FREQUENCY LOW
             uint8_t low = (freq & 0b000000000000000011111111) >> 0;
-            apu[channel].write(Namco106::FREQ_LOW + Namco106::REGS_PER_VOICE * oscillator, low);
+            apu[channel].write(Namco163::FREQ_LOW + Namco163::REGS_PER_VOICE * oscillator, low);
             // FREQUENCY MEDIUM
             uint8_t med = (freq & 0b000000001111111100000000) >> 8;
-            apu[channel].write(Namco106::FREQ_MEDIUM + Namco106::REGS_PER_VOICE * oscillator, med);
+            apu[channel].write(Namco163::FREQ_MEDIUM + Namco163::REGS_PER_VOICE * oscillator, med);
             // WAVEFORM LENGTH + FREQUENCY HIGH
             uint8_t hig = (freq & 0b111111110000000000000000) >> 16;
-            apu[channel].write(Namco106::FREQ_HIGH + Namco106::REGS_PER_VOICE * oscillator, hig);
+            apu[channel].write(Namco163::FREQ_HIGH + Namco163::REGS_PER_VOICE * oscillator, hig);
         }
     }
 
@@ -280,12 +280,12 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
         // get the number of active oscillators from the panel
         num_oscillators[channel] = getActiveOscillators(channel);
         // set the frequency for all oscillators on the chip
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+        for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // WAVE ADDRESS
-            apu[channel].write(Namco106::WAVE_ADDRESS + Namco106::REGS_PER_VOICE * oscillator, 0);
+            apu[channel].write(Namco163::WAVE_ADDRESS + Namco163::REGS_PER_VOICE * oscillator, 0);
             // VOLUME (and oscillator selection on oscillator 8, this has
             // no effect on other oscillators, so check logic is skipped)
-            apu[channel].write(Namco106::VOLUME + Namco106::REGS_PER_VOICE * oscillator, ((num_oscillators[channel] - 1) << 4) | getVolume(oscillator, channel));
+            apu[channel].write(Namco163::VOLUME + Namco163::REGS_PER_VOICE * oscillator, ((num_oscillators[channel] - 1) << 4) | getVolume(oscillator, channel));
         }
         // write waveform data to the chip's RAM based on the position in
         // the wave-table
@@ -318,12 +318,12 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
     ///
     inline void processLights(const ProcessArgs &args, unsigned channels) final {
         // set the lights based on the accumulated brightness
-        for (unsigned oscillator = 0; oscillator < Namco106::OSC_COUNT; oscillator++) {
+        for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // accumulate brightness for all the channels
             float brightness = 0.f;
             for (unsigned channel = 0; channel < channels; channel++)
                 brightness = brightness + (oscillator < num_oscillators[channel]);
-            const auto light = LIGHT_CHANNEL + 3 * (Namco106::OSC_COUNT - oscillator - 1);
+            const auto light = LIGHT_CHANNEL + 3 * (Namco163::OSC_COUNT - oscillator - 1);
             // get the brightness level for the oscillator.  Because the
             // signal is boolean, the root mean square will have no effect.
             // Instead, the average over the channels is used as brightness
@@ -339,7 +339,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
             lights[light + 0].setSmoothBrightness(level, args.sampleTime * lightDivider.getDivision());
         }
 
-        for (unsigned voice = 0; voice < Namco106::OSC_COUNT; voice++) {
+        for (unsigned voice = 0; voice < Namco163::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);
             // set the red light based on total brightness and
@@ -418,7 +418,7 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         addParam(createParam<Trimpot>(Vec(168, 282), module, NameCorpOctalWaveGenerator::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(165, 325), module, NameCorpOctalWaveGenerator::INPUT_WAVETABLE));
         // individual oscillator controls
-        for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
+        for (unsigned i = 0; i < Namco163::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
             addParam(createParam<Trimpot>(     Vec(251, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
             addParam(createParam<Trimpot>(     Vec(294, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));

@@ -1,4 +1,4 @@
-// Namco 106 chip emulator.
+// Namco 163 chip emulator.
 // Copyright 2020 Christian Kauten
 // Copyright 2006 Shay Green
 //
@@ -14,14 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_NAMCO_106_HPP_
-#define DSP_NAMCO_106_HPP_
+#ifndef DSP_NAMCO_163_HPP_
+#define DSP_NAMCO_163_HPP_
 
 #include "blip_buffer.hpp"
 #include "exceptions.hpp"
 
-/// @brief Namco 106 chip emulator.
-class Namco106 {
+/// @brief Namco 163 chip emulator.
+class Namco163 {
  public:
     /// CPU clock cycle count
     typedef int32_t cpu_time_t;
@@ -58,7 +58,7 @@ class Namco106 {
     static constexpr auto REGS_PER_VOICE = 8;
 
  private:
-    /// An oscillator on the Namco106 chip.
+    /// An oscillator on the Namco163 chip.
     struct Oscillator {
         /// TODO: document
         int32_t delay;
@@ -159,14 +159,14 @@ class Namco106 {
     }
 
     /// Disable the public copy constructor.
-    Namco106(const Namco106&);
+    Namco163(const Namco163&);
 
     /// Disable the public assignment operator.
-    Namco106& operator=(const Namco106&);
+    Namco163& operator=(const Namco163&);
 
  public:
-    /// Initialize a new Namco 106 chip emulator.
-    Namco106() {
+    /// Initialize a new Namco 163 chip emulator.
+    Namco163() {
         set_output(NULL);
         set_volume();
         reset();
@@ -248,4 +248,4 @@ class Namco106 {
     }
 };
 
-#endif  // DSP_NAMCO_106_HPP_
+#endif  // DSP_NAMCO_163_HPP_

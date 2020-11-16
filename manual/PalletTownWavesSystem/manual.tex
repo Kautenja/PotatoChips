@@ -23,6 +23,8 @@ Pallet Town Waves System is an emulation of the Nintendo GameBoy Sound System (G
   \item \textbf{Dual pulse wave generator:} Dual pulse waveform generator with duty cycles of $12.5\%$, $25\%$, $50\%$, and $75\%$; and 11-bit frequency value
   \item \textbf{Wave-table oscillator:} bank of 5 discrete 4-bit Waveforms with length of 32 samples that can be interpolated between smoothly
   \item \textbf{Noise generator:} generate pseudo-random numbers at 7 different frequencies
+  \item \textbf{4-bit Amplifier:} A 4-bit amplifier controls the output level of each oscillator with base/attenuator knobs and CV inputs (with exception of the wave waveform, which has four volume levels)
+  \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and intentional aliasing
 \end{itemize}
 
 % -------------------
@@ -39,7 +41,7 @@ Pallet Town Waves System is an emulation of the Nintendo GameBoy Sound System (G
 
 \subsection*{1{\quad}Frequency}
 
-The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 11-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Tone 1, to Tone 2, to Wave.
+The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 11-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the waveform generators. Inputs are normalled forward from Tone 1, to Tone 2, to Wave.
 
 \subsection*{2{\quad}Frequency Modulation}
 

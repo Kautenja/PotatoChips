@@ -18,14 +18,11 @@
 
 \section*{Overview}
 
-GBS is an emulation of the Nintendo GameBoy Sound System (GBS) audio processing unit. The GBS is similar to the Ricoh 2A03, but replaces the triangle waveform generator with a wave-table synthesizer.
-
-GBS provides the key features of the GameBoy Sound System chip, namely,
+Pallet Town Waves System is an emulation of the Nintendo GameBoy Sound System (GBS) audio processing unit. The GBS contains two pulse wave generators, a wavetable oscillator, and a noise generator. Pallet Town Waves System provides the key features of the GameBoy Sound System chip, namely,
 \begin{itemize}
-  \item \textbf{Dual pulse wave generator:} Dual 8-bit pulse waves with four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$
-  \item \textbf{Wave-table oscillator:} wave-table synthesis with bit depth of 4 bits and table size of 32 samples. 5 pages of wave-tables can be interpolated between using CV
+  \item \textbf{Dual pulse wave generator:} Dual pulse waveform generator with duty cycles of $12.5\%$, $25\%$, $50\%$, and $75\%$; and 11-bit frequency value
+  \item \textbf{Wave-table oscillator:} bank of 5 discrete 4-bit Waveforms with length of 32 samples that can be interpolated between smoothly
   \item \textbf{Noise generator:} generate pseudo-random numbers at 7 different frequencies
-  \item \textbf{Linear Feedback Shift Register (LFSR):} old-school 8-bit randomness!
 \end{itemize}
 
 % -------------------
@@ -40,18 +37,64 @@ GBS provides the key features of the GameBoy Sound System chip, namely,
 \includegraphics{Interface}
 \end{figure}
 
-\begin{enumerate}
-  \item Waveform selection. Draw arbitrary waveforms using the mouse pointer.
-  \item $V$/Octave inputs for pulse1, pulse2, and wave-table waveform generators.
-  \item linear CV frequency modulation for pulse1, pulse2, and wave-table waveform generators.
-  \item Coarse frequency control over the four oscillators.
-  \item Pulse width selector. Chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$ for pulse1 and pulse2.
-  \item Period of randomness $\in [0, 7]$ for the noise generator. See \url{https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Noise_Channel} for approximate frequency and pitch mappings.
-  \item CV LFSR gate, high at $2V$. Holds the LFSR generator as long as the input voltage is $>2V$. The switch inverts the direction of the CV input.
-  \item Wave-table selection. The big knob determine the wave-table used by the chip. The small knob acts as an attenuverter for the linear CV input. Wave-table morphing is accomplished through 32-bit floating point linear interpolation.
-  \item Coarse amplitude control over the oscillators using the 4-bit amplifier.When no input is connected, the slider controls the level from $0\%$ to $100\%$. When an input is connected, the slider acts as an attenuator.
-  \item Channel outputs, ${\approx}10V_{pp}$.
-\end{enumerate}
+\subsection*{1{\quad}Frequency}
+
+The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 11-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Tone 1, to Tone 2, to Wave.
+
+\subsection*{2{\quad}Frequency Modulation}
+
+When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given waveform generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding waveform generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Wave, and support audio rates.
+
+\subsection*{3{\quad}Noise}
+
+The trimpot controls the \textbf{period} of the noise generator $\in [0, 7]$. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $1V$. When the \textbf{LFSR} switch is pointing up, the noise generator produces periodic noise. When pointing down, pitched white noise is generated. The input port acts like a gate that goes high at $2V$ and inverts the value of the LFSR switch. The \textbf{sync} input can be used to manually reset the LFSR to synchronize with another oscillator.
+
+\subsection*{4{\quad}Amplifier}
+
+When no input is connected, the trimpot controls the given waveform generator volume level with 4-bit resolution (i.e., $\in [0, 15]$)\footnote{The resolution of the wavetable oscillator is actually 2-bit, i.e., $\in [0, 3]$.}. When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Wave, to Noise.
+
+\subsection*{5{\quad}Pulse Width}
+
+For \textbf{Tone 1} and \textbf{Tone 2}, the trimpot chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $2V$. For \textbf{Wave}, the trimpot chooses between the five waveforms in the wavetable. Transitions between neighboring waveforms are smoothed using linear interpolation. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $2V$. Inputs are normalled forward from Tone 1, to Tone 2, to Wave.
+
+\subsection*{6{\quad}Wavetable}
+
+For the \textbf{Wave} voice, each of the five waveforms in the table display on screens ordered from 1 to 5, top to bottom. Waveforms can be directly programmed into the module by clicking and dragging on a screen.
+
+\subsection*{7{\quad}Outputs}
+
+Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
+
+% -------------------
+% MARK: Data Sheet
+% -------------------
+
+\clearpage
+\section*{Data Sheet}
+
+\begin{table}[!htp]
+\begin{tabular}{|l|l|}
+\hline
+Type             & Oscillator               \\
+\hline
+Size             & 20 HP Eurorack           \\
+\hline
+Depth            & NA                       \\
+\hline
+Power            & NA                       \\ % 2 x 5 Eurorack
+\hline
+$+12V$ draw (mA) & 0 mA                     \\
+\hline
+$-12V$ draw (mA) & 0 mA                     \\
+\hline
+$+5V$ draw (mA)  & 0 mA                     \\
+\hline
+Sample Rate      & Programmable             \\
+\hline
+Bit Depth        & 16-bit                   \\
+\hline
+\end{tabular}
+\end{table}
 
 % -------------------
 % MARK: References

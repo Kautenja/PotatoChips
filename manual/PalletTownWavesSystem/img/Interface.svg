@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="348px" height="435px" viewBox="0 0 348 435" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="401px" height="420px" viewBox="0 0 401 420" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
-    <title>Manual</title>
+    <title>Interface</title>
     <desc>Created with Sketch.</desc>
     <defs>
         <rect id="path-1" x="0" y="0" width="300" height="380" rx="2"></rect>
@@ -11,9 +11,9 @@
         <rect id="path-9" x="0" y="0" width="135" height="58" rx="3"></rect>
         <rect id="path-11" x="0" y="0" width="135" height="58" rx="3"></rect>
     </defs>
-    <g id="Manual" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Group" transform="translate(1.000000, 0.000000)">
-            <g id="Module" transform="translate(0.000000, 51.000000)">
+    <g id="Interface" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(1.000000, 4.000000)">
+            <g id="Module" transform="translate(0.000000, 32.000000)">
                 <g id="bg">
                     <mask id="mask-2" fill="white">
                         <use xlink:href="#path-1"></use>
@@ -490,22 +490,20 @@
                     </g>
                 </g>
             </g>
-            <g id="Wave-Editor" transform="translate(10.000000, 0.000000)">
-                <rect id="Rectangle-Copy-4" stroke="#CA4179" stroke-width="5" x="2" y="75" width="134" height="333"></rect>
-                <path d="M15,47 L15,75" id="Line-3-Copy-11" stroke="#CA4179" stroke-width="5" stroke-linecap="square"></path>
-                <text id="1" font-family="Early-GameBoy, Early GameBoy" font-size="40" font-weight="normal" fill="#CA4179">
-                    <tspan x="0" y="40">1</tspan>
+            <g id="Wave-Editor" transform="translate(12.000000, 0.000000)">
+                <rect id="Rectangle-Copy-4" stroke="#CA4179" stroke-width="5" x="0" y="56" width="134" height="333"></rect>
+                <path d="M13,28 L13,56" id="Line-3-Copy-11" stroke="#CA4179" stroke-width="5" stroke-linecap="square"></path>
+                <text id="6" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#CA4179">
+                    <tspan x="5.5" y="20">6</tspan>
                 </text>
             </g>
-            <g id="Group-3" transform="translate(89.000000, 80.000000)">
+            <g id="Group-3" transform="translate(89.000000, 61.000000)">
                 <rect id="Rectangle" stroke="#FFAE71" stroke-width="4" x="65.5" y="0" width="103" height="68"></rect>
                 <path d="M60.5,32 L41.5,32" id="Line" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
-                <path d="M226.5,32 L207.5,32" id="Line-Copy" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
-                <path d="M226.5,103 L207.5,103" id="Line-Copy-2" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
+                <path d="M279,32 L207.5,32" id="Line-Copy" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
                 <path d="M60.5,103 L41.5,103" id="Line-Copy-3" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
                 <path d="M226,171 L207,171" id="Line-Copy-4" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
-                <rect id="Rectangle-Copy-8" stroke="#FFAE71" stroke-width="4" x="173.5" y="0" width="31" height="68"></rect>
-                <rect id="Rectangle-Copy-9" stroke="#FFAE71" stroke-width="4" x="173.5" y="68" width="31" height="69"></rect>
+                <rect id="Rectangle-Copy-8" stroke="#FFAE71" stroke-width="4" x="173.5" y="0" width="31" height="132"></rect>
                 <rect id="Rectangle-Copy" stroke="#FFAE71" stroke-width="4" x="65.5" y="68" width="103" height="69"></rect>
                 <rect id="Rectangle-Copy-2" stroke="#FFAE71" stroke-width="4" x="65.5" y="137" width="139" height="69"></rect>
                 <rect id="Rectangle-Copy-3" stroke="#FFAE71" stroke-width="4" x="65.5" y="206" width="103" height="72"></rect>
@@ -513,30 +511,25 @@
                 <rect id="Rectangle-Copy-4" stroke="#FFAE71" stroke-width="4" x="65.5" y="283" width="139" height="44"></rect>
                 <path d="M226,305 L207,305" id="Line-Copy-6" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
                 <path d="M60.5,242 L41.5,242" id="Line-Copy-7" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
-                <path d="M226.5,242 L207.5,242" id="Line-Copy-8" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
-                <text id="2" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="15.5" y="38">2</tspan>
+                <path d="M265,242 L207.5,242" id="Line-Copy-8" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
+                <path d="M265,242 L265,34" id="Line-Copy-9" stroke="#FFAE71" stroke-width="6" stroke-linecap="square"></path>
+                <text id="1" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
+                    <tspan x="15.5" y="38">1</tspan>
                 </text>
                 <text id="3" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="234.5" y="38">3</tspan>
+                    <tspan x="289.5" y="38">3</tspan>
                 </text>
-                <text id="5" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="234.5" y="110">5</tspan>
-                </text>
-                <text id="8" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="234.5" y="247">8</tspan>
+                <text id="2" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
+                    <tspan x="10.5" y="110">2</tspan>
                 </text>
                 <text id="4" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="10.5" y="110">4</tspan>
+                    <tspan x="237.5" y="177">4</tspan>
                 </text>
-                <text id="6" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="237.5" y="177">6</tspan>
+                <text id="5" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
+                    <tspan x="13.5" y="247">5</tspan>
                 </text>
                 <text id="7" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="13.5" y="247">7</tspan>
-                </text>
-                <text id="9" font-family="Early-GameBoy, Early GameBoy" font-size="20" font-weight="normal" fill="#FFAE71">
-                    <tspan x="234.5" y="314">9</tspan>
+                    <tspan x="234.5" y="314">7</tspan>
                 </text>
             </g>
         </g>

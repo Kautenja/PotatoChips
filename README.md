@@ -251,9 +251,9 @@ See the [Manual][BossFight] for more information about the features of this modu
 <img alt="Name Corp Octal Wave Generator Logo" src="manual/NameCorpOctalWaveGenerator/img/Logo.svg">
 </h2>
 
-**Name Corp Octal Wave Generator** is an emulation of the [Namco 106][Namco106]
+**Name Corp Octal Wave Generator** is an emulation of the [Namco 163][Namco163]
 audio processing unit from the [Nintendo Entertainment System (NES)][NES].
-The Namco 106 chip contains eight channels of wave-table synthesis and 128
+The Namco 163 chip contains eight channels of wave-table synthesis and 128
 bytes of operational RAM. The wave-tables are 4-bit and can be as long as 63
 samples. This module uses a bank of five 32-sample wave-tables to act as the
 waveform for all eight channels.
@@ -270,7 +270,7 @@ waveform for all eight channels.
     floating point linear interpolation (not very retro, but it sounds nice)
 -   **Frequency control:** 18-bit frequency control with linear frequency modulation
 -   **Amplitude modulation:** 4-bit amplifier with linear amplitude modulation
--   **Namco 106 compute limitation:** activating each additional channel (up
+-   **Namco 163 compute limitation:** activating each additional channel (up
     to 8) reduces the amount of compute available for all channels. This causes
     all channels to drop in frequency when additional channels are activated.
 
@@ -506,7 +506,7 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [SunsoftFME7]: https://wiki.nesdev.com/w/index.php/Sunsoft_5B_audio
 [Ricoh2A03]: https://wiki.nesdev.com/w/index.php/2A03
 [KonamiVRC6]: https://wiki.nesdev.com/w/index.php/VRC6_audio
-[Namco106]: https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no
+[Namco163]: https://wiki.nesdev.com/w/index.php?title=Namco_163_audio&redirect=no
 [NES]: https://en.wikipedia.org/wiki/Nintendo_Entertainment_System
 [SNES]: https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System
 

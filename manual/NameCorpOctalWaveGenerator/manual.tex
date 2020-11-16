@@ -1,10 +1,7 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName={Name Corp Octal Wave Generator}]{KautenjaDSP}
-% import a debugging package to show the margin boxes
-% \usepackage{showframe}
 % set the graphics path to the img directory
 \graphicspath{{img/}}
-\usepackage{fontawesome}
 % algorithm2e stuff
 % \SetKwInOut{Objects}{$\CKmatrix{O}$}
 % \SetKwInOut{Weights}{$\CKvector{w}$}
@@ -18,17 +15,12 @@
 
 \section*{Overview}
 
-106 is an emulation of the Namco 163 audio processing unit from the Nintendo Entertainment System (NES) for VCV Rack. The Namco 163 chip contains eight wave-table oscillators and 128 bytes of operational RAM for wave-table data. The wave-tables are 4-bit and can be as long as 63 samples. This module uses a bank of five 32-sample wave-tables to act as the waveform for all eight oscillators.
-
-Namco 163 provides the key features of the Namco 163 chip, namely,
+Name Corp Octal Wave Generator is an emulation of the Namco 163 audio processing unit from the Nintendo Entertainment System (NES). The Namco 163 chip contains eight wave-table oscillators and 128 bytes of operational RAM for wave-table data. The wave-tables are 4-bit and can be as long as 63 samples. This module uses a bank of five 32-sample wave-tables to act as the waveform for all eight oscillators. Name Corp Octal Wave Generator provides the key features of the Namco 163 chip, namely,
 \begin{itemize}
-  \item \textbf{Wave-table synthesis:} 8 wave-table oscillators with sample bit depth of 4 bits and wave-table size of 32 samples
-  \item \textbf{Waveform morph:} 5 banks of wave-tables to morph between using 32-bit floating point linear interpolation (not very retro, but it sounds nice)
-  \item \textbf{Frequency control:} 18-bit frequency control with linear frequency modulation
-  \item \textbf{Amplitude modulation:} 4-bit amplifier with linear amplitude modulation
-  \item \textbf{Namco 163 compute limitation:} activating each additional oscillator (up to 8) reduces the amount of compute available for all oscillators. This causes all oscillators to drop in frequency when additional oscillators are activated.
-
+  \item \textbf{Octal waveform generator:} Eight wavetable oscillators with 18-bit frequency value
+  \item \textbf{Waveform Morph:} Wavetable with 5 discrete 4-bit waveforms with length of $N = 32$ samples that can be interpolated between smoothly
   \item \textbf{4-bit Amplifier:} A 4-bit amplifier controls the output level of each oscillator with base/attenuator knobs and CV inputs
+  \item \textbf{Namco 163 compute limitation:} activating each additional oscillator (up to 8) reduces the amount of compute available for all oscillators. This causes all oscillators to drop in frequency when additional oscillators are activated.
   \item \textbf{Channel Mixer:} Mix the voices together internally with hard clipping and intentional aliasing
 \end{itemize}
 

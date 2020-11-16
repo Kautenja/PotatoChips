@@ -1,4 +1,4 @@
-// A Namco 106 Chip module.
+// A Namco 163 Chip module.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Namco 106 chip emulator module.
+/// A Namco 163 chip emulator module.
 struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
  private:
     /// the number of active oscillators on the chip

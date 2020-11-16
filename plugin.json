@@ -14,7 +14,7 @@
     {
       "slug": "106",
       "name": "Name Corp Octal Wave Generator",
-      "description": "An emulation of the Namco 106 wavetable chip from Nintendo Entertainment System (NES) cartridges.",
+      "description": "An emulation of the Namco 163 wavetable chip from Nintendo Entertainment System (NES) cartridges.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf",
       "tags": [
         "Oscillator",

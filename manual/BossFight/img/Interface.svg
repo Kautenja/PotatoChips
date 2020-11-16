@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1035px" height="505px" viewBox="0 0 1035 505" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
-    <title>Manual</title>
+    <title>Interface</title>
     <desc>Created with Sketch.</desc>
-    <g id="Manual" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Interface" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="Group" transform="translate(-1.000000, 0.000000)">
             <g id="Module" transform="translate(60.000000, 63.000000)">
                 <g id="bg">
@@ -1102,17 +1102,12 @@
                 </g>
             </g>
             <g id="Group-2" transform="translate(0.000000, 83.000000)">
-                <rect id="Rectangle-Copy-4" stroke="#FF994D" stroke-width="5" x="66" y="220" width="44" height="122"></rect>
-                <rect id="Rectangle-Copy-5" stroke="#FF994D" stroke-width="5" x="110" y="298" width="78" height="44"></rect>
+                <path d="M110,220 L110,298 L188,298 L188,342 L66,342 L66,220 L110,220 Z" id="Combined-Shape" stroke="#FF994D" stroke-width="5"></path>
                 <polygon id="Rectangle-Copy-6" stroke="#FF994D" stroke-width="5" points="188 -2.58473798e-16 188 298 110 298 110 220 66 220 66 0"></polygon>
                 <path d="M43,280 L66,280" id="Line-3-Copy-11" stroke="#FF994D" stroke-width="5" stroke-linecap="square"></path>
-                <path d="M174.25,343.25 L173.75,360.75" id="Line-3-Copy-13" stroke="#FF994D" stroke-width="5" stroke-linecap="square"></path>
                 <path d="M43,116 L66,116" id="Line-3-Copy-12" stroke="#FF994D" stroke-width="5" stroke-linecap="square"></path>
                 <text id="2" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
                     <tspan x="7.325" y="293">2</tspan>
-                </text>
-                <text id="3" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                    <tspan x="165.545" y="397">3</tspan>
                 </text>
                 <text id="1" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
                     <tspan x="9.5" y="123">1</tspan>
@@ -1120,11 +1115,11 @@
             </g>
             <g id="operator" transform="translate(201.000000, 0.000000)">
                 <g id="Group">
-                    <text id="6" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="91.77" y="487">6</tspan>
+                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="91.455" y="487">5</tspan>
                     </text>
-                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="55.68" y="35">4</tspan>
+                    <text id="3" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="55.545" y="35">3</tspan>
                     </text>
                     <text id="1" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="76.5" y="47">1</tspan>
@@ -1135,8 +1130,8 @@
                     <text id="1-copy-2" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="112.5" y="499">1</tspan>
                     </text>
-                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="156.455" y="35">5</tspan>
+                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="156.68" y="35">4</tspan>
                     </text>
                     <rect id="Rectangle-Copy-7" stroke="#FF994D" stroke-width="5" x="0" y="76" width="131" height="264"></rect>
                     <rect id="Rectangle-Copy-8" stroke="#FF994D" stroke-width="5" x="131" y="76" width="72" height="264"></rect>
@@ -1148,11 +1143,11 @@
             </g>
             <g id="operator" transform="translate(409.000000, 0.000000)">
                 <g id="Group">
-                    <text id="6" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="91.77" y="487">6</tspan>
+                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="91.455" y="487">5</tspan>
                     </text>
-                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="55.68" y="35">4</tspan>
+                    <text id="3" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="55.545" y="35">3</tspan>
                     </text>
                     <text id="1" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="75.4125" y="47">2</tspan>
@@ -1163,8 +1158,8 @@
                     <text id="1-copy-2" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="111.4125" y="499">2</tspan>
                     </text>
-                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="156.455" y="35">5</tspan>
+                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="156.68" y="35">4</tspan>
                     </text>
                     <rect id="Rectangle-Copy-7" stroke="#FF994D" stroke-width="5" x="0" y="76" width="131" height="264"></rect>
                     <rect id="Rectangle-Copy-8" stroke="#FF994D" stroke-width="5" x="131" y="76" width="72" height="264"></rect>
@@ -1176,11 +1171,11 @@
             </g>
             <g id="operator" transform="translate(617.000000, 0.000000)">
                 <g id="Group">
-                    <text id="6" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="91.77" y="487">6</tspan>
+                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="91.455" y="487">5</tspan>
                     </text>
-                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="55.68" y="35">4</tspan>
+                    <text id="3" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="55.545" y="35">3</tspan>
                     </text>
                     <text id="1" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="75.0225" y="47">3</tspan>
@@ -1191,8 +1186,8 @@
                     <text id="1-copy-2" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="111.0225" y="499">3</tspan>
                     </text>
-                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="156.455" y="35">5</tspan>
+                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="156.68" y="35">4</tspan>
                     </text>
                     <rect id="Rectangle-Copy-7" stroke="#FF994D" stroke-width="5" x="0" y="76" width="131" height="264"></rect>
                     <rect id="Rectangle-Copy-8" stroke="#FF994D" stroke-width="5" x="131" y="76" width="72" height="264"></rect>
@@ -1204,11 +1199,11 @@
             </g>
             <g id="operator" transform="translate(825.000000, 0.000000)">
                 <g id="Group">
-                    <text id="6" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="91.77" y="487">6</tspan>
+                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="91.455" y="487">5</tspan>
                     </text>
-                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="55.68" y="35">4</tspan>
+                    <text id="3" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="55.545" y="35">3</tspan>
                     </text>
                     <text id="1" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="75.09" y="47">4</tspan>
@@ -1219,8 +1214,8 @@
                     <text id="1-copy-2" font-family="Knewave-Regular, Knewave" font-size="15" font-weight="normal" fill="#FF994D">
                         <tspan x="111.09" y="499">4</tspan>
                     </text>
-                    <text id="5" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
-                        <tspan x="156.455" y="35">5</tspan>
+                    <text id="4" font-family="Knewave-Regular, Knewave" font-size="30" font-weight="normal" fill="#FF994D">
+                        <tspan x="156.68" y="35">4</tspan>
                     </text>
                     <rect id="Rectangle-Copy-7" stroke="#FF994D" stroke-width="5" x="0" y="76" width="131" height="264"></rect>
                     <rect id="Rectangle-Copy-8" stroke="#FF994D" stroke-width="5" x="131" y="76" width="72" height="264"></rect>

@@ -82,10 +82,10 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco106> {
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
         // set the output buffer for each individual voice
         for (unsigned osc = 0; osc < Namco106::OSC_COUNT; osc++) {
-            auto osc_name = "Channel " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ + osc,  -2.5f, 2.5f,  0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_FM + osc,  -1.f,  1.f,   0.f, osc_name + " FM");
-            configParam(PARAM_VOLUME + osc, 0,    15,   15,   osc_name + " Volume");
+            auto osc_name = "Voice " + std::to_string(osc + 1);
+            configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
+            configParam(PARAM_VOLUME + osc, 0, 15, 15, osc_name + " Volume");
         }
         memset(num_oscillators, 1, sizeof num_oscillators);
         resetWavetable();
@@ -420,9 +420,9 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         // individual oscillator controls
         for (unsigned i = 0; i < Namco106::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
-            addParam(createParam<Trimpot>(     Vec(281, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
-            addParam(createParam<Trimpot>(     Vec(321, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
+            addParam(createParam<Trimpot>(     Vec(251, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
+            addParam(createParam<Trimpot>(     Vec(294, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
+            addInput(createInput<PJ301MPort>(  Vec(328, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
             addInput(createInput<PJ301MPort>(  Vec(362, 40 + i * 41), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
             addParam(createParam<Trimpot>(     Vec(401, 43 + i * 41), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
             addOutput(createOutput<PJ301MPort>(Vec(437, 40 + i * 41), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));

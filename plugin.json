@@ -110,8 +110,7 @@
         "Oscillator",
         "Polyphonic",
         "Synth voice"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "S_SMP_ADSR",
@@ -122,8 +121,7 @@
         "Dual",
         "Envelope generator",
         "Polyphonic"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "S_SMP_BRR",
@@ -137,8 +135,7 @@
         "Panning",
         "Polyphonic",
         "Sampler"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "S_SMP_Echo",
@@ -153,8 +150,7 @@
         "Panning",
         "Polyphonic",
         "Reverb"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "S_SMP_Gauss",
@@ -168,8 +164,7 @@
         "Panning",
         "Polyphonic",
         "Voltage-controlled amplifier"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "S_SMP_Blank1",
@@ -177,8 +172,7 @@
       "description": "A blank panel with an S-SMP illustration.",
       "tags": [
         "Blank"
-      ],
-      "disabled": true
+      ]
     },
     {
       "slug": "SCC",

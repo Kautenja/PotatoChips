@@ -3,9 +3,15 @@
 </p>
 
 [![Travis CI Build Status][BuildStatus]][BuildServer]
+[![Latest Release][ReleaseBadge]][LatestRelease]
+[![VCV Library][VCVBadge]][VCVLibrary]
 
 [BuildStatus]:  https://travis-ci.org/Kautenja/PotatoChips.svg?branch=master
 [BuildServer]:  https://travis-ci.org/Kautenja/PotatoChips
+[ReleaseBadge]: https://img.shields.io/github/v/release/Kautenja/PotatoChips
+[LatestRelease]: https://github.com/Kautenja/PotatoChips/releases/latest
+[VCVBadge]: https://img.shields.io/badge/VCV-Library-white
+[VCVLibrary]: https://library.vcvrack.com/KautenjaDSP-PotatoChips
 
 These retro sound chips are so good,
 [I eat 'em like they're potato chips.][SamHyde-PotatoChips]

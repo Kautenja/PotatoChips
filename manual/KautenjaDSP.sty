@@ -48,6 +48,14 @@
 % set the page margins
 \RequirePackage[margin=1in]{geometry}
 
+\usepackage{titlesec}
+% remove the number from the Section headings
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0pt}{}
+% remove the Section portion of the Section.Subsection numbering
+\renewcommand{\thesubsection}{\arabic{subsection}}
+% update the format of the subsection header using titlesec
+\titleformat{\subsection}{\normalfont\Large\bfseries}{\thesubsection}{1em}{}
+
 % import a debugging package to show the margin boxes
 % \usepackage{showframe}
 

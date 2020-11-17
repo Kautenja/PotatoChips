@@ -1,20 +1,13 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName={Infinite Stairs}]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{Logo}{Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Infinite Stairs is an emulation of the Ricoh 2A03 sound chip from the Nintendo Entertainment System (NES). The 2A03 chip contains two pulse wave generators, a quantized triangle wave generator, and a noise generator. The original chip featured a DMC loader for playing samples that has been omitted in this emulation. Infinite Stairs provides the key features of the 2A03 chip, namely,
 \begin{itemize}
@@ -30,22 +23,22 @@ Infinite Stairs is an emulation of the Ricoh 2A03 sound chip from the Nintendo E
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{Interface}
+\includegraphics{img/Interface}
 \end{figure}
 
-\subsection*{1{\quad}Frequency}
+\subsection{Frequency}
 
 The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 10-bit value for the pulse waveform generators and an 11-bit value for the triangle waveform generator, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the waveform generators. Inputs are normalled forward from Tone 1, to Tone 2, to Triangle.
 
-\subsection*{2{\quad}Frequency Modulation}
+\subsection{Frequency Modulation}
 
 When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given waveform generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding waveform generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Triangle, and support audio rates.
 
-\subsection*{3{\quad}Noise}
+\subsection{Noise}
 
 The trimpot controls the \textbf{period} of the noise generator $\in [0, 15]$. Table~\ref{tab:noise-periods} describes a mapping between the discrete options and fundamental frequencies / MIDI notes. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $0.5V$. When the \textbf{LFSR} switch is pointing up, the noise generator produces periodic noise. When pointing down, pitched white noise is generated. The input port acts like a gate that goes high at $2V$ and inverts the value of the LFSR switch.
 
@@ -92,19 +85,19 @@ The trimpot controls the \textbf{period} of the noise generator $\in [0, 15]$. T
 \end{tabular}
 \end{table}
 
-\subsection*{4{\quad}Amplifier}
+\subsection{Amplifier}
 
 When no input is connected, the trimpot controls the given waveform generator volume level with 4-bit resolution (i.e., $\in [0, 15]$). When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Noise.
 
-\subsection*{5{\quad}Pulse Width}
+\subsection{Pulse Width}
 
 The trimpot chooses between four duty cycles: $12.5\%$, $25\%$, $50\%$, and $75\%$. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $2V$.
 
-\subsection*{6{\quad}Sync}
+\subsection{Sync}
 
 The sync inputs can be used to manually reset either the triangle waveform or noise generators to synchronize with another oscillator. These ports support audio rate modulation.
 
-\subsection*{7{\quad}Outputs}
+\subsection{Outputs}
 
 Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
 
@@ -113,7 +106,7 @@ Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is
 % -------------------
 
 \clearpage
-\section*{Data Sheet}
+\section{Data Sheet}
 
 \begin{table}[!htp]
 \begin{tabular}{|l|l|}

@@ -1,20 +1,13 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName={Step Saw}]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{Logo}{Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Step Saw is an emulation of the Konami VRC6 sound chip from the Nintendo Entertainment System (NES). The VRC6 chip contains two pulse wave generators, and a quantized saw wave generator. Step Saw provides the key features of the VRC6 chip, namely,
 \begin{itemize}
@@ -29,34 +22,34 @@ Step Saw is an emulation of the Konami VRC6 sound chip from the Nintendo Enterta
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{Interface}
+\includegraphics{img/Interface}
 \end{figure}
 
-\subsection*{1{\quad}Frequency}
+\subsection{Frequency}
 
 The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 12-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Tone 1, to Tone 2, to Saw.
 
-\subsection*{2{\quad}Frequency Modulation}
+\subsection{Frequency Modulation}
 
 When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given waveform generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding waveform generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Saw, and support audio rates.
 
-\subsection*{3{\quad}Amplifier}
+\subsection{Amplifier}
 
 When no input is connected, the trimpot controls the given waveform generator volume level with 4-bit resolution (i.e., $\in [0, 15]$). When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Saw. At a volume level of `40` ($\approx$ 1PM), the saw waveform general will begin to fold over onto itself and distort. This can be useful for fat bass-lines.
 
-\subsection*{4{\quad}Saw Waveform Hard Sync}
+\subsection{Saw Waveform Hard Sync}
 
 An input patched to this port will reset the phase of the saw waveform generator when the signal crosses a $2V$ threshold. This input supports audio rates.
 
-\subsection*{5{\quad}Pulse Width}
+\subsection{Pulse Width}
 
 The trimpot chooses between eight duty cycles: $6.25\%$, $12.5\%$, $18.75\%$, $25\%$, $31.25\%$, $37.5\%$, $43.75\%$, and $50\%$. When an input is patched to the port, the CV controls the offset from the trimpot's position. The position of the knob is offset by the CV in increments of $1V$. Inputs are normalled forward from Tone 1 to Tone 2.
 
-\subsection*{6{\quad}Outputs}
+\subsection{Outputs}
 
 Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing \footnote{The saw waveform generator features a built-in wave-folder that does not introduce aliased frequencies when the amplifier is overdriven.}. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
 
@@ -65,7 +58,7 @@ Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is
 % -------------------
 
 \clearpage
-\section*{Data Sheet}
+\section{Data Sheet}
 
 \begin{table}[!htp]
 \begin{tabular}{|l|l|}

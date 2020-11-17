@@ -64,13 +64,16 @@ script:
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
   - make dep
   - make dist
+before_deploy:
+  - export RELEASE_FILE=$(ls dist/*.zip)
 notifications:
   email: false
 deploy:
   provider: releases
   api_key:
     secure: bAEG27Sl2IJ++CYRXC910TR0gxqi+Xo0mD5X/ujDC0ju35J7pluPcaWoHu6/pqCjz7M12KKGPp5aqr/mleAEAdT0U1GtiWPdh/RI03oc4gphYvz/P9OE40AIgqJPv8Xw7InpPb5jTHmcNj6TcBqnT3agexEDPlG1KGGnCmtX6UOKEP1T0OUZ+SphbsnoZL4qDon6XxHY8xMI7oBWVIlD87KG6nXPL0h1MhFcDbMULZ6kwW1SHOaS8EbbQjCs3WKUiGYY4sEm7bFq/Hw3iYF9v0gQLtlqULl7rMMSxzqz9AvF9kBKTDJbatgiBpjl0dk75ErIrnZFgNAi6iGrVYv/dmg8BMuitMfKNRodfO5xaNByD97D7DyP1xwKd/0Q+RS1WgUCFYjDFbZ+MHl512wn1kEHNZzWWojmm7kV7ezHglQaQyWy2KSF9eObfXAvaLj7jCUGa5JOdqJSxxwyVLtVGRwqHZpcmaONhfGOkz/Z5yPMN1TdGzONygfxte2iv8hmcX0o08p14Of4ta6F+suDRJh0+IVTDW+dmkXMB+ivX3XAZXHU/diX9qgjOPhmJfgBuILsOiVSfUnfk8Sn3LSgYGUvwY43SVZQu/ADbOobXsSe0mYyPqXfrRcY71w1gvae8dp/rWla7oj7iBY9dZ2CWvDrEgcPQtXKmzlS3uASLcM=
-  file: "FILE TO UPLOAD"
+  file_glob: true
+  file: "${RELEASE_FILE}"
   skip_cleanup: true
   on:
     tags: true

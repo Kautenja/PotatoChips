@@ -7,7 +7,7 @@
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Jairasullator is an emulation of the General Instrument AY-3-8910 sound chip from many Arcade games. The AY features three tone generators, each with an optional noise effect. Jairasullator provides the key features of the General Instrument AY-3-8910 chip, namely,
 \begin{itemize}
@@ -26,7 +26,7 @@ Jairasullator is an emulation of the General Instrument AY-3-8910 sound chip fro
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
@@ -42,7 +42,7 @@ Jairasullator is an emulation of the General Instrument AY-3-8910 sound chip fro
 %   \item Channel outputs, ${\approx}10V_{pp}$.
 % \end{enumerate}
 
-\subsection*{1{\quad}Voice Control}
+\subsection{Voice Control}
 
 The \textbf{VOCT} trimpot controls the coarse frequency of the three pulse waveform generators. Frequency is quantized to a 12-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The \textbf{VOCT} ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Voice 1, to Voice 2, to Voice 3, to the Envelope Generator.
 
@@ -54,7 +54,7 @@ When a voice is in DAC mode (Tone, Noise, and Envelope are all off), the \textbf
 
 The \textbf{SYNC} input can be used to hard sync the pulse waveform generator to another oscillator. The sync port supports audio rate modulation.
 
-\subsection*{2{\quad}Voice Mode}
+\subsection{Voice Mode}
 
 When the \textbf{TONE} switch is pointing up, the given voice's tone generator is enabled. When pointing down, the tone generator is disabled for the voice. The \textbf{Tone} input port acts like a gate that goes high at $2V$ and inverts the value of the \textbf{TONE} switch.
 
@@ -64,7 +64,7 @@ When the \textbf{ENV} switch is pointing up, the global envelope generator is en
 
 Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur\footnote{This includes LFO modes}.
 
-\subsection*{3{\quad}Envelope and Noise Generator}
+\subsection{Envelope and Noise Generator}
 
 The \textbf{VOCT} trimpot controls the coarse frequency of the global envelope generator. Frequency is quantized to a 16-bit value, which is particularly noticeable in the very low / high registers. The \textbf{VOCT} port provide an exponential $V$/Octave input for controlling the pitch of the envelope generator. When nothing is patched to the \textbf{VOCT} port, the signal from port 3 is normalled as the input.
 
@@ -106,7 +106,7 @@ The \textbf{SYNC} input can be used to hard sync the envelope generator in LFO m
 % -------------------
 
 \clearpage
-\renewcommand\refname{References \& Acknowledgments}
+\renewcommand\refname{References}
 \nocite{*}
 \bibliographystyle{apalike}
 \bibliography{references}

@@ -1,20 +1,13 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName={Mega Tone}]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{Logo}{Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit from the Sega Master System, Sega Mega Drive, and Sega Genesis. The SN76489 chip contains three pulse waveform generators and an LFSR-based noise generator that selects between pitched white-noise and static periodic noise. Mega Tone provides the key features of the SN76489 chip, namely,
 \begin{itemize}
@@ -29,35 +22,35 @@ Mega Tone is an emulation of the Texas Instruments SN76489 audio processing unit
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics[width=0.4\textwidth]{Interface}
+\includegraphics[width=0.4\textwidth]{img/Interface}
 \end{figure}
 
-\subsection*{1{\quad}Tone Generator Frequency}
+\subsection{Tone Generator Frequency}
 
 The trimpot controls the coarse frequency of the three tone generators. Frequency is quantized to a 10-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3.
 
-\subsection*{2{\quad}Noise Frequency}
+\subsection{Noise Frequency}
 
 The noise generator can be set to one of four settings. The first setting produces pitched white noise based on the frequency of tone generator 3. The remaining three settings produce a static pitched white noised at rates of $\frac{N}{2048}$, $\frac{N}{1024}$, $\frac{N}{512}$ where $N$ is the reference clock rate, which is something like $3579545Hz$ on the Sega consoles. The input port provides voltage control over the noise frequency setting where each discrete setting is allocated $2.5$ Volts of input range.
 
 \clearpage
-\subsection*{3{\quad}Tone Generator Frequency Modulation}
+\subsection{Tone Generator Frequency Modulation}
 
 When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given tone generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding tone generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, and support audio rates.
 
-\subsection*{4{\quad}LFSR}
+\subsection{LFSR}
 
 When the switch is pointing up, the noise generator produces periodic noise. When pointing down, pitched white noise is generated. The input port acts like a gate that goes high at $2V$ and inverts the value of the LFSR switch.
 
-\subsection*{5{\quad}Amplifier}
+\subsection{Amplifier}
 
 When no input is connected, the trimpot controls the given tone generator volume level with 4-bit resolution (i.e., $\in [0, 15]$). When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, to Noise.
 
-\subsection*{6{\quad}Outputs}
+\subsection{Outputs}
 
 Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
 
@@ -66,7 +59,7 @@ Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is
 % -------------------
 
 \clearpage
-\section*{Data Sheet}
+\section{Data Sheet}
 
 \begin{table}[!htp]
 \begin{tabular}{|l|l|}
@@ -97,7 +90,7 @@ Bit Depth        & 16-bit                   \\
 % -------------------
 
 \clearpage
-\renewcommand\refname{References \& Acknowledgments}
+\renewcommand\refname{References}
 \nocite{*}
 \bibliographystyle{apalike}
 \bibliography{references}

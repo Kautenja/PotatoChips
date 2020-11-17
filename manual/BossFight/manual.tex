@@ -1,20 +1,13 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName={Boss Fight}]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{Logo}{Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio processing unit from the Sega Mega Drive and Sega Genesis. Boss Fight provides the key functionality of the \textit{3rd channel} of Yamaha YM2612, in addition to some hacks, omissions, and re-envisioned features, namely,
 \begin{itemize}
@@ -36,14 +29,14 @@ Boss Fight is an emulation and re-envisioning of the Yamaha YM2612 audio process
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics[width=\maxwidth{\textwidth}]{Interface}
+\includegraphics[width=\maxwidth{\textwidth}]{img/Interface}
 \end{figure}
 
-\subsection*{1{\quad}Synthesizer Control}
+\subsection{Synthesizer Control}
 
 The \textbf{Algorithm} knob controls the routing between the four operators on the synthesizer. Boss Fight offers eight FM synthesis algorithms that Figure~\ref{fig:fm-algorithms} depicts. Table~\ref{tab:fm-algorithm-instruments} presents some possible use cases for each of the algorithms. When an input is patched to the \textbf{ALG} input, algorithms can be selected in increments of $1V$.
 
@@ -51,7 +44,7 @@ The \textbf{Algorithm} knob controls the routing between the four operators on t
 \centering
 \caption{An illustration of the FM algorithms on the module.}
 \label{fig:fm-algorithms}
-\includegraphics[width=\maxwidth{\textwidth}]{Operators}
+\includegraphics[width=\maxwidth{\textwidth}]{img/Operators}
 \end{figure}
 
 \begin{table}[!htp]
@@ -100,11 +93,11 @@ The \textbf{LFO} knob controls the rate of the internal low frequency oscillator
 
 The \textbf{Saturation} knob controls the amount of internal attenuation of the master signal before passing through the DAC emulator and hard-clipper\footnote{The saturation parameter is not a feature of the Yamaha YM2612, but is added to Boss Fight for creative utilities.}. This control can be used to remove/control the hard-clipping effect on the master signal. It can also be used to invert the phase of the master signal. When an input is patched to the \textbf{SAT} input, saturation levels can be selected in increments of $\approx5mV$.
 
-\subsection*{2{\quad}Output}
+\subsection{Output}
 
 The dual output provides a buffered copy of the monophonic output from the synthesizer. The VU meter visualizes the level of the output signal from the synthesizer. Clipping begins at $0dB$, and will introduce intentional aliasing.
 
-\subsection*{3{\quad}Envelope Generator}
+\subsection{Envelope Generator}
 
 The envelope generator section provides control over the envelope generator parameters for each of the four operators on the module. Figure~\ref{fig:envelope-generator} depicts the stages in the envelope generator, where
 \begin{itemize}
@@ -120,14 +113,14 @@ The envelope generator section provides control over the envelope generator para
 \centering
 \caption{An illustration of the stages in the envelope generator.}
 \label{fig:envelope-generator}
-\includegraphics[width=\maxwidth{\textwidth}]{envelope}
+\includegraphics[width=\maxwidth{\textwidth}]{img/envelope}
 \end{figure}
 
 The \textbf{Rate Scale} parameter additionally controls the amount of key-scaling that occurs for the envelope generator parameters $\in [0, 3]$, i.e., the degree to which envelopes become shorter as frequencies become higher. For example, high pitched notes on a piano fade much more quickly than the low pitched notes.
 
 The \textbf{Loop} switch causes the envelope generator to enter a looping LFO mode when pointing up. When pointing down, the envelope generator is triggered by gate signals to the \textbf{GATE} port. The envelope generator can be re-triggered (i.e., triggered during a sustained note) using the \textbf{TRIG} port.
 
-\subsection*{4{\quad}Voice Control}
+\subsection{Voice Control}
 
 The voice control section provides control over the FM synthesis parameters for each of the four operators on the module, namely,
 
@@ -138,7 +131,7 @@ The voice control section provides control over the FM synthesis parameters for 
  \item \textbf{Frequency Modulation} determines the amount of frequency modulation applied to the operator by the global LFO $\in [0, 7]$.
 \end{itemize}
 
-\subsection*{5{\quad}Input Ports}
+\subsection{Input Ports}
 
 The top row of ports provides control for the envelope generator parameters that act as offsets from the knobs. Voltage is quantized from $7V$ to the discrete space for the parameter. The \textbf{GATE} input goes high at $2V$ and triggers the envelope generator on the operator. Figure~\ref{fig:envelope-generator} illustrates how the envelope generator interprets \texttt{key on} and \texttt{key off} events in the gate signal. The \textbf{TRIG} input goes high at $2V$ and re-triggers the envelope generator on the operator if the gate is high. The \textbf{VOCT} port provide exponential control for the oscillator's frequency offset from the base frequency determined by the \textbf{Frequency} knob. The \textbf{MUL}, \textbf{AMS}, and \textbf{FMS} inputs provide offset control for the multiply, amplitude modulation sensitivity, and frequency modulation sensitivity parameters. \textbf{All operator input ports are normalled from operator 1 through to operator 4.}
 
@@ -147,7 +140,7 @@ The top row of ports provides control for the envelope generator parameters that
 % -------------------
 
 \clearpage
-\section*{Data Sheet}
+\section{Data Sheet}
 
 \begin{table}[!htp]
 \begin{tabular}{|l|l|}
@@ -174,7 +167,7 @@ $+5V$ draw (mA)  & 0 mA                     \\
 % -------------------
 
 \clearpage
-\renewcommand\refname{References \& Acknowledgments}
+\renewcommand\refname{References}
 \nocite{*}
 \bibliographystyle{apalike}
 \bibliography{references}

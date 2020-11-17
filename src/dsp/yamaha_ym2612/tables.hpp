@@ -79,8 +79,6 @@ static constexpr unsigned TL_RESOLUTION_LENGTH = 256;
 /// 2                    - sinus sign bit           (Y axis)
 /// TL_RESOLUTION_LENGTH - sinus resolution         (X axis)
 static constexpr unsigned TL_TABLE_LENGTH = 13 * 2 * TL_RESOLUTION_LENGTH;
-/// The total level amplitude table for the envelope generator
-static int TL_TABLE[TL_TABLE_LENGTH];
 
 /// The level at which the envelope becomes quiet
 static constexpr int ENV_QUIET = TL_TABLE_LENGTH >> 3;
@@ -89,8 +87,6 @@ static constexpr int ENV_QUIET = TL_TABLE_LENGTH >> 3;
 static constexpr unsigned SIN_LENGTH = 1 << SIN_BITS;
 /// a bit mask for extracting sine table indexes in the valid range
 static constexpr unsigned SIN_MASK = SIN_LENGTH - 1;
-/// Sinusoid waveform table in 'decibel' scale
-static unsigned SIN_TABLE[SIN_LENGTH];
 
 /// Sustain level table (3dB per step)
 /// bit0, bit1, bit2, bit3, bit4, bit5, bit6
@@ -348,92 +344,152 @@ static const uint8_t LFO_PM_OUTPUT[7 * 8][8] = {
     /* DEPTH 7 */ {0, 0, 0x20, 0x30, 0x40, 0x40, 0x50, 0x60},
 };
 
-/// @brief all 128 LFO PM waveforms
-/// @details
-/// 128 combinations of 7 bits meaningful (of F-NUMBER), 8 LFO depths, 32 LFO
-/// output levels per one depth
-static int32_t LFO_PM_TABLE[128 * 8 * 32];
+/// @brief Tables for the Yamaha YM2612 emulation.
+class Tables {
+ private:
+    /// The total level amplitude table for the envelope generator
+    int TL_TABLE[TL_TABLE_LENGTH];
 
-// TODO: replace with constant tables, i.e., compile elsewhere, run, and extract the tables
-/// Initialize generic tables.
-/// @details
-/// This function is not meant to be called directly. It is marked with the
-/// constructor attribute to ensure the function is executed automatically and
-/// precisely once before control enters the scope of the `main` function.
-///
-static __attribute__((constructor)) void init_tables() {
-    // build Linear Power Table
-    for (unsigned x = 0; x < TL_RESOLUTION_LENGTH; x++) {
-        float m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
-        m = floor(m);
-        // we never reach (1 << 16) here due to the (x+1)
-        // result fits within 16 bits at maximum
-        // 16 bits here
-        signed int n = (int) m;
-        // 12 bits here
-        n >>= 4;
-        if (n & 1)  // round to nearest
-            n = (n >> 1) + 1;
-        else
-            n = n>>1;
-        // 11 bits here (rounded)
-        // 13 bits here (as in real chip)
-        n <<= 2;
-        // 14 bits (with sign bit)
-        TL_TABLE[x * 2 + 0] = n;
-        TL_TABLE[x * 2 + 1] = -TL_TABLE[x * 2 + 0];
-        // one entry in the 'Power' table use the following format,
-        //     xxxxxyyyyyyyys with:
-        //        s = sign bit
-        // yyyyyyyy = 8-bits decimal part (0-TL_RESOLUTION_LENGTH)
-        // xxxxx    = 5-bits integer 'shift' value (0-31) but, since Power
-        //            table output is 13 bits, any value above 13 (included)
-        //            would be discarded.
-        for (int i = 1; i < 13; i++) {
-            TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH] =  TL_TABLE[x * 2 + 0] >> i;
-            TL_TABLE[x * 2 + 1 + i * 2 * TL_RESOLUTION_LENGTH] = -TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH];
-        }
-    }
-    // build Logarithmic Sinus table
-    for (unsigned i = 0; i < SIN_LENGTH; i++) {
-        // non-standard sinus (checked against the real chip)
-        float m = sin(((i * 2) + 1) * M_PI / SIN_LENGTH);
-        // we never reach zero here due to ((i * 2) + 1)
-        // convert to decibels
-        float o;
-        if (m > 0.0)
-            o = 8 * log(1.0 / m) / log(2.0);
-        else
-            o = 8 * log(-1.0 / m) / log(2.0);
-        o = o / (ENV_STEP / 4);
-        signed int n = (int)(2.0 * o);
-        if (n & 1)  // round to nearest
-            n = (n >> 1) + 1;
-        else
-            n = n >> 1;
-        // 13-bits (8.5) value is formatted for above 'Power' table
-        SIN_TABLE[i] = n * 2 + (m >= 0.0 ? 0 : 1);
-    }
-    // build LFO PM modulation table
-    for (int i = 0; i < 8; i++) {  // 8 PM depths
-        for (uint8_t fnum = 0; fnum < 128; fnum++) {  // 7 bits of F-NUMBER
-            for (uint8_t step = 0; step < 8; step++) {
-                uint8_t value = 0;
-                for (uint32_t bit_tmp = 0; bit_tmp < 7; bit_tmp++) {  // 7 bits
-                    if (fnum & (1 << bit_tmp)) {
-                        uint32_t offset_fnum_bit = bit_tmp * 8;
-                        value += LFO_PM_OUTPUT[offset_fnum_bit + i][step];
-                    }
-                }
-                // 32 steps for LFO PM (sinus)
-                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      +  0] =  value;
-                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) +  8] =  value;
-                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      + 16] = -value;
-                LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) + 24] = -value;
+    /// @brief Initialize the TL table.
+    void init_tl_table() {
+        // build Linear Power Table
+        for (unsigned x = 0; x < TL_RESOLUTION_LENGTH; x++) {
+            float m = (1 << 16) / pow(2, (x + 1) * (ENV_STEP / 4.0) / 8.0);
+            m = floor(m);
+            // we never reach (1 << 16) here due to the (x+1)
+            // result fits within 16 bits at maximum
+            // 16 bits here
+            signed int n = (int) m;
+            // 12 bits here
+            n >>= 4;
+            if (n & 1)  // round to nearest
+                n = (n >> 1) + 1;
+            else
+                n = n>>1;
+            // 11 bits here (rounded)
+            // 13 bits here (as in real chip)
+            n <<= 2;
+            // 14 bits (with sign bit)
+            TL_TABLE[x * 2 + 0] = n;
+            TL_TABLE[x * 2 + 1] = -TL_TABLE[x * 2 + 0];
+            // one entry in the 'Power' table use the following format,
+            //     xxxxxyyyyyyyys with:
+            //        s = sign bit
+            // yyyyyyyy = 8-bits decimal part (0-TL_RESOLUTION_LENGTH)
+            // xxxxx    = 5-bits integer 'shift' value (0-31) but, since Power
+            //            table output is 13 bits, any value above 13 (included)
+            //            would be discarded.
+            for (int i = 1; i < 13; i++) {
+                TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH] =  TL_TABLE[x * 2 + 0] >> i;
+                TL_TABLE[x * 2 + 1 + i * 2 * TL_RESOLUTION_LENGTH] = -TL_TABLE[x * 2 + 0 + i * 2 * TL_RESOLUTION_LENGTH];
             }
         }
     }
-}
+
+    /// Sinusoid waveform table in 'decibel' scale
+    unsigned SIN_TABLE[SIN_LENGTH];
+
+    /// @brief Initialize the sine table.
+    void init_sin_table() {
+        // build Logarithmic Sinus table
+        for (unsigned i = 0; i < SIN_LENGTH; i++) {
+            // non-standard sinus (checked against the real chip)
+            float m = sin(((i * 2) + 1) * M_PI / SIN_LENGTH);
+            // we never reach zero here due to ((i * 2) + 1)
+            // convert to decibels
+            float o;
+            if (m > 0.0)
+                o = 8 * log(1.0 / m) / log(2.0);
+            else
+                o = 8 * log(-1.0 / m) / log(2.0);
+            o = o / (ENV_STEP / 4);
+            signed int n = (int)(2.0 * o);
+            if (n & 1)  // round to nearest
+                n = (n >> 1) + 1;
+            else
+                n = n >> 1;
+            // 13-bits (8.5) value is formatted for above 'Power' table
+            SIN_TABLE[i] = n * 2 + (m >= 0.0 ? 0 : 1);
+        }
+    }
+
+    /// @brief all 128 LFO PM waveforms
+    /// @details
+    /// 128 combinations of 7 bits meaningful (of F-NUMBER), 8 LFO depths, 32
+    /// LFO output levels per one depth
+    int32_t LFO_PM_TABLE[128 * 8 * 32];
+
+    /// @brief Initialize the LFO PM table.
+    void init_lfo_pm_table() {
+        // build LFO PM modulation table
+        for (int i = 0; i < 8; i++) {  // 8 PM depths
+            for (uint8_t fnum = 0; fnum < 128; fnum++) {  // 7 bits of F-NUMBER
+                for (uint8_t step = 0; step < 8; step++) {
+                    uint8_t value = 0;
+                    for (uint32_t bit_tmp = 0; bit_tmp < 7; bit_tmp++) {  // 7 bits
+                        if (fnum & (1 << bit_tmp)) {
+                            uint32_t offset_fnum_bit = bit_tmp * 8;
+                            value += LFO_PM_OUTPUT[offset_fnum_bit + i][step];
+                        }
+                    }
+                    // 32 steps for LFO PM (sinus)
+                    LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      +  0] =  value;
+                    LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) +  8] =  value;
+                    LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) +  step      + 16] = -value;
+                    LFO_PM_TABLE[(fnum * 32 * 8) + (i * 32) + (step ^ 7) + 24] = -value;
+                }
+            }
+        }
+    }
+
+    /// @brief initialize a new set of tables. (private)
+    Tables() { init_tl_table(); init_sin_table(); init_lfo_pm_table(); }
+
+    /// Disable the copy constructor.
+    Tables(const Tables&);
+
+    /// Disable the assignment operator
+    Tables& operator=(const Tables&);
+
+    /// @brief Return the singleton instance.
+    ///
+    /// @returns a pointer to the global singleton instance
+    ///
+    static Tables *instance() {
+        // create a static instance of the singleton
+        static Tables instance_ = Tables();
+        // return a pointer to the global static instance
+        return &instance_;
+    }
+
+ public:
+    /// @brief Return the total level value for the given index.
+    ///
+    /// @param index the index of the total level value to return
+    /// @returns the total level value for the given index
+    ///
+    static inline int get_tl(unsigned index) {
+        return instance()->TL_TABLE[index];
+    }
+
+    /// @brief Return the sin value for the given index.
+    ///
+    /// @param index the index of the sin value to return
+    /// @returns the sin value for the given index
+    ///
+    static inline unsigned get_sin(unsigned index) {
+        return instance()->SIN_TABLE[index];
+    }
+
+    /// @brief Return the LFO PM value for the given index.
+    ///
+    /// @param index the index of the LFO PM value to return
+    /// @returns the LFO PM value for the given index
+    ///
+    static inline int32_t get_lfo_pm(unsigned index) {
+        return instance()->LFO_PM_TABLE[index];
+    }
+};
 
 };  // namespace YamahaYM2612
 

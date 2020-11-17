@@ -1,20 +1,13 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName=Pulses]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{Logo}{Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 Pulses is an emulation of the SunSoft FME7 (5B) sound chip from the Nintendo Entertainment System (NES). The FME7 chip contains three pulse wave generators with level control. Pulses provides the key features of the FME7 chip, namely,
 \begin{itemize}
@@ -28,26 +21,26 @@ Pulses is an emulation of the SunSoft FME7 (5B) sound chip from the Nintendo Ent
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{Interface}
+\includegraphics{img/Interface}
 \end{figure}
 
-\subsection*{1{\quad}Frequency}
+\subsection{Frequency}
 
 The trimpot controls the coarse frequency of the three waveform generators. Frequency is quantized to a 12-bit value for the oscillators, which is particularly noticeable in the very low / high registers. The ports provide an exponential $V$/Octave input for controlling the pitch of the tone generators. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3.
 
-\subsection*{2{\quad}Frequency Modulation}
+\subsection{Frequency Modulation}
 
 When nothing is patched to the frequency modulation port, the trimpot can be used to fine tune the frequency of the given waveform generator. When a signal is patched, the input port provides linear frequency modulation to the corresponding waveform generator and the trimpot can be used as an attenuverter to attenuate / polarize the incoming signal. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3, and support audio rates.
 
-\subsection*{3{\quad}Amplifier}
+\subsection{Amplifier}
 
 When no input is connected, the trimpot controls the given waveform generator volume level with 4-bit resolution (i.e., $\in [0, 15]$). When an input is patched to the port, the trimpot acts like an attenuator that scales the CV control over the volume level. Because the amplifier has 4-bit control, the envelope of the voice will sound quantized when used with an external envelope generator. Inputs are normalled forward from Tone 1, to Tone 2, to Tone 3.
 
-\subsection*{4{\quad}Outputs}
+\subsection{Outputs}
 
 Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is maxed out. The individual oscillators cannot be overdriven to produce clipping, distortion, or aliasing. However, outputs are normalled forward into a sum mix where hard clipping \textit{can} occur. Excess clipping will introduce an aliasing effect to the mix. Outputs in the mix are clipped \textit{before} being normalled to the next output. VU meter lights measure the output of individual channels going from off ($-\infty dB$ to $0dB$), to green ($-12dB$ to $0dB$), and lastly to red ($0dB$ to $3dB$) when clipping begins to occur.
 
@@ -56,7 +49,7 @@ Each voice produces an output signal of at most $10V_{pp}$ when the amplifier is
 % -------------------
 
 \clearpage
-\section*{Data Sheet}
+\section{Data Sheet}
 
 \begin{table}[!htp]
 \begin{tabular}{|l|l|}
@@ -87,7 +80,7 @@ Bit Depth        & 16-bit                   \\
 % -------------------
 
 \clearpage
-\renewcommand\refname{References \& Acknowledgments}
+\renewcommand\refname{References}
 \nocite{*}
 \bibliographystyle{apalike}
 \bibliography{references}

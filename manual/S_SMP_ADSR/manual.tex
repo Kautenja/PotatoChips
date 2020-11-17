@@ -1,24 +1,17 @@
 \documentclass[12pt,letter]{article}
 \usepackage[moduleName=S-SMP(ADSR)]{KautenjaDSP}
-% set the graphics path to the img directory
-\graphicspath{{img/}}
-
-% algorithm2e stuff
-% \SetKwInOut{Objects}{$\CKmatrix{O}$}
-% \SetKwInOut{Weights}{$\CKvector{w}$}
-
 \begin{document}
-\titlePage{S-SMP-ADSR-Logo}{S-SMP-ADSR-Module}{KautenjaDSP}
+\titlePage{img/Logo}{img/Module}{img/KautenjaDSP}
 
 % -------------------
 % MARK: Overview
 % -------------------
 
-\section*{Overview}
+\section{Overview}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics[width=0.5\textwidth]{S-SMP-Chip}
+\includegraphics[width=0.5\textwidth]{img/S-SMP-Chip}
 \caption{The S-SMP module from the SNES. The S-SMP included two discrete microprocessors: the SPC700, and the S-DSP. The SPC700 performed primary computation, while the S-DSP performed DSP specific computations, like BRR decoding, sample playback, applying the echo effect, mixing levels, etc. The SPC700 and S-DSP shared $64KB$ of total RAM that was used for BRR sample data and the echo buffer. The digital audio is decoded back to an analog signal by a 16-bit DAC and amplified using an Op-Amp. Before digital-to-analog conversion, the output audio is low-pass filtered by a Gaussian filter that gives the S-SMP chip a distinctive sound.}
 \end{figure}
 
@@ -39,11 +32,11 @@ namely,
 % -------------------
 
 \clearpage
-\section*{Panel Layout}
+\section{Panel Layout}
 
 \begin{figure}[!htp]
 \centering
-\includegraphics{S-SMP-ADSR-Manual}
+\includegraphics{img/Interface}
 \end{figure}
 
 \clearpage
@@ -56,7 +49,7 @@ namely,
 % -------------------
 
 \clearpage
-\renewcommand\refname{References \& Acknowledgments}
+\renewcommand\refname{References}
 \nocite{*}
 \bibliographystyle{apalike}
 \bibliography{references}

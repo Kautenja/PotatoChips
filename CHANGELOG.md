@@ -153,7 +153,7 @@
 
 -   fix issue where GBS and 106 would drop onto the rack with corrupted waveforms
 
-## 1.8.0 (TBD)
+## 1.8.0 (2020-11-16)
 
 -   header-only DSP library
 -   fix issue where some modules would generate a "pop"/"click"/"impulse" on
@@ -242,6 +242,14 @@
     -   normalled inputs
     -   normalled outputs (i.e., mixer, with clipping, and aliasing)
     -   VU Meter to monitor levels / clipping / aliasing
+
+## 1.8.1 (2020-11-16)
+
+-   remove accidental debugging modules from release
+
+## 1.8.2 (2020-11-17)
+
+-   replace BossFight global data structures with Windows friendly implementation
 
 ## 1.9.0 (TBD)
 

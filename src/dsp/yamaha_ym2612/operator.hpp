@@ -598,11 +598,11 @@ struct Operator {
     /// shift left by the setting of its `FB` (feedback) parameter.
     ///
     inline int32_t calculate_output(uint32_t env, int32_t pm) const {
-        const uint32_t p = (env << 3) + SIN_TABLE[
+        const uint32_t p = (env << 3) + Tables::get_sin(
             (((int32_t)((phase & ~FREQ_MASK) + pm)) >> FREQ_SH) & SIN_MASK
-        ];
+        );
         if (p >= TL_TABLE_LENGTH) return 0;
-        return TL_TABLE[p];
+        return Tables::get_tl(p);
     }
 
     /// @brief Update the phase of the operator.
@@ -611,7 +611,7 @@ struct Operator {
     ///
     inline void update_phase_counters(const OperatorContext& state) {
         const uint32_t fnum_lfo = ((block_fnum & 0x7f0) >> 4) * 32 * 8;
-        const int32_t lfo_fnum_offset = LFO_PM_TABLE[fnum_lfo + pms + state.lfo_PM_step];
+        const int32_t lfo_fnum_offset = Tables::get_lfo_pm(fnum_lfo + pms + state.lfo_PM_step);
         if (pms && lfo_fnum_offset) {  // update the phase using the LFO
             uint32_t fnum = 2 * block_fnum + lfo_fnum_offset;
             const uint8_t blk = (fnum & 0x7000) >> 12;

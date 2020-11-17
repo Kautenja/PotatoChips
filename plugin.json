@@ -25,7 +25,7 @@
       "slug": "2612",
       "name": "Boss Fight",
       "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive and Sega Genesis.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Boss_Fight.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf",
       "tags": [
         "Noise",
         "Oscillator",

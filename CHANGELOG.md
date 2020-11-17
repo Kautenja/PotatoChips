@@ -251,6 +251,10 @@
 
 -   replace BossFight global data structures with Windows friendly implementation
 
+## 1.8.3 (2020-11-17)
+
+-   fix manual link for Boss Fight
+
 ## 1.9.0 (TBD)
 
 -   new module: S-SMP(Echo)

@@ -64,8 +64,6 @@ script:
   - export RACK_DIR="${HOME}"/Rack/Rack-SDK
   - make dep
   - make dist
-  - export RELEASE_FILE=$(ls dist/*.zip)
-  - echo "${RELEASE_FILE}"
 before_deploy:
   - export RELEASE_FILE=$(ls dist/*.zip)
   - echo "${RELEASE_FILE}"

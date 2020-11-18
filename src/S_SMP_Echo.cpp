@@ -16,9 +16,7 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
-// TODO: VU meters
 // TODO: bypass switch / rethink the wet/dry
-// TODO: explosion indicator for FIR filter
 // TODO: attenu-verters for FIR parameters
 // TODO: master blaster for all attenu-verters (supercell auxillary control)
 // TODO: horizontal sliders for the FIR parameters that function like Typhoon

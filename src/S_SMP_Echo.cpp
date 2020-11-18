@@ -278,8 +278,10 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipS_SMP_Echo::INPUT_MIX + i));
             // Stereo Input Ports
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Echo::INPUT_AUDIO + i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 3 * i));
             // Stereo Output Ports
             addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Echo::OUTPUT_AUDIO + i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 3 * i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
@@ -288,11 +290,6 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             param->snap = true;
             addParam(param);
         }
-        // VU Meters
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 +  0, 70), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 20, 70), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 40, 70), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L));
-        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 60, 70), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R));
     }
 };
 

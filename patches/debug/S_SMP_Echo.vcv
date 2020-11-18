@@ -50,7 +50,7 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.8.3",
       "model": "S_SMP_Echo",
       "params": [
         {
@@ -59,7 +59,7 @@
         },
         {
           "id": 1,
-          "value": 127.0
+          "value": 41.0
         },
         {
           "id": 2,
@@ -75,31 +75,31 @@
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 101.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": -35.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": -16.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": -62.0
         },
         {
           "id": 10,
-          "value": 0.0
+          "value": 66.0
         },
         {
           "id": 11,
-          "value": 0.0
+          "value": -116.0
         }
       ],
       "leftModuleId": 160,
@@ -146,7 +146,7 @@
     {
       "id": 159,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.8.3",
       "model": "2A03",
       "params": [
         {
@@ -187,7 +187,7 @@
         },
         {
           "id": 9,
-          "value": 5.0
+          "value": 8.0
         },
         {
           "id": 10,
@@ -195,7 +195,7 @@
         },
         {
           "id": 11,
-          "value": 10.0
+          "value": 3.0
         },
         {
           "id": 12,
@@ -334,6 +334,88 @@
         53,
         0
       ]
+    },
+    {
+      "id": 175,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 176,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        19,
+        1
+      ]
+    },
+    {
+      "id": 176,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "VCMixer",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.01499999
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        }
+      ],
+      "rightModuleId": 175,
+      "pos": [
+        9,
+        1
+      ]
     }
   ],
   "cables": [
@@ -434,28 +516,52 @@
       "color": "#0c8e15"
     },
     {
-      "id": 78,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 79,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
       "id": 158,
       "outputModuleId": 5,
       "outputId": 6,
       "inputModuleId": 160,
       "inputId": 5,
       "color": "#0986ad"
+    },
+    {
+      "id": 161,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 176,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 162,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 176,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 160,
+      "outputModuleId": 176,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 163,
+      "outputModuleId": 176,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 164,
+      "outputModuleId": 176,
+      "outputId": 0,
+      "inputModuleId": 175,
+      "inputId": 0,
+      "color": "#0c8e15"
     }
   ]
 }

@@ -34,6 +34,13 @@ struct ChipS_SMP_Echo : Module {
     /// the Sony S-DSP echo effect emulator
     Sony_S_DSP_Echo apu[PORT_MAX_CHANNELS];
 
+    /// a VU meter for measuring the input audio levels
+    dsp::VuMeter2 inputVUMeter[StereoSample::CHANNELS];
+    /// a VU meter for measuring the output audio levels
+    dsp::VuMeter2 outputVUMeter[StereoSample::CHANNELS];
+    /// a light divider for updating the LEDs every 512 processing steps
+    dsp::ClockDivider lightDivider;
+
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -62,6 +69,10 @@ struct ChipS_SMP_Echo : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
+        ENUMS(VU_LIGHTS_INPUT_L,  5),
+        ENUMS(VU_LIGHTS_INPUT_R,  5),
+        ENUMS(VU_LIGHTS_OUTPUT_L, 5),
+        ENUMS(VU_LIGHTS_OUTPUT_R, 5),
         NUM_LIGHTS
     };
 
@@ -74,6 +85,7 @@ struct ChipS_SMP_Echo : Module {
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Channel)");
+        lightDivider.setDivision(512);
     }
 
  protected:
@@ -136,13 +148,16 @@ struct ChipS_SMP_Echo : Module {
 
     /// @brief Return the value of the stereo input from the panel.
     ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to get the audio input for
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline int16_t getInput(unsigned channel, unsigned lane) {
+    inline int16_t getInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        return MAX * inputs[INPUT_AUDIO + lane].getPolyVoltage(channel) / 5.f;
+        const auto input = inputs[INPUT_AUDIO + lane].getPolyVoltage(channel) / 5.f;
+        inputVUMeter[lane].process(args.sampleTime, input);
+        return MAX * math::clamp(input, -1.f, 1.f);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -157,17 +172,23 @@ struct ChipS_SMP_Echo : Module {
         apu[channel].setMixLeft(getMix(channel, StereoSample::LEFT));
         apu[channel].setMixRight(getMix(channel, StereoSample::RIGHT));
         // update the FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++)
+        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
+        }
         // run a stereo sample through the echo buffer + filter
         auto output = apu[channel].run(
-            getInput(channel, StereoSample::LEFT),
-            getInput(channel, StereoSample::RIGHT)
+            getInput(args, channel, StereoSample::LEFT),
+            getInput(args, channel, StereoSample::RIGHT)
         );
         // write the stereo output to the ports
         for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
-            const auto voltage = 5.f * output.samples[i] / std::numeric_limits<int16_t>::max();
-            outputs[OUTPUT_AUDIO + i].setVoltage(voltage, channel);
+            // get the sample in [0, 1] (clipped by the finite precision of the
+            // emulation)
+            const auto sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
+            // approximate the VU meter by scaling the sample slightly
+            outputVUMeter[i].process(args.sampleTime, 1.2 * sample);
+            // set the output
+            outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample, channel);
         }
     }
 
@@ -180,14 +201,44 @@ struct ChipS_SMP_Echo : Module {
         // also set the channels on the output ports based on the number of
         // channels
         unsigned channels = 1;
-        for (unsigned port = 0; port < NUM_INPUTS; port++)
+        for (unsigned port = 0; port < NUM_INPUTS; port++) {
             channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
+        }
         // set the number of polyphony channels for output ports
-        for (unsigned port = 0; port < NUM_OUTPUTS; port++)
+        for (unsigned port = 0; port < NUM_OUTPUTS; port++) {
             outputs[port].setChannels(channels);
+        }
         // process audio samples on the chip engine.
-        for (unsigned channel = 0; channel < channels; channel++)
+        for (unsigned channel = 0; channel < channels; channel++) {
             processChannel(args, channel);
+        }
+        // process the lights based on the VU meter readings
+        if (lightDivider.process()) {
+            // left input
+            lights[VU_LIGHTS_INPUT_L + 0].setBrightness(inputVUMeter[0].getBrightness(0, 3));
+            lights[VU_LIGHTS_INPUT_L + 1].setBrightness(inputVUMeter[0].getBrightness(-3, 0));
+            lights[VU_LIGHTS_INPUT_L + 2].setBrightness(inputVUMeter[0].getBrightness(-6, -3));
+            lights[VU_LIGHTS_INPUT_L + 3].setBrightness(inputVUMeter[0].getBrightness(-12, -6));
+            lights[VU_LIGHTS_INPUT_L + 4].setBrightness(inputVUMeter[0].getBrightness(-24, -12));
+            // right input
+            lights[VU_LIGHTS_INPUT_R + 0].setBrightness(inputVUMeter[1].getBrightness(0, 3));
+            lights[VU_LIGHTS_INPUT_R + 1].setBrightness(inputVUMeter[1].getBrightness(-3, 0));
+            lights[VU_LIGHTS_INPUT_R + 2].setBrightness(inputVUMeter[1].getBrightness(-6, -3));
+            lights[VU_LIGHTS_INPUT_R + 3].setBrightness(inputVUMeter[1].getBrightness(-12, -6));
+            lights[VU_LIGHTS_INPUT_R + 4].setBrightness(inputVUMeter[1].getBrightness(-24, -12));
+            // left output
+            lights[VU_LIGHTS_OUTPUT_L + 0].setBrightness(outputVUMeter[0].getBrightness(0, 3));
+            lights[VU_LIGHTS_OUTPUT_L + 1].setBrightness(outputVUMeter[0].getBrightness(-3, 0));
+            lights[VU_LIGHTS_OUTPUT_L + 2].setBrightness(outputVUMeter[0].getBrightness(-6, -3));
+            lights[VU_LIGHTS_OUTPUT_L + 3].setBrightness(outputVUMeter[0].getBrightness(-12, -6));
+            lights[VU_LIGHTS_OUTPUT_L + 4].setBrightness(outputVUMeter[0].getBrightness(-24, -12));
+            // right output
+            lights[VU_LIGHTS_OUTPUT_R + 0].setBrightness(outputVUMeter[1].getBrightness(0, 3));
+            lights[VU_LIGHTS_OUTPUT_R + 1].setBrightness(outputVUMeter[1].getBrightness(-3, 0));
+            lights[VU_LIGHTS_OUTPUT_R + 2].setBrightness(outputVUMeter[1].getBrightness(-6, -3));
+            lights[VU_LIGHTS_OUTPUT_R + 3].setBrightness(outputVUMeter[1].getBrightness(-12, -6));
+            lights[VU_LIGHTS_OUTPUT_R + 4].setBrightness(outputVUMeter[1].getBrightness(-24, -12));
+        }
     }
 };
 
@@ -239,6 +290,30 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             param->snap = true;
             addParam(param);
         }
+        // VU Meters
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 0));
+        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 2));
+        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 4));
+
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 20, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 0));
+        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 20, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 20, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 2));
+        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 20, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 20, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 4));
+
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 40, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 0));
+        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 40, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 40, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 2));
+        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 40, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 40, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 4));
+
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 60, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 0));
+        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 60, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 60, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 2));
+        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 60, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 60, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 4));
     }
 };
 

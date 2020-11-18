@@ -18,9 +18,6 @@
 
 // TODO: bypass switch / rethink the wet/dry
 // TODO: attenu-verters for FIR parameters
-// TODO: master blaster for all attenu-verters (supercell auxillary control)
-// TODO: horizontal sliders for the FIR parameters that function like Typhoon
-// TODO: option to detect and prevent explosions
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -136,11 +133,17 @@ struct ChipS_SMP_Echo : Module {
     /// @returns the 8-bit FIR filter parameter for coefficient at given index
     ///
     inline int8_t getFIRCoefficient(unsigned channel, unsigned index) {
-        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
-        const float cv = inputs[INPUT_FIR_COEFFICIENT + index].getPolyVoltage(channel) / 10.f;
-        const float mod = std::numeric_limits<int8_t>::max() * cv;
+        // get the normal voltage from the previous channel. if the index is
+        // 0, use a default voltage of 0V
+        const auto normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
+        const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
+        // normal the voltage forward by updating the voltage on the port
+        inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
+        const float mod = std::numeric_limits<int8_t>::max() * voltage / 10.f;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
+        // get the parameter value from the knob and return the clamped parameter
+        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
         return clamp(param + mod, MIN, MAX);
     }
 

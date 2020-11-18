@@ -51,7 +51,7 @@
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.0",
-      "model": "S_SMP",
+      "model": "SuperSynth",
       "params": [
         {
           "id": 0,

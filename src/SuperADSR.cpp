@@ -300,4 +300,4 @@ struct SuperADSRWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelSuperADSR = createModel<SuperADSR, SuperADSRWidget>("S_SMP_ADSR");
+rack::Model *modelSuperADSR = createModel<SuperADSR, SuperADSRWidget>("SuperADSR");

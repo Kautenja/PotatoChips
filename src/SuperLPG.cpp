@@ -173,4 +173,4 @@ struct SuperLPGWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelSuperLPG = createModel<SuperLPG, SuperLPGWidget>("S_SMP_Gauss");
+rack::Model *modelSuperLPG = createModel<SuperLPG, SuperLPGWidget>("SuperLPG");

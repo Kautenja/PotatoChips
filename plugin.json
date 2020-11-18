@@ -100,10 +100,10 @@
       ]
     },
     {
-      "slug": "S_SMP",
-      "name": "S-SMP",
+      "slug": "SuperSynth",
+      "name": "Super Synth",
       "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSynth.pdf",
       "tags": [
         "Multiple",
         "Noise",
@@ -113,10 +113,10 @@
       ]
     },
     {
-      "slug": "S_SMP_ADSR",
-      "name": "S-SMP(ADSR)",
+      "slug": "SuperADSR",
+      "name": "Super ADSR",
       "description": "An emulation of the ADSR envelope from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf",
       "tags": [
         "Dual",
         "Envelope generator",
@@ -124,10 +124,10 @@
       ]
     },
     {
-      "slug": "S_SMP_BRR",
-      "name": "S-SMP(BRR)",
+      "slug": "SuperSampler",
+      "name": "Super Sampler",
       "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSampler.pdf",
       "tags": [
         "Multiple",
         "Effect",
@@ -153,10 +153,10 @@
       ]
     },
     {
-      "slug": "S_SMP_Gauss",
-      "name": "S-SMP(Gauss)",
+      "slug": "SuperLPG",
+      "name": "Super Low-Pass Gate",
       "description": "An emulation of the Gaussian low-pass filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperLPG.pdf",
       "tags": [
         "Dual",
         "Filter",
@@ -167,8 +167,8 @@
       ]
     },
     {
-      "slug": "S_SMP_Blank1",
-      "name": "S-SMP(Blank)",
+      "slug": "SuperSynthBlank1",
+      "name": "Super Synth Blank",
       "description": "A blank panel with an S-SMP illustration.",
       "tags": [
         "Blank"

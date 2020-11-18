@@ -593,4 +593,4 @@ struct SuperSynthWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelSuperSynth = createModel<SuperSynth, SuperSynthWidget>("S_SMP");
+rack::Model *modelSuperSynth = createModel<SuperSynth, SuperSynthWidget>("SuperSynth");

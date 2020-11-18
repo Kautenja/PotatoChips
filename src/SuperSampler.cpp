@@ -251,4 +251,4 @@ struct SuperSamplerWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelSuperSampler = createModel<SuperSampler, SuperSamplerWidget>("S_SMP_BRR");
+rack::Model *modelSuperSampler = createModel<SuperSampler, SuperSamplerWidget>("SuperSampler");

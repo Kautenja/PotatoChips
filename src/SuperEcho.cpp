@@ -142,11 +142,13 @@ struct SuperEcho : Module {
         const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
         // normal the voltage forward by updating the voltage on the port
         inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
+        // get the value of the attenuverter
         const float att = params[PARAM_FIR_COEFFICIENT_ATT + index].getValue();
+        // calculate the floating point mod value
         const float mod = att * std::numeric_limits<int8_t>::max() * voltage / 10.f;
+        // get the parameter value from the knob, sum with modulator, and clamp
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        // get the parameter value from the knob and return the clamped parameter
         const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
         return clamp(param + mod, MIN, MAX);
     }

@@ -83,8 +83,6 @@ struct WaveTableEditor : rack::LightWidget {
     struct {
         /// whether a drag is currently active
         bool is_pressed = false;
-        /// whether a drag is currently active
-        bool is_active = false;
         /// whether the drag operation is being modified
         bool is_modified = false;
         /// the current position of the mouse pointer during the drag
@@ -134,14 +132,7 @@ struct WaveTableEditor : rack::LightWidget {
         // consume the event to prevent it from propagating
         e.consume(this);
         // setup the drag state
-        drag_state.is_active = e.button == GLFW_MOUSE_BUTTON_LEFT;
         drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
-        if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {  // right click event
-            // TODO: show menu with basic waveforms
-            return;
-        }
-        // return if the drag operation is not active
-        if (e.button != GLFW_MOUSE_BUTTON_LEFT) return;
         // set the position of the drag operation to the position of the mouse
         drag_state.position = e.pos;
         // calculate the normalized x position in [0, 1]
@@ -160,11 +151,9 @@ struct WaveTableEditor : rack::LightWidget {
             drag_state.is_pressed = true;
             action = new WaveTableAction<Wavetable>(waveform, length);
             action->copy_before();
-        }
-        // update the waveform, we need to check if the button is pressed
-        // this could be a mouse up event from a click that started somewhere
-        // else
-        if (drag_state.is_pressed) {
+            // update the waveform, we need to check if the button is pressed
+            // this could be a mouse up event from a click that started
+            // somewhere else
             waveform[index] = value;
         }
     }
@@ -174,7 +163,7 @@ struct WaveTableEditor : rack::LightWidget {
         // consume the event to prevent it from propagating
         e.consume(this);
         // if the drag operation is not active, return early
-        if (!(drag_state.is_active && drag_state.is_pressed)) return;
+        if (!drag_state.is_pressed) return;
         // update the drag state based on the change in position from the mouse
         uint32_t index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;

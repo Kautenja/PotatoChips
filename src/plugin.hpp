@@ -46,8 +46,8 @@ extern rack::Model *modelBossFight_Blank1;
 
 // beta versions / WIPs
 extern rack::Model *modelSuperEcho;
+extern rack::Model *modelSuperADSR;
 extern rack::Model *modelChipS_SMP;
-extern rack::Model *modelChipS_SMP_ADSR;
 extern rack::Model *modelChipS_SMP_BRR;
 extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;

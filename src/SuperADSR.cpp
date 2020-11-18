@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// An envelope generator module based on the S-SMP chip from Nintendo SNES.
-struct ChipS_SMP_ADSR : Module {
+struct SuperADSR : Module {
     /// the number of processing lanes on the module
     static constexpr unsigned LANES = 2;
 
@@ -76,7 +76,7 @@ struct ChipS_SMP_ADSR : Module {
     };
 
     /// @brief Initialize a new S-DSP Chip module.
-    ChipS_SMP_ADSR() {
+    SuperADSR() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned lane = 0; lane < LANES; lane++) {
             configParam(PARAM_AMPLITUDE     + lane, -128, 127, 127, "Amplitude");
@@ -251,12 +251,12 @@ struct ChipS_SMP_ADSR : Module {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for SPC700.
-struct ChipS_SMP_ADSRWidget : ModuleWidget {
+struct SuperADSRWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipS_SMP_ADSRWidget(ChipS_SMP_ADSR *module) {
+    explicit SuperADSRWidget(SuperADSR *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-ADSR-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -265,39 +265,39 @@ struct ChipS_SMP_ADSRWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        for (unsigned i = 0; i < ChipS_SMP_ADSR::LANES; i++) {
+        for (unsigned i = 0; i < SuperADSR::LANES; i++) {
             // Gate, Retrig, Output
-            addInput(createInput<PJ301MPort>(Vec(20, 45 + 169 * i), module, ChipS_SMP_ADSR::INPUT_GATE + i));
-            addInput(createInput<PJ301MPort>(Vec(20, 100 + 169 * i), module, ChipS_SMP_ADSR::INPUT_RETRIG + i));
-            addOutput(createOutput<PJ301MPort>(Vec(20, 156 + 169 * i), module, ChipS_SMP_ADSR::OUTPUT_ENVELOPE + i));
+            addInput(createInput<PJ301MPort>(Vec(20, 45 + 169 * i), module, SuperADSR::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(20, 100 + 169 * i), module, SuperADSR::INPUT_RETRIG + i));
+            addOutput(createOutput<PJ301MPort>(Vec(20, 156 + 169 * i), module, SuperADSR::OUTPUT_ENVELOPE + i));
             // Amplitude
-            auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(66, 40 + 169 * i), module, ChipS_SMP_ADSR::PARAM_AMPLITUDE + i, ChipS_SMP_ADSR::LIGHT_AMPLITUDE + 3 * i);
+            auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(66, 40 + 169 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
             amplitude->snap = true;
             addParam(amplitude);
-            addInput(createInput<PJ301MPort>(Vec(61, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_AMPLITUDE + i));
+            addInput(createInput<PJ301MPort>(Vec(61, 157 + 169 * i), module, SuperADSR::INPUT_AMPLITUDE + i));
             // Attack
-            auto attack = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(100, 40 + 169 * i), module, ChipS_SMP_ADSR::PARAM_ATTACK + i, ChipS_SMP_ADSR::LIGHT_ATTACK + 3 * i);
+            auto attack = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(100, 40 + 169 * i), module, SuperADSR::PARAM_ATTACK + i, SuperADSR::LIGHT_ATTACK + 3 * i);
             attack->snap = true;
             addParam(attack);
-            addInput(createInput<PJ301MPort>(Vec(95, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_ATTACK + i));
+            addInput(createInput<PJ301MPort>(Vec(95, 157 + 169 * i), module, SuperADSR::INPUT_ATTACK + i));
             // Decay
-            auto decay = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(134, 40 + 169 * i), module, ChipS_SMP_ADSR::PARAM_DECAY + i, ChipS_SMP_ADSR::LIGHT_DECAY + 3 * i);
+            auto decay = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(134, 40 + 169 * i), module, SuperADSR::PARAM_DECAY + i, SuperADSR::LIGHT_DECAY + 3 * i);
             decay->snap = true;
             addParam(decay);
-            addInput(createInput<PJ301MPort>(Vec(129, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_DECAY + i));
+            addInput(createInput<PJ301MPort>(Vec(129, 157 + 169 * i), module, SuperADSR::INPUT_DECAY + i));
             // Sustain Level
-            auto sustainLevel = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(168, 40 + 169 * i), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_LEVEL + i, ChipS_SMP_ADSR::LIGHT_SUSTAIN_LEVEL + 3 * i);
+            auto sustainLevel = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(168, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_LEVEL + i, SuperADSR::LIGHT_SUSTAIN_LEVEL + 3 * i);
             sustainLevel->snap = true;
             addParam(sustainLevel);
-            addInput(createInput<PJ301MPort>(Vec(163, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_LEVEL + i));
+            addInput(createInput<PJ301MPort>(Vec(163, 157 + 169 * i), module, SuperADSR::INPUT_SUSTAIN_LEVEL + i));
             // Sustain Rate
-            auto sustainRate = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(202, 40 + 169 * i), module, ChipS_SMP_ADSR::PARAM_SUSTAIN_RATE + i, ChipS_SMP_ADSR::LIGHT_SUSTAIN_RATE + 3 * i);
+            auto sustainRate = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(202, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_RATE + i, SuperADSR::LIGHT_SUSTAIN_RATE + 3 * i);
             sustainRate->snap = true;
             addParam(sustainRate);
-            addInput(createInput<PJ301MPort>(Vec(197, 157 + 169 * i), module, ChipS_SMP_ADSR::INPUT_SUSTAIN_RATE + i));
+            addInput(createInput<PJ301MPort>(Vec(197, 157 + 169 * i), module, SuperADSR::INPUT_SUSTAIN_RATE + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelChipS_SMP_ADSR = createModel<ChipS_SMP_ADSR, ChipS_SMP_ADSRWidget>("S_SMP_ADSR");
+rack::Model *modelSuperADSR = createModel<SuperADSR, SuperADSRWidget>("S_SMP_ADSR");

@@ -24,7 +24,7 @@
 struct SuperEcho : Module {
  private:
     /// the Sony S-DSP echo effect emulator
-    Sony_S_DSP_Echo apu[PORT_MAX_CHANNELS];
+    SonyS_DSP::Echo apu[PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the input audio levels
     rack::dsp::VuMeter2 inputVUMeter[StereoSample::CHANNELS];
@@ -40,8 +40,8 @@ struct SuperEcho : Module {
         PARAM_DELAY,
         PARAM_FEEDBACK,
         ENUMS(PARAM_MIX, StereoSample::CHANNELS),
-        ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
-        ENUMS(PARAM_FIR_COEFFICIENT_ATT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
+        ENUMS(PARAM_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
+        ENUMS(PARAM_FIR_COEFFICIENT_ATT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
     };
 
@@ -51,7 +51,7 @@ struct SuperEcho : Module {
         INPUT_DELAY,
         INPUT_FEEDBACK,
         ENUMS(INPUT_MIX, StereoSample::CHANNELS),
-        ENUMS(INPUT_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
+        ENUMS(INPUT_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
 
@@ -71,11 +71,11 @@ struct SuperEcho : Module {
     /// @brief Initialize a new S-DSP Chip module.
     SuperEcho() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
+        for (unsigned coeff = 0; coeff < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; coeff++) {
             configParam(PARAM_FIR_COEFFICIENT     + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
             configParam(PARAM_FIR_COEFFICIENT_ATT + coeff, -1.f, 1.f, 0, "FIR Coefficient " + std::to_string(coeff + 1) + " CV Attenuverter");
         }
-        configParam(PARAM_DELAY, 0, Sony_S_DSP_Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, Sony_S_DSP_Echo::MILLISECONDS_PER_DELAY_LEVEL);
+        configParam(PARAM_DELAY, 0, SonyS_DSP::Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, SonyS_DSP::Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Channel)");
@@ -92,8 +92,8 @@ struct SuperEcho : Module {
     inline uint8_t getDelay(unsigned channel) {
         const float param = params[PARAM_DELAY].getValue();
         const float cv = inputs[INPUT_DELAY].getVoltage(channel) / 10.f;
-        const float mod = Sony_S_DSP_Echo::DELAY_LEVELS * cv;
-        const float MAX = static_cast<float>(Sony_S_DSP_Echo::DELAY_LEVELS);
+        const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
+        const float MAX = static_cast<float>(SonyS_DSP::Echo::DELAY_LEVELS);
         return clamp(param + mod, 0.f, MAX);
     }
 
@@ -200,7 +200,7 @@ struct SuperEcho : Module {
         apu[channel].setMixLeft(getMix(channel, StereoSample::LEFT));
         apu[channel].setMixRight(getMix(channel, StereoSample::RIGHT));
         // update the FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
+        for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         }
         // run a stereo sample through the echo buffer + filter
@@ -316,7 +316,7 @@ struct SuperEchoWidget : ModuleWidget {
             addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, SuperEcho::VU_LIGHTS_OUTPUT + 3 * i));
         }
         // FIR Coefficients
-        for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
+        for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
             addParam(createParam<Trimpot>(Vec(140, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
             addParam(createSnapParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i));

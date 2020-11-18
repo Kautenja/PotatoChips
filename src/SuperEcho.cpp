@@ -27,9 +27,9 @@ struct SuperEcho : Module {
     SonyS_DSP::Echo apu[PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the input audio levels
-    rack::dsp::VuMeter2 inputVUMeter[StereoSample::CHANNELS];
+    rack::dsp::VuMeter2 inputVUMeter[SonyS_DSP::StereoSample::CHANNELS];
     /// a VU meter for measuring the output audio levels
-    rack::dsp::VuMeter2 outputVUMeter[StereoSample::CHANNELS];
+    rack::dsp::VuMeter2 outputVUMeter[SonyS_DSP::StereoSample::CHANNELS];
     /// a light divider for updating the LEDs every 512 processing steps
     rack::dsp::ClockDivider lightDivider;
 
@@ -39,7 +39,7 @@ struct SuperEcho : Module {
         PARAM_BYPASS,
         PARAM_DELAY,
         PARAM_FEEDBACK,
-        ENUMS(PARAM_MIX, StereoSample::CHANNELS),
+        ENUMS(PARAM_MIX, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(PARAM_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         ENUMS(PARAM_FIR_COEFFICIENT_ATT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
@@ -47,24 +47,24 @@ struct SuperEcho : Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        ENUMS(INPUT_AUDIO, StereoSample::CHANNELS),
+        ENUMS(INPUT_AUDIO, SonyS_DSP::StereoSample::CHANNELS),
         INPUT_DELAY,
         INPUT_FEEDBACK,
-        ENUMS(INPUT_MIX, StereoSample::CHANNELS),
+        ENUMS(INPUT_MIX, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(INPUT_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         NUM_INPUTS
     };
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_AUDIO, StereoSample::CHANNELS),
+        ENUMS(OUTPUT_AUDIO, SonyS_DSP::StereoSample::CHANNELS),
         NUM_OUTPUTS
     };
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(VU_LIGHTS_INPUT,  3 * StereoSample::CHANNELS),
-        ENUMS(VU_LIGHTS_OUTPUT, 3 * StereoSample::CHANNELS),
+        ENUMS(VU_LIGHTS_INPUT,  3 * SonyS_DSP::StereoSample::CHANNELS),
+        ENUMS(VU_LIGHTS_OUTPUT, 3 * SonyS_DSP::StereoSample::CHANNELS),
         NUM_LIGHTS
     };
 
@@ -197,19 +197,19 @@ struct SuperEcho : Module {
         // update the delay parameters
         apu[channel].setDelay(getDelay(channel));
         apu[channel].setFeedback(getFeedback(channel));
-        apu[channel].setMixLeft(getMix(channel, StereoSample::LEFT));
-        apu[channel].setMixRight(getMix(channel, StereoSample::RIGHT));
+        apu[channel].setMixLeft(getMix(channel, SonyS_DSP::StereoSample::LEFT));
+        apu[channel].setMixRight(getMix(channel, SonyS_DSP::StereoSample::RIGHT));
         // update the FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         }
         // run a stereo sample through the echo buffer + filter
         auto output = apu[channel].run(
-            getInput(args, channel, StereoSample::LEFT),
-            getInput(args, channel, StereoSample::RIGHT)
+            getInput(args, channel, SonyS_DSP::StereoSample::LEFT),
+            getInput(args, channel, SonyS_DSP::StereoSample::RIGHT)
         );
         // write the stereo output to the ports
-        for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
+        for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // get the sample in [0, 1] (clipped by the finite precision of the
             // emulation)
             const auto sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
@@ -254,7 +254,7 @@ struct SuperEcho : Module {
             outputs[port].setChannels(channels);
         if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
             for (unsigned channel = 0; channel < channels; channel++) {
-                for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
+                for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
                     bypassChannel(args, channel, i);
                     apu[channel].run(0, 0);
                 }
@@ -294,7 +294,7 @@ struct SuperEchoWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // bypass switch
         addParam(createParam<CKSS>(Vec(10, 10), module, SuperEcho::PARAM_BYPASS));
-        for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
+        for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
             addParam(createSnapParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, SuperEcho::PARAM_DELAY + i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, SuperEcho::INPUT_DELAY + i));

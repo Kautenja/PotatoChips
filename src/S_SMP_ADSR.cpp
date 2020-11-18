@@ -28,7 +28,7 @@ struct ChipS_SMP_ADSR : Module {
 
  private:
     /// the Sony S-DSP ADSR enveloper generator emulator
-    Sony_S_DSP_ADSR apus[LANES][PORT_MAX_CHANNELS];
+    SonyS_DSP::ADSR apus[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input trigger and gate signals
     rack::dsp::BooleanTrigger gateTrigger[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
@@ -201,7 +201,7 @@ struct ChipS_SMP_ADSR : Module {
     ///
     inline void processChannel(unsigned channel, unsigned lane) {
         // cache the APU for this lane and channel
-        Sony_S_DSP_ADSR& apu = apus[lane][channel];
+        SonyS_DSP::ADSR& apu = apus[lane][channel];
         // set the ADSR parameters for this APU
         apu.setAttack(getAttack(channel, lane));
         apu.setDecay(getDecay(channel, lane));

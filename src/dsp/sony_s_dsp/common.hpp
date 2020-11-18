@@ -20,6 +20,9 @@
 #include <cstdint>
 #include <limits>
 
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
+
 enum : unsigned {
     /// the sample rate of the S-DSP in Hz
     SAMPLE_RATE = 32000
@@ -207,5 +210,7 @@ struct __attribute__((packed, aligned(4))) StereoSample {
     /// the 16-bit sample for the left [0] and right [1] channels.
     int16_t samples[CHANNELS] = {0, 0};
 };
+
+};  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_COMMON_HPP_

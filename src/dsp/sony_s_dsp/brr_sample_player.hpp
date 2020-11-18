@@ -15,13 +15,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_SONY_S_DSP_BRR_HPP_
-#define DSP_SONY_S_DSP_BRR_HPP_
+#ifndef DSP_SONY_S_DSP_BRR_SAMPLE_PLAYER_HPP_
+#define DSP_SONY_S_DSP_BRR_SAMPLE_PLAYER_HPP_
 
 #include "common.hpp"
 
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
+
 /// @brief An emulation of the BRR sample playback engine from the Sony S-DSP.
-class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
+class __attribute__((packed, aligned(32))) BRR_SamplePlayer {
  public:
     enum : unsigned {
         /// the size of the RAM bank in bytes
@@ -112,8 +115,8 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     }
 
  public:
-    /// @brief Initialize a new Sony_S_DSP_BRR.
-    Sony_S_DSP_BRR() : envelope_stage(EnvelopeStage::Off), block_remain(0) { }
+    /// @brief Initialize a new BRR_SamplePlayer.
+    BRR_SamplePlayer() : envelope_stage(EnvelopeStage::Off), block_remain(0) { }
 
     /// @brief Set the RAM pointer to a new value.
     ///
@@ -333,4 +336,6 @@ class __attribute__((packed, aligned(32))) Sony_S_DSP_BRR {
     }
 };
 
-#endif  // DSP_SONY_S_DSP_BRR_HPP_
+};  // namespace SonyS_DSP
+
+#endif  // DSP_SONY_S_DSP_BRR_SAMPLE_PLAYER_HPP_

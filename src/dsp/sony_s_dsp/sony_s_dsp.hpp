@@ -22,8 +22,11 @@
 #include "common.hpp"
 #include <cstring>
 
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
+
 /// @brief Sony S-DSP chip emulator.
-class Sony_S_DSP {
+class Processor {
  public:
     enum : unsigned {
         /// the number of sampler voices on the chip
@@ -421,11 +424,11 @@ class Sony_S_DSP {
     }
 
  public:
-    /// @brief Initialize a new Sony_S_DSP.
+    /// @brief Initialize a new Processor.
     ///
     /// @param ram_ a pointer to the 64KB shared RAM
     ///
-    explicit Sony_S_DSP(uint8_t* ram_) : ram(ram_) { }
+    explicit Processor(uint8_t* ram_) : ram(ram_) { }
 
     /// @brief Clear state and silence everything.
     void reset() {
@@ -797,5 +800,7 @@ class Sony_S_DSP {
         }
     }
 };
+
+};  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_HPP_

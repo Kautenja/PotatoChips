@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/sony_s_dsp/gaussian_filter.hpp"
+#include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -64,7 +64,7 @@ struct ChipS_SMP_Gauss : Module {
 
  protected:
     /// the Sony S-DSP sound chip emulator
-    Sony_S_DSP_Gaussian apu[LANES][PORT_MAX_CHANNELS];
+    SonyS_DSP::GaussianInterpolationFilter apu[LANES][PORT_MAX_CHANNELS];
 
     /// @brief Get the filter parameter for the index and polyphony channel.
     ///

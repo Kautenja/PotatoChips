@@ -15,15 +15,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_SONY_S_DSP_GAUSSIAN_HPP_
-#define DSP_SONY_S_DSP_GAUSSIAN_HPP_
+#ifndef DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_
+#define DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_
 
 #include "common.hpp"
+
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
 
 /// @brief An emulation of the Gaussian filter from the Sony S-DSP.
 /// @details
 /// The emulator consumes 16 bytes of RAM and is aligned to 16-byte addresses.
-class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
+class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
  private:
     // -----------------------------------------------------------------------
     // Byte 1,2, 3,4, 5,6, 7,8
@@ -60,8 +63,8 @@ class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
     /// the sample rate of the S-DSP in Hz
     static constexpr unsigned SAMPLE_RATE = 32000;
 
-    /// @brief Initialize a new Sony_S_DSP_Gaussian.
-    Sony_S_DSP_Gaussian() : unused_spacer_for_byte_alignment(0) { }
+    /// @brief Initialize a new GaussianInterpolationFilter.
+    GaussianInterpolationFilter() : unused_spacer_for_byte_alignment(0) { }
 
     /// @brief Set the filter coefficients to a discrete mode.
     ///
@@ -145,4 +148,6 @@ class __attribute__((packed, aligned(16))) Sony_S_DSP_Gaussian {
     }
 };
 
-#endif  // DSP_SONY_S_DSP_GAUSSIAN_HPP_
+};  // namespace SonyS_DSP
+
+#endif  // DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_

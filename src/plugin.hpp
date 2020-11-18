@@ -45,11 +45,11 @@ extern rack::Model *modelChipS_SMP_Blank1;
 extern rack::Model *modelBossFight_Blank1;
 
 // beta versions / WIPs
+extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
-extern rack::Model *modelChipS_SMP;
-extern rack::Model *modelChipS_SMP_BRR;
-extern rack::Model *modelChipS_SMP_Gauss;
+extern rack::Model *modelSuperSampler;
+extern rack::Model *modelSuperLPG;
 extern rack::Model *modelChipSCC;
 extern rack::Model *modelChipTurboGrafx16;
 

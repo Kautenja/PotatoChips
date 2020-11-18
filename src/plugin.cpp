@@ -38,11 +38,11 @@ void init(Plugin* instance) {
     instance->addModel(modelChipS_SMP_Blank1);
     instance->addModel(modelBossFight_Blank1);
     // beta versions / WIPs
+    instance->addModel(modelSuperSynth);
     instance->addModel(modelSuperEcho);
     instance->addModel(modelSuperADSR);
-    instance->addModel(modelChipS_SMP);
-    instance->addModel(modelChipS_SMP_BRR);
-    instance->addModel(modelChipS_SMP_Gauss);
+    instance->addModel(modelSuperSampler);
+    instance->addModel(modelSuperLPG);
     instance->addModel(modelChipSCC);
     instance->addModel(modelChipTurboGrafx16);
 }

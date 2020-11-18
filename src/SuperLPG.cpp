@@ -21,7 +21,7 @@
 // ---------------------------------------------------------------------------
 
 /// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
-struct ChipS_SMP_Gauss : Module {
+struct SuperLPG : Module {
     /// the number of processing lanes on the module
     static constexpr unsigned LANES = 2;
 
@@ -53,7 +53,7 @@ struct ChipS_SMP_Gauss : Module {
     };
 
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
-    ChipS_SMP_Gauss() {
+    SuperLPG() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_FILTER,        0,           3,           2, "Filter Coefficients"                 );
         configParam(PARAM_GAIN   + 0,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)",  " dB", -10, 40);
@@ -134,12 +134,12 @@ struct ChipS_SMP_Gauss : Module {
 // ---------------------------------------------------------------------------
 
 /// @brief The panel widget for S-SMP-Gauss.
-struct ChipS_SMP_GaussWidget : ModuleWidget {
+struct SuperLPGWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipS_SMP_GaussWidget(ChipS_SMP_Gauss *module) {
+    explicit SuperLPGWidget(SuperLPG *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-Gauss-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -147,16 +147,16 @@ struct ChipS_SMP_GaussWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Filter Mode
-        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, ChipS_SMP_Gauss::PARAM_FILTER);
+        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, SuperLPG::PARAM_FILTER);
         filter->snap = true;
         addParam(filter);
-        for (unsigned i = 0; i < ChipS_SMP_Gauss::LANES; i++) {
+        for (unsigned i = 0; i < SuperLPG::LANES; i++) {
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, ChipS_SMP_Gauss::INPUT_AUDIO + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, SuperLPG::INPUT_AUDIO + i));
             // Gain
-            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, ChipS_SMP_Gauss::PARAM_GAIN + i));
+            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, SuperLPG::PARAM_GAIN + i));
             // Volume
-            auto volumeIdx = ChipS_SMP_Gauss::PARAM_VOLUME + i;
+            auto volumeIdx = SuperLPG::PARAM_VOLUME + i;
             auto echoPos = Vec(20 + 44 * i, 221);
             Knob* volume;
             if (i)  // i == 1 -> right lane -> red knob
@@ -165,12 +165,12 @@ struct ChipS_SMP_GaussWidget : ModuleWidget {
                 volume = createParam<Rogan2PWhite>(echoPos, module, volumeIdx);
             volume->snap = true;
             addParam(volume);
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, ChipS_SMP_Gauss::INPUT_VOLUME + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, SuperLPG::INPUT_VOLUME + i));
             // Stereo Output Ports
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Gauss::OUTPUT_AUDIO + i));
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperLPG::OUTPUT_AUDIO + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelChipS_SMP_Gauss = createModel<ChipS_SMP_Gauss, ChipS_SMP_GaussWidget>("S_SMP_Gauss");
+rack::Model *modelSuperLPG = createModel<SuperLPG, SuperLPGWidget>("S_SMP_Gauss");

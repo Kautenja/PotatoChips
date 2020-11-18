@@ -22,7 +22,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Sony S-DSP chip (from Nintendo SNES) emulator module.
-struct ChipS_SMP_BRR : Module {
+struct SuperSampler : Module {
  public:
     /// the number of voices on the module
     static constexpr unsigned NUM_VOICES = 8;
@@ -71,7 +71,7 @@ struct ChipS_SMP_BRR : Module {
     };
 
     /// @brief Initialize a new S-DSP Chip module.
-    ChipS_SMP_BRR() {
+    SuperSampler() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned osc = 0; osc < NUM_VOICES; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
@@ -206,12 +206,12 @@ struct ChipS_SMP_BRR : Module {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for SPC700.
-struct ChipS_SMP_BRRWidget : ModuleWidget {
+struct SuperSamplerWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipS_SMP_BRRWidget(ChipS_SMP_BRR *module) {
+    explicit SuperSamplerWidget(SuperSampler *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-BRR-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -221,34 +221,34 @@ struct ChipS_SMP_BRRWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // individual oscillator controls
-        for (unsigned i = 0; i < ChipS_SMP_BRR::NUM_VOICES; i++) {
+        for (unsigned i = 0; i < SuperSampler::NUM_VOICES; i++) {
             // Frequency
-            addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOCT + i));
-            addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_FM + i));
-            addParam(createParam<Rogan2PWhite>(Vec(75, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_FREQ + i));
+            addInput(createInput<PJ301MPort>(Vec(15, 40 + i * 41), module, SuperSampler::INPUT_VOCT + i));
+            addInput(createInput<PJ301MPort>(Vec(45, 40 + i * 41), module, SuperSampler::INPUT_FM + i));
+            addParam(createParam<Rogan2PWhite>(Vec(75, 35 + i * 41), module, SuperSampler::PARAM_FREQ + i));
             // Gate
-            addInput(createInput<PJ301MPort>(Vec(120, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(120, 40 + i * 41), module, SuperSampler::INPUT_GATE + i));
             // Volume - Left
-            addInput(createInput<PJ301MPort>(Vec(155, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_L + i));
-            auto left = createParam<Rogan2PWhite>(Vec(190, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_L + i);
+            addInput(createInput<PJ301MPort>(Vec(155, 40 + i * 41), module, SuperSampler::INPUT_VOLUME_L + i));
+            auto left = createParam<Rogan2PWhite>(Vec(190, 35 + i * 41), module, SuperSampler::PARAM_VOLUME_L + i);
             left->snap = true;
             addParam(left);
             // Volume - Right
-            addInput(createInput<PJ301MPort>(Vec(240, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_VOLUME_R + i));
-            auto right = createParam<Rogan2PRed>(Vec(275, 35 + i * 41), module, ChipS_SMP_BRR::PARAM_VOLUME_R + i);
+            addInput(createInput<PJ301MPort>(Vec(240, 40 + i * 41), module, SuperSampler::INPUT_VOLUME_R + i));
+            auto right = createParam<Rogan2PRed>(Vec(275, 35 + i * 41), module, SuperSampler::PARAM_VOLUME_R + i);
             right->snap = true;
             addParam(right);
             // Phase Modulation
             if (i > 0) {  // phase modulation is not defined for the first voice
-                addParam(createParam<CKSS>(Vec(330, 40  + i * 41), module, ChipS_SMP_BRR::PARAM_PM_ENABLE + i));
-                addInput(createInput<PJ301MPort>(Vec(350, 40 + i * 41), module, ChipS_SMP_BRR::INPUT_PM_ENABLE + i));
+                addParam(createParam<CKSS>(Vec(330, 40  + i * 41), module, SuperSampler::PARAM_PM_ENABLE + i));
+                addInput(createInput<PJ301MPort>(Vec(350, 40 + i * 41), module, SuperSampler::INPUT_PM_ENABLE + i));
             }
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(380, 40 + i * 41), module, ChipS_SMP_BRR::OUTPUT_AUDIO_L + i));
-            addOutput(createOutput<PJ301MPort>(Vec(410, 40 + i * 41), module, ChipS_SMP_BRR::OUTPUT_AUDIO_R + i));
+            addOutput(createOutput<PJ301MPort>(Vec(380, 40 + i * 41), module, SuperSampler::OUTPUT_AUDIO_L + i));
+            addOutput(createOutput<PJ301MPort>(Vec(410, 40 + i * 41), module, SuperSampler::OUTPUT_AUDIO_R + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelChipS_SMP_BRR = createModel<ChipS_SMP_BRR, ChipS_SMP_BRRWidget>("S_SMP_BRR");
+rack::Model *modelSuperSampler = createModel<SuperSampler, SuperSamplerWidget>("S_SMP_BRR");

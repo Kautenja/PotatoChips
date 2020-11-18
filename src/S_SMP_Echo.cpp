@@ -69,10 +69,10 @@ struct ChipS_SMP_Echo : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(VU_LIGHTS_INPUT_L,  5),
-        ENUMS(VU_LIGHTS_INPUT_R,  5),
-        ENUMS(VU_LIGHTS_OUTPUT_L, 5),
-        ENUMS(VU_LIGHTS_OUTPUT_R, 5),
+        ENUMS(VU_LIGHTS_INPUT_L,  3),
+        ENUMS(VU_LIGHTS_INPUT_R,  3),
+        ENUMS(VU_LIGHTS_OUTPUT_L, 3),
+        ENUMS(VU_LIGHTS_OUTPUT_R, 3),
         NUM_LIGHTS
     };
 
@@ -192,6 +192,24 @@ struct ChipS_SMP_Echo : Module {
         }
     }
 
+    /// @brief Set the given VU meter light based on given VU meter.
+    ///
+    /// @param vuMeter the VU meter to get the data from
+    /// @param light the light to update from the VU meter data
+    ///
+    inline void setLight(dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
+        // get the global brightness scale from -12 to 3
+        auto brightness = vuMeter.getBrightness(-12, 3);
+        // set the red light based on total brightness and
+        // brightness from 0dB to 3dB
+        (light + 0)->setBrightness(brightness * vuMeter.getBrightness(0, 3));
+        // set the red light based on inverted total brightness and
+        // brightness from -12dB to 0dB
+        (light + 1)->setBrightness((1 - brightness) * vuMeter.getBrightness(-12, 0));
+        // set the blue light to off
+        (light + 2)->setBrightness(0);
+    }
+
     /// @brief Process the inputs and outputs to/from the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -214,30 +232,10 @@ struct ChipS_SMP_Echo : Module {
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
-            // left input
-            lights[VU_LIGHTS_INPUT_L + 0].setBrightness(inputVUMeter[0].getBrightness(0, 3));
-            lights[VU_LIGHTS_INPUT_L + 1].setBrightness(inputVUMeter[0].getBrightness(-3, 0));
-            lights[VU_LIGHTS_INPUT_L + 2].setBrightness(inputVUMeter[0].getBrightness(-6, -3));
-            lights[VU_LIGHTS_INPUT_L + 3].setBrightness(inputVUMeter[0].getBrightness(-12, -6));
-            lights[VU_LIGHTS_INPUT_L + 4].setBrightness(inputVUMeter[0].getBrightness(-24, -12));
-            // right input
-            lights[VU_LIGHTS_INPUT_R + 0].setBrightness(inputVUMeter[1].getBrightness(0, 3));
-            lights[VU_LIGHTS_INPUT_R + 1].setBrightness(inputVUMeter[1].getBrightness(-3, 0));
-            lights[VU_LIGHTS_INPUT_R + 2].setBrightness(inputVUMeter[1].getBrightness(-6, -3));
-            lights[VU_LIGHTS_INPUT_R + 3].setBrightness(inputVUMeter[1].getBrightness(-12, -6));
-            lights[VU_LIGHTS_INPUT_R + 4].setBrightness(inputVUMeter[1].getBrightness(-24, -12));
-            // left output
-            lights[VU_LIGHTS_OUTPUT_L + 0].setBrightness(outputVUMeter[0].getBrightness(0, 3));
-            lights[VU_LIGHTS_OUTPUT_L + 1].setBrightness(outputVUMeter[0].getBrightness(-3, 0));
-            lights[VU_LIGHTS_OUTPUT_L + 2].setBrightness(outputVUMeter[0].getBrightness(-6, -3));
-            lights[VU_LIGHTS_OUTPUT_L + 3].setBrightness(outputVUMeter[0].getBrightness(-12, -6));
-            lights[VU_LIGHTS_OUTPUT_L + 4].setBrightness(outputVUMeter[0].getBrightness(-24, -12));
-            // right output
-            lights[VU_LIGHTS_OUTPUT_R + 0].setBrightness(outputVUMeter[1].getBrightness(0, 3));
-            lights[VU_LIGHTS_OUTPUT_R + 1].setBrightness(outputVUMeter[1].getBrightness(-3, 0));
-            lights[VU_LIGHTS_OUTPUT_R + 2].setBrightness(outputVUMeter[1].getBrightness(-6, -3));
-            lights[VU_LIGHTS_OUTPUT_R + 3].setBrightness(outputVUMeter[1].getBrightness(-12, -6));
-            lights[VU_LIGHTS_OUTPUT_R + 4].setBrightness(outputVUMeter[1].getBrightness(-24, -12));
+            setLight(inputVUMeter[0], &lights[VU_LIGHTS_INPUT_L]);
+            setLight(inputVUMeter[1], &lights[VU_LIGHTS_INPUT_R]);
+            setLight(outputVUMeter[0], &lights[VU_LIGHTS_OUTPUT_L]);
+            setLight(outputVUMeter[1], &lights[VU_LIGHTS_OUTPUT_R]);
         }
     }
 };
@@ -291,29 +289,10 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             addParam(param);
         }
         // VU Meters
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 0));
-        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 2));
-        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 4));
-
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 20, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 0));
-        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 20, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 20, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 2));
-        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 20, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 20, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R + 4));
-
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 40, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 0));
-        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 40, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 40, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 2));
-        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 40, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 40, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 4));
-
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20 + 60, 270 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 0));
-        addChild(createLightCentered<MediumLight<YellowLight>>   (Vec(20 + 60, 285 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20 + 60, 300 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 2));
-        addChild(createLightCentered<MediumLight<GreenLight>>(Vec(20 + 60, 315 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20 + 60, 330 - 200), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R + 4));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 +  0, 70), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 20, 70), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_R));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 40, 70), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L));
+        addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 60, 70), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_R));
     }
 };
 

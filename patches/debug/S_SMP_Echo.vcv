@@ -59,7 +59,7 @@
         },
         {
           "id": 1,
-          "value": 41.0
+          "value": 17.0
         },
         {
           "id": 2,
@@ -183,11 +183,11 @@
         },
         {
           "id": 8,
-          "value": 5.0
+          "value": 15.0
         },
         {
           "id": 9,
-          "value": 8.0
+          "value": 15.0
         },
         {
           "id": 10,
@@ -392,7 +392,7 @@
       "params": [
         {
           "id": 0,
-          "value": 1.01499999
+          "value": 0.4569996
         },
         {
           "id": 1,
@@ -441,14 +441,6 @@
       "outputId": 0,
       "inputModuleId": 159,
       "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 75,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 159,
-      "inputId": 8,
       "color": "#c9b70e"
     },
     {

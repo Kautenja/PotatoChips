@@ -16,7 +16,6 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
-// TODO: bypass switch / rethink the wet/dry
 // TODO: attenu-verters for FIR parameters
 
 // ---------------------------------------------------------------------------
@@ -39,6 +38,7 @@ struct ChipS_SMP_Echo : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
+        PARAM_BYPASS,
         PARAM_DELAY,
         PARAM_FEEDBACK,
         ENUMS(PARAM_MIX, StereoSample::CHANNELS),
@@ -78,6 +78,7 @@ struct ChipS_SMP_Echo : Module {
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Channel)");
+        configParam(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }
 
@@ -166,6 +167,23 @@ struct ChipS_SMP_Echo : Module {
         return MAX * math::clamp(input, -1.f, 1.f);
     }
 
+    /// @brief Return the clean value of the stereo input from the panel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param channel the polyphonic channel to get the audio input for
+    /// @param lane the stereo delay lane to get the input voltage for
+    /// @returns the 8-bit stereo input for the given lane
+    ///
+    inline void bypassInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
+        // get the normal voltage from the left/right pair
+        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
+        // process the input on the VU meter
+        inputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
+        outputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
+        outputs[OUTPUT_AUDIO + lane].setVoltage(voltage, channel);
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -225,16 +243,19 @@ struct ChipS_SMP_Echo : Module {
         // also set the channels on the output ports based on the number of
         // channels
         unsigned channels = 1;
-        for (unsigned port = 0; port < NUM_INPUTS; port++) {
+        for (unsigned port = 0; port < NUM_INPUTS; port++)
             channels = std::max(inputs[port].getChannels(), static_cast<int>(channels));
-        }
         // set the number of polyphony channels for output ports
-        for (unsigned port = 0; port < NUM_OUTPUTS; port++) {
+        for (unsigned port = 0; port < NUM_OUTPUTS; port++)
             outputs[port].setChannels(channels);
-        }
-        // process audio samples on the chip engine.
-        for (unsigned channel = 0; channel < channels; channel++) {
-            processChannel(args, channel);
+        if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
+            for (unsigned channel = 0; channel < channels; channel++) {
+                for (unsigned i = 0; i < StereoSample::CHANNELS; i++)
+                    bypassInput(args, channel, i);
+            }
+        } else {  // process audio samples on the chip engine.
+            for (unsigned channel = 0; channel < channels; channel++)
+                processChannel(args, channel);
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
@@ -265,6 +286,8 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // bypass switch
+        addParam(createParam<CKSS>(Vec(10, 10), module, ChipS_SMP_Echo::PARAM_BYPASS));
         for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
             auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipS_SMP_Echo::PARAM_DELAY + i);

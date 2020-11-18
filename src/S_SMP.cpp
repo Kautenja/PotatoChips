@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/sony_s_dsp/sony_s_dsp.hpp"
+#include "dsp/sony_s_dsp/processor.hpp"
 #include "dsp/wavetable4bit.hpp"
 
 // ---------------------------------------------------------------------------

@@ -255,6 +255,10 @@
 
 -   fix manual link for Boss Fight
 
+## 1.8.4 (TBD)
+
+-   right click to edit waveforms on wavetable editor-based modules
+
 ## 1.9.0 (TBD)
 
 -   new module: S-SMP(Echo)

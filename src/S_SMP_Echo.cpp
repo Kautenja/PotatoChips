@@ -64,10 +64,8 @@ struct ChipS_SMP_Echo : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(VU_LIGHTS_INPUT_L,  3),
-        ENUMS(VU_LIGHTS_INPUT_R,  3),
-        ENUMS(VU_LIGHTS_OUTPUT_L, 3),
-        ENUMS(VU_LIGHTS_OUTPUT_R, 3),
+        ENUMS(VU_LIGHTS_INPUT,  3 * StereoSample::CHANNELS),
+        ENUMS(VU_LIGHTS_OUTPUT, 3 * StereoSample::CHANNELS),
         NUM_LIGHTS
     };
 
@@ -240,10 +238,10 @@ struct ChipS_SMP_Echo : Module {
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
-            setLight(inputVUMeter[0], &lights[VU_LIGHTS_INPUT_L]);
-            setLight(inputVUMeter[1], &lights[VU_LIGHTS_INPUT_R]);
-            setLight(outputVUMeter[0], &lights[VU_LIGHTS_OUTPUT_L]);
-            setLight(outputVUMeter[1], &lights[VU_LIGHTS_OUTPUT_R]);
+            setLight(inputVUMeter[0], &lights[VU_LIGHTS_INPUT]);
+            setLight(inputVUMeter[1], &lights[VU_LIGHTS_INPUT + 3]);
+            setLight(outputVUMeter[0], &lights[VU_LIGHTS_OUTPUT]);
+            setLight(outputVUMeter[1], &lights[VU_LIGHTS_OUTPUT + 3]);
         }
     }
 };
@@ -286,10 +284,10 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipS_SMP_Echo::INPUT_MIX + i));
             // Stereo Input Ports
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Echo::INPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT_L + 3 * i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT + 3 * i));
             // Stereo Output Ports
             addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Echo::OUTPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT_L + 3 * i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT + 3 * i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {

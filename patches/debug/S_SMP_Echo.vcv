@@ -55,11 +55,11 @@
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": 31.0
         },
         {
           "id": 1,
-          "value": 73.0
+          "value": 127.0
         },
         {
           "id": 2,
@@ -183,11 +183,11 @@
         },
         {
           "id": 8,
-          "value": 9.0
+          "value": 15.0
         },
         {
           "id": 9,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 10,
@@ -444,18 +444,10 @@
     {
       "id": 166,
       "outputModuleId": 159,
-      "outputId": 1,
+      "outputId": 3,
       "inputModuleId": 152,
       "inputId": 0,
       "color": "#c91847"
-    },
-    {
-      "id": 167,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 1,
-      "color": "#0986ad"
     }
   ]
 }

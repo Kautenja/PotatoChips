@@ -16,14 +16,12 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
-// TODO: attenu-verters for FIR parameters
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// An echo effect module based on the S-SMP chip from Nintendo SNES.
-struct ChipS_SMP_Echo : Module {
+/// @brief An echo effect module based on the S-SMP chip from Nintendo SNES.
+struct SuperEcho : Module {
  private:
     /// the Sony S-DSP echo effect emulator
     Sony_S_DSP_Echo apu[PORT_MAX_CHANNELS];
@@ -43,6 +41,7 @@ struct ChipS_SMP_Echo : Module {
         PARAM_FEEDBACK,
         ENUMS(PARAM_MIX, StereoSample::CHANNELS),
         ENUMS(PARAM_FIR_COEFFICIENT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
+        ENUMS(PARAM_FIR_COEFFICIENT_ATT, Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT),
         NUM_PARAMS
     };
 
@@ -70,15 +69,17 @@ struct ChipS_SMP_Echo : Module {
     };
 
     /// @brief Initialize a new S-DSP Chip module.
-    ChipS_SMP_Echo() {
+    SuperEcho() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++)
-            configParam(PARAM_FIR_COEFFICIENT  + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
+        for (unsigned coeff = 0; coeff < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; coeff++) {
+            configParam(PARAM_FIR_COEFFICIENT     + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
+            configParam(PARAM_FIR_COEFFICIENT_ATT + coeff, -1.f, 1.f, 0, "FIR Coefficient " + std::to_string(coeff + 1) + " CV Attenuverter");
+        }
         configParam(PARAM_DELAY, 0, Sony_S_DSP_Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, Sony_S_DSP_Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Channel)");
-        configParam(PARAM_BYPASS, 0, 1, 0, "Bypass");
+        configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }
 
@@ -141,7 +142,8 @@ struct ChipS_SMP_Echo : Module {
         const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
         // normal the voltage forward by updating the voltage on the port
         inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
-        const float mod = std::numeric_limits<int8_t>::max() * voltage / 10.f;
+        const float att = params[PARAM_FIR_COEFFICIENT_ATT + index].getValue();
+        const float mod = att * std::numeric_limits<int8_t>::max() * voltage / 10.f;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         // get the parameter value from the knob and return the clamped parameter
@@ -174,7 +176,7 @@ struct ChipS_SMP_Echo : Module {
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline void bypassInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
+    inline void bypassChannel(const ProcessArgs &args, unsigned channel, unsigned lane) {
         // get the normal voltage from the left/right pair
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
@@ -250,8 +252,10 @@ struct ChipS_SMP_Echo : Module {
             outputs[port].setChannels(channels);
         if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
             for (unsigned channel = 0; channel < channels; channel++) {
-                for (unsigned i = 0; i < StereoSample::CHANNELS; i++)
-                    bypassInput(args, channel, i);
+                for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
+                    bypassChannel(args, channel, i);
+                    apu[channel].run(0, 0);
+                }
             }
         } else {  // process audio samples on the chip engine.
             for (unsigned channel = 0; channel < channels; channel++)
@@ -272,12 +276,12 @@ struct ChipS_SMP_Echo : Module {
 // ---------------------------------------------------------------------------
 
 /// The panel widget for SPC700.
-struct ChipS_SMP_EchoWidget : ModuleWidget {
+struct SuperEchoWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit ChipS_SMP_EchoWidget(ChipS_SMP_Echo *module) {
+    explicit SuperEchoWidget(SuperEcho *module) {
         setModule(module);
         static constexpr auto panel = "res/S-SMP-Echo-Light.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -287,40 +291,36 @@ struct ChipS_SMP_EchoWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // bypass switch
-        addParam(createParam<CKSS>(Vec(10, 10), module, ChipS_SMP_Echo::PARAM_BYPASS));
+        addParam(createParam<CKSS>(Vec(10, 10), module, SuperEcho::PARAM_BYPASS));
         for (unsigned i = 0; i < StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
-            auto echoParam = createParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, ChipS_SMP_Echo::PARAM_DELAY + i);
-            echoParam->snap = true;
-            addParam(echoParam);
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, ChipS_SMP_Echo::INPUT_DELAY + i));
+            addParam(createSnapParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, SuperEcho::PARAM_DELAY + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, SuperEcho::INPUT_DELAY + i));
             // Echo Mix
-            auto echoIdx = ChipS_SMP_Echo::PARAM_MIX + i;
+            auto echoIdx = SuperEcho::PARAM_MIX + i;
             auto echoPos = Vec(20 + 44 * i, 163);
-            Knob* echoMix;
+            ParamWidget* echoMix;
             if (i)  // i == 1 -> right lane -> red knob
-                echoMix = createParam<Rogan2PRed>(echoPos, module, echoIdx);
+                echoMix = createSnapParam<Rogan2PRed>(echoPos, module, echoIdx);
             else  // i == 0 -> left lane -> white knob
-                echoMix = createParam<Rogan2PWhite>(echoPos, module, echoIdx);
-            echoMix->snap = true;
+                echoMix = createSnapParam<Rogan2PWhite>(echoPos, module, echoIdx);
             addParam(echoMix);
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, ChipS_SMP_Echo::INPUT_MIX + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, ChipS_SMP_Echo::INPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, ChipS_SMP_Echo::VU_LIGHTS_INPUT + 3 * i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, SuperEcho::INPUT_AUDIO + i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, SuperEcho::VU_LIGHTS_INPUT + 3 * i));
             // Stereo Output Ports
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, ChipS_SMP_Echo::OUTPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, ChipS_SMP_Echo::VU_LIGHTS_OUTPUT + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperEcho::OUTPUT_AUDIO + i));
+            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, SuperEcho::VU_LIGHTS_OUTPUT + 3 * i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < Sony_S_DSP_Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, ChipS_SMP_Echo::INPUT_FIR_COEFFICIENT + i));
-            auto param = createParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, ChipS_SMP_Echo::PARAM_FIR_COEFFICIENT + i);
-            param->snap = true;
-            addParam(param);
+            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
+            addParam(createParam<Trimpot>(Vec(140, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
+            addParam(createSnapParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i));
         }
     }
 };
 
 /// the global instance of the model
-rack::Model *modelChipS_SMP_Echo = createModel<ChipS_SMP_Echo, ChipS_SMP_EchoWidget>("S_SMP_Echo");
+rack::Model *modelSuperEcho = createModel<SuperEcho, SuperEchoWidget>("SuperEcho");

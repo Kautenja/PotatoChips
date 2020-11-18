@@ -138,10 +138,10 @@
       ]
     },
     {
-      "slug": "S_SMP_Echo",
-      "name": "S-SMP(Echo)",
+      "slug": "SuperEcho",
+      "name": "Super Echo",
       "description": "An emulation of the echo effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf",
       "tags": [
         "Delay",
         "Dual",

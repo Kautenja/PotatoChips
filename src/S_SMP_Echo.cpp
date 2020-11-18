@@ -91,7 +91,7 @@ struct ChipS_SMP_Echo : Module {
     ///
     inline uint8_t getDelay(unsigned channel) {
         const float param = params[PARAM_DELAY].getValue();
-        const float cv = inputs[INPUT_DELAY].getPolyVoltage(channel) / 10.f;
+        const float cv = inputs[INPUT_DELAY].getVoltage(channel) / 10.f;
         const float mod = Sony_S_DSP_Echo::DELAY_LEVELS * cv;
         const float MAX = static_cast<float>(Sony_S_DSP_Echo::DELAY_LEVELS);
         return clamp(param + mod, 0.f, MAX);
@@ -104,7 +104,7 @@ struct ChipS_SMP_Echo : Module {
     ///
     inline int8_t getFeedback(unsigned channel) {
         const float param = params[PARAM_FEEDBACK].getValue();
-        const float cv = inputs[INPUT_FEEDBACK].getPolyVoltage(channel) / 10.f;
+        const float cv = inputs[INPUT_FEEDBACK].getVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -119,8 +119,11 @@ struct ChipS_SMP_Echo : Module {
     ///
     inline int8_t getMix(unsigned channel, unsigned lane) {
         const float param = params[PARAM_MIX + lane].getValue();
-        const float cv = inputs[INPUT_MIX + lane].getPolyVoltage(channel) / 10.f;
-        const float mod = std::numeric_limits<int8_t>::max() * cv;
+        // get the normal voltage from the left/right pair
+        const auto normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
+        const float voltage = inputs[INPUT_MIX + lane].getNormalVoltage(normal, channel);
+        // get the mod value and clamp within finite precision
+        const float mod = std::numeric_limits<int8_t>::max() * voltage / 10.f;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, MIN, MAX);
@@ -156,8 +159,12 @@ struct ChipS_SMP_Echo : Module {
     ///
     inline int16_t getInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        const auto input = inputs[INPUT_AUDIO + lane].getPolyVoltage(channel) / 5.f;
+        // get the normal voltage from the left/right pair
+        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const auto input = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel) / 5.f;
+        // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
+        // clamp the value to finite precision and scale to the integer type
         return MAX * math::clamp(input, -1.f, 1.f);
     }
 

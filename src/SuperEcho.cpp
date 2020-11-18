@@ -39,6 +39,7 @@ struct SuperEcho : Module {
         PARAM_BYPASS,
         PARAM_DELAY,
         PARAM_FEEDBACK,
+        ENUMS(PARAM_AUDIO_ATT, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(PARAM_MIX, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(PARAM_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         ENUMS(PARAM_FIR_COEFFICIENT_ATT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
@@ -77,8 +78,10 @@ struct SuperEcho : Module {
         }
         configParam(PARAM_DELAY, 0, SonyS_DSP::Echo::DELAY_LEVELS, 0, "Echo Delay", "ms", 0, SonyS_DSP::Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
-        configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Channel)");
-        configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Channel)");
+        configParam(PARAM_AUDIO_ATT + 0, 0.f, 1.f, 0.7f, "Input Attenuator (Left Lane)");
+        configParam(PARAM_AUDIO_ATT + 1, 0.f, 1.f, 0.7f, "Input Attenuator (Right Lane)");
+        configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Lane)");
+        configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Lane)");
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }
@@ -164,7 +167,8 @@ struct SuperEcho : Module {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
         // get the normal voltage from the left/right pair
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto input = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel) / 5.f;
+        const auto gain = params[PARAM_AUDIO_ATT + lane].getValue();
+        const auto input = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel) / 5.f;
         // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
         // clamp the value to finite precision and scale to the integer type
@@ -307,6 +311,7 @@ struct SuperEchoWidget : ModuleWidget {
             else  // i == 0 -> left lane -> white knob
                 echoMix = createSnapParam<Rogan2PWhite>(echoPos, module, echoIdx);
             addParam(echoMix);
+            addParam(createParam<Trimpot>(Vec(20 + 44 * i, 180), module, SuperEcho::PARAM_AUDIO_ATT + i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, SuperEcho::INPUT_AUDIO + i));

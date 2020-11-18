@@ -30,11 +30,11 @@ struct ChipS_SMP_Echo : Module {
     Sony_S_DSP_Echo apu[PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the input audio levels
-    dsp::VuMeter2 inputVUMeter[StereoSample::CHANNELS];
+    rack::dsp::VuMeter2 inputVUMeter[StereoSample::CHANNELS];
     /// a VU meter for measuring the output audio levels
-    dsp::VuMeter2 outputVUMeter[StereoSample::CHANNELS];
+    rack::dsp::VuMeter2 outputVUMeter[StereoSample::CHANNELS];
     /// a light divider for updating the LEDs every 512 processing steps
-    dsp::ClockDivider lightDivider;
+    rack::dsp::ClockDivider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -203,7 +203,7 @@ struct ChipS_SMP_Echo : Module {
     /// @param vuMeter the VU meter to get the data from
     /// @param light the light to update from the VU meter data
     ///
-    inline void setLight(dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
+    inline void setLight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
         // get the global brightness scale from -12 to 3
         auto brightness = vuMeter.getBrightness(-12, 3);
         // set the red light based on total brightness and

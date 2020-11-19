@@ -35,11 +35,11 @@
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.960248351
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 1.02813172
         },
         {
           "id": 3,
@@ -65,7 +65,7 @@
       "leftModuleId": 159,
       "rightModuleId": 156,
       "data": {
-        "filterMode": 0
+        "filterMode": 1
       },
       "pos": [
         18,
@@ -122,7 +122,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 2.42990065
         },
         {
           "id": 3,
@@ -436,14 +436,6 @@
       "inputModuleId": 152,
       "inputId": 3,
       "color": "#0c8e15"
-    },
-    {
-      "id": 99,
-      "outputModuleId": 159,
-      "outputId": 2,
-      "inputModuleId": 152,
-      "inputId": 1,
-      "color": "#c9b70e"
     }
   ]
 }

@@ -55,7 +55,9 @@ struct SuperLPG : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(LIGHTS_FILTER, 3),
+        ENUMS(LIGHT_VU_INPUT,  3 * LANES),
+        ENUMS(LIGHT_VU_OUTPUT, 3 * LANES),
+        ENUMS(LIGHTS_FILTER,   3),
         NUM_LIGHTS
     };
 
@@ -115,6 +117,11 @@ struct SuperLPG : Module {
     /// a clock divider for running LED updates slower than audio rate
     rack::dsp::ClockDivider lightDivider;
 
+    /// a VU meter for measuring the input audio levels
+    rack::dsp::VuMeter2 inputVUMeter[LANES];
+    /// a VU meter for measuring the output audio levels
+    rack::dsp::VuMeter2 outputVUMeter[LANES];
+
     /// @brief Get the input signal frequency.
     ///
     /// @param lane the processing lane to get the input signal of
@@ -150,49 +157,60 @@ struct SuperLPG : Module {
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline int8_t getInput(unsigned lane, unsigned channel) {
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        // clamp the normalized input voltage into [-1, 1]
-        const auto input = math::clamp(gain * voltage / 5.f, -1.f, 1.f);
-        // "quantize" the floating point value into an 8-bit container
-        return std::numeric_limits<int8_t>::max() * input;
-    }
-
-    /// @brief Return the clean value of the stereo input from the panel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param lane the stereo delay lane to get the input voltage for
-    /// @param channel the polyphonic channel to get the audio input for
-    /// @returns the 8-bit stereo input for the given lane
-    ///
-    inline void bypassChannel(const ProcessArgs &args, unsigned lane, unsigned channel) {
+    inline float getInput(unsigned lane, unsigned channel) {
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
         const auto input = gain * voltage;
         // process the input on the VU meter
-        // inputVUMeter[lane].process(args.sampleTime, input / 5.f);
-        // outputVUMeter[lane].process(args.sampleTime, input / 5.f);
-        outputs[OUTPUT_AUDIO + lane].setVoltage(input, channel);
+        inputVUMeter[lane].process(APP->engine->getSampleTime(), input / 5.f);
+        // "quantize" the floating point value into an 8-bit container
+        return input;
+    }
+
+    /// @brief Get the input signal.
+    ///
+    /// @param lane the processing lane to get the input signal of
+    /// @param channel the polyphony channel to get the input signal of
+    /// @returns the input signal for the given lane and polyphony channel
+    ///
+    inline int8_t getInputFinite(unsigned lane, unsigned channel) {
+        return std::numeric_limits<int8_t>::max() * math::clamp(getInput(lane, channel) / 5.f, -1.f, 1.f);
     }
 
     /// @brief Process the CV inputs for the given channel.
     ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processChannel(const ProcessArgs &args, unsigned lane, unsigned channel) {
+    inline void processChannel(unsigned lane, unsigned channel) {
         apu[lane][channel].setFrequency(getFrequency(lane, channel));
         apu[lane][channel].setFilter(3 - filterMode);
         apu[lane][channel].setVolume(getVolume(lane, channel));
-        float sample = apu[lane][channel].run(getInput(lane, channel));
-        sample = sample / (1 << 14);
-        const auto voltage = 5.f * sample * loudnessCompensation;
+        float sample = apu[lane][channel].run(getInputFinite(lane, channel));
+        sample = loudnessCompensation * sample / (1 << 14);
+        outputVUMeter[lane].process(APP->engine->getSampleTime(), sample);
+        const auto voltage = 5.f * sample;
         // clamp to a real-world realistic boundary of 8V
         outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
+    }
+
+    /// @brief Set the given VU meter light based on given VU meter.
+    ///
+    /// @param vuMeter the VU meter to get the data from
+    /// @param light the light to update from the VU meter data
+    ///
+    inline void setVULight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
+        // get the global brightness scale from -12 to 3
+        auto brightness = vuMeter.getBrightness(-12, 3);
+        // set the red light based on total brightness and
+        // brightness from 0dB to 3dB
+        (light + 0)->setBrightness(brightness * vuMeter.getBrightness(0, 3));
+        // set the red light based on inverted total brightness and
+        // brightness from -12dB to 0dB
+        (light + 1)->setBrightness((1 - brightness) * vuMeter.getBrightness(-12, 0));
+        // set the blue light to off
+        (light + 2)->setBrightness(0);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -220,16 +238,23 @@ struct SuperLPG : Module {
         }
         if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
             for (unsigned lane = 0; lane < LANES; lane++) {
-                for (unsigned channel = 0; channel < channels; channel++)
-                    bypassChannel(args, lane, channel);
+                for (unsigned channel = 0; channel < channels; channel++) {
+                    auto input = getInput(lane, channel);
+                    outputVUMeter[lane].process(args.sampleTime, input / 5.f);
+                    outputs[OUTPUT_AUDIO + lane].setVoltage(input, channel);
+                }
             }
         } else {  // process audio samples on the chip engine.
             for (unsigned lane = 0; lane < LANES; lane++) {
                 for (unsigned channel = 0; channel < channels; channel++)
-                    processChannel(args, lane, channel);
+                    processChannel(lane, channel);
             }
         }
         if (lightDivider.process()) {
+            setVULight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setVULight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setVULight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setVULight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
             // set the envelope mode light in RGB order with the color code:
             // Red   <- filterMode == 0 -> Loud
             // Green <- filterMode == 1 -> Weird
@@ -273,6 +298,7 @@ struct SuperLPGWidget : ModuleWidget {
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 15), module, SuperLPG::PARAM_FREQ + i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 30), module, SuperLPG::INPUT_VOCT + i));
             // Stereo Input Ports
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 100), module, SuperLPG::LIGHT_VU_INPUT + 3 * i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, SuperLPG::INPUT_AUDIO + i));
             // Input Gain
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, SuperLPG::PARAM_GAIN + i));
@@ -288,6 +314,7 @@ struct SuperLPGWidget : ModuleWidget {
             addParam(volume);
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, SuperLPG::INPUT_VOLUME + i));
             // Stereo Output Ports
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 310), module, SuperLPG::LIGHT_VU_OUTPUT + 3 * i));
             addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperLPG::OUTPUT_AUDIO + i));
         }
     }

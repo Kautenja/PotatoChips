@@ -300,18 +300,9 @@ struct SuperLPGWidget : ModuleWidget {
             // Stereo Input Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 100), module, SuperLPG::LIGHT_VU_INPUT + 3 * i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, SuperLPG::INPUT_AUDIO + i));
-            // Input Gain
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, SuperLPG::PARAM_GAIN + i));
             // Volume
-            auto volumeIdx = SuperLPG::PARAM_VOLUME + i;
-            auto echoPos = Vec(20 + 44 * i, 221);
-            Knob* volume;
-            if (i)  // i == 1 -> right lane -> red knob
-                volume = createParam<Rogan2PRed>(echoPos, module, volumeIdx);
-            else  // i == 0 -> left lane -> white knob
-                volume = createParam<Rogan2PWhite>(echoPos, module, volumeIdx);
-            volume->snap = true;
-            addParam(volume);
+            addParam(createSnapParam<Trimpot>(Vec(27 + 44 * i, 221), module, SuperLPG::PARAM_VOLUME + i));
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, SuperLPG::INPUT_VOLUME + i));
             // Stereo Output Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 310), module, SuperLPG::LIGHT_VU_OUTPUT + 3 * i));

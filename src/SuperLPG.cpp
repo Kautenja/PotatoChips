@@ -70,6 +70,21 @@ struct SuperLPG : Module {
     /// the Sony S-DSP sound chip emulator
     SonyS_DSP::GaussianInterpolationFilter apu[LANES][PORT_MAX_CHANNELS];
 
+    /// @brief Get the input signal frequency.
+    ///
+    /// @param lane the processing lane to get the input signal of
+    /// @param channel the polyphony channel to get the input signal of
+    /// @returns the input signal for the given lane and polyphony channel
+    ///
+    inline uint16_t getFrequency(unsigned lane, unsigned channel) {
+        float param = params[PARAM_FREQ + lane].getValue();
+        const auto normal = lane ? inputs[INPUT_VOCT + lane - 1].getVoltage(channel) : 0.f;
+        param += inputs[INPUT_VOCT + lane].getNormalVoltage(normal, channel);
+        float frequency = rack::dsp::FREQ_C4 * powf(2.0, param);
+        frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+        return SonyS_DSP::get_pitch(frequency);
+    }
+
     /// @brief Get the filter parameter for the index and polyphony channel.
     ///
     /// @param channel the polyphony channel to get the filter parameter of
@@ -79,29 +94,32 @@ struct SuperLPG : Module {
         return params[PARAM_FILTER].getValue();
     }
 
-    /// @brief Get the volume level for the given lane and polyphony channel.
+    /// @brief Get the volume level.
     ///
     /// @param lane the processing lane to get the volume level of
     /// @param channel the polyphony channel to get the volume of
     /// @returns the volume of the gate for given lane and channel
     ///
     inline int8_t getVolume(unsigned lane, unsigned channel) {
+        const auto normal = lane ? inputs[INPUT_VOLUME + lane - 1].getVoltage(channel) : 10.f;
+        const float voltage = inputs[INPUT_VOLUME + lane].getNormalVoltage(normal, channel);
+        inputs[INPUT_VOLUME + lane].setVoltage(voltage, channel);
         const auto param = params[PARAM_VOLUME + lane].getValue();
-        const auto cv = inputs[INPUT_VOLUME + lane].isConnected() ?
-            inputs[INPUT_VOLUME + lane].getVoltage(channel) / 10.f : 1.f;
-        return math::clamp(cv * param, -128.f, 127.f);
+        return math::clamp(param * voltage / 10.f, -128.f, 127.f);
     }
 
-    /// @brief Get the input signal for the given lane and polyphony channel.
+    /// @brief Get the input signal.
     ///
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline int16_t getInput(unsigned lane, unsigned channel) {
+    inline int8_t getInput(unsigned lane, unsigned channel) {
+        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        const auto cv = inputs[INPUT_AUDIO + lane].getVoltage(channel);
-        return std::numeric_limits<uint8_t>::max() * gain * cv / 10.f;
+        const auto input = math::clamp(gain * voltage / 5.f, -1.f, 1.f);
+        return std::numeric_limits<uint8_t>::max() * input;
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -121,21 +139,12 @@ struct SuperLPG : Module {
         // process audio samples on the chip engine.
         for (unsigned lane = 0; lane < LANES; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                // calculate the frequency using standard exponential scale
-                float pitch = params[PARAM_FREQ + lane].getValue();
-                pitch += inputs[INPUT_VOCT + lane].getVoltage(channel);
-                // pitch += inputs[INPUT_FM + lane].getVoltage(channel) / 5.f;
-                float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-                frequency = rack::clamp(frequency, 0.0f, 20000.0f);
-                // convert the floating point frequency to a 14-bit pitch value
-                apu[lane][channel].setFrequency(SonyS_DSP::get_pitch(frequency));
-                // set the filter mode and volume level
+                apu[lane][channel].setFrequency(getFrequency(lane, channel));
                 apu[lane][channel].setFilter(getFilter(channel));
                 apu[lane][channel].setVolume(getVolume(lane, channel));
-                // process a sample on the chip and set the output on the port
                 float sample = apu[lane][channel].run(getInput(lane, channel));
-                sample = sample / std::numeric_limits<int16_t>::max();
-                outputs[OUTPUT_AUDIO + lane].setVoltage(10.f * sample, channel);
+                sample = sample / (1 << 14);
+                outputs[OUTPUT_AUDIO + lane].setVoltage(5.f * sample, channel);
             }
         }
     }

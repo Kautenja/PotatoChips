@@ -41,23 +41,23 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
     // -----------------------------------------------------------------------
     // Byte 11,12
     // -----------------------------------------------------------------------
-    /// the volume level after the Gaussian filter
-    int16_t volume = 0;
-    // -----------------------------------------------------------------------
-    // Byte 13,14
-    // -----------------------------------------------------------------------
     /// the 14-bit frequency value
     uint16_t rate = 0;
     // -----------------------------------------------------------------------
-    // Byte 15
+    // Byte 13
+    // -----------------------------------------------------------------------
+    /// the volume level after the Gaussian filter
+    int8_t volume = 0;
+    // -----------------------------------------------------------------------
+    // Byte 14
     // -----------------------------------------------------------------------
     /// the discrete filter mode (i.e., the set of coefficients to use)
     uint8_t filter = 0;
     // -----------------------------------------------------------------------
-    // Byte 16
+    // Byte 15,16
     // -----------------------------------------------------------------------
     /// a dummy byte for byte alignment to 16-bytes
-    const uint8_t unused_spacer_for_byte_alignment;
+    const uint16_t unused_spacer_for_byte_alignment;
 
  public:
     /// the sample rate of the S-DSP in Hz
@@ -72,24 +72,24 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
     ///
     inline void setFilter(uint8_t filter) { this->filter = filter & 0x3; }
 
-    /// @brief Set the volume level of the low-pass gate to a new value.
+    /// @brief Set the volume level of the filter to a new value.
     ///
     /// @param volume the volume level after the Gaussian low-pass filter
     ///
     inline void setVolume(int8_t volume) { this->volume = volume; }
 
-    /// @brief Set the frequency of the low-pass gate to a new value.
+    /// @brief Set the frequency of the filter to a new value.
     ///
-    /// @param freq the frequency to set the low-pass gate to
+    /// @param freq the frequency to set the filter to
     ///
     inline void setFrequency(float freq) { rate = get_pitch(freq); }
 
-    /// @brief Run the Gaussian filter for the given input sample.
+    /// @brief Run the filter for the given input sample.
     ///
-    /// @param input the 16-bit PCM sample to pass through the Gaussian filter
-    /// @returns the output from the Gaussian filter system for given input
+    /// @param input the 8-bit BRR sample to pass through the filter
+    /// @returns the 14-bit output from the filter system for given input
     ///
-    int16_t run(int16_t input) {
+    int16_t run(int8_t input) {
         // -------------------------------------------------------------------
         // MARK: Filter
         // -------------------------------------------------------------------
@@ -142,7 +142,7 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
         sample = static_cast<int16_t>(2 * sample);
         sample +=    ((table2[0] * samples[0]) >> 11) & ~1;
         // apply the volume/amplitude level
-        sample = (sample  * volume) >> 7;
+        sample = (sample * volume) >> 7;
         // return the sample clipped to 16-bit PCM
         return clamp_16(sample);
     }

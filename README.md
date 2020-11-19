@@ -464,40 +464,6 @@ the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 See the [Manual][S_SMP] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Wave Creative Modulator -->
-<!-- ------------------------------------------------------------ -->
-
-## Wave Creative Modulator _(Coming Soon!)_
-
-**Wave Creative Modulator** is an emulation of the
-[Konami Sound Creative Chip (SCC)][KonamiSCC] audio processing unit.
-
-<!-- <p align="center">
-<img alt="Wave Creative Modulator" src="manual/SCC/img/Module.svg">
-</p>
-
-### Features
-
-See the [Manual][WaveCreativeModulator] for more information about the features of this module. -->
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Grafx Turbillator -->
-<!-- ------------------------------------------------------------ -->
-
-## Grafx Turbillator _(Coming Soon!)_
-
-**Grafx Turbillator** is an emulation of the [NEC TurboGrafx16][NECTurboGrafx16]
-audio processing unit.
-
-<!-- <p align="center">
-<img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/Module.svg">
-</p>
-
-### Features
-
-See the [Manual][GrafxTurbillator] for more information about the features of this module. -->
-
-<!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->
 <!-- ------------------------------------------------------------ -->
 
@@ -540,5 +506,3 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 [Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
 [PotKeys]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf
-[WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
-[GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

@@ -175,16 +175,6 @@
       ]
     },
     {
-      "slug": "SCC",
-      "name": "SCC",
-      "description": "An emulation of the Konami SCC wavetable chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SCC.pdf",
-      "tags": [
-        "Oscillator"
-      ],
-      "disabled": true
-    },
-    {
       "slug": "SN76489",
       "name": "Mega Tone",
       "description": "An emulation of the Texas Instruments SN76489 chip from the Sega Master System, Sega Mega Drive, and Sega Genesis.",
@@ -194,16 +184,6 @@
         "Oscillator",
         "Polyphonic"
       ]
-    },
-    {
-      "slug": "TURBO_GRAFX_16",
-      "name": "Turbo Grafx 16",
-      "description": "An emulation of the NEC Turbo Grafx 16 wavetable chip.",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/TURBO_GRAFX_16.pdf",
-      "tags": [
-        "Oscillator"
-      ],
-      "disabled": true
     },
     {
       "slug": "VRC6",

@@ -30,6 +30,7 @@ struct SuperLPG : Module {
         PARAM_FILTER,
         ENUMS(PARAM_GAIN, LANES),
         ENUMS(PARAM_VOLUME, LANES),
+        ENUMS(PARAM_FREQ, LANES),
         NUM_PARAMS
     };
 
@@ -38,6 +39,7 @@ struct SuperLPG : Module {
         INPUT_FILTER,
         ENUMS(INPUT_VOLUME, LANES),
         ENUMS(INPUT_AUDIO, LANES),
+        ENUMS(INPUT_VOCT, LANES),
         NUM_INPUTS
     };
 
@@ -60,6 +62,8 @@ struct SuperLPG : Module {
         configParam(PARAM_GAIN   + 1,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128,         127,          60, "Volume (Left Channel)"               );
         configParam(PARAM_VOLUME + 1, -128,         127,          60, "Volume (Right Channel)"              );
+        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Channel)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Channel)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
     }
 
  protected:
@@ -117,10 +121,18 @@ struct SuperLPG : Module {
         // process audio samples on the chip engine.
         for (unsigned lane = 0; lane < LANES; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
+                // calculate the frequency using standard exponential scale
+                float pitch = params[PARAM_FREQ + lane].getValue();
+                pitch += inputs[INPUT_VOCT + lane].getVoltage(channel);
+                // pitch += inputs[INPUT_FM + lane].getVoltage(channel) / 5.f;
+                float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
+                frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+                // convert the floating point frequency to a 14-bit pitch value
+                apu[lane][channel].setFrequency(SonyS_DSP::get_pitch(frequency));
+                // set the filter mode and volume level
                 apu[lane][channel].setFilter(getFilter(channel));
                 apu[lane][channel].setVolume(getVolume(lane, channel));
-                // TODO: frequency control
-                // apu[lane][channel].setFrequency(262);
+                // process a sample on the chip and set the output on the port
                 float sample = apu[lane][channel].run(getInput(lane, channel));
                 sample = sample / std::numeric_limits<int16_t>::max();
                 outputs[OUTPUT_AUDIO + lane].setVoltage(10.f * sample, channel);
@@ -151,9 +163,12 @@ struct SuperLPGWidget : ModuleWidget {
         filter->snap = true;
         addParam(filter);
         for (unsigned i = 0; i < SuperLPG::LANES; i++) {
+            // Frequency
+            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 15), module, SuperLPG::PARAM_FREQ + i));
+            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 30), module, SuperLPG::INPUT_VOCT + i));
             // Stereo Input Ports
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, SuperLPG::INPUT_AUDIO + i));
-            // Gain
+            // Input Gain
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, SuperLPG::PARAM_GAIN + i));
             // Volume
             auto volumeIdx = SuperLPG::PARAM_VOLUME + i;

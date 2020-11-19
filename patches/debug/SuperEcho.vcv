@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,11 +10,11 @@
       "leftModuleId": 156,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "SMSL Audio: Sanskrit 6th",
+          "driver": 1,
+          "deviceName": "hw:HDA NVidia,7",
           "offset": 0,
           "maxChannels": 8,
-          "sampleRate": 192000,
+          "sampleRate": 48000,
           "blockSize": 512
         }
       },

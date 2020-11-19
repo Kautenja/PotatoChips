@@ -10,8 +10,8 @@ jobs:
       arch: arm64
       script:
         - scons -j2 test
-      before_deploy:
-      deploy:
+      before_deploy: ~
+      deploy: ~
     - os: linux
       dist: bionic
       arch: amd64
@@ -20,8 +20,8 @@ jobs:
       arch: arm64
       script:
         - scons -j2 test
-      before_deploy:
-      deploy:
+      before_deploy: ~
+      deploy: ~
     - os: osx
       osx_image: xcode11
     - os: osx

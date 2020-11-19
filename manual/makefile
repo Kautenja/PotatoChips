@@ -49,8 +49,8 @@ mStepSaw: build
 	cp StepSaw/build/manual.pdf build/StepSaw.pdf
 
 mSSMPEcho: build
-	make -C S_SMP_Echo
-	cp S_SMP_Echo/build/manual.pdf build/S_SMP_Echo.pdf
+	make -C SuperEcho
+	cp SuperEcho/build/manual.pdf build/SuperEcho.pdf
 
 mSSMPGauss: build
 	make -C S_SMP_Gauss

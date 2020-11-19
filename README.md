@@ -404,12 +404,12 @@ namely,
     popular SNES games.
 
 <p align="center">
-<img alt="S-SMP(Echo)" src="manual/S_SMP_Echo/img/Module.svg">
+<img alt="S-SMP(Echo)" src="manual/SuperEcho/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_Echo] for more information about the features of this module.
+See the [Manual][SuperEcho] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP-Gauss -->
@@ -533,7 +533,7 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [StepSaw]: https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf
 [S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
 [S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
-[S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
+[SuperEcho]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf
 [S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf

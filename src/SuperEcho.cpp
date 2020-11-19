@@ -36,13 +36,13 @@ struct SuperEcho : Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        PARAM_BYPASS,
         PARAM_DELAY,
         PARAM_FEEDBACK,
-        ENUMS(PARAM_AUDIO_ATT, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(PARAM_MIX, SonyS_DSP::StereoSample::CHANNELS),
         ENUMS(PARAM_FIR_COEFFICIENT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         ENUMS(PARAM_FIR_COEFFICIENT_ATT, SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
+        ENUMS(PARAM_AUDIO_ATT, SonyS_DSP::StereoSample::CHANNELS),
+        PARAM_BYPASS,
         NUM_PARAMS
     };
 
@@ -184,6 +184,9 @@ struct SuperEcho : Module {
     /// @returns the 8-bit stereo input for the given lane
     ///
     inline void bypassChannel(const ProcessArgs &args, unsigned channel, unsigned lane) {
+        // update the FIR Coefficients (so the lights still respond in bypass)
+        for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
+            apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const auto att = params[PARAM_AUDIO_ATT + lane].getValue();
@@ -200,15 +203,14 @@ struct SuperEcho : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processChannel(const ProcessArgs &args, unsigned channel) {
+        // update the FIR Coefficients
+        for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
+            apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // update the delay parameters
         apu[channel].setDelay(getDelay(channel));
         apu[channel].setFeedback(getFeedback(channel));
         apu[channel].setMixLeft(getMix(channel, SonyS_DSP::StereoSample::LEFT));
         apu[channel].setMixRight(getMix(channel, SonyS_DSP::StereoSample::RIGHT));
-        // update the FIR Coefficients
-        for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
-            apu[channel].setFIR(i, getFIRCoefficient(channel, i));
-        }
         // run a stereo sample through the echo buffer + filter
         auto output = apu[channel].run(
             getInput(args, channel, SonyS_DSP::StereoSample::LEFT),

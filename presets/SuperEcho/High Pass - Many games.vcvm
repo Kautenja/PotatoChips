@@ -1,0 +1,39 @@
+{
+  "plugin": "KautenjaDSP-PotatoChips",
+  "version": "1.7.3",
+  "model": "SuperEcho",
+  "params": [
+    {
+      "id": 4,
+      "value": 88
+    },
+    {
+      "id": 5,
+      "value": -65
+    },
+    {
+      "id": 6,
+      "value": -37
+    },
+    {
+      "id": 7,
+      "value": -16
+    },
+    {
+      "id": 8,
+      "value": -2
+    },
+    {
+      "id": 9,
+      "value": 7
+    },
+    {
+      "id": 10,
+      "value": 12
+    },
+    {
+      "id": 11,
+      "value": 12
+    }
+  ]
+}

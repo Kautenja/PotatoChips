@@ -87,7 +87,7 @@
       "id": 180,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.0",
-      "model": "S_SMP_Echo",
+      "model": "SuperEcho",
       "params": [
         {
           "id": 0,

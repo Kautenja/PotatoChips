@@ -57,7 +57,7 @@ struct SuperLPG : Module {
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
     SuperLPG() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FILTER,        0,           3,           2, "Filter Coefficients"                 );
+        configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
         configParam(PARAM_GAIN   + 0,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)",  " dB", -10, 40);
         configParam(PARAM_GAIN   + 1,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128,         127,          60, "Volume (Left Channel)"               );
@@ -66,9 +66,40 @@ struct SuperLPG : Module {
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Channel)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
     }
 
+    /// @brief Respond to the module being reset by the engine.
+    inline void onReset() override { filterMode = 0; }
+
+    /// @brief Respond to the module being randomized by the engine.
+    inline void onRandomize() override { filterMode = random::u32() % 4; }
+
+    /// @brief Return a JSON representation of this module's state
+    ///
+    /// @returns a new JSON object with this object's serialized state data
+    ///
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_object_set_new(rootJ, "filterMode", json_integer(filterMode));
+        return rootJ;
+    }
+
+    /// @brief Return the object to the given serialized state.
+    ///
+    /// @returns a JSON object with object serialized state data to restore
+    ///
+    void dataFromJson(json_t* rootJ) override {
+        json_t* filterModeObject = json_object_get(rootJ, "filterMode");
+        if (filterModeObject) filterMode = json_integer_value(filterModeObject);
+    }
+
  protected:
     /// the Sony S-DSP sound chip emulator
     SonyS_DSP::GaussianInterpolationFilter apu[LANES][PORT_MAX_CHANNELS];
+
+    /// the mode the envelope generator is in
+    uint8_t filterMode = 0;
+
+    /// a trigger for handling presses to the filter mode button
+    rack::dsp::SchmittTrigger filterModeTrigger;
 
     /// @brief Get the input signal frequency.
     ///
@@ -83,15 +114,6 @@ struct SuperLPG : Module {
         float frequency = rack::dsp::FREQ_C4 * powf(2.0, param);
         frequency = rack::clamp(frequency, 0.0f, 20000.0f);
         return SonyS_DSP::get_pitch(frequency);
-    }
-
-    /// @brief Get the filter parameter for the index and polyphony channel.
-    ///
-    /// @param channel the polyphony channel to get the filter parameter of
-    /// @returns the filter parameter at given index for given channel
-    ///
-    inline uint8_t getFilter(unsigned channel) {
-        return params[PARAM_FILTER].getValue();
     }
 
     /// @brief Get the volume level.
@@ -136,11 +158,14 @@ struct SuperLPG : Module {
         // set the number of polyphony channels for output ports
         for (unsigned port = 0; port < NUM_OUTPUTS; port++)
             outputs[port].setChannels(channels);
+        // detect presses to the trigger and cycle the mode
+        if (filterModeTrigger.process(params[PARAM_FILTER].getValue()))
+            filterMode = (filterMode + 1) % 4;
         // process audio samples on the chip engine.
         for (unsigned lane = 0; lane < LANES; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
                 apu[lane][channel].setFrequency(getFrequency(lane, channel));
-                apu[lane][channel].setFilter(getFilter(channel));
+                apu[lane][channel].setFilter(3 - filterMode);
                 apu[lane][channel].setVolume(getVolume(lane, channel));
                 float sample = apu[lane][channel].run(getInput(lane, channel));
                 sample = sample / (1 << 14);
@@ -168,9 +193,7 @@ struct SuperLPGWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Filter Mode
-        Knob* filter = createParam<Rogan3PBlue>(Vec(37, 35), module, SuperLPG::PARAM_FILTER);
-        filter->snap = true;
-        addParam(filter);
+        addParam(createParam<TL1105>(Vec(45, 55), module, SuperLPG::PARAM_FILTER));
         for (unsigned i = 0; i < SuperLPG::LANES; i++) {
             // Frequency
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 15), module, SuperLPG::PARAM_FREQ + i));

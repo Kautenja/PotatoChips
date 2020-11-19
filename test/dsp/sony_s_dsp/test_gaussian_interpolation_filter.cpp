@@ -21,14 +21,14 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp/gaussian_filter.hpp"
+#include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_Gaussian
+// MARK: sizeof SonyS_DSP::GaussianInterpolationFilter
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_Gaussian should be 16 bytes") {
-    REQUIRE(16 == sizeof(Sony_S_DSP_Gaussian));
+TEST_CASE("SonyS_DSP::GaussianInterpolationFilter should be 16 bytes") {
+    REQUIRE(16 == sizeof(SonyS_DSP::GaussianInterpolationFilter));
 }

@@ -1,4 +1,4 @@
-// Test cases for the Sony S-DSP Echo emulator.
+// Test cases for the Sony S-DSP processor.
 //
 // Copyright (c) 2020 Christian Kauten
 //
@@ -21,14 +21,24 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp/echo.hpp"
+#include "dsp/sony_s_dsp/processor.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: sizeof Sony_S_DSP_Echo
+// MARK: SonyS_DSP::Processor::GlobalData
 // ---------------------------------------------------------------------------
 
-// TEST_CASE("Sony_S_DSP_Echo should be 16 bytes") {
-//     REQUIRE(16 == sizeof(Sony_S_DSP_Echo));
-// }
+TEST_CASE("SonyS_DSP::Processor::GlobalData should be the size of NUM_REGISTERS") {
+    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS == sizeof(SonyS_DSP::Processor::GlobalData));
+}
+
+// ---------------------------------------------------------------------------
+// MARK: SonyS_DSP::Processor::RawVoice
+// ---------------------------------------------------------------------------
+
+TEST_CASE("SonyS_DSP::Processor::RawVoice should be NUM_REGISTERS / VOICE_COUNT bytes") {
+    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS / SonyS_DSP::Processor::VOICE_COUNT == sizeof(SonyS_DSP::Processor::RawVoice));
+    SonyS_DSP::Processor::RawVoice voices[SonyS_DSP::Processor::VOICE_COUNT];
+    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS == sizeof(voices));
+}

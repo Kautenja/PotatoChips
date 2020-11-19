@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp/brr.hpp"
+#include "dsp/sony_s_dsp/brr_sample_player.hpp"
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
@@ -29,6 +29,6 @@
 // MARK: sizeof Sony_S_DSP_BRR
 // ---------------------------------------------------------------------------
 
-TEST_CASE("Sony_S_DSP_BRR should be 4 bytes") {
-    REQUIRE(32 == sizeof(Sony_S_DSP_BRR));
+TEST_CASE("SonyS_DSP::BRR_SamplePlayer should be 4 bytes") {
+    REQUIRE(32 == sizeof(SonyS_DSP::BRR_SamplePlayer));
 }

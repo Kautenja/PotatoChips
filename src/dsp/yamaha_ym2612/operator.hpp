@@ -628,6 +628,6 @@ struct Operator {
     }
 };
 
-}; // namespace YamahaYM2612
+} // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_OPERATOR_HPP_

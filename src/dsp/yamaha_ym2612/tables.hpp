@@ -491,6 +491,6 @@ class Tables {
     }
 };
 
-};  // namespace YamahaYM2612
+}  // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_TABLES_HPP_

@@ -34,6 +34,7 @@ struct SuperLPG : Module {
         ENUMS(PARAM_GAIN, LANES),
         ENUMS(PARAM_VOLUME, LANES),
         ENUMS(PARAM_FREQ, LANES),
+        PARAM_BYPASS,
         NUM_PARAMS
     };
 
@@ -68,6 +69,7 @@ struct SuperLPG : Module {
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Channel)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Channel)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }
 
@@ -158,6 +160,41 @@ struct SuperLPG : Module {
         return std::numeric_limits<int8_t>::max() * input;
     }
 
+    /// @brief Return the clean value of the stereo input from the panel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param lane the stereo delay lane to get the input voltage for
+    /// @param channel the polyphonic channel to get the audio input for
+    /// @returns the 8-bit stereo input for the given lane
+    ///
+    inline void bypassChannel(const ProcessArgs &args, unsigned lane, unsigned channel) {
+        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
+        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const auto input = gain * voltage;
+        // process the input on the VU meter
+        // inputVUMeter[lane].process(args.sampleTime, input / 5.f);
+        // outputVUMeter[lane].process(args.sampleTime, input / 5.f);
+        outputs[OUTPUT_AUDIO + lane].setVoltage(input, channel);
+    }
+
+    /// @brief Process the CV inputs for the given channel.
+    ///
+    /// @param args the sample arguments (sample rate, sample time, etc.)
+    /// @param lane the processing lane to get the input signal of
+    /// @param channel the polyphonic channel to process the CV inputs to
+    ///
+    inline void processChannel(const ProcessArgs &args, unsigned lane, unsigned channel) {
+        apu[lane][channel].setFrequency(getFrequency(lane, channel));
+        apu[lane][channel].setFilter(3 - filterMode);
+        apu[lane][channel].setVolume(getVolume(lane, channel));
+        float sample = apu[lane][channel].run(getInput(lane, channel));
+        sample = sample / (1 << 14);
+        const auto voltage = 5.f * sample * loudnessCompensation;
+        // clamp to a real-world realistic boundary of 8V
+        outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
+    }
+
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -181,17 +218,15 @@ struct SuperLPG : Module {
             // this has the effect of making low modes get more compensation.
             loudnessCompensation = pow(2, filterMode);
         }
-        // process audio samples on the chip engine.
-        for (unsigned lane = 0; lane < LANES; lane++) {
-            for (unsigned channel = 0; channel < channels; channel++) {
-                apu[lane][channel].setFrequency(getFrequency(lane, channel));
-                apu[lane][channel].setFilter(3 - filterMode);
-                apu[lane][channel].setVolume(getVolume(lane, channel));
-                float sample = apu[lane][channel].run(getInput(lane, channel));
-                sample = sample / (1 << 14);
-                const auto voltage = 5.f * sample * loudnessCompensation;
-                // clamp to a real-world realistic boundary of 8V
-                outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
+        if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
+            for (unsigned lane = 0; lane < LANES; lane++) {
+                for (unsigned channel = 0; channel < channels; channel++)
+                    bypassChannel(args, lane, channel);
+            }
+        } else {  // process audio samples on the chip engine.
+            for (unsigned lane = 0; lane < LANES; lane++) {
+                for (unsigned channel = 0; channel < channels; channel++)
+                    processChannel(args, lane, channel);
             }
         }
         if (lightDivider.process()) {
@@ -228,6 +263,8 @@ struct SuperLPGWidget : ModuleWidget {
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        // Bypass
+        addParam(createParam<CKSS>(Vec(15, 25), module, SuperLPG::PARAM_BYPASS));
         // Filter Mode
         addParam(createParam<TL1105>(Vec(45, 55), module, SuperLPG::PARAM_FILTER));
         addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(45, 70), module, SuperLPG::LIGHTS_FILTER));

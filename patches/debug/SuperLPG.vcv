@@ -56,6 +56,10 @@
         {
           "id": 6,
           "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
         }
       ],
       "leftModuleId": 159,
@@ -432,6 +436,14 @@
       "inputModuleId": 152,
       "inputId": 3,
       "color": "#0c8e15"
+    },
+    {
+      "id": 99,
+      "outputModuleId": 159,
+      "outputId": 2,
+      "inputModuleId": 152,
+      "inputId": 1,
+      "color": "#c9b70e"
     }
   ]
 }

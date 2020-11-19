@@ -43,6 +43,4 @@ void init(Plugin* instance) {
     instance->addModel(modelSuperADSR);
     instance->addModel(modelSuperSampler);
     instance->addModel(modelSuperLPG);
-    instance->addModel(modelChipSCC);
-    instance->addModel(modelChipTurboGrafx16);
 }

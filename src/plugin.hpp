@@ -50,7 +50,5 @@ extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperSampler;
 extern rack::Model *modelSuperLPG;
-extern rack::Model *modelChipSCC;
-extern rack::Model *modelChipTurboGrafx16;
 
 #endif  // PLUGIN_HPP

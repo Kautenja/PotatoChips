@@ -58,10 +58,10 @@ struct SuperLPG : Module {
     SuperLPG() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
-        configParam(PARAM_GAIN   + 0,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)",  " dB", -10, 40);
-        configParam(PARAM_GAIN   + 1,  0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
-        configParam(PARAM_VOLUME + 0, -128,         127,          60, "Volume (Left Channel)"               );
-        configParam(PARAM_VOLUME + 1, -128,         127,          60, "Volume (Right Channel)"              );
+        configParam(PARAM_GAIN   + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)",  " dB", -10, 40);
+        configParam(PARAM_GAIN   + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
+        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");
+        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Channel)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Channel)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
     }

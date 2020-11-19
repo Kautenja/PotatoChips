@@ -16,9 +16,6 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 
-// TODO: mix / VCA CV attenuverter
-// TODO: loudness compensation for filter modes?
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -57,6 +54,7 @@ struct SuperLPG : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
+        ENUMS(LIGHTS_FILTER, 3),
         NUM_LIGHTS
     };
 
@@ -70,6 +68,7 @@ struct SuperLPG : Module {
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Channel)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Channel)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        lightDivider.setDivision(512);
     }
 
     /// @brief Respond to the module being reset by the engine.
@@ -110,6 +109,9 @@ struct SuperLPG : Module {
 
     /// a trigger for handling presses to the filter mode button
     rack::dsp::SchmittTrigger filterModeTrigger;
+
+    /// a clock divider for running LED updates slower than audio rate
+    rack::dsp::ClockDivider lightDivider;
 
     /// @brief Get the input signal frequency.
     ///
@@ -192,6 +194,20 @@ struct SuperLPG : Module {
                 outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
             }
         }
+        if (lightDivider.process()) {
+            // set the envelope mode light in RGB order with the color code:
+            // Red   <- filterMode == 0 -> Loud
+            // Green <- filterMode == 1 -> Weird
+            // Blue  <- filterMode == 2 -> Quiet
+            // Black <- filterMode == 3 -> Barely Audible
+            auto deltaTime = args.sampleTime * lightDivider.getDivision();
+            bool red = filterMode == 0;
+            lights[LIGHTS_FILTER + 0].setSmoothBrightness(red, deltaTime);
+            bool green = filterMode == 1;
+            lights[LIGHTS_FILTER + 1].setSmoothBrightness(green, deltaTime);
+            bool blue = filterMode == 2;
+            lights[LIGHTS_FILTER + 2].setSmoothBrightness(blue, deltaTime);
+        }
     }
 };
 
@@ -214,6 +230,7 @@ struct SuperLPGWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Filter Mode
         addParam(createParam<TL1105>(Vec(45, 55), module, SuperLPG::PARAM_FILTER));
+        addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(45, 70), module, SuperLPG::LIGHTS_FILTER));
         for (unsigned i = 0; i < SuperLPG::LANES; i++) {
             // Frequency
             addParam(createParam<Trimpot>(Vec(27 + 44 * i, 15), module, SuperLPG::PARAM_FREQ + i));

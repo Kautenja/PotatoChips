@@ -64,8 +64,9 @@ struct SuperEcho : Module {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(VU_LIGHTS_INPUT,  3 * SonyS_DSP::StereoSample::CHANNELS),
-        ENUMS(VU_LIGHTS_OUTPUT, 3 * SonyS_DSP::StereoSample::CHANNELS),
+        ENUMS(LIGHT_VU_INPUT,        3 * SonyS_DSP::StereoSample::CHANNELS),
+        ENUMS(LIGHT_VU_OUTPUT,       3 * SonyS_DSP::StereoSample::CHANNELS),
+        ENUMS(LIGHT_FIR_COEFFICIENT, 3 * SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT),
         NUM_LIGHTS
     };
 
@@ -270,10 +271,10 @@ struct SuperEcho : Module {
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
-            setLight(inputVUMeter[0], &lights[VU_LIGHTS_INPUT]);
-            setLight(inputVUMeter[1], &lights[VU_LIGHTS_INPUT + 3]);
-            setLight(outputVUMeter[0], &lights[VU_LIGHTS_OUTPUT]);
-            setLight(outputVUMeter[1], &lights[VU_LIGHTS_OUTPUT + 3]);
+            setLight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setLight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setLight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setLight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
         }
     }
 };
@@ -307,18 +308,20 @@ struct SuperEchoWidget : ModuleWidget {
             addParam(createSnapParam<Trimpot>(Vec(13 + 44 * i, 163), module, SuperEcho::PARAM_MIX + i));
             addInput(createInput<PJ301MPort>(Vec(10 + 44 * i, 198), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 236), module, SuperEcho::VU_LIGHTS_INPUT + 3 * i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 236), module, SuperEcho::LIGHT_VU_INPUT + 3 * i));
             addInput(createInput<PJ301MPort>(Vec(10 + 44 * i, 243), module, SuperEcho::INPUT_AUDIO + i));
             addParam(createParam<Trimpot>(Vec(13 + 44 * i, 278), module, SuperEcho::PARAM_AUDIO_ATT + i));
             // Stereo Output Ports
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 311), module, SuperEcho::VU_LIGHTS_OUTPUT + 3 * i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 311), module, SuperEcho::LIGHT_VU_OUTPUT + 3 * i));
             addOutput(createOutput<PJ301MPort>(Vec(10 + 44 * i, 323), module, SuperEcho::OUTPUT_AUDIO + i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
             addInput(createInput<PJ301MPort>(Vec(91, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
             addParam(createParam<Trimpot>(Vec(124, 30 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
-            addParam(createSnapParam<Rogan1PGreen>(Vec(154, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i));
+            auto param = createLightParam<LEDLightSliderHorizontal<RedGreenBlueLight>>(Vec(154, 29 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i, SuperEcho::LIGHT_FIR_COEFFICIENT + 3 * i);
+            param->snap = true;
+            addParam(param);
         }
     }
 };

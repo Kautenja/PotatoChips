@@ -486,19 +486,19 @@
       "color": "#0c8e15"
     },
     {
-      "id": 166,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 152,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
       "id": 167,
       "outputModuleId": 160,
       "outputId": 0,
       "inputModuleId": 152,
       "inputId": 6,
+      "color": "#c91847"
+    },
+    {
+      "id": 166,
+      "outputModuleId": 159,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 0,
       "color": "#c91847"
     }
   ]

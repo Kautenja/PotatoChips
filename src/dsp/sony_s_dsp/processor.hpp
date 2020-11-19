@@ -801,6 +801,6 @@ class Processor {
     }
 };
 
-};  // namespace SonyS_DSP
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_HPP_

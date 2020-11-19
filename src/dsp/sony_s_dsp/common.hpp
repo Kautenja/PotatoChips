@@ -211,6 +211,6 @@ struct __attribute__((packed, aligned(4))) StereoSample {
     int16_t samples[CHANNELS] = {0, 0};
 };
 
-};  // namespace SonyS_DSP
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_COMMON_HPP_

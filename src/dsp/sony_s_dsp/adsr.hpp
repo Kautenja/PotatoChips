@@ -193,6 +193,6 @@ class __attribute__((packed, aligned(8))) ADSR {
     }
 };
 
-};  // namespace SonyS_DSP
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

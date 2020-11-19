@@ -148,6 +148,6 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
     }
 };
 
-};  // namespace SonyS_DSP
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_

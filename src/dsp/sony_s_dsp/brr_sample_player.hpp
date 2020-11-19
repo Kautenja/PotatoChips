@@ -336,6 +336,6 @@ class __attribute__((packed, aligned(32))) BRR_SamplePlayer {
     }
 };
 
-};  // namespace SonyS_DSP
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_BRR_SAMPLE_PLAYER_HPP_

@@ -21,7 +21,7 @@
 // ---------------------------------------------------------------------------
 
 /// A low-pass gate module based on the S-SMP chip from Nintendo SNES.
-struct SuperLPG : Module {
+struct SuperVCA : Module {
     /// the number of processing lanes on the module
     static constexpr unsigned LANES = 2;
 
@@ -62,13 +62,13 @@ struct SuperLPG : Module {
     };
 
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
-    SuperLPG() {
+    SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
         configParam(PARAM_GAIN + 0, 0, M_SQRT2, 1, "Input Gain (Left Lane)", " dB", -10, 40);
         configParam(PARAM_GAIN + 1, 0, M_SQRT2, 1, "Input Gain (Right Lane)", " dB", -10, 40);
-        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Lane)");
-        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Lane)");
+        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left Lane)");
+        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right Lane)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
@@ -276,48 +276,48 @@ struct SuperLPG : Module {
 // ---------------------------------------------------------------------------
 
 /// @brief The panel widget for S-SMP-Gauss.
-struct SuperLPGWidget : ModuleWidget {
+struct SuperVCAWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit SuperLPGWidget(SuperLPG *module) {
+    explicit SuperVCAWidget(SuperVCA *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Gauss-Light.svg";
+        static constexpr auto panel = "res/SuperVCA.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Bypass
-        addParam(createParam<CKSS>(Vec(15, 25), module, SuperLPG::PARAM_BYPASS));
+        addParam(createParam<CKSS>(Vec(15, 32), module, SuperVCA::PARAM_BYPASS));
         // Filter Mode
-        addParam(createParam<TL1105>(Vec(45, 55), module, SuperLPG::PARAM_FILTER));
-        addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(45, 70), module, SuperLPG::LIGHTS_FILTER));
-        for (unsigned i = 0; i < SuperLPG::LANES; i++) {
+        addParam(createParam<TL1105>(Vec(49, 32), module, SuperVCA::PARAM_FILTER));
+        addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(67, 44), module, SuperVCA::LIGHTS_FILTER));
+        for (unsigned i = 0; i < SuperVCA::LANES; i++) {
             // Frequency
-            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 15), module, SuperLPG::PARAM_FREQ + i));
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 30), module, SuperLPG::INPUT_VOCT + i));
-            // Stereo Input Ports
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 100), module, SuperLPG::LIGHT_VU_INPUT + 3 * i));
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 117), module, SuperLPG::INPUT_AUDIO + i));
-            addParam(createParam<Trimpot>(Vec(27 + 44 * i, 165), module, SuperLPG::PARAM_GAIN + i));
+            addParam(createParam<Trimpot>(Vec(15 + 39 * i, 77), module, SuperVCA::PARAM_FREQ + i));
+            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 114), module, SuperVCA::INPUT_VOCT + i));
             // Volume
-            addParam(createSnapParam<Trimpot>(Vec(27 + 44 * i, 221), module, SuperLPG::PARAM_VOLUME + i));
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, SuperLPG::INPUT_VOLUME + i));
+            addParam(createSnapParam<Trimpot>(Vec(15 + 39 * i, 163), module, SuperVCA::PARAM_VOLUME + i));
+            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 200), module, SuperVCA::INPUT_VOLUME + i));
+            // Stereo Input Ports
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(5 + 39 * i, 236), module, SuperVCA::LIGHT_VU_INPUT + 3 * i));
+            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 243), module, SuperVCA::INPUT_AUDIO + i));
+            addParam(createParam<Trimpot>(Vec(15 + 39 * i, 278), module, SuperVCA::PARAM_GAIN + i));
             // Stereo Output Ports
-            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(15 + 44 * i, 310), module, SuperLPG::LIGHT_VU_OUTPUT + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperLPG::OUTPUT_AUDIO + i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(5 + 39 * i, 311), module, SuperVCA::LIGHT_VU_OUTPUT + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(12 + 39 * i, 323), module, SuperVCA::OUTPUT_AUDIO + i));
         }
     }
 
     void appendContextMenu(Menu* menu) override {
         // get a pointer to the module
-        SuperLPG* const module = dynamic_cast<SuperLPG*>(this->module);
+        SuperVCA* const module = dynamic_cast<SuperVCA*>(this->module);
 
         /// a structure for holding changes to the model items
         struct FilterModeItem : MenuItem {
             /// the module to update
-            SuperLPG* module;
+            SuperVCA* module;
 
             /// the currently selected envelope mode
             int filterMode;
@@ -345,4 +345,4 @@ struct SuperLPGWidget : ModuleWidget {
 };
 
 /// the global instance of the model
-rack::Model *modelSuperLPG = createModel<SuperLPG, SuperLPGWidget>("SuperLPG");
+rack::Model *modelSuperVCA = createModel<SuperVCA, SuperVCAWidget>("SuperVCA");

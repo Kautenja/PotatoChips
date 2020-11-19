@@ -49,6 +49,6 @@ extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperSampler;
-extern rack::Model *modelSuperLPG;
+extern rack::Model *modelSuperVCA;
 
 #endif  // PLUGIN_HPP

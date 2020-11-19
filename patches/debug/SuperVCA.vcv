@@ -27,7 +27,7 @@
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.3",
-      "model": "SuperLPG",
+      "model": "SuperVCA",
       "params": [
         {
           "id": 0,

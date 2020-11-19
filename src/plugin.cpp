@@ -42,5 +42,5 @@ void init(Plugin* instance) {
     instance->addModel(modelSuperEcho);
     instance->addModel(modelSuperADSR);
     instance->addModel(modelSuperSampler);
-    instance->addModel(modelSuperLPG);
+    instance->addModel(modelSuperVCA);
 }

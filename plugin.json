@@ -153,10 +153,10 @@
       ]
     },
     {
-      "slug": "SuperLPG",
+      "slug": "SuperVCA",
       "name": "Super Low-Pass Gate",
       "description": "An emulation of the Gaussian low-pass filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperLPG.pdf",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf",
       "tags": [
         "Dual",
         "Filter",

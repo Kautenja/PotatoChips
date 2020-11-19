@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        58,
+        56,
         0
       ]
     },
@@ -151,7 +151,7 @@
       "params": [
         {
           "id": 0,
-          "value": 24.0
+          "value": 20.0
         },
         {
           "id": 1,
@@ -245,7 +245,7 @@
       "leftModuleId": 177,
       "rightModuleId": 1,
       "pos": [
-        42,
+        40,
         0
       ]
     },
@@ -253,7 +253,7 @@
       "id": 177,
       "plugin": "KautenjaDSP-PotatoChips",
       "version": "1.8.3",
-      "model": "SuperLPG",
+      "model": "SuperVCA",
       "params": [
         {
           "id": 0,
@@ -261,11 +261,11 @@
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 0.707945764
         },
         {
           "id": 3,

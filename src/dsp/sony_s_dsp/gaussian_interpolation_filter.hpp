@@ -18,6 +18,7 @@
 #ifndef DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_
 #define DSP_SONY_S_DSP_GAUSSIAN_INTERPOLATION_FILTER_HPP_
 
+#include <string>
 #include "common.hpp"
 
 /// @brief Emulations of components from the Sony S-DSP chip

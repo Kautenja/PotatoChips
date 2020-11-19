@@ -269,12 +269,33 @@ struct SuperEcho : Module {
             for (unsigned channel = 0; channel < channels; channel++)
                 processChannel(args, channel);
         }
-        // process the lights based on the VU meter readings
-        if (lightDivider.process()) {
+        if (lightDivider.process()) {  // update the LEDs on the panel
             setLight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
             setLight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
             setLight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
             setLight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
+            // CV indicators for the FIR filter
+            const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            for (unsigned param = 0; param < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; param++) {
+                // get the scaled CV (it's already normalled)
+                float value = 0.f;
+                if (channels > 1) {  // polyphonic (average)
+                    for (unsigned c = 0; c < channels; c++)
+                        value += inputs[INPUT_FIR_COEFFICIENT + param].getVoltage(c);
+                    value = params[PARAM_FIR_COEFFICIENT_ATT + param].getValue() * value / channels;
+                } else {  // monophonic
+                    value = inputs[INPUT_FIR_COEFFICIENT + param].getVoltage() * params[PARAM_FIR_COEFFICIENT_ATT + param].getValue();
+                }
+                if (value > 0) {  // green for positive voltage
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
+                } else {  // red for negative voltage
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
+                }
+            }
         }
     }
 };

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="32px" viewBox="0 0 128 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>Envelope/AttackMax</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Envelope/AttackMax" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Triangle" fill="#D8D8D8" points="23 6 23 26 3 26"></polygon>
+        <rect id="Rectangle" fill="#D8D8D8" x="23" y="6" width="20" height="20"></rect>
+        <rect id="Rectangle-Copy" fill="#D8D8D8" x="43" y="6" width="20" height="20"></rect>
+        <rect id="Rectangle-Copy-2" fill="#D8D8D8" x="63" y="6" width="20" height="20"></rect>
+        <rect id="Rectangle-Copy-3" fill="#D8D8D8" x="83" y="6" width="20" height="20"></rect>
+        <rect id="Rectangle-Copy-4" fill="#D8D8D8" x="103" y="6" width="20" height="20"></rect>
+    </g>
+</svg>

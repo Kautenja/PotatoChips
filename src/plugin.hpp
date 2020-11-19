@@ -1,8 +1,6 @@
 // The NES Oscillators VCVRack plugin.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +14,7 @@
 //
 
 #include "rack.hpp"
+#include "components.hpp"
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
@@ -27,29 +26,31 @@ static constexpr uint32_t CLOCK_RATE = 768000;
 
 /// the global instance of the plug-in
 extern rack::Plugin* plugin_instance;
-// the global instance of each the 2A03 module
-extern rack::Model *modelChip2A03;
-// the global instance of each the VRC6 module
-extern rack::Model *modelChipVRC6;
-// the global instance of each the FME7 module
-extern rack::Model *modelChipFME7;
-// the global instance of each the 106 module
-extern rack::Model *modelChip106;
-// the global instance of each the SN76489 module
-extern rack::Model *modelChipSN76489;
-// the global instance of each the GBS module
-extern rack::Model *modelChipGBS;
-// the global instance of each the TurboGrafx16 module
-extern rack::Model *modelChipTurboGrafx16;
-// the global instance of each the SCC module
+
+// pointers to each module in the plug-in
+
+// current releases
+extern rack::Model *modelJairasullator;
+extern rack::Model *modelInfiniteStairs;
+extern rack::Model *modelPotKeys;
+extern rack::Model *modelStepSaw;
+extern rack::Model *modelPulses;
+extern rack::Model *modelNameCorpOctalWaveGenerator;
+extern rack::Model *modelPalletTownWavesSystem;
+extern rack::Model *modelMegaTone;
+extern rack::Model *modelBossFight;
+
+// blanks
+extern rack::Model *modelChipS_SMP_Blank1;
+extern rack::Model *modelBossFight_Blank1;
+
+// beta versions / WIPs
+extern rack::Model *modelChipS_SMP;
+extern rack::Model *modelChipS_SMP_ADSR;
+extern rack::Model *modelChipS_SMP_BRR;
+extern rack::Model *modelChipS_SMP_Echo;
+extern rack::Model *modelChipS_SMP_Gauss;
 extern rack::Model *modelChipSCC;
-// the global instance of each the AY-3-8910 module
-extern rack::Model *modelChipAY_3_8910;
-// the global instance of each the POKEY module
-extern rack::Model *modelChipPOKEY;
-// the global instance of each the 2413 module
-extern rack::Model *modelChip2413;
-// the global instance of each the 2612 module
-extern rack::Model *modelChip2612;
+extern rack::Model *modelChipTurboGrafx16;
 
 #endif  // PLUGIN_HPP

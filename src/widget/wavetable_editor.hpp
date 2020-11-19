@@ -15,20 +15,64 @@
 
 #include "rack.hpp"
 #include <cstdint>
+#include <algorithm>
 
 #ifndef WIDGETS_WAVETABLE_EDITOR_HPP_
 #define WIDGETS_WAVETABLE_EDITOR_HPP_
+
+/// @brief An action for an update to a wavetable.
+template<typename Wavetable>
+struct WaveTableAction : rack::history::Action {
+ private:
+    /// the vector containing the waveform
+    Wavetable* const waveform;
+    /// the length of the wave-table to edit
+    const uint32_t length;
+    /// the waveform before the edit
+    Wavetable* before;
+    /// the waveform after the edit
+    Wavetable* after;
+
+ public:
+    /// @brief Initialize a new wavetable update action.
+    explicit WaveTableAction(Wavetable* waveform_, uint32_t length_) :
+        rack::history::Action(),
+        waveform(waveform_),
+        length(length_) {
+        name = "KautenjaDSP WaveTableEditorAction";
+        before = new Wavetable[length];
+        after = new Wavetable[length];
+    }
+
+    /// @brief Delete the action.
+    ~WaveTableAction() { delete[] before; delete[] after; }
+
+    /// @brief copy the waveform into the before buffer.
+    inline void copy_before() { std::copy(waveform, waveform + length, before); }
+
+    /// @brief copy the waveform into the after buffer.
+    inline void copy_after() { std::copy(waveform, waveform + length, after); }
+
+    /// @brief Return true if the action is a commit-able update.
+    inline bool is_diff() { return std::memcmp(before, after, length); }
+
+    /// @brief De-commit the action.
+    inline void undo() final { std::copy(before, before + length, waveform); }
+
+    /// @brief Commit the action.
+    inline void redo() final { std::copy(after, after + length, waveform); }
+};
 
 /// A widget that displays / edits a wave-table.
 template<typename Wavetable>
 struct WaveTableEditor : rack::LightWidget {
  private:
     /// the vector containing the waveform
-    Wavetable* waveform;
+    Wavetable* const waveform;
     /// the length of the wave-table to edit
-    uint32_t length;
+    const uint32_t length;
     /// the bit depth of the waveform
-    uint64_t bit_depth;
+    const uint64_t bit_depth;
     /// the fill color for the widget
     NVGcolor fill;
     /// the background color for the widget
@@ -38,12 +82,16 @@ struct WaveTableEditor : rack::LightWidget {
     /// the state of the drag operation
     struct {
         /// whether a drag is currently active
+        bool is_pressed = false;
+        /// whether a drag is currently active
         bool is_active = false;
         /// whether the drag operation is being modified
         bool is_modified = false;
         /// the current position of the mouse pointer during the drag
         rack::Vec position = {0, 0};
     } drag_state;
+    /// the active action to commit to history
+    WaveTableAction<Wavetable>* action = nullptr;
 
  public:
     /// @brief Initialize a new wave-table editor widget.
@@ -78,6 +126,9 @@ struct WaveTableEditor : rack::LightWidget {
         setSize(size);
     }
 
+    /// @brief Delete the wavetable editor.
+    ~WaveTableEditor() { if (action != nullptr) delete action; }
+
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {
         // consume the event to prevent it from propagating
@@ -87,9 +138,10 @@ struct WaveTableEditor : rack::LightWidget {
         drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
         if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {  // right click event
             // TODO: show menu with basic waveforms
+            return;
         }
         // return if the drag operation is not active
-        if (!drag_state.is_active) return;
+        if (e.button != GLFW_MOUSE_BUTTON_LEFT) return;
         // set the position of the drag operation to the position of the mouse
         drag_state.position = e.pos;
         // calculate the normalized x position in [0, 1]
@@ -103,8 +155,18 @@ struct WaveTableEditor : rack::LightWidget {
         y = rack::math::clamp(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
-        // update the waveform
-        waveform[index] = value;
+        // if the action is a press copy the waveform before updating
+        if (e.action == GLFW_PRESS) {
+            drag_state.is_pressed = true;
+            action = new WaveTableAction<Wavetable>(waveform, length);
+            action->copy_before();
+        }
+        // update the waveform, we need to check if the button is pressed
+        // this could be a mouse up event from a click that started somewhere
+        // else
+        if (drag_state.is_pressed) {
+            waveform[index] = value;
+        }
     }
 
     /// Respond to drag move event on this widget.
@@ -112,7 +174,7 @@ struct WaveTableEditor : rack::LightWidget {
         // consume the event to prevent it from propagating
         e.consume(this);
         // if the drag operation is not active, return early
-        if (!drag_state.is_active) return;
+        if (!(drag_state.is_active && drag_state.is_pressed)) return;
         // update the drag state based on the change in position from the mouse
         uint32_t index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
@@ -128,6 +190,27 @@ struct WaveTableEditor : rack::LightWidget {
             (index ^= next_index), (next_index ^= index), (index ^= next_index);
         // update the waveform (use memset for SIMD; opposed to a loop)
         memset(waveform + index, value, next_index - index);
+    }
+
+    /// @brief Respond to drag end event on this widget.
+    /// @details
+    /// This allows detection of mouse-up events that occur both inside and
+    /// outside the widget to push the update onto the undo/redo history.
+    ///
+    void onDragEnd(const rack::event::DragEnd &e) override {
+        // consume the event to prevent it from propagating
+        e.consume(this);
+        if (!drag_state.is_pressed) return;
+        // disable the drag state and commit the action
+        drag_state.is_pressed = false;
+        action->copy_after();
+        if (action->is_diff()) {  // the action has a change
+            // add the action to the global undo/redo history
+            APP->history->push(action);
+            // clear the pointer to the action since it's no longer delegated
+            // to this wavetable editor
+            action = nullptr;
+        }
     }
 
     /// @brief Draw the display on the main context.

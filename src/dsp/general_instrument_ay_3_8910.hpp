@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-//
 
 #ifndef DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
 #define DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_
@@ -33,20 +31,50 @@ class GeneralInstrumentAy_3_8910 {
  public:
     /// the number of oscillators on the chip
     static constexpr unsigned OSC_COUNT = 3;
-    /// the first address of the RAM space
-    static constexpr uint16_t ADDR_START = 0;
-    /// the last address of the RAM space
-    static constexpr uint16_t ADDR_END   = 16;
-    /// the number of registers on the chip
-    static constexpr uint16_t NUM_REGISTERS = ADDR_END - ADDR_START;
 
     /// the indexes of the channels on the chip
     enum Channel {
-        PULSE0,
-        PULSE1,
-        PULSE2
+        PULSE0 = 0,
+        PULSE1 = 1,
+        PULSE2 = 2
     };
 
+    /// symbolic flags for enabling channels using the mixer register
+    enum ChannelEnable {
+        /// turn on all channels
+        ALL_ON      = 0b00000000,
+        /// turn off channel A tone
+        TONE_A_OFF  = 0b00000001,
+        /// turn off channel B tone
+        TONE_B_OFF  = 0b00000010,
+        /// turn off channel C tone
+        TONE_C_OFF  = 0b00000100,
+        /// turn off channel A noise
+        NOISE_A_OFF = 0b00001000,
+        /// turn off channel B noise
+        NOISE_B_OFF = 0b00010000,
+        /// turn off channel C noise
+        NOISE_C_OFF = 0b00100000,
+    };
+
+    /// symbolic flags for the ENVELOPE_SHAPE register
+    enum EnvelopeShape {
+        /// the bit mask to enable envelope hold function
+        HOLD      = 0b0001,
+        /// the bit mask to enable envelope alternate function
+        ALTERNATE = 0b0010,
+        /// the bit mask to enable envelope attack function
+        ATTACK    = 0b0100,
+        /// the bit mask to enable envelope continue function
+        CONTINUE  = 0b1000,
+    };
+
+ private:
+    // TODO: remove
+    /// the number of registers on the chip
+    static constexpr uint16_t NUM_REGISTERS = 16;
+
+    // TODO: remove
     /// the registers on the chip
     enum Register : uint16_t {
         /// the low 8 bits of the 12 bit frequency for channel A
@@ -77,51 +105,31 @@ class GeneralInstrumentAy_3_8910 {
         PERIOD_ENVELOPE_HI,
         /// the shape of the envelope
         ENVELOPE_SHAPE,
-        // IO_PORT_A,  // unused
-        // IO_PORT_B   // unused
     };
 
-    /// @brief the flag bit for turning on the envelope for a channel's
-    /// VOLUME_CH_# register
-    static constexpr int PERIOD_CH_ENVELOPE_ON = 0b00010000;
-
-    /// symbolic flags for enabling channels using the mixer register
-    enum ChannelEnableFlag {
-        /// turn on all channels
-        CHANNEL_ENABLE_ALL_ON      = 0b00000000,
-        /// turn off channel A tone
-        CHANNEL_ENABLE_TONE_A_OFF  = 0b00000001,
-        /// turn off channel B tone
-        CHANNEL_ENABLE_TONE_B_OFF  = 0b00000010,
-        /// turn off channel C tone
-        CHANNEL_ENABLE_TONE_C_OFF  = 0b00000100,
-        /// turn off channel A noise
-        CHANNEL_ENABLE_NOISE_A_OFF = 0b00001000,
-        /// turn off channel B noise
-        CHANNEL_ENABLE_NOISE_B_OFF = 0b00010000,
-        /// turn off channel C noise
-        CHANNEL_ENABLE_NOISE_C_OFF = 0b00100000,
-        // CHANNEL_ENABLE_PORT_A_OFF  = 0b01000000,  // unused
-        // CHANNEL_ENABLE_PORT_B_OFF  = 0b10000000   // unused
-    };
-
-    /// symbolic flags for the ENVELOPE_SHAPE register
-    enum EnvelopeShapeFlag {
-        /// no envelope shape
-        ENVELOPE_SHAPE_NONE      = 0b0000,
-        /// TODO:
-        ENVELOPE_SHAPE_HOLD      = 0b0001,
-        /// TODO:
-        ENVELOPE_SHAPE_ALTERNATE = 0b0010,
-        /// TODO:
-        ENVELOPE_SHAPE_ATTACK    = 0b0100,
-        /// TODO:
-        ENVELOPE_SHAPE_CONTINUE  = 0b1000,
-    };
-
- private:
     /// the range of the amplifier on the chip
     static constexpr uint8_t AMP_RANGE = 255;
+
+    /// @brief Return the amplitude for the given discrete index.
+    ///
+    /// @param index the index of the amplitude level to return
+    /// @returns the volume level for the given index
+    ///
+    static inline uint8_t get_ampltiude(unsigned index) {
+        // With channels tied together and 1K resistor to ground (as
+        // datasheet recommends), output nearly matches logarithmic curve as
+        // claimed. Approx. 1.5 dB per step.
+        static constexpr uint8_t AMP_TABLE[16] = {
+        #define ENTRY(n) uint8_t (n * AMP_RANGE + 0.5)
+            ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
+            ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
+            ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
+            ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
+        #undef ENTRY
+        };
+        return AMP_TABLE[index];
+    }
+
     /// TODO:
     static constexpr int PERIOD_FACTOR = 16;
     /// the number of bits to shift for faster multiplying / dividing by
@@ -131,20 +139,22 @@ class GeneralInstrumentAy_3_8910 {
     /// Power of two is more efficient (avoids division).
     static constexpr unsigned INAUDIBLE_FREQ = 16384;
 
-    /// With channels tied together and 1K resistor to ground (as datasheet
-    /// recommends), output nearly matches logarithmic curve as claimed. Approx.
-    /// 1.5 dB per step.
-    static const uint8_t AMP_TABLE[16];
-
-    /// TODO:
-    static const uint8_t MODES[8];
-
     /// the noise off flag bit
     static constexpr int NOISE_OFF    = 0x08;
     /// the tone off flag bit
     static constexpr int TONE_OFF     = 0x01;
 
-    /// the oscillators on the chip (three pulse waveform generators)
+    // TODO: remove
+    /// the registers on the chip
+    uint8_t regs[NUM_REGISTERS];
+
+    /// the last time the oscillators were updated
+    blip_time_t last_time = 0;
+
+    /// the synthesizer shared by the 5 oscillator channels
+    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+
+    /// @brief An oscillators on the chip (A pulse waveform generator).
     struct Oscillator {
         /// the period of the oscillator
         blip_time_t period = 0;
@@ -155,76 +165,55 @@ class GeneralInstrumentAy_3_8910 {
         /// the current phase of the oscillator
         int16_t phase = 0;
         /// the buffer the oscillator writes samples to
-        BLIPBuffer* output;
-    } oscs[OSC_COUNT];
-    /// the synthesizer shared by the 5 oscillator channels
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
-    /// the last time the oscillators were updated
-    blip_time_t last_time = 0;
-    /// the registers on the chip
-    uint8_t regs[NUM_REGISTERS];
+        BLIPBuffer* output = nullptr;
 
-    /// the noise generator on the chip
+        /// @brief Reset the oscillator state to its initial condition.
+        /// @details
+        /// This does not reset any existing output buffer for the oscillator.
+        inline void reset() {
+            period = PERIOD_FACTOR;
+            delay = last_amp = phase = 0;
+        }
+
+        /// @brief Reset the oscillator's phase to 0.
+        inline void reset_phase() { phase = 0; }
+    } oscs[OSC_COUNT];
+
+    /// The noise generator on the chip
     struct {
         /// TODO:
         blip_time_t delay = 0;
         /// the linear feedback shift register for generating noise values
         uint32_t lfsr = 1;
+
+        /// @brief Reset the noise generator state to its initial condition.
+        inline void reset() {
+            delay = 0;
+            lfsr = 1;
+        }
     } noise;
 
-    /// the envelope generator on the chip
+    /// The envelope generator on the chip
     struct {
         /// TODO:
         blip_time_t delay = 0;
-        /// TODO:
+        /// a pointer to the envelop waveform
         uint8_t const* wave = nullptr;
         /// the position in the waveform
         int pos = 0;
         /// values already passed through volume table
         uint8_t modes[8][48];
-    } env;
 
-    /// Write to the data port.
-    ///
-    /// @param addr the address to write the data to
-    /// @param data the data to write to the given address
-    ///
-    void _write(uint16_t addr, uint8_t data) {
-        // make sure the given address is legal (only need to check upper bound
-        // because the lower bound is 0 and addr is unsigned)
-        if (/*addr < ADDR_START or*/ addr > ADDR_END)
-            throw AddressSpaceException<uint16_t>(addr, ADDR_START, ADDR_END);
-        if (addr == 13) {  // envelope mode
-            if (!(data & 8)) // convert modes 0-7 to proper equivalents
-                data = (data & 4) ? 15 : 9;
-            env.wave = env.modes[data - 7];
-            env.pos = -48;
-            // will get set to envelope period in run_until()
-            env.delay = 0;
+        /// @brief Reset the envelope generator state to its initial condition.
+        inline void reset() {
+            delay = 0;
+            wave = modes[2];
+            pos = -48;
         }
-        regs[addr] = data;
-        // handle period changes accurately
-        // get the oscillator index by dividing by 2. there are two registers
-        // for each oscillator to represent the 12-bit period across a 16-bit
-        // value (with 4 unused bits)
-        unsigned i = addr >> 1;
-        if (i < OSC_COUNT) {  // i refers to i'th oscillator's period registers
-            // get the period from the two registers. the first register
-            // contains the low 8 bits and the second register contains the
-            // high 4 bits
-            blip_time_t period = ((regs[(i << 1) + 1] & 0x0F) << 8) | regs[i << 1];
-            // multiply by PERIOD_FACTOR to calculate the internal period value
-            period <<= PERIOD_SHIFTS;
-            // if the period is zero, set to the minimal value of PERIOD_FACTOR
-            if (!period) period = PERIOD_FACTOR;
-            // adjust time of next timer expiration based on change in period
-            Oscillator& osc = oscs[i];
-            if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
-            osc.period = period;
-        }
-        // TODO: same as above for envelope timer, and it also has a divide by
-        // two after it
-    }
+
+        /// @brief Reset the oscillator's phase to 0.
+        inline void reset_phase() { pos = -48; }
+    } env;
 
     /// Run the oscillators until the given end time.
     ///
@@ -275,7 +264,7 @@ class GeneralInstrumentAy_3_8910 {
             blip_time_t start_time = last_time;
             blip_time_t end_time   = final_end_time;
             int const vol_mode = regs[0x08 + index];
-            int volume = AMP_TABLE[vol_mode & 0x0F] >> half_vol;
+            int volume = get_ampltiude(vol_mode & 0x0F) >> half_vol;
             int osc_env_pos = env.pos;
             if (vol_mode & 0x10) {
                 volume = env.wave[osc_env_pos] >> half_vol;
@@ -440,6 +429,18 @@ class GeneralInstrumentAy_3_8910 {
  public:
     /// Initialize a new General Instrument AY-3-8910.
     GeneralInstrumentAy_3_8910() {
+        static constexpr uint8_t MODES[8] = {
+        #define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
+            MODE(1,0, 1,0, 1,0),
+            MODE(1,0, 0,0, 0,0),
+            MODE(1,0, 0,1, 1,0),
+            MODE(1,0, 1,1, 1,1),
+            MODE(0,1, 0,1, 0,1),
+            MODE(0,1, 1,1, 1,1),
+            MODE(0,1, 1,0, 0,1),
+            MODE(0,1, 0,0, 0,0),
+        #undef MODE
+        };
         // build full table of the upper 8 envelope waveforms
         for (int m = 8; m--;) {
             uint8_t* out = env.modes[m];
@@ -450,13 +451,13 @@ class GeneralInstrumentAy_3_8910 {
                 int step = end - amp;
                 amp *= 15;
                 for (int y = 16; --y >= 0;) {
-                    *out++ = AMP_TABLE[amp];
+                    *out++ = get_ampltiude(amp);
                     amp += step;
                 }
                 flags >>= 2;
             }
         }
-
+        // reset internal state
         set_output(NULL);
         set_volume();
         reset();
@@ -503,32 +504,133 @@ class GeneralInstrumentAy_3_8910 {
     }
 
     /// @brief Reset internal state, registers, and all oscillators.
+    /// @details
+    /// This does not reset any existing output buffer for the emulator.
+    ///
     inline void reset() {
-        last_time   = 0;
-        noise.delay = 0;
-        noise.lfsr  = 1;
-        for (unsigned i = 0; i < OSC_COUNT; i++) {
-            Oscillator* osc = &oscs[i];
-            osc->period   = PERIOD_FACTOR;
-            osc->delay    = 0;
-            osc->last_amp = 0;
-            osc->phase    = 0;
-        }
         memset(regs, 0, sizeof regs);
         regs[CHANNEL_ENABLES] = 0xFF;
-        _write(13, 0);
+        last_time = 0;
+        // reset the oscillators, noise generator, and envelope
+        for (Oscillator& osc : oscs) osc.reset();
+        noise.reset();
+        env.reset();
     }
 
-    /// @brief Write to data to a register.
+    /// @brief Set the envelope mode to a new value.
     ///
-    /// @param address the address of the register to write
-    /// @param data the data to write to the register
+    /// @param value the mode to set the envelope to
+    /// @details
+    /// This has the effect of resetting the envelope's phase.
     ///
-    inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
-        run_until(time);
-        _write(address, data);
+    inline void set_envelope_mode(uint8_t value) {
+        if (!(value & 8))  // convert modes 0-7 to proper equivalents
+            value = (value & 4) ? 15 : 9;
+        env.wave = env.modes[value - 7];
+        if (regs[ENVELOPE_SHAPE] != value) {  // check for change in mode
+            regs[ENVELOPE_SHAPE] = value;
+            env.pos = -48;
+            // will get set to envelope period in run_until()
+            env.delay = 0;
+        }
     }
+
+    /// @brief Reset the phase of the envelope generator.
+    inline void reset_envelope_phase() { env.reset_phase(); }
+
+    /// @brief Set the envelope period to a new value.
+    ///
+    /// @param value the period with which the envelope should repeat
+    ///
+    inline void set_envelope_period(uint16_t value) {
+        // set the 8-bit registers from the 16-bit frequency
+        regs[PERIOD_ENVELOPE_HI] = value >> 8;
+        regs[PERIOD_ENVELOPE_LO] = value & 0xff;
+    }
+
+    /// @brief Set the noise period to a new value.
+    ///
+    /// @param value the period with which the noise generator should repeat
+    /// \f$\in [0, 31]\f$
+    ///
+    inline void set_noise_period(uint8_t value) {
+        // value is in the first 5 bits
+        regs[NOISE_PERIOD] = 0x1f & value;
+    }
+
+    /// @brief Set the channel enable register to a new value.
+    ///
+    /// @param value the bitmask for the channel enable register
+    ///
+    inline void set_channel_enables(uint8_t value) {
+        // value is a bitmask with 6 bits
+        regs[CHANNEL_ENABLES] = 0x3f & value;
+    }
+
+    /// @brief Return true if the tone is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if tone is enabled
+    ///
+    inline bool is_tone_enabled(unsigned osc_index) const {
+        return !(regs[CHANNEL_ENABLES] & (0b00000001 << osc_index));
+    }
+
+    /// @brief Return true if the noise is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if noise is enabled
+    ///
+    inline bool is_noise_enabled(unsigned osc_index) const {
+        return !(regs[CHANNEL_ENABLES] & (0b00001000 << osc_index));
+    }
+
+    /// @brief Return true if the DAC is enabled for the given voice.
+    ///
+    /// @param osc_index the index of the voice to check if the DAC is enabled
+    ///
+    inline bool is_dac_enabled(unsigned osc_index) const {
+        return !is_tone_enabled(osc_index) && !is_noise_enabled(osc_index);
+    }
+
+    /// @brief Set the oscillator volume to a new value.
+    ///
+    /// @param osc_index the index of the oscillator to set the volume of
+    /// @param value the volume level \f$\in [0, 15]\f$
+    /// @param envelope whether the oscillator should be attenuated by the
+    /// envelope generator
+    ///
+    inline void set_voice_volume(unsigned osc_index, uint8_t value, bool envelope = false) {
+        // the value is in the first four bits. the fifth enables the EG
+        value = (envelope * 0x10) | (value & 0xf);
+        regs[VOLUME_CH_A + osc_index] = value;
+    }
+
+    /// @brief Set the oscillator volume to a new value.
+    ///
+    /// @param osc_index the index of the oscillator to set the volume of
+    /// @param value the 12 bit frequency value for the oscillator
+    ///
+    inline void set_frequency(unsigned osc_index, uint16_t value) {
+        // get the register offset of the oscillator (iterate in pairs)
+        const auto offset = osc_index << 1;
+        // set the 12-bit frequency
+        regs[PERIOD_CH_A_LO + offset] = value & 0xff;
+        regs[PERIOD_CH_A_HI + offset] = (value >> 8) & 0xf;
+        // get the period from the two registers. the first register
+        // contains the low 8 bits and the second register contains the
+        // high 4 bits
+        blip_time_t period = ((regs[offset + 1] & 0x0F) << 8) | regs[offset];
+        // multiply by PERIOD_FACTOR to calculate the internal period value
+        period <<= PERIOD_SHIFTS;
+        // if the period is zero, set to the minimal value of PERIOD_FACTOR
+        if (!period) period = PERIOD_FACTOR;
+        // adjust time of next timer expiration based on change in period
+        Oscillator& osc = oscs[osc_index];
+        if ((osc.delay += period - osc.period) < 0) osc.delay = 0;
+        osc.period = period;
+    }
+
+    /// @brief Reset the phase of the envelope generator.
+    inline void reset_phase(unsigned index) { oscs[index].reset_phase(); }
 
     /// @brief Run all oscillators up to specified time, end current frame,
     /// then start a new frame at time 0.
@@ -539,32 +641,6 @@ class GeneralInstrumentAy_3_8910 {
         run_until(time);
         last_time -= time;
     }
-};
-
-/// With channels tied together and 1K resistor to ground (as datasheet
-/// recommends), output nearly matches logarithmic curve as claimed. Approx.
-/// 1.5 dB per step.
-const uint8_t GeneralInstrumentAy_3_8910::AMP_TABLE[16] = {
-#define ENTRY(n) uint8_t (n * AMP_RANGE + 0.5)
-    ENTRY(0.000000), ENTRY(0.007813), ENTRY(0.011049), ENTRY(0.015625),
-    ENTRY(0.022097), ENTRY(0.031250), ENTRY(0.044194), ENTRY(0.062500),
-    ENTRY(0.088388), ENTRY(0.125000), ENTRY(0.176777), ENTRY(0.250000),
-    ENTRY(0.353553), ENTRY(0.500000), ENTRY(0.707107), ENTRY(1.000000),
-#undef ENTRY
-};
-
-/// TODO:
-const uint8_t GeneralInstrumentAy_3_8910::MODES[8] = {
-#define MODE(a0,a1, b0,b1, c0,c1) (a0 | a1<<1 | b0<<2 | b1<<3 | c0<<4 | c1<<5)
-    MODE(1,0, 1,0, 1,0),
-    MODE(1,0, 0,0, 0,0),
-    MODE(1,0, 0,1, 1,0),
-    MODE(1,0, 1,1, 1,1),
-    MODE(0,1, 0,1, 0,1),
-    MODE(0,1, 1,1, 1,1),
-    MODE(0,1, 1,0, 0,1),
-    MODE(0,1, 0,0, 0,0),
-#undef MODE
 };
 
 #endif  // DSP_GENERAL_INSTRUMENT_AY_3_8910_HPP_

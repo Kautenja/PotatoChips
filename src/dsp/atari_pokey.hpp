@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-//
 
 #ifndef DSP_ATARI_POKEY_HPP_
 #define DSP_ATARI_POKEY_HPP_
@@ -33,7 +31,7 @@ static void gen_poly(uint32_t mask, int count, uint8_t* out) {
     do {
         int bits = 0;
         int b = 0;
-        do {  // implemented using "Galios configuration"
+        do {  // implemented using Galois configuration
             bits |= (n & 1) << b;
             n = (n >> 1) ^ (mask & -(n & 1));
         } while (b++ < 7);
@@ -189,6 +187,15 @@ class AtariPOKEY {
         blip_time_t period = 0;
         /// the output buffer the oscillator writes samples to
         BLIPBuffer* output = nullptr;
+
+        /// @brief Reset the oscillator to its initial state.
+        ///
+        /// @details
+        /// This function will not overwrite the current output buffer.
+        ///
+        inline void reset() {
+            regs[0] = regs[1] = phase = invert = last_amp = delay = period = 0;
+        }
     } oscs[OSC_COUNT];
 
     /// the synthesizer implementation for computing samples
@@ -450,8 +457,7 @@ class AtariPOKEY {
         poly4_pos = 0;
         polym_pos = 0;
         control = 0;
-        for (unsigned i = 0; i < OSC_COUNT; i++)
-            memset(&oscs[i], 0, offsetof(Oscillator, output));
+        for (Oscillator& osc : oscs) osc.reset();
     }
 
     /// @brief Write data to register with given address.
@@ -460,11 +466,9 @@ class AtariPOKEY {
     /// @param data the data to write to the given address
     ///
     inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
         // make sure the given address is legal
         if (address < ADDR_START or address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
-        run_until(time);
         unsigned i = (address ^ 0xD200) >> 1;
         if (i < OSC_COUNT) {
             oscs[i].regs[address & 1] = data;
@@ -475,14 +479,10 @@ class AtariPOKEY {
             oscs[1].delay = 0;
             oscs[2].delay = 0;
             oscs[3].delay = 0;
+        } else if (address == 0xD20F) {
+            // TODO: are polynomials reset in this case?
+            // if ((data & 3) == 0) polym_pos = 0;
         }
-        /*
-        // TODO: are polynomials reset in this case?
-        else if (address == 0xD20F) {
-            if ((data & 3) == 0)
-                polym_pos = 0;
-        }
-        */
     }
 
     /// Run all oscillators up to specified time, end current frame, then

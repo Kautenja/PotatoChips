@@ -1,8 +1,6 @@
 // A Konami SCC Chip module.
 // Copyright 2020 Christian Kauten
 //
-// Author: Christian Kauten (kautenja@auburn.edu)
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -16,7 +14,6 @@
 //
 
 #include "plugin.hpp"
-#include "componentlibrary.hpp"
 #include "dsp/konami_scc.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -275,7 +272,7 @@ struct ChipSCC : Module {
         // process audio samples on the chip engine
         apu.end_frame(CLOCK_RATE / args.sampleRate);
         for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
-            const auto sample = buf[i].read_sample_10V();
+            const auto sample = buf[i].read_sample(5.f);
             outputs[i].setVoltage(sample);
         }
     }
@@ -331,16 +328,16 @@ struct ChipSCCWidget : ModuleWidget {
             addChild(table_editor);
         }
         // wave-table morph
-        addParam(createParam<Rogan3PSNES>(Vec(155, 183), module, ChipSCC::PARAM_WAVETABLE));
-        addParam(createParam<Rogan1PSNES>(Vec(161, 233), module, ChipSCC::PARAM_WAVETABLE_ATT));
+        addParam(createParam<Rogan3PWhite>(Vec(155, 183), module, ChipSCC::PARAM_WAVETABLE));
+        addParam(createParam<Rogan1PWhite>(Vec(161, 233), module, ChipSCC::PARAM_WAVETABLE_ATT));
         addInput(createInput<PJ301MPort>(Vec(164, 271), module, ChipSCC::INPUT_WAVETABLE));
         // individual channel controls
         for (unsigned i = 0; i < KonamiSCC::OSC_COUNT; i++) {
             addInput(createInput<PJ301MPort>(  Vec(212, 40 + i * 41), module, ChipSCC::INPUT_VOCT + i    ));
             addInput(createInput<PJ301MPort>(  Vec(242, 40 + i * 41), module, ChipSCC::INPUT_FM + i      ));
-            addParam(createParam<Rogan2PSNES>( Vec(275, 35 + i * 41), module, ChipSCC::PARAM_FREQ + i    ));
+            addParam(createParam<Rogan2PWhite>( Vec(275, 35 + i * 41), module, ChipSCC::PARAM_FREQ + i    ));
             addInput(createInput<PJ301MPort>(  Vec(317, 40 + i * 41), module, ChipSCC::INPUT_VOLUME + i  ));
-            addParam(createParam<Rogan2PSNES>( Vec(350, 35 + i * 41), module, ChipSCC::PARAM_VOLUME + i  ));
+            addParam(createParam<Rogan2PWhite>( Vec(350, 35 + i * 41), module, ChipSCC::PARAM_VOLUME + i  ));
             addOutput(createOutput<PJ301MPort>(Vec(392, 40 + i * 41), module, ChipSCC::OUTPUT_CHANNEL + i));
         }
     }

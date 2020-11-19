@@ -13,8 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-// derived from: Game_Music_Emu 0.5.2
-//
 
 #ifndef DSP_TEXAS_INSTRUMENTS_SN76489_HPP_
 #define DSP_TEXAS_INSTRUMENTS_SN76489_HPP_
@@ -25,35 +23,21 @@
 /// Texas Instruments SN76489 chip emulator.
 class TexasInstrumentsSN76489 {
  public:
-    /// the number of oscillators on the chip
+    /// the number of voices on the chip
     static constexpr int OSC_COUNT = 4;
+    /// the number of tone generators (pulse waveform generators) on the chip
+    static constexpr int TONE_COUNT = OSC_COUNT - 1;
 
-    /// the indexes of the channels on the chip
-    enum Channel {
-        PULSE0,
-        PULSE1,
-        PULSE2,
-        NOISE
-    };
-
-    /// the registers on the SN76489
-    enum Register : uint8_t {
-        /// the frequency register for pulse generator 0
-        TONE_0_FREQUENCY   = 0b10000000,
-        /// the attenuation register for pulse generator 0
-        TONE_0_ATTENUATION = 0b10010000,
-        /// the frequency register for pulse generator 1
-        TONE_1_FREQUENCY   = 0b10100000,
-        /// the attenuation register for pulse generator 1
-        TONE_1_ATTENUATION = 0b10110000,
-        /// the frequency register for pulse generator 2
-        TONE_2_FREQUENCY   = 0b11000000,
-        /// the attenuation register for pulse generator 2
-        TONE_2_ATTENUATION = 0b11010000,
-        /// the control register for the noise generator
-        NOISE_CONTROL      = 0b11100000,
-        /// the attenuation register for noise generator
-        NOISE_ATTENUATION  = 0b11110000
+    /// the indexes of the voices on the chip
+    enum Voice {
+        /// the index of the first tone generator voice
+        TONE0 = 0,
+        /// the index of the second tone generator voice
+        TONE1 = 1,
+        /// the index of the third tone generator voice
+        TONE2 = 2,
+        /// the index of the noise generator voice
+        NOISE = 3
     };
 
     /// the values for the linear feedback shift register to take.
@@ -64,34 +48,27 @@ class TexasInstrumentsSN76489 {
         N_1024   = 0b01,
         /// N / 2048
         N_2048   = 0b10,
-        /// Tone Generator #3 Output
-        N_TONE_3 = 0b11
+        /// 3rd Tone Generator Output (index 2)
+        N_TONE_2 = 0b11
     };
-
-    /// the FB bit in the Noise control register
-    static constexpr uint8_t NOISE_FEEDBACK = 0b00000100;
 
  private:
     /// an abstract base oscillator class for the chip
     struct Oscillator {
         /// the output buffer to write samples to
         BLIPBuffer* output = 0;
-        /// TODO:
+        /// a delay before opening the oscillator's amplifier
         int delay = 0;
         /// the value of the waveform amplitude at the last sample
         int last_amp = 0;
         /// the output volume from the synthesizer
         int volume = 0;
 
-        /// Reset the oscillator to its initial state.
-        inline void reset() {
-            delay = 0;
-            last_amp = 0;
-            volume = 0;
-        }
+        /// @brief Reset the oscillator to its initial state.
+        inline void reset() { delay = last_amp = volume = 0; }
     };
 
-    /// a pulse oscillator on the chip
+    /// @brief A pulse oscillator on the chip
     struct Pulse : Oscillator {
         /// the period of the oscillator
         int period = 0;
@@ -101,14 +78,10 @@ class TexasInstrumentsSN76489 {
         typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
         const Synth* synth;
 
-        /// Reset the oscillator to its initial state.
-        inline void reset() {
-            period = 0;
-            phase = 0;
-            Oscillator::reset();
-        }
+        /// @brief Reset the oscillator to its initial state.
+        inline void reset() { period = phase = 0; Oscillator::reset(); }
 
-        /// Run the oscillator from time until end_time.
+        /// @brief Run the oscillator from time until end_time.
         void run(blip_time_t time, blip_time_t end_time) {
             if (!volume || period <= 128) {
                 // ignore 16kHz and higher
@@ -145,14 +118,14 @@ class TexasInstrumentsSN76489 {
                         time += period;
                         phase ^= 1;
                     } while (time < end_time);
-                    this->last_amp = phase ? volume : -volume;
+                    last_amp = phase ? volume : -volume;
                 }
             }
             delay = time - end_time;
         }
     };
 
-    /// a noise oscillator on the chip
+    /// @brief A noise oscillator on the chip
     struct Noise : Oscillator {
         /// the possible noise periods
         static const int noise_periods[3];
@@ -165,54 +138,46 @@ class TexasInstrumentsSN76489 {
         /// The synthesizer for generating samples from this oscillator
         typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
+        /// whether the LFSR is on
+        bool is_periodic = false;
 
-        /// Reset the oscillator to its initial state.
+        /// @brief Reset the oscillator to its initial state.
         inline void reset() {
             period = &noise_periods[0];
             shifter = 0x8000;
             feedback = 0x9000;
+            is_periodic = false;
             Oscillator::reset();
         }
 
-        /// Run the oscillator from time until end_time.
+        /// @brief Run the oscillator from time until end_time.
         void run(blip_time_t time, blip_time_t end_time) {
             int amp = volume;
-            if (shifter & 1)
-                amp = -amp;
+            if (shifter & 1) amp = -amp;
 
-            {
-                int delta = amp - last_amp;
-                if (delta) {
-                    last_amp = amp;
-                    synth.offset(time, delta, output);
-                }
+            int deltaAmp = amp - last_amp;
+            if (deltaAmp) {
+                last_amp = amp;
+                synth.offset(time, deltaAmp, output);
             }
 
             time += delay;
-            if (!volume)
-                time = end_time;
+            if (!volume) time = end_time;
 
             if (time < end_time) {
-                BLIPBuffer* const output = this->output;
-                unsigned shifter = this->shifter;
                 int delta = amp * 2;
-                int period = *this->period * 2;
-                if (!period)
-                    period = 16;
-
+                int currentPeriod = *period * 2;
+                if (!currentPeriod) currentPeriod = 16;
                 do {
                     int changed = shifter + 1;
                     shifter = (feedback & -(shifter & 1)) ^ (shifter >> 1);
-                    if (changed & 2) // true if bits 0 and 1 differ
-                    {
+                    if (changed & 2) {  // true if bits 0 and 1 differ
                         delta = -delta;
                         synth.offset(time, delta, output);
                     }
-                    time += period;
+                    time += currentPeriod;
                 } while (time < end_time);
-
-                this->shifter = shifter;
-                this->last_amp = delta >> 1;
+                last_amp = delta >> 1;
             }
             delay = time - end_time;
         }
@@ -224,15 +189,15 @@ class TexasInstrumentsSN76489 {
     Pulse::Synth square_synth;
     /// the noise generator
     Noise noise;
-    /// The oscillators on the chip
-    Oscillator* oscs[OSC_COUNT] {
+    /// The voices on the chip
+    Oscillator* voices[OSC_COUNT] {
         &pulses[0],
         &pulses[1],
         &pulses[2],
         &noise
     };
 
-    /// the last time the oscillators were updated
+    /// the last time the voices were updated
     blip_time_t last_time = 0;
     /// the value of the latch register
     int latch = 0;
@@ -241,26 +206,32 @@ class TexasInstrumentsSN76489 {
     /// the value of the white noise
     unsigned looped_feedback = 0;
 
-    /// Run the oscillators until the given end time.
+    /// @brief Run the voices until the given end time.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param end_time the time to run the voices until
     ///
     void run_until(blip_time_t end_time) {
-        if (end_time < last_time)
+        if (end_time < last_time) {  // time went backwards
             throw Exception("end_time must be >= last_time");
-        if (end_time > last_time) {  // run oscillators if time is different
+        } else if (end_time > last_time) {  // time moved forwards
             if (pulses[0].output) pulses[0].run(last_time, end_time);
             if (pulses[1].output) pulses[1].run(last_time, end_time);
             if (pulses[2].output) pulses[2].run(last_time, end_time);
-            if (noise.output)      noise.run(last_time, end_time);
+            if (noise.output)     noise.run(last_time, end_time);
             last_time = end_time;
-        }
+        }  // else time has not changed
     }
 
-    /// Disable the copy constructor.
-    TexasInstrumentsSN76489(const TexasInstrumentsSN76489&);
+    /// @brief Disable the copy constructor.
+    ///
+    /// @param copy the instance to copy
+    ///
+    TexasInstrumentsSN76489(const TexasInstrumentsSN76489& copy);
 
-    /// Disable the assignment operator
+    /// @brief Disable the assignment operator.
+    ///
+    /// @param copy the instance to copy
+    ///
     TexasInstrumentsSN76489& operator=(const TexasInstrumentsSN76489&);
 
  public:
@@ -276,30 +247,29 @@ class TexasInstrumentsSN76489 {
     /// @brief Assign single oscillator output to buffer. If buffer is NULL,
     /// silences the given oscillator.
     ///
-    /// @param channel the index of the oscillator to set the output for
+    /// @param voice_idx the index of the oscillator to set the output for
     /// @param buffer the BLIPBuffer to output the given voice to
     /// @returns 0 if the output was set successfully, 1 if the index is invalid
     /// @details
     /// If buffer is NULL, the specified oscillator is muted and emulation
     /// accuracy is reduced.
     ///
-    inline void set_output(unsigned channel, BLIPBuffer* buffer) {
-        if (channel >= OSC_COUNT)  // make sure the channel is within bounds
-            throw ChannelOutOfBoundsException(channel, OSC_COUNT);
-        oscs[channel]->output = buffer;
+    inline void set_output(unsigned voice_idx, BLIPBuffer* buffer) {
+        if (voice_idx >= OSC_COUNT)  // make sure the voice index is within bounds
+            throw ChannelOutOfBoundsException(voice_idx, OSC_COUNT);
+        voices[voice_idx]->output = buffer;
     }
 
     /// @brief Assign all oscillator outputs to specified buffer. If buffer
-    /// is NULL, silences all oscillators.
+    /// is NULL, silences all voices.
     ///
     /// @param buffer the single buffer to output the all the voices to
     ///
     inline void set_output(BLIPBuffer* buffer) {
-        for (unsigned channel = 0; channel < OSC_COUNT; channel++)
-            set_output(channel, buffer);
+        for (unsigned i = 0; i < OSC_COUNT; i++) set_output(i, buffer);
     }
 
-    /// @brief Set the volume level of all oscillators.
+    /// @brief Set the volume level of all voices.
     ///
     /// @param level the value to set the volume level to, where \f$1.0\f$ is
     /// full volume. Can be overdriven past \f$1.0\f$.
@@ -319,7 +289,7 @@ class TexasInstrumentsSN76489 {
         noise.synth.set_treble_eq(equalizer);
     }
 
-    /// @brief Reset oscillators and internal state.
+    /// @brief Reset voices and internal state.
     ///
     /// @param feedback TODO:
     /// @param noise_width TODO:
@@ -332,57 +302,66 @@ class TexasInstrumentsSN76489 {
             feedback = 0x0009;
             noise_width = 16;
         }
-        // convert to "Galios configuration"
+        // convert to Galois configuration
         looped_feedback = 1 << (noise_width - 1);
         noise_feedback  = 0;
         while (noise_width--) {
             noise_feedback = (noise_feedback << 1) | (feedback & 1);
             feedback >>= 1;
         }
-        // reset the oscillators
+        // reset the voices
         pulses[0].reset();
         pulses[1].reset();
         pulses[2].reset();
         noise.reset();
     }
 
-    // TODO: update with address / latch separated from data port
-    /// @brief Write to the data port.
+    /// @brief Set the frequency to a new value.
     ///
-    /// @param data the byte to write to the data port
+    /// @param voice the index of the tone generator to set the volume of
+    /// @param value the 10-bit frequency to set the tone generator to
     ///
-    void write(uint8_t data) {
-        // the possible volume values
-        static constexpr unsigned char volumes[16] = {
-            64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0
-        };
-        // set the latch if the MSB is high
-        if (data & 0x80) latch = data;
-        // get the index of the register
-        int index = (latch >> 5) & 3;
-        if (latch & 0x10) {  // volume
-            oscs[index]->volume = volumes[data & 15];
-        } else if (index < 3) {  // pulse frequency
-            Pulse& sq = pulses[index];
-            if (data & 0x80)
-                sq.period = (sq.period & 0xFF00) | (data << 4 & 0x00FF);
-            else
-                sq.period = (sq.period & 0x00FF) | (data << 8 & 0x3F00);
-        } else {  // noise
-            int select = data & 3;
-            if (select < 3)
-                noise.period = &Noise::noise_periods[select];
-            else
-                noise.period = &pulses[2].period;
-            noise.feedback = (data & 0x04) ? noise_feedback : looped_feedback;
-            noise.shifter = 0x8000;
-        }
+    inline void set_frequency(unsigned voice, uint16_t value) {
+        pulses[voice].period = (value & 0x3FFF) << 4;
     }
 
-    /// @brief Run all oscillators up to specified time, end current frame,
+    /// @brief Set the noise mode to a new value.
+    ///
+    /// @param value the value to set the volume to \f$\in [0, 4]\f$
+    /// @param is_periodic true to enable the linear feedback shift register (LFSR)
+    /// @param reset true to reset the feedback register and shifter to default
+    ///
+    inline void set_noise(uint8_t value, bool is_periodic, bool reset = true) {
+        // cache the old values to detect changes
+        auto old_period = noise.period;
+        auto old_is_periodic = noise.is_periodic;
+        // update the parameters in the noise structure
+        noise.period = (value & 3) < 3 ?
+            &Noise::noise_periods[value & 3] : &pulses[2].period;
+        noise.is_periodic = is_periodic;
+        // return if not resetting and the values haven't changed
+        if (!reset && old_period == noise.period && old_is_periodic == is_periodic)
+            return;
+        // reset the feed register and shifter
+        noise.feedback = is_periodic ? noise_feedback : looped_feedback;
+        noise.shifter = 0x8000;
+    }
+
+    /// @brief Set the volume to a new value.
+    ///
+    /// @param voice the index of the voice to set the volume of
+    /// @param value the value to set the volume to \f$\in [0, 15]\f$
+    ///
+    inline void set_amplifier_level(unsigned voice, uint8_t value) {
+        static constexpr unsigned char volumes[16] =
+            {64, 50, 39, 31, 24, 19, 15, 12, 9, 7, 5, 4, 3, 2, 1, 0};
+        voices[voice]->volume = volumes[value & 15];
+    }
+
+    /// @brief Run all voices up to specified time, end current frame,
     /// then start a new frame at time 0.
     ///
-    /// @param end_time the time to run the oscillators until
+    /// @param end_time the time to run the voices until
     ///
     inline void end_frame(blip_time_t end_time) {
         if (end_time > last_time) run_until(end_time);

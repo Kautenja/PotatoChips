@@ -143,3 +143,142 @@
 -   fix 2612 Envelope generator to have correct timings
 -   fix 2612 TL parameter to reduce the dead range of the parameter
 -   remove invalid tags from plugin.json
+
+## 1.7.2 (2020-09-23)
+
+-   fix 2612 to use less CPU resources (disable emulators of polyphonic channels
+    that are not in use)
+
+## 1.7.3 (2020-09-24)
+
+-   fix issue where GBS and 106 would drop onto the rack with corrupted waveforms
+
+## 1.8.0 (2020-11-16)
+
+-   header-only DSP library
+-   fix issue where some modules would generate a "pop"/"click"/"impulse" on
+    start up: 2A03, GBS, VRC6, FME7, POKEY, Ay-3-8910, 106, SN76489
+-   fixes and updates to 2612 (rev2 branded as "Boss Fight")
+    -   code optimizations
+    -   updated panel layout
+    -   saturation / aliasing control
+    -   individual operator retrigger input for envelope generators
+    -   individual operator triggers, gates, VOCT, and frequency knobs
+    -   individual operator looping AD envelope generator
+    -   individual operator sensitivity to LFO-based FM and AM
+    -   VU Meter to monitor levels / clipping / aliasing
+    -   invert sustain level and total level controls to be more intuitive
+-   updates to SN76489 (rev2 branded as "Mega Tone")
+    -   **audio rate FM**
+    -   code optimizations
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to FME7 (rev2 branded as "Pulses")
+    -   **audio rate FM**
+    -   **changed default amplifier level to 10 instead of 7**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to VRC6 (rev2 branded as "Step Saw")
+    -   **audio rate FM**
+    -   **sync input for saw wave generator**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to 2A03 (rev2 branded as "Infinite Stairs")
+    -   **hard sync input**
+    -   **amplifier for steppy triangle generator**
+    -   **sync input for steppy triangle generator and noise generator**
+    -   **audio rate FM**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to AY-3-8910 (rev2 branded as "Jairasullator")
+    -   **internal envelope / LFO (full synthesizer voice)**
+    -   **discrete noise period control**
+    -   **audio rate FM**
+    -   **offet and scale parameters in DAC mode**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to POKEY (rev2 branded as "Pot Keys")
+    -   **audio rate FM**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to 106 (rev2 branded as "Name Corp Octal Wave Generator")
+    -   **undo/redo support for wavetable edits**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+-   updates to GBS (rev2 branded as "Pallet Town Waves System")
+    -   **undo/redo support for wavetable edits**
+    -   **fixed wave channel to track VOCT correctly**
+    -   new panel design
+    -   attenuverter for frequency modulation that acts as fine frequency
+        control when nothing is patched
+    -   normalled inputs
+    -   normalled outputs (i.e., mixer, with clipping, and aliasing)
+    -   VU Meter to monitor levels / clipping / aliasing
+
+## 1.8.1 (2020-11-16)
+
+-   remove accidental debugging modules from release
+
+## 1.8.2 (2020-11-17)
+
+-   replace BossFight global data structures with Windows friendly implementation
+
+## 1.8.3 (2020-11-17)
+
+-   fix manual link for Boss Fight
+
+## 1.9.0 (TBD)
+
+-   new module: S-SMP(Echo)
+    -   echo effect from the SNES (16-bit PCM @ 32kHz)
+        -   Gaussian filter removed
+        -   BRR down-sampling removed
+    -   2 channels of echo effect
+        -   feedback and delay parameters with CV control
+        -   stereo mix control with surround effect through phasing
+    -   8-tap FIR filter with coefficient parameterization and CV control
+-   new module: S-SMP(Gauss)
+    -   Gaussian filter from the SNES
+    -   low-pass filter locked to 16kHz with parameterized coefficients
+    -   designed to act as a low-pass gate / VCA without a VCF
+-   new module: S-SMP(ADSR)
+    -   Envelope generator from the SNES
+    -   Attack, Decay, Sustain, and Release stages
+-   new module: S-SMP(BRR)
+    -   Bit-Rate Reduction (BRR) based sampler/sample player
+-   new blank panels:
+    -   illustration of Sony S-SMP IC
+    -   illustration of envelope generation from Yamaha YM2612
+
+## 1.10.0 (TBD)
+
+-   new module: NES(DMC)
+    -   DMC sampler from the Ricoh 2A03 audio processing chip

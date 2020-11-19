@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="32px" viewBox="0 0 128 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 58 (84663) - https://sketch.com -->
+    <title>Envelope/AttackLFO</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Envelope/AttackLFO" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Triangle" fill="#D8D8D8" points="23 6 23 26 3 26"></polygon>
+        <polygon id="Triangle-Copy" fill="#D8D8D8" points="43 6 43 26 23 26"></polygon>
+        <polygon id="Triangle-Copy-2" fill="#D8D8D8" points="63 6 63 26 43 26"></polygon>
+        <polygon id="Triangle-Copy-3" fill="#D8D8D8" points="83 6 83 26 63 26"></polygon>
+        <polygon id="Triangle-Copy-4" fill="#D8D8D8" points="103 6 103 26 83 26"></polygon>
+        <polygon id="Triangle-Copy-5" fill="#D8D8D8" points="123 6 123 26 103 26"></polygon>
+    </g>
+</svg>

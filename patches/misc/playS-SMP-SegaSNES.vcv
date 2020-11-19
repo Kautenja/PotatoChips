@@ -1,0 +1,680 @@
+{
+  "version": "1.dev.eefe794",
+  "modules": [
+    {
+      "id": 1,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 2,
+      "data": {
+        "audio": {
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 512
+        }
+      },
+      "pos": [
+        65,
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "VCMixer",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 1.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 166,
+      "rightModuleId": 1,
+      "pos": [
+        55,
+        1
+      ]
+    },
+    {
+      "id": 5,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "MIDIToCVInterface",
+      "params": [],
+      "rightModuleId": 176,
+      "data": {
+        "channels": 8,
+        "polyMode": 0,
+        "clockDivision": 24,
+        "lastPitch": 8192,
+        "lastMod": 0,
+        "midi": {
+          "driver": -11,
+          "deviceName": "QWERTY keyboard (US)",
+          "channel": -1
+        }
+      },
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 165,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_Gauss",
+      "params": [
+        {
+          "id": 0,
+          "value": 2.0
+        },
+        {
+          "id": 1,
+          "value": 1.0
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 127.0
+        },
+        {
+          "id": 4,
+          "value": 127.0
+        }
+      ],
+      "leftModuleId": 177,
+      "rightModuleId": 166,
+      "pos": [
+        33,
+        1
+      ]
+    },
+    {
+      "id": 166,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_Echo",
+      "params": [
+        {
+          "id": 0,
+          "value": 18.0
+        },
+        {
+          "id": 1,
+          "value": 44.0
+        },
+        {
+          "id": 2,
+          "value": 44.0
+        },
+        {
+          "id": 3,
+          "value": 44.0
+        },
+        {
+          "id": 4,
+          "value": 96.0
+        },
+        {
+          "id": 5,
+          "value": 32.0
+        },
+        {
+          "id": 6,
+          "value": 96.0
+        },
+        {
+          "id": 7,
+          "value": 48.0
+        },
+        {
+          "id": 8,
+          "value": 85.0
+        },
+        {
+          "id": 9,
+          "value": 23.0
+        },
+        {
+          "id": 10,
+          "value": -128.0
+        },
+        {
+          "id": 11,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 165,
+      "rightModuleId": 2,
+      "pos": [
+        41,
+        1
+      ]
+    },
+    {
+      "id": 172,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "S_SMP_ADSR",
+      "params": [
+        {
+          "id": 0,
+          "value": 127.0
+        },
+        {
+          "id": 1,
+          "value": 127.0
+        },
+        {
+          "id": 2,
+          "value": 10.0
+        },
+        {
+          "id": 3,
+          "value": 5.0
+        },
+        {
+          "id": 4,
+          "value": 7.0
+        },
+        {
+          "id": 5,
+          "value": 7.0
+        },
+        {
+          "id": 6,
+          "value": 5.0
+        },
+        {
+          "id": 7,
+          "value": 2.0
+        },
+        {
+          "id": 8,
+          "value": 15.0
+        },
+        {
+          "id": 9,
+          "value": 20.0
+        }
+      ],
+      "leftModuleId": 176,
+      "pos": [
+        71,
+        0
+      ]
+    },
+    {
+      "id": 176,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.8.0",
+      "model": "2612",
+      "params": [
+        {
+          "id": 0,
+          "value": 5.6030879
+        },
+        {
+          "id": 1,
+          "value": 7.0
+        },
+        {
+          "id": 2,
+          "value": 3.57114959
+        },
+        {
+          "id": 3,
+          "value": 2.74380589
+        },
+        {
+          "id": 4,
+          "value": 5.44149828
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 11.0
+        },
+        {
+          "id": 7,
+          "value": 6.0
+        },
+        {
+          "id": 8,
+          "value": 12.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 11.0
+        },
+        {
+          "id": 12,
+          "value": 1.0
+        },
+        {
+          "id": 13,
+          "value": 23.0
+        },
+        {
+          "id": 14,
+          "value": 3.0
+        },
+        {
+          "id": 15,
+          "value": 3.0
+        },
+        {
+          "id": 16,
+          "value": 3.0
+        },
+        {
+          "id": 17,
+          "value": 15.0
+        },
+        {
+          "id": 18,
+          "value": 10.0
+        },
+        {
+          "id": 19,
+          "value": 5.0
+        },
+        {
+          "id": 20,
+          "value": 6.0
+        },
+        {
+          "id": 21,
+          "value": 7.0
+        },
+        {
+          "id": 22,
+          "value": 28.0
+        },
+        {
+          "id": 23,
+          "value": 8.0
+        },
+        {
+          "id": 24,
+          "value": 26.0
+        },
+        {
+          "id": 25,
+          "value": 1.0
+        },
+        {
+          "id": 26,
+          "value": 6.0
+        },
+        {
+          "id": 27,
+          "value": 8.0
+        },
+        {
+          "id": 28,
+          "value": 6.0
+        },
+        {
+          "id": 29,
+          "value": 13.0
+        },
+        {
+          "id": 30,
+          "value": 0.0
+        },
+        {
+          "id": 31,
+          "value": 1.0
+        },
+        {
+          "id": 32,
+          "value": 2.0
+        },
+        {
+          "id": 33,
+          "value": 4.0
+        },
+        {
+          "id": 34,
+          "value": 2.0
+        },
+        {
+          "id": 35,
+          "value": 2.0
+        },
+        {
+          "id": 36,
+          "value": 2.0
+        },
+        {
+          "id": 37,
+          "value": 3.0
+        },
+        {
+          "id": 38,
+          "value": 2.0
+        },
+        {
+          "id": 39,
+          "value": 1.0
+        },
+        {
+          "id": 40,
+          "value": 1.0
+        },
+        {
+          "id": 41,
+          "value": 1.0
+        },
+        {
+          "id": 42,
+          "value": 1.0
+        },
+        {
+          "id": 43,
+          "value": 1.0
+        },
+        {
+          "id": 44,
+          "value": 1.0
+        }
+      ],
+      "leftModuleId": 5,
+      "rightModuleId": 172,
+      "pos": [
+        8,
+        0
+      ]
+    },
+    {
+      "id": 177,
+      "plugin": "Bogaudio",
+      "version": "1.1.34",
+      "model": "Bogaudio-Analyzer",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 1.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 178,
+      "rightModuleId": 165,
+      "data": {
+        "range_db": 80.0
+      },
+      "pos": [
+        13,
+        1
+      ]
+    },
+    {
+      "id": 178,
+      "plugin": "Fundamental",
+      "version": "1.4.0",
+      "model": "Scope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 14.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 177,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        1
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 89,
+      "outputModuleId": 165,
+      "outputId": 1,
+      "inputModuleId": 166,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 91,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 92,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 86,
+      "outputModuleId": 166,
+      "outputId": 0,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 93,
+      "outputModuleId": 166,
+      "outputId": 1,
+      "inputModuleId": 2,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 90,
+      "outputModuleId": 165,
+      "outputId": 0,
+      "inputModuleId": 166,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 84,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 172,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 111,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 172,
+      "inputId": 2,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 142,
+      "outputModuleId": 172,
+      "outputId": 0,
+      "inputModuleId": 165,
+      "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 109,
+      "outputModuleId": 172,
+      "outputId": 0,
+      "inputModuleId": 165,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 156,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 172,
+      "inputId": 1,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 157,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 172,
+      "inputId": 3,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 175,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 176,
+      "inputId": 0,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 176,
+      "outputModuleId": 176,
+      "outputId": 0,
+      "inputModuleId": 165,
+      "inputId": 3,
+      "color": "#0986ad"
+    },
+    {
+      "id": 177,
+      "outputModuleId": 176,
+      "outputId": 1,
+      "inputModuleId": 165,
+      "inputId": 4,
+      "color": "#c91847"
+    },
+    {
+      "id": 178,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 176,
+      "inputId": 6,
+      "color": "#c91847"
+    },
+    {
+      "id": 98,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 177,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 144,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 177,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 97,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 178,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 143,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 178,
+      "inputId": 1,
+      "color": "#c91847"
+    }
+  ]
+}

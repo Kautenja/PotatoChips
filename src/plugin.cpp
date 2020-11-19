@@ -1,7 +1,5 @@
-// The Potato Chips VCVRack plugin.
+// The Potato Chips VCVRack plug-in.
 // Copyright 2020 Christian Kauten
-//
-// Author: Christian Kauten (kautenja@auburn.edu)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +15,7 @@
 
 #include "plugin.hpp"
 
-/// the global instance of the plugin
+/// the global instance of the plug-in
 Plugin* plugin_instance;
 
 /// Initialize an instance of the plug-in.
@@ -26,16 +24,25 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
-    instance->addModel(modelChip2A03);
-    instance->addModel(modelChipVRC6);
-    instance->addModel(modelChipFME7);
-    instance->addModel(modelChip106);
-    instance->addModel(modelChipSN76489);
-    instance->addModel(modelChipGBS);
-    instance->addModel(modelChipTurboGrafx16);
+    // current releases
+    instance->addModel(modelJairasullator);
+    instance->addModel(modelInfiniteStairs);
+    instance->addModel(modelPotKeys);
+    instance->addModel(modelStepSaw);
+    instance->addModel(modelPulses);
+    instance->addModel(modelNameCorpOctalWaveGenerator);
+    instance->addModel(modelPalletTownWavesSystem);
+    instance->addModel(modelMegaTone);
+    instance->addModel(modelBossFight);
+    // blanks
+    instance->addModel(modelChipS_SMP_Blank1);
+    instance->addModel(modelBossFight_Blank1);
+    // beta versions / WIPs
+    instance->addModel(modelChipS_SMP);
+    instance->addModel(modelChipS_SMP_ADSR);
+    instance->addModel(modelChipS_SMP_BRR);
+    instance->addModel(modelChipS_SMP_Echo);
+    instance->addModel(modelChipS_SMP_Gauss);
     instance->addModel(modelChipSCC);
-    instance->addModel(modelChipAY_3_8910);
-    instance->addModel(modelChipPOKEY);
-    instance->addModel(modelChip2413);
-    instance->addModel(modelChip2612);
+    instance->addModel(modelChipTurboGrafx16);
 }

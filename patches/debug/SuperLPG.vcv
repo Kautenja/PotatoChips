@@ -35,11 +35,11 @@
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 1.41421354
         },
         {
           "id": 2,
-          "value": 1.0
+          "value": 1.41421354
         },
         {
           "id": 3,
@@ -61,7 +61,7 @@
       "leftModuleId": 159,
       "rightModuleId": 156,
       "data": {
-        "filterMode": 2
+        "filterMode": 0
       },
       "pos": [
         18,

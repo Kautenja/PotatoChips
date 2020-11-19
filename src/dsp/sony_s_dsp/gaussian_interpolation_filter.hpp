@@ -72,14 +72,13 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
     /// @returns a string label describing the given filter mode
     ///
     inline static std::string getFilterLabel(uint8_t index) {
-        // string representations of the envelope modes
-        static const std::string FILTER_MODE_LABELS[FILTER_MODES] = {
-            "Very Quiet",
+        static const std::string LABELS[FILTER_MODES] = {
+            "Barely Audible",
             "Quiet",
             "Weird",
             "Loud"
         };
-        return FILTER_MODE_LABELS[index];
+        return LABELS[index];
     }
 
     /// @brief Initialize a new GaussianInterpolationFilter.
@@ -87,21 +86,21 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
 
     /// @brief Set the filter coefficients to a discrete mode.
     ///
-    /// @param filter the new mode for the filter
+    /// @param value the new mode for the filter
     ///
-    inline void setFilter(uint8_t filter) { this->filter = filter & 0x3; }
+    inline void setFilter(uint8_t value) { filter = value & 0x3; }
 
     /// @brief Set the volume level of the filter to a new value.
     ///
-    /// @param volume the volume level after the Gaussian low-pass filter
+    /// @param value the volume level after the Gaussian low-pass filter
     ///
-    inline void setVolume(int8_t volume) { this->volume = volume; }
+    inline void setVolume(int8_t value) { volume = value; }
 
     /// @brief Set the frequency of the filter to a new value.
     ///
-    /// @param freq the frequency to set the filter to
+    /// @param frequency the frequency to set the filter to in Hz
     ///
-    inline void setFrequency(float freq) { rate = get_pitch(freq); }
+    inline void setFrequency(float frequency) { rate = get_pitch(frequency); }
 
     /// @brief Run the filter for the given input sample.
     ///

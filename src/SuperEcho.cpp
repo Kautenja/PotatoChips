@@ -290,7 +290,7 @@ struct SuperEchoWidget : ModuleWidget {
     ///
     explicit SuperEchoWidget(SuperEcho *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-Echo-Light.svg";
+        static constexpr auto panel = "res/SuperEcho.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // Panel Screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -298,34 +298,27 @@ struct SuperEchoWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // bypass switch
-        addParam(createParam<CKSS>(Vec(10, 10), module, SuperEcho::PARAM_BYPASS));
+        addParam(createParam<CKSS>(Vec(15, 25), module, SuperEcho::PARAM_BYPASS));
         for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
-            addParam(createSnapParam<Rogan2PBlue>(Vec(20 + 44 * i, 51), module, SuperEcho::PARAM_DELAY + i));
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 100), module, SuperEcho::INPUT_DELAY + i));
+            addParam(createSnapParam<Trimpot>(Vec(13 + 44 * i, 77), module, SuperEcho::PARAM_DELAY + i));
+            addInput(createInput<PJ301MPort>(Vec(10 + 44 * i, 112), module, SuperEcho::INPUT_DELAY + i));
             // Echo Mix
-            auto echoIdx = SuperEcho::PARAM_MIX + i;
-            auto echoPos = Vec(20 + 44 * i, 163);
-            ParamWidget* echoMix;
-            if (i)  // i == 1 -> right lane -> red knob
-                echoMix = createSnapParam<Rogan2PRed>(echoPos, module, echoIdx);
-            else  // i == 0 -> left lane -> white knob
-                echoMix = createSnapParam<Rogan2PWhite>(echoPos, module, echoIdx);
-            addParam(echoMix);
-            addParam(createParam<Trimpot>(Vec(20 + 44 * i, 180), module, SuperEcho::PARAM_AUDIO_ATT + i));
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 212), module, SuperEcho::INPUT_MIX + i));
+            addParam(createSnapParam<Trimpot>(Vec(13 + 44 * i, 163), module, SuperEcho::PARAM_MIX + i));
+            addInput(createInput<PJ301MPort>(Vec(10 + 44 * i, 198), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
-            addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 269), module, SuperEcho::INPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 289), module, SuperEcho::VU_LIGHTS_INPUT + 3 * i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 236), module, SuperEcho::VU_LIGHTS_INPUT + 3 * i));
+            addInput(createInput<PJ301MPort>(Vec(10 + 44 * i, 243), module, SuperEcho::INPUT_AUDIO + i));
+            addParam(createParam<Trimpot>(Vec(13 + 44 * i, 278), module, SuperEcho::PARAM_AUDIO_ATT + i));
             // Stereo Output Ports
-            addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperEcho::OUTPUT_AUDIO + i));
-            addChild(createLightCentered<MediumLight<RedGreenBlueLight>>(Vec(20 + 44 * i, 344), module, SuperEcho::VU_LIGHTS_OUTPUT + 3 * i));
+            addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 44 * i, 311), module, SuperEcho::VU_LIGHTS_OUTPUT + 3 * i));
+            addOutput(createOutput<PJ301MPort>(Vec(10 + 44 * i, 323), module, SuperEcho::OUTPUT_AUDIO + i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(120, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
-            addParam(createParam<Trimpot>(Vec(140, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
-            addParam(createSnapParam<Rogan1PGreen>(Vec(162, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i));
+            addInput(createInput<PJ301MPort>(Vec(91, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
+            addParam(createParam<Trimpot>(Vec(124, 30 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
+            addParam(createSnapParam<Rogan1PGreen>(Vec(154, 25 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i));
         }
     }
 };

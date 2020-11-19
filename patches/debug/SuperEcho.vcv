@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "deviceName": "SMSL Audio: Sanskrit 6th",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        83,
+        85,
         0
       ]
     },
@@ -31,7 +31,7 @@
       "params": [],
       "rightModuleId": 159,
       "data": {
-        "channels": 1,
+        "channels": 8,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -183,7 +183,7 @@
       "leftModuleId": 171,
       "rightModuleId": 1,
       "pos": [
-        73,
+        75,
         0
       ]
     },
@@ -333,7 +333,7 @@
         "external": 0
       },
       "pos": [
-        40,
+        42,
         0
       ]
     },
@@ -375,7 +375,7 @@
         "amplitude_plot": "decibels_80"
       },
       "pos": [
-        53,
+        55,
         0
       ]
     }

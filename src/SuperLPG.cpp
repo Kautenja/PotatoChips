@@ -16,6 +16,9 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 
+// TODO: mix / VCA CV attenuverter
+// TODO: loudness compensation for filter modes?
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -24,6 +27,9 @@
 struct SuperLPG : Module {
     /// the number of processing lanes on the module
     static constexpr unsigned LANES = 2;
+
+    /// the mode the filter is in
+    uint8_t filterMode = 0;
 
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -58,8 +64,8 @@ struct SuperLPG : Module {
     SuperLPG() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
-        configParam(PARAM_GAIN + 0, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Left Channel)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0.f, 2 * M_SQRT2, M_SQRT2 / 2, "Gain (Right Channel)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 0, 0, M_SQRT2, 1, "Gain (Left Channel)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 1, 0, M_SQRT2, 1, "Gain (Right Channel)", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Volume (Left Channel)");
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Volume (Right Channel)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Channel)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
@@ -67,10 +73,14 @@ struct SuperLPG : Module {
     }
 
     /// @brief Respond to the module being reset by the engine.
-    inline void onReset() override { filterMode = 0; }
+    inline void onReset() override {
+        filterMode = 0;
+    }
 
     /// @brief Respond to the module being randomized by the engine.
-    inline void onRandomize() override { filterMode = random::u32() % 4; }
+    inline void onRandomize() override {
+        filterMode = random::u32() % SonyS_DSP::GaussianInterpolationFilter::FILTER_MODES;
+    }
 
     /// @brief Return a JSON representation of this module's state
     ///
@@ -95,8 +105,8 @@ struct SuperLPG : Module {
     /// the Sony S-DSP sound chip emulator
     SonyS_DSP::GaussianInterpolationFilter apu[LANES][PORT_MAX_CHANNELS];
 
-    /// the mode the envelope generator is in
-    uint8_t filterMode = 0;
+    /// a loudness compensation multiplier for the filter mode
+    float loudnessCompensation = 1.f;
 
     /// a trigger for handling presses to the filter mode button
     rack::dsp::SchmittTrigger filterModeTrigger;
@@ -140,8 +150,10 @@ struct SuperLPG : Module {
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        // clamp the normalized input voltage into [-1, 1]
         const auto input = math::clamp(gain * voltage / 5.f, -1.f, 1.f);
-        return std::numeric_limits<uint8_t>::max() * input;
+        // "quantize" the floating point value into an 8-bit container
+        return std::numeric_limits<int8_t>::max() * input;
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -158,9 +170,15 @@ struct SuperLPG : Module {
         // set the number of polyphony channels for output ports
         for (unsigned port = 0; port < NUM_OUTPUTS; port++)
             outputs[port].setChannels(channels);
-        // detect presses to the trigger and cycle the mode
-        if (filterModeTrigger.process(params[PARAM_FILTER].getValue()))
-            filterMode = (filterMode + 1) % 4;
+        // detect presses to the trigger and cycle the filter mode
+        if (filterModeTrigger.process(params[PARAM_FILTER].getValue())) {
+            // update the filter mode and cycle around the maximal value
+            filterMode = (filterMode + 1) % SonyS_DSP::GaussianInterpolationFilter::FILTER_MODES;
+            // update loudness compensation based on the power 2 of the mode.
+            // Because the reciprocal of the filterMode is used on the emulator,
+            // this has the effect of making low modes get more compensation.
+            loudnessCompensation = pow(2, filterMode);
+        }
         // process audio samples on the chip engine.
         for (unsigned lane = 0; lane < LANES; lane++) {
             for (unsigned channel = 0; channel < channels; channel++) {
@@ -169,7 +187,9 @@ struct SuperLPG : Module {
                 apu[lane][channel].setVolume(getVolume(lane, channel));
                 float sample = apu[lane][channel].run(getInput(lane, channel));
                 sample = sample / (1 << 14);
-                outputs[OUTPUT_AUDIO + lane].setVoltage(5.f * sample, channel);
+                const auto voltage = 5.f * sample * loudnessCompensation;
+                // clamp to a real-world realistic boundary of 8V
+                outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
             }
         }
     }
@@ -215,6 +235,39 @@ struct SuperLPGWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(25 + 44 * i, 270), module, SuperLPG::INPUT_VOLUME + i));
             // Stereo Output Ports
             addOutput(createOutput<PJ301MPort>(Vec(25 + 44 * i, 324), module, SuperLPG::OUTPUT_AUDIO + i));
+        }
+    }
+
+    void appendContextMenu(Menu* menu) override {
+        // get a pointer to the module
+        SuperLPG* const module = dynamic_cast<SuperLPG*>(this->module);
+
+        /// a structure for holding changes to the model items
+        struct FilterModeItem : MenuItem {
+            /// the module to update
+            SuperLPG* module;
+
+            /// the currently selected envelope mode
+            int filterMode;
+
+            /// Response to an action update to this item
+            void onAction(const event::Action& e) override {
+                module->filterMode = filterMode;
+            }
+        };
+
+        // add the envelope mode selection item to the menu
+        menu->addChild(new MenuSeparator);
+        menu->addChild(createMenuLabel("Filter Mode"));
+        for (int i = 0; i < SonyS_DSP::GaussianInterpolationFilter::FILTER_MODES; i++) {
+            // get the label for the filter mode. the reciprocal of the
+            // filterMode is what is set in the module, so use the reciprocal
+            // here to get the correct label from the class function
+            auto label = SonyS_DSP::GaussianInterpolationFilter::getFilterLabel(3 - i);
+            auto item = createMenuItem<FilterModeItem>(label, CHECKMARK(module->filterMode == i));
+            item->module = module;
+            item->filterMode = i;
+            menu->addChild(item);
         }
     }
 };

@@ -62,6 +62,24 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
  public:
     /// the sample rate of the S-DSP in Hz
     static constexpr unsigned SAMPLE_RATE = 32000;
+    /// the number of valid filter modes
+    static constexpr uint8_t FILTER_MODES = 4;
+
+    /// @brief Return the filter label for the given index.
+    ///
+    /// @param index the index of the filter mode to get the label of
+    /// @returns a string label describing the given filter mode
+    ///
+    inline static std::string getFilterLabel(uint8_t index) {
+        // string representations of the envelope modes
+        static const std::string FILTER_MODE_LABELS[FILTER_MODES] = {
+            "Very Quiet",
+            "Quiet",
+            "Weird",
+            "Loud"
+        };
+        return FILTER_MODE_LABELS[index];
+    }
 
     /// @brief Initialize a new GaussianInterpolationFilter.
     GaussianInterpolationFilter() : unused_spacer_for_byte_alignment(0) { }

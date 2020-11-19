@@ -81,8 +81,8 @@ struct SuperEcho : Module {
         }
         configParam(PARAM_DELAY, 0, SonyS_DSP::Echo::DELAY_LEVELS, 0, "Echo Delay", " ms", 0, SonyS_DSP::Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
-        configParam(PARAM_GAIN + 0, 0, M_SQRT2, M_SQRT2 / 2, "Input Gain (Left Lane)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0, M_SQRT2, M_SQRT2 / 2, "Input Gain (Right Lane)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 0, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Left Lane)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 1, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Right Lane)", " dB", -10, 40);
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Lane)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Lane)");
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");

@@ -233,7 +233,7 @@ struct SuperEcho : Module {
     /// @param vuMeter the VU meter to get the data from
     /// @param light the light to update from the VU meter data
     ///
-    inline void setLight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
+    inline void setVULight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
         // get the global brightness scale from -12 to 3
         auto brightness = vuMeter.getBrightness(-12, 3);
         // set the red light based on total brightness and
@@ -272,10 +272,10 @@ struct SuperEcho : Module {
                 processChannel(args, channel);
         }
         if (lightDivider.process()) {  // update the LEDs on the panel
-            setLight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
-            setLight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
-            setLight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
-            setLight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
+            setVULight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setVULight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setVULight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setVULight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
             // CV indicators for the FIR filter
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; param++) {

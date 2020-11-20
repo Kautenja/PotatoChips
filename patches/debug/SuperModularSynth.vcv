@@ -50,7 +50,7 @@
     {
       "id": 175,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.3",
+      "version": "1.9.0",
       "model": "SuperADSR",
       "params": [
         {
@@ -104,7 +104,7 @@
     {
       "id": 176,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.3",
+      "version": "1.9.0",
       "model": "SuperEcho",
       "params": [
         {
@@ -210,7 +210,7 @@
     {
       "id": 177,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.3",
+      "version": "1.9.0",
       "model": "SuperVCA",
       "params": [
         {
@@ -259,7 +259,7 @@
     {
       "id": 179,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.3",
+      "version": "1.9.0",
       "model": "VRC6",
       "params": [
         {

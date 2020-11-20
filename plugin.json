@@ -1,6 +1,6 @@
 {
   "slug": "KautenjaDSP-PotatoChips",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "license": "GPL-3.0-or-later",
   "name": "KautenjaDSP Potato Chips",
   "brand": "KautenjaDSP",
@@ -100,41 +100,14 @@
       ]
     },
     {
-      "slug": "SuperSynth",
-      "name": "Super Synth",
-      "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSynth.pdf",
-      "tags": [
-        "Multiple",
-        "Noise",
-        "Oscillator",
-        "Polyphonic",
-        "Synth voice"
-      ]
-    },
-    {
       "slug": "SuperADSR",
       "name": "Super ADSR",
-      "description": "An emulation of the ADSR envelope from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "description": "An emulation of the ADSR envelope generator from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf",
       "tags": [
         "Dual",
         "Envelope generator",
         "Polyphonic"
-      ]
-    },
-    {
-      "slug": "SuperSampler",
-      "name": "Super Sampler",
-      "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSampler.pdf",
-      "tags": [
-        "Multiple",
-        "Effect",
-        "Filter",
-        "Panning",
-        "Polyphonic",
-        "Sampler"
       ]
     },
     {
@@ -155,7 +128,7 @@
     {
       "slug": "SuperVCA",
       "name": "Super Low-Pass Gate",
-      "description": "An emulation of the Gaussian low-pass filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "description": "An emulation of the Gaussian interpolation filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf",
       "tags": [
         "Dual",
@@ -167,12 +140,41 @@
       ]
     },
     {
-      "slug": "SuperSynthBlank1",
-      "name": "Super Synth Blank",
-      "description": "A blank panel with an S-SMP illustration.",
+      "slug": "Sony_S_SMP_Blank1",
+      "name": "Sony S-SMP Blank",
+      "description": "A blank panel with an illustration of the Sony S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "tags": [
         "Blank"
       ]
+    },
+    {
+      "slug": "SuperSampler",
+      "name": "Super Sampler",
+      "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSampler.pdf",
+      "tags": [
+        "Multiple",
+        "Effect",
+        "Filter",
+        "Panning",
+        "Polyphonic",
+        "Sampler"
+      ],
+      "disabled": true
+    },
+    {
+      "slug": "SuperSynth",
+      "name": "Super Synth",
+      "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSynth.pdf",
+      "tags": [
+        "Multiple",
+        "Noise",
+        "Oscillator",
+        "Polyphonic",
+        "Synth voice"
+      ],
+      "disabled": true
     },
     {
       "slug": "SN76489",

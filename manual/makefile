@@ -36,24 +36,20 @@ mPotKeys: build
 	make -C PotKeys
 	cp PotKeys/build/manual.pdf build/PotKeys.pdf
 
-mSCC: build
-	make -C SCC
-	cp SCC/build/manual.pdf build/SCC.pdf
-
-mTurboGrafx16: build
-	make -C TurboGrafx16
-	cp TurboGrafx16/build/manual.pdf build/TurboGrafx16.pdf
-
 mStepSaw: build
 	make -C StepSaw
 	cp StepSaw/build/manual.pdf build/StepSaw.pdf
 
-mSSMPEcho: build
-	make -C S_SMP_Echo
-	cp S_SMP_Echo/build/manual.pdf build/S_SMP_Echo.pdf
+mSuperEcho: build
+	make -C SuperEcho
+	cp SuperEcho/build/manual.pdf build/SuperEcho.pdf
 
-mSSMPGauss: build
-	make -C S_SMP_Gauss
-	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
+mSuperVCA: build
+	make -C SuperVCA
+	cp SuperVCA/build/manual.pdf build/SuperVCA.pdf
 
-manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mSCC mTurboGrafx16 mStepSaw mSSMPEcho mSSMPGauss
+mSuperADSR: build
+	make -C SuperADSR
+	cp SuperADSR/build/manual.pdf build/SuperADSR.pdf
+
+manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR

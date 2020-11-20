@@ -436,6 +436,6 @@ struct Voice4Op {
     }
 };
 
-};  // namespace YamahaYM2612
+}  // namespace YamahaYM2612
 
 #endif  // DSP_YAMAHA_YM2612_VOICE4OP_HPP_

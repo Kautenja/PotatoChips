@@ -21,8 +21,11 @@
 #include <cstring>
 #include "common.hpp"
 
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
+
 /// @brief An emulation of the echo effect from the Sony S-DSP.
-class Sony_S_DSP_Echo {
+class Echo {
  public:
     /// the number of FIR coefficients used by the chip's echo filter
     static const unsigned FIR_COEFFICIENT_COUNT = 8;
@@ -69,8 +72,8 @@ class Sony_S_DSP_Echo {
     uint8_t ram[SIZE_OF_RAM];
 
  public:
-    /// @brief Initialize a new Sony_S_DSP_Echo.
-    Sony_S_DSP_Echo() { reset(); }
+    /// @brief Initialize a new Echo.
+    Echo() { reset(); }
 
     /// @brief Clear state and silence everything.
     void reset() {
@@ -184,5 +187,7 @@ class Sony_S_DSP_Echo {
         return output_buffer;
     }
 };
+
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_ECHO_HPP_

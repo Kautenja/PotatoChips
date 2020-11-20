@@ -20,10 +20,17 @@
 
 #include "common.hpp"
 
+/// @brief Emulations of components from the Sony S-DSP chip
+namespace SonyS_DSP {
+
 /// @brief An emulation of the ADSR envelope generator from the Sony S-DSP.
 /// @details
 /// The emulator consumes 8 bytes of RAM and is aligned to 8-byte addresses.
-class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
+class __attribute__((packed, aligned(8))) ADSR {
+ public:
+    /// The stages of the ADSR envelope generator.
+    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
+
  private:
     // The following fields are in a particular order for byte-alignment
     // -----------------------------------------------------------------------
@@ -50,8 +57,6 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     // -----------------------------------------------------------------------
     // Byte 4
     // -----------------------------------------------------------------------
-    /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
     /// the current stage of the envelope generator
     EnvelopeStage envelope_stage = EnvelopeStage::Off;
     // -----------------------------------------------------------------------
@@ -127,8 +132,8 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     }
 
  public:
-    /// @brief Initialize a new Sony_S_DSP_ADSR.
-    Sony_S_DSP_ADSR() :
+    /// @brief Initialize a new ADSR.
+    ADSR() :
         attack(0),
         decay(0),
         unused_spacer_for_byte_alignment(0),
@@ -165,6 +170,9 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
     ///
     inline void setAmplitude(int8_t value) { amplitude = value; }
 
+    /// @brief Return the current stage the envelope generator is in.
+    inline EnvelopeStage getStage() const { return envelope_stage; }
+
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///
     /// @param trigger a boolean trigger, True to activate, False otherwise
@@ -189,5 +197,7 @@ class __attribute__((packed, aligned(8))) Sony_S_DSP_ADSR {
         return (static_cast<int16_t>(clockEnvelope()) * amplitude) >> 7;
     }
 };
+
+}  // namespace SonyS_DSP
 
 #endif  // DSP_SONY_S_DSP_ADSR_HPP_

@@ -314,22 +314,22 @@ generator with a wave-table synthesizer.
 See the [Manual][PalletTownWavesSystem] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(ADSR) -->
+<!-- MARK: Super ADSR -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(ADSR)
+<h2 align="center">
+<img alt="Super ADSR Logo" src="manual/SuperADSR/img/Logo.svg">
+</h2>
 
-S-SMP(ADSR) is an emulation of the ADSR from the Sony S-SMP audio processing
+Super ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
 unit in the [Super Nintendo Entertainment System (SNES)][SNES]. The envelope
 generator has three stages, (1) an attack stage that ramps up linearly to the
 total level, (2) a decay stage that ramps down exponentially to a sustain
 level, and (3) a sustain/release stage that ramps down exponentially from the
 sustain level to zero.
 
-S-SMP(ADSR) provides the key features of the ADSR envelope generator of the
+Super ADSR provides the key features of the ADSR envelope generator of the
 S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Processing:** Two envelope generators on one module for
     stereo modulation, cross modulation, or both!
 -   **Total Level Control:** Control over the overall level of the envelope
@@ -338,50 +338,55 @@ S-SMP chip, namely,
     control voltages.
 
 <p align="center">
-<img alt="S-SMP(ADSR)" src="manual/S_SMP_ADSR/img/Module.svg">
+<img alt="Super ADSR" src="manual/SuperADSR/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_ADSR] for more information about the features of this module.
+See the [Manual][SuperADSR] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(BRR) -->
+<!-- MARK: Super VCA -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(BRR)
+<h2 align="center">
+<img alt="Super VCA Logo" src="manual/SuperVCA/img/Logo.svg">
+</h2>
 
-S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
-engine from the Sony S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)][SNES]. The sample playback engine
-has a compression ratio of _32:9_ over standard 16-bit PCM, and includes a
-reconstruction filter.
+Super VCA is an emulation of the BRR filter & Gaussian interpolation filter
+from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
+were applied to BRR sample blocks on the SNES and the Gaussian interpolation
+filter was applied to output audio and removed high-frequency content from the
+signal.
 
-S-SMP(BRR) provides the key features of the BRR sample playback engine of the
-S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
--   **Multi-channel Processing:** 8 different mono sample playback channels.
--   **Stereo Panning:** Split mono samples into the stereo field and introduce
-    surround sound effects.
--   **Reconstruction Filter:** Four-mode reconstruction filter including a
-    bypass mode and three low-pass filter modes.
+Super VCA provides the key features of the BRR filter and Gaussian filter
+of the S-SMP chip, namely,
+-   **Stereo Processing:** Dual processing channels for stereo effects or other
+    create multi-tracking applications.
+-   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine
+    that act as low-pass filters.
+-   **Gaussian Interpolation Filter:** A filter that removes high-frequency
+    content and adds subtle distortion. This filter provides the muffling
+    character that fans of SNES audio will find familiar.
 
 <p align="center">
-<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/Module.svg">
+<img alt="Super VCA" src="manual/SuperVCA/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_BRR] for more information about the features of this module.
+See the [Manual][SuperVCA] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(Echo) -->
+<!-- MARK: Super Echo -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(Echo)
+<h2 align="center">
+<img alt="Super Echo Logo" src="manual/SuperEcho/img/Logo.svg">
+</h2>
 
-S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP
+Super Echo is a Eurorack module that emulates the echo effect from the S-SMP
 sound chip on the [Super Nintendo Entertainment System (SNES)][SNES].The Echo
 effect of the S-SMP chip has _15_ different delay levels of _16ms_ each, a
 _64KB_ echo buffer, an 8-tap FIR filter for shaping the sound of the echo,
@@ -389,10 +394,8 @@ parameterized feedback, and parameterized dry / wet mix level. The echo buffer
 is stereo, although the echo parameters and coefficients of the FIR filter are
 the same for both channels.
 
-S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
+Super Echo provides the key features of the echo module of the S-SMP chip,
 namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Processing:** Echo buffer for two independent inputs in stereo
     configuration. The parameters are the same for both inputs, but the inputs
     have their own dedicated echo buffers.
@@ -410,98 +413,59 @@ namely,
     popular SNES games.
 
 <p align="center">
-<img alt="S-SMP(Echo)" src="manual/S_SMP_Echo/img/Module.svg">
+<img alt="Super Echo" src="manual/SuperEcho/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_Echo] for more information about the features of this module.
+See the [Manual][SuperEcho] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP-Gauss -->
+<!-- MARK: S-SMP(BRR) -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(Gauss)
+<!-- ## S-SMP(BRR)
 
-S-SMP(Gauss) is an emulation of the BRR filter & Gaussian interpolation filter
-from the Sony S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
-were applied to BRR sample blocks on the SNES and the Gaussian interpolation
-filter was applied to output audio and removed high-frequency content from the
-signal.
+S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
+engine from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)][SNES]. The sample playback engine
+has a compression ratio of _32:9_ over standard 16-bit PCM, and includes a
+reconstruction filter.
 
-S-SMP(Gauss) provides the key features of the BRR filter and Gaussian filter
-of the S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
--   **Stereo Processing:** Dual processing channels for stereo effects or other
-    create multi-tracking applications.
--   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine
-    that act as low-pass filters.
--   **Gaussian Interpolation Filter:** A filter that removes high-frequency
-    content and adds subtle distortion. This filter provides the muffling
-    character that fans of SNES audio will find familiar.
+S-SMP(BRR) provides the key features of the BRR sample playback engine of the
+S-SMP chip, namely,
+-   **Multi-channel Processing:** 8 different mono sample playback channels.
+-   **Stereo Panning:** Split mono samples into the stereo field and introduce
+    surround sound effects.
+-   **Reconstruction Filter:** Four-mode reconstruction filter including a
+    bypass mode and three low-pass filter modes.
 
 <p align="center">
-<img alt="S-SMP(Gauss)" src="manual/S_SMP_Gauss/img/Module.svg">
+<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_Gauss] for more information about the features of this module.
+See the [Manual][S_SMP_BRR] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP _(Coming Soon!)_
+<!-- ## S-SMP _(Coming Soon!)_
 
 S-SMP is an emulation of the Sony S-SMP audio processing unit from the
 [Super Nintendo Entertainment System (SNES)][SNES].
 The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
 the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 
-<!-- <p align="center">
+<p align="center">
 <img alt="S-SMP" src="manual/S_SMP/img/Module.svg">
 </p>
 
 ### Features
 
 See the [Manual][S_SMP] for more information about the features of this module. -->
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Wave Creative Modulator -->
-<!-- ------------------------------------------------------------ -->
-
-## Wave Creative Modulator _(Coming Soon!)_
-
-**Wave Creative Modulator** is an emulation of the
-[Konami Sound Creative Chip (SCC)][KonamiSCC] audio processing unit.
-
-<!-- <p align="center">
-<img alt="Wave Creative Modulator" src="manual/SCC/img/Module.svg">
-</p>
-
-### Features
-
-See the [Manual][WaveCreativeModulator] for more information about the features of this module. -->
-
-<!-- ------------------------------------------------------------ -->
-<!-- MARK: Grafx Turbillator -->
-<!-- ------------------------------------------------------------ -->
-
-## Grafx Turbillator _(Coming Soon!)_
-
-**Grafx Turbillator** is an emulation of the [NEC TurboGrafx16][NECTurboGrafx16]
-audio processing unit.
-
-<!-- <p align="center">
-<img alt="Grafx Turbillator" src="manual/TurboGrafx16/img/Module.svg">
-</p>
-
-### Features
-
-See the [Manual][GrafxTurbillator] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Links -->
@@ -537,14 +501,12 @@ See the [Manual][GrafxTurbillator] for more information about the features of th
 [Pulses]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf
 [PalletTownWavesSystem]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf
 [StepSaw]: https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf
-[S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
-[S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
-[S_SMP_Echo]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Echo.pdf
+[SuperADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf
+[SuperVCA]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf
+[SuperEcho]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf
 [S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 [Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
 [PotKeys]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf
-[WaveCreativeModulator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/WaveCreativeModulator.pdf
-[GrafxTurbillator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/GrafxTurbillator.pdf

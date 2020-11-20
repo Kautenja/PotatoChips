@@ -5,7 +5,7 @@
     <desc>Created with Sketch.</desc>
     <g id="SuperEcho" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="bg" fill-rule="nonzero">
-            <g fill="#C5C6BF" id="Background">
+            <g fill="#E6E6E6" id="Background">
                 <rect x="0" y="0" width="240" height="380" rx="1"></rect>
             </g>
             <g id="Logo/Panel/LightMode" transform="translate(88.000000, 364.000000)" fill="#000000">
@@ -42,7 +42,7 @@
                     <polygon id="Triangle-Copy-5" transform="translate(5.000000, 218.902344) scale(1, -1) translate(-5.000000, -218.902344) " points="5 215.402344 10 222.402344 0 222.402344"></polygon>
                     <polygon id="Triangle-Copy-6" transform="translate(5.000000, 261.902344) scale(1, -1) translate(-5.000000, -261.902344) " points="5 258.402344 10 265.402344 0 265.402344"></polygon>
                 </g>
-                <g id="lines" fill="#F2F2F2" fill-rule="nonzero">
+                <g id="lines" fill="#696969" fill-rule="nonzero">
                     <g id="Group" transform="translate(0.833333, 0.500000)">
                         <path d="M3,0 L3,2 L6,2 L6,0 L3,0 Z M7,0 L7,2 L10,2 L10,0 L7,0 Z M11,0 L11,2 L14,2 L14,0 L11,0 Z M15,0 L15,2 L18,2 L18,0 L15,0 Z M19,0 L19,2 L22,2 L22,0 L19,0 Z M23,0 L23,2 L26,2 L26,0 L23,0 Z M27,0 L27,2 L30,2 L30,0 L27,0 Z M31,0 L31,2 L34,2 L34,0 L31,0 Z M35,0 L35,2 L38,2 L38,0 L35,0 Z M39,0 L39,2 L42,2 L42,0 L39,0 Z M43,0 L43,2 L46,2 L46,0 L43,0 Z M47,0 L47,2 L50,2 L50,0 L47,0 Z M51,0 L51,2 L54,2 L54,0 L51,0 Z M55,0 L55,2 L58,2 L58,0 L55,0 Z M59,0 L59,2 L62,2 L62,0 L59,0 Z M63,0 L63,2 L66,2 L66,0 L63,0 Z M67,0 L67,2 L70,2 L70,0 L67,0 Z M71,0 L71,2 L74,2 L74,0 L71,0 Z M75,0 L75,2 L78,2 L78,0 L75,0 Z" id="Line-2-Copy-15"></path>
                         <path d="M-2.84217094e-14,43.5 L-2.84217094e-14,45.5 L3,45.5 L3,43.5 L-2.84217094e-14,43.5 Z M4,43.5 L4,45.5 L7,45.5 L7,43.5 L4,43.5 Z M8,43.5 L8,45.5 L11,45.5 L11,43.5 L8,43.5 Z M12,43.5 L12,45.5 L15,45.5 L15,43.5 L12,43.5 Z M16,43.5 L16,45.5 L19,45.5 L19,43.5 L16,43.5 Z M20,43.5 L20,45.5 L23,45.5 L23,43.5 L20,43.5 Z M24,43.5 L24,45.5 L27,45.5 L27,43.5 L24,43.5 Z M28,43.5 L28,45.5 L31,45.5 L31,43.5 L28,43.5 Z M32,43.5 L32,45.5 L35,45.5 L35,43.5 L32,43.5 Z M36,43.5 L36,45.5 L39,45.5 L39,43.5 L36,43.5 Z M40,43.5 L40,45.5 L43,45.5 L43,43.5 L40,43.5 Z M44,43.5 L44,45.5 L47,45.5 L47,43.5 L44,43.5 Z M48,43.5 L48,45.5 L51,45.5 L51,43.5 L48,43.5 Z M52,43.5 L52,45.5 L55,45.5 L55,43.5 L52,43.5 Z M56,43.5 L56,45.5 L59,45.5 L59,43.5 L56,43.5 Z M60,43.5 L60,45.5 L63,45.5 L63,43.5 L60,43.5 Z M64,43.5 L64,45.5 L67,45.5 L67,43.5 L64,43.5 Z M68,43.5 L68,45.5 L71,45.5 L71,43.5 L68,43.5 Z M72,43.5 L72,45.5 L75,45.5 L75,43.5 L72,43.5 Z" id="Line-2-Copy-14"></path>

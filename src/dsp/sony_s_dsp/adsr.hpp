@@ -27,6 +27,10 @@ namespace SonyS_DSP {
 /// @details
 /// The emulator consumes 8 bytes of RAM and is aligned to 8-byte addresses.
 class __attribute__((packed, aligned(8))) ADSR {
+ public:
+    /// The stages of the ADSR envelope generator.
+    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
+
  private:
     // The following fields are in a particular order for byte-alignment
     // -----------------------------------------------------------------------
@@ -53,8 +57,6 @@ class __attribute__((packed, aligned(8))) ADSR {
     // -----------------------------------------------------------------------
     // Byte 4
     // -----------------------------------------------------------------------
-    /// The stages of the ADSR envelope generator.
-    enum class EnvelopeStage : uint8_t { Off, Attack, Decay, Sustain, Release };
     /// the current stage of the envelope generator
     EnvelopeStage envelope_stage = EnvelopeStage::Off;
     // -----------------------------------------------------------------------
@@ -167,6 +169,9 @@ class __attribute__((packed, aligned(8))) ADSR {
     /// @param value the amplitude level to use.
     ///
     inline void setAmplitude(int8_t value) { amplitude = value; }
+
+    /// @brief Return the current stage the envelope generator is in.
+    inline EnvelopeStage getStage() const { return envelope_stage; }
 
     /// @brief Run DSP for some samples and write them to the given buffer.
     ///

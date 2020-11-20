@@ -105,11 +105,11 @@
         },
         {
           "id": 2,
-          "value": 10.0
+          "value": 12.0
         },
         {
           "id": 3,
-          "value": 10.0
+          "value": 15.0
         },
         {
           "id": 4,
@@ -121,19 +121,19 @@
         },
         {
           "id": 6,
-          "value": 5.0
+          "value": 3.0
         },
         {
           "id": 7,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 8,
-          "value": 20.0
+          "value": 10.0
         },
         {
           "id": 9,
-          "value": 20.0
+          "value": 4.0
         }
       ],
       "leftModuleId": 3,

@@ -17,6 +17,9 @@
 #include "plugin.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
 
+// TODO: inverted output
+// TODO: CV level control
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -51,11 +54,6 @@ struct SuperADSR : Module {
     enum InputIds {
         ENUMS(INPUT_GATE,          LANES),
         ENUMS(INPUT_RETRIG,        LANES),
-        ENUMS(INPUT_AMPLITUDE,     LANES),
-        ENUMS(INPUT_ATTACK,        LANES),
-        ENUMS(INPUT_DECAY,         LANES),
-        ENUMS(INPUT_SUSTAIN_LEVEL, LANES),
-        ENUMS(INPUT_SUSTAIN_RATE,  LANES),
         NUM_INPUTS
     };
 
@@ -89,93 +87,6 @@ struct SuperADSR : Module {
     }
 
  protected:
-    void set_light(unsigned light, unsigned lane, float cv, float sample_time) {
-        if (cv > 0) {
-            lights[light + 3 * lane + 0].setSmoothBrightness(0, sample_time);
-            lights[light + 3 * lane + 1].setSmoothBrightness(cv / 10.f, sample_time);
-            lights[light + 3 * lane + 2].setSmoothBrightness(0, sample_time);
-        } else {
-            lights[light + 3 * lane + 0].setSmoothBrightness(-cv / 10.f, sample_time);
-            lights[light + 3 * lane + 1].setSmoothBrightness(0, sample_time);
-            lights[light + 3 * lane + 2].setSmoothBrightness(0, sample_time);
-        }
-    }
-
-    /// @brief Return the value of the attack parameter from the panel.
-    ///
-    /// @param channel the polyphonic channel to get the attack parameter for
-    /// @param lane the processing lane to get the attack rate parameter for
-    /// @returns the 8-bit attack parameter after applying CV modulations
-    ///
-    inline uint8_t getAttack(unsigned channel, unsigned lane, bool update_light = true) {
-        const float param = params[PARAM_ATTACK + lane].getValue();
-        auto port = inputs[INPUT_ATTACK + lane];
-        const float cv = port.isMonophonic() ? port.getVoltageSum() : port.getVoltage(channel);
-        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        // invert attack so it increases in time as it increase in value
-        return 15 - clamp(param + mod, 0.f, 15.f);
-    }
-
-    /// @brief Return the value of the decay parameter from the panel.
-    ///
-    /// @param channel the polyphonic channel to get the decay parameter for
-    /// @param lane the processing lane to get the decay rate parameter for
-    /// @returns the 8-bit decay parameter after applying CV modulations
-    ///
-    inline uint8_t getDecay(unsigned channel, unsigned lane) {
-        const float param = params[PARAM_DECAY + lane].getValue();
-        auto port = inputs[INPUT_DECAY + lane];
-        const float cv = port.isMonophonic() ? port.getVoltageSum() : port.getVoltage(channel);
-        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        // invert decay so it increases in time as it increase in value
-        return 7 - clamp(param + mod, 0.f, 7.f);
-    }
-
-    /// @brief Return the value of the sustain rate parameter from the panel.
-    ///
-    /// @param channel the polyphonic channel to get the sustain rate parameter for
-    /// @param lane the processing lane to get the sustain rate parameter for
-    /// @returns the 8-bit sustain rate parameter after applying CV modulations
-    ///
-    inline uint8_t getSustainRate(unsigned channel, unsigned lane) {
-        const float param = params[PARAM_SUSTAIN_RATE + lane].getValue();
-        auto port = inputs[INPUT_SUSTAIN_RATE + lane];
-        const float cv = port.isMonophonic() ? port.getVoltageSum() : port.getVoltage(channel);
-        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        // invert sustain rate so it increases in time as it increase in value
-        return 31 - clamp(param + mod, 0.f, 31.f);
-    }
-
-    /// @brief Return the value of the sustain level parameter from the panel.
-    ///
-    /// @param channel the polyphonic channel to get the sustain level parameter for
-    /// @param lane the processing lane to get the sustain level parameter for
-    /// @returns the 8-bit sustain level parameter after applying CV modulations
-    ///
-    inline uint8_t getSustainLevel(unsigned channel, unsigned lane) {
-        const float param = params[PARAM_SUSTAIN_LEVEL + lane].getValue();
-        auto port = inputs[INPUT_SUSTAIN_LEVEL + lane];
-        const float cv = port.isMonophonic() ? port.getVoltageSum() : port.getVoltage(channel);
-        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        return clamp(param + mod, 0.f, 7.f);
-    }
-
-    /// @brief Return the value of the amplitude parameter from the panel.
-    ///
-    /// @param channel the polyphonic channel to get the amplitude parameter for
-    /// @param lane the processing lane to get the amplitude parameter for
-    /// @returns the 8-bit amplitude parameter after applying CV modulations
-    ///
-    inline int8_t getAmplitude(unsigned channel, unsigned lane) {
-        const float param = params[PARAM_AMPLITUDE + lane].getValue();
-        auto port = inputs[INPUT_AMPLITUDE + lane];
-        const float cv = port.isMonophonic() ? port.getVoltageSum() : port.getVoltage(channel);
-        const float mod = std::numeric_limits<int8_t>::max() * cv / 10.f;
-        static constexpr float MIN = std::numeric_limits<int8_t>::min();
-        static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, MIN, MAX);
-    }
-
     /// @brief Return true if the envelope for given lane and polyphony channel
     /// is being triggered.
     ///
@@ -203,11 +114,11 @@ struct SuperADSR : Module {
         // cache the APU for this lane and channel
         SonyS_DSP::ADSR& apu = apus[lane][channel];
         // set the ADSR parameters for this APU
-        apu.setAttack(getAttack(channel, lane));
-        apu.setDecay(getDecay(channel, lane));
-        apu.setSustainRate(getSustainRate(channel, lane));
-        apu.setSustainLevel(getSustainLevel(channel, lane));
-        apu.setAmplitude(getAmplitude(channel, lane));
+        apu.setAttack(15 - params[PARAM_ATTACK + lane].getValue());
+        apu.setDecay(7 - params[PARAM_DECAY + lane].getValue());
+        apu.setSustainRate(31 - params[PARAM_SUSTAIN_RATE + lane].getValue());
+        apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL + lane].getValue());
+        apu.setAmplitude(params[PARAM_AMPLITUDE + lane].getValue());
         // trigger this APU and process the output
         auto trigger = getTrigger(channel, lane);
         auto sample = apu.run(trigger, gateTrigger[lane][channel].state);
@@ -236,11 +147,24 @@ struct SuperADSR : Module {
         if (lightDivider.process()) {
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned lane = 0; lane < LANES; lane++) {
-                set_light(LIGHT_AMPLITUDE, lane, inputs[INPUT_AMPLITUDE + lane].getVoltage(0), sample_time);
-                set_light(LIGHT_ATTACK, lane, inputs[INPUT_ATTACK + lane].getVoltage(0), sample_time);
-                set_light(LIGHT_DECAY, lane, inputs[INPUT_DECAY + lane].getVoltage(0), sample_time);
-                set_light(LIGHT_SUSTAIN_LEVEL, lane, inputs[INPUT_SUSTAIN_LEVEL + lane].getVoltage(0), sample_time);
-                set_light(LIGHT_SUSTAIN_RATE, lane, inputs[INPUT_SUSTAIN_RATE + lane].getVoltage(0), sample_time);
+                // set amplitude light based on the output
+                auto output = outputs[OUTPUT_ENVELOPE + lane].getVoltage() / 10.f;
+                if (output > 0) {  // positive, green light
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 0].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 1].setSmoothBrightness(output, sample_time);
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 2].setSmoothBrightness(0, sample_time);
+                } else {  // negative, red light
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 0].setSmoothBrightness(-output, sample_time);
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 1].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_AMPLITUDE + 3 * lane + 2].setSmoothBrightness(0, sample_time);
+                }
+                // set stage lights based on active stage
+                for (int i = 0; i < 4; i++) {
+                    const auto active = static_cast<int>(apus[lane][0].getStage()) == i + 1;
+                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 0].setSmoothBrightness(active, sample_time);
+                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 1].setSmoothBrightness(active, sample_time);
+                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 2].setSmoothBrightness(active, sample_time);
+                }
             }
         }
     }
@@ -274,27 +198,22 @@ struct SuperADSRWidget : ModuleWidget {
             auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(66, 40 + 169 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
             amplitude->snap = true;
             addParam(amplitude);
-            addInput(createInput<PJ301MPort>(Vec(61, 157 + 169 * i), module, SuperADSR::INPUT_AMPLITUDE + i));
             // Attack
             auto attack = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(100, 40 + 169 * i), module, SuperADSR::PARAM_ATTACK + i, SuperADSR::LIGHT_ATTACK + 3 * i);
             attack->snap = true;
             addParam(attack);
-            addInput(createInput<PJ301MPort>(Vec(95, 157 + 169 * i), module, SuperADSR::INPUT_ATTACK + i));
             // Decay
             auto decay = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(134, 40 + 169 * i), module, SuperADSR::PARAM_DECAY + i, SuperADSR::LIGHT_DECAY + 3 * i);
             decay->snap = true;
             addParam(decay);
-            addInput(createInput<PJ301MPort>(Vec(129, 157 + 169 * i), module, SuperADSR::INPUT_DECAY + i));
             // Sustain Level
             auto sustainLevel = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(168, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_LEVEL + i, SuperADSR::LIGHT_SUSTAIN_LEVEL + 3 * i);
             sustainLevel->snap = true;
             addParam(sustainLevel);
-            addInput(createInput<PJ301MPort>(Vec(163, 157 + 169 * i), module, SuperADSR::INPUT_SUSTAIN_LEVEL + i));
             // Sustain Rate
             auto sustainRate = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(202, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_RATE + i, SuperADSR::LIGHT_SUSTAIN_RATE + 3 * i);
             sustainRate->snap = true;
             addParam(sustainRate);
-            addInput(createInput<PJ301MPort>(Vec(197, 157 + 169 * i), module, SuperADSR::INPUT_SUSTAIN_RATE + i));
         }
     }
 };

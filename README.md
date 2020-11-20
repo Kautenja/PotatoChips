@@ -424,7 +424,7 @@ See the [Manual][SuperEcho] for more information about the features of this modu
 <!-- MARK: S-SMP(BRR) -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(BRR)
+<!-- ## S-SMP(BRR)
 
 S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
 engine from the Sony S-SMP audio processing unit in the
@@ -446,20 +446,20 @@ S-SMP chip, namely,
 
 ### Features
 
-See the [Manual][S_SMP_BRR] for more information about the features of this module.
+See the [Manual][S_SMP_BRR] for more information about the features of this module. -->
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP _(Coming Soon!)_
+<!-- ## S-SMP _(Coming Soon!)_
 
 S-SMP is an emulation of the Sony S-SMP audio processing unit from the
 [Super Nintendo Entertainment System (SNES)][SNES].
 The S-SMP is a complex module containing a DSP chip (the S-DSP), a CPU chip (
 the SPC700), 64KB of total RAM storage, an amplifier, and a DAC.
 
-<!-- <p align="center">
+<p align="center">
 <img alt="S-SMP" src="manual/S_SMP/img/Module.svg">
 </p>
 

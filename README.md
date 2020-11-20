@@ -314,19 +314,21 @@ generator with a wave-table synthesizer.
 See the [Manual][PalletTownWavesSystem] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(ADSR) -->
+<!-- MARK: Super ADSR -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(ADSR)
+<h2 align="center">
+<img alt="Super ADSR Logo" src="manual/SuperADSR/img/Logo.svg">
+</h2>
 
-S-SMP(ADSR) is an emulation of the ADSR from the Sony S-SMP audio processing
+Super ADSR is an emulation of the ADSR from the Sony S-SMP audio processing
 unit in the [Super Nintendo Entertainment System (SNES)][SNES]. The envelope
 generator has three stages, (1) an attack stage that ramps up linearly to the
 total level, (2) a decay stage that ramps down exponentially to a sustain
 level, and (3) a sustain/release stage that ramps down exponentially from the
 sustain level to zero.
 
-S-SMP(ADSR) provides the key features of the ADSR envelope generator of the
+Super ADSR provides the key features of the ADSR envelope generator of the
 S-SMP chip, namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
@@ -338,12 +340,12 @@ S-SMP chip, namely,
     control voltages.
 
 <p align="center">
-<img alt="S-SMP(ADSR)" src="manual/S_SMP_ADSR/img/Module.svg">
+<img alt="Super ADSR" src="manual/SuperADSR/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_ADSR] for more information about the features of this module.
+See the [Manual][SuperADSR] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP(BRR) -->
@@ -376,12 +378,14 @@ S-SMP chip, namely,
 See the [Manual][S_SMP_BRR] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(Echo) -->
+<!-- MARK: Super Echo -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(Echo)
+<h2 align="center">
+<img alt="Super Echo Logo" src="manual/SuperEcho/img/Logo.svg">
+</h2>
 
-S-SMP(Echo) is a Eurorack module that emulates the echo effect from the S-SMP
+Super Echo is a Eurorack module that emulates the echo effect from the S-SMP
 sound chip on the [Super Nintendo Entertainment System (SNES)][SNES].The Echo
 effect of the S-SMP chip has _15_ different delay levels of _16ms_ each, a
 _64KB_ echo buffer, an 8-tap FIR filter for shaping the sound of the echo,
@@ -389,7 +393,7 @@ parameterized feedback, and parameterized dry / wet mix level. The echo buffer
 is stereo, although the echo parameters and coefficients of the FIR filter are
 the same for both channels.
 
-S-SMP(Echo) provides the key features of the echo module of the S-SMP chip,
+Super Echo provides the key features of the echo module of the S-SMP chip,
 namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
@@ -410,7 +414,7 @@ namely,
     popular SNES games.
 
 <p align="center">
-<img alt="S-SMP(Echo)" src="manual/SuperEcho/img/Module.svg">
+<img alt="Super Echo" src="manual/SuperEcho/img/Module.svg">
 </p>
 
 ### Features
@@ -418,19 +422,21 @@ namely,
 See the [Manual][SuperEcho] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP-Gauss -->
+<!-- MARK: Super VCA -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(Gauss)
+<h2 align="center">
+<img alt="Super VCA Logo" src="manual/SuperVCA/img/Logo.svg">
+</h2>
 
-S-SMP(Gauss) is an emulation of the BRR filter & Gaussian interpolation filter
+Super VCA is an emulation of the BRR filter & Gaussian interpolation filter
 from the Sony S-SMP audio processing unit in the
 [Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
 were applied to BRR sample blocks on the SNES and the Gaussian interpolation
 filter was applied to output audio and removed high-frequency content from the
 signal.
 
-S-SMP(Gauss) provides the key features of the BRR filter and Gaussian filter
+Super VCA provides the key features of the BRR filter and Gaussian filter
 of the S-SMP chip, namely,
 -   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
     audio inputs and outputs of the module are locked to _32kHz_.
@@ -443,12 +449,12 @@ of the S-SMP chip, namely,
     character that fans of SNES audio will find familiar.
 
 <p align="center">
-<img alt="S-SMP(Gauss)" src="manual/S_SMP_Gauss/img/Module.svg">
+<img alt="Super VCA" src="manual/SuperVCA/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_Gauss] for more information about the features of this module.
+See the [Manual][SuperVCA] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->
@@ -503,8 +509,8 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 [Pulses]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf
 [PalletTownWavesSystem]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf
 [StepSaw]: https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf
-[S_SMP_ADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_ADSR.pdf
-[S_SMP_Gauss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_Gauss.pdf
+[SuperADSR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf
+[SuperVCA]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf
 [SuperEcho]: https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf
 [S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf

@@ -40,12 +40,16 @@ mStepSaw: build
 	make -C StepSaw
 	cp StepSaw/build/manual.pdf build/StepSaw.pdf
 
-mSSMPEcho: build
+mSuperEcho: build
 	make -C SuperEcho
 	cp SuperEcho/build/manual.pdf build/SuperEcho.pdf
 
-mSSMPGauss: build
-	make -C S_SMP_Gauss
-	cp S_SMP_Gauss/build/manual.pdf build/S_SMP_Gauss.pdf
+mSuperVCA: build
+	make -C SuperVCA
+	cp SuperVCA/build/manual.pdf build/SuperVCA.pdf
 
-manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSSMPEcho mSSMPGauss
+mSuperADSR: build
+	make -C SuperADSR
+	cp SuperADSR/build/manual.pdf build/SuperADSR.pdf
+
+manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR

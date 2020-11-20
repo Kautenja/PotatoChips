@@ -330,8 +330,6 @@ sustain level to zero.
 
 Super ADSR provides the key features of the ADSR envelope generator of the
 S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Processing:** Two envelope generators on one module for
     stereo modulation, cross modulation, or both!
 -   **Total Level Control:** Control over the overall level of the envelope
@@ -361,8 +359,6 @@ reconstruction filter.
 
 S-SMP(BRR) provides the key features of the BRR sample playback engine of the
 S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Multi-channel Processing:** 8 different mono sample playback channels.
 -   **Stereo Panning:** Split mono samples into the stereo field and introduce
     surround sound effects.
@@ -395,8 +391,6 @@ the same for both channels.
 
 Super Echo provides the key features of the echo module of the S-SMP chip,
 namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Processing:** Echo buffer for two independent inputs in stereo
     configuration. The parameters are the same for both inputs, but the inputs
     have their own dedicated echo buffers.
@@ -438,8 +432,6 @@ signal.
 
 Super VCA provides the key features of the BRR filter and Gaussian filter
 of the S-SMP chip, namely,
--   **_32KHz_ Sample Rate:** The S-SMP was designed to run at _32kHz_, so the
-    audio inputs and outputs of the module are locked to _32kHz_.
 -   **Stereo Processing:** Dual processing channels for stereo effects or other
     create multi-tracking applications.
 -   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine

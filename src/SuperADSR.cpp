@@ -123,7 +123,9 @@ struct SuperADSR : Module {
         // trigger this APU and process the output
         auto trigger = getTrigger(channel, lane);
         auto sample = apu.run(trigger, gateTrigger[lane][channel].state);
-        outputs[OUTPUT_ENVELOPE + lane].setVoltage(10.f * sample / 128.f, channel);
+        const auto voltage = 10.f * sample / 128.f;
+        outputs[OUTPUT_ENVELOPE + lane].setVoltage(voltage, channel);
+        outputs[OUTPUT_INVERTED + lane].setVoltage(-voltage, channel);
     }
 
     /// @brief Process the CV inputs for the given channel.

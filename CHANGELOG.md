@@ -255,34 +255,30 @@
 
 -   fix manual link for Boss Fight
 
-## 1.8.4 (TBD)
+## 1.9.0 (2020-11-20)
 
--   right click to edit waveforms on wavetable editor-based modules
-
-## 1.9.0 (TBD)
-
--   new module: S-SMP(Echo)
-    -   echo effect from the SNES (16-bit PCM @ 32kHz)
+-   new module: Super Echo
+    -   echo effect from the SNES (16-bit PCM)
         -   Gaussian filter removed
         -   BRR down-sampling removed
     -   2 channels of echo effect
         -   feedback and delay parameters with CV control
         -   stereo mix control with surround effect through phasing
     -   8-tap FIR filter with coefficient parameterization and CV control
--   new module: S-SMP(Gauss)
-    -   Gaussian filter from the SNES
-    -   low-pass filter locked to 16kHz with parameterized coefficients
+    -   extended delay control up to _512ms_
+-   new module: Super VCA
+    -   Gaussian interpolation filter from the SNES
+    -   low-pass IIR filter with parameterized coefficients (for operational modes)
     -   designed to act as a low-pass gate / VCA without a VCF
--   new module: S-SMP(ADSR)
+-   new module: Super ADSR
     -   Envelope generator from the SNES
-    -   Attack, Decay, Sustain, and Release stages
--   new module: S-SMP(BRR)
-    -   Bit-Rate Reduction (BRR) based sampler/sample player
+    -   Attack, Decay, Sustain, and Release rate stages
 -   new blank panels:
     -   illustration of Sony S-SMP IC
-    -   illustration of envelope generation from Yamaha YM2612
 
 ## 1.10.0 (TBD)
 
+-   new module: S-SMP(BRR)
+    -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip

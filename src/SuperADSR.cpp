@@ -149,7 +149,7 @@ struct SuperADSR : Module {
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned lane = 0; lane < LANES; lane++) {
                 // set amplitude light based on the output
-                auto output = outputs[OUTPUT_ENVELOPE + lane].getVoltage() / 10.f;
+                auto output = (outputs[OUTPUT_ENVELOPE + lane].getVoltageSum() / channels) / 10.f;
                 if (output > 0) {  // positive, green light
                     lights[LIGHT_AMPLITUDE + 3 * lane + 0].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_AMPLITUDE + 3 * lane + 1].setSmoothBrightness(output, sample_time);
@@ -161,10 +161,17 @@ struct SuperADSR : Module {
                 }
                 // set stage lights based on active stage
                 for (int i = 0; i < 3; i++) {
-                    const auto active = static_cast<int>(apus[lane][0].getStage()) == i + 1;
-                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 0].setSmoothBrightness(active, sample_time);
-                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 1].setSmoothBrightness(active, sample_time);
+                    float active = 0;
+                    for (unsigned channel = 0; channel < channels; channel++)
+                        active += static_cast<int>(apus[lane][channel].getStage()) == i + 1;
+                    active /= channels;
+                    // const auto active = static_cast<int>(apus[lane][0].getStage()) == i + 1;
+                    // go in BGR order so blue can be set first
                     lights[LIGHT_ATTACK + 3 * lane + 6 * i + 2].setSmoothBrightness(active, sample_time);
+                    // zero out the value if polyphonic
+                    if (channels > 1) active = 0;
+                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 1].setSmoothBrightness(active, sample_time);
+                    lights[LIGHT_ATTACK + 3 * lane + 6 * i + 0].setSmoothBrightness(active, sample_time);
                 }
             }
         }

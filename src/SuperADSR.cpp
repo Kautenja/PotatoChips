@@ -159,7 +159,7 @@ struct SuperADSR : Module {
                     lights[LIGHT_AMPLITUDE + 3 * lane + 2].setSmoothBrightness(0, sample_time);
                 }
                 // set stage lights based on active stage
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 3; i++) {
                     const auto active = static_cast<int>(apus[lane][0].getStage()) == i + 1;
                     lights[LIGHT_ATTACK + 3 * lane + 6 * i + 0].setSmoothBrightness(active, sample_time);
                     lights[LIGHT_ATTACK + 3 * lane + 6 * i + 1].setSmoothBrightness(active, sample_time);

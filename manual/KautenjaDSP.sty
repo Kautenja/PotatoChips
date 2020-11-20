@@ -73,6 +73,10 @@
 % MARK: Declarations
 % ----------------------------------------------------------------------------
 
+\let\tempone\itemize
+\let\temptwo\enditemize
+\renewenvironment{itemize}{\tempone\addtolength{\itemsep}{-0.5\baselineskip}}{\temptwo}
+
 % setup captions for tables
 \captionsetup[table]{%
   labelfont={bf},

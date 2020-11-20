@@ -155,10 +155,10 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Red" transform="translate(5.500000, 52.500000)">
+                    <g id="LEDSliderRedHandle">
+                        <polygon id="path162650" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
+                        <polygon id="path162652" fill="#F82B1C" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
                     </g>
                 </g>
             </g>
@@ -168,10 +168,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 33.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>
@@ -181,10 +180,10 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/White" transform="translate(5.500000, 14.500000)">
+                    <g id="LEDSliderWhiteHandle">
+                        <polygon id="path162662" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 4.11671773e-14"></polygon>
+                        <polygon id="path162664" fill="#EEEEEE" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
                     </g>
                 </g>
             </g>
@@ -194,10 +193,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 11.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>
@@ -207,10 +205,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 33.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>
@@ -222,7 +219,7 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
+                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 13.500000)">
                     <g id="LEDSliderGreenHandle">
                         <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                         <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
@@ -235,10 +232,10 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/White" transform="translate(5.500000, 19.500000)">
+                    <g id="LEDSliderWhiteHandle">
+                        <polygon id="path162662" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 4.11671773e-14"></polygon>
+                        <polygon id="path162664" fill="#EEEEEE" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
                     </g>
                 </g>
             </g>
@@ -248,10 +245,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 33.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>
@@ -261,10 +257,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 63.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>
@@ -274,10 +269,9 @@
                         <polygon id="path159840" fill-rule="nonzero" points="9 0 9 79 0 79 0 0"></polygon>
                     </g>
                 </g>
-                <g id="Sliders/LEDSlider/Vertical/Handle/Green" transform="translate(5.500000, 33.500000)">
-                    <g id="LEDSliderGreenHandle">
-                        <polygon id="path162646" fill="#5C5C5C" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
-                        <polygon id="path162648" fill="#8FC53D" fill-rule="nonzero" points="8 1 8 10 0 10 0 1"></polygon>
+                <g id="Sliders/LEDSlider/Vertical/Handle/Grey" transform="translate(5.500000, 7.500000)" fill="#5C5C5C">
+                    <g id="LEDSliderHandle">
+                        <polygon id="path162650" fill-rule="nonzero" points="8 0 8 12 0 12 0 0"></polygon>
                     </g>
                 </g>
             </g>

@@ -346,32 +346,37 @@ S-SMP chip, namely,
 See the [Manual][SuperADSR] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: S-SMP(BRR) -->
+<!-- MARK: Super VCA -->
 <!-- ------------------------------------------------------------ -->
 
-## S-SMP(BRR)
+<h2 align="center">
+<img alt="Super VCA Logo" src="manual/SuperVCA/img/Logo.svg">
+</h2>
 
-S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
-engine from the Sony S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)][SNES]. The sample playback engine
-has a compression ratio of _32:9_ over standard 16-bit PCM, and includes a
-reconstruction filter.
+Super VCA is an emulation of the BRR filter & Gaussian interpolation filter
+from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
+were applied to BRR sample blocks on the SNES and the Gaussian interpolation
+filter was applied to output audio and removed high-frequency content from the
+signal.
 
-S-SMP(BRR) provides the key features of the BRR sample playback engine of the
-S-SMP chip, namely,
--   **Multi-channel Processing:** 8 different mono sample playback channels.
--   **Stereo Panning:** Split mono samples into the stereo field and introduce
-    surround sound effects.
--   **Reconstruction Filter:** Four-mode reconstruction filter including a
-    bypass mode and three low-pass filter modes.
+Super VCA provides the key features of the BRR filter and Gaussian filter
+of the S-SMP chip, namely,
+-   **Stereo Processing:** Dual processing channels for stereo effects or other
+    create multi-tracking applications.
+-   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine
+    that act as low-pass filters.
+-   **Gaussian Interpolation Filter:** A filter that removes high-frequency
+    content and adds subtle distortion. This filter provides the muffling
+    character that fans of SNES audio will find familiar.
 
 <p align="center">
-<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/Module.svg">
+<img alt="Super VCA" src="manual/SuperVCA/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][S_SMP_BRR] for more information about the features of this module.
+See the [Manual][SuperVCA] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: Super Echo -->
@@ -416,37 +421,32 @@ namely,
 See the [Manual][SuperEcho] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
-<!-- MARK: Super VCA -->
+<!-- MARK: S-SMP(BRR) -->
 <!-- ------------------------------------------------------------ -->
 
-<h2 align="center">
-<img alt="Super VCA Logo" src="manual/SuperVCA/img/Logo.svg">
-</h2>
+## S-SMP(BRR)
 
-Super VCA is an emulation of the BRR filter & Gaussian interpolation filter
-from the Sony S-SMP audio processing unit in the
-[Super Nintendo Entertainment System (SNES)][SNES]. The four BRR filter modes
-were applied to BRR sample blocks on the SNES and the Gaussian interpolation
-filter was applied to output audio and removed high-frequency content from the
-signal.
+S-SMP(BRR) is an emulation of the Bit-Rate Reduction (BRR) sample playback
+engine from the Sony S-SMP audio processing unit in the
+[Super Nintendo Entertainment System (SNES)][SNES]. The sample playback engine
+has a compression ratio of _32:9_ over standard 16-bit PCM, and includes a
+reconstruction filter.
 
-Super VCA provides the key features of the BRR filter and Gaussian filter
-of the S-SMP chip, namely,
--   **Stereo Processing:** Dual processing channels for stereo effects or other
-    create multi-tracking applications.
--   **4 BRR Filter Modes:** 4 filter modes from the BRR sample playback engine
-    that act as low-pass filters.
--   **Gaussian Interpolation Filter:** A filter that removes high-frequency
-    content and adds subtle distortion. This filter provides the muffling
-    character that fans of SNES audio will find familiar.
+S-SMP(BRR) provides the key features of the BRR sample playback engine of the
+S-SMP chip, namely,
+-   **Multi-channel Processing:** 8 different mono sample playback channels.
+-   **Stereo Panning:** Split mono samples into the stereo field and introduce
+    surround sound effects.
+-   **Reconstruction Filter:** Four-mode reconstruction filter including a
+    bypass mode and three low-pass filter modes.
 
 <p align="center">
-<img alt="Super VCA" src="manual/SuperVCA/img/Module.svg">
+<img alt="S-SMP(BRR)" src="manual/S_SMP_BRR/img/Module.svg">
 </p>
 
 ### Features
 
-See the [Manual][SuperVCA] for more information about the features of this module.
+See the [Manual][S_SMP_BRR] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: S-SMP -->

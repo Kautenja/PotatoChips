@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        56,
+        52,
         0
       ]
     },
@@ -73,7 +73,7 @@
       "params": [],
       "rightModuleId": 3,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -101,7 +101,7 @@
         },
         {
           "id": 1,
-          "value": 93.0
+          "value": -128.0
         },
         {
           "id": 2,
@@ -155,7 +155,7 @@
         },
         {
           "id": 1,
-          "value": 31.0
+          "value": 0.0
         },
         {
           "id": 2,
@@ -245,7 +245,7 @@
       "leftModuleId": 177,
       "rightModuleId": 1,
       "pos": [
-        40,
+        36,
         0
       ]
     },
@@ -294,7 +294,7 @@
         "filterMode": 0
       },
       "pos": [
-        34,
+        30,
         0
       ]
     }

@@ -60,6 +60,7 @@ struct SuperADSR : Module {
     /// the indexes of output ports on the module
     enum OutputIds {
         ENUMS(OUTPUT_ENVELOPE, LANES),
+        ENUMS(OUTPUT_INVERTED, LANES),
         NUM_OUTPUTS
     };
 
@@ -182,7 +183,7 @@ struct SuperADSRWidget : ModuleWidget {
     ///
     explicit SuperADSRWidget(SuperADSR *module) {
         setModule(module);
-        static constexpr auto panel = "res/S-SMP-ADSR-Light.svg";
+        static constexpr auto panel = "res/SuperADSR.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
         // panel screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
@@ -191,27 +192,28 @@ struct SuperADSRWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SuperADSR::LANES; i++) {
             // Gate, Retrig, Output
-            addInput(createInput<PJ301MPort>(Vec(20, 45 + 169 * i), module, SuperADSR::INPUT_GATE + i));
-            addInput(createInput<PJ301MPort>(Vec(20, 100 + 169 * i), module, SuperADSR::INPUT_RETRIG + i));
-            addOutput(createOutput<PJ301MPort>(Vec(20, 156 + 169 * i), module, SuperADSR::OUTPUT_ENVELOPE + i));
+            addInput(createInput<PJ301MPort>(Vec(20 + 84 * i, 281), module, SuperADSR::INPUT_GATE + i));
+            addInput(createInput<PJ301MPort>(Vec(53 + 84 * i, 281), module, SuperADSR::INPUT_RETRIG + i));
+            addOutput(createOutput<PJ301MPort>(Vec(20 + 84 * i, 324), module, SuperADSR::OUTPUT_ENVELOPE + i));
+            addOutput(createOutput<PJ301MPort>(Vec(53 + 84 * i, 324), module, SuperADSR::OUTPUT_INVERTED + i));
             // Amplitude
-            auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(66, 40 + 169 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
+            auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(12, 48 + 119 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
             amplitude->snap = true;
             addParam(amplitude);
             // Attack
-            auto attack = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(100, 40 + 169 * i), module, SuperADSR::PARAM_ATTACK + i, SuperADSR::LIGHT_ATTACK + 3 * i);
+            auto attack = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(46, 48 + 119 * i), module, SuperADSR::PARAM_ATTACK + i, SuperADSR::LIGHT_ATTACK + 3 * i);
             attack->snap = true;
             addParam(attack);
             // Decay
-            auto decay = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(134, 40 + 169 * i), module, SuperADSR::PARAM_DECAY + i, SuperADSR::LIGHT_DECAY + 3 * i);
+            auto decay = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(80, 48 + 119 * i), module, SuperADSR::PARAM_DECAY + i, SuperADSR::LIGHT_DECAY + 3 * i);
             decay->snap = true;
             addParam(decay);
             // Sustain Level
-            auto sustainLevel = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(168, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_LEVEL + i, SuperADSR::LIGHT_SUSTAIN_LEVEL + 3 * i);
+            auto sustainLevel = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(114, 48 + 119 * i), module, SuperADSR::PARAM_SUSTAIN_LEVEL + i, SuperADSR::LIGHT_SUSTAIN_LEVEL + 3 * i);
             sustainLevel->snap = true;
             addParam(sustainLevel);
             // Sustain Rate
-            auto sustainRate = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(202, 40 + 169 * i), module, SuperADSR::PARAM_SUSTAIN_RATE + i, SuperADSR::LIGHT_SUSTAIN_RATE + 3 * i);
+            auto sustainRate = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(148, 48 + 119 * i), module, SuperADSR::PARAM_SUSTAIN_RATE + i, SuperADSR::LIGHT_SUSTAIN_RATE + 3 * i);
             sustainRate->snap = true;
             addParam(sustainRate);
         }

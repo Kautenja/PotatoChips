@@ -235,8 +235,8 @@ struct BossFight : rack::Module {
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);
         // set the operator parameters
-        float pitch = 0;
         for (unsigned channel = 0; channel < channels; channel++) {
+            float pitch = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
                 float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);

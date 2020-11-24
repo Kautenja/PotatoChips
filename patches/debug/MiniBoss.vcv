@@ -7,6 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
+      "leftModuleId": 5,
       "rightModuleId": 2,
       "data": {
         "audio": {
@@ -19,8 +20,8 @@
         }
       },
       "pos": [
-        0,
-        2
+        8,
+        1
       ]
     },
     {
@@ -53,8 +54,8 @@
       "leftModuleId": 1,
       "rightModuleId": 150,
       "pos": [
-        10,
-        2
+        18,
+        1
       ]
     },
     {
@@ -63,7 +64,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 159,
+      "rightModuleId": 1,
       "data": {
         "channels": 4,
         "polyMode": 0,
@@ -78,7 +79,7 @@
       },
       "pos": [
         0,
-        0
+        1
       ]
     },
     {
@@ -297,8 +298,8 @@
         }
       ],
       "pos": [
-        1,
-        1
+        0,
+        0
       ]
     },
     {
@@ -311,8 +312,8 @@
       "rightModuleId": 154,
       "data": {},
       "pos": [
-        20,
-        2
+        28,
+        1
       ]
     },
     {
@@ -353,8 +354,8 @@
         "amplitude_plot": "decibels_140"
       },
       "pos": [
-        23,
-        2
+        31,
+        1
       ]
     },
     {
@@ -402,77 +403,8 @@
         "external": 0
       },
       "pos": [
-        43,
-        2
-      ]
-    },
-    {
-      "id": 159,
-      "plugin": "Bogaudio",
-      "version": "1.1.35",
-      "model": "Bogaudio-Reftone",
-      "params": [
-        {
-          "id": 0,
-          "value": 9.0
-        },
-        {
-          "id": 1,
-          "value": 4.0
-        },
-        {
-          "id": 2,
-          "value": 0.00297000003
-        }
-      ],
-      "bypass": true,
-      "leftModuleId": 5,
-      "rightModuleId": 161,
-      "data": {},
-      "pos": [
-        8,
-        0
-      ]
-    },
-    {
-      "id": 161,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "bypass": true,
-      "leftModuleId": 159,
-      "rightModuleId": 162,
-      "pos": [
-        11,
-        0
-      ]
-    },
-    {
-      "id": 162,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "bypass": true,
-      "leftModuleId": 161,
-      "rightModuleId": 152,
-      "pos": [
-        16,
-        0
-      ]
-    },
-    {
-      "id": 152,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
-      "model": "2612_Blank1",
-      "params": [],
-      "bypass": true,
-      "leftModuleId": 162,
-      "pos": [
-        21,
-        0
+        51,
+        1
       ]
     }
   ],
@@ -492,22 +424,6 @@
       "inputModuleId": 154,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 1401,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 161,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 1402,
-      "outputModuleId": 142,
-      "outputId": 0,
-      "inputModuleId": 162,
-      "inputId": 0,
-      "color": "#c91847"
     },
     {
       "id": 1405,

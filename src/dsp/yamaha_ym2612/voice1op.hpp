@@ -58,8 +58,6 @@ struct Voice1Op {
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
 
-    /// the currently selected algorithm
-    uint8_t algorithm = 0;
     /// feedback shift
     uint8_t feedback = 0;
 
@@ -109,108 +107,34 @@ struct Voice1Op {
     inline void reset() {
         state.reset();
         for (auto &op : operators) op.reset(state);
-        algorithm = 0;
         feedback = 0;
         op1_out[0] = op1_out[1] = 0;
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
-        set_algorithm(7);
+
+        {
+            int32_t *carrier = &audio_output;
+            // get the connections
+            int32_t **om1 = &connections[Op1];
+            int32_t **om2 = &connections[Op3];
+            int32_t **oc1 = &connections[Op2];
+            int32_t **memc = &mem_connect;
+
+            *om1 = carrier;
+            *oc1 = carrier;
+            *om2 = carrier;
+            *memc = &mem;  // store it anywhere where it will not be used
+
+            connections[Op4] = carrier;
+        }
+
         update_phase_increment = true;
     }
 
     // -----------------------------------------------------------------------
     // MARK: Parameter Setters
     // -----------------------------------------------------------------------
-
-    /// @brief Set algorithm, i.e., operator routing.
-    ///
-    /// @param value the algorithm / routing to set the voice to
-    ///
-    inline void set_algorithm(uint8_t value) {
-        algorithm = value & 7;
-        int32_t *carrier = &audio_output;
-        // get the connections
-        int32_t **om1 = &connections[Op1];
-        int32_t **om2 = &connections[Op3];
-        int32_t **oc1 = &connections[Op2];
-        int32_t **memc = &mem_connect;
-        // set the algorithm
-        switch (algorithm) {
-        case 0:
-            // M1---C1---MEM---M2---C2---OUT
-            *om1 = &c1;
-            *oc1 = &mem;
-            *om2 = &c2;
-            *memc = &m2;
-            break;
-        case 1:
-            // M1------+-MEM---M2---C2---OUT
-            //      C1-+
-            *om1 = &mem;
-            *oc1 = &mem;
-            *om2 = &c2;
-            *memc = &m2;
-            break;
-        case 2:
-            // M1-----------------+-C2---OUT
-            //      C1---MEM---M2-+
-            *om1 = &c2;
-            *oc1 = &mem;
-            *om2 = &c2;
-            *memc = &m2;
-            break;
-        case 3:
-            // M1---C1---MEM------+-C2---OUT
-            //                 M2-+
-            *om1 = &c1;
-            *oc1 = &mem;
-            *om2 = &c2;
-            *memc = &c2;
-            break;
-        case 4:
-            // M1---C1-+-OUT
-            // M2---C2-+
-            // MEM: not used
-            *om1 = &c1;
-            *oc1 = carrier;
-            *om2 = &c2;
-            *memc = &mem;  // store it anywhere where it will not be used
-            break;
-        case 5:
-            //    +----C1----+
-            // M1-+-MEM---M2-+-OUT
-            //    +----C2----+
-            *om1 = nullptr;  // special mark
-            *oc1 = carrier;
-            *om2 = carrier;
-            *memc = &m2;
-            break;
-        case 6:
-            // M1---C1-+
-            //      M2-+-OUT
-            //      C2-+
-            // MEM: not used
-            *om1 = &c1;
-            *oc1 = carrier;
-            *om2 = carrier;
-            *memc = &mem;  // store it anywhere where it will not be used
-            break;
-        case 7:
-            // M1-+
-            // C1-+-OUT
-            // M2-+
-            // C2-+
-            // MEM: not used
-            *om1 = carrier;
-            *oc1 = carrier;
-            *om2 = carrier;
-            *memc = &mem;  // store it anywhere where it will not be used
-            break;
-        }
-        connections[Op4] = carrier;
-    }
-
 
     /// @brief Set the feedback amount.
     ///

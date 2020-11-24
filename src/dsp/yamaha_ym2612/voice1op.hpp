@@ -158,8 +158,8 @@ struct Voice1Op {
     ///
     /// @param frequency the frequency value measured in Hz
     ///
-    inline void set_frequency(uint8_t op_index, float frequency) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_frequency(state, frequency);
+    inline void set_frequency(float frequency) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_frequency(state, frequency);
     }
 
     /// @brief Set the gate for the given voice.
@@ -168,8 +168,8 @@ struct Voice1Op {
     /// @param is_open true if the gate is open, false otherwise
     /// @param prevent_clicks true to prevent clicks from note re-triggers
     ///
-    inline void set_gate(uint8_t op_index, bool is_open, bool prevent_clicks = false) {
-        operators[OPERATOR_INDEXES[op_index]].set_gate(is_open, prevent_clicks);
+    inline void set_gate(bool is_open, bool prevent_clicks = false) {
+        operators[OPERATOR_INDEXES[0]].set_gate(is_open, prevent_clicks);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -177,8 +177,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    inline void set_rate_scale(uint8_t op_index, uint8_t value) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_rs(value);
+    inline void set_rate_scale(uint8_t value) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_rs(value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.
@@ -186,8 +186,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the attack rate (AR) register of (in [0, 3])
     /// @param value the rate of the attack stage of the envelope generator
     ///
-    inline void set_attack_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_ar(value);
+    inline void set_attack_rate(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_ar(value);
     }
 
     /// @brief Set the total level (TL) register for the given voice and operator.
@@ -195,8 +195,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
     /// @param value the total amplitude of envelope generator
     ///
-    inline void set_total_level(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_tl(value);
+    inline void set_total_level(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_tl(value);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
@@ -204,8 +204,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the 1st decay rate (D1) register of (in [0, 3])
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
-    inline void set_decay_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_dr(value);
+    inline void set_decay_rate(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_dr(value);
     }
 
     /// @brief Set the sustain level (SL) register for the given voice and operator.
@@ -213,8 +213,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the sustain level (SL) register of (in [0, 3])
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
-    inline void set_sustain_level(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_sl(value);
+    inline void set_sustain_level(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_sl(value);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
@@ -222,8 +222,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the 2nd decay rate (D2) register of (in [0, 3])
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
-    inline void set_sustain_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_sr(value);
+    inline void set_sustain_rate(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_sr(value);
     }
 
     /// @brief Set the release rate (RR) register for the given voice and operator.
@@ -231,8 +231,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the release rate (RR) register of (in [0, 3])
     /// @param value the rate of release of the envelope generator after key-off
     ///
-    inline void set_release_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_rr(value);
+    inline void set_release_rate(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_rr(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.
@@ -240,8 +240,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the multiplier  (MUL)register of (in [0, 3])
     /// @param value the value of the FM phase multiplier
     ///
-    inline void set_multiplier(uint8_t op_index, uint8_t value) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_multiplier(value);
+    inline void set_multiplier(uint8_t value) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_multiplier(value);
     }
 
     /// @brief Set the detune (DET) register for the given voice and operator.
@@ -249,8 +249,8 @@ struct Voice1Op {
     /// @param op_index the operator to set the detune (DET) register of (in [0, 3])
     /// @param value the the level of detuning for the FM operator
     ///
-    inline void set_detune(uint8_t op_index, uint8_t value = 4) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_detune(state, value);
+    inline void set_detune(uint8_t value = 4) {
+        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_detune(state, value);
     }
 
     /// @brief Set whether SSG envelopes are enabled for the given operator.
@@ -258,24 +258,24 @@ struct Voice1Op {
     /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
     /// @param is_on whether the looping envelope generator should be turned on
     ///
-    inline void set_ssg_enabled(uint8_t op_index, bool is_on) {
-        operators[OPERATOR_INDEXES[op_index]].set_ssg_enabled(is_on);
+    inline void set_ssg_enabled(bool is_on) {
+        operators[OPERATOR_INDEXES[0]].set_ssg_enabled(is_on);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
     ///
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
-    inline void set_am_sensitivity(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_am_sensitivity(value);
+    inline void set_am_sensitivity(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_am_sensitivity(value);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
     ///
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
-    inline void set_fm_sensitivity(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_fm_sensitivity(value);
+    inline void set_fm_sensitivity(uint8_t value) {
+        operators[OPERATOR_INDEXES[0]].set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------

@@ -169,17 +169,17 @@ struct MiniBoss : rack::Module {
     inline void processCV(const ProcessArgs &args, unsigned channel) {
         apu[channel].set_lfo           (getParam(channel, PARAM_LFO, INPUT_LFO, 7));
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].set_attack_rate   (0, getParam(channel,       PARAM_AR,  INPUT_AR,  31 ));
-        apu[channel].set_total_level   (0, 100 - getParam(channel, PARAM_TL,  INPUT_TL,  100));
-        apu[channel].set_decay_rate    (0, getParam(channel,       PARAM_D1,  INPUT_D1,  31 ));
-        apu[channel].set_sustain_level (0, 15 - getParam(channel,  PARAM_SL,  INPUT_SL,  15 ));
-        apu[channel].set_sustain_rate  (0, getParam(channel,       PARAM_D2,  INPUT_D2,  31 ));
-        apu[channel].set_release_rate  (0, getParam(channel,       PARAM_RR,  INPUT_RR,  15 ));
-        apu[channel].set_multiplier    (0, getParam(channel,       PARAM_MUL, INPUT_MUL, 15 ));
-        apu[channel].set_fm_sensitivity(0, getParam(channel,       PARAM_FMS, INPUT_FMS, 7  ));
-        apu[channel].set_am_sensitivity(0, getParam(channel,       PARAM_AMS, INPUT_AMS, 4  ));
-        apu[channel].set_ssg_enabled   (0, params[PARAM_SSG_ENABLE].getValue());
-        apu[channel].set_rate_scale    (0, params[PARAM_RS].getValue());
+        apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR,  31 ));
+        apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL,  100));
+        apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1,  31 ));
+        apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL,  15 ));
+        apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2,  31 ));
+        apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR,  15 ));
+        apu[channel].set_multiplier    (getParam(channel,       PARAM_MUL, INPUT_MUL, 15 ));
+        apu[channel].set_fm_sensitivity(getParam(channel,       PARAM_FMS, INPUT_FMS, 7  ));
+        apu[channel].set_am_sensitivity(getParam(channel,       PARAM_AMS, INPUT_AMS, 4  ));
+        apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
+        apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
         // process the gate trigger, high at 2V
         gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
         // process the retrig trigger, high at 2V
@@ -189,7 +189,7 @@ struct MiniBoss : rack::Module {
         // but when neither or both are high, the gate is closed. This
         // causes the gate to get shut for a sample when re-triggering an
         // already gated voice
-        apu[channel].set_gate(0, trigger ^ gate_triggers[channel].state);
+        apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
     }
 
     /// @brief Process a sample.
@@ -214,7 +214,7 @@ struct MiniBoss : rack::Module {
         for (unsigned channel = 0; channel < channels; channel++) {
             const float frequency = params[PARAM_FREQ].getValue();
             const float pitch = inputs[INPUT_PITCH].getVoltage(channel);
-            apu[channel].set_frequency(0, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
+            apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
         }
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {

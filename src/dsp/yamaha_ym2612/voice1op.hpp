@@ -28,9 +28,6 @@ namespace YamahaYM2612 {
 /// @brief A single 4-operator FM voice.
 struct Voice1Op {
  public:
-    /// the number of FM operators on the module
-    static constexpr unsigned NUM_OPERATORS = 1;
-
     /// the maximal value that an operator can output (signed 14-bit)
     static constexpr int32_t OUTPUT_MAX = 8191;
     /// the minimal value that an operator can output (signed 14-bit)
@@ -73,13 +70,6 @@ struct Voice1Op {
     /// one sample delay memory
     int32_t mem = 0;
 
-    /// the output of the operators based on the algorithm connections
-    int32_t* connections[4];
-    /// where to put the delayed sample (MEM)
-    int32_t *mem_connect = nullptr;
-    /// delayed sample (MEM) value
-    int32_t mem_value = 0;
-
     /// the last output sample from the voice
     int32_t audio_output = 0;
 
@@ -109,16 +99,6 @@ struct Voice1Op {
         oprtr.reset(state);
         feedback = 0;
         output_feedback[0] = output_feedback[1] = 0;
-        memset(connections, 0, sizeof connections);
-        mem_connect = nullptr;
-        mem_value = 0;
-
-        // TODO: remove
-        {
-            connections[Op1] = &audio_output;
-            mem_connect = &mem;
-        }
-
         update_phase_increment = true;
     }
 
@@ -287,8 +267,6 @@ struct Voice1Op {
         // -------------------------------------------------------------------
         // reset the algorithm outputs to 0
         m2 = c1 = c2 = mem = 0;
-        // restore delayed sample (MEM) value to m2 or c2
-        *mem_connect = mem_value;
         // Operator 1
         unsigned envelope = oprtr.get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
@@ -296,10 +274,7 @@ struct Voice1Op {
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         output_feedback[0] = output_feedback[1];
         // set the connection outputs from operator 1 based on the algorithm
-        if (!connections[Op1])  // algorithm 5
-            mem = c1 = c2 = output_feedback[1];
-        else  // other algorithms
-            *connections[Op1] += output_feedback[1];
+        audio_output += output_feedback[1];
         // calculate the next output from operator 1
         if (envelope < ENV_QUIET) {  // operator 1 envelope is open
             // if feedback is disabled, set feedback carrier to 0

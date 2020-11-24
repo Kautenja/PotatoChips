@@ -52,8 +52,8 @@ struct Voice1Op {
  private:
     /// general state
     OperatorContext state;
-    /// four operators
-    Operator operators[4];
+    /// 1-op voice
+    Operator oprtr;
 
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
@@ -62,7 +62,7 @@ struct Voice1Op {
     uint8_t feedback = 0;
 
     /// operator 1 output for feedback
-    int32_t op1_out[2] = {0, 0};
+    int32_t output_feedback[2] = {0, 0};
 
     /// Phase Modulation input for operator 2
     int32_t m2 = 0;
@@ -74,7 +74,7 @@ struct Voice1Op {
     int32_t mem = 0;
 
     /// the output of the operators based on the algorithm connections
-    int32_t* connections[NUM_OPERATORS];
+    int32_t* connections[4];
     /// where to put the delayed sample (MEM)
     int32_t *mem_connect = nullptr;
     /// delayed sample (MEM) value
@@ -106,27 +106,22 @@ struct Voice1Op {
     /// @brief Reset the voice to default.
     inline void reset() {
         state.reset();
-        for (auto &op : operators) op.reset(state);
+        oprtr.reset(state);
         feedback = 0;
-        op1_out[0] = op1_out[1] = 0;
+        output_feedback[0] = output_feedback[1] = 0;
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
 
         {
             int32_t *carrier = &audio_output;
-            // get the connections
+
             int32_t **om1 = &connections[Op1];
-            int32_t **om2 = &connections[Op3];
-            int32_t **oc1 = &connections[Op2];
             int32_t **memc = &mem_connect;
 
             *om1 = carrier;
-            *oc1 = carrier;
-            *om2 = carrier;
-            *memc = &mem;  // store it anywhere where it will not be used
-
-            connections[Op4] = carrier;
+            // store it anywhere where it will not be used
+            *memc = &mem;
         }
 
         update_phase_increment = true;
@@ -150,16 +145,12 @@ struct Voice1Op {
     ///
     inline void set_lfo(uint8_t value) { state.set_lfo(value); }
 
-    // -----------------------------------------------------------------------
-    // MARK: Operator Parameter Settings
-    // -----------------------------------------------------------------------
-
     /// @brief Set the frequency of the voice.
     ///
     /// @param frequency the frequency value measured in Hz
     ///
     inline void set_frequency(float frequency) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_frequency(state, frequency);
+        update_phase_increment |= oprtr.set_frequency(state, frequency);
     }
 
     /// @brief Set the gate for the given voice.
@@ -169,7 +160,7 @@ struct Voice1Op {
     /// @param prevent_clicks true to prevent clicks from note re-triggers
     ///
     inline void set_gate(bool is_open, bool prevent_clicks = false) {
-        operators[OPERATOR_INDEXES[0]].set_gate(is_open, prevent_clicks);
+        oprtr.set_gate(is_open, prevent_clicks);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -178,7 +169,7 @@ struct Voice1Op {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void set_rate_scale(uint8_t value) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_rs(value);
+        update_phase_increment |= oprtr.set_rs(value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.
@@ -187,7 +178,7 @@ struct Voice1Op {
     /// @param value the rate of the attack stage of the envelope generator
     ///
     inline void set_attack_rate(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_ar(value);
+        oprtr.set_ar(value);
     }
 
     /// @brief Set the total level (TL) register for the given voice and operator.
@@ -196,7 +187,7 @@ struct Voice1Op {
     /// @param value the total amplitude of envelope generator
     ///
     inline void set_total_level(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_tl(value);
+        oprtr.set_tl(value);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
@@ -205,7 +196,7 @@ struct Voice1Op {
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
     inline void set_decay_rate(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_dr(value);
+        oprtr.set_dr(value);
     }
 
     /// @brief Set the sustain level (SL) register for the given voice and operator.
@@ -214,7 +205,7 @@ struct Voice1Op {
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
     inline void set_sustain_level(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_sl(value);
+        oprtr.set_sl(value);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
@@ -223,7 +214,7 @@ struct Voice1Op {
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
     inline void set_sustain_rate(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_sr(value);
+        oprtr.set_sr(value);
     }
 
     /// @brief Set the release rate (RR) register for the given voice and operator.
@@ -232,7 +223,7 @@ struct Voice1Op {
     /// @param value the rate of release of the envelope generator after key-off
     ///
     inline void set_release_rate(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_rr(value);
+        oprtr.set_rr(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.
@@ -241,7 +232,7 @@ struct Voice1Op {
     /// @param value the value of the FM phase multiplier
     ///
     inline void set_multiplier(uint8_t value) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_multiplier(value);
+        update_phase_increment |= oprtr.set_multiplier(value);
     }
 
     /// @brief Set the detune (DET) register for the given voice and operator.
@@ -250,7 +241,7 @@ struct Voice1Op {
     /// @param value the the level of detuning for the FM operator
     ///
     inline void set_detune(uint8_t value = 4) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[0]].set_detune(state, value);
+        update_phase_increment |= oprtr.set_detune(state, value);
     }
 
     /// @brief Set whether SSG envelopes are enabled for the given operator.
@@ -259,7 +250,7 @@ struct Voice1Op {
     /// @param is_on whether the looping envelope generator should be turned on
     ///
     inline void set_ssg_enabled(bool is_on) {
-        operators[OPERATOR_INDEXES[0]].set_ssg_enabled(is_on);
+        oprtr.set_ssg_enabled(is_on);
     }
 
     /// @brief Set the AM sensitivity (AMS) register for the given voice.
@@ -267,7 +258,7 @@ struct Voice1Op {
     /// @param value the amount of amplitude modulation (AM) sensitivity
     ///
     inline void set_am_sensitivity(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_am_sensitivity(value);
+        oprtr.set_am_sensitivity(value);
     }
 
     /// @brief Set the FM sensitivity (FMS) register for the given voice.
@@ -275,7 +266,7 @@ struct Voice1Op {
     /// @param value the amount of frequency modulation (FM) sensitivity
     ///
     inline void set_fm_sensitivity(uint8_t value) {
-        operators[OPERATOR_INDEXES[0]].set_fm_sensitivity(value);
+        oprtr.set_fm_sensitivity(value);
     }
 
     // -----------------------------------------------------------------------
@@ -289,15 +280,13 @@ struct Voice1Op {
     inline int16_t step() {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
-            for (Operator& oprtr : operators)
-                oprtr.refresh_phase_and_envelope();
+            oprtr.refresh_phase_and_envelope();
             update_phase_increment = false;
         }
         // clear the audio output
         audio_output = 0;
         // update the SSG envelope
-        for (Operator& oprtr : operators)
-            oprtr.update_ssg_envelope_generator();
+        oprtr.update_ssg_envelope_generator();
         // -------------------------------------------------------------------
         // calculate operator outputs
         // -------------------------------------------------------------------
@@ -306,42 +295,28 @@ struct Voice1Op {
         // restore delayed sample (MEM) value to m2 or c2
         *mem_connect = mem_value;
         // Operator 1
-        unsigned envelope = operators[Op1].get_envelope(state);
+        unsigned envelope = oprtr.get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
-        int32_t feedback_carrier = op1_out[0] + op1_out[1];
+        int32_t feedback_carrier = output_feedback[0] + output_feedback[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
-        op1_out[0] = op1_out[1];
+        output_feedback[0] = output_feedback[1];
         // set the connection outputs from operator 1 based on the algorithm
         if (!connections[Op1])  // algorithm 5
-            mem = c1 = c2 = op1_out[1];
+            mem = c1 = c2 = output_feedback[1];
         else  // other algorithms
-            *connections[Op1] += op1_out[1];
+            *connections[Op1] += output_feedback[1];
         // calculate the next output from operator 1
         if (envelope < ENV_QUIET) {  // operator 1 envelope is open
             // if feedback is disabled, set feedback carrier to 0
             if (!feedback) feedback_carrier = 0;
             // shift carrier by the feedback amount
-            op1_out[1] = operators[Op1].calculate_output(envelope, feedback_carrier << feedback);
+            output_feedback[1] = oprtr.calculate_output(envelope, feedback_carrier << feedback);
         } else {  // clear the next output from operator 1
-            op1_out[1] = 0;
+            output_feedback[1] = 0;
         }
-        // Operator 3
-        envelope = operators[Op3].get_envelope(state);
-        if (envelope < ENV_QUIET)
-            *connections[Op3] += operators[Op3].calculate_output(envelope, m2 << 15);
-        // Operator 2
-        envelope = operators[Op2].get_envelope(state);
-        if (envelope < ENV_QUIET)
-            *connections[Op2] += operators[Op2].calculate_output(envelope, c1 << 15);
-        // Operator 4
-        envelope = operators[Op4].get_envelope(state);
-        if (envelope < ENV_QUIET)
-            *connections[Op4] += operators[Op4].calculate_output(envelope, c2 << 15);
-        // store current MEM
-        mem_value = mem;
-        // update phase counters AFTER output calculations
-        for (Operator& oprtr : operators)
-            oprtr.update_phase_counters(state);
+
+        // update phase counter AFTER output calculations
+        oprtr.update_phase_counters(state);
         // -------------------------------------------------------------------
         // advance LFO & envelope generator
         // -------------------------------------------------------------------
@@ -350,8 +325,7 @@ struct Voice1Op {
         while (state.eg_timer >= state.eg_timer_overflow) {
             state.eg_timer -= state.eg_timer_overflow;
             state.eg_cnt++;
-            for (Operator& oprtr : operators)
-                oprtr.update_envelope_generator(state.eg_cnt);
+            oprtr.update_envelope_generator(state.eg_cnt);
         }
 
         return audio_output;

@@ -127,23 +127,19 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
-        for (unsigned i = 0; i < YamahaYM2612::Voice1Op::NUM_OPERATORS; i++) {  // operator parameters
-            auto opName = "Operator " + std::to_string(i + 1);
-            // total level is defined on the domain [0, 127], but values above
-            // 70 cause the operator to drop below usable levels
-            configParam(PARAM_FREQ       + i, -5.f, 5.f, 0.f, opName + " Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_AR         + i,  1,    31,  31, opName + " Attack Rate");
-            configParam(PARAM_TL         + i,  0,   100, 100, opName + " Total Level");
-            configParam(PARAM_D1         + i,  0,    31,   0, opName + " 1st Decay Rate");
-            configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
-            configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
-            configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
-            configParam(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier");
-            configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
-            configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
-            configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
-            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope");
-        }
+        configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
+        // operator parameters
+        configParam(PARAM_AR,  1,  31,  31, "Attack Rate");
+        configParam(PARAM_TL,  0, 100, 100, "Total Level");
+        configParam(PARAM_D1,  0,  31,   0, "1st Decay Rate");
+        configParam(PARAM_SL,  0,  15,  15, "Sustain Level");
+        configParam(PARAM_D2,  0,  31,   0, "2nd Decay Rate");
+        configParam(PARAM_RR,  0,  15,  15, "Release Rate");
+        configParam(PARAM_MUL, 0,  15,   1, "Multiplier");
+        configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
+        configParam(PARAM_AMS, 0,   3,   0, "Amplitude modulation sensitivity");
+        configParam(PARAM_FMS, 0,   7,   0, "Frequency modulation sensitivity");
+        configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
         // reset the emulator
         onSampleRateChange();
         // set the rate of the CV acquisition clock divider
@@ -233,8 +229,8 @@ struct MiniBoss : rack::Module {
             for (unsigned channel = 0; channel < channels; channel++)
                 processCV(args, channel);
         // set the operator parameters
-        float pitch = 0;
         for (unsigned channel = 0; channel < channels; channel++) {
+            float pitch = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice1Op::NUM_OPERATORS; op++) {
                 float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
@@ -323,8 +319,8 @@ struct MiniBossWidget : ModuleWidget {
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {
                 const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + 4 * j + i));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + j));
+                addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + j));
             }
         }
     }

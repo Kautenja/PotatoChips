@@ -66,7 +66,7 @@
       "params": [],
       "rightModuleId": 1,
       "data": {
-        "channels": 4,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -106,194 +106,50 @@
         },
         {
           "id": 4,
-          "value": 7.0
+          "value": 31.0
         },
         {
           "id": 5,
-          "value": 8.0
+          "value": 100.0
         },
         {
           "id": 6,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 7,
-          "value": 7.0
+          "value": 15.0
         },
         {
           "id": 8,
-          "value": 78.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": 100.0
+          "value": 15.0
         },
         {
           "id": 10,
-          "value": 100.0
+          "value": 0.0
         },
         {
           "id": 11,
-          "value": 100.0
+          "value": 1.0
         },
         {
           "id": 12,
-          "value": 5.0
+          "value": 0.0
         },
         {
           "id": 13,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 14,
-          "value": 7.0
+          "value": 0.0
         },
         {
           "id": 15,
-          "value": 11.0
-        },
-        {
-          "id": 16,
-          "value": 15.0
-        },
-        {
-          "id": 17,
-          "value": 15.0
-        },
-        {
-          "id": 18,
-          "value": 15.0
-        },
-        {
-          "id": 19,
-          "value": 15.0
-        },
-        {
-          "id": 20,
-          "value": 7.0
-        },
-        {
-          "id": 21,
-          "value": 6.0
-        },
-        {
-          "id": 22,
-          "value": 8.0
-        },
-        {
-          "id": 23,
-          "value": 7.0
-        },
-        {
-          "id": 24,
-          "value": 3.0
-        },
-        {
-          "id": 25,
-          "value": 10.0
-        },
-        {
-          "id": 26,
-          "value": 9.0
-        },
-        {
-          "id": 27,
-          "value": 9.0
-        },
-        {
-          "id": 28,
-          "value": 0.0
-        },
-        {
-          "id": 29,
-          "value": 0.0
-        },
-        {
-          "id": 30,
-          "value": 0.0
-        },
-        {
-          "id": 31,
-          "value": 0.0
-        },
-        {
-          "id": 32,
-          "value": 1.0
-        },
-        {
-          "id": 33,
-          "value": 1.0
-        },
-        {
-          "id": 34,
-          "value": 1.0
-        },
-        {
-          "id": 35,
-          "value": 1.0
-        },
-        {
-          "id": 36,
-          "value": 0.0
-        },
-        {
-          "id": 37,
-          "value": 0.0
-        },
-        {
-          "id": 38,
-          "value": 0.0
-        },
-        {
-          "id": 39,
-          "value": 0.0
-        },
-        {
-          "id": 40,
-          "value": 0.0
-        },
-        {
-          "id": 41,
-          "value": 0.0
-        },
-        {
-          "id": 42,
-          "value": 0.0
-        },
-        {
-          "id": 43,
-          "value": 0.0
-        },
-        {
-          "id": 44,
-          "value": 0.0
-        },
-        {
-          "id": 45,
-          "value": 0.0
-        },
-        {
-          "id": 46,
-          "value": 0.0
-        },
-        {
-          "id": 47,
-          "value": 0.0
-        },
-        {
-          "id": 48,
-          "value": 0.0
-        },
-        {
-          "id": 49,
-          "value": 0.0
-        },
-        {
-          "id": 50,
-          "value": 0.0
-        },
-        {
-          "id": 51,
           "value": 0.0
         }
       ],
@@ -418,46 +274,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 1316,
-      "outputModuleId": 150,
-      "outputId": 0,
-      "inputModuleId": 154,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1405,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 142,
-      "inputId": 32,
-      "color": "#c91847"
-    },
-    {
-      "id": 1404,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 36,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 1403,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 142,
-      "inputId": 28,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1317,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 150,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 1242,
       "outputModuleId": 2,
       "outputId": 2,
@@ -487,6 +303,70 @@
       "outputId": 1,
       "inputModuleId": 2,
       "inputId": 2,
+      "color": "#c91847"
+    },
+    {
+      "id": 1317,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 150,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1316,
+      "outputModuleId": 150,
+      "outputId": 0,
+      "inputModuleId": 154,
+      "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1419,
+      "outputModuleId": 2,
+      "outputId": 2,
+      "inputModuleId": 150,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1420,
+      "outputModuleId": 150,
+      "outputId": 1,
+      "inputModuleId": 154,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1421,
+      "outputModuleId": 154,
+      "outputId": 1,
+      "inputModuleId": 155,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1424,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 142,
+      "inputId": 10,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1425,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 12,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1423,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 142,
+      "inputId": 11,
       "color": "#c91847"
     }
   ]

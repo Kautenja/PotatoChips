@@ -29,7 +29,7 @@ namespace YamahaYM2612 {
 struct Voice1Op {
  public:
     /// the number of FM operators on the module
-    static constexpr unsigned NUM_OPERATORS = 4;
+    static constexpr unsigned NUM_OPERATORS = 1;
 
     /// the maximal value that an operator can output (signed 14-bit)
     static constexpr int32_t OUTPUT_MAX = 8191;
@@ -53,7 +53,7 @@ struct Voice1Op {
     /// general state
     OperatorContext state;
     /// four operators
-    Operator operators[NUM_OPERATORS];
+    Operator operators[4];
 
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;

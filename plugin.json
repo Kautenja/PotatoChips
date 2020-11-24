@@ -12,6 +12,18 @@
   "donateUrl": "https://maps.org/donate",
   "modules": [
     {
+      "slug": "MiniBoss",
+      "name": "Mini Boss",
+      "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive and Sega Genesis.",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf",
+      "tags": [
+        "Noise",
+        "Oscillator",
+        "Polyphonic",
+        "Synth voice"
+      ]
+    },
+    {
       "slug": "106",
       "name": "Name Corp Octal Wave Generator",
       "description": "An emulation of the Namco 163 wavetable chip from Nintendo Entertainment System (NES) cartridges.",

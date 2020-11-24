@@ -24,7 +24,6 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
-    // current releases
     instance->addModel(modelJairasullator);
     instance->addModel(modelInfiniteStairs);
     instance->addModel(modelPotKeys);
@@ -34,13 +33,12 @@ void init(Plugin* instance) {
     instance->addModel(modelPalletTownWavesSystem);
     instance->addModel(modelMegaTone);
     instance->addModel(modelBossFight);
-    // blanks
-    instance->addModel(modelChipS_SMP_Blank1);
-    instance->addModel(modelBossFight_Blank1);
-    // beta versions / WIPs
+    instance->addModel(modelMiniBoss);
     instance->addModel(modelSuperSynth);
     instance->addModel(modelSuperEcho);
     instance->addModel(modelSuperADSR);
     instance->addModel(modelSuperSampler);
     instance->addModel(modelSuperVCA);
+    instance->addModel(modelChipS_SMP_Blank1);
+    instance->addModel(modelBossFight_Blank1);
 }

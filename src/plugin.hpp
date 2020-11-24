@@ -27,9 +27,6 @@ static constexpr uint32_t CLOCK_RATE = 768000;
 /// the global instance of the plug-in
 extern rack::Plugin* plugin_instance;
 
-// pointers to each module in the plug-in
-
-// current releases
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelInfiniteStairs;
 extern rack::Model *modelPotKeys;
@@ -39,16 +36,14 @@ extern rack::Model *modelNameCorpOctalWaveGenerator;
 extern rack::Model *modelPalletTownWavesSystem;
 extern rack::Model *modelMegaTone;
 extern rack::Model *modelBossFight;
-
-// blanks
-extern rack::Model *modelChipS_SMP_Blank1;
-extern rack::Model *modelBossFight_Blank1;
-
-// beta versions / WIPs
+extern rack::Model *modelMiniBoss;
 extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperSampler;
 extern rack::Model *modelSuperVCA;
+
+extern rack::Model *modelChipS_SMP_Blank1;
+extern rack::Model *modelBossFight_Blank1;
 
 #endif  // PLUGIN_HPP

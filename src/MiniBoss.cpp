@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Eurorack module based on the Yamaha YM2612.
-struct BossFight : rack::Module {
+struct MiniBoss : rack::Module {
  private:
     /// a YM2612 chip emulator
     YamahaYM2612::Voice1Op apu[PORT_MAX_CHANNELS];
@@ -120,7 +120,7 @@ struct BossFight : rack::Module {
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
     /// Initialize a new Boss Fight module.
-    BossFight() {
+    MiniBoss() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
         configParam(PARAM_AL,  0, 7, 7, "Algorithm");
@@ -149,7 +149,6 @@ struct BossFight : rack::Module {
         // set the rate of the CV acquisition clock divider
         cvDivider.setDivision(16);
         lightDivider.setDivision(512);
-
     }
 
     /// @brief Respond to the change of sample rate in the engine.
@@ -182,8 +181,7 @@ struct BossFight : rack::Module {
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
         apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         // set the global parameters
-        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB,  7));
         // normal pitch gate and re-trigger
         float gate = 0;
         float retrig = 0;
@@ -271,13 +269,13 @@ struct BossFight : rack::Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for BossFight.
-struct BossFightWidget : ModuleWidget {
+/// The panel widget for MiniBoss.
+struct MiniBossWidget : ModuleWidget {
     /// @brief Initialize a new widget.
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit BossFightWidget(BossFight *module) {
+    explicit MiniBossWidget(MiniBoss *module) {
         setModule(module);
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
         // Panel Screws
@@ -285,62 +283,51 @@ struct BossFightWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Algorithm Display
-        addChild(new IndexedFrameDisplay(
-            [&]() {
-                return this->module ? reinterpret_cast<BossFight*>(this->module)->algorithm[0] : 0;
-            },
-            "res/BossFight_algorithms/",
-            YamahaYM2612::Voice1Op::NUM_ALGORITHMS,
-            Vec(10, 20),
-            Vec(110, 70)
-        ));
         // Algorithm, Feedback, LFO, Saturation
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, BossFight::PARAM_AL));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, BossFight::PARAM_FB));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, BossFight::PARAM_LFO));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, BossFight::PARAM_SATURATION));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
+        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, MiniBoss::PARAM_SATURATION));
         // Saturation Indicator
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, BossFight::VU_LIGHTS + 0));
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, BossFight::VU_LIGHTS + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, BossFight::VU_LIGHTS + 2));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, BossFight::VU_LIGHTS + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, BossFight::VU_LIGHTS + 4));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, BossFight::VU_LIGHTS + 5));
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, MiniBoss::VU_LIGHTS + 0));
+        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, MiniBoss::VU_LIGHTS + 1));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, MiniBoss::VU_LIGHTS + 2));
+        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, MiniBoss::VU_LIGHTS + 3));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, MiniBoss::VU_LIGHTS + 4));
+        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, MiniBoss::VU_LIGHTS + 5));
         // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
-        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
-        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
+        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, MiniBoss::INPUT_AL));
+        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, MiniBoss::INPUT_FB));
+        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, MiniBoss::INPUT_LFO));
+        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_SATURATION));
+        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_MASTER + 0));
+        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, MiniBoss::OUTPUT_MASTER + 1));
         // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice1Op::NUM_OPERATORS; i++) {
             auto offset = i * 210;
             // ADSR
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, BossFight::PARAM_AR + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, BossFight::PARAM_TL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, BossFight::PARAM_D1 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, BossFight::PARAM_SL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, BossFight::PARAM_D2 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, BossFight::PARAM_RR + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, MiniBoss::PARAM_AR + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, MiniBoss::PARAM_TL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, MiniBoss::PARAM_D1 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, MiniBoss::PARAM_SL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, MiniBoss::PARAM_D2 + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, MiniBoss::PARAM_RR + i));
             // Looping ADSR, Key Scaling
-            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, BossFight::PARAM_SSG_ENABLE + i));
-            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, BossFight::PARAM_RS + i));
+            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, MiniBoss::PARAM_SSG_ENABLE + i));
+            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, MiniBoss::PARAM_RS + i));
             // Frequency and modulation
-            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, BossFight::PARAM_FREQ + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, BossFight::PARAM_MUL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, BossFight::PARAM_AMS + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, BossFight::PARAM_FMS + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, MiniBoss::PARAM_FREQ + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, MiniBoss::PARAM_MUL + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, MiniBoss::PARAM_AMS + i));
+            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, MiniBoss::PARAM_FMS + i));
             // Input Ports
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {
                 const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + 4 * j + i));
+                addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + 4 * j + i));
             }
         }
     }
 };
 
-Model *modelMiniBoss = createModel<BossFight, BossFightWidget>("MiniBoss");
+Model *modelMiniBoss = createModel<MiniBoss, MiniBossWidget>("MiniBoss");

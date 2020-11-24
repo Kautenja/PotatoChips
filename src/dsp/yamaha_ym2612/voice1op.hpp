@@ -30,8 +30,6 @@ struct Voice1Op {
  public:
     /// the number of FM operators on the module
     static constexpr unsigned NUM_OPERATORS = 4;
-    /// the number of FM algorithms on the module
-    static constexpr unsigned NUM_ALGORITHMS = 8;
 
     /// the maximal value that an operator can output (signed 14-bit)
     static constexpr int32_t OUTPUT_MAX = 8191;
@@ -117,7 +115,7 @@ struct Voice1Op {
         memset(connections, 0, sizeof connections);
         mem_connect = nullptr;
         mem_value = 0;
-        set_algorithm(0);
+        set_algorithm(7);
         update_phase_increment = true;
     }
 

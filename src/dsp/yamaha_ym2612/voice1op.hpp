@@ -113,15 +113,10 @@ struct Voice1Op {
         mem_connect = nullptr;
         mem_value = 0;
 
+        // TODO: remove
         {
-            int32_t *carrier = &audio_output;
-
-            int32_t **om1 = &connections[Op1];
-            int32_t **memc = &mem_connect;
-
-            *om1 = carrier;
-            // store it anywhere where it will not be used
-            *memc = &mem;
+            connections[Op1] = &audio_output;
+            mem_connect = &mem;
         }
 
         update_phase_increment = true;

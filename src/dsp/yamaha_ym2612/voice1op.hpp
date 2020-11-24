@@ -51,25 +51,13 @@ struct Voice1Op {
     OperatorContext state;
     /// 1-op voice
     Operator oprtr;
-
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
 
     /// feedback shift
     uint8_t feedback = 0;
-
-    /// operator 1 output for feedback
+    /// operator output for feedback
     int32_t output_feedback[2] = {0, 0};
-
-    /// Phase Modulation input for operator 2
-    int32_t m2 = 0;
-    /// Phase Modulation input for operator 3
-    int32_t c1 = 0;
-    /// Phase Modulation input for operator 4
-    int32_t c2 = 0;
-    /// one sample delay memory
-    int32_t mem = 0;
-
     /// the last output sample from the voice
     int32_t audio_output = 0;
 
@@ -262,34 +250,26 @@ struct Voice1Op {
         audio_output = 0;
         // update the SSG envelope
         oprtr.update_ssg_envelope_generator();
-        // -------------------------------------------------------------------
         // calculate operator outputs
-        // -------------------------------------------------------------------
-        // reset the algorithm outputs to 0
-        m2 = c1 = c2 = mem = 0;
-        // Operator 1
-        unsigned envelope = oprtr.get_envelope(state);
+        const unsigned envelope = oprtr.get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
         int32_t feedback_carrier = output_feedback[0] + output_feedback[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         output_feedback[0] = output_feedback[1];
-        // set the connection outputs from operator 1 based on the algorithm
+        // set the output from the operator's feedback
         audio_output += output_feedback[1];
-        // calculate the next output from operator 1
-        if (envelope < ENV_QUIET) {  // operator 1 envelope is open
+        // calculate the next output from operator
+        if (envelope < ENV_QUIET) {  // operator envelope is open
             // if feedback is disabled, set feedback carrier to 0
             if (!feedback) feedback_carrier = 0;
             // shift carrier by the feedback amount
             output_feedback[1] = oprtr.calculate_output(envelope, feedback_carrier << feedback);
-        } else {  // clear the next output from operator 1
+        } else {  // clear the next output from operator
             output_feedback[1] = 0;
         }
-
         // update phase counter AFTER output calculations
         oprtr.update_phase_counters(state);
-        // -------------------------------------------------------------------
         // advance LFO & envelope generator
-        // -------------------------------------------------------------------
         state.advance_lfo();
         state.eg_timer += state.eg_timer_add;
         while (state.eg_timer >= state.eg_timer_overflow) {

@@ -7,8 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 5,
-      "rightModuleId": 2,
+      "leftModuleId": 155,
       "data": {
         "audio": {
           "driver": 5,
@@ -20,8 +19,8 @@
         }
       },
       "pos": [
-        8,
-        1
+        77,
+        0
       ]
     },
     {
@@ -51,11 +50,11 @@
           "value": 1.0
         }
       ],
-      "leftModuleId": 1,
+      "leftModuleId": 142,
       "rightModuleId": 150,
       "pos": [
-        18,
-        1
+        31,
+        0
       ]
     },
     {
@@ -64,7 +63,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 1,
+      "rightModuleId": 142,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -79,7 +78,7 @@
       },
       "pos": [
         0,
-        1
+        0
       ]
     },
     {
@@ -149,8 +148,10 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 5,
+      "rightModuleId": 2,
       "pos": [
-        0,
+        8,
         0
       ]
     },
@@ -164,8 +165,8 @@
       "rightModuleId": 154,
       "data": {},
       "pos": [
-        28,
-        1
+        41,
+        0
       ]
     },
     {
@@ -206,8 +207,8 @@
         "amplitude_plot": "decibels_140"
       },
       "pos": [
-        31,
-        1
+        44,
+        0
       ]
     },
     {
@@ -250,13 +251,14 @@
         }
       ],
       "leftModuleId": 154,
+      "rightModuleId": 1,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        51,
-        1
+        64,
+        0
       ]
     }
   ],
@@ -268,14 +270,6 @@
       "inputModuleId": 155,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 1242,
-      "outputModuleId": 2,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
     },
     {
       "id": 1408,
@@ -294,14 +288,6 @@
       "color": "#0986ad"
     },
     {
-      "id": 1415,
-      "outputModuleId": 142,
-      "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
-      "color": "#c91847"
-    },
-    {
       "id": 1317,
       "outputModuleId": 2,
       "outputId": 1,
@@ -318,51 +304,27 @@
       "color": "#0986ad"
     },
     {
-      "id": 1419,
-      "outputModuleId": 2,
-      "outputId": 2,
-      "inputModuleId": 150,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1420,
-      "outputModuleId": 150,
-      "outputId": 1,
-      "inputModuleId": 154,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1421,
-      "outputModuleId": 154,
-      "outputId": 1,
-      "inputModuleId": 155,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1424,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 142,
-      "inputId": 9,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1423,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 142,
-      "inputId": 10,
-      "color": "#c91847"
-    },
-    {
       "id": 1425,
       "outputModuleId": 5,
       "outputId": 0,
       "inputModuleId": 142,
       "inputId": 11,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1426,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 142,
+      "inputId": 10,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1427,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 142,
+      "inputId": 9,
       "color": "#c9b70e"
     }
   ]

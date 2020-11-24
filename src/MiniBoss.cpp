@@ -104,7 +104,7 @@ struct MiniBoss : rack::Module {
 
     /// the indexes of output ports on the module
     enum OutputIds {
-        ENUMS(OUTPUT_MASTER, 2),
+        OUTPUT_OSC,
         NUM_OUTPUTS
     };
 
@@ -224,8 +224,7 @@ struct MiniBoss : rack::Module {
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);
-            outputs[OUTPUT_MASTER + 0].setVoltage(5.f * sample, channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(5.f * sample, channel);
+            outputs[OUTPUT_OSC].setVoltage(5.f * sample, channel);
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
@@ -251,16 +250,16 @@ struct MiniBossWidget : ModuleWidget {
     ///
     explicit MiniBossWidget(MiniBoss *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
+        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/MiniBoss.svg")));
         // Panel Screws
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Algorithm, Feedback, LFO, Saturation
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, MiniBoss::PARAM_SATURATION));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 187), module, MiniBoss::PARAM_SATURATION));
         // Saturation Indicator
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, MiniBoss::VU_LIGHTS + 0));
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, MiniBoss::VU_LIGHTS + 1));
@@ -272,8 +271,7 @@ struct MiniBossWidget : ModuleWidget {
         addInput(createInput<PJ301MPort>  (Vec(98, 249), module, MiniBoss::INPUT_FB));
         addInput(createInput<PJ301MPort>  (Vec(63, 293), module, MiniBoss::INPUT_LFO));
         addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_SATURATION));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, MiniBoss::OUTPUT_MASTER + 1));
+        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_OSC));
         // ADSR
         addParam(createSnapParam<Rogan2PWhite>(Vec(159, 35),  module, MiniBoss::PARAM_AR));
         addParam(createSnapParam<Rogan2PWhite>(Vec(223, 60),  module, MiniBoss::PARAM_TL));

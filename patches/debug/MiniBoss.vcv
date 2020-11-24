@@ -346,24 +346,24 @@
       "outputModuleId": 5,
       "outputId": 1,
       "inputModuleId": 142,
-      "inputId": 10,
+      "inputId": 9,
       "color": "#0986ad"
-    },
-    {
-      "id": 1425,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 142,
-      "inputId": 12,
-      "color": "#c9b70e"
     },
     {
       "id": 1423,
       "outputModuleId": 5,
       "outputId": 6,
       "inputModuleId": 142,
-      "inputId": 11,
+      "inputId": 10,
       "color": "#c91847"
+    },
+    {
+      "id": 1425,
+      "outputModuleId": 5,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 11,
+      "color": "#c9b70e"
     }
   ]
 }

@@ -82,7 +82,6 @@ struct MiniBoss : rack::Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
-        INPUT_AL,
         INPUT_FB,
         INPUT_LFO,
         INPUT_SATURATION,
@@ -270,7 +269,6 @@ struct MiniBossWidget : ModuleWidget {
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, MiniBoss::VU_LIGHTS + 4));
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, MiniBoss::VU_LIGHTS + 5));
         // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, MiniBoss::INPUT_AL));
         addInput(createInput<PJ301MPort>  (Vec(98, 249), module, MiniBoss::INPUT_FB));
         addInput(createInput<PJ301MPort>  (Vec(63, 293), module, MiniBoss::INPUT_LFO));
         addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_SATURATION));

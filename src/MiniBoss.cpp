@@ -297,31 +297,26 @@ struct MiniBossWidget : ModuleWidget {
         addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_SATURATION));
         addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_MASTER + 0));
         addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, MiniBoss::OUTPUT_MASTER + 1));
-        // Operator Parameters and Inputs
-        for (unsigned i = 0; i < YamahaYM2612::Voice1Op::NUM_OPERATORS; i++) {
-            auto offset = i * 210;
-            // ADSR
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, MiniBoss::PARAM_AR + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, MiniBoss::PARAM_TL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, MiniBoss::PARAM_D1 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, MiniBoss::PARAM_SL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, MiniBoss::PARAM_D2 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, MiniBoss::PARAM_RR + i));
-            // Looping ADSR, Key Scaling
-            addParam(createParam<CKSS>(Vec(216 + offset, 203), module, MiniBoss::PARAM_SSG_ENABLE + i));
-            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, MiniBoss::PARAM_RS + i));
-            // Frequency and modulation
-            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, MiniBoss::PARAM_FREQ + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, MiniBoss::PARAM_MUL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, MiniBoss::PARAM_AMS + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, MiniBoss::PARAM_FMS + i));
-            // Input Ports
-            const auto op_offset = 210 * i;
-            for (unsigned j = 0; j < 6; j++) {
-                const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + j));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + j));
-            }
+        // ADSR
+        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 35),  module, MiniBoss::PARAM_AR));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(223, 60),  module, MiniBoss::PARAM_TL));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 103), module, MiniBoss::PARAM_D1));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(223, 147), module, MiniBoss::PARAM_SL));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 173), module, MiniBoss::PARAM_D2));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 242), module, MiniBoss::PARAM_RR));
+        // Looping ADSR, Key Scaling
+        addParam(createParam<CKSS>(Vec(216, 203), module, MiniBoss::PARAM_SSG_ENABLE));
+        addParam(createSnapParam<Trimpot>(Vec(248, 247), module, MiniBoss::PARAM_RS));
+        // Frequency and modulation
+        addParam(createParam<Rogan2PWhite>(Vec(290, 35),  module, MiniBoss::PARAM_FREQ));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 103), module, MiniBoss::PARAM_MUL));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 173), module, MiniBoss::PARAM_AMS));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 242), module, MiniBoss::PARAM_FMS));
+        // Input Ports
+        for (unsigned j = 0; j < 6; j++) {
+            const auto x = 140 + j * 35;
+            addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + j));
+            addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + j));
         }
     }
 };

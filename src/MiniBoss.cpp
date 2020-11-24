@@ -25,13 +25,13 @@
 /// A Eurorack module based on the Yamaha YM2612.
 struct MiniBoss : rack::Module {
  private:
-    /// a YM2612 chip emulator
+    /// a YM2612 operator 1 emulator
     YamahaYM2612::Voice1Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[YamahaYM2612::Voice1Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrig_triggers[YamahaYM2612::Voice1Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    rack::dsp::BooleanTrigger retrig_triggers[PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
@@ -167,39 +167,29 @@ struct MiniBoss : rack::Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) {
-        // set the global parameters
-        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
-        apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        // normal pitch gate and re-trigger
-        float gate = 0;
-        float retrig = 0;
-        // set the operator parameters
-        for (unsigned op = 0; op < YamahaYM2612::Voice1Op::NUM_OPERATORS; op++) {
-            apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL   + op, INPUT_TL         + op, 100));
-            apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL    + op, INPUT_SL         + op, 15 ));
-            apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
-            apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 4  ));
-            // SSG and rate scale
-            apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
-            apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
-            // process the gate trigger, high at 2V
-            gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
-            gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
-            // process the retrig trigger, high at 2V
-            retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
-            // use the exclusive or of the gate and retrigger. This ensures that
-            // when either gate or trigger alone is high, the gate is open,
-            // but when neither or both are high, the gate is closed. This
-            // causes the gate to get shut for a sample when re-triggering an
-            // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].state);
-        }
+        apu[channel].set_lfo           (getParam(channel, PARAM_LFO, INPUT_LFO, 7));
+        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_attack_rate   (0, getParam(channel,       PARAM_AR,  INPUT_AR,  31 ));
+        apu[channel].set_total_level   (0, 100 - getParam(channel, PARAM_TL,  INPUT_TL,  100));
+        apu[channel].set_decay_rate    (0, getParam(channel,       PARAM_D1,  INPUT_D1,  31 ));
+        apu[channel].set_sustain_level (0, 15 - getParam(channel,  PARAM_SL,  INPUT_SL,  15 ));
+        apu[channel].set_sustain_rate  (0, getParam(channel,       PARAM_D2,  INPUT_D2,  31 ));
+        apu[channel].set_release_rate  (0, getParam(channel,       PARAM_RR,  INPUT_RR,  15 ));
+        apu[channel].set_multiplier    (0, getParam(channel,       PARAM_MUL, INPUT_MUL, 15 ));
+        apu[channel].set_fm_sensitivity(0, getParam(channel,       PARAM_FMS, INPUT_FMS, 7  ));
+        apu[channel].set_am_sensitivity(0, getParam(channel,       PARAM_AMS, INPUT_AMS, 4  ));
+        apu[channel].set_ssg_enabled   (0, params[PARAM_SSG_ENABLE].getValue());
+        apu[channel].set_rate_scale    (0, params[PARAM_RS].getValue());
+        // process the gate trigger, high at 2V
+        gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        // process the retrig trigger, high at 2V
+        const auto trigger = retrig_triggers[channel].process(rescale(inputs[INPUT_RETRIG].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        // use the exclusive or of the gate and retrigger. This ensures that
+        // when either gate or trigger alone is high, the gate is open,
+        // but when neither or both are high, the gate is closed. This
+        // causes the gate to get shut for a sample when re-triggering an
+        // already gated voice
+        apu[channel].set_gate(0, trigger ^ gate_triggers[channel].state);
     }
 
     /// @brief Process a sample.
@@ -222,12 +212,9 @@ struct MiniBoss : rack::Module {
                 processCV(args, channel);
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
-            float pitch = 0;
-            for (unsigned op = 0; op < YamahaYM2612::Voice1Op::NUM_OPERATORS; op++) {
-                float frequency = params[PARAM_FREQ + op].getValue();
-                pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
-            }
+            const float frequency = params[PARAM_FREQ].getValue();
+            const float pitch = inputs[INPUT_PITCH].getVoltage(channel);
+            apu[channel].set_frequency(0, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
         }
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {

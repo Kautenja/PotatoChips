@@ -180,7 +180,7 @@ struct BossFight : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
-        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
+        apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 7));
         // set the global parameters
         apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
         apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));

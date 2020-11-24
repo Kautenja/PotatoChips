@@ -62,22 +62,21 @@ struct MiniBoss : rack::Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        PARAM_AL,
         PARAM_FB,
         PARAM_LFO,
         PARAM_SATURATION,
-        ENUMS(PARAM_AR,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_TL,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_D1,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_SL,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_D2,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_RR,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_FREQ,       YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_MUL,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_AMS,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_FMS,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_RS,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(PARAM_SSG_ENABLE, YamahaYM2612::Voice1Op::NUM_OPERATORS),
+        PARAM_AR,
+        PARAM_TL,
+        PARAM_D1,
+        PARAM_SL,
+        PARAM_D2,
+        PARAM_RR,
+        PARAM_FREQ,
+        PARAM_MUL,
+        PARAM_AMS,
+        PARAM_FMS,
+        PARAM_RS,
+        PARAM_SSG_ENABLE,
         NUM_PARAMS
     };
 
@@ -88,19 +87,19 @@ struct MiniBoss : rack::Module {
         INPUT_LFO,
         INPUT_SATURATION,
         // Row 1
-        ENUMS(INPUT_AR,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_TL,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_D1,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_SL,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_D2,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_RR,         YamahaYM2612::Voice1Op::NUM_OPERATORS),
+        INPUT_AR,
+        INPUT_TL,
+        INPUT_D1,
+        INPUT_SL,
+        INPUT_D2,
+        INPUT_RR,
         // Row 2
-        ENUMS(INPUT_GATE,       YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_RETRIG,     YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_PITCH,      YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_MUL,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_AMS,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
-        ENUMS(INPUT_FMS,        YamahaYM2612::Voice1Op::NUM_OPERATORS),
+        INPUT_GATE,
+        INPUT_RETRIG,
+        INPUT_PITCH,
+        INPUT_MUL,
+        INPUT_AMS,
+        INPUT_FMS,
         NUM_INPUTS
     };
 
@@ -116,14 +115,10 @@ struct MiniBoss : rack::Module {
         NUM_LIGHTS
     };
 
-    /// the current FM algorithm
-    uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
     /// Initialize a new Boss Fight module.
     MiniBoss() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
-        configParam(PARAM_AL,  0, 7, 7, "Algorithm");
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
@@ -172,11 +167,8 @@ struct MiniBoss : rack::Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) {
-        // this value is used in the algorithm widget
-        algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
-        algorithm[channel] = clamp(algorithm[channel], 0, 7);
-        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         // set the global parameters
+        apu[channel].set_lfo(getParam(0, PARAM_LFO, INPUT_LFO, 7));
         apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB,  7));
         // normal pitch gate and re-trigger
         float gate = 0;

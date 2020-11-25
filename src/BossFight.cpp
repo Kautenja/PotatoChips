@@ -18,8 +18,6 @@
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
-// TODO: fix attack rate input to have minimal value of 1 on CV
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

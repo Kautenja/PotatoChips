@@ -84,7 +84,7 @@
     {
       "id": 142,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "model": "MiniBoss",
       "params": [
         {

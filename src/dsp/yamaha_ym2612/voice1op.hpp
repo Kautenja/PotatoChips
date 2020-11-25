@@ -26,7 +26,7 @@
 namespace YamahaYM2612 {
 
 /// @brief A single 4-operator FM voice.
-struct Voice1Op {
+struct FeedbackOperator {
  private:
     /// general state
     OperatorContext state;
@@ -45,7 +45,7 @@ struct Voice1Op {
     /// @param sample_rate the rate to draw samples from the emulator at
     /// @param clock_rate the underlying clock rate of the system
     ///
-    explicit Voice1Op(float sample_rate = 44100, float clock_rate = 768000) {
+    explicit FeedbackOperator(float sample_rate = 44100, float clock_rate = 768000) {
         set_sample_rate(sample_rate, clock_rate);
         reset();
     }

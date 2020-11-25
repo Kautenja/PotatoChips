@@ -26,7 +26,7 @@
 struct MiniBoss : rack::Module {
  private:
     /// a YM2612 operator 1 emulator
-    YamahaYM2612::Voice1Op apu[PORT_MAX_CHANNELS];
+    YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
     dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];

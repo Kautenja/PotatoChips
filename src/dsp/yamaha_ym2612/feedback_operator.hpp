@@ -17,8 +17,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef DSP_YAMAHA_YM2612_VOICE4OP_HPP_
-#define DSP_YAMAHA_YM2612_VOICE4OP_HPP_
+#ifndef DSP_YAMAHA_YM2612_FEEDBACK_OPERATOR_HPP_
+#define DSP_YAMAHA_YM2612_FEEDBACK_OPERATOR_HPP_
 
 #include "operator.hpp"
 
@@ -26,12 +26,10 @@
 namespace YamahaYM2612 {
 
 /// @brief A single 4-operator FM voice.
-struct FeedbackOperator {
+struct FeedbackOperator : public Operator, public OperatorContext {
  private:
     /// general state
     OperatorContext state;
-    /// 1-op voice
-    Operator oprtr;
     /// operator output for feedback
     int32_t output_feedback[2] = {0, 0};
     /// a flag determining whether the phase increment needs to be updated
@@ -62,7 +60,7 @@ struct FeedbackOperator {
     /// @brief Reset the voice to default.
     inline void reset() {
         state.reset();
-        oprtr.reset(state);
+        Operator::reset(state);
         feedback = 0;
         output_feedback[0] = output_feedback[1] = 0;
         update_phase_increment = true;
@@ -91,17 +89,7 @@ struct FeedbackOperator {
     /// @param frequency the frequency value measured in Hz
     ///
     inline void set_frequency(float frequency) {
-        update_phase_increment |= oprtr.set_frequency(state, frequency);
-    }
-
-    /// @brief Set the gate for the given voice.
-    ///
-    /// @param op_index the operator to set the gate of of (in [0, 3])
-    /// @param is_open true if the gate is open, false otherwise
-    /// @param prevent_clicks true to prevent clicks from note re-triggers
-    ///
-    inline void set_gate(bool is_open, bool prevent_clicks = false) {
-        oprtr.set_gate(is_open, prevent_clicks);
+        update_phase_increment |= Operator::set_frequency(state, frequency);
     }
 
     /// @brief Set the rate-scale (RS) register for the given voice and operator.
@@ -109,62 +97,8 @@ struct FeedbackOperator {
     /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    inline void set_rate_scale(uint8_t value) {
-        update_phase_increment |= oprtr.set_rs(value);
-    }
-
-    /// @brief Set the attack rate (AR) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the attack rate (AR) register of (in [0, 3])
-    /// @param value the rate of the attack stage of the envelope generator
-    ///
-    inline void set_attack_rate(uint8_t value) {
-        oprtr.set_ar(value);
-    }
-
-    /// @brief Set the total level (TL) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the total level (TL) register of (in [0, 3])
-    /// @param value the total amplitude of envelope generator
-    ///
-    inline void set_total_level(uint8_t value) {
-        oprtr.set_tl(value);
-    }
-
-    /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the 1st decay rate (D1) register of (in [0, 3])
-    /// @param value the rate of decay for the 1st decay stage of the envelope generator
-    ///
-    inline void set_decay_rate(uint8_t value) {
-        oprtr.set_dr(value);
-    }
-
-    /// @brief Set the sustain level (SL) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the sustain level (SL) register of (in [0, 3])
-    /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
-    ///
-    inline void set_sustain_level(uint8_t value) {
-        oprtr.set_sl(value);
-    }
-
-    /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the 2nd decay rate (D2) register of (in [0, 3])
-    /// @param value the rate of decay for the 2nd decay stage of the envelope generator
-    ///
-    inline void set_sustain_rate(uint8_t value) {
-        oprtr.set_sr(value);
-    }
-
-    /// @brief Set the release rate (RR) register for the given voice and operator.
-    ///
-    /// @param op_index the operator to set the release rate (RR) register of (in [0, 3])
-    /// @param value the rate of release of the envelope generator after key-off
-    ///
-    inline void set_release_rate(uint8_t value) {
-        oprtr.set_rr(value);
+    inline void set_rs(uint8_t value) {
+        update_phase_increment |= Operator::set_rs(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.
@@ -173,7 +107,7 @@ struct FeedbackOperator {
     /// @param value the value of the FM phase multiplier
     ///
     inline void set_multiplier(uint8_t value) {
-        update_phase_increment |= oprtr.set_multiplier(value);
+        update_phase_increment |= Operator::set_multiplier(value);
     }
 
     /// @brief Set the detune (DET) register for the given voice and operator.
@@ -182,32 +116,7 @@ struct FeedbackOperator {
     /// @param value the the level of detuning for the FM operator
     ///
     inline void set_detune(uint8_t value = 4) {
-        update_phase_increment |= oprtr.set_detune(state, value);
-    }
-
-    /// @brief Set whether SSG envelopes are enabled for the given operator.
-    ///
-    /// @param op_index the operator to set the SSG-EG register of (in [0, 3])
-    /// @param is_on whether the looping envelope generator should be turned on
-    ///
-    inline void set_ssg_enabled(bool is_on) {
-        oprtr.set_ssg_enabled(is_on);
-    }
-
-    /// @brief Set the AM sensitivity (AMS) register for the given voice.
-    ///
-    /// @param value the amount of amplitude modulation (AM) sensitivity
-    ///
-    inline void set_am_sensitivity(uint8_t value) {
-        oprtr.set_am_sensitivity(value);
-    }
-
-    /// @brief Set the FM sensitivity (FMS) register for the given voice.
-    ///
-    /// @param value the amount of frequency modulation (FM) sensitivity
-    ///
-    inline void set_fm_sensitivity(uint8_t value) {
-        oprtr.set_fm_sensitivity(value);
+        update_phase_increment |= Operator::set_detune(state, value);
     }
 
     // -----------------------------------------------------------------------
@@ -222,13 +131,13 @@ struct FeedbackOperator {
     inline int16_t step(int16_t mod = 0) {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
-            oprtr.refresh_phase_and_envelope();
+            refresh_phase_and_envelope();
             update_phase_increment = false;
         }
         // update the SSG envelope
-        oprtr.update_ssg_envelope_generator();
+        update_ssg_envelope_generator();
         // calculate operator outputs
-        const unsigned envelope = oprtr.get_envelope(state);
+        const unsigned envelope = get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
         int32_t fb_carrier = output_feedback[0] + output_feedback[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
@@ -243,19 +152,19 @@ struct FeedbackOperator {
             // 1. shift carrier by the feedback amount
             // 1. sum into phase modulation signal for operator
             const auto pm = (static_cast<int32_t>(mod) << 15) + (fb_carrier << feedback);
-            output_feedback[1] = oprtr.calculate_output(envelope, pm);
+            output_feedback[1] = calculate_output(envelope, pm);
         } else {  // clear the next output from operator
             output_feedback[1] = 0;
         }
         // update phase counter AFTER output calculations
-        oprtr.update_phase_counters(state);
+        update_phase_counters(state);
         // advance LFO & envelope generator
         state.advance_lfo();
         state.eg_timer += state.eg_timer_add;
         while (state.eg_timer >= state.eg_timer_overflow) {
             state.eg_timer -= state.eg_timer_overflow;
             state.eg_cnt++;
-            oprtr.update_envelope_generator(state.eg_cnt);
+            update_envelope_generator(state.eg_cnt);
         }
 
         return audio_output;
@@ -264,4 +173,4 @@ struct FeedbackOperator {
 
 }  // namespace YamahaYM2612
 
-#endif  // DSP_YAMAHA_YM2612_VOICE4OP_HPP_
+#endif  // DSP_YAMAHA_YM2612_FEEDBACK_OPERATOR_HPP_

@@ -58,8 +58,6 @@ struct Voice1Op {
     uint8_t feedback = 0;
     /// operator output for feedback
     int32_t output_feedback[2] = {0, 0};
-    /// the last output sample from the voice
-    int32_t audio_output = 0;
 
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.
@@ -247,8 +245,6 @@ struct Voice1Op {
             oprtr.refresh_phase_and_envelope();
             update_phase_increment = false;
         }
-        // clear the audio output
-        audio_output = 0;
         // update the SSG envelope
         oprtr.update_ssg_envelope_generator();
         // calculate operator outputs
@@ -258,7 +254,7 @@ struct Voice1Op {
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         output_feedback[0] = output_feedback[1];
         // set the output from the operator's feedback
-        audio_output += output_feedback[1];
+        int32_t audio_output = output_feedback[1];
         // calculate the next output from operator
         if (envelope < ENV_QUIET) {  // operator envelope is open
             // if feedback is disabled, set feedback carrier to 0

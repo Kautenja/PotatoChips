@@ -221,7 +221,7 @@ struct MiniBoss : rack::Module {
             const int16_t audio_output = (apu[channel].step(fm) * getVolume(channel)) >> 7;
             // convert the clipped audio to a floating point sample and set the
             // output voltage for the channel
-            const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);
+            const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_OSC].setVoltage(5.f * sample, channel);
         }
     }

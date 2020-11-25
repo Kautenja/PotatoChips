@@ -251,7 +251,7 @@ struct BossFight : rack::Module {
             vuMeter.process(args.sampleTime, audio_output / static_cast<float>(1 << 13));
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
-            const auto sample = YamahaYM2612::Voice4Op::clip(audio_output) / static_cast<float>(1 << 13);
+            const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_MASTER + 0].setVoltage(5.f * sample, channel);
             outputs[OUTPUT_MASTER + 1].setVoltage(5.f * sample, channel);
         }

@@ -33,24 +33,6 @@ struct Voice4Op {
     /// the number of FM algorithms on the module
     static constexpr unsigned NUM_ALGORITHMS = 8;
 
-    /// the maximal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MAX = 8191;
-    /// the minimal value that an operator can output (signed 14-bit)
-    static constexpr int32_t OUTPUT_MIN = -8192;
-
-    /// @brief clip the given sample to 14 bits.
-    ///
-    /// @param sample the sample to clip to 14 bits
-    /// @returns the sample after clipping to 14 bits
-    ///
-    static inline int16_t clip(int16_t sample) {
-        if (sample > OUTPUT_MAX)
-            return OUTPUT_MAX;
-        else if (sample < OUTPUT_MIN)
-            return OUTPUT_MIN;
-        return sample;
-    }
-
  private:
     /// general state
     OperatorContext state;

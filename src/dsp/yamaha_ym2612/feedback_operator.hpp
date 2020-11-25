@@ -26,7 +26,7 @@
 namespace YamahaYM2612 {
 
 /// @brief A single 4-operator FM voice.
-struct FeedbackOperator : public Operator, public OperatorContext {
+struct FeedbackOperator : public Operator {
  private:
     /// general state
     OperatorContext state;

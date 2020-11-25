@@ -147,7 +147,7 @@ struct MiniBoss : rack::Module {
     ///
     /// @returns the 8-bit saturation value
     ///
-    inline int32_t getSaturation(unsigned channel) {
+    inline int32_t getVolume(unsigned channel) {
         const float param = params[PARAM_VOLUME].getValue();
         const float cv = inputs[INPUT_VOLUME].getPolyVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
@@ -213,7 +213,7 @@ struct MiniBoss : rack::Module {
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
-            const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
+            const int16_t audio_output = (apu[channel].step() * getVolume(channel)) >> 7;
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);

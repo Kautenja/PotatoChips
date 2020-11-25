@@ -62,7 +62,7 @@ struct MiniBoss : rack::Module {
     enum ParamIds {
         PARAM_FB,
         PARAM_LFO,
-        PARAM_SATURATION,
+        PARAM_VOLUME,
         PARAM_AR,
         PARAM_TL,
         PARAM_D1,
@@ -82,15 +82,13 @@ struct MiniBoss : rack::Module {
     enum InputIds {
         INPUT_FB,
         INPUT_LFO,
-        INPUT_SATURATION,
-        // Row 1
+        INPUT_VOLUME,
         INPUT_AR,
         INPUT_TL,
         INPUT_D1,
         INPUT_SL,
         INPUT_D2,
         INPUT_RR,
-        // Row 2
         INPUT_GATE,
         INPUT_RETRIG,
         INPUT_PITCH,
@@ -108,7 +106,6 @@ struct MiniBoss : rack::Module {
 
     /// the indexes of lights on the module
     enum LightIds {
-        ENUMS(VU_LIGHTS, 6),
         NUM_LIGHTS
     };
 
@@ -118,7 +115,7 @@ struct MiniBoss : rack::Module {
         // global parameters
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
-        configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
+        configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
         // operator parameters
         configParam(PARAM_AR,  1,  31,  31, "Attack Rate");
@@ -151,8 +148,8 @@ struct MiniBoss : rack::Module {
     /// @returns the 8-bit saturation value
     ///
     inline int32_t getSaturation(unsigned channel) {
-        const float param = params[PARAM_SATURATION].getValue();
-        const float cv = inputs[INPUT_SATURATION].getPolyVoltage(channel) / 10.f;
+        const float param = params[PARAM_VOLUME].getValue();
+        const float cv = inputs[INPUT_VOLUME].getPolyVoltage(channel) / 10.f;
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, 0.f, MAX);
@@ -246,18 +243,11 @@ struct MiniBossWidget : ModuleWidget {
         // Feedback, LFO, Saturation
         addParam(createSnapParam<Rogan2PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
         addParam(createSnapParam<Rogan2PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 187), module, MiniBoss::PARAM_SATURATION));
-        // Saturation Indicator
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, MiniBoss::VU_LIGHTS + 0));
-        addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, MiniBoss::VU_LIGHTS + 1));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 300), module, MiniBoss::VU_LIGHTS + 2));
-        addChild(createLightCentered<MediumLight<YellowLight>>(Vec(20, 315), module, MiniBoss::VU_LIGHTS + 3));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, MiniBoss::VU_LIGHTS + 4));
-        addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, MiniBoss::VU_LIGHTS + 5));
+        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 187), module, MiniBoss::PARAM_VOLUME));
         // Global Ports
         addInput(createInput<PJ301MPort>  (Vec(98, 249), module, MiniBoss::INPUT_FB));
         addInput(createInput<PJ301MPort>  (Vec(63, 293), module, MiniBoss::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_SATURATION));
+        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_VOLUME));
         addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_OSC));
         // ADSR
         addParam(createSnapParam<Rogan2PWhite>(Vec(159, 35),  module, MiniBoss::PARAM_AR));

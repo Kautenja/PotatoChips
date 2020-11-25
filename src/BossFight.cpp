@@ -18,6 +18,8 @@
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
+// TODO: fix attack rate input to have minimal value of 1 on CV
+
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
@@ -46,17 +48,19 @@ struct BossFight : rack::Module {
     /// @param channel the channel to get the parameter value for
     /// @param paramIndex the index of the parameter in the params list
     /// @param inputIndex the index of the CV input in the inputs list
-    /// @param int max the maximal value for the parameter
+    /// @param min the minimal value for the parameter
+    /// @param max the maximal value for the parameter
     ///
     inline uint8_t getParam(
         unsigned channel,
         unsigned paramIndex,
         unsigned inputIndex,
+        unsigned min,
         unsigned max
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
-        return clamp(static_cast<int>(param + cv), 0, max);
+        return clamp(static_cast<int>(param + cv), min, max);
     }
 
  public:
@@ -180,24 +184,24 @@ struct BossFight : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
-        apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 7));
+        apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
-        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL,  7));
-        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
+        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
+        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
         // normal pitch gate and re-trigger
         float gate = 0;
         float retrig = 0;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
-            apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 31 ));
-            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL   + op, INPUT_TL         + op, 100));
-            apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 31 ));
-            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL    + op, INPUT_SL         + op, 15 ));
-            apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 31 ));
-            apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 15 ));
-            apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 15 ));
-            apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 7  ));
-            apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 4  ));
+            apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 1, 31 ));
+            apu[channel].set_total_level   (op, 100 - getParam(channel, PARAM_TL   + op, INPUT_TL         + op, 0, 100));
+            apu[channel].set_decay_rate    (op, getParam(channel, PARAM_D1         + op, INPUT_D1         + op, 0, 31 ));
+            apu[channel].set_sustain_level (op, 15 - getParam(channel, PARAM_SL    + op, INPUT_SL         + op, 0, 15 ));
+            apu[channel].set_sustain_rate  (op, getParam(channel, PARAM_D2         + op, INPUT_D2         + op, 0, 31 ));
+            apu[channel].set_release_rate  (op, getParam(channel, PARAM_RR         + op, INPUT_RR         + op, 0, 15 ));
+            apu[channel].set_multiplier    (op, getParam(channel, PARAM_MUL        + op, INPUT_MUL        + op, 0, 15 ));
+            apu[channel].set_fm_sensitivity(op, getParam(channel, PARAM_FMS        + op, INPUT_FMS        + op, 0, 7  ));
+            apu[channel].set_am_sensitivity(op, getParam(channel, PARAM_AMS        + op, INPUT_AMS        + op, 0, 4  ));
             // SSG and rate scale
             apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());

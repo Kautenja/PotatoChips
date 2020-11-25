@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        87,
+        105,
         0
       ]
     },
@@ -53,7 +53,7 @@
       "leftModuleId": 7,
       "rightModuleId": 1,
       "pos": [
-        77,
+        95,
         0
       ]
     },
@@ -63,7 +63,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 160,
+      "rightModuleId": 156,
       "data": {
         "channels": 1,
         "polyMode": 0,
@@ -120,14 +120,14 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 156,
+      "leftModuleId": 164,
       "rightModuleId": 2,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        64,
+        82,
         0
       ]
     },
@@ -190,8 +190,8 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 161,
-      "rightModuleId": 7,
+      "leftModuleId": 5,
+      "rightModuleId": 160,
       "data": {
         "Config Enabled": false,
         "Config Mode": -1,
@@ -365,7 +365,7 @@
         ]
       },
       "pos": [
-        54,
+        8,
         0
       ]
     },
@@ -440,10 +440,10 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 5,
+      "leftModuleId": 156,
       "rightModuleId": 161,
       "pos": [
-        8,
+        18,
         0
       ]
     },
@@ -519,9 +519,9 @@
         }
       ],
       "leftModuleId": 160,
-      "rightModuleId": 156,
+      "rightModuleId": 163,
       "pos": [
-        31,
+        34,
         0
       ]
     },
@@ -596,10 +596,11 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 161,
       "rightModuleId": 164,
       "pos": [
-        8,
-        1
+        50,
+        0
       ]
     },
     {
@@ -674,9 +675,10 @@
         }
       ],
       "leftModuleId": 163,
+      "rightModuleId": 7,
       "pos": [
-        31,
-        1
+        66,
+        0
       ]
     }
   ],
@@ -712,174 +714,6 @@
       "inputModuleId": 2,
       "inputId": 1,
       "color": "#0986ad"
-    },
-    {
-      "id": 1444,
-      "outputModuleId": 160,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1449,
-      "outputModuleId": 161,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1442,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 160,
-      "inputId": 12,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1443,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 160,
-      "inputId": 10,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1448,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 161,
-      "inputId": 12,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1447,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 161,
-      "inputId": 10,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1452,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 160,
-      "inputId": 11,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1450,
-      "outputModuleId": 156,
-      "outputId": 1,
-      "inputModuleId": 161,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1445,
-      "outputModuleId": 156,
-      "outputId": 0,
-      "inputModuleId": 160,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1453,
-      "outputModuleId": 156,
-      "outputId": 2,
-      "inputModuleId": 163,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1454,
-      "outputModuleId": 156,
-      "outputId": 3,
-      "inputModuleId": 164,
-      "inputId": 0,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1455,
-      "outputModuleId": 163,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 2,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1456,
-      "outputModuleId": 164,
-      "outputId": 0,
-      "inputModuleId": 156,
-      "inputId": 3,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1457,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 163,
-      "inputId": 10,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1458,
-      "outputModuleId": 5,
-      "outputId": 1,
-      "inputModuleId": 164,
-      "inputId": 10,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1459,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 163,
-      "inputId": 11,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1460,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 164,
-      "inputId": 11,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1461,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 163,
-      "inputId": 12,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1462,
-      "outputModuleId": 5,
-      "outputId": 0,
-      "inputModuleId": 164,
-      "inputId": 12,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1451,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 161,
-      "inputId": 11,
-      "color": "#c9b70e"
-    },
-    {
-      "id": 1465,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 156,
-      "inputId": 5,
-      "color": "#c9b70e"
     }
   ]
 }

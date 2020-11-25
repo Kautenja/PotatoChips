@@ -60,40 +60,46 @@ struct MiniBoss : rack::Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
-        PARAM_FM,
-        PARAM_FB,
-        PARAM_LFO,
-        PARAM_VOLUME,
+        // envelope generator
         PARAM_AR,
         PARAM_TL,
         PARAM_D1,
         PARAM_SL,
         PARAM_D2,
         PARAM_RR,
-        PARAM_FREQ,
-        PARAM_MUL,
-        PARAM_AMS,
-        PARAM_FMS,
-        PARAM_RS,
         PARAM_SSG_ENABLE,
+        PARAM_RS,
+        // row 1
+        PARAM_FREQ,
+        PARAM_LFO,
+        PARAM_FMS,
+        PARAM_AMS,
+        // row 2
+        PARAM_FM,
+        PARAM_MUL,
+        PARAM_FB,
+        PARAM_VOLUME,
         NUM_PARAMS
     };
 
     /// the indexes of input ports on the module
     enum InputIds {
-        INPUT_FM,
-        INPUT_FB,
-        INPUT_LFO,
-        INPUT_VOLUME,
+        // row 1
         INPUT_AR,
         INPUT_TL,
         INPUT_D1,
         INPUT_SL,
         INPUT_D2,
         INPUT_RR,
+        // row 2
         INPUT_GATE,
         INPUT_RETRIG,
-        INPUT_PITCH,
+        INPUT_VOCT,
+        INPUT_FM,
+        INPUT_VOLUME,
+        // TODO: remove?
+        INPUT_FB,
+        INPUT_LFO,
         INPUT_MUL,
         INPUT_AMS,
         INPUT_FMS,
@@ -108,6 +114,12 @@ struct MiniBoss : rack::Module {
 
     /// the indexes of lights on the module
     enum LightIds {
+        ENUMS(LIGHT_AR, 3),
+        ENUMS(LIGHT_TL, 3),
+        ENUMS(LIGHT_D1, 3),
+        ENUMS(LIGHT_SL, 3),
+        ENUMS(LIGHT_D2, 3),
+        ENUMS(LIGHT_RR, 3),
         NUM_LIGHTS
     };
 
@@ -123,14 +135,14 @@ struct MiniBoss : rack::Module {
         // operator parameters
         configParam(PARAM_AR,  1,  31,  31, "Attack Rate");
         configParam(PARAM_TL,  0, 100, 100, "Total Level");
-        configParam(PARAM_D1,  0,  31,   0, "1st Decay Rate");
+        configParam(PARAM_D1,  0,  31,   0, "Decay Rate");
         configParam(PARAM_SL,  0,  15,  15, "Sustain Level");
-        configParam(PARAM_D2,  0,  31,   0, "2nd Decay Rate");
+        configParam(PARAM_D2,  0,  31,   0, "Sustain Rate");
         configParam(PARAM_RR,  0,  15,  15, "Release Rate");
         configParam(PARAM_MUL, 0,  15,   1, "Multiplier");
         configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
-        configParam(PARAM_AMS, 0,   3,   0, "Amplitude modulation sensitivity");
-        configParam(PARAM_FMS, 0,   7,   0, "Frequency modulation sensitivity");
+        configParam(PARAM_AMS, 0,   3,   0, "LFO amplitude modulation sensitivity");
+        configParam(PARAM_FMS, 0,   7,   0, "LFO frequency modulation sensitivity");
         configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
         // reset the emulator
         onSampleRateChange();
@@ -210,7 +222,7 @@ struct MiniBoss : rack::Module {
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
             const float frequency = params[PARAM_FREQ].getValue();
-            const float pitch = inputs[INPUT_PITCH].getVoltage(channel);
+            const float pitch = inputs[INPUT_VOCT].getVoltage(channel);
             apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
         }
         // advance one sample in the emulator
@@ -245,40 +257,36 @@ struct MiniBossWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-
-        addInput(createInput<PJ301MPort>  (Vec(15, 15), module, MiniBoss::INPUT_FM));
-        addParam(createParam<Trimpot>(Vec(15, 40),  module, MiniBoss::PARAM_FM));
-
-        // Feedback, LFO, Saturation
-        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(77, 187), module, MiniBoss::PARAM_VOLUME));
-        // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, MiniBoss::INPUT_FB));
-        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, MiniBoss::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, MiniBoss::INPUT_VOLUME));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, MiniBoss::OUTPUT_OSC));
         // ADSR
-        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 35),  module, MiniBoss::PARAM_AR));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(223, 60),  module, MiniBoss::PARAM_TL));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 103), module, MiniBoss::PARAM_D1));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(223, 147), module, MiniBoss::PARAM_SL));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 173), module, MiniBoss::PARAM_D2));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(159, 242), module, MiniBoss::PARAM_RR));
-        // Looping ADSR, Key Scaling
-        addParam(createParam<CKSS>(Vec(216, 203), module, MiniBoss::PARAM_SSG_ENABLE));
-        addParam(createSnapParam<Trimpot>(Vec(248, 247), module, MiniBoss::PARAM_RS));
-        // Frequency and modulation
-        addParam(createParam<Rogan2PWhite>(Vec(290, 35),  module, MiniBoss::PARAM_FREQ));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 103), module, MiniBoss::PARAM_MUL));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 173), module, MiniBoss::PARAM_AMS));
-        addParam(createSnapParam<Rogan2PWhite>(Vec(290, 242), module, MiniBoss::PARAM_FMS));
-        // Input Ports
-        for (unsigned j = 0; j < 6; j++) {
-            const auto x = 140 + j * 35;
-            addInput(createInput<PJ301MPort>(Vec(x, 295), module, MiniBoss::INPUT_AR + j));
-            addInput(createInput<PJ301MPort>(Vec(x, 339), module, MiniBoss::INPUT_GATE + j));
+        for (unsigned i = 0; i < 6; i++) {
+            auto slider = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(7 + 33 * i, 41), module, MiniBoss::PARAM_AR + i, MiniBoss::LIGHT_AR + 3 * i);
+            slider->snap = true;
+            addParam(slider);
         }
+        // Looping ADSR, Key Scaling
+        addParam(createParam<CKSS>(Vec(209, 43), module, MiniBoss::PARAM_SSG_ENABLE));
+        addParam(createSnapParam<Trimpot>(Vec(208, 98), module, MiniBoss::PARAM_RS));
+        // Frequency, Multiplier, FM, LFO, Volume
+        const unsigned KNOB_PER_ROW = 4;
+        for (unsigned row = 0; row < 2; row++) {
+            for (unsigned knob = 0; knob < KNOB_PER_ROW; knob++) {
+                const auto position = Vec(13 + 60 * knob, 157 + 68 * row);
+                // get the index of the parameter. there are 4 knobs per row
+                const auto index = MiniBoss::PARAM_FREQ + KNOB_PER_ROW * row + knob;
+                auto param = createParam<Rogan2PWhite>(position,  module, index);
+                // knobs 2,3,4 on all rows are discrete. knob 1 is continuous
+                param->snap = knob > 1;
+                addParam(param);
+            }
+        }
+        // ports
+        for (unsigned j = 0; j < 6; j++) {
+            const auto x = 13 + j * 37;
+            addInput(createInput<PJ301MPort>(Vec(x, 288), module, MiniBoss::INPUT_AR + j));
+            if (j >= 5) continue;
+            addInput(createInput<PJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
+        }
+        addOutput(createOutput<PJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
     }
 };
 

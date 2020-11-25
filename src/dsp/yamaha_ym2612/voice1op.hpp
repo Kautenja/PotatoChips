@@ -238,10 +238,10 @@ struct Voice1Op {
 
     /// @brief Run a step on the emulator to produce a sample.
     ///
-    /// @param modulator the phase modulation signal
+    /// @param mod the phase modulation signal
     /// @returns a 16-bit PCM sample from the synthesizer
     ///
-    inline int16_t step(int32_t modulator = 0) {
+    inline int16_t step(int16_t mod = 0) {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             oprtr.refresh_phase_and_envelope();
@@ -254,7 +254,7 @@ struct Voice1Op {
         // calculate operator outputs
         const unsigned envelope = oprtr.get_envelope(state);
         // sum [t-2] sample with [t-1] sample as the feedback carrier for op1
-        int32_t feedback_carrier = output_feedback[0] + output_feedback[1];
+        int32_t fb_carrier = output_feedback[0] + output_feedback[1];
         // set the [t-2] sample as the [t-1] sample (i.e., step the history)
         output_feedback[0] = output_feedback[1];
         // set the output from the operator's feedback
@@ -262,9 +262,12 @@ struct Voice1Op {
         // calculate the next output from operator
         if (envelope < ENV_QUIET) {  // operator envelope is open
             // if feedback is disabled, set feedback carrier to 0
-            if (!feedback) feedback_carrier = 0;
-            // shift carrier by the feedback amount
-            output_feedback[1] = oprtr.calculate_output(envelope, modulator + (feedback_carrier << feedback));
+            if (!feedback) fb_carrier = 0;
+            // 1. shift mod by the bit-depth
+            // 1. shift carrier by the feedback amount
+            // 1. sum into phase modulation signal for operator
+            const auto pm = (static_cast<int32_t>(mod) << 15) + (fb_carrier << feedback);
+            output_feedback[1] = oprtr.calculate_output(envelope, pm);
         } else {  // clear the next output from operator
             output_feedback[1] = 0;
         }

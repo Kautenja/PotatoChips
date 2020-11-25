@@ -215,9 +215,10 @@ struct MiniBoss : rack::Module {
         }
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
-            // set the output voltage based on the 14-bit signed PCM sample
+            // get the FM signal as a 14-bit signed sample
             const float fm = (1 << 13) * clamp(params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel) / 5.0, -1.f, 1.f);
-            const int16_t audio_output = (apu[channel].step(static_cast<int32_t>(fm) << 15) * getVolume(channel)) >> 7;
+            // set the output voltage based on the 14-bit signed sample
+            const int16_t audio_output = (apu[channel].step(fm) * getVolume(channel)) >> 7;
             // convert the clipped audio to a floating point sample and set the
             // output voltage for the channel
             const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);

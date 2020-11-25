@@ -34,11 +34,10 @@ struct Voice1Op {
     Operator oprtr;
     /// a flag determining whether the phase increment needs to be updated
     bool update_phase_increment = false;
-
-    /// feedback shift
-    uint8_t feedback = 0;
     /// operator output for feedback
     int32_t output_feedback[2] = {0, 0};
+    /// feedback shift
+    uint8_t feedback = 0;
 
  public:
     /// @brief Initialize a new YamahaYM2612 with given sample rate.

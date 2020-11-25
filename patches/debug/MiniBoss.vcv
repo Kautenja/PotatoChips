@@ -326,6 +326,14 @@
       "inputModuleId": 142,
       "inputId": 9,
       "color": "#c9b70e"
+    },
+    {
+      "id": 1428,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

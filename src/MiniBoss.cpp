@@ -36,8 +36,6 @@ struct MiniBoss : rack::Module {
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
 
-    /// a VU meter for measuring the output audio level from the emulator
-    dsp::VuMeter2 vuMeter;
     /// a light divider for updating the LEDs every 512 processing steps
     dsp::ClockDivider lightDivider;
 
@@ -219,21 +217,10 @@ struct MiniBoss : rack::Module {
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
             const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
-            // update the VU meter before clipping to more accurately detect it
-            vuMeter.process(args.sampleTime, audio_output / static_cast<float>(1 << 13));
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_OSC].setVoltage(5.f * sample, channel);
-        }
-        // process the lights based on the VU meter readings
-        if (lightDivider.process()) {
-            lights[VU_LIGHTS + 0].setBrightness(vuMeter.getBrightness(3, 6));
-            lights[VU_LIGHTS + 1].setBrightness(vuMeter.getBrightness(0, 3));
-            lights[VU_LIGHTS + 2].setBrightness(vuMeter.getBrightness(-3, 0));
-            lights[VU_LIGHTS + 3].setBrightness(vuMeter.getBrightness(-6, -3));
-            lights[VU_LIGHTS + 4].setBrightness(vuMeter.getBrightness(-12, -6));
-            lights[VU_LIGHTS + 5].setBrightness(vuMeter.getBrightness(-24, -12));
         }
     }
 };
@@ -256,7 +243,7 @@ struct MiniBossWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        // Algorithm, Feedback, LFO, Saturation
+        // Feedback, LFO, Saturation
         addParam(createSnapParam<Rogan2PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
         addParam(createSnapParam<Rogan2PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));
         addParam(createSnapParam<Rogan2PWhite>(Vec(77, 187), module, MiniBoss::PARAM_SATURATION));

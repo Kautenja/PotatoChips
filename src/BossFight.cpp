@@ -242,9 +242,6 @@ struct BossFight : rack::Module {
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
                 apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
             }
-        }
-        // advance one sample in the emulator
-        for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
             const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
             // update the VU meter before clipping to more accurately detect it

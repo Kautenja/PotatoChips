@@ -222,21 +222,6 @@ struct MiniBoss : rack::Module {
         }
 
         if (lightDivider.process()) {
-            // const auto sample_time = lightDivider.getDivision() * args.sampleTime;
-            // for (unsigned i = 0; i < 6; i++) {
-            //     // set amplitude light based on the output
-            //     auto cv =
-            //     if (output > 0) {  // positive, green light
-            //         lights[LIGHT_AR + 3 * i + 0].setSmoothBrightness(0,  sample_time);
-            //         lights[LIGHT_AR + 3 * i + 1].setSmoothBrightness(cv, sample_time);
-            //         lights[LIGHT_AR + 3 * i + 2].setSmoothBrightness(0,  sample_time);
-            //     } else {  // negative, red light
-            //         lights[LIGHT_AR + 3 * i + 0].setSmoothBrightness(-cv, sample_time);
-            //         lights[LIGHT_AR + 3 * i + 1].setSmoothBrightness(0,   sample_time);
-            //         lights[LIGHT_AR + 3 * i + 2].setSmoothBrightness(0,   sample_time);
-            //     }
-            // }
-
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < 6; param++) {
                 // get the scaled CV (it's already normalled)

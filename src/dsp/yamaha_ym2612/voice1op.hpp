@@ -240,7 +240,7 @@ struct Voice1Op {
     ///
     /// @returns a 16-bit PCM sample from the synthesizer
     ///
-    inline int16_t step() {
+    inline int16_t step(int32_t frequency_mod = 0) {
         // refresh phase and envelopes (KSR may have changed)
         if (update_phase_increment) {
             oprtr.refresh_phase_and_envelope();
@@ -263,7 +263,7 @@ struct Voice1Op {
             // if feedback is disabled, set feedback carrier to 0
             if (!feedback) feedback_carrier = 0;
             // shift carrier by the feedback amount
-            output_feedback[1] = oprtr.calculate_output(envelope, feedback_carrier << feedback);
+            output_feedback[1] = oprtr.calculate_output(envelope, frequency_mod + (feedback_carrier << feedback));
         } else {  // clear the next output from operator
             output_feedback[1] = 0;
         }

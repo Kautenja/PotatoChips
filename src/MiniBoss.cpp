@@ -60,6 +60,7 @@ struct MiniBoss : rack::Module {
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
+        PARAM_FM,
         PARAM_FB,
         PARAM_LFO,
         PARAM_VOLUME,
@@ -80,6 +81,7 @@ struct MiniBoss : rack::Module {
 
     /// the indexes of input ports on the module
     enum InputIds {
+        INPUT_FM,
         INPUT_FB,
         INPUT_LFO,
         INPUT_VOLUME,
@@ -117,6 +119,7 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
         configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FM, -1, 1, 0, "Frequency Modulation");
         // operator parameters
         configParam(PARAM_AR,  1,  31,  31, "Attack Rate");
         configParam(PARAM_TL,  0, 100, 100, "Total Level");
@@ -213,7 +216,11 @@ struct MiniBoss : rack::Module {
         // advance one sample in the emulator
         for (unsigned channel = 0; channel < channels; channel++) {
             // set the output voltage based on the 14-bit signed PCM sample
-            const int16_t audio_output = (apu[channel].step() * getVolume(channel)) >> 7;
+            auto mod = params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel) / 5.0;
+            mod = clamp(mod, -1.f, 1.f);
+            mod = mod * (1 << 13);
+            int32_t fm = static_cast<int>(mod) << 15;
+            const int16_t audio_output = (apu[channel].step(fm) * getVolume(channel)) >> 7;
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Voice1Op::clip(audio_output) / static_cast<float>(1 << 13);
@@ -240,6 +247,10 @@ struct MiniBossWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+
+        addInput(createInput<PJ301MPort>  (Vec(15, 15), module, MiniBoss::INPUT_FM));
+        addParam(createParam<Trimpot>(Vec(15, 40),  module, MiniBoss::PARAM_FM));
+
         // Feedback, LFO, Saturation
         addParam(createSnapParam<Rogan2PWhite>(Vec(77, 116),  module, MiniBoss::PARAM_FB));
         addParam(createSnapParam<Rogan2PWhite>(Vec(10, 187), module, MiniBoss::PARAM_LFO));

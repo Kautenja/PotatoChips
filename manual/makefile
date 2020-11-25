@@ -20,6 +20,10 @@ mBossFight: build
 	make -C BossFight
 	cp BossFight/build/manual.pdf build/BossFight.pdf
 
+mMiniBoss: build
+	make -C MiniBoss
+	cp MiniBoss/build/manual.pdf build/MiniBoss.pdf
+
 mPulses: build
 	make -C Pulses
 	cp Pulses/build/manual.pdf build/Pulses.pdf
@@ -52,4 +56,4 @@ mSuperADSR: build
 	make -C SuperADSR
 	cp SuperADSR/build/manual.pdf build/SuperADSR.pdf
 
-manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR
+manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mMiniBoss mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR

@@ -20,7 +20,7 @@
       },
       "pos": [
         105,
-        1
+        0
       ]
     },
     {
@@ -54,7 +54,7 @@
       "rightModuleId": 1,
       "pos": [
         95,
-        1
+        0
       ]
     },
     {
@@ -78,7 +78,7 @@
       },
       "pos": [
         0,
-        1
+        0
       ]
     },
     {
@@ -128,7 +128,7 @@
       },
       "pos": [
         82,
-        1
+        0
       ]
     },
     {
@@ -196,7 +196,7 @@
         "Config Enabled": false,
         "Config Mode": -1,
         "Config Scene": -1,
-        "Current Scene": 1,
+        "Current Scene": 0,
         "Ring Morph": true,
         "Randomize Ring Morph": false,
         "Auto Exit": false,
@@ -366,7 +366,7 @@
       },
       "pos": [
         8,
-        1
+        0
       ]
     },
     {
@@ -425,7 +425,7 @@
         },
         {
           "id": 12,
-          "value": 0.447000057
+          "value": 0.216000006
         },
         {
           "id": 13,
@@ -437,14 +437,14 @@
         },
         {
           "id": 15,
-          "value": 65.0
+          "value": 127.0
         }
       ],
       "leftModuleId": 156,
       "rightModuleId": 161,
       "pos": [
         18,
-        1
+        0
       ]
     },
     {
@@ -503,7 +503,7 @@
         },
         {
           "id": 12,
-          "value": 0.311999947
+          "value": 0.199999988
         },
         {
           "id": 13,
@@ -522,7 +522,7 @@
       "rightModuleId": 163,
       "pos": [
         34,
-        1
+        0
       ]
     },
     {
@@ -581,7 +581,7 @@
         },
         {
           "id": 12,
-          "value": 0.61500001
+          "value": 0.555000067
         },
         {
           "id": 13,
@@ -593,14 +593,14 @@
         },
         {
           "id": 15,
-          "value": 104.0
+          "value": 127.0
         }
       ],
       "leftModuleId": 161,
       "rightModuleId": 164,
       "pos": [
         50,
-        1
+        0
       ]
     },
     {
@@ -659,7 +659,7 @@
         },
         {
           "id": 12,
-          "value": 0.435000002
+          "value": 0.0
         },
         {
           "id": 13,
@@ -671,105 +671,13 @@
         },
         {
           "id": 15,
-          "value": 90.0
+          "value": 127.0
         }
       ],
       "leftModuleId": 163,
       "rightModuleId": 7,
       "pos": [
         66,
-        1
-      ]
-    },
-    {
-      "id": 165,
-      "plugin": "squinkylabs-plug1",
-      "version": "1.0.15",
-      "model": "squinkylabs-wvco",
-      "params": [
-        {
-          "id": 0,
-          "value": 4.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 0.0
-        },
-        {
-          "id": 8,
-          "value": 100.0
-        },
-        {
-          "id": 9,
-          "value": 50.0
-        },
-        {
-          "id": 10,
-          "value": 50.0
-        },
-        {
-          "id": 11,
-          "value": 50.0
-        },
-        {
-          "id": 12,
-          "value": 50.0
-        },
-        {
-          "id": 13,
-          "value": 0.0
-        },
-        {
-          "id": 14,
-          "value": 0.0
-        },
-        {
-          "id": 15,
-          "value": 0.0
-        },
-        {
-          "id": 16,
-          "value": 0.0
-        },
-        {
-          "id": 17,
-          "value": 0.0
-        },
-        {
-          "id": 18,
-          "value": 0.0
-        },
-        {
-          "id": 19,
-          "value": 1.0
-        }
-      ],
-      "pos": [
-        18,
         0
       ]
     }

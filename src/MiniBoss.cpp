@@ -44,17 +44,19 @@ struct MiniBoss : rack::Module {
     /// @param channel the channel to get the parameter value for
     /// @param paramIndex the index of the parameter in the params list
     /// @param inputIndex the index of the CV input in the inputs list
-    /// @param int max the maximal value for the parameter
+    /// @param min the minimal value for the parameter
+    /// @param max the maximal value for the parameter
     ///
     inline uint8_t getParam(
         unsigned channel,
         unsigned paramIndex,
         unsigned inputIndex,
+        unsigned min,
         unsigned max
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
-        return clamp(static_cast<int>(param + cv), 0, max);
+        return clamp(static_cast<int>(param + cv), min, max);
     }
 
  public:
@@ -97,12 +99,6 @@ struct MiniBoss : rack::Module {
         INPUT_VOCT,
         INPUT_FM,
         INPUT_VOLUME,
-        // TODO: remove?
-        INPUT_FB,
-        INPUT_LFO,
-        INPUT_MUL,
-        INPUT_AMS,
-        INPUT_FMS,
         NUM_INPUTS
     };
 
@@ -176,24 +172,24 @@ struct MiniBoss : rack::Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) {
-        apu[channel].set_lfo           (getParam(channel, PARAM_LFO, INPUT_LFO, 7));
-        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB,  7));
-        apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR,  31 ));
-        apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL,  100));
-        apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1,  31 ));
-        apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL,  15 ));
-        apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2,  31 ));
-        apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR,  15 ));
-        apu[channel].set_multiplier    (getParam(channel,       PARAM_MUL, INPUT_MUL, 15 ));
-        apu[channel].set_fm_sensitivity(getParam(channel,       PARAM_FMS, INPUT_FMS, 7  ));
-        apu[channel].set_am_sensitivity(getParam(channel,       PARAM_AMS, INPUT_AMS, 4  ));
+        apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
+        apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
+        apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
+        apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
+        apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
+        apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
+        apu[channel].set_multiplier    (params[PARAM_MUL].getValue());
+        apu[channel].set_feedback      (params[PARAM_FB].getValue());
+        apu[channel].set_lfo           (params[PARAM_LFO].getValue());
+        apu[channel].set_fm_sensitivity(params[PARAM_FMS].getValue());
+        apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
         apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
         apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
         // process the gate trigger, high at 2V
         gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // process the retrig trigger, high at 2V
+        // process the re-trig trigger, high at 2V
         const auto trigger = retrig_triggers[channel].process(rescale(inputs[INPUT_RETRIG].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // use the exclusive or of the gate and retrigger. This ensures that
+        // use the exclusive or of the gate and re-trigger. This ensures that
         // when either gate or trigger alone is high, the gate is open,
         // but when neither or both are high, the gate is closed. This
         // causes the gate to get shut for a sample when re-triggering an
@@ -224,9 +220,6 @@ struct MiniBoss : rack::Module {
             const float frequency = params[PARAM_FREQ].getValue();
             const float pitch = inputs[INPUT_VOCT].getVoltage(channel);
             apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
-        }
-        // advance one sample in the emulator
-        for (unsigned channel = 0; channel < channels; channel++) {
             // get the FM signal as a 14-bit signed sample
             const float fm = (1 << 13) * clamp(params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel) / 5.0, -1.f, 1.f);
             // set the output voltage based on the 14-bit signed sample

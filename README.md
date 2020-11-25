@@ -250,6 +250,45 @@ omissions, and re-envisioned features, namely,
 See the [Manual][BossFight] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: Mini Boss -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Mini Boss Logo" src="manual/MiniBoss/img/Logo.svg">
+</h2>
+
+**Mini Boss** is an emulation and re-envisioning of the Yamaha
+[Yamaha YM2612][YM2612] audio processing unit from the
+[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
+functionality of a single operator from Yamaha YM2612, in addition to some hacks,
+omissions, and re-envisioned features, namely,
+
+<p align="center">
+<img alt="Mini Boss" src="manual/MiniBoss/img/Module.svg">
+</p>
+
+### Features
+
+-   **16-bit Audio:** It's 8 bits better than the previous generation of chips!
+    This is marketing! We're actually lying though -- the YM2612 produced a
+    _14-bit_ stream, and so does BossFight. You're not getting those 2 bits
+    back; go cry about it.
+-   **Single Operator FM Synthesis:** Full control over the parameters
+    including envelopes, multipliers, rate scalings, tunings, gates, and
+    internal LFO modulation.
+-   **Feedback:** Feedback into the operator one for interesting timbres or
+    total wave destruction and noise.
+-   **Looping Envelopes:** Transform the one-shot envelope generator into a
+    looping AD envelope.
+-   **Low-Frequency Oscillator:** A shared low-frequency sine oscillator
+    controls amplitude modulation and frequency modulation of each operator.
+-   **Mono Output:** The original YM2612 was stereo, but only because it had
+    six channels of synthesis. Mini Boss is a monophonic voice so there is no
+    built-in stereo processing.
+
+See the [Manual][MiniBoss] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: Name Corp Octal Wave Generator -->
 <!-- ------------------------------------------------------------ -->
 
@@ -507,6 +546,7 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 [S_SMP_BRR]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP_BRR.pdf
 [S_SMP]: https://github.com/Kautenja/PotatoChips/releases/latest/download/S_SMP.pdf
 [BossFight]: https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf
+[MiniBoss]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf
 [MegaTone]: https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf
 [Jairasullator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf
 [PotKeys]: https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf

@@ -28,9 +28,9 @@ struct MiniBoss : rack::Module {
     YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[PORT_MAX_CHANNELS];
+    dsp::BooleanTrigger gates[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrig_triggers[PORT_MAX_CHANNELS];
+    rack::dsp::BooleanTrigger retriggers[PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
     dsp::ClockDivider cvDivider;
@@ -149,8 +149,8 @@ struct MiniBoss : rack::Module {
     /// @brief Respond to the change of sample rate in the engine.
     inline void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
-        for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
-            apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+        for (unsigned ch = 0; ch < PORT_MAX_CHANNELS; ch++)
+            apu[ch].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// @brief Return the value of the mix parameter from the panel.
@@ -163,6 +163,49 @@ struct MiniBoss : rack::Module {
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, 0.f, MAX);
+    }
+
+    /// @brief Process the gate trigger, high at 2V.
+    ///
+    /// @param channel the polyphonic channel to get the gate of
+    /// @returns true if the gate is high, false otherwise
+    ///
+    inline bool getGate(unsigned channel) {
+        const auto input = inputs[INPUT_GATE].getVoltage(channel);
+        gates[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
+        return gates[channel].state;
+    }
+
+    /// @brief Process the re-trig trigger, high at 2V.
+    ///
+    /// @param channel the polyphonic channel to get the re-trigger of
+    /// @returns true if the channel is being re-triggered
+    ///
+    inline bool getRetrigger(unsigned channel) {
+        const auto input = inputs[INPUT_RETRIG].getVoltage(channel);
+        return retriggers[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
+    }
+
+    /// @brief Return the frequency for the given channel.
+    ///
+    /// @param channel the polyphonic channel to return the frequency for
+    /// @returns the floating point frequency
+    ///
+    inline float getFrequency(unsigned channel) {
+        const float base = params[PARAM_FREQ].getValue();
+        const float voct = inputs[INPUT_VOCT].getVoltage(channel);
+        return dsp::FREQ_C4 * std::pow(2.f, clamp(base + voct, -6.5f, 6.5f));
+    }
+
+    /// @brief Return the frequency mod for the given channel.
+    ///
+    /// @param channel the polyphonic channel to return the frequency for
+    /// @returns the 14-bit aigned frequency modulation signal
+    ///
+    inline int16_t getFM(unsigned channel) {
+        const auto input = inputs[INPUT_FM].getVoltage(channel) / 5.0;
+        const auto depth = params[PARAM_FM].getValue();
+        return (1 << 13) * clamp(depth * input, -1.f, 1.f);
     }
 
     /// @brief Process a sample.
@@ -180,7 +223,7 @@ struct MiniBoss : rack::Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process control voltage when the CV divider is high
-        if (cvDivider.process())
+        if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
                 apu[channel].set_ar            (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
                 apu[channel].set_tl            (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
@@ -195,26 +238,19 @@ struct MiniBoss : rack::Module {
                 apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
                 apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
                 apu[channel].set_rs            (params[PARAM_RS].getValue());
-                // process the gate trigger, high at 2V
-                gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-                // process the re-trig trigger, high at 2V
-                const auto trigger = retrig_triggers[channel].process(rescale(inputs[INPUT_RETRIG].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-                // use the exclusive or of the gate and re-trigger. This ensures that
-                // when either gate or trigger alone is high, the gate is open,
-                // but when neither or both are high, the gate is closed. This
-                // causes the gate to get shut for a sample when re-triggering an
-                // already gated voice
-                apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
+                // use the exclusive or of the gate and re-trigger. This ensures
+                // that when either gate or trigger alone is high, the gate is
+                // open, but when neither or both are high, the gate is closed.
+                // This causes the gate to get shut for a sample when
+                // re-triggering an already gated voice
+                apu[channel].set_gate(getGate(channel) ^ getRetrigger(channel));
             }
+        }
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
-            const float frequency = params[PARAM_FREQ].getValue();
-            const float pitch = inputs[INPUT_VOCT].getVoltage(channel);
-            apu[channel].set_frequency(dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
-            // get the FM signal as a 14-bit signed sample
-            const float fm = (1 << 13) * clamp(params[PARAM_FM].getValue() * inputs[INPUT_FM].getVoltage(channel) / 5.0, -1.f, 1.f);
+            apu[channel].set_frequency(getFrequency(channel));
             // set the output voltage based on the 14-bit signed sample
-            const int16_t audio_output = (apu[channel].step(fm) * getVolume(channel)) >> 7;
+            const int16_t audio_output = (apu[channel].step(getFM(channel)) * getVolume(channel)) >> 7;
             // convert the clipped audio to a floating point sample and set the
             // output voltage for the channel
             const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
@@ -223,7 +259,7 @@ struct MiniBoss : rack::Module {
         if (lightDivider.process()) {
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < 6; param++) {
-                // get the scaled CV (it's already normalled)
+                // get the scaled CV
                 float value = 0.f;
                 if (channels > 1) {  // polyphonic (average)
                     for (unsigned c = 0; c < channels; c++)
@@ -266,7 +302,11 @@ struct MiniBossWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // ADSR
         for (unsigned i = 0; i < 6; i++) {
-            auto slider = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(7 + 33 * i, 41), module, MiniBoss::PARAM_AR + i, MiniBoss::LIGHT_AR + 3 * i);
+            const auto pos = Vec(7 + 33 * i, 41);
+            const auto param = MiniBoss::PARAM_AR + i;
+            const auto light = MiniBoss::LIGHT_AR + 3 * i;
+            auto slider =
+                createLightParam<LEDLightSlider<RedGreenBlueLight>>(pos, module, param, light);
             slider->snap = true;
             addParam(slider);
         }

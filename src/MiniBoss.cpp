@@ -16,7 +16,6 @@
 #include <functional>
 #include "plugin.hpp"
 #include "dsp/yamaha_ym2612/feedback_operator.hpp"
-#include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

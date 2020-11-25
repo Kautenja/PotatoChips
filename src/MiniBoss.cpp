@@ -54,7 +54,7 @@ struct MiniBoss : rack::Module {
         unsigned max
     ) {
         auto param = params[paramIndex].getValue();
-        auto cv = max * inputs[inputIndex].getVoltage(channel) / 10.0f;
+        auto cv = max * inputs[inputIndex].getVoltage(channel) / 8.f;
         return clamp(static_cast<int>(param + cv), min, max);
     }
 

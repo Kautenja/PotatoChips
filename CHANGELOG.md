@@ -276,7 +276,17 @@
 -   new blank panels:
     -   illustration of Sony S-SMP IC
 
-## 1.10.0 (TBD)
+## 1.10.0 (2020-11-25)
+
+-   new module: Mini Boss
+    -   single operator version of an operator from **Boss Fight**
+-   fix issues with Boss Fight
+    -   fix issue where extreme negative voltage to the AR input would cause the
+        envelope generator to be silent. This is an intentional design of the
+        YM2612, but is better to omit for this module
+    -   fix polyphonic pitch calculation for the operators
+
+## 1.11.0 (TBD)
 
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player

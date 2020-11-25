@@ -166,37 +166,6 @@ struct MiniBoss : rack::Module {
         return clamp(param + mod, 0.f, MAX);
     }
 
-    /// @brief Process the CV inputs for the given channel.
-    ///
-    /// @param args the sample arguments (sample rate, sample time, etc.)
-    /// @param channel the polyphonic channel to process the CV inputs to
-    ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) {
-        apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
-        apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
-        apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
-        apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
-        apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
-        apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
-        apu[channel].set_multiplier    (params[PARAM_MUL].getValue());
-        apu[channel].set_feedback      (params[PARAM_FB].getValue());
-        apu[channel].set_lfo           (params[PARAM_LFO].getValue());
-        apu[channel].set_fm_sensitivity(params[PARAM_FMS].getValue());
-        apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
-        apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
-        apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
-        // process the gate trigger, high at 2V
-        gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // process the re-trig trigger, high at 2V
-        const auto trigger = retrig_triggers[channel].process(rescale(inputs[INPUT_RETRIG].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        // use the exclusive or of the gate and re-trigger. This ensures that
-        // when either gate or trigger alone is high, the gate is open,
-        // but when neither or both are high, the gate is closed. This
-        // causes the gate to get shut for a sample when re-triggering an
-        // already gated voice
-        apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
-    }
-
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
@@ -213,8 +182,31 @@ struct MiniBoss : rack::Module {
             outputs[port].setChannels(channels);
         // process control voltage when the CV divider is high
         if (cvDivider.process())
-            for (unsigned channel = 0; channel < channels; channel++)
-                processCV(args, channel);
+            for (unsigned channel = 0; channel < channels; channel++) {
+                apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
+                apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
+                apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
+                apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
+                apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
+                apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
+                apu[channel].set_multiplier    (params[PARAM_MUL].getValue());
+                apu[channel].set_feedback      (params[PARAM_FB].getValue());
+                apu[channel].set_lfo           (params[PARAM_LFO].getValue());
+                apu[channel].set_fm_sensitivity(params[PARAM_FMS].getValue());
+                apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
+                apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
+                apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
+                // process the gate trigger, high at 2V
+                gate_triggers[channel].process(rescale(inputs[INPUT_GATE].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+                // process the re-trig trigger, high at 2V
+                const auto trigger = retrig_triggers[channel].process(rescale(inputs[INPUT_RETRIG].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+                // use the exclusive or of the gate and re-trigger. This ensures that
+                // when either gate or trigger alone is high, the gate is open,
+                // but when neither or both are high, the gate is closed. This
+                // causes the gate to get shut for a sample when re-triggering an
+                // already gated voice
+                apu[channel].set_gate(trigger ^ gate_triggers[channel].state);
+            }
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
             const float frequency = params[PARAM_FREQ].getValue();
@@ -228,6 +220,45 @@ struct MiniBoss : rack::Module {
             // output voltage for the channel
             const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_OSC].setVoltage(5.f * sample, channel);
+        }
+
+        if (lightDivider.process()) {
+            // const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            // for (unsigned i = 0; i < 6; i++) {
+            //     // set amplitude light based on the output
+            //     auto cv =
+            //     if (output > 0) {  // positive, green light
+            //         lights[LIGHT_AR + 3 * i + 0].setSmoothBrightness(0,  sample_time);
+            //         lights[LIGHT_AR + 3 * i + 1].setSmoothBrightness(cv, sample_time);
+            //         lights[LIGHT_AR + 3 * i + 2].setSmoothBrightness(0,  sample_time);
+            //     } else {  // negative, red light
+            //         lights[LIGHT_AR + 3 * i + 0].setSmoothBrightness(-cv, sample_time);
+            //         lights[LIGHT_AR + 3 * i + 1].setSmoothBrightness(0,   sample_time);
+            //         lights[LIGHT_AR + 3 * i + 2].setSmoothBrightness(0,   sample_time);
+            //     }
+            // }
+
+            const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            for (unsigned param = 0; param < 6; param++) {
+                // get the scaled CV (it's already normalled)
+                float value = 0.f;
+                if (channels > 1) {  // polyphonic (average)
+                    for (unsigned c = 0; c < channels; c++)
+                        value += inputs[INPUT_AR + param].getVoltage(c);
+                    value = value / channels;
+                } else {  // monophonic
+                    value = inputs[INPUT_AR + param].getVoltage();
+                }
+                if (value > 0) {  // green for positive voltage
+                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
+                } else {  // red for negative voltage
+                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(0, sample_time);
+                    lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
+                }
+            }
         }
     }
 };
@@ -268,7 +299,7 @@ struct MiniBossWidget : ModuleWidget {
                 const auto index = MiniBoss::PARAM_FREQ + KNOB_PER_ROW * row + knob;
                 auto param = createParam<Rogan2PWhite>(position,  module, index);
                 // knobs 2,3,4 on all rows are discrete. knob 1 is continuous
-                param->snap = knob > 1;
+                param->snap = knob > 0;
                 addParam(param);
             }
         }

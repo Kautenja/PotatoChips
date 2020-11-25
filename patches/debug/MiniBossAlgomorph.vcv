@@ -196,13 +196,13 @@
         "Config Enabled": false,
         "Config Mode": -1,
         "Config Scene": -1,
-        "Current Scene": 0,
-        "Ring Morph": false,
+        "Current Scene": 2,
+        "Ring Morph": true,
         "Randomize Ring Morph": false,
         "Auto Exit": false,
         "CCW Scene Selection": true,
         "Click Filter Enabled": true,
-        "Glowing Ink": false,
+        "Glowing Ink": true,
         "VU Lights": true,
         "Operator Destinations": [
           {
@@ -242,7 +242,43 @@
             "Destination": false
           },
           {
+            "Destination": true
+          },
+          {
             "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": true
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": true
+          },
+          {
+            "Destination": false
+          },
+          {
+            "Destination": true
           },
           {
             "Destination": false
@@ -275,43 +311,7 @@
             "Destination": false
           },
           {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
-          },
-          {
-            "Destination": false
+            "Destination": true
           }
         ],
         "Algorithm Names": [
@@ -319,10 +319,10 @@
             "Name": 1153
           },
           {
-            "Name": 0
+            "Name": 1089
           },
           {
-            "Name": 0
+            "Name": 2049
           }
         ],
         "Operators Enabled": [
@@ -381,19 +381,19 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": 4.0
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 21.0
         },
         {
           "id": 4,
-          "value": 31.0
+          "value": 15.0
         },
         {
           "id": 5,
@@ -409,7 +409,7 @@
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 9,
@@ -429,7 +429,7 @@
         },
         {
           "id": 13,
-          "value": 0.0
+          "value": 7.0
         },
         {
           "id": 14,
@@ -455,11 +455,166 @@
       "params": [
         {
           "id": 0,
-          "value": 1.0
+          "value": 0.996999979
         },
         {
           "id": 1,
+          "value": 3.0
+        },
+        {
+          "id": 2,
+          "value": 5.0
+        },
+        {
+          "id": 3,
+          "value": 127.0
+        },
+        {
+          "id": 4,
+          "value": 11.0
+        },
+        {
+          "id": 5,
+          "value": 100.0
+        },
+        {
+          "id": 6,
           "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 15.0
+        },
+        {
+          "id": 8,
+          "value": 4.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 1.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 7.0
+        },
+        {
+          "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 160,
+      "rightModuleId": 156,
+      "pos": [
+        31,
+        0
+      ]
+    },
+    {
+      "id": 163,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.9.0",
+      "model": "MiniBoss",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 3.0
+        },
+        {
+          "id": 2,
+          "value": 2.0
+        },
+        {
+          "id": 3,
+          "value": 14.0
+        },
+        {
+          "id": 4,
+          "value": 13.0
+        },
+        {
+          "id": 5,
+          "value": 100.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 15.0
+        },
+        {
+          "id": 8,
+          "value": 7.0
+        },
+        {
+          "id": 9,
+          "value": 15.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 7.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 7.0
+        },
+        {
+          "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 164,
+      "pos": [
+        8,
+        1
+      ]
+    },
+    {
+      "id": 164,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.9.0",
+      "model": "MiniBoss",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 3.0
         },
         {
           "id": 2,
@@ -500,161 +655,6 @@
         {
           "id": 11,
           "value": 1.0
-        },
-        {
-          "id": 12,
-          "value": 0.0
-        },
-        {
-          "id": 13,
-          "value": 0.0
-        },
-        {
-          "id": 14,
-          "value": 0.0
-        },
-        {
-          "id": 15,
-          "value": 0.0
-        }
-      ],
-      "leftModuleId": 160,
-      "rightModuleId": 156,
-      "pos": [
-        31,
-        0
-      ]
-    },
-    {
-      "id": 163,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
-      "model": "MiniBoss",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 31.0
-        },
-        {
-          "id": 5,
-          "value": 100.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 15.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 15.0
-        },
-        {
-          "id": 10,
-          "value": 0.0
-        },
-        {
-          "id": 11,
-          "value": 7.0
-        },
-        {
-          "id": 12,
-          "value": 0.0
-        },
-        {
-          "id": 13,
-          "value": 0.0
-        },
-        {
-          "id": 14,
-          "value": 0.0
-        },
-        {
-          "id": 15,
-          "value": 0.0
-        }
-      ],
-      "rightModuleId": 164,
-      "pos": [
-        8,
-        1
-      ]
-    },
-    {
-      "id": 164,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
-      "model": "MiniBoss",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 31.0
-        },
-        {
-          "id": 5,
-          "value": 100.0
-        },
-        {
-          "id": 6,
-          "value": 0.0
-        },
-        {
-          "id": 7,
-          "value": 15.0
-        },
-        {
-          "id": 8,
-          "value": 0.0
-        },
-        {
-          "id": 9,
-          "value": 15.0
-        },
-        {
-          "id": 10,
-          "value": 0.0
-        },
-        {
-          "id": 11,
-          "value": 11.0
         },
         {
           "id": 12,
@@ -762,14 +762,6 @@
       "color": "#c9b70e"
     },
     {
-      "id": 1451,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 161,
-      "inputId": 11,
-      "color": "#c9b70e"
-    },
-    {
       "id": 1452,
       "outputModuleId": 5,
       "outputId": 6,
@@ -871,6 +863,22 @@
       "outputId": 0,
       "inputModuleId": 164,
       "inputId": 12,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1451,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 161,
+      "inputId": 11,
+      "color": "#c9b70e"
+    },
+    {
+      "id": 1465,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 156,
+      "inputId": 5,
       "color": "#c9b70e"
     }
   ]

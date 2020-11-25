@@ -220,7 +220,6 @@ struct MiniBoss : rack::Module {
             const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
             outputs[OUTPUT_OSC].setVoltage(5.f * sample, channel);
         }
-
         if (lightDivider.process()) {
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < 6; param++) {

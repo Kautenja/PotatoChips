@@ -7,7 +7,6 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 155,
       "data": {
         "audio": {
           "driver": 5,
@@ -89,7 +88,7 @@
       "params": [
         {
           "id": 0,
-          "value": 31.0
+          "value": 19.0
         },
         {
           "id": 1,
@@ -109,7 +108,7 @@
         },
         {
           "id": 5,
-          "value": 15.0
+          "value": 4.0
         },
         {
           "id": 6,
@@ -154,6 +153,9 @@
       ],
       "leftModuleId": 5,
       "rightModuleId": 2,
+      "data": {
+        "prevent_clicks": true
+      },
       "pos": [
         8,
         0
@@ -205,7 +207,6 @@
         }
       ],
       "leftModuleId": 150,
-      "rightModuleId": 155,
       "data": {
         "frequency_plot": "log",
         "amplitude_plot": "decibels_140"
@@ -216,10 +217,10 @@
       ]
     },
     {
-      "id": 155,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "Scope",
+      "id": 156,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
       "params": [
         {
           "id": 0,
@@ -254,27 +255,17 @@
           "value": 0.0
         }
       ],
-      "leftModuleId": 154,
-      "rightModuleId": 1,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        57,
-        0
+        2,
+        1
       ]
     }
   ],
   "cables": [
-    {
-      "id": 1320,
-      "outputModuleId": 154,
-      "outputId": 0,
-      "inputModuleId": 155,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
     {
       "id": 1408,
       "outputModuleId": 2,
@@ -346,6 +337,14 @@
       "inputModuleId": 154,
       "inputId": 1,
       "color": "#c91847"
+    },
+    {
+      "id": 1320,
+      "outputModuleId": 154,
+      "outputId": 0,
+      "inputModuleId": 156,
+      "inputId": 0,
+      "color": "#0986ad"
     }
   ]
 }

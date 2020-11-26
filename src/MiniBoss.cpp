@@ -1,4 +1,4 @@
-// A Eurorack module based on a Yamaha YM2612 chip emulation.
+// A Eurorack FM operator module based on a Yamaha YM2612 chip emulation.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// A Eurorack module based on the Yamaha YM2612.
+/// A Eurorack FM operator module based on the Yamaha YM2612.
 struct MiniBoss : rack::Module {
  private:
     /// a YM2612 operator 1 emulator
@@ -45,6 +45,7 @@ struct MiniBoss : rack::Module {
     /// @param inputIndex the index of the CV input in the inputs list
     /// @param min the minimal value for the parameter
     /// @param max the maximal value for the parameter
+    /// @returns the 8-bit value of the given parameter
     ///
     inline uint8_t getParam(
         unsigned channel,
@@ -59,6 +60,9 @@ struct MiniBoss : rack::Module {
     }
 
  public:
+    /// Whether to attempt to prevent clicks from the envelope generator
+    bool prevent_clicks = false;
+
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         // envelope generator
@@ -147,10 +151,35 @@ struct MiniBoss : rack::Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
+    void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned ch = 0; ch < PORT_MAX_CHANNELS; ch++)
             apu[ch].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    /// @brief Respond to the module being reset by the engine.
+    void onReset() override {
+        prevent_clicks = false;
+    }
+
+    /// @brief Return a JSON representation of this module's state
+    ///
+    /// @returns a new JSON object with this object's serialized state data
+    ///
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_object_set_new(rootJ, "prevent_clicks", json_boolean(prevent_clicks));
+        return rootJ;
+    }
+
+    /// @brief Return the object to the given serialized state.
+    ///
+    /// @returns a JSON object with object serialized state data to restore
+    ///
+    void dataFromJson(json_t* rootJ) override {
+        json_t* prevent_clicks_object = json_object_get(rootJ, "prevent_clicks");
+        if (prevent_clicks_object)
+            prevent_clicks = json_boolean_value(prevent_clicks_object);
     }
 
     /// @brief Return the value of the mix parameter from the panel.
@@ -243,7 +272,7 @@ struct MiniBoss : rack::Module {
                 // open, but when neither or both are high, the gate is closed.
                 // This causes the gate to get shut for a sample when
                 // re-triggering an already gated voice
-                apu[channel].set_gate(getGate(channel) ^ getRetrigger(channel));
+                apu[channel].set_gate(getGate(channel) ^ getRetrigger(channel), prevent_clicks);
             }
         }
         // set the operator parameters
@@ -334,6 +363,35 @@ struct MiniBossWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
         }
         addOutput(createOutput<PJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
+    }
+
+    /// @brief Append the context menu to the module when right clicked.
+    ///
+    /// @param menu the menu object to add context items for the module to
+    ///
+    void appendContextMenu(Menu* menu) override {
+        // get a pointer to the module
+        MiniBoss* const module = dynamic_cast<MiniBoss*>(this->module);
+
+        /// a structure for holding changes to the model items
+        struct PreventClicksItem : MenuItem {
+            /// the module to update
+            MiniBoss* module;
+
+            /// Response to an action update to this item
+            void onAction(const event::Action& e) override {
+                module->prevent_clicks = !module->prevent_clicks;
+            }
+        };
+
+        // add the envelope mode selection item to the menu
+        menu->addChild(new MenuSeparator);
+        auto item = createMenuItem<PreventClicksItem>(
+            "Prevent Envelope Generator Clicks",
+            CHECKMARK(module->prevent_clicks)
+        );
+        item->module = module;
+        menu->addChild(item);
     }
 };
 

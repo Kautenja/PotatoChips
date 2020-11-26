@@ -139,7 +139,7 @@
     },
     {
       "slug": "SuperVCA",
-      "name": "Super Low-Pass Gate",
+      "name": "Super VCA",
       "description": "An emulation of the Gaussian interpolation filter effect from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf",
       "tags": [
@@ -201,7 +201,7 @@
     },
     {
       "slug": "VRC6",
-      "name": "StepSaw",
+      "name": "Step Saw",
       "description": "An emulation of the Konami VRC6 chip from Nintendo Entertainment System (NES) cartridges.",
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf",
       "tags": [

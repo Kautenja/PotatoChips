@@ -259,7 +259,7 @@ See the [Manual][BossFight] for more information about the features of this modu
 
 **Mini Boss** is an emulation and re-envisioning of the Yamaha
 [Yamaha YM2612][YM2612] audio processing unit from the
-[Sega Mega Drive & Sega Genesis][SegaMD]. Boss Fight provides the key
+[Sega Mega Drive & Sega Genesis][SegaMD]. Mini Boss provides the key
 functionality of a single operator from Yamaha YM2612, in addition to some hacks,
 omissions, and re-envisioned features, namely,
 

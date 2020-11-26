@@ -7,6 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
+      "leftModuleId": 154,
       "data": {
         "audio": {
           "driver": 5,
@@ -18,7 +19,7 @@
         }
       },
       "pos": [
-        70,
+        57,
         0
       ]
     },
@@ -64,7 +65,7 @@
       "params": [],
       "rightModuleId": 142,
       "data": {
-        "channels": 1,
+        "channels": 4,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -136,7 +137,7 @@
         },
         {
           "id": 12,
-          "value": 0.0
+          "value": 0.108000003
         },
         {
           "id": 13,
@@ -207,6 +208,7 @@
         }
       ],
       "leftModuleId": 150,
+      "rightModuleId": 1,
       "data": {
         "frequency_plot": "log",
         "amplitude_plot": "decibels_140"
@@ -260,7 +262,7 @@
         "external": 0
       },
       "pos": [
-        2,
+        0,
         1
       ]
     }

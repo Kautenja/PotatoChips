@@ -1,4 +1,4 @@
-// TODO:
+// A V/OCT distortion effect based on Atari 2600 music programming.
 // Copyright 2020 Christian Kauten
 //
 // This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-// TODO: key-scaling
 // TODO: sync input
 // TODO: different note modes: 2, 3, 4, 5
 // TODO: offset control between notes (models for musical / video-game based)
@@ -46,7 +45,7 @@ static inline float pitch_to_frequency(
     float pitch,
     float tuning = rack::dsp::FREQ_C4
 ) {
-    return tuning * powf(2, pitch);
+    return tuning * powf(2.f, pitch);
 }
 
 /// @brief Convert the given frequency in \f$Hz\f$ to pitch in V/OCT.
@@ -66,7 +65,7 @@ static inline float frequency_to_pitch(
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// TODO
+/// @brief A V/OCT distortion effect based on Atari 2600 music programming.
 struct Pitch2600 : rack::engine::Module {
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
@@ -103,9 +102,7 @@ struct Pitch2600 : rack::engine::Module {
     }
 
     /// @brief Reset the module to its initial state.
-    inline void onReset() final {
-        phase = 0.f;
-    }
+    inline void onReset() final { phase = 0.f; }
 
     /// @brief Process the lights on the module.
     ///
@@ -163,26 +160,21 @@ struct Pitch2600 : rack::engine::Module {
 // MARK: Widget
 // ---------------------------------------------------------------------------
 
-/// The panel widget for Pitch2600.
+/// @brief The panel widget for the Pitch2600 module.
 struct Pitch2600Widget : ModuleWidget {
-    /// @brief Initialize a new widget.
+    /// @brief Initialize a new panel widget.
     ///
-    /// @param module the back-end module to interact with
+    /// @param module the Pitch2600 module to interact with
     ///
     explicit Pitch2600Widget(Pitch2600 *module) {
         setModule(module);
         static constexpr auto panel = "res/StepSaw.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
-        // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        // addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        // addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addInput(createInput<PJ301MPort>(  Vec(10, 20), module, Pitch2600::INPUT_VOCT ));
         addOutput(createOutput<PJ301MPort>(Vec(10, 55), module, Pitch2600::OUTPUT_VOCT));
         addParam(createParam<Trimpot>(     Vec(10, 90), module, Pitch2600::PARAM_FREQ ));
     }
 };
 
-/// the global instance of the model
+/// the global instance of the VCV Rack module
 rack::Model *modelPitch2600 = createModel<Pitch2600, Pitch2600Widget>("Pitch2600");

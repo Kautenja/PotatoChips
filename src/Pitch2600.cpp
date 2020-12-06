@@ -13,6 +13,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+// TODO: FM input
 // TODO: sync input
 // TODO: different note modes: 2, 3, 4, 5
 // TODO: offset control between notes (models for musical / video-game based)

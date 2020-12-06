@@ -17,6 +17,9 @@
 // TODO: different note modes: 2, 3, 4, 5
 // TODO: offset control between notes (models for musical / video-game based)
 // TODO: mess with non-uniform offsets for the cycle apportionment of notes
+// TODO: internal slew limiter that only slews internal note changes, not note
+// changes in the input V/OCT signal. i.e., allow the changes to be blended
+// between analog and discrete
 
 #include "plugin.hpp"
 

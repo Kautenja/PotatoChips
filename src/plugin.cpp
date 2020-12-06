@@ -39,6 +39,7 @@ void init(Plugin* instance) {
     instance->addModel(modelSuperADSR);
     instance->addModel(modelSuperSampler);
     instance->addModel(modelSuperVCA);
+    instance->addModel(modelPitch2600);
     instance->addModel(modelChipS_SMP_Blank1);
     instance->addModel(modelBossFight_Blank1);
 }

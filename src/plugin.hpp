@@ -42,6 +42,7 @@ extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperSampler;
 extern rack::Model *modelSuperVCA;
+extern rack::Model *modelPitch2600;
 
 extern rack::Model *modelChipS_SMP_Blank1;
 extern rack::Model *modelBossFight_Blank1;

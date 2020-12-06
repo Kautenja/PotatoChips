@@ -12,6 +12,10 @@
   "donateUrl": "https://maps.org/donate",
   "modules": [
     {
+      "slug": "Pitch2600",
+      "name": "Pitch 2600"
+    },
+    {
       "slug": "MiniBoss",
       "name": "Mini Boss",
       "description": "An emulation of the Yamaha YM2612 FM synthesis chip from the Sega Mega Drive and Sega Genesis.",

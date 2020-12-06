@@ -65,7 +65,7 @@
       "params": [],
       "rightModuleId": 156,
       "data": {
-        "channels": 4,
+        "channels": 8,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -405,7 +405,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
@@ -443,7 +443,7 @@
       "leftModuleId": 156,
       "rightModuleId": 161,
       "data": {
-        "prevent_clicks": false
+        "prevent_clicks": true
       },
       "pos": [
         18,
@@ -486,7 +486,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
@@ -524,7 +524,7 @@
       "leftModuleId": 160,
       "rightModuleId": 163,
       "data": {
-        "prevent_clicks": false
+        "prevent_clicks": true
       },
       "pos": [
         34,
@@ -567,7 +567,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
@@ -605,7 +605,7 @@
       "leftModuleId": 161,
       "rightModuleId": 164,
       "data": {
-        "prevent_clicks": false
+        "prevent_clicks": true
       },
       "pos": [
         50,
@@ -648,7 +648,7 @@
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 8,
@@ -686,7 +686,7 @@
       "leftModuleId": 163,
       "rightModuleId": 7,
       "data": {
-        "prevent_clicks": false
+        "prevent_clicks": true
       },
       "pos": [
         66,
@@ -701,14 +701,6 @@
       "outputId": 0,
       "inputModuleId": 1,
       "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1446,
-      "outputModuleId": 156,
-      "outputId": 4,
-      "inputModuleId": 2,
-      "inputId": 1,
       "color": "#0986ad"
     },
     {
@@ -886,6 +878,14 @@
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#c91847"
+    },
+    {
+      "id": 1446,
+      "outputModuleId": 156,
+      "outputId": 4,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

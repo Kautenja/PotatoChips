@@ -101,7 +101,7 @@ struct Pitch2600 : rack::engine::Module {
     /// @brief Initialize a new module.
     Pitch2600() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam(PARAM_FREQ, -7.f, 2.f, 0.f, "Refresh Rate", " Hz", dsp::FREQ_SEMITONE, 60.f);
+        configParam(PARAM_FREQ, -7.f, 7.f, 0.f, "Refresh Rate", " Hz", dsp::FREQ_SEMITONE, 60.f);
     }
 
     /// @brief Reset the module to its initial state.

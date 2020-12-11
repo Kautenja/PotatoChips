@@ -20,6 +20,28 @@
 
 namespace Trigger {
 
+/// @brief A trigger that detects when a signal foes from negative to positive.
+struct ZeroCrossing {
+ private:
+    /// the value of the signal on the last sample, i.e., last call to process
+    float signal_last = 0.f;
+
+ public:
+    /// @brief Reset the trigger to its default state
+    inline void reset() { signal_last = 0.f; }
+
+    /// @brief Process a step of the boolean signal.
+    ///
+    /// @param signal a sample of a boolean signal
+    /// @returns true if the state changes from negative to positive
+    ///
+    inline bool process(float signal) {
+        const bool triggered = signal_last < 0.f && signal >= 0.f;
+        signal_last = signal;
+        return triggered;
+    }
+};
+
 /// @brief A trigger that detects when a boolean changes from false to true.
 struct Boolean {
  private:
@@ -35,7 +57,7 @@ struct Boolean {
 
     /// @brief Process a step of the boolean signal.
     ///
-    /// @param state a sample of a boolean signal
+    /// @param signal a sample of a boolean signal
     /// @returns true if the state changes from false to true
     ///
     inline bool process(bool signal) {
@@ -63,7 +85,7 @@ struct Threshold {
 
     /// @brief Process a step of the signal.
     ///
-    /// @param state a sample of an arbitrary signal
+    /// @param signal a sample of an arbitrary signal
     /// @returns true if the trigger goes above \f$1.0\f$ and false if it goes
     /// below \f$0.0\f$. The trigger goes high once per cycle and must return
     /// to \f$0.0\f$ before firing again, .i.e, `isHigh` will go true at

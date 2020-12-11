@@ -286,6 +286,10 @@
         YM2612, but is better to omit for this module
     -   fix polyphonic pitch calculation for the operators
 
+## 1.10.1 (TBD)
+
+-   fix sync inputs for Infinite Stairs, StepSaw, and Jairasullator. the inputs were triggering when the input crossed 2V, they now trigger when the signal crosses zero (from negative to positive)
+
 ## 1.11.0 (TBD)
 
 -   new module: S-SMP(BRR)

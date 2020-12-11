@@ -105,7 +105,7 @@ struct HeldThresholdTrigger {
     /// \f$T_s = \frac{1}{f_s}\f$
     ///
     inline bool process(float signal, float sample_time) {
-        switch(state) {
+        switch (state) {
         case Off:  // off; detect initial press event
             if (signal >= 1.f) {  // initial press event; reset timer
                 state = Pressed;

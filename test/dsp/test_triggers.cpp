@@ -89,3 +89,103 @@ SCENARIO("BooleanTrigger processes a signal") {
 // ---------------------------------------------------------------------------
 // MARK: ThresholdTrigger
 // ---------------------------------------------------------------------------
+
+TEST_CASE("ThresholdTrigger should be false when initialized") {
+    ThresholdTrigger trigger;
+    REQUIRE_FALSE(trigger.isHigh());
+}
+
+TEST_CASE("ThresholdTrigger should be false when initialized and reset") {
+    ThresholdTrigger trigger;
+    trigger.reset();
+    REQUIRE_FALSE(trigger.isHigh());
+}
+
+TEST_CASE("ThresholdTrigger should be false when high and reset") {
+    ThresholdTrigger trigger;
+    trigger.process(1.f);
+    REQUIRE(trigger.isHigh());
+    trigger.reset();
+    REQUIRE_FALSE(trigger.isHigh());
+}
+
+SCENARIO("ThresholdTrigger processes a binary signal") {
+    GIVEN("a trigger") {
+        ThresholdTrigger trigger;
+        WHEN("the signal goes from low to low") {
+            trigger.process(0.f);
+            bool value = trigger.process(0.f);
+            THEN("the trigger does not fire and state is low") {
+                REQUIRE_FALSE(value);
+                REQUIRE_FALSE(trigger.isHigh());
+            }
+        }
+        WHEN("the signal goes from low to high") {
+            trigger.process(0.f);
+            bool value = trigger.process(1.f);
+            THEN("the trigger fires and state is high") {
+                REQUIRE(value);
+                REQUIRE(trigger.isHigh());
+            }
+        }
+        WHEN("the signal goes from high to high") {
+            trigger.process(1.f);
+            bool value = trigger.process(1.f);
+            THEN("the trigger does not fire and state is high") {
+                REQUIRE_FALSE(value);
+                REQUIRE(trigger.isHigh());
+            }
+        }
+        WHEN("the signal goes from high to low") {
+            trigger.process(1.f);
+            bool value = trigger.process(0.f);
+            THEN("the trigger does not fire and state is high") {
+                REQUIRE_FALSE(value);
+                REQUIRE_FALSE(trigger.isHigh());
+            }
+        }
+    }
+}
+
+SCENARIO("ThresholdTrigger processes a simple triangular signal") {
+    GIVEN("a trigger") {
+        ThresholdTrigger trigger;
+        WHEN("the signal increases to 1.f and decreases to 0.f") {
+            {    // 0.0
+                bool value = trigger.process(0.f);
+                THEN("the trigger does not fire at 0.f and is low") {
+                    REQUIRE_FALSE(value);
+                    REQUIRE_FALSE(trigger.isHigh());
+                }
+            } {  // 0.5
+                bool value = trigger.process(0.5f);
+                THEN("the trigger does not fire at 0.5f and is low") {
+                    REQUIRE_FALSE(value);
+                    REQUIRE_FALSE(trigger.isHigh());
+                }
+            } {  // 1.0
+                bool value = trigger.process(1.0f);
+                THEN("the trigger fires at 1.0f and is high") {
+                    REQUIRE(value);
+                    REQUIRE(trigger.isHigh());
+                }
+            } {  // 0.5
+                bool value = trigger.process(0.5f);
+                THEN("the trigger does not fire at 0.5f and is high") {
+                    REQUIRE_FALSE(value);
+                    REQUIRE(trigger.isHigh());
+                }
+            } {  // 0.0
+                bool value = trigger.process(0.f);
+                THEN("the reverse does not fires at 0.f and goes low") {
+                    REQUIRE_FALSE(value);
+                    REQUIRE_FALSE(trigger.isHigh());
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// MARK: HeldThresholdTrigger
+// ---------------------------------------------------------------------------

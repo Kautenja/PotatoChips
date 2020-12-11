@@ -18,8 +18,10 @@
 
 #include "exceptions.hpp"
 
+namespace Trigger {
+
 /// @brief A trigger that detects when a boolean changes from false to true.
-struct BooleanTrigger {
+struct Boolean {
  private:
     /// the current state of the trigger
     bool state = false;
@@ -44,7 +46,7 @@ struct BooleanTrigger {
 };
 
 /// @brief A trigger that detects a threshold value.
-struct ThresholdTrigger {
+struct Threshold {
  private:
     /// the current value of the trigger's signal
     bool state = false;
@@ -79,7 +81,7 @@ struct ThresholdTrigger {
 };
 
 /// @brief A trigger that detects a threshold value held for a period of time.
-struct HeldThresholdTrigger {
+struct HeldThreshold {
     /// the number of seconds to wait for detecting a hold (\f$100ms\f$)
     static constexpr float HOLD_TIME = 0.100;
 
@@ -131,5 +133,7 @@ struct HeldThresholdTrigger {
     /// @brief Return true if the trigger is being held, opposed to triggered.
     inline bool isHeld() const { return state == Held; }
 };
+
+}  // namespace Trigger
 
 #endif  // DSP_TRIGGERS_

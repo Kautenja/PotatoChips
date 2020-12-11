@@ -26,31 +26,31 @@
 #include "catch.hpp"
 
 // ---------------------------------------------------------------------------
-// MARK: BooleanTrigger
+// MARK: Trigger::Boolean
 // ---------------------------------------------------------------------------
 
-TEST_CASE("BooleanTrigger should be false when initialized") {
-    BooleanTrigger trigger;
+TEST_CASE("Trigger::Boolean should be false when initialized") {
+    Trigger::Boolean trigger;
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-TEST_CASE("BooleanTrigger should be false when initialized and reset") {
-    BooleanTrigger trigger;
+TEST_CASE("Trigger::Boolean should be false when initialized and reset") {
+    Trigger::Boolean trigger;
     trigger.reset();
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-TEST_CASE("BooleanTrigger should be false when high and reset") {
-    BooleanTrigger trigger;
+TEST_CASE("Trigger::Boolean should be false when high and reset") {
+    Trigger::Boolean trigger;
     trigger.process(true);
     REQUIRE(trigger.isHigh());
     trigger.reset();
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-SCENARIO("BooleanTrigger processes a signal") {
+SCENARIO("Trigger::Boolean processes a signal") {
     GIVEN("a trigger") {
-        BooleanTrigger trigger;
+        Trigger::Boolean trigger;
         WHEN("the signal goes from low to low") {
             trigger.process(false);
             bool value = trigger.process(false);
@@ -87,31 +87,31 @@ SCENARIO("BooleanTrigger processes a signal") {
 }
 
 // ---------------------------------------------------------------------------
-// MARK: ThresholdTrigger
+// MARK: Trigger::Threshold
 // ---------------------------------------------------------------------------
 
-TEST_CASE("ThresholdTrigger should be false when initialized") {
-    ThresholdTrigger trigger;
+TEST_CASE("Trigger::Threshold should be false when initialized") {
+    Trigger::Threshold trigger;
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-TEST_CASE("ThresholdTrigger should be false when initialized and reset") {
-    ThresholdTrigger trigger;
+TEST_CASE("Trigger::Threshold should be false when initialized and reset") {
+    Trigger::Threshold trigger;
     trigger.reset();
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-TEST_CASE("ThresholdTrigger should be false when high and reset") {
-    ThresholdTrigger trigger;
+TEST_CASE("Trigger::Threshold should be false when high and reset") {
+    Trigger::Threshold trigger;
     trigger.process(1.f);
     REQUIRE(trigger.isHigh());
     trigger.reset();
     REQUIRE_FALSE(trigger.isHigh());
 }
 
-SCENARIO("ThresholdTrigger processes a binary signal") {
+SCENARIO("Trigger::Threshold processes a binary signal") {
     GIVEN("a trigger") {
-        ThresholdTrigger trigger;
+        Trigger::Threshold trigger;
         WHEN("the signal goes from low to low") {
             trigger.process(0.f);
             bool value = trigger.process(0.f);
@@ -147,9 +147,9 @@ SCENARIO("ThresholdTrigger processes a binary signal") {
     }
 }
 
-SCENARIO("ThresholdTrigger processes a simple triangular signal") {
+SCENARIO("Trigger::Threshold processes a simple triangular signal") {
     GIVEN("a trigger") {
-        ThresholdTrigger trigger;
+        Trigger::Threshold trigger;
         WHEN("the signal increases to 1.f and decreases to 0.f") {
             {    // 0.0
                 bool value = trigger.process(0.f);
@@ -187,13 +187,13 @@ SCENARIO("ThresholdTrigger processes a simple triangular signal") {
 }
 
 // ---------------------------------------------------------------------------
-// MARK: HeldThresholdTrigger
+// MARK: Trigger::HeldThreshold
 // ---------------------------------------------------------------------------
 
-SCENARIO("HeldThresholdTrigger processes signals at 100Hz") {
+SCENARIO("Trigger::HeldThreshold processes signals at 100Hz") {
     GIVEN("an initialized trigger and sample rate") {
         float sample_time = 0.01f;
-        HeldThresholdTrigger trigger;
+        Trigger::HeldThreshold trigger;
         WHEN("the trigger starts to go high") {
             auto value = trigger.process(1.f, sample_time);
             THEN("the trigger does not fire and is not held") {
@@ -213,7 +213,7 @@ SCENARIO("HeldThresholdTrigger processes signals at 100Hz") {
             THEN("the trigger does not fire, but is held after the window") {
                 float time = 0.f;
                 // enter the press stage
-                while (time < HeldThresholdTrigger::HOLD_TIME) {
+                while (time < Trigger::HeldThreshold::HOLD_TIME) {
                     time += sample_time;
                     auto value = trigger.process(1.f, sample_time);
                     REQUIRE_FALSE(value);

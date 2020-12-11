@@ -84,7 +84,7 @@
     {
       "id": 142,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "model": "2612",
       "params": [
         {
@@ -465,7 +465,7 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "model": "2612_Blank1",
       "params": [],
       "bypass": true,

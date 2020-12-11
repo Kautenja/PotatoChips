@@ -46,14 +46,14 @@ struct BooleanTrigger {
 struct ThresholdTrigger {
  private:
     /// the current value of the trigger's signal
-    bool state = true;
+    bool state = false;
 
  public:
     /// @brief Return the state of the boolean trigger.
     inline float isHigh() const { return state; }
 
     /// @brief Reset the trigger to its default state
-    inline void reset() { state = true; }
+    inline void reset() { state = false; }
 
     /// @brief Process a step of the signal.
     ///

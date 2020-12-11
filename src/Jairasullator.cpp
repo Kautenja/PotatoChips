@@ -16,6 +16,7 @@
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
+#include "dsp/triggers.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -31,7 +32,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     rack::dsp::BooleanTrigger envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the sync ports and the envelope trig
-    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
+    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
     /// a trigger for handling presses to the change mode button
     rack::dsp::SchmittTrigger envModeTrigger;
@@ -353,7 +354,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // reset the voltage on this port for the next voice to normal to
         inputs[INPUT_RESET + index].setVoltage(sync, channel);
         // process the sync trigger and return the result
-        return syncTriggers[channel][index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
+        return syncTriggers[channel][index].process(sync);
     }
 
     /// @brief Process the audio rate inputs for the given channel.

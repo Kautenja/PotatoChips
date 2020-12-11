@@ -40,7 +40,7 @@
         },
         {
           "id": 2,
-          "value": 0.613919795
+          "value": 0.0
         },
         {
           "id": 3,
@@ -134,7 +134,7 @@
     {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.0",
       "model": "AY_3_8910",
       "params": [
         {
@@ -211,7 +211,7 @@
         },
         {
           "id": 18,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 19,

@@ -16,6 +16,7 @@
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/konami_vrc6.hpp"
+#include "dsp/triggers.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -73,7 +74,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
 
  protected:
     /// trigger for handling inputs to the sync port for the saw wave
-    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS];
+    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS];
 
     /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///
@@ -185,9 +186,10 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     inline void processAudio(const ProcessArgs &args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
+        // detect sync for triangle generator voice
         const float sync = inputs[INPUT_SYNC].getVoltage(channel);
-        if (syncTriggers[channel].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
-            apu[channel].reset_phase(2);
+        if (syncTriggers[channel].process(sync)) apu[channel].reset_phase(2);
+        // set frequency for all voices
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // frequency (max frequency is same for pulses and saw, 4095)
             uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], 4095, clock_division[oscillator]);

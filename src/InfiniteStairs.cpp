@@ -16,6 +16,7 @@
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/ricoh_2a03.hpp"
+#include "dsp/triggers.hpp"
 
 // TODO: volume control for the triangle waveform
 
@@ -28,6 +29,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
     dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
+    /// trigger for handling inputs to the sync port for the saw wave
+    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -94,9 +97,6 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     }
 
  protected:
-    /// trigger for handling inputs to the sync port for the saw wave
-    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS][2];
-
     /// @brief Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -232,7 +232,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // sync input (for triangle and noise oscillator)
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT - Ricoh2A03::TRIANGLE; i++) {
             const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
-            if (syncTriggers[channel][i].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
+            if (syncTriggers[channel][i].process(sync))
                 apu[channel].reset_phase(Ricoh2A03::TRIANGLE + i);
         }
     }

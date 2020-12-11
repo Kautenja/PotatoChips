@@ -190,59 +190,47 @@ SCENARIO("ThresholdTrigger processes a simple triangular signal") {
 // MARK: HeldThresholdTrigger
 // ---------------------------------------------------------------------------
 
-SCENARIO("HeldThresholdTrigger is initialized") {
-    WHEN("the default sample rate argument is used") {
+SCENARIO("HeldThresholdTrigger processes signals at 100Hz") {
+    GIVEN("an initialized trigger and sample rate") {
+        float sample_time = 0.01f;
         HeldThresholdTrigger trigger;
-        THEN("the trigger has sample rate of 44100Hz") {
-            REQUIRE(44100.f == trigger.get_sample_rate());
-
-        }
-    }
-    GIVEN("a positive sample rate") {
-        float sample_rate = 100.f;
-        WHEN("the trigger is initialized with the sample rate") {
-            HeldThresholdTrigger trigger(sample_rate);
-            THEN("get_sample_rate returns the sample rate") {
-                REQUIRE(sample_rate == trigger.get_sample_rate());
+        WHEN("the trigger starts to go high") {
+            auto value = trigger.process(1.f, sample_time);
+            THEN("the trigger does not fire and is not held") {
+                REQUIRE_FALSE(value);
+                REQUIRE_FALSE(trigger.isHeld());
             }
         }
-    }
-    GIVEN("a sample rate that is exactly zero") {
-        float sample_rate = 0.f;
-        WHEN("the trigger is initialized with the sample rate") {
-            THEN("an error is thrown") {
-                REQUIRE_THROWS(HeldThresholdTrigger(sample_rate));
+        WHEN("the trigger goes high then low within the press window") {
+            trigger.process(1.f, 0.01f);
+            auto value = trigger.process(0.f, sample_time);
+            THEN("the trigger fires and is not held") {
+                REQUIRE(value);
+                REQUIRE_FALSE(trigger.isHeld());
             }
         }
-    }
-    GIVEN("a sample rate that is below zero") {
-        float sample_rate = -1.f;
-        WHEN("the trigger is initialized with the sample rate") {
-            THEN("an error is thrown") {
-                REQUIRE_THROWS(HeldThresholdTrigger(sample_rate));
-            }
-        }
-    }
-}
-
-SCENARIO("HeldThresholdTrigger changes sample rates") {
-    GIVEN("an initialized trigger") {
-        HeldThresholdTrigger trigger;
-        WHEN("the sample rate is changed to a positive value") {
-            float sample_rate = 100.f;
-            trigger.set_sample_rate(sample_rate);
-            THEN("get_sample_rate returns the sample rate") {
-                REQUIRE(sample_rate == trigger.get_sample_rate());
-            }
-        }
-        WHEN("the sample rate is changed to a value of zero") {
-            THEN("an error is thrown") {
-                REQUIRE_THROWS(trigger.set_sample_rate(0.f));
-            }
-        }
-        WHEN("the sample rate is changed to a negative value") {
-            THEN("an error is thrown") {
-                REQUIRE_THROWS(trigger.set_sample_rate(-1.f));
+        WHEN("the trigger goes high past the press window") {
+            THEN("the trigger does not fire, but is held after the window") {
+                float time = 0.f;
+                // enter the press stage
+                while (time < HeldThresholdTrigger::HOLD_TIME) {
+                    time += sample_time;
+                    auto value = trigger.process(1.f, sample_time);
+                    REQUIRE_FALSE(value);
+                    REQUIRE_FALSE(trigger.isHeld());
+                }
+                // enter the held stage for a single sample
+                {
+                    auto value = trigger.process(1.f, sample_time);
+                    REQUIRE_FALSE(value);
+                    REQUIRE(trigger.isHeld());
+                }
+                // take the trigger low in a single sample
+                {
+                    auto value = trigger.process(0.f, sample_time);
+                    REQUIRE_FALSE(value);
+                    REQUIRE_FALSE(trigger.isHeld());
+                }
             }
         }
     }

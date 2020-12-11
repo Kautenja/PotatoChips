@@ -80,13 +80,10 @@ struct ThresholdTrigger {
 
 /// @brief A trigger that detects a threshold value held for a period of time.
 struct HeldThresholdTrigger {
- private:
     /// the number of seconds to wait for detecting a hold (\f$100ms\f$)
     static constexpr float HOLD_TIME = 0.100;
 
-    /// the number of samples per second
-    float sample_rate;
-
+ private:
     /// the current state of the trigger
     enum State {
         Off = 0,
@@ -98,32 +95,7 @@ struct HeldThresholdTrigger {
     float time = 0.f;
 
  public:
-    /// @brief Initialize a new held threshold trigger.
-    ///
-    /// @param sample_rate the number of samples per second, i.e.,
-    /// \f$f_s = \frac{1}{T_s}\f$
-    ///
-    explicit HeldThresholdTrigger(float sample_rate_ = 44100) {
-        set_sample_rate(sample_rate_);
-    }
-
-    /// @brief Set the sample rate.
-    ///
-    /// @param sample_rate the number of samples per second, i.e.,
-    /// \f$f_s = \frac{1}{T_s}\f$
-    ///
-    inline void set_sample_rate(float sample_rate_) {
-        if (sample_rate_ <= 0.f)
-            throw Exception("sample_rate must be positive");
-        sample_rate = sample_rate_;
-    }
-
-    /// @brief Return the sample rate, i.e., \f$f_s = \frac{1}{T_s}\f$.
-    inline float get_sample_rate() const { return sample_rate; }
-
     /// @brief Reset the trigger to the default state.
-    /// @details
-    /// This does not affect the sample rate of the trigger.
     inline void reset() { state = Off; }
 
     /// @brief Process a step of the signal.

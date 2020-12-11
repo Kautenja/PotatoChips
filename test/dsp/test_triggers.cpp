@@ -189,3 +189,61 @@ SCENARIO("ThresholdTrigger processes a simple triangular signal") {
 // ---------------------------------------------------------------------------
 // MARK: HeldThresholdTrigger
 // ---------------------------------------------------------------------------
+
+SCENARIO("HeldThresholdTrigger is initialized") {
+    WHEN("the default sample rate argument is used") {
+        HeldThresholdTrigger trigger;
+        THEN("the trigger has sample rate of 44100Hz") {
+            REQUIRE(44100.f == trigger.get_sample_rate());
+
+        }
+    }
+    GIVEN("a positive sample rate") {
+        float sample_rate = 100.f;
+        WHEN("the trigger is initialized with the sample rate") {
+            HeldThresholdTrigger trigger(sample_rate);
+            THEN("get_sample_rate returns the sample rate") {
+                REQUIRE(sample_rate == trigger.get_sample_rate());
+            }
+        }
+    }
+    GIVEN("a sample rate that is exactly zero") {
+        float sample_rate = 0.f;
+        WHEN("the trigger is initialized with the sample rate") {
+            THEN("an error is thrown") {
+                REQUIRE_THROWS(HeldThresholdTrigger(sample_rate));
+            }
+        }
+    }
+    GIVEN("a sample rate that is below zero") {
+        float sample_rate = -1.f;
+        WHEN("the trigger is initialized with the sample rate") {
+            THEN("an error is thrown") {
+                REQUIRE_THROWS(HeldThresholdTrigger(sample_rate));
+            }
+        }
+    }
+}
+
+SCENARIO("HeldThresholdTrigger changes sample rates") {
+    GIVEN("an initialized trigger") {
+        HeldThresholdTrigger trigger;
+        WHEN("the sample rate is changed to a positive value") {
+            float sample_rate = 100.f;
+            trigger.set_sample_rate(sample_rate);
+            THEN("get_sample_rate returns the sample rate") {
+                REQUIRE(sample_rate == trigger.get_sample_rate());
+            }
+        }
+        WHEN("the sample rate is changed to a value of zero") {
+            THEN("an error is thrown") {
+                REQUIRE_THROWS(trigger.set_sample_rate(0.f));
+            }
+        }
+        WHEN("the sample rate is changed to a negative value") {
+            THEN("an error is thrown") {
+                REQUIRE_THROWS(trigger.set_sample_rate(-1.f));
+            }
+        }
+    }
+}

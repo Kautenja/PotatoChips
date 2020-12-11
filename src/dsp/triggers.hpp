@@ -102,14 +102,14 @@ struct HeldThresholdTrigger {
     /// @param sample_rate the number of samples per second, i.e.,
     /// \f$f_s = \frac{1}{T_s}\f$
     ///
-    void set_sample_rate(float sample_rate_) {
+    inline void set_sample_rate(float sample_rate_) {
         if (sample_rate_ <= 0.f)
             throw Exception("sample_rate must be positive");
         sample_rate = sample_rate_;
     }
 
     /// @brief Return the sample rate, i.e., \f$f_s = \frac{1}{T_s}\f$.
-    float get_sample_rate() const { return sample_rate; }
+    inline float get_sample_rate() const { return sample_rate; }
 
     /// @brief Reset the trigger to the default state.
     /// @details

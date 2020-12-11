@@ -87,6 +87,16 @@ struct HeldThresholdTrigger {
     /// the number of samples per second
     float sample_rate;
 
+    /// the current state of the trigger
+    enum State {
+        Off = 0,
+        Pressed,
+        Held
+    } state = Off;
+
+    /// the current time, only used when the trigger is pressed
+    float time = 0.f;
+
  public:
     /// @brief Initialize a new held threshold trigger.
     ///
@@ -114,7 +124,7 @@ struct HeldThresholdTrigger {
     /// @brief Reset the trigger to the default state.
     /// @details
     /// This does not affect the sample rate of the trigger.
-    inline void reset() { }
+    inline void reset() { state = Off; }
 
     /// @brief Process a step of the signal.
     ///
@@ -122,17 +132,32 @@ struct HeldThresholdTrigger {
     /// @param sample_time the amount of time between samples, i.e.,
     /// \f$T_s = \frac{1}{f_s}\f$
     ///
-    inline void process(float signal, float sample_time) {
-
-    }
-
-    inline bool didTrigger() {
+    inline bool process(float signal, float sample_time) {
+        switch(state) {
+        case Off:  // off; detect initial press event
+            if (signal >= 1.f) {  // initial press event; reset timer
+                state = Pressed;
+                time = 0.f;
+            }
+            break;
+        case Pressed:  // pressing; might be holding
+            if (signal <= 0.f) {  // went low before hold time, trigger
+                state = Off;
+                return true;
+            } else {  // still high, increment timer and don't fire
+                time += sample_time;
+                if (time >= HOLD_TIME) state = Held;
+            }
+            break;
+        case Held:  // holding; might be releasing
+            if (signal <= 0.f) state = Off;
+            break;
+        }
         return false;
     }
 
-    inline bool isHolding() {
-        return false;
-    }
+    /// @brief Return true if the trigger is being held, opposed to triggered.
+    inline bool isHeld() const { return state == Held; }
 };
 
 #endif  // DSP_TRIGGERS_

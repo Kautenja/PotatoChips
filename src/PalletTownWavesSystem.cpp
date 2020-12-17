@@ -14,9 +14,10 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
+#include "engine/chip_module.hpp"
 #include "widget/wavetable_editor.hpp"
 
 // ---------------------------------------------------------------------------
@@ -27,7 +28,7 @@
 struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Boolean lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -343,7 +344,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // noise
         // ---------------------------------------------------------------
         // set the period and LFSR
-        bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].state;
+        bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].isHigh();
         auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod(channel);
         if (apu[channel].read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
             apu[channel].write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);

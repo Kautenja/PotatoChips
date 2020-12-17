@@ -14,11 +14,9 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
-#include "dsp/ricoh_2a03.hpp"
 #include "dsp/triggers.hpp"
-
-// TODO: volume control for the triangle waveform
+#include "dsp/ricoh_2a03.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -28,7 +26,7 @@
 struct InfiniteStairs : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
     /// trigger for handling inputs to the sync port for the saw wave
     Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][2];
 
@@ -254,7 +252,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         apu[channel].set_voice_volume(Ricoh2A03::TRIANGLE, getVolume(Ricoh2A03::TRIANGLE, channel));
         // noise oscillator
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
+        const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].isHigh();
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
         apu[channel].set_voice_volume(Ricoh2A03::NOISE, getVolume(Ricoh2A03::NOISE, channel));
     }

@@ -13,14 +13,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <functional>
 #include "plugin.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
+
+/// @brief A parameter quantity for the YM2612 LFO.
+struct LFOQuantity : rack::ParamQuantity {
+    /// @brief Return the value as a formatted string.
+    inline std::string getDisplayValueString() override {
+        const char* labels[8] = {
+            "3.98",
+            "5.56",
+            "6.02",
+            "6.37",
+            "6.88",
+            "9.63",
+            "48.1",
+            "72.2"
+        };
+        const int index = getValue();
+        if (index < 0 || index > 7) return "?";
+        return labels[index];
+    }
+};
+
+/// @brief A parameter quantity for the YM2612 Multiplier.
+struct MultiplierQuantity : rack::ParamQuantity {
+    /// @brief Return the value as a formatted string.
+    inline std::string getDisplayValueString() override {
+        const int value = getValue();
+        if (value == 0) return "1/2";
+        return std::to_string(value);
+    }
+};
 
 /// A Eurorack module based on the Yamaha YM2612.
 struct BossFight : rack::Module {
@@ -29,17 +59,17 @@ struct BossFight : rack::Module {
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    Trigger::Boolean gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
-
-    /// a clock divider for reducing computation (on CV acquisition)
-    dsp::ClockDivider cvDivider;
+    Trigger::Boolean retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the output audio level from the emulator
-    dsp::VuMeter2 vuMeter;
+    rack::dsp::VuMeter2 vuMeter;
+
+    /// a clock divider for reducing computation (on CV acquisition)
+    rack::dsp::ClockDivider cvDivider;
     /// a light divider for updating the LEDs every 512 processing steps
-    dsp::ClockDivider lightDivider;
+    rack::dsp::ClockDivider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///
@@ -127,7 +157,7 @@ struct BossFight : rack::Module {
         // global parameters
         configParam(PARAM_AL,  0, 7, 7, "Algorithm");
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0, "LFO frequency", " Hz");
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
@@ -140,7 +170,7 @@ struct BossFight : rack::Module {
             configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
             configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
-            configParam(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier");
+            configParam<MultiplierQuantity>(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier", "x");
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
             configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
             configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
@@ -184,8 +214,8 @@ struct BossFight : rack::Module {
         algorithm[channel] = clamp(algorithm[channel], 0, 7);
         apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
-        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
-        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
+        apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
+        apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
         // normal pitch gate and re-trigger
         float gate = 0;
         float retrig = 0;
@@ -214,7 +244,7 @@ struct BossFight : rack::Module {
             // but when neither or both are high, the gate is closed. This
             // causes the gate to get shut for a sample when re-triggering an
             // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].state);
+            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh());
         }
     }
 

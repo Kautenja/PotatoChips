@@ -289,6 +289,10 @@
 ## 1.10.1 (TBD)
 
 -   fix sync inputs for Infinite Stairs, StepSaw, and Jairasullator. the inputs were triggering when the input crossed 2V, they now trigger when the signal crosses zero (from negative to positive)
+-   fix trigger-able inputs to not fire when opening a patch
+-   update parameter descriptions for Boss Fight and Mini Boss
+    -   LFO now shows the Hz measurement of the LFO
+    -   multiply now shows "1/2" instead of "0" when all the way CCW
 
 ## 1.11.0 (TBD)
 

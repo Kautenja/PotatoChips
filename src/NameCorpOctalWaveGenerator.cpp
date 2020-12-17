@@ -83,7 +83,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         // set the output buffer for each individual voice
         for (unsigned osc = 0; osc < Namco163::OSC_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, rack::dsp::FREQ_C4);
             configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
             configParam(PARAM_VOLUME + osc, 0, 15, 15, osc_name + " Volume");
         }

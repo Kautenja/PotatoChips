@@ -15,6 +15,7 @@
 
 #include <limits>
 #include "plugin.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
 
 // TODO: inverted output
@@ -33,9 +34,9 @@ struct SuperADSR : Module {
     /// the Sony S-DSP ADSR enveloper generator emulator
     SonyS_DSP::ADSR apus[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input trigger and gate signals
-    rack::dsp::BooleanTrigger gateTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Boolean gateTrigger[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrigTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Boolean retrigTrigger[LANES][PORT_MAX_CHANNELS];
     /// a clock divider for light updates
     rack::dsp::ClockDivider lightDivider;
 
@@ -122,7 +123,7 @@ struct SuperADSR : Module {
         apu.setAmplitude(params[PARAM_AMPLITUDE + lane].getValue());
         // trigger this APU and process the output
         auto trigger = getTrigger(channel, lane);
-        auto sample = apu.run(trigger, gateTrigger[lane][channel].state);
+        auto sample = apu.run(trigger, gateTrigger[lane][channel].isHigh());
         const auto voltage = 10.f * sample / 128.f;
         outputs[OUTPUT_ENVELOPE + lane].setVoltage(voltage, channel);
         outputs[OUTPUT_INVERTED + lane].setVoltage(-voltage, channel);

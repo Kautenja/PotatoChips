@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -11,12 +11,12 @@
       "rightModuleId": 7,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 1024
+          "blockSize": 512
         }
       },
       "pos": [
@@ -134,12 +134,12 @@
     {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "model": "AY_3_8910",
       "params": [
         {
           "id": 0,
-          "value": -5.0
+          "value": 0.0
         },
         {
           "id": 1,
@@ -147,7 +147,7 @@
         },
         {
           "id": 2,
-          "value": -2.94000196
+          "value": 0.0
         },
         {
           "id": 3,
@@ -171,7 +171,7 @@
         },
         {
           "id": 8,
-          "value": 15.0
+          "value": 10.0
         },
         {
           "id": 9,
@@ -211,7 +211,7 @@
         },
         {
           "id": 18,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 19,
@@ -238,14 +238,6 @@
     }
   ],
   "cables": [
-    {
-      "id": 846,
-      "outputModuleId": 5,
-      "outputId": 6,
-      "inputModuleId": 16,
-      "inputId": 25,
-      "color": "#c91847"
-    },
     {
       "id": 286,
       "outputModuleId": 2,
@@ -285,6 +277,14 @@
       "inputModuleId": 16,
       "inputId": 0,
       "color": "#0986ad"
+    },
+    {
+      "id": 1427,
+      "outputModuleId": 5,
+      "outputId": 1,
+      "inputModuleId": 16,
+      "inputId": 25,
+      "color": "#c9b70e"
     }
   ]
 }

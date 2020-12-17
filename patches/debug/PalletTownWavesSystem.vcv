@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,12 +10,12 @@
       "leftModuleId": 2,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
-          "blockSize": 2048
+          "blockSize": 512
         }
       },
       "pos": [
@@ -84,7 +84,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.1",
       "model": "GBS",
       "params": [
         {
@@ -133,11 +133,11 @@
         },
         {
           "id": 11,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 12,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 13,
@@ -145,7 +145,7 @@
         },
         {
           "id": 14,
-          "value": 0.0
+          "value": 10.0
         }
       ],
       "leftModuleId": 137,
@@ -410,38 +410,6 @@
   ],
   "cables": [
     {
-      "id": 746,
-      "outputModuleId": 48,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 4,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 747,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#c91847"
-    },
-    {
-      "id": 748,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 752,
-      "outputModuleId": 48,
-      "outputId": 3,
-      "inputModuleId": 51,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
       "id": 757,
       "outputModuleId": 5,
       "outputId": 0,
@@ -472,6 +440,38 @@
       "inputModuleId": 137,
       "inputId": 5,
       "color": "#0c8e15"
+    },
+    {
+      "id": 1476,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 51,
+      "inputId": 0,
+      "color": "#c91847"
+    },
+    {
+      "id": 746,
+      "outputModuleId": 48,
+      "outputId": 3,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0c8e15"
+    },
+    {
+      "id": 748,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#0986ad"
+    },
+    {
+      "id": 747,
+      "outputModuleId": 2,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#c91847"
     }
   ]
 }

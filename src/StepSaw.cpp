@@ -14,9 +14,9 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
-#include "dsp/konami_vrc6.hpp"
 #include "dsp/triggers.hpp"
+#include "dsp/konami_vrc6.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

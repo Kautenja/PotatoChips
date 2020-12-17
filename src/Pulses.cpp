@@ -14,8 +14,8 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
 #include "dsp/sunsoft_fme7.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

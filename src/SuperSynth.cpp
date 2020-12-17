@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/sony_s_dsp/processor.hpp"
 #include "dsp/wavetable4bit.hpp"
 
@@ -33,7 +34,7 @@ struct SuperSynth : Module {
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
+    Trigger::Boolean gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

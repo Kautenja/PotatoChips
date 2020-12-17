@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,12 +10,12 @@
       "leftModuleId": 154,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 1024
+          "blockSize": 512
         }
       },
       "pos": [
@@ -84,12 +84,12 @@
     {
       "id": 142,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "model": "MiniBoss",
       "params": [
         {
           "id": 0,
-          "value": 19.0
+          "value": 14.0
         },
         {
           "id": 1,
@@ -105,7 +105,7 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 5,
@@ -113,19 +113,19 @@
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": -1.18500173
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 10,
@@ -137,15 +137,15 @@
         },
         {
           "id": 12,
-          "value": 0.108000003
+          "value": 0.0
         },
         {
           "id": 13,
-          "value": 1.0
+          "value": 4.0
         },
         {
           "id": 14,
-          "value": 0.0
+          "value": 3.0
         },
         {
           "id": 15,
@@ -346,6 +346,14 @@
       "outputId": 0,
       "inputModuleId": 156,
       "inputId": 0,
+      "color": "#0986ad"
+    },
+    {
+      "id": 1470,
+      "outputModuleId": 142,
+      "outputId": 0,
+      "inputModuleId": 142,
+      "inputId": 9,
       "color": "#0986ad"
     }
   ]

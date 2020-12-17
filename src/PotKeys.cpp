@@ -14,8 +14,9 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/atari_pokey.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -25,7 +26,7 @@
 struct PotKeys : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
-    dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
+    Trigger::Boolean controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -188,8 +189,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         for (std::size_t bit = 0; bit < AtariPOKEY::CTL_FLAGS; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
             controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
-                !controlTriggers[channel][bit].state;
+            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) - !controlTriggers[channel][bit].isHigh();
             // the position for the current button's index
             controlByte |= state << bit;
         }

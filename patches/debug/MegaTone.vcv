@@ -11,7 +11,7 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "hw:Sanskrit 6th,0",
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
@@ -134,7 +134,7 @@
     {
       "id": 76,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.1",
       "model": "SN76489",
       "params": [
         {

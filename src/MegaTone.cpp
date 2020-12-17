@@ -14,8 +14,9 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -25,7 +26,7 @@
 struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  private:
     /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Boolean lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -184,7 +185,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
         // noise generator
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].state), false);
+        apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].isHigh()), false);
         apu[channel].set_amplifier_level(TexasInstrumentsSN76489::NOISE, getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }
 

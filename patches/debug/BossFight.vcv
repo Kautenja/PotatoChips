@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -7,54 +7,20 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "rightModuleId": 2,
+      "leftModuleId": 155,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 1024
+          "blockSize": 256
         }
       },
       "pos": [
-        0,
-        2
-      ]
-    },
-    {
-      "id": 2,
-      "plugin": "Fundamental",
-      "version": "1.4.0",
-      "model": "VCMixer",
-      "params": [
-        {
-          "id": 0,
-          "value": 1.0
-        },
-        {
-          "id": 1,
-          "value": 1.0
-        },
-        {
-          "id": 2,
-          "value": 1.0
-        },
-        {
-          "id": 3,
-          "value": 1.0
-        },
-        {
-          "id": 4,
-          "value": 1.0
-        }
-      ],
-      "leftModuleId": 1,
-      "rightModuleId": 150,
-      "pos": [
-        10,
-        2
+        68,
+        1
       ]
     },
     {
@@ -63,7 +29,7 @@
       "version": "1.1.6",
       "model": "MIDIToCVInterface",
       "params": [],
-      "rightModuleId": 159,
+      "rightModuleId": 142,
       "data": {
         "channels": 4,
         "polyMode": 0,
@@ -84,12 +50,12 @@
     {
       "id": 142,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "model": "2612",
       "params": [
         {
           "id": 0,
-          "value": 7.0
+          "value": 6.0
         },
         {
           "id": 1,
@@ -97,7 +63,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 2.0
         },
         {
           "id": 3,
@@ -217,7 +183,7 @@
         },
         {
           "id": 32,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 33,
@@ -281,7 +247,7 @@
         },
         {
           "id": 48,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 49,
@@ -296,9 +262,10 @@
           "value": 0.0
         }
       ],
+      "leftModuleId": 5,
       "pos": [
-        1,
-        1
+        8,
+        0
       ]
     },
     {
@@ -307,12 +274,12 @@
       "version": "1.1.35",
       "model": "Bogaudio-VU",
       "params": [],
-      "leftModuleId": 2,
+      "leftModuleId": 152,
       "rightModuleId": 154,
       "data": {},
       "pos": [
-        20,
-        2
+        32,
+        1
       ]
     },
     {
@@ -353,8 +320,8 @@
         "amplitude_plot": "decibels_140"
       },
       "pos": [
-        23,
-        2
+        35,
+        1
       ]
     },
     {
@@ -397,82 +364,26 @@
         }
       ],
       "leftModuleId": 154,
+      "rightModuleId": 1,
       "data": {
         "lissajous": 0,
         "external": 0
       },
       "pos": [
-        43,
-        2
-      ]
-    },
-    {
-      "id": 159,
-      "plugin": "Bogaudio",
-      "version": "1.1.35",
-      "model": "Bogaudio-Reftone",
-      "params": [
-        {
-          "id": 0,
-          "value": 9.0
-        },
-        {
-          "id": 1,
-          "value": 4.0
-        },
-        {
-          "id": 2,
-          "value": 0.00297000003
-        }
-      ],
-      "bypass": true,
-      "leftModuleId": 5,
-      "rightModuleId": 161,
-      "data": {},
-      "pos": [
-        8,
-        0
-      ]
-    },
-    {
-      "id": 161,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "bypass": true,
-      "leftModuleId": 159,
-      "rightModuleId": 162,
-      "pos": [
-        11,
-        0
-      ]
-    },
-    {
-      "id": 162,
-      "plugin": "KautenjaDSP",
-      "version": "1.0.0",
-      "model": "CountingHertz",
-      "params": [],
-      "bypass": true,
-      "leftModuleId": 161,
-      "rightModuleId": 152,
-      "pos": [
-        16,
-        0
+        55,
+        1
       ]
     },
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "model": "2612_Blank1",
       "params": [],
-      "bypass": true,
-      "leftModuleId": 162,
+      "rightModuleId": 150,
       "pos": [
-        21,
-        0
+        0,
+        1
       ]
     }
   ],
@@ -492,22 +403,6 @@
       "inputModuleId": 154,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 1401,
-      "outputModuleId": 159,
-      "outputId": 1,
-      "inputModuleId": 161,
-      "inputId": 0,
-      "color": "#0c8e15"
-    },
-    {
-      "id": 1402,
-      "outputModuleId": 142,
-      "outputId": 0,
-      "inputModuleId": 162,
-      "inputId": 0,
-      "color": "#c91847"
     },
     {
       "id": 1405,
@@ -534,44 +429,52 @@
       "color": "#c9b70e"
     },
     {
-      "id": 1317,
-      "outputModuleId": 2,
+      "id": 1419,
+      "outputModuleId": 150,
+      "outputId": 1,
+      "inputModuleId": 154,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1420,
+      "outputModuleId": 154,
+      "outputId": 1,
+      "inputModuleId": 155,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1414,
+      "outputModuleId": 142,
       "outputId": 0,
       "inputModuleId": 150,
       "inputId": 0,
       "color": "#0986ad"
     },
     {
-      "id": 1242,
-      "outputModuleId": 2,
-      "outputId": 2,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#c91847"
-    },
-    {
-      "id": 1408,
-      "outputModuleId": 2,
-      "outputId": 1,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 1414,
-      "outputModuleId": 142,
-      "outputId": 0,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 1415,
       "outputModuleId": 142,
       "outputId": 1,
-      "inputModuleId": 2,
-      "inputId": 2,
+      "inputModuleId": 150,
+      "inputId": 1,
       "color": "#c91847"
+    },
+    {
+      "id": 1471,
+      "outputModuleId": 150,
+      "outputId": 1,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#c91847"
+    },
+    {
+      "id": 1472,
+      "outputModuleId": 150,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#0986ad"
     }
   ]
 }

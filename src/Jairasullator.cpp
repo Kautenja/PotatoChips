@@ -14,9 +14,9 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
-#include "dsp/general_instrument_ay_3_8910.hpp"
 #include "dsp/triggers.hpp"
+#include "dsp/general_instrument_ay_3_8910.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -26,16 +26,16 @@
 struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
  private:
     /// triggers for handling inputs to the tone and noise enable switches
-    rack::dsp::BooleanTrigger mixerTriggers[PORT_MAX_CHANNELS][2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+    Trigger::Boolean mixerTriggers[PORT_MAX_CHANNELS][2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the envelope enable switches
-    rack::dsp::BooleanTrigger envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
+    Trigger::Boolean envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the sync ports and the envelope trig
     Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
     /// a trigger for handling presses to the change mode button
-    rack::dsp::SchmittTrigger envModeTrigger;
+    Trigger::Threshold envModeTrigger;
 
  public:
     /// the mode the envelope generator is in
@@ -226,7 +226,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         auto cv = math::clamp(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
         envTriggers[channel][osc].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
         // return the state of the switch based on the parameter and trig input
-        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].state;
+        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].isHigh();
     }
 
     /// @brief Return the noise period.
@@ -330,7 +330,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
             mixerTriggers[channel][i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
-            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].state;
+            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].isHigh();
             // invert the state to indicate "OFF" semantics instead of "ON"
             mixerByte |= !toneState << i;
         }

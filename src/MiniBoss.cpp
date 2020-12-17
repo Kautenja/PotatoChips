@@ -15,11 +15,42 @@
 
 #include <functional>
 #include "plugin.hpp"
+#include "dsp/triggers.hpp"
 #include "dsp/yamaha_ym2612/feedback_operator.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
+
+/// @brief A parameter quantity for the YM2612 LFO.
+struct LFOQuantity : rack::ParamQuantity {
+    /// @brief Return the value as a formatted string.
+    inline std::string getDisplayValueString() override {
+        const char* labels[8] = {
+            "3.98",
+            "5.56",
+            "6.02",
+            "6.37",
+            "6.88",
+            "9.63",
+            "48.1",
+            "72.2"
+        };
+        const int index = getValue();
+        if (index < 0 || index > 7) return "?";
+        return labels[index];
+    }
+};
+
+/// @brief A parameter quantity for the YM2612 Multiplier.
+struct MultiplierQuantity : rack::ParamQuantity {
+    /// @brief Return the value as a formatted string.
+    inline std::string getDisplayValueString() override {
+        const int value = getValue();
+        if (value == 0) return "1/2";
+        return std::to_string(value);
+    }
+};
 
 /// A Eurorack FM operator module based on the Yamaha YM2612.
 struct MiniBoss : rack::Module {
@@ -28,15 +59,14 @@ struct MiniBoss : rack::Module {
     YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gates[PORT_MAX_CHANNELS];
+    Trigger::Boolean gates[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retriggers[PORT_MAX_CHANNELS];
+    Trigger::Boolean retriggers[PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
-    dsp::ClockDivider cvDivider;
-
+    rack::dsp::ClockDivider cvDivider;
     /// a light divider for updating the LEDs every 512 processing steps
-    dsp::ClockDivider lightDivider;
+    rack::dsp::ClockDivider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///
@@ -127,7 +157,7 @@ struct MiniBoss : rack::Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0, "LFO frequency", " Hz");
         configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FM, -1, 1, 0, "Frequency Modulation");
@@ -138,7 +168,7 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_SL,  0,  15,  15, "Sustain Level");
         configParam(PARAM_D2,  0,  31,   0, "Sustain Rate");
         configParam(PARAM_RR,  0,  15,  15, "Release Rate");
-        configParam(PARAM_MUL, 0,  15,   1, "Multiplier");
+        configParam<MultiplierQuantity>(PARAM_MUL, 0,  15,   1, "Multiplier", "x");
         configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
         configParam(PARAM_AMS, 0,   3,   0, "LFO amplitude modulation sensitivity");
         configParam(PARAM_FMS, 0,   7,   0, "LFO frequency modulation sensitivity");
@@ -202,7 +232,7 @@ struct MiniBoss : rack::Module {
     inline bool getGate(unsigned channel) {
         const auto input = inputs[INPUT_GATE].getVoltage(channel);
         gates[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
-        return gates[channel].state;
+        return gates[channel].isHigh();
     }
 
     /// @brief Process the re-trig trigger, high at 2V.

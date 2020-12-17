@@ -36,6 +36,21 @@ struct LFOQuantity : rack::ParamQuantity {
         if (index < 0 || index > 7) return "?";
         return labels[index];
     }
+
+    // /// @brief Return the minimal allowed value.
+    // inline float getMinValue() override { return 0.f; }
+
+    // /// @brief Return the maximal allowed value.
+    // inline float getMaxValue() override { return 7.f; }
+
+    // /// @brief Return the default value.
+    // inline float getDefaultValue() override { return 0.f; }
+
+    /// @brief Return the parameter description.
+    inline std::string getLabel() override { return "LFO frequency"; }
+
+    /// @brief Return the unit description.
+    inline std::string getUnit() override { return " Hz"; }
 };
 
 /// @brief A parameter quantity for the YM2612 Multiplier.
@@ -81,6 +96,15 @@ struct AMSQuantity : rack::ParamQuantity {
         return labels[index];
     }
 
+    // /// @brief Return the minimal allowed value.
+    // inline float getMinValue() override { return 0.f; }
+
+    // /// @brief Return the maximal allowed value.
+    // inline float getMaxValue() override { return 4.f; }
+
+    // /// @brief Return the default value.
+    // inline float getDefaultValue() override { return 0.f; }
+
     /// @brief Return the parameter description.
     inline std::string getLabel() override {
         return "LFO amplitude modulation sensitivity";
@@ -112,15 +136,22 @@ struct FMSQuantity : rack::ParamQuantity {
         return labels[index];
     }
 
+    // /// @brief Return the minimal allowed value.
+    // inline float getMinValue() override { return 0.f; }
+
+    // /// @brief Return the maximal allowed value.
+    // inline float getMaxValue() override { return 7.f; }
+
+    // /// @brief Return the default value.
+    // inline float getDefaultValue() override { return 0.f; }
+
     /// @brief Return the parameter description.
     inline std::string getLabel() override {
         return "LFO frequency modulation sensitivity";
     }
 
     /// @brief Return the unit description.
-    inline std::string getUnit() override {
-        return "\% of a halftone";
-    }
+    inline std::string getUnit() override { return "\% of a halftone"; }
 };
 
 #endif  // ENGINE_YM2612_PARAMS_HPP_

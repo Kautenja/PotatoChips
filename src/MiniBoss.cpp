@@ -128,7 +128,7 @@ struct MiniBoss : rack::Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0, "LFO frequency", " Hz");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FM, -1, 1, 0, "Frequency Modulation");
@@ -139,11 +139,11 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_SL,  0,  15,  15, "Sustain Level");
         configParam(PARAM_D2,  0,  31,   0, "Sustain Rate");
         configParam(PARAM_RR,  0,  15,  15, "Release Rate");
-        configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
         configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
+        configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
+        configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
         configParam<AMSQuantity>(PARAM_AMS, 0, 3, 0);
         configParam<FMSQuantity>(PARAM_FMS, 0, 7, 0);
-        configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
         // reset the emulator
         onSampleRateChange();
         // set the rate of the CV acquisition clock divider

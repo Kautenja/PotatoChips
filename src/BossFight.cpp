@@ -126,9 +126,9 @@ struct BossFight : rack::Module {
     BossFight() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
-        configParam(PARAM_AL,  0, 7, 7, "Algorithm");
-        configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0, "LFO frequency", " Hz");
+        configParam(PARAM_AL, 0, 7, 7, "Algorithm");
+        configParam(PARAM_FB, 0, 7, 0, "Feedback");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
@@ -141,11 +141,11 @@ struct BossFight : rack::Module {
             configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
             configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
-            configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
+            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0, 1, 0, opName + " Looping Envelope");
+            configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
             configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);
-            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope");
         }
         // reset the emulator
         onSampleRateChange();

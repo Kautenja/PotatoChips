@@ -255,19 +255,19 @@ struct MiniBoss : rack::Module {
         // process control voltage when the CV divider is high
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                apu[channel].set_ar            (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
-                apu[channel].set_tl            (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
-                apu[channel].set_dr            (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
-                apu[channel].set_sl            (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
-                apu[channel].set_sr            (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
-                apu[channel].set_rr            (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
+                apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
+                apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
+                apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
+                apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
+                apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
+                apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
                 apu[channel].set_multiplier    (params[PARAM_MUL].getValue());
                 apu[channel].set_feedback      (params[PARAM_FB].getValue());
                 apu[channel].set_lfo           (params[PARAM_LFO].getValue());
                 apu[channel].set_fm_sensitivity(params[PARAM_FMS].getValue());
                 apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
                 apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
-                apu[channel].set_rs            (params[PARAM_RS].getValue());
+                apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
                 // use the exclusive or of the gate and re-trigger. This ensures
                 // that when either gate or trigger alone is high, the gate is
                 // open, but when neither or both are high, the gate is closed.

@@ -97,8 +97,8 @@ struct FeedbackOperator : public Operator {
     /// @param op_index the operator to set the rate-scale (RS) register of (in [0, 3])
     /// @param value the amount of rate-scale applied to the FM operator
     ///
-    inline void set_rs(uint8_t value) {
-        update_phase_increment |= Operator::set_rs(value);
+    inline void set_rate_scale(uint8_t value) {
+        update_phase_increment |= Operator::set_rate_scale(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.

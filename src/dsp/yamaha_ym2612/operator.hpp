@@ -292,13 +292,13 @@ struct Operator {
         is_gate_open = false;
         pms = 0;
         ams = LFO_AMS_DEPTH_SHIFT[0];
-        set_rs(0);
-        set_ar(0);
-        set_tl(0);
-        set_dr(0);
-        set_sl(0);
-        set_sr(0);
-        set_rr(0);
+        set_rate_scale(0);
+        set_attack_rate(0);
+        set_total_level(0);
+        set_decay_rate(0);
+        set_sustain_level(0);
+        set_sustain_rate(0);
+        set_release_rate(0);
         set_ssg_enabled(false);
     }
 
@@ -374,7 +374,7 @@ struct Operator {
     ///
     /// @param value the value for the attack rate (AR)
     ///
-    inline void set_ar(uint8_t value) {
+    inline void set_attack_rate(uint8_t value) {
         ar = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
         // refresh Attack rate
         if (ar + ksr < 32 + 62) {
@@ -390,13 +390,13 @@ struct Operator {
     ///
     /// @param value the value for the total level (TL)
     ///
-    inline void set_tl(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
+    inline void set_total_level(uint8_t value) { tl = (value & 0x7f) << (ENV_BITS - 7); }
 
     /// @brief Set the decay 1 rate, i.e., decay rate.
     ///
     /// @param value the value for the decay 1 rate (D1R)
     ///
-    inline void set_dr(uint8_t value) {
+    inline void set_decay_rate(uint8_t value) {
         d1r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
         eg_sh_d1r = ENV_RATE_SHIFT[d1r + ksr];
         eg_sel_d1r = ENV_RATE_SELECT[d1r + ksr];
@@ -406,13 +406,13 @@ struct Operator {
     ///
     /// @param value the value to index from the sustain level table
     ///
-    inline void set_sl(uint8_t value) { sl = SL_TABLE[value]; }
+    inline void set_sustain_level(uint8_t value) { sl = SL_TABLE[value]; }
 
     /// @brief Set the decay 2 rate, i.e., sustain rate.
     ///
     /// @param value the value for the decay 2 rate (D2R)
     ///
-    inline void set_sr(uint8_t value) {
+    inline void set_sustain_rate(uint8_t value) {
         d2r = (value & 0x1f) ? 32 + ((value & 0x1f) << 1) : 0;
         eg_sh_d2r = ENV_RATE_SHIFT[d2r + ksr];
         eg_sel_d2r = ENV_RATE_SELECT[d2r + ksr];
@@ -422,7 +422,7 @@ struct Operator {
     ///
     /// @param value the value for the release rate (RR)
     ///
-    inline void set_rr(uint8_t value) {
+    inline void set_release_rate(uint8_t value) {
         rr = 34 + (value << 2);
         eg_sh_rr = ENV_RATE_SHIFT[rr + ksr];
         eg_sel_rr = ENV_RATE_SELECT[rr + ksr];
@@ -434,7 +434,7 @@ struct Operator {
     /// @returns true if the phase increments need to be recalculated, i.e.,
     /// true if the new value differs from the old value
     ///
-    inline bool set_rs(uint8_t value) {
+    inline bool set_rate_scale(uint8_t value) {
         uint8_t old_KSR = KSR;
         KSR = 3 - (value & 3);
         // refresh Attack rate

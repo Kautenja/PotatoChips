@@ -388,7 +388,7 @@ struct MiniBossWidget : ModuleWidget {
         // add the envelope mode selection item to the menu
         menu->addChild(new MenuSeparator);
         auto item = createMenuItem<PreventClicksItem>(
-            "Prevent Envelope Generator Clicks",
+            "Soft Reset Envelope Generator",
             CHECKMARK(module->prevent_clicks)
         );
         item->module = module;

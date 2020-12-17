@@ -322,9 +322,6 @@ struct Operator {
     // MARK: Parameter Setters
     // -----------------------------------------------------------------------
 
-    // TODO: why when setting prevent_click to true, randomizing a patch, and
-    // then resetting the patch, do some poly voices stay locked at a high
-    // attenuation level?
     /// @brief Set the key-on flag for the given operator.
     ///
     /// @param is_gate_open true if the gate is open, false otherwise

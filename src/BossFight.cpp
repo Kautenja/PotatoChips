@@ -63,6 +63,9 @@ struct BossFight : rack::Module {
     }
 
  public:
+    /// Whether to attempt to prevent clicks from the envelope generator
+    bool prevent_clicks = false;
+
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         PARAM_AL,
@@ -162,6 +165,31 @@ struct BossFight : rack::Module {
             apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
+    /// @brief Respond to the module being reset by the engine.
+    void onReset() override {
+        prevent_clicks = false;
+    }
+
+    /// @brief Return a JSON representation of this module's state
+    ///
+    /// @returns a new JSON object with this object's serialized state data
+    ///
+    json_t* dataToJson() override {
+        json_t* rootJ = json_object();
+        json_object_set_new(rootJ, "prevent_clicks", json_boolean(prevent_clicks));
+        return rootJ;
+    }
+
+    /// @brief Return the object to the given serialized state.
+    ///
+    /// @returns a JSON object with object serialized state data to restore
+    ///
+    void dataFromJson(json_t* rootJ) override {
+        json_t* prevent_clicks_object = json_object_get(rootJ, "prevent_clicks");
+        if (prevent_clicks_object)
+            prevent_clicks = json_boolean_value(prevent_clicks_object);
+    }
+
     /// @brief Return the value of the mix parameter from the panel.
     ///
     /// @returns the 8-bit saturation value
@@ -215,7 +243,7 @@ struct BossFight : rack::Module {
             // but when neither or both are high, the gate is closed. This
             // causes the gate to get shut for a sample when re-triggering an
             // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh());
+            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh(), prevent_clicks);
         }
     }
 
@@ -340,6 +368,35 @@ struct BossFightWidget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
             }
         }
+    }
+
+    /// @brief Append the context menu to the module when right clicked.
+    ///
+    /// @param menu the menu object to add context items for the module to
+    ///
+    void appendContextMenu(Menu* menu) override {
+        // get a pointer to the module
+        BossFight* const module = dynamic_cast<BossFight*>(this->module);
+
+        /// a structure for holding changes to the model items
+        struct PreventClicksItem : MenuItem {
+            /// the module to update
+            BossFight* module;
+
+            /// Response to an action update to this item
+            void onAction(const event::Action& e) override {
+                module->prevent_clicks = !module->prevent_clicks;
+            }
+        };
+
+        // add the envelope mode selection item to the menu
+        menu->addChild(new MenuSeparator);
+        auto item = createMenuItem<PreventClicksItem>(
+            "Soft Reset Envelope Generator",
+            CHECKMARK(module->prevent_clicks)
+        );
+        item->module = module;
+        menu->addChild(item);
     }
 };
 

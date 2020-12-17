@@ -304,3 +304,11 @@
     -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip
+
+## 1.12.0 (TBD)
+
+-   Yamaha YM2151
+
+## 1.13.0 (TBD)
+
+-   Yamaha YM2413

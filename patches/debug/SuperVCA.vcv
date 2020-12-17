@@ -11,22 +11,22 @@
       "data": {
         "audio": {
           "driver": 1,
-          "deviceName": "hw:HDA NVidia,7",
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 1024
+          "blockSize": 512
         }
       },
       "pos": [
-        36,
+        34,
         1
       ]
     },
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.3",
+      "version": "1.10.1",
       "model": "SuperVCA",
       "params": [
         {
@@ -35,11 +35,11 @@
         },
         {
           "id": 1,
-          "value": 0.960248351
+          "value": 0.743320227
         },
         {
           "id": 2,
-          "value": 1.02813172
+          "value": 0.743320227
         },
         {
           "id": 3,
@@ -65,7 +65,7 @@
       "leftModuleId": 159,
       "rightModuleId": 156,
       "data": {
-        "filterMode": 1
+        "filterMode": 0
       },
       "pos": [
         18,
@@ -102,7 +102,7 @@
       "leftModuleId": 152,
       "rightModuleId": 1,
       "pos": [
-        26,
+        24,
         1
       ]
     },
@@ -118,7 +118,7 @@
         },
         {
           "id": 1,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 2,
@@ -424,7 +424,7 @@
     {
       "id": 95,
       "outputModuleId": 159,
-      "outputId": 0,
+      "outputId": 2,
       "inputModuleId": 163,
       "inputId": 0,
       "color": "#c91847"
@@ -432,7 +432,7 @@
     {
       "id": 94,
       "outputModuleId": 159,
-      "outputId": 0,
+      "outputId": 2,
       "inputModuleId": 152,
       "inputId": 3,
       "color": "#0c8e15"

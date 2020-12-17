@@ -64,13 +64,13 @@ struct SuperVCA : Module {
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
     SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
+        configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Mode");
         configParam(PARAM_GAIN + 0, 0, M_SQRT2, 1, "Input Gain (Left Lane)", " dB", -10, 40);
         configParam(PARAM_GAIN + 1, 0, M_SQRT2, 1, "Input Gain (Right Lane)", " dB", -10, 40);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left Lane)");
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right Lane)");
-        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", 2, dsp::FREQ_C4);
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }

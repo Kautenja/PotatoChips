@@ -293,6 +293,8 @@
 -   update parameter descriptions for Boss Fight and Mini Boss
     -   LFO now shows the Hz measurement of the LFO
     -   multiply now shows "1/2" instead of "0" when all the way CCW
+    -   FMS now measures the sensitivity in _% of halftone_
+    -   AMS now measures the sensitivity in _dB_
 
 ## 1.11.0 (TBD)
 

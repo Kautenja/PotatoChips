@@ -132,7 +132,6 @@
         "Dual",
         "Effect",
         "Filter",
-        "Panning",
         "Polyphonic",
         "Reverb"
       ]
@@ -144,9 +143,6 @@
       "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf",
       "tags": [
         "Dual",
-        "Filter",
-        "Low-pass gate",
-        "Panning",
         "Polyphonic",
         "Voltage-controlled amplifier"
       ]

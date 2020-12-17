@@ -36,7 +36,7 @@ struct ZeroCrossing {
     /// @returns true if the state changes from negative to positive
     ///
     inline bool process(float signal) {
-        const bool triggered = signal_last < 0.f && signal >= 0.f;
+        const bool triggered = signal_last <= 0.f && signal > 0.f;
         signal_last = signal;
         return triggered;
     }

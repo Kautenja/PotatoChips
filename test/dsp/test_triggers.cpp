@@ -34,9 +34,9 @@ TEST_CASE("Trigger::Boolean should be false when processing 0s") {
     REQUIRE_FALSE(trigger.process(0.f));
 }
 
-TEST_CASE("Trigger::Boolean should be false when processing positive from 0") {
+TEST_CASE("Trigger::Boolean should be true when processing positive from 0") {
     Trigger::ZeroCrossing trigger;
-    REQUIRE_FALSE(trigger.process(0.f));
+    REQUIRE(trigger.process(1.f));
 }
 
 TEST_CASE("Trigger::Boolean should be true when processing positive from negative") {

@@ -295,6 +295,8 @@
     -   multiply now shows "1/2" instead of "0" when all the way CCW
     -   FMS now measures the sensitivity in _% of halftone_
     -   AMS now measures the sensitivity in _dB_
+    -   change "prevent clicks from envelope generator" to "soft reset envelope generator"
+    -   add _soft reset envelope generator_ to BossFight
 
 ## 1.11.0 (TBD)
 

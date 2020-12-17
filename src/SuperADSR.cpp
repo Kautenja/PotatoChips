@@ -18,9 +18,6 @@
 #include "dsp/triggers.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
 
-// TODO: inverted output
-// TODO: CV level control
-
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------

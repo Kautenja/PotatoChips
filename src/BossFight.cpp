@@ -16,41 +16,12 @@
 #include "plugin.hpp"
 #include "dsp/triggers.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
+#include "engine/yamaha_ym2612_params.hpp"
 #include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
 // ---------------------------------------------------------------------------
-
-/// @brief A parameter quantity for the YM2612 LFO.
-struct LFOQuantity : rack::ParamQuantity {
-    /// @brief Return the value as a formatted string.
-    inline std::string getDisplayValueString() override {
-        const char* labels[8] = {
-            "3.98",
-            "5.56",
-            "6.02",
-            "6.37",
-            "6.88",
-            "9.63",
-            "48.1",
-            "72.2"
-        };
-        const int index = getValue();
-        if (index < 0 || index > 7) return "?";
-        return labels[index];
-    }
-};
-
-/// @brief A parameter quantity for the YM2612 Multiplier.
-struct MultiplierQuantity : rack::ParamQuantity {
-    /// @brief Return the value as a formatted string.
-    inline std::string getDisplayValueString() override {
-        const int value = getValue();
-        if (value == 0) return "1/2";
-        return std::to_string(value);
-    }
-};
 
 /// A Eurorack module based on the Yamaha YM2612.
 struct BossFight : rack::Module {
@@ -170,10 +141,10 @@ struct BossFight : rack::Module {
             configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
             configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
-            configParam<MultiplierQuantity>(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier", "x");
+            configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
-            configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
-            configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
+            configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
+            configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);
             configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope");
         }
         // reset the emulator

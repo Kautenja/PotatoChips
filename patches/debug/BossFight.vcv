@@ -31,7 +31,7 @@
       "params": [],
       "rightModuleId": 142,
       "data": {
-        "channels": 4,
+        "channels": 1,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -247,7 +247,7 @@
         },
         {
           "id": 48,
-          "value": 1.0
+          "value": 0.0
         },
         {
           "id": 49,
@@ -263,6 +263,9 @@
         }
       ],
       "leftModuleId": 5,
+      "data": {
+        "prevent_clicks": true
+      },
       "pos": [
         8,
         0

@@ -14,7 +14,8 @@
 //
 
 // TODO: FM input
-// TODO: sync input
+// TODO: sync input / reset input
+// TODO: key scale for faster arps at higher note frequencies
 // TODO: different note modes: 2, 3, 4, 5
 // TODO: offset control between notes (models for musical / video-game based)
 // TODO: mess with non-uniform offsets for the cycle apportionment of notes

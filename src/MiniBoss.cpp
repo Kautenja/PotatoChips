@@ -30,9 +30,9 @@ struct MiniBoss : rack::Module {
     YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    Trigger::Boolean gates[PORT_MAX_CHANNELS];
+    Trigger::Threshold gates[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    Trigger::Boolean retriggers[PORT_MAX_CHANNELS];
+    Trigger::Threshold retriggers[PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
     rack::dsp::ClockDivider cvDivider;
@@ -202,7 +202,7 @@ struct MiniBoss : rack::Module {
     ///
     inline bool getGate(unsigned channel) {
         const auto input = inputs[INPUT_GATE].getVoltage(channel);
-        gates[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
+        gates[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
         return gates[channel].isHigh();
     }
 
@@ -213,7 +213,7 @@ struct MiniBoss : rack::Module {
     ///
     inline bool getRetrigger(unsigned channel) {
         const auto input = inputs[INPUT_RETRIG].getVoltage(channel);
-        return retriggers[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
+        return retriggers[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
     }
 
     /// @brief Return the frequency for the given channel.

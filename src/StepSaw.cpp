@@ -74,7 +74,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
 
  protected:
     /// trigger for handling inputs to the sync port for the saw wave
-    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS];
+    Trigger::Zero syncTriggers[PORT_MAX_CHANNELS];
 
     /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///

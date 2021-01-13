@@ -32,7 +32,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     Trigger::Boolean envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the sync ports and the envelope trig
-    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
+    Trigger::Zero syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
     /// a trigger for handling presses to the change mode button
     Trigger::Threshold envModeTrigger;

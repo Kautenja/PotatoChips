@@ -28,7 +28,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// Schmitt Triggers for handling inputs to the LFSR port
     Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
     /// trigger for handling inputs to the sync port for the saw wave
-    Trigger::ZeroCrossing syncTriggers[PORT_MAX_CHANNELS][2];
+    Trigger::Zero syncTriggers[PORT_MAX_CHANNELS][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

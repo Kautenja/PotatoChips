@@ -251,7 +251,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // triangle wave
         apu[channel].set_voice_volume(Ricoh2A03::TRIANGLE, getVolume(Ricoh2A03::TRIANGLE, channel));
         // noise oscillator
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].isHigh();
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
         apu[channel].set_voice_volume(Ricoh2A03::NOISE, getVolume(Ricoh2A03::NOISE, channel));

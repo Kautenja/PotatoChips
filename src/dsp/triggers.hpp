@@ -78,7 +78,7 @@ struct Threshold {
     /// after processing an input signal of \f$1.0\f$, and will stay high until
     /// the signal reaches \f$0.0\f$.
     ///
-    inline float isHigh() const { return state; }
+    inline bool isHigh() const { return state; }
 
     /// @brief Reset the trigger to its default state
     inline void reset() { state = false; }

@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/triggers.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "engine/yamaha_ym2612_params.hpp"
 #include "widget/indexed_frame_display.hpp"

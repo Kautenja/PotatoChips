@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/triggers.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/brr_sample_player.hpp"
 #include "dsp/wavetable4bit.hpp"
 

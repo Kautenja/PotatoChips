@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/triggers.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/konami_vrc6.hpp"
 #include "engine/chip_module.hpp"
 

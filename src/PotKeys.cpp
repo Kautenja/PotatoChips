@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/triggers.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/atari_pokey.hpp"
 #include "engine/chip_module.hpp"
 

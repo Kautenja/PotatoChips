@@ -14,7 +14,7 @@
 //
 
 #include "plugin.hpp"
-#include "dsp/triggers.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "engine/chip_module.hpp"

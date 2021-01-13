@@ -34,9 +34,9 @@ struct SuperSampler : Module {
     /// the Sony S-DSP sound chip emulator
     SonyS_DSP::BRR_SamplePlayer apu[NUM_VOICES][PORT_MAX_CHANNELS];
     /// triggers for handling gate inputs for the voices
-    Trigger::Boolean gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
+    Trigger::Threshold gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
     /// triggers for handling inputs to the phase modulation enable ports
-    Trigger::Boolean pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
+    Trigger::Threshold pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -162,13 +162,13 @@ struct SuperSampler : Module {
         // MARK: Gate input
         // -------------------------------------------------------------------
         const auto gate = inputs[INPUT_GATE + voice].getVoltage(channel);
-        bool trigger = gateTriggers[voice][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+        bool trigger = gateTriggers[voice][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------
         SonyS_DSP::StereoSample output;
         // get a flag determining whether phase modulation is enabled for the voice
-        pmTriggers[voice][channel].process(rescale(inputs[INPUT_PM_ENABLE + voice].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        pmTriggers[voice][channel].process(rescale(inputs[INPUT_PM_ENABLE + voice].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         bool is_pm = (1 - params[PARAM_PM_ENABLE + voice].getValue()) - !pmTriggers[voice][channel].isHigh();
         // run the sample through the voice
         apu[voice][channel].run(

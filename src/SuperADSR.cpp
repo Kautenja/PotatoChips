@@ -31,9 +31,9 @@ struct SuperADSR : Module {
     /// the Sony S-DSP ADSR enveloper generator emulator
     SonyS_DSP::ADSR apus[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input trigger and gate signals
-    Trigger::Boolean gateTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Threshold gateTrigger[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    Trigger::Boolean retrigTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Threshold retrigTrigger[LANES][PORT_MAX_CHANNELS];
     /// a clock divider for light updates
     Trigger::Divider lightDivider;
 
@@ -95,10 +95,10 @@ struct SuperADSR : Module {
     ///
     inline bool getTrigger(unsigned channel, unsigned lane) {
         // get the trigger from the gate input
-        const auto gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const auto gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
         const bool gate = gateTrigger[lane][channel].process(gateCV);
         // get the trigger from the re-trigger input
-        const auto retrigCV = rescale(inputs[INPUT_RETRIG + lane].getVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const auto retrigCV = rescale(inputs[INPUT_RETRIG + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
         const bool retrig = retrigTrigger[lane][channel].process(retrigCV);
         // OR the two boolean values together
         return gate || retrig;

@@ -34,7 +34,7 @@ struct SuperSynth : Module {
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
     /// triggers for handling gate inputs for the voices
-    Trigger::Boolean gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
+    Trigger::Threshold gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -239,9 +239,9 @@ struct SuperSynth : Module {
             // get the voltage from the gate input port
             const auto gate = inputs[INPUT_GATE + voice].getVoltage();
             // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f)) << voice);
             // process the inverted voltage to detect key-of events
-            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.01f, 2.f, 0.f, 1.f)) << voice);
         }
         if (key_on) {  // a key-on event occurred from the gate input
             // write key off to enable all voices

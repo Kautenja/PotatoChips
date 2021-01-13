@@ -28,7 +28,7 @@
 struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port
-    Trigger::Boolean lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -320,7 +320,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
         // set the global volume

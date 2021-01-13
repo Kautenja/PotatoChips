@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.476a49b",
+  "version": "1.dev.2db08f1",
   "modules": [
     {
       "id": 1,
@@ -10,8 +10,8 @@
       "leftModuleId": 2,
       "data": {
         "audio": {
-          "driver": 1,
-          "deviceName": "default",
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
@@ -84,7 +84,7 @@
     {
       "id": 48,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.1",
+      "version": "1.10.2",
       "model": "GBS",
       "params": [
         {
@@ -145,7 +145,7 @@
         },
         {
           "id": 14,
-          "value": 10.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 137,

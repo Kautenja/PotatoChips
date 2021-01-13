@@ -17,6 +17,7 @@
 #include "rack.hpp"
 #include "../plugin.hpp"
 #include "../dsp/blip_buffer.hpp"
+#include "../dsp/trigger.hpp"
 
 #ifndef ENGINE_CHIP_MODULE_HPP_
 #define ENGINE_CHIP_MODULE_HPP_
@@ -37,9 +38,9 @@ struct ChipModule : rack::engine::Module {
     ChipEmulator apu[PORT_MAX_CHANNELS];
 
     /// a clock divider for running CV acquisition slower than audio rate
-    rack::dsp::ClockDivider cvDivider;
+    Trigger::Divider cvDivider;
     /// a clock divider for running LED updates slower than audio rate
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// a VU meter for measuring the output audio level from the emulator
     rack::dsp::VuMeter2 vuMeter[ChipEmulator::OSC_COUNT];

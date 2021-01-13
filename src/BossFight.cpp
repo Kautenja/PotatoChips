@@ -38,9 +38,9 @@ struct BossFight : rack::Module {
     rack::dsp::VuMeter2 vuMeter;
 
     /// a clock divider for reducing computation (on CV acquisition)
-    rack::dsp::ClockDivider cvDivider;
+    Trigger::Divider cvDivider;
     /// a light divider for updating the LEDs every 512 processing steps
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///

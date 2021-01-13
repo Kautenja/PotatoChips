@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 
 // ---------------------------------------------------------------------------
@@ -115,7 +116,7 @@ struct SuperVCA : Module {
     rack::dsp::SchmittTrigger filterModeTrigger;
 
     /// a clock divider for running LED updates slower than audio rate
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// a VU meter for measuring the input audio levels
     rack::dsp::VuMeter2 inputVUMeter[LANES];

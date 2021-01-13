@@ -35,7 +35,7 @@ struct SuperADSR : Module {
     /// triggers for handling input re-trigger signals
     Trigger::Boolean retrigTrigger[LANES][PORT_MAX_CHANNELS];
     /// a clock divider for light updates
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

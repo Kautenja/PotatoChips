@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
 // ---------------------------------------------------------------------------
@@ -31,7 +32,7 @@ struct SuperEcho : Module {
     /// a VU meter for measuring the output audio levels
     rack::dsp::VuMeter2 outputVUMeter[SonyS_DSP::StereoSample::CHANNELS];
     /// a light divider for updating the LEDs every 512 processing steps
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module

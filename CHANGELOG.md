@@ -298,6 +298,12 @@
     -   change "prevent clicks from envelope generator" to "soft reset envelope generator"
     -   add _soft reset envelope generator_ to BossFight
 
+## 1.10.2 (2021-01-12)
+
+-   fix sync inputs for Infinite Stairs, StepSaw, and Jairasullator. the inputs were triggering when the input crossed 0V, they now trigger when the signal crosses the threshold of 0.01V to 0.02V (approximately 0V). This allows the sync to be triggered by a DC signal, like a gate or LFO.
+-   fix trigger inputs on Pallet Town Waves System, Super ADSR, Boss Fight, Infinite Stairs, Jairasullator, Mega Tone, Mini Boss, and Pot Keys. They now work with AC and DC signals.
+-   fix clock dividers for CV acquisition and LED light updates. They now fire on the downbeat of the source clock
+
 ## 1.11.0 (TBD)
 
 -   new module: S-SMP(BRR)

@@ -28,7 +28,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// Schmitt Triggers for handling inputs to the LFSR port
     Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
     /// trigger for handling inputs to the sync port for the saw wave
-    Trigger::Zero syncTriggers[PORT_MAX_CHANNELS][2];
+    Trigger::Threshold syncTriggers[PORT_MAX_CHANNELS][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -230,7 +230,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // sync input (for triangle and noise oscillator)
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT - Ricoh2A03::TRIANGLE; i++) {
             const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
-            if (syncTriggers[channel][i].process(sync))
+            if (syncTriggers[channel][i].process(rescale(sync, 0.01f, 0.02f, 0.f, 1.f)))
                 apu[channel].reset_phase(Ricoh2A03::TRIANGLE + i);
         }
     }

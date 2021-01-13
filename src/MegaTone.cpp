@@ -26,7 +26,7 @@
 struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  private:
     /// a Schmitt Trigger for handling inputs to the LFSR port
-    Trigger::Boolean lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -184,7 +184,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
         // noise generator
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].isHigh()), false);
         apu[channel].set_amplifier_level(TexasInstrumentsSN76489::NOISE, getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }

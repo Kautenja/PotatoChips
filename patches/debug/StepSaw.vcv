@@ -147,7 +147,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 3,
@@ -164,7 +164,7 @@
     {
       "id": 133,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.0",
+      "version": "1.10.1",
       "model": "VRC6",
       "params": [
         {
@@ -201,11 +201,11 @@
         },
         {
           "id": 8,
-          "value": 10.0
+          "value": 0.0
         },
         {
           "id": 9,
-          "value": 9.0
+          "value": 0.0
         },
         {
           "id": 10,
@@ -292,6 +292,14 @@
       "inputModuleId": 133,
       "inputId": 8,
       "color": "#c9b70e"
+    },
+    {
+      "id": 881,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 133,
+      "inputId": 11,
+      "color": "#000000"
     }
   ]
 }

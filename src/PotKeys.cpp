@@ -26,7 +26,7 @@
 struct PotKeys : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
-    Trigger::Boolean controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
+    Trigger::Threshold controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -188,7 +188,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < AtariPOKEY::CTL_FLAGS; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
-            controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+            controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
             bool state = (1 - params[PARAM_CONTROL + bit].getValue()) - !controlTriggers[channel][bit].isHigh();
             // the position for the current button's index
             controlByte |= state << bit;

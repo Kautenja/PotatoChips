@@ -30,9 +30,9 @@ struct BossFight : rack::Module {
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    Trigger::Boolean gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    Trigger::Threshold gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    Trigger::Boolean retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    Trigger::Threshold retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the output audio level from the emulator
     rack::dsp::VuMeter2 vuMeter;
@@ -234,10 +234,10 @@ struct BossFight : rack::Module {
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
-            gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+            gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
             // process the retrig trigger, high at 2V
             retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
+            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
             // use the exclusive or of the gate and retrigger. This ensures that
             // when either gate or trigger alone is high, the gate is open,
             // but when neither or both are high, the gate is closed. This

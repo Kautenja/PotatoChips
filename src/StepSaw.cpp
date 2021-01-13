@@ -187,7 +187,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         // detect sync for triangle generator voice
-        const float sync = rescale(inputs[INPUT_SYNC].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
+        const float sync = rescale(inputs[INPUT_SYNC].getVoltage(channel), 0.01f, 0.02f, 0.f, 1.f);
         if (syncTriggers[channel].process(sync)) apu[channel].reset_phase(2);
         // set frequency for all voices
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {

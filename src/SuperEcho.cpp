@@ -172,7 +172,7 @@ struct SuperEcho : Module {
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
         // const auto att = params[PARAM_GAIN + lane].getValue();
-        const auto input = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel) / 5.f;
+        const auto input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
         // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
         // clamp the value to finite precision and scale to the integer type
@@ -191,12 +191,12 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
+        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
         const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto att = params[PARAM_GAIN + lane].getValue();
-        const auto voltage = att * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
+        const auto voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         // process the input on the VU meter
-        inputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
-        outputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
+        inputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
+        outputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
         outputs[OUTPUT_AUDIO + lane].setVoltage(voltage, channel);
     }
 

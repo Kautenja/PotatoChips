@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
 #include "dsp/sunsoft_fme7.hpp"
 #include "engine/chip_module.hpp"
 

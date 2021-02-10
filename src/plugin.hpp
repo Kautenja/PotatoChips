@@ -14,7 +14,8 @@
 //
 
 #include "rack.hpp"
-#include "components.hpp"
+#include "kautenja_rack/helpers.hpp"
+#include "kautenja_rack/param_quantity.hpp"
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP

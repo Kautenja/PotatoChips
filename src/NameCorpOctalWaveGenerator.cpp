@@ -15,6 +15,7 @@
 
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
 #include "dsp/namco_163.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"

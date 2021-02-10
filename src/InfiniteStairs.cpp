@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
 #include "dsp/trigger.hpp"
 #include "dsp/ricoh_2a03.hpp"
 #include "engine/chip_module.hpp"

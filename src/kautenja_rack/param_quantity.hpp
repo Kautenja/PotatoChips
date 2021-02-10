@@ -1,5 +1,7 @@
-// Components for the plugin.
+// Extensions to the VCV Rack ParamQuantity class.
 // Copyright 2020 Christian Kauten
+//
+// Author: Christian Kauten (kautenja@auburn.edu)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,25 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef KAUTENJA_RACK_PARAM_QUANTITY
+#define KAUTENJA_RACK_PARAM_QUANTITY
+
 #include <string>
 #include "rack.hpp"
-
-#ifndef COMPONENTS_HPP_
-#define COMPONENTS_HPP_
-
-/// @brief Create a parameter that snaps to integer values.
-///
-/// @tparam P the type of the parameter to initialize
-/// @tparam Args the type of arguments to pass to the `createParam` function
-/// @tparam args the arguments to pass to the `createParam` function
-/// @returns a pointer to the freshly allocated parameter
-///
-template<typename P, typename... Args>
-inline rack::ParamWidget* createSnapParam(Args... args) {
-    auto param = rack::createParam<P>(args...);
-    param->snap = true;
-    return param;
-}
 
 /// @brief A parameter quantity for a boolean switch.
 struct BooleanParamQuantity : rack::ParamQuantity {
@@ -53,4 +41,4 @@ struct TriggerParamQuantity : rack::ParamQuantity {
     inline std::string getLabel() override { return ""; }
 };
 
-#endif  // COMPONENTS_HPP_
+#endif  // KAUTENJA_RACK_PARAM_QUANTITY

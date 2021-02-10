@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
 #include "dsp/trigger.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"

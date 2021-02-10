@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
 #include "dsp/trigger.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
 #include "engine/chip_module.hpp"

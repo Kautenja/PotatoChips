@@ -14,6 +14,7 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
 #include "dsp/trigger.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 #include "engine/chip_module.hpp"

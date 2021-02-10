@@ -158,7 +158,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         inputs[INPUT_LEVEL + voice].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
         return MAX - rack::clamp(level, MIN, MAX);

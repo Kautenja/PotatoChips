@@ -150,7 +150,7 @@ struct SuperADSR : Module {
             const auto sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned lane = 0; lane < LANES; lane++) {
                 // set amplitude light based on the output
-                auto output = (outputs[OUTPUT_ENVELOPE + lane].getVoltageSum() / channels) / 10.f;
+                auto output = Math::Eurorack::fromDC(outputs[OUTPUT_ENVELOPE + lane].getVoltageSum() / channels);
                 if (output > 0) {  // positive, green light
                     lights[LIGHT_AMPLITUDE + 3 * lane + 0].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_AMPLITUDE + 3 * lane + 1].setSmoothBrightness(output, sample_time);

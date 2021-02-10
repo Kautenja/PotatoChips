@@ -190,7 +190,7 @@ struct MiniBoss : rack::Module {
     ///
     inline int32_t getVolume(unsigned channel) {
         const float param = params[PARAM_VOLUME].getValue();
-        const float cv = inputs[INPUT_VOLUME].getPolyVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_VOLUME].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, 0.f, MAX);
@@ -301,10 +301,10 @@ struct MiniBoss : rack::Module {
                 }
                 if (value > 0) {  // green for positive voltage
                     lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(0, sample_time);
-                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 } else {  // red for negative voltage
-                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(-Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 }

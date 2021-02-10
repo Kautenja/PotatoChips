@@ -127,7 +127,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(mod, channel);
         // apply the control mod to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * mod / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(mod));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
         return rack::clamp(level, MIN, MAX);

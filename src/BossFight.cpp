@@ -197,7 +197,7 @@ struct BossFight : rack::Module {
     ///
     inline int32_t getSaturation(unsigned channel) {
         const float param = params[PARAM_SATURATION].getValue();
-        const float cv = inputs[INPUT_SATURATION].getPolyVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_SATURATION].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, 0.f, MAX);

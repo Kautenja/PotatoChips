@@ -275,7 +275,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        uint8_t volume = rack::clamp(roundf(level * voltage / 10.f), 0.f, static_cast<float>(max));
+        uint8_t volume = rack::clamp(roundf(level * Math::Eurorack::fromDC(voltage)), 0.f, static_cast<float>(max));
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%

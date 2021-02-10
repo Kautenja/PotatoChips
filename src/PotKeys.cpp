@@ -174,7 +174,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(mod, channel);
         // apply the control mod to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        param = roundf(param * mod / 10.f);
+        param = roundf(param * Math::Eurorack::fromDC(mod));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
         return rack::clamp(param, MIN, MAX);

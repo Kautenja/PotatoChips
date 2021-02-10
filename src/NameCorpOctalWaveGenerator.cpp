@@ -162,7 +162,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         auto param = params[PARAM_NUM_OSCILLATORS].getValue();
         auto att = params[PARAM_NUM_OSCILLATORS_ATT].getValue();
         // get the CV as 1V per oscillator
-        auto cv = 8.f * inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel) / 10.f;
+        auto cv = 8.f * Math::Eurorack::fromDC(inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel));
         // oscillators are indexed maths style on the chip, not CS style
         return rack::math::clamp(param + att * cv, 1.f, 8.f);
     }
@@ -244,7 +244,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         inputs[INPUT_VOLUME + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
         return rack::clamp(level, MIN, MAX);

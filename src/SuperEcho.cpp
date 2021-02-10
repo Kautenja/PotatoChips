@@ -97,7 +97,7 @@ struct SuperEcho : Module {
     ///
     inline uint8_t getDelay(unsigned channel) {
         const float param = params[PARAM_DELAY].getValue();
-        const float cv = inputs[INPUT_DELAY].getVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_DELAY].getVoltage(channel));
         const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
         const float MAX = static_cast<float>(SonyS_DSP::Echo::DELAY_LEVELS);
         return clamp(param + mod, 0.f, MAX);
@@ -110,7 +110,7 @@ struct SuperEcho : Module {
     ///
     inline int8_t getFeedback(unsigned channel) {
         const float param = params[PARAM_FEEDBACK].getValue();
-        const float cv = inputs[INPUT_FEEDBACK].getVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_FEEDBACK].getVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -129,7 +129,7 @@ struct SuperEcho : Module {
         const auto normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = inputs[INPUT_MIX + lane].getNormalVoltage(normal, channel);
         // get the mod value and clamp within finite precision
-        const float mod = std::numeric_limits<int8_t>::max() * voltage / 10.f;
+        const float mod = std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         return clamp(param + mod, MIN, MAX);
@@ -151,7 +151,7 @@ struct SuperEcho : Module {
         // get the value of the attenuverter
         const float att = params[PARAM_FIR_COEFFICIENT_ATT + index].getValue();
         // calculate the floating point mod value
-        const float mod = att * std::numeric_limits<int8_t>::max() * voltage / 10.f;
+        const float mod = att * std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
         // get the parameter value from the knob, sum with modulator, and clamp
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -293,10 +293,10 @@ struct SuperEcho : Module {
                 }
                 if (value > 0) {  // green for positive voltage
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(0, sample_time);
-                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 } else {  // red for negative voltage
-                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(-Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 }

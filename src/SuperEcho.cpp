@@ -95,7 +95,7 @@ struct SuperEcho : Module {
     /// @param channel the polyphonic channel to get the delay parameter for
     /// @returns the 8-bit delay parameter after applying CV modulations
     ///
-    inline uint8_t getDelay(unsigned channel) {
+    inline uint8_t getDelay(const unsigned& channel) {
         const float param = params[PARAM_DELAY].getValue();
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_DELAY].getVoltage(channel));
         const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
@@ -108,7 +108,7 @@ struct SuperEcho : Module {
     /// @param channel the feedback channel to get the delay parameter for
     /// @returns the 8-bit feedback parameter after applying CV modulations
     ///
-    inline int8_t getFeedback(unsigned channel) {
+    inline int8_t getFeedback(const unsigned& channel) {
         const float param = params[PARAM_FEEDBACK].getValue();
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_FEEDBACK].getVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
@@ -123,7 +123,7 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the mix level parameter for
     /// @returns the 8-bit mix parameter after applying CV modulations
     ///
-    inline int8_t getMix(unsigned channel, unsigned lane) {
+    inline int8_t getMix(const unsigned& channel, const unsigned& lane) {
         const float param = params[PARAM_MIX + lane].getValue();
         // get the normal voltage from the left/right pair
         const float normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
@@ -141,7 +141,7 @@ struct SuperEcho : Module {
     /// @param index the index of the FIR filter coefficient to get
     /// @returns the 8-bit FIR filter parameter for coefficient at given index
     ///
-    inline int8_t getFIRCoefficient(unsigned channel, unsigned index) {
+    inline int8_t getFIRCoefficient(const unsigned& channel, const unsigned& index) {
         // get the normal voltage from the previous channel. if the index is
         // 0, use a default voltage of 0V
         const float normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
@@ -166,7 +166,7 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline int16_t getInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
+    inline int16_t getInput(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
         // get the normal voltage from the left/right pair
         const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
@@ -186,7 +186,7 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline void bypassChannel(const ProcessArgs &args, unsigned channel, unsigned lane) {
+    inline void bypassChannel(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
         // update the FIR Coefficients (so the lights still respond in bypass)
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
@@ -205,7 +205,7 @@ struct SuperEcho : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processChannel(const ProcessArgs &args, unsigned channel) {
+    inline void processChannel(const ProcessArgs& args, const unsigned& channel) {
         // update the FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
@@ -235,7 +235,7 @@ struct SuperEcho : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

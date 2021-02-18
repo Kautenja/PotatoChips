@@ -117,53 +117,6 @@ inline float quantize(const float& value, const uint8_t& bits) {
     return integer_value / max;
 }
 
-/// @brief Return the output of the sine function.
-///
-/// @tparam the type of values to compute
-/// @param x the input to the sine function in radians
-/// @returns the output of the sine function for given input
-/// @details
-/// This implements the _Bhaskara_ approximation of the sine function:
-///
-/// \f$\sin(x) \approx \frac{16x(\pi - x)}{5\pi^2 - 4x(\pi - x)}\f$
-///
-template <typename T>
-inline T sin_bhaskara(const T& x) {
-    return (16 * x * (PI - x)) / (5 * square(PI) - 4 * x * (PI - x));
-}
-
-/// @brief Return the output of the sine function.
-///
-/// @tparam the type of values to compute
-/// @param x the input to the sine function in radians \f$\in [0, 2\pi]\f$
-/// @returns the output of the sine function for given input
-/// @details
-/// This implements a polynomial approximation of sine computed by Ridge
-/// regression.
-///
-template <typename T>
-inline T sin_poly3(const T& x) {
-    static constexpr T a = 0.09093347;
-    static constexpr T b = -0.85559925;
-    static constexpr T c = 1.84028261;
-    return a * cubed(x) + b * square(x) + c * x;
-}
-
-/// @brief Return the output of the cosine function.
-///
-/// @tparam the type of values to compute
-/// @param x the input to the cosine function in radians
-/// @returns the output of the cosine function for given input
-/// @details
-/// This implements the _Bhaskara_ approximation of the cosine function:
-///
-/// \f$\cos(y) \approx \frac{\pi^2 - 4y^2}{\pi^2 + y^2}\f$
-///
-template <typename T>
-inline T cos_bhaskara(const T& x) {
-    return (square(PI) - 4 * square(x)) / (square(PI) + square(x));
-}
-
 }  // namespace Math
 
 #endif  // DSP_MATH_FUNCTIONS_HPP

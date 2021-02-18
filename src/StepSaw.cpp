@@ -100,27 +100,11 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         float freq_max,
         float clock_division
     ) {
-        // get the pitch from the parameter and control voltage
         float pitch = params[PARAM_FREQ + oscillator].getValue();
-        // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 0V. Reset this port's
-        // voltage afterward to propagate the normalling chain forward.
-        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
-        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
-        inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
-        pitch += pitchCV;
-        // get the attenuverter parameter value
-        const auto att = params[PARAM_FM + oscillator].getValue();
-        // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 5V. Reset this port's
-        // voltage afterward to propagate the normalling chain forward.
-        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
-        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
-        inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
-        pitch += att * mod / 5.f;
-        // convert the pitch to frequency based on standard exponential scale
-        float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = Math::clip(freq, 0.0f, 20000.0f);
+        pitch += normalChain(&inputs[INPUT_VOCT], oscillator, channel, 0.f);
+        const float att = params[PARAM_FM + oscillator].getValue();
+        pitch += att * Math::Eurorack::fromDC(normalChain(&inputs[INPUT_FM], oscillator, channel, 5.f));
+        float freq = Math::Eurorack::voct2freq(pitch);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
         return Math::clip(freq, freq_min, freq_max);
@@ -135,20 +119,12 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
     inline uint8_t getPW(unsigned oscillator, unsigned channel) {
-        // the minimal value for the pulse width register
-        static constexpr float PW_MIN = 0;
-        // the maximal value for the pulse width register (before shift)
-        static constexpr float PW_MAX = 0b00000111;
         if (oscillator == KonamiVRC6::SAW) return 0;  // no PW for saw wave
-        // get the pulse width from the parameter knob
-        auto param = params[PARAM_PW + oscillator].getValue();
-        // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 5V. Reset this port's
-        // voltage afterward to propagate the normalling chain forward.
-        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getVoltage(channel) : 0.f;
-        const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
-        inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
+        const float param = params[PARAM_PW + oscillator].getValue();
+        const float mod = normalChain(&inputs[INPUT_PW], oscillator, channel, 0.f);
         // get the 8-bit pulse width clamped within legal limits
+        static constexpr float PW_MIN = 0;
+        static constexpr float PW_MAX = 0b00000111;
         uint8_t pw = Math::clip(param + mod, PW_MIN, PW_MAX);
         // shift the pulse width over into the high 4 bits
         return pw << 4;
@@ -163,20 +139,9 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
     inline uint8_t getLevel(unsigned oscillator, unsigned channel, uint8_t max_level) {
-        // get the level from the parameter knob
-        auto level = params[PARAM_LEVEL + oscillator].getValue();
-        // get the normalled input voltage based on the voice index. Voice 0
-        // has no prior voltage, and is thus normalled to 10V. Reset this port's
-        // voltage afterward to propagate the normalling chain forward.
-        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
-        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
-        inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
-        // apply the control voltage to the level. Normal to a constant
-        // 10V source instead of checking if the cable is connected
-        level = roundf(level * Math::Eurorack::fromDC(voltage));
-        // get the 8-bit attenuation by inverting the level and clipping
-        // to the legal bounds of the parameter
-        return Math::clip(level, 0.f, static_cast<float>(max_level));
+        float level = params[PARAM_LEVEL + oscillator].getValue();
+        const float voltage = normalChain(&inputs[INPUT_LEVEL], oscillator, channel, 10.f);
+        return Math::clip(level * Math::Eurorack::fromDC(voltage), 0.f, static_cast<float>(max_level));
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -210,8 +175,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     inline void processCV(const ProcessArgs& args, unsigned channel) final {
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] = {15, 15, 63};
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-            // level
-            uint8_t level = getPW(oscillator, channel) | getLevel(oscillator, channel, max_level[oscillator]);
+            const uint8_t level = getPW(oscillator, channel) | getLevel(oscillator, channel, max_level[oscillator]);
             apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * oscillator, level);
         }
     }
@@ -222,18 +186,8 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param channels the number of active polyphonic channels
     ///
     inline void processLights(const ProcessArgs& args, unsigned channels) final {
-        for (unsigned voice = 0; voice < KonamiVRC6::OSC_COUNT; voice++) {
-            // get the global brightness scale from -12 to 3
-            auto brightness = vuMeter[voice].getBrightness(-12, 3);
-            // set the red light based on total brightness and
-            // brightness from 0dB to 3dB
-            lights[LIGHTS_LEVEL + voice * 3 + 0].setBrightness(brightness * vuMeter[voice].getBrightness(0, 3));
-            // set the red light based on inverted total brightness and
-            // brightness from -12dB to 0dB
-            lights[LIGHTS_LEVEL + voice * 3 + 1].setBrightness((1 - brightness) * vuMeter[voice].getBrightness(-12, 0));
-            // set the blue light to off
-            lights[LIGHTS_LEVEL + voice * 3 + 2].setBrightness(0);
-        }
+        for (unsigned voice = 0; voice < KonamiVRC6::OSC_COUNT; voice++)
+            setVULight3(vuMeter[voice], &lights[LIGHTS_LEVEL + voice * 3]);
     }
 };
 

@@ -79,35 +79,31 @@ struct StepSaw : ChipModule<KonamiVRC6> {
 
     /// @brief Get the frequency for the given oscillator and polyphony channel.
     ///
+    /// @tparam MAX the maximal value for the frequency register
+    /// @tparam DIVISION the clock division of the oscillator relative
     /// @param oscillator the oscillator to return the frequency for
     /// @param channel the polyphonic channel to return the frequency for
     /// @param freq_min the minimal value for the frequency register to
     /// produce sound
-    /// @param freq_max the maximal value for the frequency register
-    /// @param clock_division the clock division of the oscillator relative
     /// to the CPU
     /// @returns the 12 bit frequency value from the panel
     /// @details
-    /// parameters for pulse wave:
+    /// parameters for pulse wave (max is implied 4095):
     /// freq_min = 4, clock_division = 16
-    /// parameters for triangle wave:
+    /// parameters for saw wave (max is implied 4095):
     /// freq_min = 3, clock_division = 14
     ///
-    inline uint16_t getFrequency(
-        unsigned oscillator,
-        unsigned channel,
-        float freq_min,
-        float clock_division
-    ) {
+    template<uint16_t MIN, uint16_t DIVISION>
+    inline uint16_t getFrequency(const unsigned& oscillator, const unsigned& channel) {
         float pitch = params[PARAM_FREQ + oscillator].getValue();
         pitch += normalChain(&inputs[INPUT_VOCT], oscillator, channel, 0.f);
         const float att = params[PARAM_FM + oscillator].getValue();
         pitch += att * Math::Eurorack::fromDC(normalChain(&inputs[INPUT_FM], oscillator, channel, 5.f));
         float freq = Math::Eurorack::voct2freq(pitch);
         // convert the frequency to an 11-bit value
-        freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
+        freq = (buffers[channel][oscillator].get_clock_rate() / (static_cast<float>(DIVISION) * freq)) - 1;
         static constexpr float MAX = 4095.f;
-        return Math::clip(freq, freq_min, MAX);
+        return Math::clip(freq, static_cast<float>(MIN), MAX);
     }
 
     /// @brief Return the pulse width parameter for the given oscillator and
@@ -118,7 +114,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @returns the pulse width value in an 8-bit container in the high 4 bits.
     /// if channel == 2, i.e., saw channel, returns 0 (no PW for saw wave)
     ///
-    inline uint8_t getPW(unsigned oscillator, unsigned channel) {
+    inline uint8_t getPW(const unsigned& oscillator, const unsigned& channel) {
         if (oscillator == KonamiVRC6::SAW) return 0;  // no PW for saw wave
         const float param = params[PARAM_PW + oscillator].getValue();
         const float mod = normalChain(&inputs[INPUT_PW], oscillator, channel, 0.f);
@@ -133,16 +129,30 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @brief Return the level parameter for the given oscillator and
     /// polyphony channel.
     ///
-    /// @tparam max_level the maximal level for the input oscillator
+    /// @tparam MAX the maximal level for the input oscillator
     /// @param oscillator the oscillator to return the pulse width value for
     /// @param channel the polyphony channel of the given oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    template<uint8_t max_level>
-    inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
+    template<uint8_t MAX>
+    inline uint8_t getLevel(const unsigned& oscillator, const unsigned& channel) {
         float level = params[PARAM_LEVEL + oscillator].getValue();
         const float voltage = normalChain(&inputs[INPUT_LEVEL], oscillator, channel, 10.f);
-        return Math::clip(level * Math::Eurorack::fromDC(voltage), 0.f, static_cast<float>(max_level));
+        return Math::clip(level * Math::Eurorack::fromDC(voltage), 0.f, static_cast<float>(MAX));
+    }
+
+    /// @brief Set the frequency for an oscillator.
+    ///
+    /// @param freq the frequency to set the oscillator to
+    /// @param oscillator the oscillator to set the frequency of
+    /// @param channel the polyphony channel of the given oscillator
+    ///
+    inline void setApuFrequency(const uint16_t& freq, const unsigned& oscillator, const unsigned& channel) {
+        uint8_t lo =  freq & 0b0000000011111111;
+        uint8_t hi = (freq & 0b0000111100000000) >> 8;
+        hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
+        apu[channel].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * oscillator, lo);
+        apu[channel].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * oscillator, hi);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -151,21 +161,13 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
     inline void processAudio(const ProcessArgs& args, unsigned channel) final {
-        static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
-        static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         // detect sync for triangle generator voice
         const float sync = rescale(inputs[INPUT_SYNC].getVoltage(channel), 0.01f, 0.02f, 0.f, 1.f);
         if (syncTriggers[channel].process(sync)) apu[channel].reset_phase(2);
         // set frequency for all voices
-        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-            // frequency (max frequency is same for pulses and saw, 4095)
-            uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], clock_division[oscillator]);
-            uint8_t lo =  freq & 0b0000000011111111;
-            uint8_t hi = (freq & 0b0000111100000000) >> 8;
-            hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
-            apu[channel].write(KonamiVRC6::PULSE0_PERIOD_LOW + KonamiVRC6::REGS_PER_OSC * oscillator, lo);
-            apu[channel].write(KonamiVRC6::PULSE0_PERIOD_HIGH + KonamiVRC6::REGS_PER_OSC * oscillator, hi);
-        }
+        setApuFrequency(getFrequency<4, 16>(0, channel), 0, channel);
+        setApuFrequency(getFrequency<4, 16>(1, channel), 1, channel);
+        setApuFrequency(getFrequency<3, 14>(2, channel), 2, channel);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -174,16 +176,9 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs& args, unsigned channel) final {
-        {
-            const uint8_t level = getPW(0, channel) | getLevel<15>(0, channel);
-            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 0, level);
-        } {
-            const uint8_t level = getPW(1, channel) | getLevel<15>(1, channel);
-            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 1, level);
-        } {
-            const uint8_t level = getPW(2, channel) | getLevel<63>(2, channel);
-            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 2, level);
-        }
+        apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 0, getPW(0, channel) | getLevel<15>(0, channel));
+        apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 1, getPW(1, channel) | getLevel<15>(1, channel));
+        apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 2, getPW(2, channel) | getLevel<63>(2, channel));
     }
 
     /// @brief Process the lights on the module.

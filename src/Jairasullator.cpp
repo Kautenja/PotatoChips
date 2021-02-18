@@ -363,7 +363,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // oscillators (processed in order for port normalling)
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             if (getReset(osc, channel)) apu[channel].reset_phase(osc);
@@ -380,7 +380,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs& args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         apu[channel].set_channel_enables(getChannelEnables(channel));
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
@@ -394,7 +394,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs& args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < GeneralInstrumentAy_3_8910::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

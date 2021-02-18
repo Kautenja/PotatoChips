@@ -23,8 +23,6 @@
 #ifndef ENGINE_CHIP_MODULE_HPP_
 #define ENGINE_CHIP_MODULE_HPP_
 
-// TODO: move BLIP Buffer inside the emulator class instead of using it here
-
 /// @brief An abstract chip emulator module.
 /// @tparam ChipEmulator the class of the chip emulator
 /// @details All ports are assumed to be polyphonic. I.e., all inputs ports
@@ -59,21 +57,21 @@ struct ChipModule : rack::engine::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const rack::engine::Module::ProcessArgs &args, unsigned channel) = 0;
+    virtual void processAudio(const rack::engine::Module::ProcessArgs &args, const unsigned& channel) = 0;
 
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    virtual void processCV(const rack::engine::Module::ProcessArgs &args, unsigned channel) = 0;
+    virtual void processCV(const rack::engine::Module::ProcessArgs &args, const unsigned& channel) = 0;
 
     /// @brief Process the lights on the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    virtual void processLights(const rack::engine::Module::ProcessArgs &args, unsigned channels) = 0;
+    virtual void processLights(const rack::engine::Module::ProcessArgs &args, const unsigned& channels) = 0;
 
  public:
     /// @brief Initialize a new Chip module.
@@ -97,7 +95,7 @@ struct ChipModule : rack::engine::Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
+    void onSampleRateChange() final {
         // reset the CV and light divider clocks
         cvDivider.reset();
         lightDivider.reset();
@@ -109,7 +107,7 @@ struct ChipModule : rack::engine::Module {
     }
 
     /// @brief Respond to the module being reset by the engine.
-    inline void onReset() override {
+    void onReset() override {
         // reset the CV and light divider clocks
         cvDivider.reset();
         lightDivider.reset();
@@ -146,17 +144,15 @@ struct ChipModule : rack::engine::Module {
             apu[channel].end_frame(CLOCK_RATE / args.sampleRate);
             // get the output from each oscillator and set the output port
             for (unsigned osc = 0; osc < ChipEmulator::OSC_COUNT; osc++) {
-                auto output = buffers[channel][osc].read_sample(5.f);
+                float output = buffers[channel][osc].read_sample();
                 if (normal_outputs) {  // mix outputs from previous voices
-                    auto shouldNormal = osc && !outputs[osc - 1].isConnected();
-                    auto lastOutput = shouldNormal ? outputs[osc - 1].getVoltage(channel) : 0.f;
-                    output += lastOutput;
+                    const bool shouldNormal = osc && !outputs[osc - 1].isConnected();
+                    const float lastOutput = shouldNormal ? outputs[osc - 1].getVoltage(channel) : 0.f;
+                    output += Math::Eurorack::fromAC(lastOutput);
                 }
-                // update the VU meter with the un-clipped signal
-                vuMeter[osc].process(args.sampleTime / channels, output / 5.f);
-                // hard clip the output
-                if (hard_clip) output = Math::clip(output, -5.f, 5.f);
-                outputs[osc].setVoltage(output, channel);
+                vuMeter[osc].process(args.sampleTime / channels, output);
+                if (hard_clip) output = Math::clip(output, -1.f, 1.f);
+                outputs[osc].setVoltage(Math::Eurorack::toAC(output), channel);
             }
         }
         // process lights using the overridden function

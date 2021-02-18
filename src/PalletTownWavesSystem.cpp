@@ -294,9 +294,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs& args, unsigned channel) override {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-            // frequency
             auto freq = getFrequency(oscillator, channel);
             apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator,
                          freq & 0b0000000011111111
@@ -305,7 +304,6 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
                 0x80 | ((freq & 0b0000011100000000) >> 8)
             );
         }
-        // frequency
         auto freq = getFrequency(2, channel);
         apu[channel].write(NintendoGBS::WAVE_FREQ_LO,
                      freq & 0b0000000011111111
@@ -320,7 +318,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs& args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
@@ -399,7 +397,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs& args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < NintendoGBS::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

@@ -166,14 +166,9 @@ class BLIPBuffer {
 
     /// @brief Return a scaled floating point output sample from the buffer.
     ///
-    /// @param scale the scale factor to use instead of unit scale of 1
+    /// @returns the sample \f$\in [-1, 1]\f$
     ///
-    /// @returns the sample \f$\in [-1, 1]\f$ without clipping, i.e.,
-    /// \f$\pm 1\f$ is \f$0db\f$.
-    /// @details
-    /// Calls to this function advance the sample accumulator
-    ///
-    inline float read_sample(float scale = 1.f) {
+    inline float read_sample() {
         // get the sample from the accumulator (don't clip it though). cast
         // it as a float for later calculation.
         float sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
@@ -185,7 +180,7 @@ class BLIPBuffer {
         memset(buffer + remain, 0, count * sizeof *buffer);
         // scale the sample by the scale factor and the binary code space for
         // the digital signal to produce a floating point value
-        return scale * sample / std::numeric_limits<blip_sample_t>::max();
+        return sample / std::numeric_limits<blip_sample_t>::max();
     }
 };
 

@@ -160,7 +160,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // detect sync for triangle generator voice
         const float sync = rescale(inputs[INPUT_SYNC].getVoltage(channel), 0.01f, 0.02f, 0.f, 1.f);
         if (syncTriggers[channel].process(sync)) apu[channel].reset_phase(2);
@@ -175,7 +175,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs& args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 0, getPW(0, channel) | getLevel<15>(0, channel));
         apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 1, getPW(1, channel) | getLevel<15>(1, channel));
         apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 2, getPW(2, channel) | getLevel<63>(2, channel));
@@ -186,7 +186,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs& args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < KonamiVRC6::OSC_COUNT; voice++)
             setVULight3(vuMeter[voice], &lights[LIGHTS_LEVEL + voice * 3]);
     }

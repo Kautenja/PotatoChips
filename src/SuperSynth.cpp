@@ -299,7 +299,7 @@ struct SuperSynth : Module {
             pitch += inputs[INPUT_VOCT + voice].getVoltage();
             pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
             float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-            frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+            frequency = Math::clip(frequency, 0.0f, 20000.0f);
             // convert the floating point frequency to a 14-bit pitch value
             auto pitch16bit = SonyS_DSP::get_pitch(frequency);
             // set the 14-bit pitch value to the cascade of two RAM slots

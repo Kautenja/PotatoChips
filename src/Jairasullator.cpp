@@ -169,10 +169,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+        return Math::clip(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
     /// @brief Return the level for the given channel.
@@ -210,7 +210,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // to the legal bounds of the parameter
         // // the maximal value for the volume width register
         static constexpr float MAX = 15;
-        return rack::clamp(level, 0.f, MAX);
+        return Math::clip(level, 0.f, MAX);
     }
 
     /// @brief Return whether the given oscillator has the envelope enabled.
@@ -224,7 +224,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     inline bool isEnvelopeOn(unsigned osc, unsigned channel) {
         // clamp the input within [0, 10]. this allows bipolar signals to
         // be interpreted as unipolar signals for the trigger input
-        auto cv = math::clamp(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
+        auto cv = Math::clip(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
         envTriggers[channel][osc].process(rescale(cv, 0.01f, 2.f, 0.f, 1.f));
         // return the state of the switch based on the parameter and trig input
         return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].isHigh();
@@ -245,7 +245,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // scale such that [0,7]V controls the full range of the parameter
         const float mod = rescale(cv, 0.f, 7.f, 0.f, MAX);
         // invert the parameter so larger values have higher frequencies
-        return MAX - rack::clamp(floorf(param + mod), 0.f, MAX);
+        return MAX - Math::clip(floorf(param + mod), 0.f, MAX);
     }
 
     /// @brief Return the envelope period.
@@ -278,10 +278,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = 1 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][0].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, FREQ16BIT_MIN, FREQ16BIT_MAX);
+        return Math::clip(freq, FREQ16BIT_MIN, FREQ16BIT_MAX);
     }
 
     /// @brief Return the envelope mode.
@@ -328,7 +328,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned i = 0; i < 2 * GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // clamp the input within [0, 10]. this allows bipolar signals to
             // be interpreted as unipolar signals for the trigger input
-            auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
+            auto cv = Math::clip(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
             mixerTriggers[channel][i].process(rescale(cv, 0.01f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
             bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].isHigh();

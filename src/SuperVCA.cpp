@@ -131,9 +131,9 @@ struct SuperVCA : Module {
     /// @returns the input signal for the given lane and polyphony channel
     ///
     inline uint16_t getFrequency(unsigned lane, unsigned channel) {
-        const auto param = params[PARAM_FREQ + lane].getValue();
-        const auto input = normalChain(&inputs[INPUT_VOCT], lane, channel, 0.f);
-        const auto frequency = voct2freq(param + input);
+        const float param = params[PARAM_FREQ + lane].getValue();
+        const float input = normalChain(&inputs[INPUT_VOCT], lane, channel, 0.f);
+        const float frequency = Math::Eurorack::voct2freq(param + input);
         return SonyS_DSP::get_pitch(frequency);
     }
 
@@ -144,9 +144,9 @@ struct SuperVCA : Module {
     /// @returns the volume of the gate for given lane and channel
     ///
     inline int8_t getVolume(unsigned lane, unsigned channel) {
-        const auto param = params[PARAM_VOLUME + lane].getValue();
-        const auto cv = Math::Eurorack::fromDC(normalChain(&inputs[INPUT_VOLUME], lane, channel, 10.f));
-        return math::clamp(param * cv, -128.f, 127.f);
+        const float param = params[PARAM_VOLUME + lane].getValue();
+        const float cv = Math::Eurorack::fromDC(normalChain(&inputs[INPUT_VOLUME], lane, channel, 10.f));
+        return Math::clip(param * cv, -128.f, 127.f);
     }
 
     /// @brief Get the input signal.
@@ -156,8 +156,8 @@ struct SuperVCA : Module {
     /// @returns the input signal for the given lane and polyphony channel
     ///
     inline float getInput(unsigned lane, unsigned channel) {
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        const auto input = gain * Math::Eurorack::fromAC(normalChain(&inputs[INPUT_AUDIO], lane, channel, 0.f));
+        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const float input = gain * Math::Eurorack::fromAC(normalChain(&inputs[INPUT_AUDIO], lane, channel, 0.f));
         inputVUMeter[lane].process(APP->engine->getSampleTime(), input);
         return input;
     }
@@ -169,7 +169,8 @@ struct SuperVCA : Module {
     /// @returns the input signal for the given lane and polyphony channel
     ///
     inline int8_t getInputFinite(unsigned lane, unsigned channel) {
-        return std::numeric_limits<int8_t>::max() * Math::clip(getInput(lane, channel), -1.f, 1.f);
+        constexpr float MAX = std::numeric_limits<int8_t>::max();
+        return MAX * Math::clip(getInput(lane, channel), -1.f, 1.f);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -184,8 +185,7 @@ struct SuperVCA : Module {
         float sample = apu[lane][channel].run(getInputFinite(lane, channel));
         sample = loudnessCompensation * sample / (1 << 14);
         outputVUMeter[lane].process(APP->engine->getSampleTime(), sample);
-        const auto voltage = Math::Eurorack::toAC(sample);
-        outputs[OUTPUT_AUDIO + lane].setVoltage(voltage, channel);
+        outputs[OUTPUT_AUDIO + lane].setVoltage(Math::Eurorack::toAC(sample), channel);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -214,7 +214,7 @@ struct SuperVCA : Module {
         if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
             for (unsigned lane = 0; lane < LANES; lane++) {
                 for (unsigned channel = 0; channel < channels; channel++) {
-                    auto input = getInput(lane, channel);
+                    const float input = getInput(lane, channel);
                     outputVUMeter[lane].process(args.sampleTime, input);
                     outputs[OUTPUT_AUDIO + lane].setVoltage(Math::Eurorack::toAC(input), channel);
                 }
@@ -235,13 +235,10 @@ struct SuperVCA : Module {
             // Green <- filterMode == 1 -> Weird
             // Blue  <- filterMode == 2 -> Quiet
             // Black <- filterMode == 3 -> Barely Audible
-            auto deltaTime = args.sampleTime * lightDivider.getDivision();
-            bool red = filterMode == 0;
-            lights[LIGHTS_FILTER + 0].setSmoothBrightness(red, deltaTime);
-            bool green = filterMode == 1;
-            lights[LIGHTS_FILTER + 1].setSmoothBrightness(green, deltaTime);
-            bool blue = filterMode == 2;
-            lights[LIGHTS_FILTER + 2].setSmoothBrightness(blue, deltaTime);
+            const float deltaTime = args.sampleTime * lightDivider.getDivision();
+            lights[LIGHTS_FILTER + 0].setSmoothBrightness(filterMode == 0, deltaTime);
+            lights[LIGHTS_FILTER + 1].setSmoothBrightness(filterMode == 1, deltaTime);
+            lights[LIGHTS_FILTER + 2].setSmoothBrightness(filterMode == 2, deltaTime);
         }
     }
 };

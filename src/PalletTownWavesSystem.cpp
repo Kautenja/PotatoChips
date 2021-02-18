@@ -191,10 +191,10 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
-        return rack::clamp(freq, 8.f, 2035.f);
+        return Math::clip(freq, 8.f, 2035.f);
     }
 
     /// @brief Get the PW for the given oscillator
@@ -217,7 +217,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        uint8_t pw = Math::clip(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
         // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
@@ -235,7 +235,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // rescale from a 7V range to the parameter space in [-5, 5]
         auto cv = rescale(inputs[INPUT_WAVETABLE].getNormalVoltage(normalMod, channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
-        return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
+        return Math::clip(param + /*att * */ cv, 1.f, 5.f) - 1;
     }
 
     /// @brief Return the period of the noise oscillator from the panel controls.
@@ -253,7 +253,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume parameter for the given oscillator.
@@ -275,7 +275,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        uint8_t volume = rack::clamp(roundf(level * Math::Eurorack::fromDC(voltage)), 0.f, static_cast<float>(max));
+        uint8_t volume = Math::clip(roundf(level * Math::Eurorack::fromDC(voltage)), 0.f, static_cast<float>(max));
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%

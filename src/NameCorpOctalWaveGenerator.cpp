@@ -164,7 +164,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         // get the CV as 1V per oscillator
         auto cv = 8.f * Math::Eurorack::fromDC(inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel));
         // oscillators are indexed maths style on the chip, not CS style
-        return rack::math::clamp(param + att * cv, 1.f, 8.f);
+        return Math::clip(param + att * cv, 1.f, 8.f);
     }
 
     /// @brief Return the wave-table position parameter.
@@ -178,7 +178,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         // get the CV as 1V per wave-table
         auto cv = rescale(inputs[INPUT_WAVETABLE].getVoltage(channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
-        return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
+        return Math::clip(param + att * cv, 1.f, 5.f) - 1;
     }
 
     /// @brief Return the frequency parameter for the given oscillator.
@@ -209,14 +209,14 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
         // ignoring num_oscillators in the calculation allows the standard 103
         // function where additional oscillators reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buffers[channel][oscillator].get_clock_rate();
         // clamp within the legal bounds for the frequency value
-        freq = rack::clamp(freq, 512.f, 262143.f);
+        freq = Math::clip(freq, 512.f, 262143.f);
         // OR the waveform length into the high 6 bits of "frequency Hi"
         // register, which is the third bite, i.e. shift left 2 + 16
         return static_cast<uint32_t>(freq) | (wave_length << 18);
@@ -247,7 +247,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, MIN, MAX);
+        return Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.

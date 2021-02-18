@@ -60,7 +60,11 @@ struct BossFight : rack::Module {
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 8.f;
-        return clamp(static_cast<int>(param + cv), min, max);
+        return Math::clip(
+            static_cast<int>(param + cv),
+            static_cast<int>(min),
+            static_cast<int>(max)
+        );
     }
 
  public:
@@ -200,7 +204,7 @@ struct BossFight : rack::Module {
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_SATURATION].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, 0.f, MAX);
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -211,7 +215,7 @@ struct BossFight : rack::Module {
     inline void processCV(const ProcessArgs &args, unsigned channel) {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
-        algorithm[channel] = clamp(algorithm[channel], 0, 7);
+        algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
         apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
         apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
@@ -272,7 +276,7 @@ struct BossFight : rack::Module {
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
                 float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
+                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, Math::clip(frequency + pitch, -6.5f, 6.5f)));
             }
             // set the output voltage based on the 14-bit signed PCM sample
             const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;

@@ -120,10 +120,10 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, MIN, MAX);
+        return Math::clip(freq, MIN, MAX);
     }
 
     /// @brief Return the noise for the given oscillator.
@@ -150,7 +150,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         param += mod;
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(param, MIN, MAX);
+        return Math::clip(param, MIN, MAX);
     }
 
     /// @brief Return the level for the given oscillator.
@@ -177,7 +177,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         param = roundf(param * Math::Eurorack::fromDC(mod));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(param, MIN, MAX);
+        return Math::clip(param, MIN, MAX);
     }
 
     /// @brief Return the control byte.

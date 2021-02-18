@@ -113,10 +113,10 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][voice].get_clock_rate() / (CLOCK_DIVISION * freq));
-        return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
+        return Math::clip(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
     /// @brief Return the period of the noise voice from the panel controls.
@@ -134,7 +134,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume level from the panel controls.
@@ -161,7 +161,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return MAX - rack::clamp(level, MIN, MAX);
+        return MAX - Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.

@@ -139,10 +139,10 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
-        return rack::clamp(freq, freq_min, freq_max);
+        return Math::clip(freq, freq_min, freq_max);
     }
 
     /// @brief Get the PW for the given oscillator and polyphony channel
@@ -165,7 +165,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        uint8_t pw = Math::clip(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
         // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
@@ -184,7 +184,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getPolyVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume level from the panel controls for a given oscillator and polyphony channel.
@@ -214,7 +214,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, MIN, MAX);
+        return Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.

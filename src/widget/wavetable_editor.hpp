@@ -137,13 +137,13 @@ struct WaveTableEditor : rack::LightWidget {
         drag_state.position = e.pos;
         // calculate the normalized x position in [0, 1]
         float x = drag_state.position.x / box.size.x;
-        x = rack::math::clamp(x, 0.f, 1.f);
+        x = Math::clip(x, 0.f, 1.f);
         // calculate the position in the wave-table
         uint32_t index = x * length;
         // calculate the normalized y position in [0, 1]
         // y increases downward in pixel space, so invert about 1
         float y = 1.f - drag_state.position.y / box.size.y;
-        y = rack::math::clamp(y, 0.f, 1.f);
+        y = Math::clip(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
         // if the action is a press copy the waveform before updating
@@ -165,14 +165,14 @@ struct WaveTableEditor : rack::LightWidget {
         // if the drag operation is not active, return early
         if (!drag_state.is_pressed) return;
         // update the drag state based on the change in position from the mouse
-        uint32_t index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
+        uint32_t index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
-        uint32_t next_index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
+        uint32_t next_index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.y += e.mouseDelta.y / APP->scene->rackScroll->zoomWidget->zoom;
         // calculate the normalized y position in [0, 1]
         // y increases downward in pixel space, so invert about 1
         float y = 1.f - drag_state.position.y / box.size.y;
-        y = rack::math::clamp(y, 0.f, 1.f);
+        y = Math::clip(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
         if (next_index < index)  // swap next index if it's less the current

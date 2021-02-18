@@ -100,7 +100,7 @@ struct SuperEcho : Module {
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_DELAY].getVoltage(channel));
         const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
         const float MAX = static_cast<float>(SonyS_DSP::Echo::DELAY_LEVELS);
-        return clamp(param + mod, 0.f, MAX);
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Return the value of the feedback parameter from the panel.
@@ -114,7 +114,7 @@ struct SuperEcho : Module {
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the mix parameter from the panel.
@@ -132,7 +132,7 @@ struct SuperEcho : Module {
         const float mod = std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the FIR filter parameter from the panel.
@@ -156,7 +156,7 @@ struct SuperEcho : Module {
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
         const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the stereo input from the panel.
@@ -176,7 +176,7 @@ struct SuperEcho : Module {
         // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
         // clamp the value to finite precision and scale to the integer type
-        return MAX * math::clamp(input, -1.f, 1.f);
+        return MAX * Math::clip(input, -1.f, 1.f);
     }
 
     /// @brief Return the clean value of the stereo input from the panel.

@@ -58,7 +58,11 @@ struct MiniBoss : rack::Module {
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 8.f;
-        return clamp(static_cast<int>(param + cv), min, max);
+        return Math::clip(
+            static_cast<int>(param + cv),
+            static_cast<int>(min),
+            static_cast<int>(max)
+        );
     }
 
  public:
@@ -193,7 +197,7 @@ struct MiniBoss : rack::Module {
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_VOLUME].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, 0.f, MAX);
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Process the gate trigger, high at 2V.
@@ -225,7 +229,7 @@ struct MiniBoss : rack::Module {
     inline float getFrequency(unsigned channel) {
         const float base = params[PARAM_FREQ].getValue();
         const float voct = inputs[INPUT_VOCT].getVoltage(channel);
-        return dsp::FREQ_C4 * std::pow(2.f, clamp(base + voct, -6.5f, 6.5f));
+        return dsp::FREQ_C4 * std::pow(2.f, Math::clip(base + voct, -6.5f, 6.5f));
     }
 
     /// @brief Return the frequency mod for the given channel.
@@ -234,9 +238,9 @@ struct MiniBoss : rack::Module {
     /// @returns the 14-bit aigned frequency modulation signal
     ///
     inline int16_t getFM(unsigned channel) {
-        const auto input = inputs[INPUT_FM].getVoltage(channel) / 5.0;
+        const auto input = inputs[INPUT_FM].getVoltage(channel) / 5.f;
         const auto depth = params[PARAM_FM].getValue();
-        return (1 << 13) * clamp(depth * input, -1.f, 1.f);
+        return (1 << 13) * Math::clip(depth * input, -1.f, 1.f);
     }
 
     /// @brief Process a sample.

@@ -99,10 +99,10 @@ struct Pulses : ChipModule<SunSoftFME7> {
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+        return Math::clip(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
     /// @brief Return the volume parameter for the given oscillator.
@@ -130,7 +130,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
         level = roundf(level * Math::Eurorack::fromDC(mod));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, MIN, MAX);
+        return Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.

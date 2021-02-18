@@ -88,6 +88,17 @@ inline float toAC(const float& value) {
     return value * AC_MAX_VOLTS;
 }
 
+/// @brief Convert the input voltage in V/OCT format to a frequency in Hertz.
+///
+/// @param voltage the voltage to convert to frequency in Hertz
+/// @returns the frequency of corresponding to the input voltage based on V/OCT
+/// @details
+/// The frequency will be clamped to the audible range of \f$[0, 20000]Hz\f$.
+///
+inline float voct2freq(float voltage) {
+    return clip(rack::dsp::FREQ_C4 * powf(2.0, voltage), 0.0f, 20000.0f);
+}
+
 }  // namespace Eurorack
 
 }  // namespace Math

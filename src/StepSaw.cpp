@@ -120,10 +120,10 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
-        return rack::clamp(freq, freq_min, freq_max);
+        return Math::clip(freq, freq_min, freq_max);
     }
 
     /// @brief Return the pulse width parameter for the given oscillator and
@@ -149,7 +149,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(param + mod, PW_MIN, PW_MAX);
+        uint8_t pw = Math::clip(param + mod, PW_MIN, PW_MAX);
         // shift the pulse width over into the high 4 bits
         return pw << 4;
     }
@@ -176,7 +176,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, 0.f, static_cast<float>(max_level));
+        return Math::clip(level, 0.f, static_cast<float>(max_level));
     }
 
     /// @brief Process the audio rate inputs for the given channel.

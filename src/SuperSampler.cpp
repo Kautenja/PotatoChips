@@ -146,18 +146,18 @@ struct SuperSampler : Module {
         pitch += inputs[INPUT_VOCT + voice].getVoltage(channel);
         pitch += inputs[INPUT_FM + voice].getVoltage(channel) / 5.f;
         float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+        frequency = Math::clip(frequency, 0.0f, 20000.0f);
         apu[voice][channel].setFrequency(frequency);
         // ---------------------------------------------------------------
         // MARK: Amplifier Volume
         // ---------------------------------------------------------------
         const auto leftVolumeParam = params[PARAM_VOLUME_L + voice].getValue();
         const auto leftVolumeCV = inputs[INPUT_VOLUME_L + voice].getVoltage(channel);
-        const auto leftVolume = math::clamp(leftVolumeParam + leftVolumeCV, -128.f, 127.f);
+        const auto leftVolume = Math::clip(leftVolumeParam + leftVolumeCV, -128.f, 127.f);
         apu[voice][channel].setVolumeLeft(leftVolume);
         const auto rightVolumeParam = params[PARAM_VOLUME_R + voice].getValue();
         const auto rightVolumeCV = inputs[INPUT_VOLUME_R + voice].getVoltage(channel);
-        const auto rightVolume = math::clamp(rightVolumeParam + rightVolumeCV, -128.f, 127.f);
+        const auto rightVolume = Math::clip(rightVolumeParam + rightVolumeCV, -128.f, 127.f);
         apu[voice][channel].setVolumeRight(rightVolume);
         // -------------------------------------------------------------------
         // MARK: Gate input

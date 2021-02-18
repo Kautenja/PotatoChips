@@ -17,6 +17,7 @@
 #include "rack.hpp"
 #include "../plugin.hpp"
 #include "../dsp/blip_buffer.hpp"
+#include "../dsp/math.hpp"
 #include "../dsp/trigger.hpp"
 
 #ifndef ENGINE_CHIP_MODULE_HPP_
@@ -154,7 +155,7 @@ struct ChipModule : rack::engine::Module {
                 // update the VU meter with the un-clipped signal
                 vuMeter[osc].process(args.sampleTime / channels, output / 5.f);
                 // hard clip the output
-                if (hard_clip) output = math::clamp(output, -5.f, 5.f);
+                if (hard_clip) output = Math::clip(output, -5.f, 5.f);
                 outputs[osc].setVoltage(output, channel);
             }
         }

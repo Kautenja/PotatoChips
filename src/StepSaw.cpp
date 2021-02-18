@@ -89,15 +89,14 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @returns the 12 bit frequency value from the panel
     /// @details
     /// parameters for pulse wave:
-    /// freq_min = 4, freq_max = 4095, clock_division = 16
+    /// freq_min = 4, clock_division = 16
     /// parameters for triangle wave:
-    /// freq_min = 3, freq_max = 4095, clock_division = 14
+    /// freq_min = 3, clock_division = 14
     ///
     inline uint16_t getFrequency(
         unsigned oscillator,
         unsigned channel,
         float freq_min,
-        float freq_max,
         float clock_division
     ) {
         float pitch = params[PARAM_FREQ + oscillator].getValue();
@@ -107,7 +106,8 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         float freq = Math::Eurorack::voct2freq(pitch);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
-        return Math::clip(freq, freq_min, freq_max);
+        static constexpr float MAX = 4095.f;
+        return Math::clip(freq, freq_min, MAX);
     }
 
     /// @brief Return the pulse width parameter for the given oscillator and
@@ -133,12 +133,13 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @brief Return the level parameter for the given oscillator and
     /// polyphony channel.
     ///
+    /// @tparam max_level the maximal level for the input oscillator
     /// @param oscillator the oscillator to return the pulse width value for
     /// @param channel the polyphony channel of the given oscillator
-    /// @param max_level the maximal level for the input oscillator
     /// @returns the level value in an 8-bit container in the low 4 bits
     ///
-    inline uint8_t getLevel(unsigned oscillator, unsigned channel, uint8_t max_level) {
+    template<uint8_t max_level>
+    inline uint8_t getLevel(unsigned oscillator, unsigned channel) {
         float level = params[PARAM_LEVEL + oscillator].getValue();
         const float voltage = normalChain(&inputs[INPUT_LEVEL], oscillator, channel, 10.f);
         return Math::clip(level * Math::Eurorack::fromDC(voltage), 0.f, static_cast<float>(max_level));
@@ -158,7 +159,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         // set frequency for all voices
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // frequency (max frequency is same for pulses and saw, 4095)
-            uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], 4095, clock_division[oscillator]);
+            uint16_t freq = getFrequency(oscillator, channel, freq_low[oscillator], clock_division[oscillator]);
             uint8_t lo =  freq & 0b0000000011111111;
             uint8_t hi = (freq & 0b0000111100000000) >> 8;
             hi |= KonamiVRC6::PERIOD_HIGH_ENABLED;  // enable the oscillator
@@ -173,10 +174,15 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
     inline void processCV(const ProcessArgs& args, unsigned channel) final {
-        static constexpr float max_level[KonamiVRC6::OSC_COUNT] = {15, 15, 63};
-        for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
-            const uint8_t level = getPW(oscillator, channel) | getLevel(oscillator, channel, max_level[oscillator]);
-            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * oscillator, level);
+        {
+            const uint8_t level = getPW(0, channel) | getLevel<15>(0, channel);
+            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 0, level);
+        } {
+            const uint8_t level = getPW(1, channel) | getLevel<15>(1, channel);
+            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 1, level);
+        } {
+            const uint8_t level = getPW(2, channel) | getLevel<63>(2, channel);
+            apu[channel].write(KonamiVRC6::PULSE0_DUTY_VOLUME + KonamiVRC6::REGS_PER_OSC * 2, level);
         }
     }
 

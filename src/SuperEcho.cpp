@@ -126,7 +126,7 @@ struct SuperEcho : Module {
     inline int8_t getMix(unsigned channel, unsigned lane) {
         const float param = params[PARAM_MIX + lane].getValue();
         // get the normal voltage from the left/right pair
-        const auto normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
+        const float normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = inputs[INPUT_MIX + lane].getNormalVoltage(normal, channel);
         // get the mod value and clamp within finite precision
         const float mod = std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
@@ -144,7 +144,7 @@ struct SuperEcho : Module {
     inline int8_t getFIRCoefficient(unsigned channel, unsigned index) {
         // get the normal voltage from the previous channel. if the index is
         // 0, use a default voltage of 0V
-        const auto normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
+        const float normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
         const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
         // normal the voltage forward by updating the voltage on the port
         inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
@@ -169,10 +169,10 @@ struct SuperEcho : Module {
     inline int16_t getInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
         // get the normal voltage from the left/right pair
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
         // const auto att = params[PARAM_GAIN + lane].getValue();
-        const auto input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
+        const float input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
         // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
         // clamp the value to finite precision and scale to the integer type
@@ -191,9 +191,9 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
+        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const float voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
         outputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
@@ -223,30 +223,12 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // get the sample in [0, 1] (clipped by the finite precision of the
             // emulation)
-            const auto sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
+            const float sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
             // approximate the VU meter by scaling the sample slightly
             outputVUMeter[i].process(args.sampleTime, 1.2 * sample);
             // set the output
             outputs[OUTPUT_AUDIO + i].setVoltage(5.f * sample, channel);
         }
-    }
-
-    /// @brief Set the given VU meter light based on given VU meter.
-    ///
-    /// @param vuMeter the VU meter to get the data from
-    /// @param light the light to update from the VU meter data
-    ///
-    inline void setVULight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
-        // get the global brightness scale from -12 to 3
-        auto brightness = vuMeter.getBrightness(-12, 3);
-        // set the red light based on total brightness and
-        // brightness from 0dB to 3dB
-        (light + 0)->setBrightness(brightness * vuMeter.getBrightness(0, 3));
-        // set the red light based on inverted total brightness and
-        // brightness from -12dB to 0dB
-        (light + 1)->setBrightness((1 - brightness) * vuMeter.getBrightness(-12, 0));
-        // set the blue light to off
-        (light + 2)->setBrightness(0);
     }
 
     /// @brief Process the inputs and outputs to/from the module.
@@ -275,12 +257,12 @@ struct SuperEcho : Module {
                 processChannel(args, channel);
         }
         if (lightDivider.process()) {  // update the LEDs on the panel
-            setVULight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
-            setVULight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
-            setVULight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
-            setVULight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
+            setVULight3(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setVULight3(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setVULight3(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setVULight3(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
             // CV indicators for the FIR filter
-            const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            const float sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; param++) {
                 // get the scaled CV (it's already normalled)
                 float value = 0.f;

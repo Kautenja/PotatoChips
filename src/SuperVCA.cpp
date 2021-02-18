@@ -130,7 +130,7 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline uint16_t getFrequency(unsigned lane, unsigned channel) {
+    inline uint16_t getFrequency(const unsigned& lane, const unsigned& channel) {
         const float param = params[PARAM_FREQ + lane].getValue();
         const float input = normalChain(&inputs[INPUT_VOCT], lane, channel, 0.f);
         const float frequency = Math::Eurorack::voct2freq(param + input);
@@ -143,7 +143,7 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the volume of
     /// @returns the volume of the gate for given lane and channel
     ///
-    inline int8_t getVolume(unsigned lane, unsigned channel) {
+    inline int8_t getVolume(const unsigned& lane, const unsigned& channel) {
         const float param = params[PARAM_VOLUME + lane].getValue();
         const float cv = Math::Eurorack::fromDC(normalChain(&inputs[INPUT_VOLUME], lane, channel, 10.f));
         return Math::clip(param * cv, -128.f, 127.f);
@@ -155,20 +155,20 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline float getInput(unsigned lane, unsigned channel) {
-        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+    inline float getInput(const unsigned& lane, const unsigned& channel) {
+        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
         const float input = gain * Math::Eurorack::fromAC(normalChain(&inputs[INPUT_AUDIO], lane, channel, 0.f));
         inputVUMeter[lane].process(APP->engine->getSampleTime(), input);
         return input;
     }
 
-    /// @brief Get the input signal.
+    /// @brief Get the input signal in fixed point.
     ///
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline int8_t getInputFinite(unsigned lane, unsigned channel) {
+    inline int8_t getInputFixed(const unsigned& lane, const unsigned& channel) {
         constexpr float MAX = std::numeric_limits<int8_t>::max();
         return MAX * Math::clip(getInput(lane, channel), -1.f, 1.f);
     }
@@ -178,11 +178,11 @@ struct SuperVCA : Module {
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processChannel(unsigned lane, unsigned channel) {
+    inline void processChannel(const unsigned& lane, const unsigned& channel) {
         apu[lane][channel].setFrequency(getFrequency(lane, channel));
         apu[lane][channel].setFilter(3 - filterMode);
         apu[lane][channel].setVolume(getVolume(lane, channel));
-        float sample = apu[lane][channel].run(getInputFinite(lane, channel));
+        float sample = apu[lane][channel].run(getInputFixed(lane, channel));
         sample = loudnessCompensation * sample / (1 << 14);
         outputVUMeter[lane].process(APP->engine->getSampleTime(), sample);
         outputs[OUTPUT_AUDIO + lane].setVoltage(Math::Eurorack::toAC(sample), channel);
@@ -253,7 +253,7 @@ struct SuperVCAWidget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit SuperVCAWidget(SuperVCA *module) {
+    explicit SuperVCAWidget(SuperVCA* module) {
         setModule(module);
         static constexpr auto panel = "res/SuperVCA.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -282,6 +282,10 @@ struct SuperVCAWidget : ModuleWidget {
         }
     }
 
+    /// @brief Fill a context menu with information and controls for the module.
+    ///
+    /// @param menu the menu to fill with contents related to the module
+    ///
     void appendContextMenu(Menu* menu) override {
         // get a pointer to the module
         SuperVCA* const module = dynamic_cast<SuperVCA*>(this->module);

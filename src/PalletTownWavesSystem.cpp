@@ -294,7 +294,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
+    virtual void processAudio(const ProcessArgs& args, unsigned channel) override {
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
             // frequency
             auto freq = getFrequency(oscillator, channel);
@@ -320,7 +320,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, unsigned channel) final {
         lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
@@ -399,7 +399,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         for (unsigned voice = 0; voice < NintendoGBS::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

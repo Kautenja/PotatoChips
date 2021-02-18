@@ -212,7 +212,7 @@ struct BossFight : rack::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) {
+    inline void processCV(const ProcessArgs& args, unsigned channel) {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
@@ -256,7 +256,7 @@ struct BossFight : rack::Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs& args) override {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

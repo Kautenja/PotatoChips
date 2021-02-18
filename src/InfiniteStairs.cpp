@@ -222,7 +222,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
         // pulse generators
         for (unsigned i = 0; i < Ricoh2A03::TRIANGLE; i++)
             apu[channel].set_frequency(i, getFrequency(i, channel, 8, 1023, 16));
@@ -241,7 +241,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, unsigned channel) final {
         // pulse generators
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
             // set the pulse width of the pulse wave (high 3 bits) and set
@@ -263,7 +263,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         for (unsigned voice = 0; voice < Ricoh2A03::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

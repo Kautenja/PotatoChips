@@ -138,7 +138,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // frequency. there are two frequency registers per voice.
             // shift the index left 1 instead of multiplying by 2
@@ -155,7 +155,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, unsigned channel) final {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // level
             apu[channel].write(SunSoftFME7::PULSE_A_ENV + oscillator, 0x10 | getVolume(oscillator, channel));
@@ -167,7 +167,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         for (unsigned voice = 0; voice < SunSoftFME7::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

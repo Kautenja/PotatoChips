@@ -255,7 +255,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
+    virtual void processAudio(const ProcessArgs& args, unsigned channel) override {
         // set the frequency for all oscillators on the chip
         for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // extract the low, medium, and high frequency register values
@@ -277,7 +277,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) override {
+    inline void processCV(const ProcessArgs& args, unsigned channel) override {
         // get the number of active oscillators from the panel
         num_oscillators[channel] = getActiveOscillators(channel);
         // set the frequency for all oscillators on the chip
@@ -317,7 +317,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         // set the lights based on the accumulated brightness
         for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // accumulate brightness for all the channels

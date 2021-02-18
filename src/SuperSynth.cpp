@@ -203,7 +203,7 @@ struct SuperSynth : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // -------------------------------------------------------------------
         // MARK: RAM (SPC700 emulation)
         // -------------------------------------------------------------------

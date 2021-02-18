@@ -169,7 +169,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
         // tone generators (3)
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_frequency(voice, getFrequency(voice, channel));
@@ -180,7 +180,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    void processCV(const ProcessArgs &args, unsigned channel) final {
+    void processCV(const ProcessArgs& args, unsigned channel) final {
         // tone generators (3)
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
@@ -195,7 +195,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

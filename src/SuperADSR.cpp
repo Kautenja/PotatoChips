@@ -131,7 +131,7 @@ struct SuperADSR : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

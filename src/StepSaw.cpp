@@ -184,7 +184,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, unsigned channel) final {
         static constexpr float freq_low[KonamiVRC6::OSC_COUNT] =       { 4,  4,  3};
         static constexpr float clock_division[KonamiVRC6::OSC_COUNT] = {16, 16, 14};
         // detect sync for triangle generator voice
@@ -207,7 +207,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, unsigned channel) final {
         static constexpr float max_level[KonamiVRC6::OSC_COUNT] = {15, 15, 63};
         for (unsigned oscillator = 0; oscillator < KonamiVRC6::OSC_COUNT; oscillator++) {
             // level
@@ -221,7 +221,7 @@ struct StepSaw : ChipModule<KonamiVRC6> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, unsigned channels) final {
         for (unsigned voice = 0; voice < KonamiVRC6::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

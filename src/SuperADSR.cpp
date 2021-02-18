@@ -94,7 +94,7 @@ struct SuperADSR : Module {
     /// @param lane the processing lane to get the trigger input for
     /// @returns True if the given envelope generator is triggered
     ///
-    inline bool getTrigger(unsigned channel, unsigned lane) {
+    inline bool getTrigger(const unsigned& channel, const unsigned& lane) {
         // get the trigger from the gate input
         const float gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
         const bool gate = gateTrigger[lane][channel].process(gateCV);
@@ -110,7 +110,7 @@ struct SuperADSR : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     /// @param lane the processing lane on the module to process
     ///
-    inline void processChannel(unsigned channel, unsigned lane) {
+    inline void processChannel(const unsigned& channel, const unsigned& lane) {
         // cache the APU for this lane and channel
         SonyS_DSP::ADSR& apu = apus[lane][channel];
         // set the ADSR parameters for this APU

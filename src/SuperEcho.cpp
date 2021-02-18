@@ -99,7 +99,7 @@ struct SuperEcho : Module {
         const float param = params[PARAM_DELAY].getValue();
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_DELAY].getVoltage(channel));
         const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
-        const float MAX = static_cast<float>(SonyS_DSP::Echo::DELAY_LEVELS);
+        static constexpr float MAX = SonyS_DSP::Echo::DELAY_LEVELS;
         return Math::clip(param + mod, 0.f, MAX);
     }
 
@@ -125,10 +125,8 @@ struct SuperEcho : Module {
     ///
     inline int8_t getMix(const unsigned& channel, const unsigned& lane) {
         const float param = params[PARAM_MIX + lane].getValue();
-        // get the normal voltage from the left/right pair
         const float normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = inputs[INPUT_MIX + lane].getNormalVoltage(normal, channel);
-        // get the mod value and clamp within finite precision
         const float mod = std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
@@ -142,20 +140,12 @@ struct SuperEcho : Module {
     /// @returns the 8-bit FIR filter parameter for coefficient at given index
     ///
     inline int8_t getFIRCoefficient(const unsigned& channel, const unsigned& index) {
-        // get the normal voltage from the previous channel. if the index is
-        // 0, use a default voltage of 0V
-        const float normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
-        const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
-        // normal the voltage forward by updating the voltage on the port
-        inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
-        // get the value of the attenuverter
+        const float input = normalChain(&inputs[INPUT_FIR_COEFFICIENT], index, channel, 0.f);
         const float att = params[PARAM_FIR_COEFFICIENT_ATT + index].getValue();
-        // calculate the floating point mod value
-        const float mod = att * std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
-        // get the parameter value from the knob, sum with modulator, and clamp
+        const float mod = att * std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(input);
+        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
         return Math::clip(param + mod, MIN, MAX);
     }
 
@@ -167,15 +157,11 @@ struct SuperEcho : Module {
     /// @returns the 8-bit stereo input for the given lane
     ///
     inline int16_t getInput(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
-        static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        // get the normal voltage from the left/right pair
         const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        // const auto att = params[PARAM_GAIN + lane].getValue();
+        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
         const float input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
-        // process the input on the VU meter
         inputVUMeter[lane].process(args.sampleTime, input);
-        // clamp the value to finite precision and scale to the integer type
+        static constexpr float MAX = std::numeric_limits<int16_t>::max();
         return MAX * Math::clip(input, -1.f, 1.f);
     }
 
@@ -191,7 +177,7 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
-        const float gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
+        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
         const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         // process the input on the VU meter

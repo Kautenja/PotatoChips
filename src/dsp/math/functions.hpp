@@ -68,7 +68,7 @@ inline T mod(const T& a, const T& b) {
 /// @returns the evaluation of \f$\texttt{base}^2\f$
 ///
 template<typename T>
-inline T squared(const T& x) {
+inline T square(const T& x) {
     return x * x;
 }
 
@@ -78,7 +78,7 @@ inline T squared(const T& x) {
 /// @returns the evaluation of \f$\texttt{base}^3\f$
 ///
 template<typename T>
-inline T cubed(const T& x) {
+inline T cube(const T& x) {
     return x * x * x;
 }
 
@@ -129,7 +129,7 @@ inline float quantize(const float& value, const uint8_t& bits) {
 ///
 template <typename T>
 inline T sin_bhaskara(const T& x) {
-    return (16 * x * (PI - x)) / (5 * squared(PI) - 4 * x * (PI - x));
+    return (16 * x * (PI - x)) / (5 * square(PI) - 4 * x * (PI - x));
 }
 
 /// @brief Return the output of the sine function.
@@ -146,7 +146,7 @@ inline T sin_poly3(const T& x) {
     static constexpr T a = 0.09093347;
     static constexpr T b = -0.85559925;
     static constexpr T c = 1.84028261;
-    return a * cubed(x) + b * squared(x) + c * x;
+    return a * cubed(x) + b * square(x) + c * x;
 }
 
 /// @brief Return the output of the cosine function.
@@ -161,7 +161,7 @@ inline T sin_poly3(const T& x) {
 ///
 template <typename T>
 inline T cos_bhaskara(const T& x) {
-    return (squared(PI) - 4 * squared(x)) / (squared(PI) + squared(x));
+    return (square(PI) - 4 * square(x)) / (square(PI) + square(x));
 }
 
 }  // namespace Math

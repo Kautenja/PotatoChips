@@ -164,14 +164,14 @@ struct BossFight : rack::Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
+    void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
             apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
     }
 
     /// @brief Respond to the module being reset by the engine.
-    void onReset() override {
+    void onReset() final {
         prevent_clicks = false;
     }
 
@@ -179,7 +179,7 @@ struct BossFight : rack::Module {
     ///
     /// @returns a new JSON object with this object's serialized state data
     ///
-    json_t* dataToJson() override {
+    json_t* dataToJson() final {
         json_t* rootJ = json_object();
         json_object_set_new(rootJ, "prevent_clicks", json_boolean(prevent_clicks));
         return rootJ;
@@ -189,7 +189,7 @@ struct BossFight : rack::Module {
     ///
     /// @returns a JSON object with object serialized state data to restore
     ///
-    void dataFromJson(json_t* rootJ) override {
+    void dataFromJson(json_t* rootJ) final {
         json_t* prevent_clicks_object = json_object_get(rootJ, "prevent_clicks");
         if (prevent_clicks_object)
             prevent_clicks = json_boolean_value(prevent_clicks_object);
@@ -199,7 +199,7 @@ struct BossFight : rack::Module {
     ///
     /// @returns the 8-bit saturation value
     ///
-    inline int32_t getSaturation(unsigned channel) {
+    inline int32_t getSaturation(const unsigned& channel) {
         const float param = params[PARAM_SATURATION].getValue();
         const float cv = Math::Eurorack::fromDC(inputs[INPUT_SATURATION].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
@@ -212,7 +212,7 @@ struct BossFight : rack::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs& args, unsigned channel) {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
@@ -242,7 +242,7 @@ struct BossFight : rack::Module {
             gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
             // process the retrig trigger, high at 2V
             retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
+            const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
             // use the exclusive or of the gate and retrigger. This ensures that
             // when either gate or trigger alone is high, the gate is open,
             // but when neither or both are high, the gate is closed. This
@@ -274,9 +274,9 @@ struct BossFight : rack::Module {
         for (unsigned channel = 0; channel < channels; channel++) {
             float pitch = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
-                float frequency = params[PARAM_FREQ + op].getValue();
+                const float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, Math::clip(frequency + pitch, -6.5f, 6.5f)));
+                apu[channel].set_frequency(op, Math::Eurorack::voct2freq(Math::clip(frequency + pitch, -6.5f, 6.5f)));
             }
             // set the output voltage based on the 14-bit signed PCM sample
             const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
@@ -285,8 +285,8 @@ struct BossFight : rack::Module {
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
-            outputs[OUTPUT_MASTER + 0].setVoltage(5.f * sample, channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(5.f * sample, channel);
+            outputs[OUTPUT_MASTER + 0].setVoltage(Math::Eurorack::toAC(sample), channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(Math::Eurorack::toAC(sample), channel);
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {

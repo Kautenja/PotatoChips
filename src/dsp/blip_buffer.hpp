@@ -158,7 +158,7 @@ class BLIPBuffer {
         flush();
     }
 
-    /// @brief Set the frequency of the high-pass filter
+    /// @brief Set the frequency of the global high-pass filter.
     /// @details
     /// Higher values reduce the bass more.
     ///
@@ -167,18 +167,29 @@ class BLIPBuffer {
     inline void set_bass_freq(const int32_t& frequency) {
         int32_t shift = 31;
         if (frequency > 0) {
-            // extract the highest bit from the registered frequency
-            asm(
-                "bsrl %1, %0"
-                : "=r" (shift)
-                : "r" ((frequency << 16) / sample_rate)
-            );
-            shift = 13 - shift;
-            // NOTE: the above assembly replaces the following C++ while loop
-            // See https://stackoverflow.com/questions/671815/what-is-the-fastest-most-efficient-way-to-find-the-highest-set-bit-msb-in-an-i
-            // shift = 13;
-            // int32_t f = (frequency << 16) / sample_rate;
-            // while ((f >>= 1) && --shift) { }
+            #if defined (_M_IX86)    || \
+            defined (_M_IA64)    || \
+            defined (__i486__)   || \
+            defined (__x86_64__) || \
+            defined (__ia64__)   || \
+            defined (__i386__)  // CISC (true)
+                // extract the highest bit from the registered frequency
+                asm(
+                    "bsrl %1, %0"
+                    : "=r" (shift)
+                    : "r" ((frequency << 16) / sample_rate)
+                );
+                shift = 13 - shift;
+            #else  // CISC (false)
+                // NOTE: above assembly replaces the following C++ while loop
+                // for CISC architectures. See:
+                // https://stackoverflow.com/questions/671815/what-is-the-fastest-most-efficient-way-to-find-the-highest-set-bit-msb-in-an-i
+                // A RISC equivalent can be worked out. See:
+                // https://fgiesen.wordpress.com/2013/10/18/bit-scanning-equivalencies/
+                shift = 13;
+                int32_t f = (frequency << 16) / sample_rate;
+                while ((f >>= 1) && --shift) { }
+            #endif  // CISC
         }
         bass_freq = frequency;
         bass_shift = shift;

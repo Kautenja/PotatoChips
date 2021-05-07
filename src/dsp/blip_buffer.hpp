@@ -72,7 +72,7 @@ class BLIPBuffer {
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    blip_ulong factor = 1;
+    uint32_t factor = 1;
     /// the cut-off frequency of the high-pass filter in Hz
     int bass_freq = 16;
     /// the number of shifts to adjust samples to filter out bass according to
@@ -93,7 +93,9 @@ class BLIPBuffer {
     blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) * sizeof(blip_time_t)];
 
     /// @brief Initialize a new BLIP Buffer.
-    BLIPBuffer() { memset(buffer, 0, sizeof buffer); }
+    BLIPBuffer() {
+        memset(buffer, 0, sizeof buffer);
+    }
 
     /// @brief Set the output sample rate and clock rate.
     ///
@@ -103,7 +105,7 @@ class BLIPBuffer {
     void set_sample_rate(uint32_t sample_rate_, uint32_t clock_rate_) {
         // calculate the number of cycles per sample (round by truncation) and
         // re-calculate the clock rate with rounding error accounted for
-        clock_rate_ = static_cast<uint32_t>(clock_rate_ / sample_rate_) * sample_rate_;
+        clock_rate_ = sample_rate_ * (clock_rate_ / sample_rate_);
         // calculate the time factor based on the clock_rate and sample_rate
         double ratio = static_cast<double>(sample_rate_) / clock_rate_;
         blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
@@ -118,7 +120,7 @@ class BLIPBuffer {
         set_bass_freq(bass_freq);
     }
 
-    /// @brief Return the current output sample rate.
+    /// @brief Return the current sample rate.
     ///
     /// @returns the audio sample rate
     ///
@@ -129,6 +131,12 @@ class BLIPBuffer {
     /// @returns the number of source time units per second
     ///
     inline uint32_t get_clock_rate() const { return clock_rate; }
+
+    /// @brief Return the current factor from the sample rate and clock rate.
+    ///
+    /// @returns the current factor
+    ///
+    inline uint32_t get_factor() const { return factor; }
 
     /// @brief Set the frequency of the high-pass filter, where higher values
     /// reduce the bass more.

@@ -168,13 +168,14 @@ class BLIPBuffer {
         int32_t shift = 31;
         if (frequency > 0) {
             // extract the highest bit from the registered frequency
-            asm (
+            asm(
                 "bsrl %1, %0"
                 : "=r" (shift)
                 : "r" ((frequency << 16) / sample_rate)
             );
             shift = 13 - shift;
             // NOTE: the above assembly replaces the following C++ while loop
+            // See https://stackoverflow.com/questions/671815/what-is-the-fastest-most-efficient-way-to-find-the-highest-set-bit-msb-in-an-i
             // shift = 13;
             // int32_t f = (frequency << 16) / sample_rate;
             // while ((f >>= 1) && --shift) { }

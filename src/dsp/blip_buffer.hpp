@@ -34,13 +34,13 @@ static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
 /// directly.
 static constexpr uint32_t BLIP_PHASE_BITS = 6;
 
-/// TODO:
+/// the size of the buffer and the largest impulse that it can accommodate
 static constexpr int32_t BLIP_WIDEST_IMPULSE = 16;
 
-/// TODO:
+/// the index of the BLIP sample following the phase bits
 static constexpr int32_t BLIP_RES = 1 << BLIP_PHASE_BITS;
 
-/// TODO:
+/// the dynamic range of the BLIP samples measured as a bit shift offset
 static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
@@ -168,12 +168,12 @@ class BLIPBuffer {
     inline void set_bass_freq(const int32_t& frequency) {
         bass_freq = frequency;
         if (bass_freq > 0) {  // calculate the bass shift from the frequency
-            #if defined (_M_IX86)    || \
-            defined (_M_IA64)    || \
-            defined (__i486__)   || \
-            defined (__x86_64__) || \
-            defined (__ia64__)   || \
-            defined (__i386__)  // CISC (true)
+            #if defined(_M_IX86)    || \
+                defined(_M_IA64)    || \
+                defined(__i486__)   || \
+                defined(__x86_64__) || \
+                defined(__ia64__)   || \
+                defined(__i386__)  // CISC (true)
                 // extract the highest bit from the registered frequency
                 asm(
                     "bsrl %1, %0"
@@ -535,12 +535,12 @@ class BLIPSynthesizer {
 
         int16_t const* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
 
-        #if defined (_M_IX86)    || \
-            defined (_M_IA64)    || \
-            defined (__i486__)   || \
-            defined (__x86_64__) || \
-            defined (__ia64__)   || \
-            defined (__i386__)  // CISC
+        #if defined(_M_IX86)    || \
+            defined(_M_IA64)    || \
+            defined(__i486__)   || \
+            defined(__x86_64__) || \
+            defined(__ia64__)   || \
+            defined(__i386__)  // CISC
 
         // straight forward implementation resulted in better code on GCC for x86
 

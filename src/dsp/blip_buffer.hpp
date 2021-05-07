@@ -44,7 +44,7 @@ static constexpr uint32_t BLIP_PHASE_BITS = 6;
 static constexpr int BLIP_WIDEST_IMPULSE = 16;
 
 /// TODO:
-static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
+static constexpr int BLIP_RES = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
 static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
@@ -72,7 +72,7 @@ class BLIPBuffer {
     int32_t bass_shift = 0;
 
     /// the accumulator for integrating samples into
-    int32_t sample_accumulator = 0;
+    int32_t accumulator = 0;
     /// the buffer of samples in the BLIP buffer
     int32_t buffer[BLIP_WIDEST_IMPULSE + 1];
 
@@ -85,7 +85,10 @@ class BLIPBuffer {
 
  public:
     /// @brief Initialize a new BLIPBuffer.
-    BLIPBuffer() { memset(buffer, 0, sizeof(buffer)); }
+    BLIPBuffer() { flush(); }
+
+    /// @brief Flush the current contents of the buffer and accumulator.
+    void flush() { accumulator = 0; memset(buffer, 0, sizeof(buffer)); }
 
     /// @brief Set the output sample rate and clock rate.
     ///
@@ -109,10 +112,11 @@ class BLIPBuffer {
         sample_rate = sample_rate_;
         clock_rate = clock_rate_;
         factor = factor_;
-        sample_accumulator = 0;
         // reset the bass frequency because sample_rate has changed. This
         // function is atomic and guaranteed to not raise an error.
         set_bass_freq(bass_freq);
+        // clear the contents of the buffer / accumulator
+        flush();
     }
 
     /// @brief Return the current sample rate.
@@ -170,11 +174,20 @@ class BLIPBuffer {
     ///
     inline blip_time_t* get_buffer() { return buffer; }
 
+    /// @brief Return the sample accumulator.
+    ///
+    /// @returns the sample accumulator
+    ///
+    inline int32_t get_accumulator() const { return accumulator; }
+
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
     ///
     /// @param time the time to re-sample
-    /// @returns the re-sampled time according to the clock rate factor, i.e.,
+    /// @returns the re-sampled time according to the clock rate factor
+    /// @details
+    /// The re-sampled time is calculated as
+    ///
     /// \f$time * \frac{sample_rate}{clock_rate}\f$
     ///
     inline uint32_t resampled_time(const blip_time_t& time) const {
@@ -184,12 +197,14 @@ class BLIPBuffer {
     /// @brief Return a scaled floating point output sample from the buffer.
     ///
     /// @returns the sample \f$\in [-1, 1]\f$
+    /// @details
+    /// The buffer is advanced by the read operation.
     ///
     inline float read_sample() {
         // get the sample from the accumulator (don't clip it though). cast
         // it as a float for later calculation.
-        float sample = sample_accumulator >> (BLIP_SAMPLE_BITS - 16);
-        sample_accumulator += *buffer - (sample_accumulator >> (bass_shift));
+        float sample = accumulator >> (BLIP_SAMPLE_BITS - 16);
+        accumulator += *buffer - (accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
         auto remain = count + BLIP_WIDEST_IMPULSE;
@@ -290,10 +305,10 @@ class BLIPEqualizer {
         double half_rate = sample_rate * 0.5;
         double oversample = cutoff_freq ?
             half_rate / cutoff_freq :
-            blip_res * 2.25 / count + 0.85;
+            BLIP_RES * 2.25 / count + 0.85;
         double cutoff = rolloff_freq * oversample / half_rate;
         // generate a sinc
-        gen_sinc(out, count, blip_res * oversample, treble, cutoff);
+        gen_sinc(out, count, BLIP_RES * oversample, treble, cutoff);
         // apply (half of) hamming window
         double to_fraction = pi / (count - 1);
         for (uint32_t i = count; i--;)
@@ -320,7 +335,7 @@ class BLIPSynthesizer {
     /// TODO:
     double volume_unit = 0;
     /// TODO:
-    int16_t impulses[blip_res * (quality / 2) + 1];
+    int16_t impulses[BLIP_RES * (quality / 2) + 1];
     /// TODO:
     blip_long kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
@@ -331,22 +346,22 @@ class BLIPSynthesizer {
     int delta_factor = 0;
 
     /// TODO:
-    inline int impulses_size() const { return blip_res / 2 * quality + 1; }
+    inline int impulses_size() const { return BLIP_RES / 2 * quality + 1; }
 
     /// TODO:
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of first half
         int const size = impulses_size();
-        for (int p = blip_res; p-- >= blip_res / 2;) {
-            int p2 = blip_res - 2 - p;
+        for (int p = BLIP_RES; p-- >= BLIP_RES / 2;) {
+            int p2 = BLIP_RES - 2 - p;
             long error = kernel_unit;
-            for (int i = 1; i < size; i += blip_res) {
+            for (int i = 1; i < size; i += BLIP_RES) {
                 error -= impulses[i + p ];
                 error -= impulses[i + p2];
             }
             if (p == p2)  // phase = 0.5 impulse uses same half for both sides
                 error /= 2;
-            impulses[size - blip_res + p] += (int16_t) error;
+            impulses[size - BLIP_RES + p] += (int16_t) error;
         }
     }
 
@@ -399,25 +414,25 @@ class BLIPSynthesizer {
     /// @param equalizer the equalization parameter for the synthesizer
     ///
     void set_treble_eq(BLIPEqualizer const& equalizer) {
-        float fimpulse[blip_res / 2 * (BLIP_WIDEST_IMPULSE - 1) + blip_res * 2];
+        float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
 
-        int const half_size = blip_res / 2 * (quality - 1);
-        equalizer._generate(&fimpulse[blip_res], half_size);
+        int const half_size = BLIP_RES / 2 * (quality - 1);
+        equalizer._generate(&fimpulse[BLIP_RES], half_size);
 
         int i;
 
         // need mirror slightly past center for calculation
-        for (i = blip_res; i--;)
-            fimpulse[blip_res + half_size + i] = fimpulse[blip_res + half_size - 1 - i];
+        for (i = BLIP_RES; i--;)
+            fimpulse[BLIP_RES + half_size + i] = fimpulse[BLIP_RES + half_size - 1 - i];
 
         // starts at 0
-        for (i = 0; i < blip_res; i++)
+        for (i = 0; i < BLIP_RES; i++)
             fimpulse[i] = 0.0f;
 
         // find rescale factor
         double total = 0.0;
         for (i = 0; i < half_size; i++)
-            total += fimpulse[blip_res + i];
+            total += fimpulse[BLIP_RES + i];
 
         // double const base_unit = 44800.0 - 128 * 18; // allows treble up to +0 dB
         // double const base_unit = 37888.0; // allows treble to +5 dB
@@ -432,7 +447,7 @@ class BLIPSynthesizer {
         for (i = 0; i < impulses_size; i++) {
             impulses[i] = (int16_t) floor((next - sum) * rescale + 0.5);
             sum += fimpulse[i];
-            next += fimpulse[i + blip_res];
+            next += fimpulse[i + BLIP_RES];
         }
         adjust_impulse();
 
@@ -510,13 +525,13 @@ class BLIPSynthesizer {
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
         blip_long* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
-        int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
+        int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
 
         int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;
         int const rev = fwd + quality - 2;
         int const mid = quality / 2 - 1;
 
-        int16_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
+        int16_t const* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
 
         #if defined (_M_IX86)    || \
             defined (_M_IA64)    || \
@@ -528,7 +543,7 @@ class BLIPSynthesizer {
         // straight forward implementation resulted in better code on GCC for x86
 
         #define ADD_IMP(out, in) \
-            buffer[out] += (blip_long) imp[blip_res * (in)] * delta
+            buffer[out] += (blip_long) imp[BLIP_RES * (in)] * delta
 
         #define BLIP_FWD(i) {\
             ADD_IMP(fwd     + i, i    );\
@@ -559,15 +574,15 @@ class BLIPSynthesizer {
 
         #define BLIP_FWD(i) {\
             blip_long t0 =                       i0 * delta + buffer[fwd     + i];\
-            blip_long t1 = imp[blip_res * (i + 1)] * delta + buffer[fwd + 1 + i];\
-            i0 =           imp[blip_res * (i + 2)];\
+            blip_long t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
+            i0 =           imp[BLIP_RES * (i + 2)];\
             buffer[fwd     + i] = t0;\
             buffer[fwd + 1 + i] = t1;\
         }
         #define BLIP_REV(r) {\
             blip_long t0 =                 i0 * delta + buffer[rev     - r];\
-            blip_long t1 = imp[blip_res * r] * delta + buffer[rev + 1 - r];\
-            i0 =           imp[blip_res * (r - 1)];\
+            blip_long t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
+            i0 =           imp[BLIP_RES * (r - 1)];\
             buffer[rev     - r] = t0;\
             buffer[rev + 1 - r] = t1;\
         }
@@ -577,9 +592,9 @@ class BLIPSynthesizer {
             if (quality > 8 ) BLIP_FWD(2)
             if (quality > 12) BLIP_FWD(4) {
                 blip_long t0 =                   i0 * delta + buffer[fwd + mid - 1];
-                blip_long t1 = imp[blip_res * mid] * delta + buffer[fwd + mid    ];
+                blip_long t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
-                i0 = imp[blip_res * mid];
+                i0 = imp[BLIP_RES * mid];
                 buffer[fwd + mid - 1] = t0;
                 buffer[fwd + mid    ] = t1;
             }

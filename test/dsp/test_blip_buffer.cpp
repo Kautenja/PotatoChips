@@ -29,6 +29,16 @@
 // MARK:
 // ---------------------------------------------------------------------------
 
+TEST_CASE("BLIPBuffer is initisalized") {
+    BLIPBuffer buffer;
+    REQUIRE(0 == buffer.get_sample_rate());
+    REQUIRE(0 == buffer.get_clock_rate());
+    REQUIRE(1 << BLIP_WIDEST_IMPULSE == buffer.get_factor());
+    REQUIRE(16 == buffer.get_bass_freq());
+    REQUIRE(0 == buffer.get_bass_shift());
+    REQUIRE(0 == buffer.get_accumulator());
+}
+
 SCENARIO("Set the sample rate and clock rate to realistic values") {
     GIVEN("an initialized buffer") {
         BLIPBuffer buffer;
@@ -43,7 +53,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(11025, 768000);
             THEN("the rates are set") {
                 REQUIRE(11025 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(760725 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 16kHz with a clock rate of 768kHz") {
@@ -57,7 +67,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(22050, 768000);
             THEN("the rates are set") {
                 REQUIRE(22050 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(749700 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 32kHz with a clock rate of 768kHz") {
@@ -71,7 +81,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(44100, 768000);
             THEN("the rates are set") {
                 REQUIRE(44100 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(749700 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 48kHz with a clock rate of 768kHz") {
@@ -85,7 +95,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(88200, 768000);
             THEN("the rates are set") {
                 REQUIRE(88200 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(705600 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 96kHz with a clock rate of 768kHz") {
@@ -99,7 +109,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(176400, 768000);
             THEN("the rates are set") {
                 REQUIRE(176400 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(705600 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 192kHz with a clock rate of 768kHz") {
@@ -113,7 +123,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(352800, 768000);
             THEN("the rates are set") {
                 REQUIRE(352800 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(705600 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 384kHz with a clock rate of 768kHz") {
@@ -127,7 +137,7 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
             buffer.set_sample_rate(705600, 768000);
             THEN("the rates are set") {
                 REQUIRE(705600 == buffer.get_sample_rate());
-                // REQUIRE(768000 == buffer.get_clock_rate());
+                REQUIRE(705600 == buffer.get_clock_rate());
             }
         }
         WHEN("the sample rate is set to 768kHz with a clock rate of 768kHz") {

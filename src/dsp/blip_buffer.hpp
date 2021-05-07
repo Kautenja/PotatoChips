@@ -55,7 +55,7 @@ static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
     #define BLIP_RESTRICT
 #endif
 
-/// A Band-limited sound synthesis buffer.
+/// @brief A Band-limited impulse polynomial buffer.
 class BLIPBuffer {
  protected:
     /// The sample rate to generate samples from the buffer at
@@ -84,7 +84,7 @@ class BLIPBuffer {
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
-    /// @brief Initialize a new BLIP Buffer.
+    /// @brief Initialize a new BLIPBuffer.
     BLIPBuffer() { memset(buffer, 0, sizeof(buffer)); }
 
     /// @brief Set the output sample rate and clock rate.
@@ -201,22 +201,22 @@ class BLIPBuffer {
     }
 };
 
-/// Low-pass equalization parameters and logic.
+/// @brief Low-pass equalization parameters and logic.
 class BLIPEqualizer {
  private:
     /// the constant value for Pi
     static constexpr double pi = 3.1415926535897932384626433832795029;
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
-    double treble;
+    double treble = 0;
     /// TODO:
-    uint32_t rolloff_freq;
+    uint32_t rolloff_freq = 0;
     /// the sample rate the engine is running at
-    uint32_t sample_rate;
+    uint32_t sample_rate = 0;
     /// TODO:
-    uint32_t cutoff_freq;
+    uint32_t cutoff_freq = 0;
 
-    /// Generate a sinc.
+    /// Generate a sinc function.
     ///
     /// @param out the output buffer to generate sinc values into
     /// @param count the number of samples to generate

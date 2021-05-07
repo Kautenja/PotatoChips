@@ -107,9 +107,9 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
 
-    /// @brief Return the TODO.
+    /// @brief Return the number of bits to shift for high-pass filtering.
     ///
-    /// @returns TODO
+    /// @returns the number of bits to shift to high-pass the signal
     ///
     inline uint32_t get_bass_shift() const { return bass_shift; }
 

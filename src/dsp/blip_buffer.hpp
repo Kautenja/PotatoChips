@@ -343,20 +343,20 @@ class BLIPSynthesizer {
     /// the output buffer that the synthesizer writes samples to
     BLIPBuffer* buffer = 0;
     /// the last amplitude value (DPCM sample) to output from the synthesizer
-    int last_amp = 0;
+    int32_t last_amp = 0;
     /// the influence of amplitude deltas based on the volume unit
-    int delta_factor = 0;
+    int32_t delta_factor = 0;
 
-    /// TODO:
-    inline int impulses_size() const { return BLIP_RES / 2 * quality + 1; }
+    /// @brief Return the size of the impulses.
+    static inline int32_t impulses_size() { return BLIP_RES / 2 * quality + 1; }
 
     /// TODO:
     void adjust_impulse() {
-        // sum pairs for each phase and add error correction to end of first half
+        // sum pairs for each phase and add error correction to end of 1st half
         int const size = impulses_size();
         for (int p = BLIP_RES; p-- >= BLIP_RES / 2;) {
             int p2 = BLIP_RES - 2 - p;
-            long error = kernel_unit;
+            int32_t error = kernel_unit;
             for (int i = 1; i < size; i += BLIP_RES) {
                 error -= impulses[i + p ];
                 error -= impulses[i + p2];

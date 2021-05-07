@@ -30,9 +30,6 @@ typedef int32_t blip_long;
 /// A time unit at source clock rate
 typedef blip_long blip_time_t;
 
-/// An output sample type for 16-bit signed samples[-32768, 32767]
-typedef int16_t blip_sample_t;
-
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
 /// accurate ratio but reduce maximum buffer size.
 static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
@@ -60,24 +57,26 @@ static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
 
 /// A Band-limited sound synthesis buffer.
 class BLIPBuffer {
- private:
+ protected:
     /// The sample rate to generate samples from the buffer at
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    uint32_t factor = 1;
+    uint32_t factor = 1L << BLIP_BUFFER_ACCURACY;
+
     /// the cut-off frequency of the high-pass filter in Hz
-    int bass_freq = 16;
+    int32_t bass_freq = 16;
     /// the number of shifts to adjust samples to filter out bass according to
     /// the cut-off frequency of the hi-pass filter (`bass_freq`)
-    int bass_shift = 0;
+    int32_t bass_shift = 0;
+
     /// the accumulator for integrating samples into
-    blip_long sample_accumulator = 0;
-
+    int32_t sample_accumulator = 0;
     /// the buffer of samples in the BLIP buffer
-    blip_time_t buffer[BLIP_WIDEST_IMPULSE + 1];
+    int32_t buffer[BLIP_WIDEST_IMPULSE + 1];
 
+ private:
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);
 
@@ -86,7 +85,7 @@ class BLIPBuffer {
 
  public:
     /// @brief Initialize a new BLIP Buffer.
-    BLIPBuffer() { memset(buffer, 0, sizeof buffer); }
+    BLIPBuffer() { memset(buffer, 0, sizeof(buffer)); }
 
     /// @brief Set the output sample rate and clock rate.
     ///
@@ -140,8 +139,8 @@ class BLIPBuffer {
     ///
     /// @param frequency the cut-off frequency of the high-pass filter
     ///
-    inline void set_bass_freq(int frequency) {
-        int shift = 31;
+    inline void set_bass_freq(const int32_t& frequency) {
+        int32_t shift = 31;
         if (frequency > 0) {
             shift = 13;
             blip_long f = (frequency << 16) / sample_rate;
@@ -165,7 +164,11 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_shift() const { return bass_shift; }
 
-    inline blip_time_t* get_buffer() { return &buffer[0]; }
+    /// @brief Return a pointer to the underlying buffer.
+    ///
+    /// @returns a pointer to the underlying buffer of samples
+    ///
+    inline blip_time_t* get_buffer() { return buffer; }
 
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
@@ -194,7 +197,7 @@ class BLIPBuffer {
         memset(buffer + remain, 0, count * sizeof *buffer);
         // scale the sample by the scale factor and the binary code space for
         // the digital signal to produce a floating point value
-        return sample / std::numeric_limits<blip_sample_t>::max();
+        return sample / std::numeric_limits<int16_t>::max();
     }
 };
 
@@ -317,7 +320,7 @@ class BLIPSynthesizer {
     /// TODO:
     double volume_unit = 0;
     /// TODO:
-    blip_sample_t impulses[blip_res * (quality / 2) + 1];
+    int16_t impulses[blip_res * (quality / 2) + 1];
     /// TODO:
     blip_long kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
@@ -343,7 +346,7 @@ class BLIPSynthesizer {
             }
             if (p == p2)  // phase = 0.5 impulse uses same half for both sides
                 error /= 2;
-            impulses[size - blip_res + p] += (blip_sample_t) error;
+            impulses[size - blip_res + p] += (int16_t) error;
         }
     }
 
@@ -383,7 +386,7 @@ class BLIPSynthesizer {
                     long offset = 0x8000 + (1 << (shift - 1));
                     long offset2 = 0x8000 >> shift;
                     for (int i = impulses_size(); i--;)
-                        impulses[i] = (blip_sample_t) (((impulses[i] + offset) >> shift) - offset2);
+                        impulses[i] = (int16_t) (((impulses[i] + offset) >> shift) - offset2);
                     adjust_impulse();
                 }
             }
@@ -427,7 +430,7 @@ class BLIPSynthesizer {
         double next = 0.0;
         int const impulses_size = this->impulses_size();
         for (i = 0; i < impulses_size; i++) {
-            impulses[i] = (blip_sample_t) floor((next - sum) * rescale + 0.5);
+            impulses[i] = (int16_t) floor((next - sum) * rescale + 0.5);
             sum += fimpulse[i];
             next += fimpulse[i + blip_res];
         }
@@ -513,7 +516,7 @@ class BLIPSynthesizer {
         int const rev = fwd + quality - 2;
         int const mid = quality / 2 - 1;
 
-        blip_sample_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
+        int16_t const* BLIP_RESTRICT imp = impulses + blip_res - phase;
 
         #if defined (_M_IX86)    || \
             defined (_M_IA64)    || \

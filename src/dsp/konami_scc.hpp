@@ -107,7 +107,7 @@ class KonamiSCC {
     /// the oscillators on the chip
     Oscillator oscs[OSC_COUNT];
     /// the last time the oscillators were updated
-    blip_time_t last_time = 0;
+    int32_t last_time = 0;
     /// the registers on the chip
     uint8_t regs[NUM_REGISTERS];
     /// the synthesizer for the oscillators on the chip
@@ -117,7 +117,7 @@ class KonamiSCC {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time)
             throw Exception("end_time must be >= last_time");
         else if (end_time == last_time)
@@ -128,10 +128,10 @@ class KonamiSCC {
             BLIPBuffer* const output = osc.output;
             if (!output) continue;
             // get the period of the oscillator
-            blip_time_t period = (regs[0x80 + index * 2 + 1] & 0x0F) * 0x100 + regs[0x80 + index * 2] + 1;
+            int32_t period = (regs[0x80 + index * 2 + 1] & 0x0F) * 0x100 + regs[0x80 + index * 2] + 1;
             int volume = 0;
             if (regs[0x8F] & (1 << index)) {
-                blip_time_t inaudible_period = (output->get_clock_rate() + INAUDIBLE_FREQ * 32) / (INAUDIBLE_FREQ * 16);
+                int32_t inaudible_period = (output->get_clock_rate() + INAUDIBLE_FREQ * 32) / (INAUDIBLE_FREQ * 16);
                 if (period > inaudible_period)
                     volume = (regs[0x8A + index] & 0x0F) * (AMP_RANGE / 256 / 15);
             }
@@ -148,10 +148,10 @@ class KonamiSCC {
                 }
             }
             // get the time to advance to
-            blip_time_t time = last_time + osc.delay;
+            int32_t time = last_time + osc.delay;
             if (time < end_time) {
                 if (!volume) {  // maintain phase
-                    blip_time_t count = (end_time - time + period - 1) / period;
+                    int32_t count = (end_time - time + period - 1) / period;
                     osc.phase = (osc.phase + count) & (WAVE_SIZE - 1);
                     time += count * period;
                 } else {
@@ -245,7 +245,7 @@ class KonamiSCC {
     /// @param data the byte to write to the register at given address
     ///
     inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
+        static constexpr int32_t time = 0;
         // make sure the given address is legal. the starting address is 0,
         // and address is unsigned, so just check the upper bound
         if (/*address < ADDR_START or*/ address > ADDR_END)
@@ -259,7 +259,7 @@ class KonamiSCC {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t end_time) {
+    inline void end_frame(int32_t end_time) {
         run_until(end_time);
         last_time -= end_time;
     }

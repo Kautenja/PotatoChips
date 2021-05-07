@@ -231,7 +231,7 @@ class Namco163 {
     /// @param data the data to write to the given address
     ///
     inline void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
+        static constexpr int32_t time = 0;
         run_until(time);
         addr_reg = address;
         access() = data;

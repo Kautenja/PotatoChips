@@ -24,9 +24,6 @@
 #include <limits>
 #include "exceptions.hpp"
 
-/// A time unit at source clock rate
-typedef int32_t blip_time_t;
-
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
 /// accurate ratio but reduce maximum buffer size.
 static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;

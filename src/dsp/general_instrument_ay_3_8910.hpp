@@ -149,7 +149,7 @@ class GeneralInstrumentAy_3_8910 {
     uint8_t regs[NUM_REGISTERS];
 
     /// the last time the oscillators were updated
-    blip_time_t last_time = 0;
+    int32_t last_time = 0;
 
     /// the synthesizer shared by the 5 oscillator channels
     BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
@@ -157,9 +157,9 @@ class GeneralInstrumentAy_3_8910 {
     /// @brief An oscillators on the chip (A pulse waveform generator).
     struct Oscillator {
         /// the period of the oscillator
-        blip_time_t period = 0;
+        int32_t period = 0;
         /// TODO:
-        blip_time_t delay = 0;
+        int32_t delay = 0;
         /// the value of the last output from the oscillator
         int16_t last_amp = 0;
         /// the current phase of the oscillator
@@ -182,7 +182,7 @@ class GeneralInstrumentAy_3_8910 {
     /// The noise generator on the chip
     struct {
         /// TODO:
-        blip_time_t delay = 0;
+        int32_t delay = 0;
         /// the linear feedback shift register for generating noise values
         uint32_t lfsr = 1;
 
@@ -196,7 +196,7 @@ class GeneralInstrumentAy_3_8910 {
     /// The envelope generator on the chip
     struct {
         /// TODO:
-        blip_time_t delay = 0;
+        int32_t delay = 0;
         /// a pointer to the envelop waveform
         uint8_t const* wave = nullptr;
         /// the position in the waveform
@@ -219,23 +219,23 @@ class GeneralInstrumentAy_3_8910 {
     ///
     /// @param final_end_time the time to run the oscillators until
     ///
-    void run_until(blip_time_t final_end_time) {
+    void run_until(int32_t final_end_time) {
         if (final_end_time < last_time)  // invalid end time
             throw Exception("final_end_time must be >= last_time");
         else if (final_end_time == last_time)  // no change in time
             return;
 
         // noise period and initial values
-        blip_time_t const noise_period_factor = PERIOD_FACTOR * 2; // verified
-        blip_time_t noise_period = (regs[NOISE_PERIOD] & 0x1F) * noise_period_factor;
+        int32_t const noise_period_factor = PERIOD_FACTOR * 2; // verified
+        int32_t noise_period = (regs[NOISE_PERIOD] & 0x1F) * noise_period_factor;
         if (!noise_period)
             noise_period = noise_period_factor;
-        blip_time_t const old_noise_delay = noise.delay;
+        int32_t const old_noise_delay = noise.delay;
         uint32_t const old_noise_lfsr = noise.lfsr;
 
         // envelope period
-        blip_time_t const env_period_factor = PERIOD_FACTOR * 2; // verified
-        blip_time_t env_period = (regs[PERIOD_ENVELOPE_HI] * 0x100L + regs[PERIOD_ENVELOPE_LO]) * env_period_factor;
+        int32_t const env_period_factor = PERIOD_FACTOR * 2; // verified
+        int32_t env_period = (regs[PERIOD_ENVELOPE_HI] * 0x100L + regs[PERIOD_ENVELOPE_LO]) * env_period_factor;
         if (!env_period)
             env_period = env_period_factor; // same as period 1 on my AY chip
         if (!env.delay)
@@ -253,7 +253,7 @@ class GeneralInstrumentAy_3_8910 {
 
             // period
             int half_vol = 0;
-            blip_time_t inaudible_period = (uint32_t) (osc_output->get_clock_rate() +
+            int32_t inaudible_period = (uint32_t) (osc_output->get_clock_rate() +
                     INAUDIBLE_FREQ) / (INAUDIBLE_FREQ * 2);
             if (osc->period <= inaudible_period && !(osc_mode & TONE_OFF)) {
                 half_vol = 1; // Actually around 60%, but 50% is close enough
@@ -261,8 +261,8 @@ class GeneralInstrumentAy_3_8910 {
             }
 
             // envelope
-            blip_time_t start_time = last_time;
-            blip_time_t end_time   = final_end_time;
+            int32_t start_time = last_time;
+            int32_t end_time   = final_end_time;
             int const vol_mode = regs[0x08 + index];
             int volume = get_ampltiude(vol_mode & 0x0F) >> half_vol;
             int osc_env_pos = env.pos;
@@ -281,16 +281,16 @@ class GeneralInstrumentAy_3_8910 {
             }
 
             // tone time
-            blip_time_t const period = osc->period;
-            blip_time_t time = start_time + osc->delay;
+            int32_t const period = osc->period;
+            int32_t time = start_time + osc->delay;
             if (osc_mode & TONE_OFF) {  // maintain tone's phase when off
-                blip_time_t count = (final_end_time - time + period - 1) / period;
+                int32_t count = (final_end_time - time + period - 1) / period;
                 time += count * period;
                 osc->phase ^= count & 1;
             }
 
             // noise time
-            blip_time_t ntime = final_end_time;
+            int32_t ntime = final_end_time;
             uint32_t noise_lfsr = 1;
             if (!(osc_mode & NOISE_OFF)) {
                 ntime = start_time + old_noise_delay;
@@ -332,7 +332,7 @@ class GeneralInstrumentAy_3_8910 {
                     int phase = osc->phase | (osc_mode & TONE_OFF);
                     do {
                         // run noise
-                        blip_time_t end = end_time;
+                        int32_t end = end_time;
                         if (end_time > time) end = time;
                         if (phase & delta_non_zero) {
                             while (ntime <= end) {  // must advance *past* time to avoid hang
@@ -346,8 +346,8 @@ class GeneralInstrumentAy_3_8910 {
                             }
                         } else {
                             // 20 or more noise periods on average for some music
-                            blip_time_t remain = end - ntime;
-                            blip_time_t count = remain / noise_period;
+                            int32_t remain = end - ntime;
+                            int32_t count = remain / noise_period;
                             if (remain >= 0)
                                 ntime += noise_period + count * noise_period;
                         }
@@ -404,9 +404,9 @@ class GeneralInstrumentAy_3_8910 {
         // TODO: optimized saw wave envelope?
 
         // maintain envelope phase
-        blip_time_t remain = final_end_time - last_time - env.delay;
+        int32_t remain = final_end_time - last_time - env.delay;
         if (remain >= 0) {
-            blip_time_t count = (remain + env_period) / env_period;
+            int32_t count = (remain + env_period) / env_period;
             env.pos += count;
             if (env.pos >= 0)
                 env.pos = (env.pos & 31) - 32;
@@ -618,7 +618,7 @@ class GeneralInstrumentAy_3_8910 {
         // get the period from the two registers. the first register
         // contains the low 8 bits and the second register contains the
         // high 4 bits
-        blip_time_t period = ((regs[offset + 1] & 0x0F) << 8) | regs[offset];
+        int32_t period = ((regs[offset + 1] & 0x0F) << 8) | regs[offset];
         // multiply by PERIOD_FACTOR to calculate the internal period value
         period <<= PERIOD_SHIFTS;
         // if the period is zero, set to the minimal value of PERIOD_FACTOR
@@ -637,7 +637,7 @@ class GeneralInstrumentAy_3_8910 {
     ///
     /// @param time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t time) {
+    inline void end_frame(int32_t time) {
         run_until(time);
         last_time -= time;
     }

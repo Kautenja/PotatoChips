@@ -116,7 +116,7 @@ class KonamiVRC6 {
     /// the oscillators on the chip
     Oscillator oscs[OSC_COUNT];
     /// the time after the last run_until call
-    blip_time_t last_time = 0;
+    int32_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
     BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 31> saw_synth;
@@ -127,7 +127,7 @@ class KonamiVRC6 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(blip_time_t time) {
+    void run_until(int32_t time) {
         if (time < last_time)
             throw Exception("time must be >= last_time");
         else if (time == last_time)
@@ -143,7 +143,7 @@ class KonamiVRC6 {
     /// @param osc the oscillator to run
     /// @param end_time the number of elapsed cycles
     ///
-    void run_square(Oscillator& osc, blip_time_t end_time) {
+    void run_square(Oscillator& osc, int32_t end_time) {
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
@@ -153,7 +153,7 @@ class KonamiVRC6 {
         int gate = osc.regs[Oscillator::VOLUME] & 0x80;
         int duty = ((osc.regs[Oscillator::VOLUME] >> 4) & 7) + 1;
         int delta = ((gate || osc.phase < duty) ? volume : 0) - osc.last_amp;
-        blip_time_t time = last_time;
+        int32_t time = last_time;
         if (delta) {
             osc.last_amp += delta;
             square_synth.offset(time, delta, output);
@@ -188,14 +188,14 @@ class KonamiVRC6 {
     ///
     /// @param end_time the number of elapsed cycles
     ///
-    void run_saw(blip_time_t end_time) {
+    void run_saw(int32_t end_time) {
         Oscillator& osc = oscs[2];
         BLIPBuffer* output = osc.output;
         if (!output) return;
 
         int amp = osc.amp;
         int amp_step = osc.regs[Oscillator::VOLUME] & 0x3F;
-        blip_time_t time = last_time;
+        int32_t time = last_time;
         int last_amp = osc.last_amp;
 
         if (!(osc.regs[Oscillator::PERIOD_HIGH] & 0x80) || !(amp_step | amp)) {
@@ -305,7 +305,7 @@ class KonamiVRC6 {
     ///
     inline void write(uint16_t address, uint8_t data) {
         // the number of elapsed cycles
-        static constexpr blip_time_t time = 0;
+        static constexpr int32_t time = 0;
         // run the emulator up to the given time
         run_until(time);
         // get the register number from the address (lowest 2 bits). all 12
@@ -328,7 +328,7 @@ class KonamiVRC6 {
     ///
     /// @param time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t time) {
+    inline void end_frame(int32_t time) {
         run_until(time);
         last_time -= time;
     }

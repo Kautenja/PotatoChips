@@ -351,8 +351,8 @@ class Ricoh2A03 {
                     }
                 } else {
                     // using re-sampled time avoids conversion in synth.offset()
-                    const auto rperiod = output->resampled_time(period);
-                    auto rtime = output->resampled_time(time);
+                    const auto rperiod = period * output->get_factor();
+                    auto rtime = time * output->get_factor();
 
                     int currentDelta = amp * 2 - volume;
                     const int tap = (regs[2] & mode_flag ? 8 : 13);

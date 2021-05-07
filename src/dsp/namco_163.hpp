@@ -108,8 +108,8 @@ class Namco163 {
             BLIPBuffer* output = osc.output;
             if (!output) continue;
 
-            auto time = output->resampled_time(last_time) + osc.delay;
-            auto end_time = output->resampled_time(nes_end_time);
+            auto time = last_time * output->get_factor() + osc.delay;
+            auto end_time = nes_end_time * output->get_factor();
             osc.delay = 0;
             if (time < end_time) {
                 // get the register bank for this oscillator
@@ -129,7 +129,7 @@ class Namco163 {
                 // prevent low frequencies from excessively delaying freq changes
                 if (freq < 64 * active_oscs) continue;
                 // calculate the period of the waveform
-                auto period = output->resampled_time(((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) / wave_size;
+                auto period = (((osc_reg[4] >> 2)) * 15 * 65536 * active_oscs / freq) * output->get_factor() / wave_size;
                 // backup the amplitude and position
                 int last_amp = osc.last_amp;
                 int wave_pos = osc.wave_pos;

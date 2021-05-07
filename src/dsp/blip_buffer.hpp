@@ -24,11 +24,8 @@
 #include <limits>
 #include "exceptions.hpp"
 
-/// A 32-bit signed value
-typedef int32_t blip_long;
-
 /// A time unit at source clock rate
-typedef blip_long blip_time_t;
+typedef int32_t blip_time_t;
 
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
 /// accurate ratio but reduce maximum buffer size.
@@ -87,38 +84,6 @@ class BLIPBuffer {
     /// @brief Initialize a new BLIPBuffer.
     BLIPBuffer() { flush(); }
 
-    /// @brief Flush the current contents of the buffer and accumulator.
-    void flush() { accumulator = 0; memset(buffer, 0, sizeof(buffer)); }
-
-    /// @brief Set the output sample rate and clock rate.
-    ///
-    /// @param sample_rate_ the number of samples per second
-    /// @param clock_rate_ the number of source clock cycles per second
-    ///
-    void set_sample_rate(uint32_t sample_rate_, uint32_t clock_rate_) {
-        if (!(sample_rate_ > 0))  // sample rate must be positive
-            throw Exception("sample_rate must be greater than 0.");
-        if (!(clock_rate_ > 0))  // clock rate must be positive
-            throw Exception("clock_rate must be greater than 0.");
-        // Calculate the number of cycles per sample, quantize by truncation,
-        // and re-calculate the clock rate with rounding error accounted for.
-        clock_rate_ = sample_rate_ * (clock_rate_ / sample_rate_);
-        // calculate the time factor based on the clock_rate and sample_rate
-        float ratio = static_cast<float>(sample_rate_) / clock_rate_;
-        blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5f);
-        if (!(factor_ > 0))  // factor must be positive
-            throw Exception("sample_rate : clock_rate ratio is too large.");
-        // update the instance variables atomically after error handling
-        sample_rate = sample_rate_;
-        clock_rate = clock_rate_;
-        factor = factor_;
-        // reset the bass frequency because sample_rate has changed. This
-        // function is atomic and guaranteed to not raise an error.
-        set_bass_freq(bass_freq);
-        // clear the contents of the buffer / accumulator
-        flush();
-    }
-
     /// @brief Return the current sample rate.
     ///
     /// @returns the audio sample rate
@@ -137,23 +102,6 @@ class BLIPBuffer {
     ///
     inline uint32_t get_factor() const { return factor; }
 
-    /// @brief Set the frequency of the high-pass filter
-    /// @details
-    /// Higher values reduce the bass more.
-    ///
-    /// @param frequency the cut-off frequency of the high-pass filter
-    ///
-    inline void set_bass_freq(const int32_t& frequency) {
-        int32_t shift = 31;
-        if (frequency > 0) {
-            shift = 13;
-            blip_long f = (frequency << 16) / sample_rate;
-            while ((f >>= 1) && --shift) { }
-        }
-        bass_freq = frequency;
-        bass_shift = shift;
-    }
-
     /// @brief Return the frequency of the  high-pass filter.
     ///
     /// @returns the cut-off frequency of the high-pass filter
@@ -168,30 +116,66 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_shift() const { return bass_shift; }
 
-    /// @brief Return a pointer to the underlying buffer.
-    ///
-    /// @returns a pointer to the underlying buffer of samples
-    ///
-    inline blip_time_t* get_buffer() { return buffer; }
-
     /// @brief Return the sample accumulator.
     ///
     /// @returns the sample accumulator
     ///
     inline int32_t get_accumulator() const { return accumulator; }
 
-    /// @brief Return the time value re-sampled according to the clock rate
-    /// factor.
+    /// @brief Return a pointer to the underlying buffer.
     ///
-    /// @param time the time to re-sample
-    /// @returns the re-sampled time according to the clock rate factor
+    /// @returns a pointer to the underlying buffer of samples
+    ///
+    inline int32_t* get_buffer() { return buffer; }
+
+    /// @brief Flush the current contents of the buffer and accumulator.
+    void flush() { accumulator = 0; memset(buffer, 0, sizeof(buffer)); }
+
+    /// @brief Set the output sample rate and clock rate.
+    ///
+    /// @param sample_rate_ the number of samples per second
+    /// @param clock_rate_ the number of source clock cycles per second
+    ///
+    void set_sample_rate(const uint32_t& sample_rate_, const uint32_t& clock_rate_) {
+        if (!(sample_rate_ > 0))  // sample rate must be positive
+            throw Exception("sample_rate must be greater than 0.");
+        if (!(clock_rate_ > 0))  // clock rate must be positive
+            throw Exception("clock_rate must be greater than 0.");
+        // Calculate the number of clock cycles per sample, quantize by
+        // truncation, and re-calculate the clock rate with rounding error
+        // accounted for.
+        auto quantized_clock_rate = sample_rate_ * (clock_rate_ / sample_rate_);
+        // calculate the time factor based on the clock_rate and sample_rate
+        float ratio = static_cast<float>(sample_rate_) / quantized_clock_rate;
+        int32_t factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5f);
+        if (!(factor_ > 0))  // factor must be positive
+            throw Exception("sample_rate : clock_rate ratio is too large.");
+        // update the instance variables atomically after error handling
+        sample_rate = sample_rate_;
+        clock_rate = quantized_clock_rate;
+        factor = factor_;
+        // reset the bass frequency because sample_rate has changed. This
+        // function is atomic and guaranteed to not raise an error.
+        set_bass_freq(bass_freq);
+        // clear the contents of the buffer / accumulator
+        flush();
+    }
+
+    /// @brief Set the frequency of the high-pass filter
     /// @details
-    /// The re-sampled time is calculated as
+    /// Higher values reduce the bass more.
     ///
-    /// \f$time * \frac{sample_rate}{clock_rate}\f$
+    /// @param frequency the cut-off frequency of the high-pass filter
     ///
-    inline uint32_t resampled_time(const blip_time_t& time) const {
-        return time * factor;
+    inline void set_bass_freq(const int32_t& frequency) {
+        int32_t shift = 31;
+        if (frequency > 0) {
+            shift = 13;
+            int32_t f = (frequency << 16) / sample_rate;
+            while ((f >>= 1) && --shift) { }
+        }
+        bass_freq = frequency;
+        bass_shift = shift;
     }
 
     /// @brief Return a scaled floating point output sample from the buffer.
@@ -337,7 +321,7 @@ class BLIPSynthesizer {
     /// TODO:
     int16_t impulses[BLIP_RES * (quality / 2) + 1];
     /// TODO:
-    blip_long kernel_unit = 0;
+    int32_t kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
     BLIPBuffer* buffer = 0;
     /// the last amplitude value (DPCM sample) to output from the synthesizer
@@ -480,10 +464,10 @@ class BLIPSynthesizer {
     /// @param time the time of the sample
     /// @param amplitude the amplitude of the waveform to synthesizer
     ///
-    inline void update(blip_time_t time, int amplitude) {
+    inline void update(int32_t time, int amplitude) {
         int delta = amplitude - last_amp;
         last_amp = amplitude;
-        offset_resampled(buffer->resampled_time(time), delta, buffer);
+        offset_resampled(buffer->get_factor() * time, delta, buffer);
     }
 
     /// @brief Add an amplitude transition of specified delta into specified
@@ -494,8 +478,8 @@ class BLIPSynthesizer {
     /// The actual change in amplitude is delta * (volume / range)
     /// @param buffer the buffer to write the data into
     ///
-    inline void offset(blip_time_t time, int delta, BLIPBuffer* buffer) const {
-        offset_resampled(buffer->resampled_time(time), delta, buffer);
+    inline void offset(int32_t time, int delta, BLIPBuffer* buffer) const {
+        offset_resampled(buffer->get_factor() * time, delta, buffer);
     }
 
     /// @brief Add an amplitude transition of specified delta.
@@ -504,7 +488,7 @@ class BLIPSynthesizer {
     /// @param delta the change in amplitude. can be positive or negative.
     /// The actual change in amplitude is delta * (volume / range)
     ///
-    inline void offset(blip_time_t time, int delta) const {
+    inline void offset(int32_t time, int delta) const {
         offset(time, delta, buffer);
     }
 
@@ -524,7 +508,7 @@ class BLIPSynthesizer {
         if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
-        blip_long* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
+        int32_t* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
 
         int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;
@@ -543,7 +527,7 @@ class BLIPSynthesizer {
         // straight forward implementation resulted in better code on GCC for x86
 
         #define ADD_IMP(out, in) \
-            buffer[out] += (blip_long) imp[BLIP_RES * (in)] * delta
+            buffer[out] += (int32_t) imp[BLIP_RES * (in)] * delta
 
         #define BLIP_FWD(i) {\
             ADD_IMP(fwd     + i, i    );\
@@ -573,26 +557,26 @@ class BLIPSynthesizer {
         // for RISC processors, help compiler by reading ahead of writes
 
         #define BLIP_FWD(i) {\
-            blip_long t0 =                       i0 * delta + buffer[fwd     + i];\
-            blip_long t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
+            int32_t t0 =                       i0 * delta + buffer[fwd     + i];\
+            int32_t t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
             i0 =           imp[BLIP_RES * (i + 2)];\
             buffer[fwd     + i] = t0;\
             buffer[fwd + 1 + i] = t1;\
         }
         #define BLIP_REV(r) {\
-            blip_long t0 =                 i0 * delta + buffer[rev     - r];\
-            blip_long t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
+            int32_t t0 =                 i0 * delta + buffer[rev     - r];\
+            int32_t t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
             i0 =           imp[BLIP_RES * (r - 1)];\
             buffer[rev     - r] = t0;\
             buffer[rev + 1 - r] = t1;\
         }
 
-            blip_long i0 = *imp;
+            int32_t i0 = *imp;
             BLIP_FWD(0)
             if (quality > 8 ) BLIP_FWD(2)
             if (quality > 12) BLIP_FWD(4) {
-                blip_long t0 =                   i0 * delta + buffer[fwd + mid - 1];
-                blip_long t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
+                int32_t t0 =                   i0 * delta + buffer[fwd + mid - 1];
+                int32_t t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
                 i0 = imp[BLIP_RES * mid];
                 buffer[fwd + mid - 1] = t0;
@@ -602,8 +586,8 @@ class BLIPSynthesizer {
             if (quality > 8 ) BLIP_REV(4)
             BLIP_REV(2)
 
-            blip_long t0 =   i0 * delta + buffer[rev    ];
-            blip_long t1 = *imp * delta + buffer[rev + 1];
+            int32_t t0 =   i0 * delta + buffer[rev    ];
+            int32_t t1 = *imp * delta + buffer[rev + 1];
             buffer[rev    ] = t0;
             buffer[rev + 1] = t1;
         #endif  // CISC

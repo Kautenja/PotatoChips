@@ -27,17 +27,11 @@
 /// A 32-bit signed value
 typedef int32_t blip_long;
 
-/// A 32-bit unsigned value
-typedef uint32_t blip_ulong;
-
 /// A time unit at source clock rate
 typedef blip_long blip_time_t;
 
 /// An output sample type for 16-bit signed samples[-32768, 32767]
 typedef int16_t blip_sample_t;
-
-/// A re-sampled time unit
-typedef blip_ulong blip_resampled_time_t;
 
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
 /// accurate ratio but reduce maximum buffer size.
@@ -81,17 +75,16 @@ class BLIPBuffer {
     /// the accumulator for integrating samples into
     blip_long sample_accumulator = 0;
 
+    /// the buffer of samples in the BLIP buffer
+    blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) ];
+
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);
 
-    /// Disable the assignment operator
+    /// Disable the assignment operator.
     BLIPBuffer& operator=(const BLIPBuffer&);
 
  public:
-    // TODO: move to private / protected
-    /// the buffer of samples in the BLIP buffer
-    blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) * sizeof(blip_time_t)];
-
     /// @brief Initialize a new BLIP Buffer.
     BLIPBuffer() { memset(buffer, 0, sizeof buffer); }
 
@@ -172,6 +165,8 @@ class BLIPBuffer {
     ///
     inline uint32_t get_bass_shift() const { return bass_shift; }
 
+    inline blip_time_t* get_buffer() { return &buffer[0]; }
+
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
     ///
@@ -179,7 +174,7 @@ class BLIPBuffer {
     /// @returns the re-sampled time according to the clock rate factor, i.e.,
     /// \f$time * \frac{sample_rate}{clock_rate}\f$
     ///
-    inline blip_resampled_time_t resampled_time(const blip_time_t& time) const {
+    inline uint32_t resampled_time(const blip_time_t& time) const {
         return time * factor;
     }
 
@@ -505,17 +500,13 @@ class BLIPSynthesizer {
     /// Works directly in terms of fractional output samples.
     /// Contact Shay Green for more info.
     ///
-    void offset_resampled(
-        blip_resampled_time_t time,
-        int delta,
-        BLIPBuffer* blip_buffer
-    ) const {
+    void offset_resampled(uint32_t time, int delta, BLIPBuffer* blip_buffer) const {
         // TODO: remove. the "1" used to be a call to blip_buffer->get_size()
         // that is now static. This likely no longer needs to be checked
         if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
         delta *= delta_factor;
-        blip_long* BLIP_RESTRICT buffer = blip_buffer->buffer + (time >> BLIP_BUFFER_ACCURACY);
+        blip_long* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (blip_res - 1));
 
         int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;

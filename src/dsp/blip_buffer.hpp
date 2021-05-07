@@ -167,9 +167,17 @@ class BLIPBuffer {
     inline void set_bass_freq(const int32_t& frequency) {
         int32_t shift = 31;
         if (frequency > 0) {
-            shift = 13;
-            int32_t f = (frequency << 16) / sample_rate;
-            while ((f >>= 1) && --shift) { }
+            // extract the highest bit from the registered frequency
+            asm (
+                "bsrl %1, %0"
+                : "=r" (shift)
+                : "r" ((frequency << 16) / sample_rate)
+            );
+            shift = 13 - shift;
+            // NOTE: the above assembly replaces the following C++ while loop
+            // shift = 13;
+            // int32_t f = (frequency << 16) / sample_rate;
+            // while ((f >>= 1) && --shift) { }
         }
         bass_freq = frequency;
         bass_shift = shift;

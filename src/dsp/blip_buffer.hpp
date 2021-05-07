@@ -613,4 +613,6 @@ class BLIPSynthesizer {
     }
 };
 
+#undef BLIP_RESTRICT
+
 #endif  // DSP_BLIP_BUFFER_HPP_

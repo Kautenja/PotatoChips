@@ -159,14 +159,15 @@ class BLIPBuffer {
     }
 
     /// @brief Set the frequency of the global high-pass filter.
-    /// @details
-    /// Higher values reduce the bass more.
     ///
     /// @param frequency the cut-off frequency of the high-pass filter
+    /// @details
+    /// Higher frequency values reduce the bass more. Performance of this
+    /// function varies by architecture.
     ///
     inline void set_bass_freq(const int32_t& frequency) {
-        int32_t shift = 31;
-        if (frequency > 0) {
+        bass_freq = frequency;
+        if (bass_freq > 0) {  // calculate the bass shift from the frequency
             #if defined (_M_IX86)    || \
             defined (_M_IA64)    || \
             defined (__i486__)   || \
@@ -176,23 +177,23 @@ class BLIPBuffer {
                 // extract the highest bit from the registered frequency
                 asm(
                     "bsrl %1, %0"
-                    : "=r" (shift)
-                    : "r" ((frequency << 16) / sample_rate)
+                    : "=r" (bass_shift)
+                    : "r" ((bass_freq << 16) / sample_rate)
                 );
-                shift = 13 - shift;
+                bass_shift = 13 - bass_shift;
             #else  // CISC (false)
                 // NOTE: above assembly replaces the following C++ while loop
                 // for CISC architectures. See:
                 // https://stackoverflow.com/questions/671815/what-is-the-fastest-most-efficient-way-to-find-the-highest-set-bit-msb-in-an-i
-                // A RISC equivalent can be worked out. See:
+                // TODO: An assembly RISC equivalent can be worked out. See:
                 // https://fgiesen.wordpress.com/2013/10/18/bit-scanning-equivalencies/
-                shift = 13;
-                int32_t f = (frequency << 16) / sample_rate;
-                while ((f >>= 1) && --shift) { }
+                bass_shift = 13;
+                int32_t f = (bass_freq << 16) / sample_rate;
+                while ((f >>= 1) && --bass_shift) { }
             #endif  // CISC
+        } else {  // frequency is 0, set shift to static value
+            bass_shift = 31;
         }
-        bass_freq = frequency;
-        bass_shift = shift;
     }
 
     /// @brief Return a scaled floating point output sample from the buffer.

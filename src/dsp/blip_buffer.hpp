@@ -41,13 +41,13 @@ typedef blip_ulong blip_resampled_time_t;
 
 /// The number of bits in re-sampled ratio fraction. Higher values give a more
 /// accurate ratio but reduce maximum buffer size.
-static constexpr uint8_t BLIP_BUFFER_ACCURACY = 16;
+static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
 
 /// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
 /// in noticeable broadband noise when synthesizing high frequency square
 /// waves. Affects size of BLIPSynthesizer objects since they store the waveform
 /// directly.
-static constexpr uint8_t BLIP_PHASE_BITS = 6;
+static constexpr uint32_t BLIP_PHASE_BITS = 6;
 
 /// TODO:
 static constexpr int BLIP_WIDEST_IMPULSE = 16;
@@ -56,7 +56,7 @@ static constexpr int BLIP_WIDEST_IMPULSE = 16;
 static constexpr int blip_res = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
-static constexpr uint8_t BLIP_SAMPLE_BITS = 30;
+static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
 
 #if defined (__GNUC__) || _MSC_VER >= 1100
     #define BLIP_RESTRICT __restrict
@@ -93,9 +93,7 @@ class BLIPBuffer {
     blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) * sizeof(blip_time_t)];
 
     /// @brief Initialize a new BLIP Buffer.
-    BLIPBuffer() {
-        memset(buffer, 0, sizeof buffer);
-    }
+    BLIPBuffer() { memset(buffer, 0, sizeof buffer); }
 
     /// @brief Set the output sample rate and clock rate.
     ///
@@ -103,20 +101,25 @@ class BLIPBuffer {
     /// @param clock_rate_ the number of source clock cycles per second
     ///
     void set_sample_rate(uint32_t sample_rate_, uint32_t clock_rate_) {
-        // calculate the number of cycles per sample (round by truncation) and
-        // re-calculate the clock rate with rounding error accounted for
+        if (!(sample_rate_ > 0))  // sample rate must be positive
+            throw Exception("sample_rate must be greater than 0.");
+        if (!(clock_rate_ > 0))  // clock rate must be positive
+            throw Exception("clock_rate must be greater than 0.");
+        // Calculate the number of cycles per sample, quantize by truncation,
+        // and re-calculate the clock rate with rounding error accounted for.
         clock_rate_ = sample_rate_ * (clock_rate_ / sample_rate_);
         // calculate the time factor based on the clock_rate and sample_rate
-        double ratio = static_cast<double>(sample_rate_) / clock_rate_;
-        blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5);
-        if (!(factor_ > 0 || !sample_rate))  // fails if ratio is too large
-            throw Exception("sample_rate : clock_rate ratio is too large");
-        // update the instance variables atomically
+        float ratio = static_cast<float>(sample_rate_) / clock_rate_;
+        blip_long factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5f);
+        if (!(factor_ > 0))  // factor must be positive
+            throw Exception("sample_rate : clock_rate ratio is too large.");
+        // update the instance variables atomically after error handling
         sample_rate = sample_rate_;
         clock_rate = clock_rate_;
         factor = factor_;
         sample_accumulator = 0;
-        // reset the bass frequency (because sample_rate has changed)
+        // reset the bass frequency because sample_rate has changed. This
+        // function is atomic and guaranteed to not raise an error.
         set_bass_freq(bass_freq);
     }
 
@@ -138,8 +141,9 @@ class BLIPBuffer {
     ///
     inline uint32_t get_factor() const { return factor; }
 
-    /// @brief Set the frequency of the high-pass filter, where higher values
-    /// reduce the bass more.
+    /// @brief Set the frequency of the high-pass filter
+    /// @details
+    /// Higher values reduce the bass more.
     ///
     /// @param frequency the cut-off frequency of the high-pass filter
     ///
@@ -150,16 +154,23 @@ class BLIPBuffer {
             blip_long f = (frequency << 16) / sample_rate;
             while ((f >>= 1) && --shift) { }
         }
-        bass_shift = shift;
         bass_freq = frequency;
+        bass_shift = shift;
     }
 
     /// @brief Return the frequency of the  high-pass filter.
     ///
-    /// @returns the cut-off frequency of the high-pass filter, where higher
-    /// values reduce the bass more.
+    /// @returns the cut-off frequency of the high-pass filter
+    /// @details
+    /// Higher values reduce the bass more.
     ///
     inline uint32_t get_bass_freq() const { return bass_freq; }
+
+    /// @brief Return the TODO.
+    ///
+    /// @returns TODO
+    ///
+    inline uint32_t get_bass_shift() const { return bass_shift; }
 
     /// @brief Return the time value re-sampled according to the clock rate
     /// factor.
@@ -168,7 +179,7 @@ class BLIPBuffer {
     /// @returns the re-sampled time according to the clock rate factor, i.e.,
     /// \f$time * \frac{sample_rate}{clock_rate}\f$
     ///
-    inline blip_resampled_time_t resampled_time(blip_time_t time) const {
+    inline blip_resampled_time_t resampled_time(const blip_time_t& time) const {
         return time * factor;
     }
 

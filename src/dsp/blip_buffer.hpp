@@ -331,7 +331,7 @@ enum BLIPQuality {
 /// Calculate it by finding the difference between the maximum and minimum
 /// expected amplitudes (max - min).
 ///
-template<BLIPQuality quality, int range>
+template<BLIPQuality quality, int32_t range>
 class BLIPSynthesizer {
  private:
     /// TODO:
@@ -353,11 +353,11 @@ class BLIPSynthesizer {
     /// TODO:
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of 1st half
-        int const size = impulses_size();
-        for (int p = BLIP_RES; p-- >= BLIP_RES / 2;) {
-            int p2 = BLIP_RES - 2 - p;
+        const int32_t size = impulses_size();
+        for (int32_t p = BLIP_RES; p-- >= BLIP_RES / 2;) {
+            const int32_t p2 = BLIP_RES - 2 - p;
             int32_t error = kernel_unit;
-            for (int i = 1; i < size; i += BLIP_RES) {
+            for (int32_t i = 1; i < size; i += BLIP_RES) {
                 error -= impulses[i + p ];
                 error -= impulses[i + p2];
             }
@@ -376,39 +376,37 @@ class BLIPSynthesizer {
     /// @param new_unit the new volume level to use
     ///
     void set_volume(double new_unit) {
-        new_unit = new_unit * (1.0 / (range < 0 ? -range : range));
-        if (new_unit != volume_unit) {
-            // use default eq if it hasn't been set yet
-            if (!kernel_unit)
-                set_treble_eq(BLIPEqualizer(-8.0));
-
-            volume_unit = new_unit;
-            double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
-
-            if (factor > 0.0) {
-                int shift = 0;
-
-                // if unit is really small, might need to attenuate kernel
-                while (factor < 2.0) {
-                    shift++;
-                    factor *= 2.0;
-                }
-
-                if (shift) {
-                    kernel_unit >>= shift;
-                    if (kernel_unit <= 0)
-                        throw Exception("volume level is too low");
-                    // keep values positive to avoid round-towards-zero of sign-preserving
-                    // right shift for negative values
-                    long offset = 0x8000 + (1 << (shift - 1));
-                    long offset2 = 0x8000 >> shift;
-                    for (int i = impulses_size(); i--;)
-                        impulses[i] = (int16_t) (((impulses[i] + offset) >> shift) - offset2);
-                    adjust_impulse();
-                }
+        // normalize the new unit by the range
+        new_unit = new_unit / abs(range);
+        // return if the volume has not changed
+        if (new_unit == volume_unit) return;
+        // use default equalizer if it hasn't been set yet
+        if (!kernel_unit) set_treble_eq(BLIPEqualizer(-8.0));
+        // set the volume
+        volume_unit = new_unit;
+        double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
+        if (factor > 0.0) {
+            int32_t shift = 0;
+            while (factor < 2.0) {  // unit is small -> attenuate kernel
+                shift++;
+                factor *= 2.0;
             }
-            delta_factor = (int) floor(factor + 0.5);
+            if (shift) {
+                kernel_unit >>= shift;
+                if (kernel_unit <= 0)
+                    throw Exception("volume level is too low");
+                // keep values positive to avoid round-towards-zero of
+                // sign-preserving right shift for negative values
+                int32_t offset = 0x8000 + (1 << (shift - 1));
+                int32_t offset2 = 0x8000 >> shift;
+                for (int32_t i = impulses_size(); i > 0; i--)
+                    impulses[i] = (((impulses[i] + offset) >> shift) - offset2);
+                adjust_impulse();
+            }
         }
+        // set the integer-valued delta factor based on the floor of the factor
+        // using an epsilon value of 0.5 to account for numerical imprecision.
+        delta_factor = floor(factor + 0.5f);
     }
 
     /// @brief Set treble equalization for the synthesizer.

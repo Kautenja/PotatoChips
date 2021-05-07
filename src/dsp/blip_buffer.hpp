@@ -35,10 +35,10 @@ static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
 static constexpr uint32_t BLIP_PHASE_BITS = 6;
 
 /// TODO:
-static constexpr int BLIP_WIDEST_IMPULSE = 16;
+static constexpr int32_t BLIP_WIDEST_IMPULSE = 16;
 
 /// TODO:
-static constexpr int BLIP_RES = 1 << BLIP_PHASE_BITS;
+static constexpr int32_t BLIP_RES = 1 << BLIP_PHASE_BITS;
 
 /// TODO:
 static constexpr uint32_t BLIP_SAMPLE_BITS = 30;

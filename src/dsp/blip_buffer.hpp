@@ -76,7 +76,7 @@ class BLIPBuffer {
     blip_long sample_accumulator = 0;
 
     /// the buffer of samples in the BLIP buffer
-    blip_time_t buffer[(BLIP_WIDEST_IMPULSE + 1) ];
+    blip_time_t buffer[BLIP_WIDEST_IMPULSE + 1];
 
     /// Disable the copy constructor.
     BLIPBuffer(const BLIPBuffer&);

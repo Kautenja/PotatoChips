@@ -226,22 +226,22 @@ class BLIPEqualizer {
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
     double treble = 0;
-    /// TODO:
+    /// the roll-off frequency of the low-pass filter
     uint32_t rolloff_freq = 0;
     /// the sample rate the engine is running at
     uint32_t sample_rate = 0;
-    /// TODO:
+    /// the cut-off frequency of the low-pass filter
     uint32_t cutoff_freq = 0;
 
     /// Generate a sinc function.
     ///
     /// @param out the output buffer to generate sinc values into
     /// @param count the number of samples to generate
-    /// @param oversample TODO:
+    /// @param oversample the amount of oversampling to apply
     /// @param treble Logarithmic roll-off to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0)
     /// increase treble.
-    /// @param cutoff TODO:
+    /// @param cutoff the cut-off frequency in [0, 1)
     ///
     static inline void gen_sinc(
         float* out,
@@ -276,12 +276,12 @@ class BLIPEqualizer {
  public:
     /// Initialize a new BLIPEqualizer.
     ///
-    /// @param treble Logarithmic rolloff to treble dB at half sampling rate.
+    /// @param treble logarithmic roll-off to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
     /// treble.
-    /// @param rolloff_freq TODO:
+    /// @param rolloff_freq the roll-off frequency of the low-pass filter
     /// @param sample_rate the sample rate the engine is running at
-    /// @param cutoff_freq TODO:
+    /// @param cutoff_freq the cut-off frequency of the low-pass filter
     ///
     explicit BLIPEqualizer(
         double treble,
@@ -334,11 +334,11 @@ enum BLIPQuality {
 template<BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
 class BLIPSynthesizer {
  private:
-    /// TODO:
+    /// the last set volume level (used to detect changes in volume level)
     double volume_unit = 0;
-    /// TODO:
+    /// the impulses in the synthesizers buffer
     int16_t impulses[BLIP_RES * (QUALITY / 2) + 1];
-    /// TODO:
+    /// the kernel unit for calculating amplitudes of impulses
     int32_t kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
     BLIPBuffer* buffer = 0;
@@ -352,7 +352,7 @@ class BLIPSynthesizer {
         return QUALITY * (BLIP_RES / 2) + 1;
     }
 
-    /// TODO:
+    /// @brief Adjust the impulses in the buffer according to the kernel unit.
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of 1st half
         static const int32_t SIZE = impulses_size();
@@ -470,43 +470,9 @@ class BLIPSynthesizer {
     ///
     inline BLIPBuffer* get_output() const { return buffer; }
 
-    /// Update amplitude of waveform at given time. Using this requires a
-    /// separate BLIPSynthesizer for each waveform.
+    /// @brief Add an amplitude transition of specified delta into the buffer.
     ///
-    /// @param time the time of the sample
-    /// @param amplitude the amplitude of the waveform to synthesizer
-    ///
-    inline void update(int32_t time, int amplitude) {
-        int delta = amplitude - last_amp;
-        last_amp = amplitude;
-        offset_resampled(buffer->get_factor() * time, delta, buffer);
-    }
-
-    /// @brief Add an amplitude transition of specified delta into specified
-    /// buffer rather than the instance buffer.
-    ///
-    /// @param time TODO:
-    /// @param delta the change in amplitude. can be positive or negative.
-    /// The actual change in amplitude is delta * (volume / range)
-    /// @param buffer the buffer to write the data into
-    ///
-    inline void offset(int32_t time, int delta, BLIPBuffer* buffer) const {
-        offset_resampled(buffer->get_factor() * time, delta, buffer);
-    }
-
-    /// @brief Add an amplitude transition of specified delta.
-    ///
-    /// @param time TODO:
-    /// @param delta the change in amplitude. can be positive or negative.
-    /// The actual change in amplitude is delta * (volume / range)
-    ///
-    inline void offset(int32_t time, int delta) const {
-        offset(time, delta, buffer);
-    }
-
-    /// @brief TODO:
-    ///
-    /// @param time TODO:
+    /// @param time the amount of time between this sample and the last
     /// @param delta the change in amplitude. can be positive or negative.
     /// The actual change in amplitude is delta * (volume / range)
     /// @param blip_buffer the buffer to write the data into
@@ -514,41 +480,37 @@ class BLIPSynthesizer {
     /// Works directly in terms of fractional output samples.
     /// Contact Shay Green for more info.
     ///
-    void offset_resampled(uint32_t time, int delta, BLIPBuffer* blip_buffer) const {
-        // TODO: remove. the "1" used to be a call to blip_buffer->get_size()
-        // that is now static. This likely no longer needs to be checked
+    void offset_resampled(uint32_t time, int32_t delta, BLIPBuffer* blip_buffer) const {
+        static constexpr int32_t fwd = (BLIP_WIDEST_IMPULSE - QUALITY) / 2;
+        static constexpr int32_t rev = fwd + QUALITY - 2;
+        static constexpr int32_t mid = QUALITY / 2 - 1;
+        // ensure the time is valid with respect to the accuracy of the buffer
         if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
+        // update the delta by the delta factor and cache necessary structures
         delta *= delta_factor;
-        int32_t* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
-        int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
-
-        int const fwd = (BLIP_WIDEST_IMPULSE - QUALITY) / 2;
-        int const rev = fwd + QUALITY - 2;
-        int const mid = QUALITY / 2 - 1;
-
-        int16_t const* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
+        int32_t* const BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
+        const int32_t phase = (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
+        const int16_t* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
 
         #if defined(_M_IX86)    || \
             defined(_M_IA64)    || \
             defined(__i486__)   || \
             defined(__x86_64__) || \
             defined(__ia64__)   || \
-            defined(__i386__)  // CISC
+            defined(__i386__)  // CISC (true)
+            // straight forward implementation resulted in better code on GCC for x86
+            #define ADD_IMP(out, in) \
+                buffer[out] += (int32_t) imp[BLIP_RES * (in)] * delta
 
-        // straight forward implementation resulted in better code on GCC for x86
-
-        #define ADD_IMP(out, in) \
-            buffer[out] += (int32_t) imp[BLIP_RES * (in)] * delta
-
-        #define BLIP_FWD(i) {\
-            ADD_IMP(fwd     + i, i    );\
-            ADD_IMP(fwd + 1 + i, i + 1);\
-        }
-        #define BLIP_REV(r) {\
-            ADD_IMP(rev     - r, r + 1);\
-            ADD_IMP(rev + 1 - r, r    );\
-        }
+            #define BLIP_FWD(i) {\
+                ADD_IMP(fwd     + i, i    );\
+                ADD_IMP(fwd + 1 + i, i + 1);\
+            }
+            #define BLIP_REV(r) {\
+                ADD_IMP(rev     - r, r + 1);\
+                ADD_IMP(rev + 1 - r, r    );\
+            }
 
             BLIP_FWD(0)
             if (QUALITY > 8 ) BLIP_FWD(2)
@@ -564,30 +526,28 @@ class BLIPSynthesizer {
             ADD_IMP(rev    , 1);
             ADD_IMP(rev + 1, 0);
 
-        #else  // CISC (false)
-
-        // for RISC processors, help compiler by reading ahead of writes
-
-        #define BLIP_FWD(i) {\
-            int32_t t0 =                       i0 * delta + buffer[fwd     + i];\
-            int32_t t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
-            i0 =           imp[BLIP_RES * (i + 2)];\
-            buffer[fwd     + i] = t0;\
-            buffer[fwd + 1 + i] = t1;\
-        }
-        #define BLIP_REV(r) {\
-            int32_t t0 =                 i0 * delta + buffer[rev     - r];\
-            int32_t t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
-            i0 =           imp[BLIP_RES * (r - 1)];\
-            buffer[rev     - r] = t0;\
-            buffer[rev + 1 - r] = t1;\
-        }
+        #else  // CISC (false), i.e., RISC
+            // for RISC processors, help compiler by reading ahead of writes
+            #define BLIP_FWD(i) {\
+                int32_t t0 =                      i0 * delta + buffer[fwd     + i];\
+                int32_t t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
+                i0 =           imp[BLIP_RES * (i + 2)];\
+                buffer[fwd     + i] = t0;\
+                buffer[fwd + 1 + i] = t1;\
+            }
+            #define BLIP_REV(r) {\
+                int32_t t0 =                i0 * delta + buffer[rev     - r];\
+                int32_t t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
+                i0 =           imp[BLIP_RES * (r - 1)];\
+                buffer[rev     - r] = t0;\
+                buffer[rev + 1 - r] = t1;\
+            }
 
             int32_t i0 = *imp;
             BLIP_FWD(0)
             if (QUALITY > 8 ) BLIP_FWD(2)
             if (QUALITY > 12) BLIP_FWD(4) {
-                int32_t t0 =                   i0 * delta + buffer[fwd + mid - 1];
+                int32_t t0 =                  i0 * delta + buffer[fwd + mid - 1];
                 int32_t t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
                 i0 = imp[BLIP_RES * mid];
@@ -606,6 +566,40 @@ class BLIPSynthesizer {
 
         #undef BLIP_FWD
         #undef BLIP_REV
+    }
+
+    /// @brief Add an amplitude transition of specified delta into specified
+    /// buffer rather than the instance buffer.
+    ///
+    /// @param time the amount of time between this sample and the last
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    /// @param buffer the buffer to write the data into
+    ///
+    inline void offset(int32_t time, int32_t delta, BLIPBuffer* buffer) const {
+        offset_resampled(buffer->get_factor() * time, delta, buffer);
+    }
+
+    /// @brief Add an amplitude transition of specified delta.
+    ///
+    /// @param time the amount of time between this sample and the last
+    /// @param delta the change in amplitude. can be positive or negative.
+    /// The actual change in amplitude is delta * (volume / range)
+    ///
+    inline void offset(int32_t time, int32_t delta) const {
+        offset(time, delta, buffer);
+    }
+
+    /// Update amplitude of waveform at given time. Using this requires a
+    /// separate BLIPSynthesizer for each waveform.
+    ///
+    /// @param time the amount of time between this sample and the last
+    /// @param amplitude the amplitude of the waveform to synthesizer
+    ///
+    inline void update(int32_t time, int32_t amplitude) {
+        const int32_t delta = amplitude - last_amp;
+        last_amp = amplitude;
+        offset_resampled(time * buffer->get_factor(), delta, buffer);
     }
 };
 

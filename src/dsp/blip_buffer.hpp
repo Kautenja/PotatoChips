@@ -355,17 +355,17 @@ class BLIPSynthesizer {
     /// TODO:
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of 1st half
-        const int32_t size = impulses_size();
-        for (int32_t p = BLIP_RES; p-- >= BLIP_RES / 2;) {
+        static const int32_t SIZE = impulses_size();
+        for (int32_t p = BLIP_RES; p >= BLIP_RES / 2; p--) {
             const int32_t p2 = BLIP_RES - 2 - p;
             int32_t error = kernel_unit;
-            for (int32_t i = 1; i < size; i += BLIP_RES) {
+            for (int32_t i = 1; i < SIZE; i += BLIP_RES) {
                 error -= impulses[i + p ];
                 error -= impulses[i + p2];
             }
             if (p == p2)  // phase = 0.5 impulse uses same half for both sides
                 error /= 2;
-            impulses[size - BLIP_RES + p] += (int16_t) error;
+            impulses[SIZE - BLIP_RES + p] += error;
         }
     }
 
@@ -415,49 +415,43 @@ class BLIPSynthesizer {
     ///
     /// @param equalizer the equalization parameter for the synthesizer
     ///
-    void set_treble_eq(BLIPEqualizer const& equalizer) {
+    void set_treble_eq(const BLIPEqualizer& equalizer) {
+        static constexpr int32_t HALF_SIZE = BLIP_RES / 2 * (QUALITY - 1);
         float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
-
-        int const half_size = BLIP_RES / 2 * (QUALITY - 1);
-        equalizer._generate(&fimpulse[BLIP_RES], half_size);
-
-        int i;
-
+        equalizer._generate(&fimpulse[BLIP_RES], HALF_SIZE);
+        int32_t i;
         // need mirror slightly past center for calculation
-        for (i = BLIP_RES; i--;)
-            fimpulse[BLIP_RES + half_size + i] = fimpulse[BLIP_RES + half_size - 1 - i];
-
+        for (i = BLIP_RES; i > 0; i--)
+            fimpulse[BLIP_RES + HALF_SIZE + i] = fimpulse[BLIP_RES + HALF_SIZE - 1 - i];
         // starts at 0
         for (i = 0; i < BLIP_RES; i++)
-            fimpulse[i] = 0.0f;
-
+            fimpulse[i] = 0;
         // find rescale factor
-        double total = 0.0;
-        for (i = 0; i < half_size; i++)
+        double total = 0;
+        for (i = 0; i < HALF_SIZE; i++)
             total += fimpulse[BLIP_RES + i];
 
-        // double const base_unit = 44800.0 - 128 * 18; // allows treble up to +0 dB
-        // double const base_unit = 37888.0; // allows treble to +5 dB
-        double const base_unit = 32768.0; // necessary for blip_unscaled to work
-        double rescale = base_unit / 2 / total;
-        kernel_unit = (long) base_unit;
+        // static constexpr double BASE_UNIT = 44800 - 128 * 18; // allows treble up to +0 dB
+        // static constexpr double BASE_UNIT = 37888; // allows treble to +5 dB
+        static constexpr double BASE_UNIT = 32768; // necessary for blip_unscaled to work
+        double rescale = BASE_UNIT / 2 / total;
+        kernel_unit = floor(BASE_UNIT);
 
-        // integrate, first difference, rescale, convert to int
-        double sum = 0.0;
-        double next = 0.0;
-        int const impulses_size = this->impulses_size();
-        for (i = 0; i < impulses_size; i++) {
-            impulses[i] = (int16_t) floor((next - sum) * rescale + 0.5);
+        // integrate, first difference, rescale, quantize
+        double sum = 0;
+        double next = 0;
+        for (i = 0; i < impulses_size(); i++) {
+            impulses[i] = floor((next - sum) * rescale + 0.5);
             sum += fimpulse[i];
             next += fimpulse[i + BLIP_RES];
         }
         adjust_impulse();
 
         // volume might require rescaling
-        double vol = volume_unit;
-        if (vol) {
-            volume_unit = 0.0;
-            set_volume(vol);
+        const double volume_unit = this->volume_unit;
+        if (volume_unit) {
+            this->volume_unit = 0;
+            set_volume(volume_unit);
         }
     }
 

@@ -29,7 +29,7 @@
 // MARK:
 // ---------------------------------------------------------------------------
 
-TEST_CASE("BLIPBuffer is initisalized") {
+TEST_CASE("initialize a default BLIPBuffer") {
     BLIPBuffer buffer;
     REQUIRE(0 == buffer.get_sample_rate());
     REQUIRE(0 == buffer.get_clock_rate());

@@ -397,10 +397,10 @@ class BLIPSynthesizer {
                     throw Exception("volume level is too low");
                 // keep values positive to avoid round-towards-zero of
                 // sign-preserving right shift for negative values
-                int32_t offset = 0x8000 + (1 << (shift - 1));
-                int32_t offset2 = 0x8000 >> shift;
+                int32_t offset_hi = 0x8000 + (1 << (shift - 1));
+                int32_t offset_lo = 0x8000 >> shift;
                 for (int32_t i = impulses_size(); i > 0; i--)
-                    impulses[i] = (((impulses[i] + offset) >> shift) - offset2);
+                    impulses[i] = ((impulses[i] + offset_hi) >> shift) - offset_lo;
                 adjust_impulse();
             }
         }

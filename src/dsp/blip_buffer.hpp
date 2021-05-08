@@ -326,18 +326,18 @@ enum BLIPQuality {
 };
 
 /// @brief A digital synthesizer for arbitrary waveforms based on BLIP.
-/// @tparam quality the quality of the BLIP algorithm
-/// @tparam range specifies the greatest expected change in amplitude.
+/// @tparam QUALITY the quality of the BLIP algorithm
+/// @tparam DYNAMIC_RANGE specifies the greatest expected change in amplitude.
 /// Calculate it by finding the difference between the maximum and minimum
 /// expected amplitudes (max - min).
 ///
-template<BLIPQuality quality, int32_t range>
+template<BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
 class BLIPSynthesizer {
  private:
     /// TODO:
     double volume_unit = 0;
     /// TODO:
-    int16_t impulses[BLIP_RES * (quality / 2) + 1];
+    int16_t impulses[BLIP_RES * (QUALITY / 2) + 1];
     /// TODO:
     int32_t kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
@@ -348,7 +348,9 @@ class BLIPSynthesizer {
     int32_t delta_factor = 0;
 
     /// @brief Return the size of the impulses.
-    static inline int32_t impulses_size() { return BLIP_RES / 2 * quality + 1; }
+    static inline int32_t impulses_size() {
+        return QUALITY * (BLIP_RES / 2) + 1;
+    }
 
     /// TODO:
     void adjust_impulse() {
@@ -377,7 +379,7 @@ class BLIPSynthesizer {
     ///
     void set_volume(double new_unit) {
         // normalize the new unit by the range
-        new_unit = new_unit / abs(range);
+        new_unit = new_unit / abs(DYNAMIC_RANGE);
         // return if the volume has not changed
         if (new_unit == volume_unit) return;
         // use default equalizer if it hasn't been set yet
@@ -416,7 +418,7 @@ class BLIPSynthesizer {
     void set_treble_eq(BLIPEqualizer const& equalizer) {
         float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
 
-        int const half_size = BLIP_RES / 2 * (quality - 1);
+        int const half_size = BLIP_RES / 2 * (QUALITY - 1);
         equalizer._generate(&fimpulse[BLIP_RES], half_size);
 
         int i;
@@ -527,9 +529,9 @@ class BLIPSynthesizer {
         int32_t* BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
         int phase = (int) (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
 
-        int const fwd = (BLIP_WIDEST_IMPULSE - quality) / 2;
-        int const rev = fwd + quality - 2;
-        int const mid = quality / 2 - 1;
+        int const fwd = (BLIP_WIDEST_IMPULSE - QUALITY) / 2;
+        int const rev = fwd + QUALITY - 2;
+        int const mid = QUALITY / 2 - 1;
 
         int16_t const* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
 
@@ -555,14 +557,14 @@ class BLIPSynthesizer {
         }
 
             BLIP_FWD(0)
-            if (quality > 8 ) BLIP_FWD(2)
-            if (quality > 12) BLIP_FWD(4) {
+            if (QUALITY > 8 ) BLIP_FWD(2)
+            if (QUALITY > 12) BLIP_FWD(4) {
                 ADD_IMP(fwd + mid - 1, mid - 1);
                 ADD_IMP(fwd + mid    , mid    );
                 imp = impulses + phase;
             }
-            if (quality > 12) BLIP_REV(6)
-            if (quality > 8 ) BLIP_REV(4)
+            if (QUALITY > 12) BLIP_REV(6)
+            if (QUALITY > 8 ) BLIP_REV(4)
             BLIP_REV(2)
 
             ADD_IMP(rev    , 1);
@@ -589,8 +591,8 @@ class BLIPSynthesizer {
 
             int32_t i0 = *imp;
             BLIP_FWD(0)
-            if (quality > 8 ) BLIP_FWD(2)
-            if (quality > 12) BLIP_FWD(4) {
+            if (QUALITY > 8 ) BLIP_FWD(2)
+            if (QUALITY > 12) BLIP_FWD(4) {
                 int32_t t0 =                   i0 * delta + buffer[fwd + mid - 1];
                 int32_t t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
@@ -598,8 +600,8 @@ class BLIPSynthesizer {
                 buffer[fwd + mid - 1] = t0;
                 buffer[fwd + mid    ] = t1;
             }
-            if (quality > 12) BLIP_REV(6)
-            if (quality > 8 ) BLIP_REV(4)
+            if (QUALITY > 12) BLIP_REV(6)
+            if (QUALITY > 8 ) BLIP_REV(4)
             BLIP_REV(2)
 
             int32_t t0 =   i0 * delta + buffer[rev    ];

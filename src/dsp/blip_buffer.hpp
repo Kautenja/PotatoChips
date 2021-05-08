@@ -24,12 +24,6 @@
 #include <limits>
 #include "exceptions.hpp"
 
-#if defined (__GNUC__) || _MSC_VER >= 1100
-    #define BLIP_RESTRICT __restrict
-#else
-    #define BLIP_RESTRICT
-#endif
-
 /// @brief A Band-limited impulse polynomial buffer.
 class BLIPBuffer {
  public:
@@ -489,9 +483,18 @@ class BLIPSynthesizer {
             throw Exception("time goes beyond end of buffer");
         // update the delta by the delta factor and cache necessary structures
         delta *= delta_factor;
-        int32_t* const BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIPBuffer::ACCURACY);
+
+        #if defined (__GNUC__) || _MSC_VER >= 1100
+            #define RESTRICT __restrict
+        #else
+            #define RESTRICT
+        #endif
+
+        int32_t* const RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIPBuffer::ACCURACY);
         const int32_t phase = (time >> (BLIPBuffer::ACCURACY - BLIPBuffer::PHASE_BITS) & (BLIPBuffer::RESOLUTION - 1));
-        const int16_t* BLIP_RESTRICT imp = impulses + BLIPBuffer::RESOLUTION - phase;
+        const int16_t* RESTRICT imp = impulses + BLIPBuffer::RESOLUTION - phase;
+
+        #undef RESTRICT
 
         #if defined(_M_IX86)    || \
             defined(_M_IA64)    || \
@@ -602,7 +605,5 @@ class BLIPSynthesizer {
         offset_resampled(time * buffer->get_factor(), delta, buffer);
     }
 };
-
-#undef BLIP_RESTRICT
 
 #endif  // DSP_BLIP_BUFFER_HPP_

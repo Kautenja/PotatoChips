@@ -546,7 +546,7 @@ class Ricoh2A03 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         square_synth.set_treble_eq(equalizer);
         triangle.synth.set_treble_eq(equalizer);
         noise.synth.set_treble_eq(equalizer);

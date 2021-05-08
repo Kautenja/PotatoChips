@@ -219,13 +219,14 @@ class BLIPBuffer {
 };
 
 /// @brief Low-pass equalization parameters and logic.
+template<typename T>
 class BLIPEqualizer {
  private:
     /// the constant value for Pi
-    static constexpr double PI = 3.1415926535897932384626433832795029;
+    static constexpr T PI = 3.1415926535897932384626433832795029;
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
-    double treble = 0;
+    T treble = 0;
     /// the roll-off frequency of the low-pass filter
     uint32_t rolloff_freq = 0;
     /// the sample rate the engine is running at
@@ -243,31 +244,27 @@ class BLIPEqualizer {
     /// increase treble.
     /// @param cutoff the cut-off frequency in [0, 1)
     ///
-    static inline void gen_sinc(
-        float* out,
-        uint32_t count,
-        double oversample,
-        double treble,
-        double cutoff
-    ) {
-        if (cutoff >= 0.999) cutoff = 0.999;
-        if (treble < -300.0) treble = -300.0;
-        if (treble > 5.0)    treble = 5.0;
-        static constexpr double maxh = 4096.0;
-        const double rolloff =
-            pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
-        const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
-        const double to_angle = PI / 2 / maxh / oversample;
-        for (uint32_t i = 0; i < count; i++) {
-            double angle = ((i - count) * 2 + 1) * to_angle;
-            double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
-            double cos_nc_angle = cos(maxh * cutoff * angle);
-            double cos_nc1_angle = cos((maxh * cutoff - 1.0) * angle);
-            double cos_angle = cos(angle);
+    static inline void gen_sinc(T* out, size_t count, T oversample, T treble, T cutoff) {
+        if (cutoff >= 0.999)
+            cutoff = 0.999;
+        if (treble < -300)
+            treble = -300;
+        else if (treble > 5)
+            treble = 5;
+        static constexpr T maxh = 4096;
+        const T rolloff = pow(10, 1 / (20 * maxh) * treble / (1 - cutoff));
+        const T pow_a_n = pow(rolloff, maxh - maxh * cutoff);
+        const T to_angle = PI / 2 / maxh / oversample;
+        for (size_t i = 0; i < count; i++) {
+            T angle = (2 * (i - count) + 1) * to_angle;
+            T c = rolloff * cos((maxh - 1) * angle) - cos(maxh * angle);
+            T cos_nc_angle = cos(maxh * cutoff * angle);
+            T cos_nc1_angle = cos((maxh * cutoff - 1) * angle);
+            T cos_angle = cos(angle);
             c = c * pow_a_n - rolloff * cos_nc1_angle + cos_nc_angle;
-            double d = 1.0 + rolloff * (rolloff - cos_angle - cos_angle);
-            double b = 2.0 - cos_angle - cos_angle;
-            double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
+            T d = 1 + rolloff * (rolloff - cos_angle - cos_angle);
+            T b = 2 - cos_angle - cos_angle;
+            T a = 1 - cos_angle - cos_nc_angle + cos_nc1_angle;
             // a / b + c / d
             out[i] = (a * d + c * b) / (b * d);
         }
@@ -283,8 +280,7 @@ class BLIPEqualizer {
     /// @param sample_rate the sample rate the engine is running at
     /// @param cutoff_freq the cut-off frequency of the low-pass filter
     ///
-    explicit BLIPEqualizer(
-        double treble,
+    explicit BLIPEqualizer(T treble,
         uint32_t rolloff_freq = 0,
         uint32_t sample_rate = 44100,
         uint32_t cutoff_freq = 0
@@ -301,20 +297,20 @@ class BLIPEqualizer {
     /// @details
     /// for usage within instances of BLIPSynthesizer_
     ///
-    inline void operator()(float* out, uint32_t count) const {
+    inline void operator()(T* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
         // (8 points->1.49, 16 points->1.15)
-        const double half_rate = sample_rate * 0.5;
-        const double oversample = cutoff_freq ?
+        const T half_rate = sample_rate * 0.5;
+        const T oversample = cutoff_freq ?
             half_rate / cutoff_freq :
             BLIP_RES * 2.25 / count + 0.85;
-        const double cutoff = rolloff_freq * oversample / half_rate;
+        const T cutoff = rolloff_freq * oversample / half_rate;
         // generate a sinc
         gen_sinc(out, count, BLIP_RES * oversample, treble, cutoff);
         // apply (half of) hamming window
-        const double to_fraction = PI / (count - 1);
+        const T to_fraction = PI / (count - 1);
         for (uint32_t i = count; i--;)
-            out[i] *= 0.54f - 0.46f * cos(i * to_fraction);
+            out[i] *= 0.54 - 0.46 * cos(i * to_fraction);
     }
 };
 
@@ -383,7 +379,7 @@ class BLIPSynthesizer {
         // return if the volume has not changed
         if (new_unit == volume_unit) return;
         // use default equalizer if it hasn't been set yet
-        if (!kernel_unit) set_treble_eq(BLIPEqualizer(-8.0));
+        if (!kernel_unit) set_treble_eq(BLIPEqualizer<float>(-8.0));
         // set the volume
         volume_unit = new_unit;
         double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
@@ -415,7 +411,7 @@ class BLIPSynthesizer {
     ///
     /// @param equalizer the equalization parameter for the synthesizer
     ///
-    void set_treble_eq(const BLIPEqualizer& equalizer) {
+    void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         static constexpr int32_t HALF_SIZE = BLIP_RES / 2 * (QUALITY - 1);
         float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
         equalizer(&fimpulse[BLIP_RES], HALF_SIZE);

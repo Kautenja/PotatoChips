@@ -636,7 +636,7 @@ class NintendoGBS {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    void set_treble_eq(const BLIPEqualizer& equalizer) {
+    void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         pulse_synth.set_treble_eq(equalizer);
         other_synth.set_treble_eq(equalizer);
     }

@@ -228,7 +228,7 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         synth.set_treble_eq(equalizer);
     }
 

@@ -158,7 +158,7 @@ class AtariPOKEY {
         ///
         /// @param equalizer the equalization parameter for the synthesizers
         ///
-        inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+        inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
             synth.set_treble_eq(equalizer);
         }
     };
@@ -438,7 +438,7 @@ class AtariPOKEY {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         impl->set_treble_eq(equalizer);
     }
 

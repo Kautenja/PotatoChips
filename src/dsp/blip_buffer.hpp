@@ -141,7 +141,7 @@ class BLIPBuffer {
         auto quantized_clock_rate = sample_rate_ * (clock_rate_ / sample_rate_);
         // calculate the time factor based on the clock_rate and sample_rate
         float ratio = static_cast<float>(sample_rate_) / quantized_clock_rate;
-        int32_t factor_ = floor(ratio * (1L << ACCURACY) + 0.5f);
+        int32_t factor_ = floor(ratio * (1L << ACCURACY) + 0.5);
         if (!(factor_ > 0))  // factor must be positive
             throw Exception("sample_rate : clock_rate ratio is too large.");
         // update the instance variables atomically after error handling
@@ -402,7 +402,7 @@ class BLIPSynthesizer {
         }
         // set the integer-valued delta factor based on the floor of the factor
         // using an epsilon value of 0.5 to account for numerical imprecision.
-        delta_factor = floor(factor + 0.5f);
+        delta_factor = floor(factor + 0.5);
     }
 
     /// @brief Set treble equalization for the synthesizer.

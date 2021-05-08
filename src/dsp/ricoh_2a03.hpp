@@ -182,7 +182,7 @@ class Ricoh2A03 {
             }
         }
 
-        void run(blip_time_t time, blip_time_t end_time) {
+        void run(int32_t time, int32_t end_time) {
             if (!output) return;
             const int volume = this->volume();
             const int period = this->period();
@@ -201,7 +201,7 @@ class Ricoh2A03 {
                     // maintain proper phase
                     int count = (end_time - time + timer_period - 1) / timer_period;
                     phase = (phase + count) & (PHASE_RANGE - 1);
-                    time += static_cast<blip_time_t>(count * timer_period);
+                    time += static_cast<int32_t>(count * timer_period);
                 }
             } else {
                 // handle duty select
@@ -265,7 +265,7 @@ class Ricoh2A03 {
             return amp;
         }
 
-        void run(blip_time_t time, blip_time_t end_time) {
+        void run(int32_t time, int32_t end_time) {
             if (!output) return;
             // TODO: track phase when period < 3
             // TODO: Output 7.5 on dac when period < 2? More accurate,
@@ -321,7 +321,7 @@ class Ricoh2A03 {
         /// the BLIP synthesizer for the oscillator
         BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 15> synth;
 
-        void run(blip_time_t time, blip_time_t end_time) {
+        void run(int32_t time, int32_t end_time) {
             static const int16_t noise_period_table[16] = {
                 0x004, 0x008, 0x010, 0x020, 0x040, 0x060, 0x080, 0x0A0,
                 0x0CA, 0x0FE, 0x17C, 0x1FC, 0x2FA, 0x3F8, 0x7F2, 0xFE4
@@ -351,8 +351,8 @@ class Ricoh2A03 {
                     }
                 } else {
                     // using re-sampled time avoids conversion in synth.offset()
-                    const auto rperiod = output->resampled_time(period);
-                    auto rtime = output->resampled_time(time);
+                    const auto rperiod = period * output->get_factor();
+                    auto rtime = time * output->get_factor();
 
                     int currentDelta = amp * 2 - volume;
                     const int tap = (regs[2] & mode_flag ? 8 : 13);
@@ -401,7 +401,7 @@ class Ricoh2A03 {
     Oscillator* oscs[OSC_COUNT] = { &pulse0, &pulse1, &triangle, &noise };
 
     /// has been run until this time in current frame
-    blip_time_t last_time;
+    int32_t last_time;
 
     /// cycles until frame counter runs next
     int frame_delay;
@@ -433,7 +433,7 @@ class Ricoh2A03 {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time)
             throw Exception("end_time must be >= last_time");
         else if (end_time == last_time)
@@ -441,7 +441,7 @@ class Ricoh2A03 {
 
         while (true) {
             // earlier of next frame time or end time
-            blip_time_t time = last_time + frame_delay;
+            int32_t time = last_time + frame_delay;
             if (time > end_time) time = end_time;
             frame_delay -= time - last_time;
 
@@ -647,7 +647,7 @@ class Ricoh2A03 {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t end_time) {
+    inline void end_frame(int32_t end_time) {
         if (end_time > last_time) run_until(end_time);
         last_time -= end_time;
     }

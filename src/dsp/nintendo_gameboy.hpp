@@ -220,7 +220,7 @@ class NintendoGBS {
             }
         }
 
-        void run(blip_time_t time, blip_time_t end_time, int playing) {
+        void run(int32_t time, int32_t end_time, int playing) {
             if (sweep_freq == 2048)
                 playing = false;
 
@@ -279,7 +279,7 @@ class NintendoGBS {
             bits = 1;
         }
 
-        void run(blip_time_t time, blip_time_t end_time, int playing) {
+        void run(int32_t time, int32_t end_time, int playing) {
             int amp = volume & playing;
             int tap = 13 - (regs[3] & 8);
             if (bits >> tap & 2)
@@ -303,8 +303,8 @@ class NintendoGBS {
 
                 // keep parallel resampled time to eliminate time conversion in the loop
                 BLIPBuffer* const output = this->output;
-                const auto resampled_period = output->resampled_time(period);
-                auto resampled_time = output->resampled_time(time);
+                const auto resampled_period = period * output->get_factor();
+                auto resampled_time = time * output->get_factor();
                 unsigned bits = this->bits;
                 int delta = amp * 2;
 
@@ -364,7 +364,7 @@ class NintendoGBS {
             }
         }
 
-        void run(blip_time_t time, blip_time_t end_time, int playing) {
+        void run(int32_t time, int32_t end_time, int playing) {
             int volume_shift = (volume - 1) & 7;  // volume = 0 causes shift = 7
             int frequency;
             {
@@ -409,11 +409,11 @@ class NintendoGBS {
     };
 
     /// TODO:
-    blip_time_t next_frame_time;
+    int32_t next_frame_time;
     /// TODO:
-    blip_time_t last_time;
+    int32_t last_time;
     /// TODO:
-    blip_time_t frame_period;
+    int32_t frame_period;
     /// TODO:
     double volume_unit;
     /// TODO:
@@ -456,14 +456,14 @@ class NintendoGBS {
     ///
     /// @param time the number of elapsed cycles
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time)
             throw Exception("end_time must be >= last_time");
         else if (end_time == last_time)
             return;
 
         while (true) {
-            blip_time_t time = next_frame_time;
+            int32_t time = next_frame_time;
             if (time > end_time)
                 time = end_time;
 
@@ -682,7 +682,7 @@ class NintendoGBS {
     /// @param data the data to write to the register
     ///
     void write(uint16_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
+        static constexpr int32_t time = 0;
         static constexpr unsigned char powerup_regs[0x20] = {
             0x80,0x3F,0x00,0xFF,0xBF,                     // square 1
             0xFF,0x3F,0x00,0xFF,0xBF,                     // square 2
@@ -794,7 +794,7 @@ class NintendoGBS {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    void end_frame(blip_time_t end_time) {
+    void end_frame(int32_t end_time) {
         run_until(end_time);
         next_frame_time -= end_time;
         last_time -= end_time;

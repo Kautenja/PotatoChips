@@ -106,7 +106,7 @@ class NECTurboGrafx16 {
         /// TODO:
         uint8_t dac;
         /// the last time that the oscillator was updated
-        blip_time_t last_time;
+        int32_t last_time;
 
         /// the left, center, and right channel output buffers for the oscillator
         BLIPBuffer* outputs[2];
@@ -127,7 +127,7 @@ class NECTurboGrafx16 {
         /// @param synth the synthesizer to use for generating samples
         /// @param time the number of elapsed cycles
         ///
-        void run_until(const Synthesizer& synth, blip_time_t end_time) {
+        void run_until(const Synthesizer& synth, int32_t end_time) {
             if (end_time < last_time)
                 throw Exception("end_time must be >= last_time");
             else if (end_time == last_time)
@@ -149,7 +149,7 @@ class NECTurboGrafx16 {
                     if (delta) synth.offset(last_time, delta, osc_outputs_1);
                 }
                 // update time
-                blip_time_t time = last_time + delay;
+                int32_t time = last_time + delay;
                 if (time < end_time) {
                     if (noise & 0x80) {
                         if (volume_0 | volume_1) {
@@ -198,7 +198,7 @@ class NECTurboGrafx16 {
                                 //     dprintf("Used period 0\n");
                             }
                             // maintain phase when silent
-                            blip_time_t count = (end_time - time + period - 1) / period;
+                            int32_t count = (end_time - time + period - 1) / period;
                             phase += count; // phase will be masked below
                             time += count * period;
                         }
@@ -437,7 +437,7 @@ class NECTurboGrafx16 {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t end_time) {
+    inline void end_frame(int32_t end_time) {
         for (unsigned channel = 0; channel < OSC_COUNT; channel++) {
             oscs[channel].run_until(synth, end_time);
             oscs[channel].last_time -= end_time;

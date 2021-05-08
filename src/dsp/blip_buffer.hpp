@@ -219,6 +219,7 @@ class BLIPBuffer {
 };
 
 /// @brief Low-pass equalization parameters and logic.
+/// @tparam T the datatype for computing floating point logic
 template<typename T>
 class BLIPEqualizer {
  private:
@@ -227,12 +228,12 @@ class BLIPEqualizer {
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
     T treble = 0;
+    /// the cut-off frequency of the low-pass filter
+    uint32_t cutoff_freq = 0;
     /// the roll-off frequency of the low-pass filter
     uint32_t rolloff_freq = 0;
     /// the sample rate the engine is running at
     uint32_t sample_rate = 0;
-    /// the cut-off frequency of the low-pass filter
-    uint32_t cutoff_freq = 0;
 
     /// Generate a sinc function.
     ///
@@ -276,19 +277,19 @@ class BLIPEqualizer {
     /// @param treble logarithmic roll-off to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
     /// treble.
+    /// @param cutoff_freq the cut-off frequency of the low-pass filter
     /// @param rolloff_freq the roll-off frequency of the low-pass filter
     /// @param sample_rate the sample rate the engine is running at
-    /// @param cutoff_freq the cut-off frequency of the low-pass filter
     ///
     explicit BLIPEqualizer(T treble,
+        uint32_t cutoff_freq = 0,
         uint32_t rolloff_freq = 0,
-        uint32_t sample_rate = 44100,
-        uint32_t cutoff_freq = 0
+        uint32_t sample_rate = 44100
     ) :
         treble(treble),
+        cutoff_freq(cutoff_freq),
         rolloff_freq(rolloff_freq),
-        sample_rate(sample_rate),
-        cutoff_freq(cutoff_freq) { }
+        sample_rate(sample_rate) { }
 
     /// Generate sinc values into an output buffer with given quantity.
     ///
@@ -309,7 +310,7 @@ class BLIPEqualizer {
         gen_sinc(out, count, BLIP_RES * oversample, treble, cutoff);
         // apply (half of) hamming window
         const T to_fraction = PI / (count - 1);
-        for (uint32_t i = count; i--;)
+        for (uint32_t i = count; i > 0; i--)
             out[i] *= 0.54 - 0.46 * cos(i * to_fraction);
     }
 };

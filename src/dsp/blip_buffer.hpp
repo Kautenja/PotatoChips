@@ -383,9 +383,9 @@ class BLIPSynthesizer {
         double factor = new_unit * (1L << BLIPBuffer::SAMPLE_BITS) / kernel_unit;
         if (factor > 0.0) {
             int32_t shift = 0;
-            while (factor < 2.0) {  // unit is small -> attenuate kernel
+            while (factor < 2) {  // unit is small -> attenuate kernel
                 shift++;
-                factor *= 2.0;
+                factor *= 2;
             }
             if (shift) {
                 kernel_unit >>= shift;

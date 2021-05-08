@@ -120,7 +120,7 @@ class NECTurboGrafx16 {
         /// the range of the amplifier on the oscillator
         enum { AMP_RANGE = 0x8000 };
         /// the synthesizer type that the oscillator uses
-        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM,1> Synthesizer;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM,1> Synthesizer;
 
         /// @brief Run the oscillator until specified time.
         ///

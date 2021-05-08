@@ -186,7 +186,7 @@ class NintendoGBS {
         enum { period_mask = 0x70 };
         enum { shift_mask  = 0x07 };
 
-        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> Synth;
         Synth const* synth;
         int sweep_delay;
         int sweep_freq;
@@ -270,7 +270,7 @@ class NintendoGBS {
     };
 
     struct Noise : Envelope {
-        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth const* synth;
         unsigned bits = 1;
 
@@ -328,7 +328,7 @@ class NintendoGBS {
     };
 
     struct Wave : Oscillator {
-        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth const* synth;
         int wave_pos;
         enum { wave_size = 32 };

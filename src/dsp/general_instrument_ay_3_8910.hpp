@@ -152,7 +152,7 @@ class GeneralInstrumentAy_3_8910 {
     int32_t last_time = 0;
 
     /// the synthesizer shared by the 5 oscillator channels
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> synth;
 
     /// @brief An oscillators on the chip (A pulse waveform generator).
     struct Oscillator {

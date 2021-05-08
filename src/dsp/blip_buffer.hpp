@@ -219,6 +219,8 @@ class BLIPBuffer {
 /// @tparam T the datatype for computing floating point logic
 template<typename T>
 class BLIPEqualizer {
+    static_assert(std::is_floating_point<T>::value, "T must be a floating point type");
+
  private:
     /// the constant value for Pi
     static constexpr T PI = 3.1415926535897932384626433832795029;
@@ -320,16 +322,20 @@ enum BLIPQuality {
 };
 
 /// @brief A digital synthesizer for arbitrary waveforms based on BLIP.
+/// @tparam T the datatype for computing floating point logic
 /// @tparam QUALITY the quality of the BLIP algorithm
 /// @tparam DYNAMIC_RANGE specifies the greatest expected change in amplitude.
 /// Calculate it by finding the difference between the maximum and minimum
 /// expected amplitudes (max - min).
 ///
-template<BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
+template<typename T, BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
 class BLIPSynthesizer {
+    static_assert(std::is_floating_point<T>::value, "T must be a floating point type");
+    static_assert(QUALITY > 0, "QUALITY must be a positive integer");
+
  private:
     /// the last set volume level (used to detect changes in volume level)
-    double volume_unit = 0;
+    T volume_unit = 0;
     /// the impulses in the synthesizers buffer
     int16_t impulses[BLIPBuffer::RESOLUTION * (QUALITY / 2) + 1];
     /// the kernel unit for calculating amplitudes of impulses
@@ -371,16 +377,16 @@ class BLIPSynthesizer {
     ///
     /// @param new_unit the new volume level to use
     ///
-    void set_volume(double new_unit) {
+    void set_volume(T new_unit) {
         // normalize the new unit by the range
         new_unit = new_unit / abs(DYNAMIC_RANGE);
         // return if the volume has not changed
         if (new_unit == volume_unit) return;
         // use default equalizer if it hasn't been set yet
-        if (!kernel_unit) set_treble_eq(BLIPEqualizer<float>(-8.0));
+        if (!kernel_unit) set_treble_eq(BLIPEqualizer<T>(-8.0));
         // set the volume
         volume_unit = new_unit;
-        double factor = new_unit * (1L << BLIPBuffer::SAMPLE_BITS) / kernel_unit;
+        T factor = new_unit * (1L << BLIPBuffer::SAMPLE_BITS) / kernel_unit;
         if (factor > 0.0) {
             int32_t shift = 0;
             while (factor < 2) {  // unit is small -> attenuate kernel
@@ -409,9 +415,9 @@ class BLIPSynthesizer {
     ///
     /// @param equalizer the equalization parameter for the synthesizer
     ///
-    void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
+    void set_treble_eq(const BLIPEqualizer<T>& equalizer) {
         static constexpr int32_t HALF_SIZE = BLIPBuffer::RESOLUTION / 2 * (QUALITY - 1);
-        float fimpulse[BLIPBuffer::RESOLUTION / 2 * (BLIPBuffer::WIDEST_IMPULSE - 1) + BLIPBuffer::RESOLUTION * 2];
+        T fimpulse[BLIPBuffer::RESOLUTION / 2 * (BLIPBuffer::WIDEST_IMPULSE - 1) + BLIPBuffer::RESOLUTION * 2];
         equalizer(&fimpulse[BLIPBuffer::RESOLUTION], HALF_SIZE);
         int32_t i;
         // need mirror slightly past center for calculation
@@ -421,19 +427,19 @@ class BLIPSynthesizer {
         for (i = 0; i < BLIPBuffer::RESOLUTION; i++)
             fimpulse[i] = 0;
         // find rescale factor
-        double total = 0;
+        T total = 0;
         for (i = 0; i < HALF_SIZE; i++)
             total += fimpulse[BLIPBuffer::RESOLUTION + i];
 
-        // static constexpr double BASE_UNIT = 44800 - 128 * 18; // allows treble up to +0 dB
-        // static constexpr double BASE_UNIT = 37888; // allows treble to +5 dB
-        static constexpr double BASE_UNIT = 32768; // necessary for blip_unscaled to work
-        double rescale = BASE_UNIT / 2 / total;
+        // static constexpr T BASE_UNIT = 44800 - 128 * 18; // allows treble up to +0 dB
+        // static constexpr T BASE_UNIT = 37888; // allows treble to +5 dB
+        static constexpr T BASE_UNIT = 32768; // necessary for blip_unscaled to work
+        T rescale = BASE_UNIT / 2 / total;
         kernel_unit = floor(BASE_UNIT);
 
         // integrate, first difference, rescale, quantize
-        double sum = 0;
-        double next = 0;
+        T sum = 0;
+        T next = 0;
         for (i = 0; i < impulses_size(); i++) {
             impulses[i] = floor((next - sum) * rescale + 0.5);
             sum += fimpulse[i];
@@ -442,7 +448,7 @@ class BLIPSynthesizer {
         adjust_impulse();
 
         // volume might require rescaling
-        const double volume_unit = this->volume_unit;
+        const T volume_unit = this->volume_unit;
         if (volume_unit) {
             this->volume_unit = 0;
             set_volume(volume_unit);

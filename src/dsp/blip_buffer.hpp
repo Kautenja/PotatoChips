@@ -222,7 +222,7 @@ class BLIPBuffer {
 class BLIPEqualizer {
  private:
     /// the constant value for Pi
-    static constexpr double pi = 3.1415926535897932384626433832795029;
+    static constexpr double PI = 3.1415926535897932384626433832795029;
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
     double treble = 0;
@@ -257,7 +257,7 @@ class BLIPEqualizer {
         const double rolloff =
             pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
         const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
-        const double to_angle = pi / 2 / maxh / oversample;
+        const double to_angle = PI / 2 / maxh / oversample;
         for (uint32_t i = 0; i < count; i++) {
             double angle = ((i - count) * 2 + 1) * to_angle;
             double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
@@ -301,18 +301,18 @@ class BLIPEqualizer {
     /// @details
     /// for usage within instances of BLIPSynthesizer_
     ///
-    inline void _generate(float* out, uint32_t count) const {
+    inline void operator()(float* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
         // (8 points->1.49, 16 points->1.15)
-        double half_rate = sample_rate * 0.5;
-        double oversample = cutoff_freq ?
+        const double half_rate = sample_rate * 0.5;
+        const double oversample = cutoff_freq ?
             half_rate / cutoff_freq :
             BLIP_RES * 2.25 / count + 0.85;
-        double cutoff = rolloff_freq * oversample / half_rate;
+        const double cutoff = rolloff_freq * oversample / half_rate;
         // generate a sinc
         gen_sinc(out, count, BLIP_RES * oversample, treble, cutoff);
         // apply (half of) hamming window
-        double to_fraction = pi / (count - 1);
+        const double to_fraction = PI / (count - 1);
         for (uint32_t i = count; i--;)
             out[i] *= 0.54f - 0.46f * cos(i * to_fraction);
     }
@@ -418,7 +418,7 @@ class BLIPSynthesizer {
     void set_treble_eq(const BLIPEqualizer& equalizer) {
         static constexpr int32_t HALF_SIZE = BLIP_RES / 2 * (QUALITY - 1);
         float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
-        equalizer._generate(&fimpulse[BLIP_RES], HALF_SIZE);
+        equalizer(&fimpulse[BLIP_RES], HALF_SIZE);
         int32_t i;
         // need mirror slightly past center for calculation
         for (i = BLIP_RES; i > 0; i--)

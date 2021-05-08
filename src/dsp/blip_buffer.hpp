@@ -24,10 +24,6 @@
 #include <limits>
 #include "exceptions.hpp"
 
-/// The number of bits in re-sampled ratio fraction. Higher values give a more
-/// accurate ratio but reduce maximum buffer size.
-static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
-
 /// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
 /// in noticeable broadband noise when synthesizing high frequency square
 /// waves. Affects size of BLIPSynthesizer objects since they store the waveform
@@ -51,13 +47,18 @@ static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
 
 /// @brief A Band-limited impulse polynomial buffer.
 class BLIPBuffer {
+ public:
+    /// The number of bits in re-sampled ratio fraction. Higher values give a more
+    /// accurate ratio but reduce maximum buffer size.
+    static constexpr uint32_t ACCURACY = 16;
+
  protected:
     /// The sample rate to generate samples from the buffer at
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    uint32_t factor = 1L << BLIP_BUFFER_ACCURACY;
+    uint32_t factor = 1L << ACCURACY;
 
     /// the cut-off frequency of the high-pass filter in Hz
     int32_t bass_freq = 16;
@@ -144,7 +145,7 @@ class BLIPBuffer {
         auto quantized_clock_rate = sample_rate_ * (clock_rate_ / sample_rate_);
         // calculate the time factor based on the clock_rate and sample_rate
         float ratio = static_cast<float>(sample_rate_) / quantized_clock_rate;
-        int32_t factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5f);
+        int32_t factor_ = floor(ratio * (1L << ACCURACY) + 0.5f);
         if (!(factor_ > 0))  // factor must be positive
             throw Exception("sample_rate : clock_rate ratio is too large.");
         // update the instance variables atomically after error handling
@@ -482,12 +483,12 @@ class BLIPSynthesizer {
         static constexpr int32_t rev = fwd + QUALITY - 2;
         static constexpr int32_t mid = QUALITY / 2 - 1;
         // ensure the time is valid with respect to the accuracy of the buffer
-        if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
+        if (!((time >> BLIPBuffer::ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
         // update the delta by the delta factor and cache necessary structures
         delta *= delta_factor;
-        int32_t* const BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
-        const int32_t phase = (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
+        int32_t* const BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIPBuffer::ACCURACY);
+        const int32_t phase = (time >> (BLIPBuffer::ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
         const int16_t* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
 
         #if defined(_M_IX86)    || \

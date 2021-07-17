@@ -158,6 +158,12 @@ struct WaveTableEditor : rack::LightWidget {
         }
     }
 
+    void onDragStart(const rack::event::DragStart &e) override {
+        appGet()->window->cursorLock();
+        // consume the event to prevent it from propagating
+        e.consume(this);
+    }
+
     /// Respond to drag move event on this widget.
     void onDragMove(const rack::event::DragMove &e) override {
         // consume the event to prevent it from propagating
@@ -187,6 +193,7 @@ struct WaveTableEditor : rack::LightWidget {
     /// outside the widget to push the update onto the undo/redo history.
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
+        appGet()->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);
         if (!drag_state.is_pressed) return;

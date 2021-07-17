@@ -158,7 +158,13 @@ struct WaveTableEditor : rack::LightWidget {
         }
     }
 
+    /// @brief Respond to drag start event on this widget.
+    /// @details
+    /// This allows detection of mouse-up events that occur both inside and
+    /// outside the widget to push the update onto the undo/redo history.
+    ///
     void onDragStart(const rack::event::DragStart &e) override {
+        // lock the cursor so it does not move in the engine during the edit
         appGet()->window->cursorLock();
         // consume the event to prevent it from propagating
         e.consume(this);
@@ -193,6 +199,7 @@ struct WaveTableEditor : rack::LightWidget {
     /// outside the widget to push the update onto the undo/redo history.
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
+        // unlock the cursor to return it to its normal state
         appGet()->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);

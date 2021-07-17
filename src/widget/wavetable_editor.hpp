@@ -129,8 +129,14 @@ struct WaveTableEditor : rack::LightWidget {
 
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {
-        // consume the event to prevent it from propagating
+        // Consume the event to prevent it from propagating.
         e.consume(this);
+        // Handle right clicks.
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            auto widget = dynamic_cast<ModuleWidget*>(parent);
+            widget->createContextMenu();
+            return;
+        }
         // setup the drag state
         drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
         // set the position of the drag operation to the position of the mouse

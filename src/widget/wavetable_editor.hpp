@@ -39,7 +39,7 @@ struct WaveTableAction : rack::history::Action {
         rack::history::Action(),
         waveform(waveform_),
         length(length_) {
-        name = "KautenjaDSP WaveTableEditorAction";
+        name = "KautenjaDSP Wavetable Edit";
         before = new Wavetable[length];
         after = new Wavetable[length];
     }

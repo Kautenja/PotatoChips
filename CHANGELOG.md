@@ -311,6 +311,9 @@
 -   Mirror monophonic inputs to modules that are running poly-phonically
 -   new module: Blocks
     -   inspired by Mutable Instruments Edges
+-   fix panels with missing inputs / potentiometers
+    - InfiniteStairs looked liked an input was missing for a VCA on the NES triangle
+    - PalletTownWavesSystem had a missing sync input that has been removed from the panel
 
 ## 1.12.0 (TBD)
 

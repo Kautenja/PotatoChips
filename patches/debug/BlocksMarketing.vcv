@@ -1,0 +1,509 @@
+{
+  "version": "1.dev.2db08f1",
+  "modules": [
+    {
+      "id": 1,
+      "plugin": "Core",
+      "version": "1.1.6",
+      "model": "AudioInterface",
+      "params": [],
+      "leftModuleId": 30,
+      "rightModuleId": 38,
+      "data": {
+        "audio": {
+          "driver": 5,
+          "deviceName": "Apple Inc.: Built-in Output",
+          "offset": 0,
+          "maxChannels": 8,
+          "sampleRate": 44100,
+          "blockSize": 256
+        }
+      },
+      "pos": [
+        52,
+        0
+      ]
+    },
+    {
+      "id": 30,
+      "plugin": "KautenjaDSP-PotatoChips",
+      "version": "1.11.0",
+      "model": "Blocks",
+      "params": [
+        {
+          "id": 0,
+          "value": -1.00899208
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 255.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        },
+        {
+          "id": 11,
+          "value": 0.0
+        },
+        {
+          "id": 12,
+          "value": 0.0
+        },
+        {
+          "id": 13,
+          "value": 0.0
+        },
+        {
+          "id": 14,
+          "value": 0.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 34,
+      "rightModuleId": 1,
+      "data": {
+        "shape1": 0,
+        "shape2": 0,
+        "shape3": 0,
+        "shape4": 0
+      },
+      "pos": [
+        42,
+        0
+      ]
+    },
+    {
+      "id": 34,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "NurseRatchet",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 0.5
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 0.0
+        },
+        {
+          "id": 5,
+          "value": 0.300000012
+        },
+        {
+          "id": 6,
+          "value": 2.0
+        },
+        {
+          "id": 7,
+          "value": 2.0
+        },
+        {
+          "id": 8,
+          "value": 1.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 1.0
+        },
+        {
+          "id": 11,
+          "value": 0.310499996
+        },
+        {
+          "id": 12,
+          "value": 4.0
+        },
+        {
+          "id": 13,
+          "value": 4.0
+        },
+        {
+          "id": 14,
+          "value": 1.0
+        },
+        {
+          "id": 15,
+          "value": 0.0
+        },
+        {
+          "id": 16,
+          "value": 4.0
+        },
+        {
+          "id": 17,
+          "value": 0.0
+        },
+        {
+          "id": 18,
+          "value": 4.75
+        },
+        {
+          "id": 19,
+          "value": 3.0
+        },
+        {
+          "id": 20,
+          "value": 2.5
+        },
+        {
+          "id": 21,
+          "value": 2.5
+        },
+        {
+          "id": 22,
+          "value": 2.5
+        },
+        {
+          "id": 23,
+          "value": 2.5
+        },
+        {
+          "id": 24,
+          "value": 2.5
+        },
+        {
+          "id": 25,
+          "value": 2.5
+        },
+        {
+          "id": 26,
+          "value": 2.5
+        },
+        {
+          "id": 27,
+          "value": 2.5
+        },
+        {
+          "id": 28,
+          "value": 1.0
+        },
+        {
+          "id": 29,
+          "value": 4.0
+        },
+        {
+          "id": 30,
+          "value": 3.0
+        },
+        {
+          "id": 31,
+          "value": 0.0
+        },
+        {
+          "id": 32,
+          "value": 2.0
+        },
+        {
+          "id": 33,
+          "value": 1.0
+        },
+        {
+          "id": 34,
+          "value": 4.0
+        },
+        {
+          "id": 35,
+          "value": 0.0
+        },
+        {
+          "id": 36,
+          "value": 0.0
+        },
+        {
+          "id": 37,
+          "value": 0.0
+        },
+        {
+          "id": 38,
+          "value": 0.0
+        },
+        {
+          "id": 39,
+          "value": 0.0
+        },
+        {
+          "id": 40,
+          "value": 0.0
+        },
+        {
+          "id": 41,
+          "value": 0.0
+        },
+        {
+          "id": 42,
+          "value": 0.0
+        },
+        {
+          "id": 43,
+          "value": 0.0
+        },
+        {
+          "id": 44,
+          "value": 0.0
+        },
+        {
+          "id": 45,
+          "value": 0.0
+        },
+        {
+          "id": 46,
+          "value": 0.0
+        },
+        {
+          "id": 47,
+          "value": 0.0
+        },
+        {
+          "id": 48,
+          "value": 0.0
+        },
+        {
+          "id": 49,
+          "value": 0.0
+        },
+        {
+          "id": 50,
+          "value": 0.0
+        },
+        {
+          "id": 51,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 30,
+      "data": {
+        "stepIndex": 1,
+        "lastPressIndex": 7,
+        "isRunning": true,
+        "direction": 1,
+        "envelope_mode": 1,
+        "is_force_offset": true,
+        "is_time_offset": true,
+        "is_looping": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": 36,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Oscilloscope",
+      "params": [
+        {
+          "id": 0,
+          "value": 0.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        },
+        {
+          "id": 2,
+          "value": 0.0
+        },
+        {
+          "id": 3,
+          "value": 0.0
+        },
+        {
+          "id": 4,
+          "value": 16.0
+        },
+        {
+          "id": 5,
+          "value": 0.0
+        },
+        {
+          "id": 6,
+          "value": 0.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        }
+      ],
+      "rightModuleId": 43,
+      "data": {
+        "lissajous": 0,
+        "external": 0
+      },
+      "pos": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": 38,
+      "plugin": "VCV-Recorder",
+      "version": "1.1.0",
+      "model": "Recorder",
+      "params": [
+        {
+          "id": 0,
+          "value": 1.0
+        },
+        {
+          "id": 1,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 1,
+      "data": {
+        "format": "wav",
+        "path": "",
+        "incrementPath": true,
+        "sampleRate": 44100,
+        "depth": 16,
+        "bitRate": 256000,
+        "videoBitRate": 2048000
+      },
+      "pos": [
+        62,
+        0
+      ]
+    },
+    {
+      "id": 43,
+      "plugin": "Bogaudio",
+      "version": "1.1.37",
+      "model": "Bogaudio-AnalyzerXL",
+      "params": [],
+      "leftModuleId": 36,
+      "data": {
+        "frequency_plot": "log",
+        "range": 0.0,
+        "amplitude_plot": "decibels_140",
+        "smooth": 0.25,
+        "quality": "good",
+        "window": "kaiser"
+      },
+      "pos": [
+        47,
+        1
+      ]
+    }
+  ],
+  "cables": [
+    {
+      "id": 1998,
+      "outputModuleId": 34,
+      "outputId": 1,
+      "inputModuleId": 30,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 2002,
+      "outputModuleId": 30,
+      "outputId": 3,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 2003,
+      "outputModuleId": 30,
+      "outputId": 3,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#000000"
+    },
+    {
+      "id": 2004,
+      "outputModuleId": 30,
+      "outputId": 3,
+      "inputModuleId": 38,
+      "inputId": 2,
+      "color": "#000000"
+    },
+    {
+      "id": 2007,
+      "outputModuleId": 30,
+      "outputId": 3,
+      "inputModuleId": 36,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 2005,
+      "outputModuleId": 30,
+      "outputId": 3,
+      "inputModuleId": 43,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 2008,
+      "outputModuleId": 34,
+      "outputId": 6,
+      "inputModuleId": 30,
+      "inputId": 8,
+      "color": "#000000"
+    }
+  ]
+}

@@ -306,15 +306,23 @@
 
 ## 1.11.0 (TBD)
 
+-   Fix wavetable editor screens to allow right clicks
+-   Fix name of wave table editor Undo/Redo actions
+-   Mirror monophonic inputs to modules that are running poly-phonically
+-   new module: Blocks
+    -   inspired by Mutable Instruments Edges
+
+## 1.12.0 (TBD)
+
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip
 
-## 1.12.0 (TBD)
+## 1.13.0 (TBD)
 
 -   Yamaha YM2151
 
-## 1.13.0 (TBD)
+## 1.14.0 (TBD)
 
 -   Yamaha YM2413

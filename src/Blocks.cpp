@@ -1,4 +1,4 @@
-// A Linear Feedback Shift Register (LFSR) module.
+// The digital oscillator from the Mutable Instruments Edges module.
 // Copyright 2020 Christian Kauten
 //
 // Author: Christian Kauten (kautenja@auburn.edu)

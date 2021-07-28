@@ -7,7 +7,7 @@
       "version": "1.1.6",
       "model": "AudioInterface",
       "params": [],
-      "leftModuleId": 23,
+      "leftModuleId": 32,
       "data": {
         "audio": {
           "driver": 5,
@@ -19,7 +19,7 @@
         }
       },
       "pos": [
-        54,
+        74,
         0
       ]
     },
@@ -155,10 +155,10 @@
         }
       ],
       "leftModuleId": 26,
-      "rightModuleId": 1,
+      "rightModuleId": 31,
       "data": {
         "solo": [
-          true,
+          false,
           false,
           false,
           false
@@ -321,12 +321,12 @@
     {
       "id": 30,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.2",
+      "version": "1.11.0",
       "model": "Blocks",
       "params": [
         {
           "id": 0,
-          "value": 0.0
+          "value": -1.00899208
         },
         {
           "id": 1,
@@ -334,11 +334,11 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 0.991007864
         },
         {
           "id": 3,
-          "value": 0.0
+          "value": 1.99100792
         },
         {
           "id": 4,
@@ -362,15 +362,15 @@
         },
         {
           "id": 9,
-          "value": 255.0
+          "value": 161.0
         },
         {
           "id": 10,
-          "value": 255.0
+          "value": 77.0
         },
         {
           "id": 11,
-          "value": 255.0
+          "value": 20.0
         },
         {
           "id": 12,
@@ -393,33 +393,147 @@
       "rightModuleId": 26,
       "data": {
         "shape1": 0,
-        "shape2": 0,
-        "shape3": 0,
+        "shape2": 2,
+        "shape3": 1,
         "shape4": 0
       },
       "pos": [
         8,
         0
       ]
+    },
+    {
+      "id": 31,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Compressor",
+      "params": [
+        {
+          "id": 0,
+          "value": -1.0
+        },
+        {
+          "id": 1,
+          "value": 1.47712123
+        },
+        {
+          "id": 2,
+          "value": 10.0
+        },
+        {
+          "id": 3,
+          "value": 0.891250908
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 1.0
+        },
+        {
+          "id": 6,
+          "value": 1.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 23,
+      "rightModuleId": 32,
+      "data": {
+        "is_peak_metering": true,
+        "attack_shape": 0.5,
+        "release_shape": 0.5,
+        "look_ahead": 0.00100000005,
+        "clipping_mode": 2
+      },
+      "pos": [
+        54,
+        0
+      ]
+    },
+    {
+      "id": 32,
+      "plugin": "KautenjaDSP",
+      "version": "1.0.0",
+      "model": "Compressor",
+      "params": [
+        {
+          "id": 0,
+          "value": -1.0
+        },
+        {
+          "id": 1,
+          "value": 1.47712123
+        },
+        {
+          "id": 2,
+          "value": 10.0
+        },
+        {
+          "id": 3,
+          "value": 0.891250908
+        },
+        {
+          "id": 4,
+          "value": 1.0
+        },
+        {
+          "id": 5,
+          "value": 1.0
+        },
+        {
+          "id": 6,
+          "value": 1.0
+        },
+        {
+          "id": 7,
+          "value": 0.0
+        },
+        {
+          "id": 8,
+          "value": 0.0
+        },
+        {
+          "id": 9,
+          "value": 0.0
+        },
+        {
+          "id": 10,
+          "value": 0.0
+        }
+      ],
+      "leftModuleId": 31,
+      "rightModuleId": 1,
+      "data": {
+        "is_peak_metering": true,
+        "attack_shape": 0.5,
+        "release_shape": 0.5,
+        "look_ahead": 0.00100000005,
+        "clipping_mode": 2
+      },
+      "pos": [
+        64,
+        0
+      ]
     }
   ],
   "cables": [
-    {
-      "id": 1977,
-      "outputModuleId": 23,
-      "outputId": 8,
-      "inputModuleId": 1,
-      "inputId": 0,
-      "color": "#000000"
-    },
-    {
-      "id": 1978,
-      "outputModuleId": 23,
-      "outputId": 9,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#000000"
-    },
     {
       "id": 1981,
       "outputModuleId": 5,
@@ -490,6 +604,38 @@
       "outputId": 0,
       "inputModuleId": 23,
       "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 1977,
+      "outputModuleId": 23,
+      "outputId": 8,
+      "inputModuleId": 31,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 1978,
+      "outputModuleId": 23,
+      "outputId": 9,
+      "inputModuleId": 32,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 1990,
+      "outputModuleId": 31,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 1991,
+      "outputModuleId": 32,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
       "color": "#000000"
     }
   ]

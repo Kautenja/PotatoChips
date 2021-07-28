@@ -20,6 +20,30 @@ They're just so addicting!
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
 
 <!-- ------------------------------------------------------------ -->
+<!-- MARK: Blocks -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Blocks Logo" src="manual/Blocks/img/Logo.svg">
+</h2>
+
+**Blocks** is a port of the digital oscillator code from the
+[Mutable Instruments Edges Module](https://mutable-instruments.net/modules/edges/). Blocks contains four identical channels, each with a sine, triangle, quantized triangle, sample and hold, short LFSR, and long LFSR oscillator.
+
+<p align="center">
+<img alt="Blocks" src="manual/Blocks/img/Module.svg">
+</p>
+
+### Features
+
+-   **Quad wave generator:** Quad 16-bit wave generators with six different shapes
+-   **Quantized triangle wave generator:** Generate NES style triangle wave
+    with 16 steps of quantization
+-   **Noise generator:** generate pseudo-random numbers using sample and hold and short and long LFSRs
+
+See the [Manual][Blocks] for more information about the features of this module.
+
+<!-- ------------------------------------------------------------ -->
 <!-- MARK: InfiniteStairs -->
 <!-- ------------------------------------------------------------ -->
 

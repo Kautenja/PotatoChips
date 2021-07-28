@@ -304,7 +304,7 @@
 -   fix trigger inputs on Pallet Town Waves System, Super ADSR, Boss Fight, Infinite Stairs, Jairasullator, Mega Tone, Mini Boss, and Pot Keys. They now work with AC and DC signals.
 -   fix clock dividers for CV acquisition and LED light updates. They now fire on the downbeat of the source clock
 
-## 1.11.0 (TBD)
+## 1.11.0 (2021-07-27)
 
 -   Fix wavetable editor screens to allow right clicks
 -   Fix name of wave table editor Undo/Redo actions

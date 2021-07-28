@@ -1002,22 +1002,22 @@ const uint8_t nes_triangle_5[] = {
 
 /// the lookup table for the individual waveforms.
 const uint8_t* const lookup_table[] = {
-  triangle_0,
-  triangle_1,
-  triangle_2,
-  triangle_3,
-  triangle_4,
-  triangle_5,
-  triangle_6,
-  triangle_6,
-  nes_triangle_0,
-  nes_triangle_1,
-  nes_triangle_2,
-  nes_triangle_3,
-  nes_triangle_4,
-  nes_triangle_5,
-  triangle_6,
-  triangle_6,
+    triangle_0,
+    triangle_1,
+    triangle_2,
+    triangle_3,
+    triangle_4,
+    triangle_5,
+    triangle_6,
+    triangle_6,
+    nes_triangle_0,
+    nes_triangle_1,
+    nes_triangle_2,
+    nes_triangle_3,
+    nes_triangle_4,
+    nes_triangle_5,
+    triangle_6,
+    triangle_6,
 };
 
 /// Mix two 8-bit values.
@@ -1027,7 +1027,7 @@ const uint8_t* const lookup_table[] = {
 /// @param balance the mix between a (0) and b (255)
 ///
 static inline uint8_t mix(uint16_t a, uint16_t b, uint8_t balance) {
-  return a + (((b - a) * balance) >> 8);
+    return a + (((b - a) * balance) >> 8);
 }
 
 /// Interpolate between a points in a wave table.
@@ -1036,9 +1036,9 @@ static inline uint8_t mix(uint16_t a, uint16_t b, uint8_t balance) {
 /// @param phase the current phase in the wave table
 ///
 static inline uint8_t interpolate(const uint8_t* table, uint16_t phase) {
-  // get the index of the waveform as a 9-bit value (512 wave points)
-  uint16_t index = phase >> 7;
-  return mix(table[index], table[index + 1], phase & 0x7f);
+    // get the index of the waveform as a 9-bit value (512 wave points)
+    uint16_t index = phase >> 7;
+    return mix(table[index], table[index + 1], phase & 0x7f);
 }
 
 /// Interpolate between two wave tables.
@@ -1051,16 +1051,16 @@ static inline uint8_t interpolate(const uint8_t* table, uint16_t phase) {
 /// @returns a value interpolated between the two wave tables at the given phase
 ///
 static inline uint16_t interpolate(
-  const uint8_t* table_a,
-  const uint8_t* table_b,
-  uint8_t gain_a,
-  uint8_t gain_b,
-  uint16_t phase
+    const uint8_t* table_a,
+    const uint8_t* table_b,
+    uint8_t gain_a,
+    uint8_t gain_b,
+    uint16_t phase
 ) {
-  uint16_t result = 0;
-  result += interpolate(table_a, phase) * gain_a;
-  result += interpolate(table_b, phase) * gain_b;
-  return result;
+    uint16_t result = 0;
+    result += interpolate(table_a, phase) * gain_a;
+    result += interpolate(table_b, phase) * gain_b;
+    return result;
 }
 
 }  // namespace MutableIntstrumentsEdges

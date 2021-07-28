@@ -559,6 +559,7 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 
 <!-- Manuals -->
 
+[Blocks]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf
 [NameCorpOctalWaveGenerator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf
 [InfiniteStairs]: https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf
 [Pulses]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf

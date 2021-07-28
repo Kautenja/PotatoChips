@@ -326,7 +326,7 @@
       "params": [
         {
           "id": 0,
-          "value": -1.00899208
+          "value": 0.0
         },
         {
           "id": 1,
@@ -334,11 +334,11 @@
         },
         {
           "id": 2,
-          "value": 0.991007864
+          "value": 0.0
         },
         {
           "id": 3,
-          "value": 1.99100792
+          "value": 0.0
         },
         {
           "id": 4,
@@ -362,15 +362,15 @@
         },
         {
           "id": 9,
-          "value": 161.0
+          "value": 255.0
         },
         {
           "id": 10,
-          "value": 77.0
+          "value": 255.0
         },
         {
           "id": 11,
-          "value": 20.0
+          "value": 255.0
         },
         {
           "id": 12,
@@ -392,9 +392,9 @@
       "leftModuleId": 5,
       "rightModuleId": 26,
       "data": {
-        "shape1": 1,
-        "shape2": 2,
-        "shape3": 1,
+        "shape1": 0,
+        "shape2": 0,
+        "shape3": 0,
         "shape4": 0
       },
       "pos": [

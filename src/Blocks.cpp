@@ -25,7 +25,7 @@
 // MARK: Module
 // ---------------------------------------------------------------------------
 
-/// @brief The digital oscillator from the Mutable Instruments Blocks module.
+/// @brief The digital oscillator from the Mutable Instruments Edges module.
 struct Blocks : rack::Module {
     static constexpr std::size_t NUM_VOICES = 4;
 

@@ -104,7 +104,7 @@ class SunSoftFME7 {
     int32_t last_time;
 
     /// the synthesizer for generating sound from the chip
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
@@ -228,7 +228,7 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         synth.set_treble_eq(equalizer);
     }
 

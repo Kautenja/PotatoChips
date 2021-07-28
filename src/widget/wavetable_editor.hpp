@@ -39,7 +39,7 @@ struct WaveTableAction : rack::history::Action {
         rack::history::Action(),
         waveform(waveform_),
         length(length_) {
-        name = "KautenjaDSP WaveTableEditorAction";
+        name = "KautenjaDSP Wavetable Edit";
         before = new Wavetable[length];
         after = new Wavetable[length];
     }
@@ -129,8 +129,14 @@ struct WaveTableEditor : rack::LightWidget {
 
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {
-        // consume the event to prevent it from propagating
+        // Consume the event to prevent it from propagating.
         e.consume(this);
+        // Handle right clicks.
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            auto widget = dynamic_cast<ModuleWidget*>(parent);
+            widget->createContextMenu();
+            return;
+        }
         // setup the drag state
         drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
         // set the position of the drag operation to the position of the mouse
@@ -158,7 +164,18 @@ struct WaveTableEditor : rack::LightWidget {
         }
     }
 
-    /// Respond to drag move event on this widget.
+    /// @brief Respond to drag start event on this widget.
+    /// @details
+    /// This allows detection of mouse-down events to lock the cursor.
+    ///
+    void onDragStart(const rack::event::DragStart &e) override {
+        // lock the cursor so it does not move in the engine during the edit
+        appGet()->window->cursorLock();
+        // consume the event to prevent it from propagating
+        e.consume(this);
+    }
+
+    /// @brief Respond to drag move event on this widget.
     void onDragMove(const rack::event::DragMove &e) override {
         // consume the event to prevent it from propagating
         e.consume(this);
@@ -187,6 +204,8 @@ struct WaveTableEditor : rack::LightWidget {
     /// outside the widget to push the update onto the undo/redo history.
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
+        // unlock the cursor to return it to its normal state
+        appGet()->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);
         if (!drag_state.is_pressed) return;

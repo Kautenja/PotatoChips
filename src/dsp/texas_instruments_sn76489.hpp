@@ -75,7 +75,7 @@ class TexasInstrumentsSN76489 {
         /// the phase of the oscillator
         int phase = 0;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> Synth;
         const Synth* synth;
 
         /// @brief Reset the oscillator to its initial state.
@@ -136,7 +136,7 @@ class TexasInstrumentsSN76489 {
         /// the linear feedback shift registers
         unsigned feedback = 0x9000;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
         /// whether the LFSR is on
         bool is_periodic = false;
@@ -284,7 +284,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         square_synth.set_treble_eq(equalizer);
         noise.synth.set_treble_eq(equalizer);
     }

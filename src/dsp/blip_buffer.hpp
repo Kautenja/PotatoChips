@@ -24,40 +24,31 @@
 #include <limits>
 #include "exceptions.hpp"
 
-/// The number of bits in re-sampled ratio fraction. Higher values give a more
-/// accurate ratio but reduce maximum buffer size.
-static constexpr uint32_t BLIP_BUFFER_ACCURACY = 16;
-
-/// Number bits in phase offset. Fewer than 6 bits (64 phase offsets) results
-/// in noticeable broadband noise when synthesizing high frequency square
-/// waves. Affects size of BLIPSynthesizer objects since they store the waveform
-/// directly.
-static constexpr uint32_t BLIP_PHASE_BITS = 6;
-
-/// the size of the buffer and the largest impulse that it can accommodate
-static constexpr int32_t BLIP_WIDEST_IMPULSE = 16;
-
-/// the index of the BLIP sample following the phase bits
-static constexpr int32_t BLIP_RES = 1 << BLIP_PHASE_BITS;
-
-/// the dynamic range of the BLIP samples measured as a bit shift offset
-static constexpr uint32_t BLIP_SAMPLE_BITS = 30;
-
-#if defined (__GNUC__) || _MSC_VER >= 1100
-    #define BLIP_RESTRICT __restrict
-#else
-    #define BLIP_RESTRICT
-#endif
-
 /// @brief A Band-limited impulse polynomial buffer.
 class BLIPBuffer {
+ public:
+    /// The number of bits in re-sampled ratio fraction. Higher values give a
+    /// more accurate ratio but reduce maximum buffer size.
+    static constexpr uint32_t ACCURACY = 16;
+    /// Number bits in phase offset. Fewer than 6 bits (64 phase offsets)
+    /// results in noticeable broadband noise when synthesizing high frequency
+    /// square waves. Affects size of BLIPSynthesizer objects since they store
+    /// the waveform directly.
+    static constexpr uint32_t PHASE_BITS = 6;
+    /// the size of the buffer and the largest impulse that it can accommodate
+    static constexpr int32_t WIDEST_IMPULSE = 16;
+    /// the index of the BLIP sample following the phase bits
+    static constexpr int32_t RESOLUTION = 1 << PHASE_BITS;
+    /// the dynamic range of the BLIP samples measured as a bit shift offset
+    static constexpr uint32_t SAMPLE_BITS = 30;
+
  protected:
     /// The sample rate to generate samples from the buffer at
     uint32_t sample_rate = 0;
     /// The clock rate of the chip to emulate
     uint32_t clock_rate = 0;
     /// the clock rate factor, i.e., the number of CPU samples per audio sample
-    uint32_t factor = 1L << BLIP_BUFFER_ACCURACY;
+    uint32_t factor = 1L << ACCURACY;
 
     /// the cut-off frequency of the high-pass filter in Hz
     int32_t bass_freq = 16;
@@ -68,7 +59,7 @@ class BLIPBuffer {
     /// the accumulator for integrating samples into
     int32_t accumulator = 0;
     /// the buffer of samples in the BLIP buffer
-    int32_t buffer[BLIP_WIDEST_IMPULSE + 1];
+    int32_t buffer[WIDEST_IMPULSE + 1];
 
  private:
     /// Disable the copy constructor.
@@ -144,7 +135,7 @@ class BLIPBuffer {
         auto quantized_clock_rate = sample_rate_ * (clock_rate_ / sample_rate_);
         // calculate the time factor based on the clock_rate and sample_rate
         float ratio = static_cast<float>(sample_rate_) / quantized_clock_rate;
-        int32_t factor_ = floor(ratio * (1L << BLIP_BUFFER_ACCURACY) + 0.5f);
+        int32_t factor_ = floor(ratio * (1L << ACCURACY) + 0.5);
         if (!(factor_ > 0))  // factor must be positive
             throw Exception("sample_rate : clock_rate ratio is too large.");
         // update the instance variables atomically after error handling
@@ -205,11 +196,11 @@ class BLIPBuffer {
     inline float read_sample() {
         // get the sample from the accumulator (don't clip it though). cast
         // it as a float for later calculation.
-        float sample = accumulator >> (BLIP_SAMPLE_BITS - 16);
+        float sample = accumulator >> (SAMPLE_BITS - 16);
         accumulator += *buffer - (accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
-        auto remain = count + BLIP_WIDEST_IMPULSE;
+        auto remain = count + WIDEST_IMPULSE;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         // scale the sample by the scale factor and the binary code space for
@@ -219,19 +210,23 @@ class BLIPBuffer {
 };
 
 /// @brief Low-pass equalization parameters and logic.
+/// @tparam T the datatype for computing floating point logic
+template<typename T>
 class BLIPEqualizer {
+    static_assert(std::is_floating_point<T>::value, "T must be a floating point type");
+
  private:
     /// the constant value for Pi
-    static constexpr double PI = 3.1415926535897932384626433832795029;
+    static constexpr T PI = 3.1415926535897932384626433832795029;
     /// Logarithmic roll-off to treble dB at half sampling rate. Negative
     /// values reduce treble, small positive values (0 to 5.0) increase treble.
-    double treble = 0;
+    T treble = 0;
+    /// the cut-off frequency of the low-pass filter
+    uint32_t cutoff_freq = 0;
     /// the roll-off frequency of the low-pass filter
     uint32_t rolloff_freq = 0;
     /// the sample rate the engine is running at
     uint32_t sample_rate = 0;
-    /// the cut-off frequency of the low-pass filter
-    uint32_t cutoff_freq = 0;
 
     /// Generate a sinc function.
     ///
@@ -243,31 +238,27 @@ class BLIPEqualizer {
     /// increase treble.
     /// @param cutoff the cut-off frequency in [0, 1)
     ///
-    static inline void gen_sinc(
-        float* out,
-        uint32_t count,
-        double oversample,
-        double treble,
-        double cutoff
-    ) {
-        if (cutoff >= 0.999) cutoff = 0.999;
-        if (treble < -300.0) treble = -300.0;
-        if (treble > 5.0)    treble = 5.0;
-        static constexpr double maxh = 4096.0;
-        const double rolloff =
-            pow(10.0, 1.0 / (maxh * 20.0) * treble / (1.0 - cutoff));
-        const double pow_a_n = pow(rolloff, maxh - maxh * cutoff);
-        const double to_angle = PI / 2 / maxh / oversample;
-        for (uint32_t i = 0; i < count; i++) {
-            double angle = ((i - count) * 2 + 1) * to_angle;
-            double c = rolloff * cos((maxh - 1.0) * angle) - cos(maxh * angle);
-            double cos_nc_angle = cos(maxh * cutoff * angle);
-            double cos_nc1_angle = cos((maxh * cutoff - 1.0) * angle);
-            double cos_angle = cos(angle);
+    static inline void gen_sinc(T* out, size_t count, T oversample, T treble, T cutoff) {
+        if (cutoff >= 0.999)
+            cutoff = 0.999;
+        if (treble < -300)
+            treble = -300;
+        else if (treble > 5)
+            treble = 5;
+        static constexpr T maxh = 4096;
+        const T rolloff = pow(10, 1 / (20 * maxh) * treble / (1 - cutoff));
+        const T pow_a_n = pow(rolloff, maxh - maxh * cutoff);
+        const T to_angle = PI / 2 / maxh / oversample;
+        for (size_t i = 0; i < count; i++) {
+            T angle = (2 * (i - count) + 1) * to_angle;
+            T c = rolloff * cos((maxh - 1) * angle) - cos(maxh * angle);
+            T cos_nc_angle = cos(maxh * cutoff * angle);
+            T cos_nc1_angle = cos((maxh * cutoff - 1) * angle);
+            T cos_angle = cos(angle);
             c = c * pow_a_n - rolloff * cos_nc1_angle + cos_nc_angle;
-            double d = 1.0 + rolloff * (rolloff - cos_angle - cos_angle);
-            double b = 2.0 - cos_angle - cos_angle;
-            double a = 1.0 - cos_angle - cos_nc_angle + cos_nc1_angle;
+            T d = 1 + rolloff * (rolloff - cos_angle - cos_angle);
+            T b = 2 - cos_angle - cos_angle;
+            T a = 1 - cos_angle - cos_nc_angle + cos_nc1_angle;
             // a / b + c / d
             out[i] = (a * d + c * b) / (b * d);
         }
@@ -279,20 +270,19 @@ class BLIPEqualizer {
     /// @param treble logarithmic roll-off to treble dB at half sampling rate.
     /// Negative values reduce treble, small positive values (0 to 5.0) increase
     /// treble.
+    /// @param cutoff_freq the cut-off frequency of the low-pass filter
     /// @param rolloff_freq the roll-off frequency of the low-pass filter
     /// @param sample_rate the sample rate the engine is running at
-    /// @param cutoff_freq the cut-off frequency of the low-pass filter
     ///
-    explicit BLIPEqualizer(
-        double treble,
+    explicit BLIPEqualizer(T treble,
+        uint32_t cutoff_freq = 0,
         uint32_t rolloff_freq = 0,
-        uint32_t sample_rate = 44100,
-        uint32_t cutoff_freq = 0
+        uint32_t sample_rate = 44100
     ) :
         treble(treble),
+        cutoff_freq(cutoff_freq),
         rolloff_freq(rolloff_freq),
-        sample_rate(sample_rate),
-        cutoff_freq(cutoff_freq) { }
+        sample_rate(sample_rate) { }
 
     /// Generate sinc values into an output buffer with given quantity.
     ///
@@ -301,20 +291,20 @@ class BLIPEqualizer {
     /// @details
     /// for usage within instances of BLIPSynthesizer_
     ///
-    inline void operator()(float* out, uint32_t count) const {
+    inline void operator()(T* out, uint32_t count) const {
         // lower cutoff freq for narrow kernels with their wider transition band
         // (8 points->1.49, 16 points->1.15)
-        const double half_rate = sample_rate * 0.5;
-        const double oversample = cutoff_freq ?
+        const T half_rate = sample_rate * 0.5;
+        const T oversample = cutoff_freq ?
             half_rate / cutoff_freq :
-            BLIP_RES * 2.25 / count + 0.85;
-        const double cutoff = rolloff_freq * oversample / half_rate;
+            BLIPBuffer::RESOLUTION * 2.25 / count + 0.85;
+        const T cutoff = rolloff_freq * oversample / half_rate;
         // generate a sinc
-        gen_sinc(out, count, BLIP_RES * oversample, treble, cutoff);
+        gen_sinc(out, count, BLIPBuffer::RESOLUTION * oversample, treble, cutoff);
         // apply (half of) hamming window
-        const double to_fraction = PI / (count - 1);
-        for (uint32_t i = count; i--;)
-            out[i] *= 0.54f - 0.46f * cos(i * to_fraction);
+        const T to_fraction = PI / (count - 1);
+        for (uint32_t i = count; i > 0; i--)
+            out[i] *= 0.54 - 0.46 * cos(i * to_fraction);
     }
 };
 
@@ -326,18 +316,22 @@ enum BLIPQuality {
 };
 
 /// @brief A digital synthesizer for arbitrary waveforms based on BLIP.
+/// @tparam T the datatype for computing floating point logic
 /// @tparam QUALITY the quality of the BLIP algorithm
 /// @tparam DYNAMIC_RANGE specifies the greatest expected change in amplitude.
 /// Calculate it by finding the difference between the maximum and minimum
 /// expected amplitudes (max - min).
 ///
-template<BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
+template<typename T, BLIPQuality QUALITY, int32_t DYNAMIC_RANGE>
 class BLIPSynthesizer {
+    static_assert(std::is_floating_point<T>::value, "T must be a floating point type");
+    static_assert(QUALITY > 0, "QUALITY must be a positive integer");
+
  private:
     /// the last set volume level (used to detect changes in volume level)
-    double volume_unit = 0;
+    T volume_unit = 0;
     /// the impulses in the synthesizers buffer
-    int16_t impulses[BLIP_RES * (QUALITY / 2) + 1];
+    int16_t impulses[BLIPBuffer::RESOLUTION * (QUALITY / 2) + 1];
     /// the kernel unit for calculating amplitudes of impulses
     int32_t kernel_unit = 0;
     /// the output buffer that the synthesizer writes samples to
@@ -349,23 +343,23 @@ class BLIPSynthesizer {
 
     /// @brief Return the size of the impulses.
     static inline int32_t impulses_size() {
-        return QUALITY * (BLIP_RES / 2) + 1;
+        return QUALITY * (BLIPBuffer::RESOLUTION / 2) + 1;
     }
 
     /// @brief Adjust the impulses in the buffer according to the kernel unit.
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of 1st half
         static const int32_t SIZE = impulses_size();
-        for (int32_t p = BLIP_RES; p >= BLIP_RES / 2; p--) {
-            const int32_t p2 = BLIP_RES - 2 - p;
+        for (int32_t p = BLIPBuffer::RESOLUTION; p >= BLIPBuffer::RESOLUTION / 2; p--) {
+            const int32_t p2 = BLIPBuffer::RESOLUTION - 2 - p;
             int32_t error = kernel_unit;
-            for (int32_t i = 1; i < SIZE; i += BLIP_RES) {
+            for (int32_t i = 1; i < SIZE; i += BLIPBuffer::RESOLUTION) {
                 error -= impulses[i + p ];
                 error -= impulses[i + p2];
             }
             if (p == p2)  // phase = 0.5 impulse uses same half for both sides
                 error /= 2;
-            impulses[SIZE - BLIP_RES + p] += error;
+            impulses[SIZE - BLIPBuffer::RESOLUTION + p] += error;
         }
     }
 
@@ -377,21 +371,21 @@ class BLIPSynthesizer {
     ///
     /// @param new_unit the new volume level to use
     ///
-    void set_volume(double new_unit) {
+    void set_volume(T new_unit) {
         // normalize the new unit by the range
         new_unit = new_unit / abs(DYNAMIC_RANGE);
         // return if the volume has not changed
         if (new_unit == volume_unit) return;
         // use default equalizer if it hasn't been set yet
-        if (!kernel_unit) set_treble_eq(BLIPEqualizer(-8.0));
+        if (!kernel_unit) set_treble_eq(BLIPEqualizer<T>(-8.0));
         // set the volume
         volume_unit = new_unit;
-        double factor = new_unit * (1L << BLIP_SAMPLE_BITS) / kernel_unit;
+        T factor = new_unit * (1L << BLIPBuffer::SAMPLE_BITS) / kernel_unit;
         if (factor > 0.0) {
             int32_t shift = 0;
-            while (factor < 2.0) {  // unit is small -> attenuate kernel
+            while (factor < 2) {  // unit is small -> attenuate kernel
                 shift++;
-                factor *= 2.0;
+                factor *= 2;
             }
             if (shift) {
                 kernel_unit >>= shift;
@@ -408,47 +402,47 @@ class BLIPSynthesizer {
         }
         // set the integer-valued delta factor based on the floor of the factor
         // using an epsilon value of 0.5 to account for numerical imprecision.
-        delta_factor = floor(factor + 0.5f);
+        delta_factor = floor(factor + 0.5);
     }
 
     /// @brief Set treble equalization for the synthesizer.
     ///
     /// @param equalizer the equalization parameter for the synthesizer
     ///
-    void set_treble_eq(const BLIPEqualizer& equalizer) {
-        static constexpr int32_t HALF_SIZE = BLIP_RES / 2 * (QUALITY - 1);
-        float fimpulse[BLIP_RES / 2 * (BLIP_WIDEST_IMPULSE - 1) + BLIP_RES * 2];
-        equalizer(&fimpulse[BLIP_RES], HALF_SIZE);
+    void set_treble_eq(const BLIPEqualizer<T>& equalizer) {
+        static constexpr int32_t HALF_SIZE = BLIPBuffer::RESOLUTION / 2 * (QUALITY - 1);
+        T fimpulse[BLIPBuffer::RESOLUTION / 2 * (BLIPBuffer::WIDEST_IMPULSE - 1) + BLIPBuffer::RESOLUTION * 2];
+        equalizer(&fimpulse[BLIPBuffer::RESOLUTION], HALF_SIZE);
         int32_t i;
         // need mirror slightly past center for calculation
-        for (i = BLIP_RES; i > 0; i--)
-            fimpulse[BLIP_RES + HALF_SIZE + i] = fimpulse[BLIP_RES + HALF_SIZE - 1 - i];
+        for (i = BLIPBuffer::RESOLUTION; i > 0; i--)
+            fimpulse[BLIPBuffer::RESOLUTION + HALF_SIZE + i] = fimpulse[BLIPBuffer::RESOLUTION + HALF_SIZE - 1 - i];
         // starts at 0
-        for (i = 0; i < BLIP_RES; i++)
+        for (i = 0; i < BLIPBuffer::RESOLUTION; i++)
             fimpulse[i] = 0;
         // find rescale factor
-        double total = 0;
+        T total = 0;
         for (i = 0; i < HALF_SIZE; i++)
-            total += fimpulse[BLIP_RES + i];
+            total += fimpulse[BLIPBuffer::RESOLUTION + i];
 
-        // static constexpr double BASE_UNIT = 44800 - 128 * 18; // allows treble up to +0 dB
-        // static constexpr double BASE_UNIT = 37888; // allows treble to +5 dB
-        static constexpr double BASE_UNIT = 32768; // necessary for blip_unscaled to work
-        double rescale = BASE_UNIT / 2 / total;
+        // static constexpr T BASE_UNIT = 44800 - 128 * 18; // allows treble up to +0 dB
+        // static constexpr T BASE_UNIT = 37888; // allows treble to +5 dB
+        static constexpr T BASE_UNIT = 32768; // necessary for blip_unscaled to work
+        T rescale = BASE_UNIT / 2 / total;
         kernel_unit = floor(BASE_UNIT);
 
         // integrate, first difference, rescale, quantize
-        double sum = 0;
-        double next = 0;
+        T sum = 0;
+        T next = 0;
         for (i = 0; i < impulses_size(); i++) {
             impulses[i] = floor((next - sum) * rescale + 0.5);
             sum += fimpulse[i];
-            next += fimpulse[i + BLIP_RES];
+            next += fimpulse[i + BLIPBuffer::RESOLUTION];
         }
         adjust_impulse();
 
         // volume might require rescaling
-        const double volume_unit = this->volume_unit;
+        const T volume_unit = this->volume_unit;
         if (volume_unit) {
             this->volume_unit = 0;
             set_volume(volume_unit);
@@ -481,17 +475,26 @@ class BLIPSynthesizer {
     /// Contact Shay Green for more info.
     ///
     void offset_resampled(uint32_t time, int32_t delta, BLIPBuffer* blip_buffer) const {
-        static constexpr int32_t fwd = (BLIP_WIDEST_IMPULSE - QUALITY) / 2;
+        static constexpr int32_t fwd = (BLIPBuffer::WIDEST_IMPULSE - QUALITY) / 2;
         static constexpr int32_t rev = fwd + QUALITY - 2;
         static constexpr int32_t mid = QUALITY / 2 - 1;
         // ensure the time is valid with respect to the accuracy of the buffer
-        if (!((time >> BLIP_BUFFER_ACCURACY) < 1))
+        if (!((time >> BLIPBuffer::ACCURACY) < 1))
             throw Exception("time goes beyond end of buffer");
         // update the delta by the delta factor and cache necessary structures
         delta *= delta_factor;
-        int32_t* const BLIP_RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIP_BUFFER_ACCURACY);
-        const int32_t phase = (time >> (BLIP_BUFFER_ACCURACY - BLIP_PHASE_BITS) & (BLIP_RES - 1));
-        const int16_t* BLIP_RESTRICT imp = impulses + BLIP_RES - phase;
+
+        #if defined (__GNUC__) || _MSC_VER >= 1100
+            #define RESTRICT __restrict
+        #else
+            #define RESTRICT
+        #endif
+
+        int32_t* const RESTRICT buffer = blip_buffer->get_buffer() + (time >> BLIPBuffer::ACCURACY);
+        const int32_t phase = (time >> (BLIPBuffer::ACCURACY - BLIPBuffer::PHASE_BITS) & (BLIPBuffer::RESOLUTION - 1));
+        const int16_t* RESTRICT imp = impulses + BLIPBuffer::RESOLUTION - phase;
+
+        #undef RESTRICT
 
         #if defined(_M_IX86)    || \
             defined(_M_IA64)    || \
@@ -501,7 +504,7 @@ class BLIPSynthesizer {
             defined(__i386__)  // CISC (true)
             // straight forward implementation resulted in better code on GCC for x86
             #define ADD_IMP(out, in) \
-                buffer[out] += (int32_t) imp[BLIP_RES * (in)] * delta
+                buffer[out] += (int32_t) imp[BLIPBuffer::RESOLUTION * (in)] * delta
 
             #define BLIP_FWD(i) {\
                 ADD_IMP(fwd     + i, i    );\
@@ -530,15 +533,15 @@ class BLIPSynthesizer {
             // for RISC processors, help compiler by reading ahead of writes
             #define BLIP_FWD(i) {\
                 int32_t t0 =                      i0 * delta + buffer[fwd     + i];\
-                int32_t t1 = imp[BLIP_RES * (i + 1)] * delta + buffer[fwd + 1 + i];\
-                i0 =           imp[BLIP_RES * (i + 2)];\
+                int32_t t1 = imp[BLIPBuffer::RESOLUTION * (i + 1)] * delta + buffer[fwd + 1 + i];\
+                i0 =           imp[BLIPBuffer::RESOLUTION * (i + 2)];\
                 buffer[fwd     + i] = t0;\
                 buffer[fwd + 1 + i] = t1;\
             }
             #define BLIP_REV(r) {\
                 int32_t t0 =                i0 * delta + buffer[rev     - r];\
-                int32_t t1 = imp[BLIP_RES * r] * delta + buffer[rev + 1 - r];\
-                i0 =           imp[BLIP_RES * (r - 1)];\
+                int32_t t1 = imp[BLIPBuffer::RESOLUTION * r] * delta + buffer[rev + 1 - r];\
+                i0 =           imp[BLIPBuffer::RESOLUTION * (r - 1)];\
                 buffer[rev     - r] = t0;\
                 buffer[rev + 1 - r] = t1;\
             }
@@ -548,9 +551,9 @@ class BLIPSynthesizer {
             if (QUALITY > 8 ) BLIP_FWD(2)
             if (QUALITY > 12) BLIP_FWD(4) {
                 int32_t t0 =                  i0 * delta + buffer[fwd + mid - 1];
-                int32_t t1 = imp[BLIP_RES * mid] * delta + buffer[fwd + mid    ];
+                int32_t t1 = imp[BLIPBuffer::RESOLUTION * mid] * delta + buffer[fwd + mid    ];
                 imp = impulses + phase;
-                i0 = imp[BLIP_RES * mid];
+                i0 = imp[BLIPBuffer::RESOLUTION * mid];
                 buffer[fwd + mid - 1] = t0;
                 buffer[fwd + mid    ] = t1;
             }
@@ -602,7 +605,5 @@ class BLIPSynthesizer {
         offset_resampled(time * buffer->get_factor(), delta, buffer);
     }
 };
-
-#undef BLIP_RESTRICT
 
 #endif  // DSP_BLIP_BUFFER_HPP_

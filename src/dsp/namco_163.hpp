@@ -81,7 +81,7 @@ class Namco163 {
     /// the RAM on the chip
     uint8_t reg[REG_COUNT];
     /// the synthesizer for producing sound from the chip
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 15> synth;
 
     /// Return a reference to the register pointed to by the address register.
     /// @details
@@ -208,7 +208,7 @@ class Namco163 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         synth.set_treble_eq(equalizer);
     }
 

@@ -29,11 +29,11 @@
 // MARK:
 // ---------------------------------------------------------------------------
 
-TEST_CASE("BLIPBuffer is initisalized") {
+TEST_CASE("initialize a default BLIPBuffer") {
     BLIPBuffer buffer;
     REQUIRE(0 == buffer.get_sample_rate());
     REQUIRE(0 == buffer.get_clock_rate());
-    REQUIRE(1 << BLIP_WIDEST_IMPULSE == buffer.get_factor());
+    REQUIRE((1 << BLIPBuffer::WIDEST_IMPULSE) == buffer.get_factor());
     REQUIRE(16 == buffer.get_bass_freq());
     REQUIRE(0 == buffer.get_bass_shift());
     REQUIRE(0 == buffer.get_accumulator());

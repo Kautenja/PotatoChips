@@ -13,6 +13,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
 #include "rack.hpp"
 
 #ifndef ENGINE_YM2612_PARAMS_HPP_
@@ -151,7 +152,7 @@ struct FMSQuantity : rack::ParamQuantity {
     }
 
     /// @brief Return the unit description.
-    inline std::string getUnit() override { return "\% of a halftone"; }
+    inline std::string getUnit() override { return "% of a halftone"; }
 };
 
 #endif  // ENGINE_YM2612_PARAMS_HPP_

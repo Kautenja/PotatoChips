@@ -140,7 +140,7 @@ class Ricoh2A03 {
         int sweep_delay = 0;
 
         /// the BLIP synthesizer for the oscillator (shared between pulse waves)
-        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 15> Synth;
         const Synth* synth;
 
         /// @brief Reset the oscillator to uniform and default state.
@@ -246,7 +246,7 @@ class Ricoh2A03 {
         /// the current phase of the oscillator
         int phase = PHASE_RANGE;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> synth;
+        BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 15> synth;
 
         /// @brief Reset the oscillator to uniform and default state.
         inline void reset() {
@@ -319,7 +319,7 @@ class Ricoh2A03 {
         /// the output value from the noise oscillator
         int noise = 1 << 14;
         /// the BLIP synthesizer for the oscillator
-        BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 15> synth;
+        BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 15> synth;
 
         void run(int32_t time, int32_t end_time) {
             static const int16_t noise_period_table[16] = {
@@ -546,7 +546,7 @@ class Ricoh2A03 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         square_synth.set_treble_eq(equalizer);
         triangle.synth.set_treble_eq(equalizer);
         noise.synth.set_treble_eq(equalizer);

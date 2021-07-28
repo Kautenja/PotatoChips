@@ -119,9 +119,9 @@ class KonamiVRC6 {
     int32_t last_time = 0;
 
     /// a BLIP synthesizer for the saw waveform
-    BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 31> saw_synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 31> saw_synth;
     /// a BLIP synthesizer for the square waveform
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 15> square_synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 15> square_synth;
 
     /// @brief Run VRC6 until specified time.
     ///
@@ -284,7 +284,7 @@ class KonamiVRC6 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         saw_synth.set_treble_eq(equalizer);
         square_synth.set_treble_eq(equalizer);
     }

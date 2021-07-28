@@ -28,6 +28,7 @@ static constexpr uint32_t CLOCK_RATE = 768000;
 /// the global instance of the plug-in
 extern rack::Plugin* plugin_instance;
 
+extern rack::Model *modelBlocks;
 extern rack::Model *modelJairasullator;
 extern rack::Model *modelInfiniteStairs;
 extern rack::Model *modelPotKeys;

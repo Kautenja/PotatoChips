@@ -37,8 +37,8 @@
         "lastPitch": 8192,
         "lastMod": 0,
         "midi": {
-          "driver": -11,
-          "deviceName": "QWERTY keyboard (US)",
+          "driver": 1,
+          "deviceName": "Keystation 88 MK3 (USB MIDI)",
           "channel": -1
         }
       },
@@ -262,7 +262,7 @@
       "rightModuleId": 23,
       "data": {
         "triggerOnLoad": true,
-        "shouldTriggerOnLoad": true
+        "shouldTriggerOnLoad": false
       },
       "pos": [
         18,
@@ -392,7 +392,7 @@
       "leftModuleId": 5,
       "rightModuleId": 26,
       "data": {
-        "shape1": 2,
+        "shape1": 1,
         "shape2": 0,
         "shape3": 0,
         "shape4": 0

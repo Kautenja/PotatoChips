@@ -26,7 +26,7 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.2",
+      "version": "1.11.0",
       "model": "SuperVCA",
       "params": [
         {
@@ -43,11 +43,11 @@
         },
         {
           "id": 3,
-          "value": 127.0
+          "value": 60.0
         },
         {
           "id": 4,
-          "value": 127.0
+          "value": 60.0
         },
         {
           "id": 5,
@@ -65,7 +65,7 @@
       "leftModuleId": 159,
       "rightModuleId": 156,
       "data": {
-        "filterMode": 2
+        "filterMode": 1
       },
       "pos": [
         18,
@@ -156,7 +156,7 @@
       "params": [],
       "rightModuleId": 159,
       "data": {
-        "channels": 1,
+        "channels": 16,
         "polyMode": 0,
         "clockDivision": 24,
         "lastPitch": 8192,
@@ -323,13 +323,13 @@
     {
       "id": 154,
       "plugin": "Bogaudio",
-      "version": "1.1.35",
+      "version": "1.1.37",
       "model": "Bogaudio-AnalyzerXL",
       "params": [],
       "data": {
         "frequency_plot": "log",
         "range": 0.0,
-        "amplitude_plot": "decibels_80",
+        "amplitude_plot": "decibels_140",
         "smooth": 0.25,
         "quality": "high",
         "window": "kaiser"
@@ -422,19 +422,27 @@
       "color": "#c91847"
     },
     {
-      "id": 88,
-      "outputModuleId": 162,
-      "outputId": 0,
-      "inputModuleId": 152,
-      "inputId": 5,
-      "color": "#0986ad"
-    },
-    {
       "id": 99,
       "outputModuleId": 159,
       "outputId": 0,
       "inputModuleId": 152,
       "inputId": 3,
+      "color": "#000000"
+    },
+    {
+      "id": 100,
+      "outputModuleId": 162,
+      "outputId": 1,
+      "inputModuleId": 152,
+      "inputId": 1,
+      "color": "#000000"
+    },
+    {
+      "id": 101,
+      "outputModuleId": 162,
+      "outputId": 0,
+      "inputModuleId": 152,
+      "inputId": 5,
       "color": "#000000"
     }
   ]

@@ -50,28 +50,28 @@
     {
       "id": 152,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.10.2",
+      "version": "1.11.0",
       "model": "SuperEcho",
       "params": [
         {
           "id": 0,
-          "value": 31.0
+          "value": 0.0
         },
         {
           "id": 1,
-          "value": 75.0
+          "value": 0.0
         },
         {
           "id": 2,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 3,
-          "value": 127.0
+          "value": 0.0
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 127.0
         },
         {
           "id": 5,
@@ -83,7 +83,7 @@
         },
         {
           "id": 7,
-          "value": 54.0
+          "value": 0.0
         },
         {
           "id": 8,
@@ -91,7 +91,7 @@
         },
         {
           "id": 9,
-          "value": 40.0
+          "value": 0.0
         },
         {
           "id": 10,
@@ -99,47 +99,47 @@
         },
         {
           "id": 11,
-          "value": 65.0
+          "value": 0.0
         },
         {
           "id": 12,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 13,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 14,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 15,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 16,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 17,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 18,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 19,
-          "value": -1.0
+          "value": 0.0
         },
         {
           "id": 20,
-          "value": 0.471404523
+          "value": 1.0
         },
         {
           "id": 21,
-          "value": 0.471404523
+          "value": 1.0
         },
         {
           "id": 22,
@@ -270,7 +270,7 @@
     {
       "id": 171,
       "plugin": "Bogaudio",
-      "version": "1.1.35",
+      "version": "1.1.37",
       "model": "Bogaudio-Analyzer",
       "params": [
         {

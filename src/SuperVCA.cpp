@@ -67,8 +67,8 @@ struct SuperVCA : Module {
     SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Mode");
-        configParam(PARAM_GAIN + 0, 0, M_SQRT2, 1, "Input Gain (Left Lane)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0, M_SQRT2, 1, "Input Gain (Right Lane)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
+        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left Lane)");
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right Lane)");
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", 2, dsp::FREQ_C4);
@@ -156,7 +156,7 @@ struct SuperVCA : Module {
     /// @returns the input signal for the given lane and polyphony channel
     ///
     inline float getInput(const unsigned& lane, const unsigned& channel) {
-        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
+        const float gain = params[PARAM_GAIN + lane].getValue();
         const float input = gain * Math::Eurorack::fromAC(normalChain(&inputs[INPUT_AUDIO], lane, channel, 0.f));
         inputVUMeter[lane].process(APP->engine->getSampleTime(), input);
         return input;

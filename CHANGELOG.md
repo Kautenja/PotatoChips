@@ -317,7 +317,7 @@
 
 ## 1.11.1 (TBD)
 
--   Fix gain control on Super Echo to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
+-   Fix gain control on Super Echo and Super VCA to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
 
 ## 1.12.0 (TBD)
 

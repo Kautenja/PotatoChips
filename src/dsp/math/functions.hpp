@@ -84,12 +84,28 @@ inline T cube(const T& x) {
 
 /// @brief Return the input value converted to decibels.
 ///
+/// @tparam T the type of number to convert to decibels
 /// @param x the value to convert to decibel scale
-/// @returns \f$20 * \mathrm{log}_{10}(\texttt{value})\f$
+/// @returns the decibel value \f$20 \log{10}(|x|)\f$
+/// @details
+/// It is assumed that signals exist in the unit domain \f$\in [-1, 1]\f$
 ///
 template<typename T>
-inline T decibels(const T& x) {
-    return static_cast<T>(20) * log10(abs(x));
+inline T amplitude2decibels(const T& x) {
+    return T(20) * log10(abs(x));
+}
+
+/// @brief Return the input decibel value converted to amplitude.
+///
+/// @tparam T the type of number to convert to amplitude
+/// @param x the decibel value to convert to linear scale
+/// @returns the amplitude value \f$10^{\frac{x}{20}}\f$
+/// @details
+/// It is assumed that signals exist in the unit domain \f$\in [-1, 1]\f$.
+///
+template<typename T>
+inline T decibels2amplitude(const T& x) {
+    return pow(T(10), x / T(20));
 }
 
 /// @brief Quantize a single-precision float value to the given number of bits.

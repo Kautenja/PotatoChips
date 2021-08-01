@@ -315,6 +315,10 @@
     - InfiniteStairs looked liked an input was missing for a VCA on the NES triangle
     - PalletTownWavesSystem had a missing sync input that has been removed from the panel
 
+## 1.11.1 (TBD)
+
+-   Fix gain control on Super Echo to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
+
 ## 1.12.0 (TBD)
 
 -   new module: S-SMP(BRR)

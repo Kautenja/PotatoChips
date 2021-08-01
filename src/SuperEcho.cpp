@@ -81,8 +81,8 @@ struct SuperEcho : Module {
         }
         configParam(PARAM_DELAY, 0, SonyS_DSP::Echo::DELAY_LEVELS, 0, "Echo Delay", " ms", 0, SonyS_DSP::Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
-        configParam(PARAM_GAIN + 0, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Left Lane)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Right Lane)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
+        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Lane)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Lane)");
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
@@ -158,7 +158,7 @@ struct SuperEcho : Module {
     ///
     inline int16_t getInput(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
         const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
+        const float gain = params[PARAM_GAIN + lane].getValue();
         const float input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
         inputVUMeter[lane].process(args.sampleTime, input);
         static constexpr float MAX = std::numeric_limits<int16_t>::max();
@@ -177,7 +177,7 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
-        const float gain = Math::square(params[PARAM_GAIN + lane].getValue());
+        const float gain = params[PARAM_GAIN + lane].getValue();
         const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         // process the input on the VU meter

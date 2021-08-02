@@ -9,7 +9,6 @@
   "authorUrl": "https://kautenja.github.io/",
   "sourceUrl": "https://github.com/Kautenja/PotatoChips",
   "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md",
-  "donateUrl": "https://maps.org/donate",
   "modules": [
     {
       "slug": "Blocks",

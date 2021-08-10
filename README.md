@@ -6,8 +6,8 @@
 [![Latest Release][ReleaseBadge]][LatestRelease]
 [![VCV Library][VCVBadge]][VCVLibrary]
 
-[BuildStatus]:  https://travis-ci.org/Kautenja/PotatoChips.svg?branch=master
-[BuildServer]:  https://travis-ci.org/Kautenja/PotatoChips
+[BuildStatus]:  https://travis-ci.com/Kautenja/PotatoChips.svg?branch=master
+[BuildServer]:  https://travis-ci.com/Kautenja/PotatoChips
 [ReleaseBadge]: https://img.shields.io/github/v/release/Kautenja/PotatoChips
 [LatestRelease]: https://github.com/Kautenja/PotatoChips/releases/latest
 [VCVBadge]: https://img.shields.io/badge/VCV-Library-white

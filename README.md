@@ -13,7 +13,7 @@
 [VCVBadge]: https://img.shields.io/badge/VCV-Library-white
 [VCVLibrary]: https://library.vcvrack.com/KautenjaDSP-PotatoChips
 
-These retro sound chips are so good,
+These retro sound generators are so good,
 [I eat 'em like they're potato chips.][SamHyde-PotatoChips]
 They're just so addicting!
 

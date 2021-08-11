@@ -11,6 +11,10 @@
   "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/master/CHANGELOG.md",
   "modules": [
     {
+      "slug": "Pitch2600",
+      "name": "Pitch 2600"
+    },
+    {
       "slug": "Blocks",
       "name": "Blocks",
       "description": "Inspired by Mutable Instruments Edges.",

@@ -14,9 +14,11 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
+#include "engine/chip_module.hpp"
 #include "widget/wavetable_editor.hpp"
 
 // ---------------------------------------------------------------------------
@@ -27,7 +29,7 @@
 struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
  private:
     /// a Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -189,10 +191,10 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
-        return rack::clamp(freq, 8.f, 2035.f);
+        return Math::clip(freq, 8.f, 2035.f);
     }
 
     /// @brief Get the PW for the given oscillator
@@ -215,7 +217,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        uint8_t pw = Math::clip(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
         // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
@@ -233,7 +235,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // rescale from a 7V range to the parameter space in [-5, 5]
         auto cv = rescale(inputs[INPUT_WAVETABLE].getNormalVoltage(normalMod, channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
-        return rack::math::clamp(param + /*att * */ cv, 1.f, 5.f) - 1;
+        return Math::clip(param + /*att * */ cv, 1.f, 5.f) - 1;
     }
 
     /// @brief Return the period of the noise oscillator from the panel controls.
@@ -251,7 +253,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume parameter for the given oscillator.
@@ -273,7 +275,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        uint8_t volume = rack::clamp(roundf(level * voltage / 10.f), 0.f, static_cast<float>(max));
+        uint8_t volume = Math::clip(roundf(level * Math::Eurorack::fromDC(voltage)), 0.f, static_cast<float>(max));
         // wave volume is 2-bit:
         // 00 - 0%
         // 01 - 100%
@@ -292,9 +294,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
-            // frequency
             auto freq = getFrequency(oscillator, channel);
             apu[channel].write(NintendoGBS::PULSE0_FREQ_LO               + NintendoGBS::REGS_PER_VOICE * oscillator,
                          freq & 0b0000000011111111
@@ -303,7 +304,6 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
                 0x80 | ((freq & 0b0000011100000000) >> 8)
             );
         }
-        // frequency
         auto freq = getFrequency(2, channel);
         apu[channel].write(NintendoGBS::WAVE_FREQ_LO,
                      freq & 0b0000000011111111
@@ -318,8 +318,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         // turn on the power
         apu[channel].write(NintendoGBS::POWER_CONTROL_STATUS, 0b10000000);
         // set the global volume
@@ -343,7 +343,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         // noise
         // ---------------------------------------------------------------
         // set the period and LFSR
-        bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].state;
+        bool is_lfsr = (1 - params[PARAM_LFSR].getValue()) - !lfsr[channel].isHigh();
         auto noise_clock_shift = is_lfsr * 0b00001000 | getNoisePeriod(channel);
         if (apu[channel].read(NintendoGBS::NOISE_CLOCK_SHIFT) != noise_clock_shift) {
             apu[channel].write(NintendoGBS::NOISE_CLOCK_SHIFT, noise_clock_shift);
@@ -397,7 +397,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < NintendoGBS::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

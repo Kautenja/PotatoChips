@@ -14,9 +14,9 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
-
-// change input attenuator to gain
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -33,7 +33,7 @@ struct SuperEcho : Module {
     /// a VU meter for measuring the output audio levels
     rack::dsp::VuMeter2 outputVUMeter[SonyS_DSP::StereoSample::CHANNELS];
     /// a light divider for updating the LEDs every 512 processing steps
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -81,8 +81,8 @@ struct SuperEcho : Module {
         }
         configParam(PARAM_DELAY, 0, SonyS_DSP::Echo::DELAY_LEVELS, 0, "Echo Delay", " ms", 0, SonyS_DSP::Echo::MILLISECONDS_PER_DELAY_LEVEL);
         configParam(PARAM_FEEDBACK, -128, 127, 0, "Echo Feedback");
-        configParam(PARAM_GAIN + 0, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Left Lane)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0, M_SQRT2, M_SQRT2 / 3, "Input Gain (Right Lane)", " dB", -10, 40);
+        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
+        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Lane)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Lane)");
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
@@ -95,12 +95,12 @@ struct SuperEcho : Module {
     /// @param channel the polyphonic channel to get the delay parameter for
     /// @returns the 8-bit delay parameter after applying CV modulations
     ///
-    inline uint8_t getDelay(unsigned channel) {
+    inline uint8_t getDelay(const unsigned& channel) {
         const float param = params[PARAM_DELAY].getValue();
-        const float cv = inputs[INPUT_DELAY].getVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_DELAY].getVoltage(channel));
         const float mod = SonyS_DSP::Echo::DELAY_LEVELS * cv;
-        const float MAX = static_cast<float>(SonyS_DSP::Echo::DELAY_LEVELS);
-        return clamp(param + mod, 0.f, MAX);
+        static constexpr float MAX = SonyS_DSP::Echo::DELAY_LEVELS;
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Return the value of the feedback parameter from the panel.
@@ -108,13 +108,13 @@ struct SuperEcho : Module {
     /// @param channel the feedback channel to get the delay parameter for
     /// @returns the 8-bit feedback parameter after applying CV modulations
     ///
-    inline int8_t getFeedback(unsigned channel) {
+    inline int8_t getFeedback(const unsigned& channel) {
         const float param = params[PARAM_FEEDBACK].getValue();
-        const float cv = inputs[INPUT_FEEDBACK].getVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_FEEDBACK].getVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the mix parameter from the panel.
@@ -123,16 +123,14 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the mix level parameter for
     /// @returns the 8-bit mix parameter after applying CV modulations
     ///
-    inline int8_t getMix(unsigned channel, unsigned lane) {
+    inline int8_t getMix(const unsigned& channel, const unsigned& lane) {
         const float param = params[PARAM_MIX + lane].getValue();
-        // get the normal voltage from the left/right pair
-        const auto normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
+        const float normal = lane ? inputs[INPUT_MIX + lane - 1].getVoltage(channel) : 0.f;
         const float voltage = inputs[INPUT_MIX + lane].getNormalVoltage(normal, channel);
-        // get the mod value and clamp within finite precision
-        const float mod = std::numeric_limits<int8_t>::max() * voltage / 10.f;
+        const float mod = std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(voltage);
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the FIR filter parameter from the panel.
@@ -141,22 +139,14 @@ struct SuperEcho : Module {
     /// @param index the index of the FIR filter coefficient to get
     /// @returns the 8-bit FIR filter parameter for coefficient at given index
     ///
-    inline int8_t getFIRCoefficient(unsigned channel, unsigned index) {
-        // get the normal voltage from the previous channel. if the index is
-        // 0, use a default voltage of 0V
-        const auto normal = index ? inputs[INPUT_FIR_COEFFICIENT + index - 1].getVoltage(channel) : 0.f;
-        const float voltage = inputs[INPUT_FIR_COEFFICIENT + index].getNormalVoltage(normal, channel);
-        // normal the voltage forward by updating the voltage on the port
-        inputs[INPUT_FIR_COEFFICIENT + index].setVoltage(voltage, channel);
-        // get the value of the attenuverter
+    inline int8_t getFIRCoefficient(const unsigned& channel, const unsigned& index) {
+        const float input = normalChain(&inputs[INPUT_FIR_COEFFICIENT], index, channel, 0.f);
         const float att = params[PARAM_FIR_COEFFICIENT_ATT + index].getValue();
-        // calculate the floating point mod value
-        const float mod = att * std::numeric_limits<int8_t>::max() * voltage / 10.f;
-        // get the parameter value from the knob, sum with modulator, and clamp
+        const float mod = att * std::numeric_limits<int8_t>::max() * Math::Eurorack::fromDC(input);
+        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
         static constexpr float MIN = std::numeric_limits<int8_t>::min();
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        const float param = params[PARAM_FIR_COEFFICIENT + index].getValue();
-        return clamp(param + mod, MIN, MAX);
+        return Math::clip(param + mod, MIN, MAX);
     }
 
     /// @brief Return the value of the stereo input from the panel.
@@ -166,17 +156,13 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline int16_t getInput(const ProcessArgs &args, unsigned channel, unsigned lane) {
-        static constexpr float MAX = std::numeric_limits<int16_t>::max();
-        // get the normal voltage from the left/right pair
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        // const auto att = params[PARAM_GAIN + lane].getValue();
-        const auto input = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel) / 5.f;
-        // process the input on the VU meter
+    inline int16_t getInput(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
+        const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const float gain = params[PARAM_GAIN + lane].getValue();
+        const float input = gain * Math::Eurorack::fromAC(inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel));
         inputVUMeter[lane].process(args.sampleTime, input);
-        // clamp the value to finite precision and scale to the integer type
-        return MAX * math::clamp(input, -1.f, 1.f);
+        static constexpr float MAX = std::numeric_limits<int16_t>::max();
+        return MAX * Math::clip(input, -1.f, 1.f);
     }
 
     /// @brief Return the clean value of the stereo input from the panel.
@@ -186,17 +172,17 @@ struct SuperEcho : Module {
     /// @param lane the stereo delay lane to get the input voltage for
     /// @returns the 8-bit stereo input for the given lane
     ///
-    inline void bypassChannel(const ProcessArgs &args, unsigned channel, unsigned lane) {
+    inline void bypassChannel(const ProcessArgs& args, const unsigned& channel, const unsigned& lane) {
         // update the FIR Coefficients (so the lights still respond in bypass)
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
         // get the normal voltage from the left/right pair
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto att = params[PARAM_GAIN + lane].getValue();
-        const auto voltage = att * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
+        const float gain = params[PARAM_GAIN + lane].getValue();
+        const float normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
+        const float voltage = gain * inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
         // process the input on the VU meter
-        inputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
-        outputVUMeter[lane].process(args.sampleTime, voltage / 5.f);
+        inputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
+        outputVUMeter[lane].process(args.sampleTime, Math::Eurorack::fromAC(voltage));
         outputs[OUTPUT_AUDIO + lane].setVoltage(voltage, channel);
     }
 
@@ -205,7 +191,7 @@ struct SuperEcho : Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processChannel(const ProcessArgs &args, unsigned channel) {
+    inline void processChannel(const ProcessArgs& args, const unsigned& channel) {
         // update the FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++)
             apu[channel].setFIR(i, getFIRCoefficient(channel, i));
@@ -223,7 +209,7 @@ struct SuperEcho : Module {
         for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // get the sample in [0, 1] (clipped by the finite precision of the
             // emulation)
-            const auto sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
+            const float sample = output.samples[i] / static_cast<float>(std::numeric_limits<int16_t>::max());
             // approximate the VU meter by scaling the sample slightly
             outputVUMeter[i].process(args.sampleTime, 1.2 * sample);
             // set the output
@@ -231,29 +217,11 @@ struct SuperEcho : Module {
         }
     }
 
-    /// @brief Set the given VU meter light based on given VU meter.
-    ///
-    /// @param vuMeter the VU meter to get the data from
-    /// @param light the light to update from the VU meter data
-    ///
-    inline void setVULight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
-        // get the global brightness scale from -12 to 3
-        auto brightness = vuMeter.getBrightness(-12, 3);
-        // set the red light based on total brightness and
-        // brightness from 0dB to 3dB
-        (light + 0)->setBrightness(brightness * vuMeter.getBrightness(0, 3));
-        // set the red light based on inverted total brightness and
-        // brightness from -12dB to 0dB
-        (light + 1)->setBrightness((1 - brightness) * vuMeter.getBrightness(-12, 0));
-        // set the blue light to off
-        (light + 2)->setBrightness(0);
-    }
-
     /// @brief Process the inputs and outputs to/from the module.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -275,12 +243,12 @@ struct SuperEcho : Module {
                 processChannel(args, channel);
         }
         if (lightDivider.process()) {  // update the LEDs on the panel
-            setVULight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
-            setVULight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
-            setVULight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
-            setVULight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
+            setVULight3(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setVULight3(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setVULight3(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setVULight3(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
             // CV indicators for the FIR filter
-            const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            const float sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned param = 0; param < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; param++) {
                 // get the scaled CV (it's already normalled)
                 float value = 0.f;
@@ -293,10 +261,10 @@ struct SuperEcho : Module {
                 }
                 if (value > 0) {  // green for positive voltage
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(0, sample_time);
-                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 } else {  // red for negative voltage
-                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_FIR_COEFFICIENT + 3 * param + 0].setSmoothBrightness(-Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 1].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_FIR_COEFFICIENT + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 }

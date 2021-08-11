@@ -6,18 +6,42 @@
 [![Latest Release][ReleaseBadge]][LatestRelease]
 [![VCV Library][VCVBadge]][VCVLibrary]
 
-[BuildStatus]:  https://travis-ci.org/Kautenja/PotatoChips.svg?branch=master
-[BuildServer]:  https://travis-ci.org/Kautenja/PotatoChips
+[BuildStatus]:  https://travis-ci.com/Kautenja/PotatoChips.svg?branch=master
+[BuildServer]:  https://travis-ci.com/Kautenja/PotatoChips
 [ReleaseBadge]: https://img.shields.io/github/v/release/Kautenja/PotatoChips
 [LatestRelease]: https://github.com/Kautenja/PotatoChips/releases/latest
 [VCVBadge]: https://img.shields.io/badge/VCV-Library-white
 [VCVLibrary]: https://library.vcvrack.com/KautenjaDSP-PotatoChips
 
-These retro sound chips are so good,
+These retro sound generators are so good,
 [I eat 'em like they're potato chips.][SamHyde-PotatoChips]
 They're just so addicting!
 
 [SamHyde-PotatoChips]: https://www.youtube.com/watch?v=lL5M-vXq58c
+
+<!-- ------------------------------------------------------------ -->
+<!-- MARK: Blocks -->
+<!-- ------------------------------------------------------------ -->
+
+<h2 align="center">
+<img alt="Blocks Logo" src="manual/Blocks/img/Logo.svg">
+</h2>
+
+**Blocks** is a port of the digital oscillator code from the
+[Mutable Instruments Edges Module](https://mutable-instruments.net/modules/edges/). Blocks contains four identical channels, each with a sine, triangle, quantized triangle, sample and hold, short LFSR, and long LFSR oscillator.
+
+<p align="center">
+<img alt="Blocks" src="manual/Blocks/img/Module.svg">
+</p>
+
+### Features
+
+-   **Quad wave generator:** Quad 16-bit wave generators with six different shapes
+-   **Quantized triangle wave generator:** Generate NES style triangle wave
+    with 16 steps of quantization
+-   **Noise generator:** generate pseudo-random numbers using sample and hold and short and long LFSRs
+
+See the [Manual][Blocks] for more information about the features of this module.
 
 <!-- ------------------------------------------------------------ -->
 <!-- MARK: InfiniteStairs -->
@@ -535,6 +559,7 @@ See the [Manual][S_SMP] for more information about the features of this module. 
 
 <!-- Manuals -->
 
+[Blocks]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf
 [NameCorpOctalWaveGenerator]: https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf
 [InfiniteStairs]: https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf
 [Pulses]: https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf

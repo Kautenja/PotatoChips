@@ -14,10 +14,10 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/ricoh_2a03.hpp"
-
-// TODO: volume control for the triangle waveform
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -27,7 +27,9 @@
 struct InfiniteStairs : ChipModule<Ricoh2A03> {
  private:
     /// Schmitt Triggers for handling inputs to the LFSR port
-    dsp::SchmittTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
+    /// trigger for handling inputs to the sync port for the saw wave
+    Trigger::Threshold syncTriggers[PORT_MAX_CHANNELS][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -94,9 +96,6 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     }
 
  protected:
-    /// trigger for handling inputs to the sync port for the saw wave
-    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS][2];
-
     /// @brief Get the frequency for the given oscillator and polyphony channel
     ///
     /// @param oscillator the oscillator to return the frequency for
@@ -140,10 +139,10 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][oscillator].get_clock_rate() / (clock_division * freq)) - 1;
-        return rack::clamp(freq, freq_min, freq_max);
+        return Math::clip(freq, freq_min, freq_max);
     }
 
     /// @brief Get the PW for the given oscillator and polyphony channel
@@ -166,7 +165,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
-        uint8_t pw = rack::clamp(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
+        uint8_t pw = Math::clip(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
         // shift the pulse width over into the high 2 bits
         return pw << 6;
     }
@@ -185,7 +184,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getPolyVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume level from the panel controls for a given oscillator and polyphony channel.
@@ -212,10 +211,10 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, MIN, MAX);
+        return Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -223,7 +222,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // pulse generators
         for (unsigned i = 0; i < Ricoh2A03::TRIANGLE; i++)
             apu[channel].set_frequency(i, getFrequency(i, channel, 8, 1023, 16));
@@ -232,7 +231,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // sync input (for triangle and noise oscillator)
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT - Ricoh2A03::TRIANGLE; i++) {
             const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
-            if (syncTriggers[channel][i].process(rescale(sync, 0.f, 2.f, 0.f, 1.f)))
+            if (syncTriggers[channel][i].process(rescale(sync, 0.01f, 0.02f, 0.f, 1.f)))
                 apu[channel].reset_phase(Ricoh2A03::TRIANGLE + i);
         }
     }
@@ -242,7 +241,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         // pulse generators
         for (unsigned oscillator = 0; oscillator < 2; oscillator++) {
             // set the pulse width of the pulse wave (high 3 bits) and set
@@ -253,8 +252,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // triangle wave
         apu[channel].set_voice_volume(Ricoh2A03::TRIANGLE, getVolume(Ricoh2A03::TRIANGLE, channel));
         // noise oscillator
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].state;
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
+        const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].isHigh();
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
         apu[channel].set_voice_volume(Ricoh2A03::NOISE, getVolume(Ricoh2A03::NOISE, channel));
     }
@@ -264,7 +263,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < Ricoh2A03::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

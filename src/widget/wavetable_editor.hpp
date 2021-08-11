@@ -39,7 +39,7 @@ struct WaveTableAction : rack::history::Action {
         rack::history::Action(),
         waveform(waveform_),
         length(length_) {
-        name = "KautenjaDSP WaveTableEditorAction";
+        name = "KautenjaDSP Wavetable Edit";
         before = new Wavetable[length];
         after = new Wavetable[length];
     }
@@ -129,21 +129,27 @@ struct WaveTableEditor : rack::LightWidget {
 
     /// Respond to a button event on this widget.
     void onButton(const rack::event::Button &e) override {
-        // consume the event to prevent it from propagating
+        // Consume the event to prevent it from propagating.
         e.consume(this);
+        // Handle right clicks.
+        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            auto widget = dynamic_cast<ModuleWidget*>(parent);
+            widget->createContextMenu();
+            return;
+        }
         // setup the drag state
         drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
         // set the position of the drag operation to the position of the mouse
         drag_state.position = e.pos;
         // calculate the normalized x position in [0, 1]
         float x = drag_state.position.x / box.size.x;
-        x = rack::math::clamp(x, 0.f, 1.f);
+        x = Math::clip(x, 0.f, 1.f);
         // calculate the position in the wave-table
         uint32_t index = x * length;
         // calculate the normalized y position in [0, 1]
         // y increases downward in pixel space, so invert about 1
         float y = 1.f - drag_state.position.y / box.size.y;
-        y = rack::math::clamp(y, 0.f, 1.f);
+        y = Math::clip(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
         // if the action is a press copy the waveform before updating
@@ -158,21 +164,32 @@ struct WaveTableEditor : rack::LightWidget {
         }
     }
 
-    /// Respond to drag move event on this widget.
+    /// @brief Respond to drag start event on this widget.
+    /// @details
+    /// This allows detection of mouse-down events to lock the cursor.
+    ///
+    void onDragStart(const rack::event::DragStart &e) override {
+        // lock the cursor so it does not move in the engine during the edit
+        appGet()->window->cursorLock();
+        // consume the event to prevent it from propagating
+        e.consume(this);
+    }
+
+    /// @brief Respond to drag move event on this widget.
     void onDragMove(const rack::event::DragMove &e) override {
         // consume the event to prevent it from propagating
         e.consume(this);
         // if the drag operation is not active, return early
         if (!drag_state.is_pressed) return;
         // update the drag state based on the change in position from the mouse
-        uint32_t index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
+        uint32_t index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
-        uint32_t next_index = length * rack::math::clamp(drag_state.position.x / box.size.x, 0.f, 1.f);
+        uint32_t next_index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
         drag_state.position.y += e.mouseDelta.y / APP->scene->rackScroll->zoomWidget->zoom;
         // calculate the normalized y position in [0, 1]
         // y increases downward in pixel space, so invert about 1
         float y = 1.f - drag_state.position.y / box.size.y;
-        y = rack::math::clamp(y, 0.f, 1.f);
+        y = Math::clip(y, 0.f, 1.f);
         // calculate the value of the wave-table at this index
         uint64_t value = y * bit_depth;
         if (next_index < index)  // swap next index if it's less the current
@@ -187,6 +204,8 @@ struct WaveTableEditor : rack::LightWidget {
     /// outside the widget to push the update onto the undo/redo history.
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
+        // unlock the cursor to return it to its normal state
+        appGet()->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);
         if (!drag_state.is_pressed) return;

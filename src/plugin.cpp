@@ -24,6 +24,7 @@ Plugin* plugin_instance;
 ///
 void init(Plugin* instance) {
     plugin_instance = instance;
+    instance->addModel(modelBlocks);
     instance->addModel(modelJairasullator);
     instance->addModel(modelInfiniteStairs);
     instance->addModel(modelPotKeys);

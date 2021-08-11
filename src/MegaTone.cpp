@@ -14,8 +14,10 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -25,7 +27,7 @@
 struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
  private:
     /// a Schmitt Trigger for handling inputs to the LFSR port
-    dsp::BooleanTrigger lfsr[PORT_MAX_CHANNELS];
+    Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -111,10 +113,10 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
         freq = (buffers[channel][voice].get_clock_rate() / (CLOCK_DIVISION * freq));
-        return rack::clamp(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
+        return Math::clip(freq, FREQ10BIT_MIN, FREQ10BIT_MAX);
     }
 
     /// @brief Return the period of the noise voice from the panel controls.
@@ -132,7 +134,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         // apply the control voltage to the attenuation
         if (inputs[INPUT_NOISE_PERIOD].isConnected())
             freq += inputs[INPUT_NOISE_PERIOD].getVoltage(channel) / 2.f;
-        return FREQ_MAX - rack::clamp(floorf(freq), FREQ_MIN, FREQ_MAX);
+        return FREQ_MAX - Math::clip(floorf(freq), FREQ_MIN, FREQ_MAX);
     }
 
     /// @brief Return the volume level from the panel controls.
@@ -156,10 +158,10 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         inputs[INPUT_LEVEL + voice].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return MAX - rack::clamp(level, MIN, MAX);
+        return MAX - Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -167,7 +169,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // tone generators (3)
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_frequency(voice, getFrequency(voice, channel));
@@ -178,13 +180,13 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         // tone generators (3)
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::TONE_COUNT; voice++)
             apu[channel].set_amplifier_level(voice, getVolume(voice, channel));
         // noise generator
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].state), false);
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
+        apu[channel].set_noise(getNoisePeriod(channel), !(params[PARAM_LFSR].getValue() - lfsr[channel].isHigh()), false);
         apu[channel].set_amplifier_level(TexasInstrumentsSN76489::NOISE, getVolume(TexasInstrumentsSN76489::NOISE, channel));
     }
 
@@ -193,7 +195,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < TexasInstrumentsSN76489::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

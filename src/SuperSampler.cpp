@@ -14,6 +14,8 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/brr_sample_player.hpp"
 #include "dsp/wavetable4bit.hpp"
 
@@ -33,9 +35,9 @@ struct SuperSampler : Module {
     /// the Sony S-DSP sound chip emulator
     SonyS_DSP::BRR_SamplePlayer apu[NUM_VOICES][PORT_MAX_CHANNELS];
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
+    Trigger::Threshold gateTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
     /// triggers for handling inputs to the phase modulation enable ports
-    dsp::BooleanTrigger pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
+    Trigger::Threshold pmTriggers[NUM_VOICES][PORT_MAX_CHANNELS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -144,36 +146,36 @@ struct SuperSampler : Module {
         pitch += inputs[INPUT_VOCT + voice].getVoltage(channel);
         pitch += inputs[INPUT_FM + voice].getVoltage(channel) / 5.f;
         float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+        frequency = Math::clip(frequency, 0.0f, 20000.0f);
         apu[voice][channel].setFrequency(frequency);
         // ---------------------------------------------------------------
         // MARK: Amplifier Volume
         // ---------------------------------------------------------------
         const auto leftVolumeParam = params[PARAM_VOLUME_L + voice].getValue();
         const auto leftVolumeCV = inputs[INPUT_VOLUME_L + voice].getVoltage(channel);
-        const auto leftVolume = math::clamp(leftVolumeParam + leftVolumeCV, -128.f, 127.f);
+        const auto leftVolume = Math::clip(leftVolumeParam + leftVolumeCV, -128.f, 127.f);
         apu[voice][channel].setVolumeLeft(leftVolume);
         const auto rightVolumeParam = params[PARAM_VOLUME_R + voice].getValue();
         const auto rightVolumeCV = inputs[INPUT_VOLUME_R + voice].getVoltage(channel);
-        const auto rightVolume = math::clamp(rightVolumeParam + rightVolumeCV, -128.f, 127.f);
+        const auto rightVolume = Math::clip(rightVolumeParam + rightVolumeCV, -128.f, 127.f);
         apu[voice][channel].setVolumeRight(rightVolume);
         // -------------------------------------------------------------------
         // MARK: Gate input
         // -------------------------------------------------------------------
         const auto gate = inputs[INPUT_GATE + voice].getVoltage(channel);
-        bool trigger = gateTriggers[voice][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+        bool trigger = gateTriggers[voice][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
         // -------------------------------------------------------------------
         // MARK: Stereo output
         // -------------------------------------------------------------------
         SonyS_DSP::StereoSample output;
         // get a flag determining whether phase modulation is enabled for the voice
-        pmTriggers[voice][channel].process(rescale(inputs[INPUT_PM_ENABLE + voice].getVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-        bool is_pm = (1 - params[PARAM_PM_ENABLE + voice].getValue()) - !pmTriggers[voice][channel].state;
+        pmTriggers[voice][channel].process(rescale(inputs[INPUT_PM_ENABLE + voice].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
+        bool is_pm = (1 - params[PARAM_PM_ENABLE + voice].getValue()) - !pmTriggers[voice][channel].isHigh();
         // run the sample through the voice
         apu[voice][channel].run(
             output,
             trigger,
-            gateTriggers[voice][channel].state,
+            gateTriggers[voice][channel].isHigh(),
             is_pm ? apu[voice - 1][channel].getOutput() : 0
         );
         outputs[OUTPUT_AUDIO_L + voice].setVoltage(5.f * output.samples[0] / std::numeric_limits<int16_t>::max(), channel);
@@ -184,7 +186,7 @@ struct SuperSampler : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels

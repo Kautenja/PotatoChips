@@ -13,9 +13,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <functional>
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
+#include "engine/yamaha_ym2612_params.hpp"
 #include "widget/indexed_frame_display.hpp"
 
 // ---------------------------------------------------------------------------
@@ -29,17 +31,17 @@ struct BossFight : rack::Module {
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+    Trigger::Threshold gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
-
-    /// a clock divider for reducing computation (on CV acquisition)
-    dsp::ClockDivider cvDivider;
+    Trigger::Threshold retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
 
     /// a VU meter for measuring the output audio level from the emulator
-    dsp::VuMeter2 vuMeter;
+    rack::dsp::VuMeter2 vuMeter;
+
+    /// a clock divider for reducing computation (on CV acquisition)
+    Trigger::Divider cvDivider;
     /// a light divider for updating the LEDs every 512 processing steps
-    dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///
@@ -58,10 +60,17 @@ struct BossFight : rack::Module {
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 8.f;
-        return clamp(static_cast<int>(param + cv), min, max);
+        return Math::clip(
+            static_cast<int>(param + cv),
+            static_cast<int>(min),
+            static_cast<int>(max)
+        );
     }
 
  public:
+    /// Whether to attempt to prevent clicks from the envelope generator
+    bool prevent_clicks = false;
+
     /// the indexes of parameters (knobs, switches, etc.) on the module
     enum ParamIds {
         PARAM_AL,
@@ -125,9 +134,9 @@ struct BossFight : rack::Module {
     BossFight() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
-        configParam(PARAM_AL,  0, 7, 7, "Algorithm");
-        configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
+        configParam(PARAM_AL, 0, 7, 7, "Algorithm");
+        configParam(PARAM_FB, 0, 7, 0, "Feedback");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
@@ -140,11 +149,11 @@ struct BossFight : rack::Module {
             configParam(PARAM_SL         + i,  0,    15,  15, opName + " Sustain Level");
             configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
-            configParam(PARAM_MUL        + i,  0,    15,   1, opName + " Multiplier");
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
-            configParam(PARAM_AMS        + i,  0,     3,   0, opName + " Amplitude modulation sensitivity");
-            configParam(PARAM_FMS        + i,  0,     7,   0, opName + " Frequency modulation sensitivity");
-            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0,     1,   0, opName + " Looping Envelope");
+            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0, 1, 0, opName + " Looping Envelope");
+            configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
+            configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
+            configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);
         }
         // reset the emulator
         onSampleRateChange();
@@ -155,22 +164,47 @@ struct BossFight : rack::Module {
     }
 
     /// @brief Respond to the change of sample rate in the engine.
-    inline void onSampleRateChange() final {
+    void onSampleRateChange() final {
         // update the buffer for each oscillator and polyphony channel
         for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
             apu[channel].set_sample_rate(APP->engine->getSampleRate(), CLOCK_RATE);
+    }
+
+    /// @brief Respond to the module being reset by the engine.
+    void onReset() final {
+        prevent_clicks = false;
+    }
+
+    /// @brief Return a JSON representation of this module's state
+    ///
+    /// @returns a new JSON object with this object's serialized state data
+    ///
+    json_t* dataToJson() final {
+        json_t* rootJ = json_object();
+        json_object_set_new(rootJ, "prevent_clicks", json_boolean(prevent_clicks));
+        return rootJ;
+    }
+
+    /// @brief Return the object to the given serialized state.
+    ///
+    /// @returns a JSON object with object serialized state data to restore
+    ///
+    void dataFromJson(json_t* rootJ) final {
+        json_t* prevent_clicks_object = json_object_get(rootJ, "prevent_clicks");
+        if (prevent_clicks_object)
+            prevent_clicks = json_boolean_value(prevent_clicks_object);
     }
 
     /// @brief Return the value of the mix parameter from the panel.
     ///
     /// @returns the 8-bit saturation value
     ///
-    inline int32_t getSaturation(unsigned channel) {
+    inline int32_t getSaturation(const unsigned& channel) {
         const float param = params[PARAM_SATURATION].getValue();
-        const float cv = inputs[INPUT_SATURATION].getPolyVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_SATURATION].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, 0.f, MAX);
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -178,14 +212,14 @@ struct BossFight : rack::Module {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
-        algorithm[channel] = clamp(algorithm[channel], 0, 7);
+        algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
         apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
-        apu[channel].set_algorithm     (getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
-        apu[channel].set_feedback      (getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
+        apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
+        apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
         // normal pitch gate and re-trigger
         float gate = 0;
         float retrig = 0;
@@ -205,16 +239,16 @@ struct BossFight : rack::Module {
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
             // process the gate trigger, high at 2V
             gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
-            gate_triggers[op][channel].process(rescale(gate, 0.f, 2.f, 0.f, 1.f));
+            gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
             // process the retrig trigger, high at 2V
             retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const auto trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.f, 2.f, 0.f, 1.f));
+            const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
             // use the exclusive or of the gate and retrigger. This ensures that
             // when either gate or trigger alone is high, the gate is open,
             // but when neither or both are high, the gate is closed. This
             // causes the gate to get shut for a sample when re-triggering an
             // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].state);
+            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh(), prevent_clicks);
         }
     }
 
@@ -222,7 +256,7 @@ struct BossFight : rack::Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs& args) override {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -240,9 +274,9 @@ struct BossFight : rack::Module {
         for (unsigned channel = 0; channel < channels; channel++) {
             float pitch = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
-                float frequency = params[PARAM_FREQ + op].getValue();
+                const float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
-                apu[channel].set_frequency(op, dsp::FREQ_C4 * std::pow(2.f, clamp(frequency + pitch, -6.5f, 6.5f)));
+                apu[channel].set_frequency(op, Math::Eurorack::voct2freq(Math::clip(frequency + pitch, -6.5f, 6.5f)));
             }
             // set the output voltage based on the 14-bit signed PCM sample
             const int16_t audio_output = (apu[channel].step() * getSaturation(channel)) >> 7;
@@ -251,8 +285,8 @@ struct BossFight : rack::Module {
             // convert the clipped audio to a floating point sample and set
             // the output voltage for the channel
             const auto sample = YamahaYM2612::Operator::clip(audio_output) / static_cast<float>(1 << 13);
-            outputs[OUTPUT_MASTER + 0].setVoltage(5.f * sample, channel);
-            outputs[OUTPUT_MASTER + 1].setVoltage(5.f * sample, channel);
+            outputs[OUTPUT_MASTER + 0].setVoltage(Math::Eurorack::toAC(sample), channel);
+            outputs[OUTPUT_MASTER + 1].setVoltage(Math::Eurorack::toAC(sample), channel);
         }
         // process the lights based on the VU meter readings
         if (lightDivider.process()) {
@@ -339,6 +373,35 @@ struct BossFightWidget : ModuleWidget {
                 addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
             }
         }
+    }
+
+    /// @brief Append the context menu to the module when right clicked.
+    ///
+    /// @param menu the menu object to add context items for the module to
+    ///
+    void appendContextMenu(Menu* menu) override {
+        // get a pointer to the module
+        BossFight* const module = dynamic_cast<BossFight*>(this->module);
+
+        /// a structure for holding changes to the model items
+        struct PreventClicksItem : MenuItem {
+            /// the module to update
+            BossFight* module;
+
+            /// Response to an action update to this item
+            void onAction(const event::Action& e) override {
+                module->prevent_clicks = !module->prevent_clicks;
+            }
+        };
+
+        // add the envelope mode selection item to the menu
+        menu->addChild(new MenuSeparator);
+        auto item = createMenuItem<PreventClicksItem>(
+            "Soft Reset Envelope Generator",
+            CHECKMARK(module->prevent_clicks)
+        );
+        item->module = module;
+        menu->addChild(item);
     }
 };
 

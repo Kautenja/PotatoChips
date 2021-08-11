@@ -75,14 +75,14 @@ class TexasInstrumentsSN76489 {
         /// the phase of the oscillator
         int phase = 0;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> Synth;
         const Synth* synth;
 
         /// @brief Reset the oscillator to its initial state.
         inline void reset() { period = phase = 0; Oscillator::reset(); }
 
         /// @brief Run the oscillator from time until end_time.
-        void run(blip_time_t time, blip_time_t end_time) {
+        void run(int32_t time, int32_t end_time) {
             if (!volume || period <= 128) {
                 // ignore 16kHz and higher
                 if (last_amp) {
@@ -136,7 +136,7 @@ class TexasInstrumentsSN76489 {
         /// the linear feedback shift registers
         unsigned feedback = 0x9000;
         /// The synthesizer for generating samples from this oscillator
-        typedef BLIPSynthesizer<BLIP_QUALITY_MEDIUM, 1> Synth;
+        typedef BLIPSynthesizer<float, BLIP_QUALITY_MEDIUM, 1> Synth;
         Synth synth;
         /// whether the LFSR is on
         bool is_periodic = false;
@@ -151,7 +151,7 @@ class TexasInstrumentsSN76489 {
         }
 
         /// @brief Run the oscillator from time until end_time.
-        void run(blip_time_t time, blip_time_t end_time) {
+        void run(int32_t time, int32_t end_time) {
             int amp = volume;
             if (shifter & 1) amp = -amp;
 
@@ -198,7 +198,7 @@ class TexasInstrumentsSN76489 {
     };
 
     /// the last time the voices were updated
-    blip_time_t last_time = 0;
+    int32_t last_time = 0;
     /// the value of the latch register
     int latch = 0;
     /// the value of the LFSR noise
@@ -210,7 +210,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param end_time the time to run the voices until
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time) {  // time went backwards
             throw Exception("end_time must be >= last_time");
         } else if (end_time > last_time) {  // time moved forwards
@@ -284,7 +284,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         square_synth.set_treble_eq(equalizer);
         noise.synth.set_treble_eq(equalizer);
     }
@@ -363,7 +363,7 @@ class TexasInstrumentsSN76489 {
     ///
     /// @param end_time the time to run the voices until
     ///
-    inline void end_frame(blip_time_t end_time) {
+    inline void end_frame(int32_t end_time) {
         if (end_time > last_time) run_until(end_time);
         last_time -= end_time;
     }

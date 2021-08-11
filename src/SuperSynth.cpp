@@ -14,6 +14,8 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/processor.hpp"
 #include "dsp/wavetable4bit.hpp"
 
@@ -33,7 +35,7 @@ struct SuperSynth : Module {
     inline void clearRAM() { memset(ram, 0, sizeof ram); }
 
     /// triggers for handling gate inputs for the voices
-    rack::dsp::BooleanTrigger gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
+    Trigger::Threshold gateTriggers[SonyS_DSP::Processor::VOICE_COUNT][2];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -201,7 +203,7 @@ struct SuperSynth : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // -------------------------------------------------------------------
         // MARK: RAM (SPC700 emulation)
         // -------------------------------------------------------------------
@@ -238,9 +240,9 @@ struct SuperSynth : Module {
             // get the voltage from the gate input port
             const auto gate = inputs[INPUT_GATE + voice].getVoltage();
             // process the voltage to detect key-on events
-            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+            key_on = key_on | (gateTriggers[voice][0].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f)) << voice);
             // process the inverted voltage to detect key-of events
-            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.f, 2.f, 0.f, 1.f)) << voice);
+            key_off = key_off | (gateTriggers[voice][1].process(rescale(10.f - gate, 0.01f, 2.f, 0.f, 1.f)) << voice);
         }
         if (key_on) {  // a key-on event occurred from the gate input
             // write key off to enable all voices
@@ -297,7 +299,7 @@ struct SuperSynth : Module {
             pitch += inputs[INPUT_VOCT + voice].getVoltage();
             pitch += inputs[INPUT_FM + voice].getVoltage() / 5.f;
             float frequency = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-            frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+            frequency = Math::clip(frequency, 0.0f, 20000.0f);
             // convert the floating point frequency to a 14-bit pitch value
             auto pitch16bit = SonyS_DSP::get_pitch(frequency);
             // set the 14-bit pitch value to the cascade of two RAM slots

@@ -4,6 +4,10 @@ all: manual
 build:
 	mkdir -p build
 
+mBlocks: build
+	make -C Blocks
+	cp Blocks/build/manual.pdf build/Blocks.pdf
+
 mNameCorpOctalWaveGenerator: build
 	make -C NameCorpOctalWaveGenerator
 	cp NameCorpOctalWaveGenerator/build/manual.pdf build/NameCorpOctalWaveGenerator.pdf
@@ -56,4 +60,4 @@ mSuperADSR: build
 	make -C SuperADSR
 	cp SuperADSR/build/manual.pdf build/SuperADSR.pdf
 
-manual: mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mMiniBoss mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR
+manual: mBlocks mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mMiniBoss mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR

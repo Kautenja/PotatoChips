@@ -14,8 +14,10 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/atari_pokey.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -25,7 +27,7 @@
 struct PotKeys : ChipModule<AtariPOKEY> {
  private:
     /// triggers for handling inputs to the control ports
-    dsp::BooleanTrigger controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
+    Trigger::Threshold controlTriggers[PORT_MAX_CHANNELS][AtariPOKEY::CTL_FLAGS];
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -118,10 +120,10 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         // convert the pitch to frequency based on standard exponential scale
         // and clamp within [0, 20000] Hz
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, MIN, MAX);
+        return Math::clip(freq, MIN, MAX);
     }
 
     /// @brief Return the noise for the given oscillator.
@@ -148,7 +150,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         param += mod;
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(param, MIN, MAX);
+        return Math::clip(param, MIN, MAX);
     }
 
     /// @brief Return the level for the given oscillator.
@@ -172,10 +174,10 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(mod, channel);
         // apply the control mod to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        param = roundf(param * mod / 10.f);
+        param = roundf(param * Math::Eurorack::fromDC(mod));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(param, MIN, MAX);
+        return Math::clip(param, MIN, MAX);
     }
 
     /// @brief Return the control byte.
@@ -187,9 +189,8 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         uint8_t controlByte = 0;
         for (std::size_t bit = 0; bit < AtariPOKEY::CTL_FLAGS; bit++) {
             if (bit == 3 or bit == 4) continue;  // ignore 16-bit
-            controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.f, 2.f, 0.f, 1.f));
-            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) -
-                !controlTriggers[channel][bit].state;
+            controlTriggers[channel][bit].process(rescale(inputs[INPUT_CONTROL + bit].getPolyVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
+            bool state = (1 - params[PARAM_CONTROL + bit].getValue()) - !controlTriggers[channel][bit].isHigh();
             // the position for the current button's index
             controlByte |= state << bit;
         }
@@ -201,7 +202,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
             // there are 2 registers per oscillator, multiply first
             // oscillator by 2 to produce an offset between registers
@@ -216,7 +217,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         for (unsigned oscillator = 0; oscillator < AtariPOKEY::OSC_COUNT; oscillator++) {
             // there are 2 registers per oscillator, multiply first
             // oscillator by 2 to produce an offset between registers
@@ -233,7 +234,7 @@ struct PotKeys : ChipModule<AtariPOKEY> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < AtariPOKEY::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

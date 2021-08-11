@@ -286,9 +286,50 @@
         YM2612, but is better to omit for this module
     -   fix polyphonic pitch calculation for the operators
 
-## 1.11.0 (TBD)
+## 1.10.1 (2020-12-17)
+
+-   fix sync inputs for Infinite Stairs, StepSaw, and Jairasullator. the inputs were triggering when the input crossed 2V, they now trigger when the signal crosses zero (from negative to positive)
+-   fix trigger-able inputs to not fire when opening a patch
+-   update parameter descriptions for Boss Fight and Mini Boss
+    -   LFO now shows the Hz measurement of the LFO
+    -   multiply now shows "1/2" instead of "0" when all the way CCW
+    -   FMS now measures the sensitivity in _% of halftone_
+    -   AMS now measures the sensitivity in _dB_
+    -   change "prevent clicks from envelope generator" to "soft reset envelope generator"
+    -   add _soft reset envelope generator_ to BossFight
+
+## 1.10.2 (2021-01-12)
+
+-   fix sync inputs for Infinite Stairs, StepSaw, and Jairasullator. the inputs were triggering when the input crossed 0V, they now trigger when the signal crosses the threshold of 0.01V to 0.02V (approximately 0V). This allows the sync to be triggered by a DC signal, like a gate or LFO.
+-   fix trigger inputs on Pallet Town Waves System, Super ADSR, Boss Fight, Infinite Stairs, Jairasullator, Mega Tone, Mini Boss, and Pot Keys. They now work with AC and DC signals.
+-   fix clock dividers for CV acquisition and LED light updates. They now fire on the downbeat of the source clock
+
+## 1.11.0 (2021-07-27)
+
+-   Fix wavetable editor screens to allow right clicks
+-   Fix name of wave table editor Undo/Redo actions
+-   Mirror monophonic inputs to modules that are running poly-phonically
+-   new module: Blocks
+    -   inspired by Mutable Instruments Edges
+-   fix panels with missing inputs / potentiometers
+    - InfiniteStairs looked liked an input was missing for a VCA on the NES triangle
+    - PalletTownWavesSystem had a missing sync input that has been removed from the panel
+
+## 1.11.1 (TBD)
+
+-   Fix gain control on Super Echo and Super VCA to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
+
+## 1.12.0 (TBD)
 
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip
+
+## 1.13.0 (TBD)
+
+-   Yamaha YM2151
+
+## 1.14.0 (TBD)
+
+-   Yamaha YM2413

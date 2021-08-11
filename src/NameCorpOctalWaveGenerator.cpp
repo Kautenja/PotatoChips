@@ -15,6 +15,7 @@
 
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
 #include "dsp/namco_163.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -83,7 +84,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         // set the output buffer for each individual voice
         for (unsigned osc = 0; osc < Namco163::OSC_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
-            configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, rack::dsp::FREQ_C4);
             configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
             configParam(PARAM_VOLUME + osc, 0, 15, 15, osc_name + " Volume");
         }
@@ -161,9 +162,9 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         auto param = params[PARAM_NUM_OSCILLATORS].getValue();
         auto att = params[PARAM_NUM_OSCILLATORS_ATT].getValue();
         // get the CV as 1V per oscillator
-        auto cv = 8.f * inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel) / 10.f;
+        auto cv = 8.f * Math::Eurorack::fromDC(inputs[INPUT_NUM_OSCILLATORS].getPolyVoltage(channel));
         // oscillators are indexed maths style on the chip, not CS style
-        return rack::math::clamp(param + att * cv, 1.f, 8.f);
+        return Math::clip(param + att * cv, 1.f, 8.f);
     }
 
     /// @brief Return the wave-table position parameter.
@@ -177,7 +178,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         // get the CV as 1V per wave-table
         auto cv = rescale(inputs[INPUT_WAVETABLE].getVoltage(channel), -7.f, 7.f, -5.f, 5.f);
         // wave-tables are indexed maths style on panel, subtract 1 for CS style
-        return rack::math::clamp(param + att * cv, 1.f, 5.f) - 1;
+        return Math::clip(param + att * cv, 1.f, 5.f) - 1;
     }
 
     /// @brief Return the frequency parameter for the given oscillator.
@@ -208,14 +209,14 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to the 8-bit value for the oscillator
         static constexpr uint32_t wave_length = 64 - (SAMPLES_PER_WAVETABLE / 4);
         // ignoring num_oscillators in the calculation allows the standard 103
         // function where additional oscillators reduce the frequency of all
         freq *= (wave_length * 15.f * 65536.f) / buffers[channel][oscillator].get_clock_rate();
         // clamp within the legal bounds for the frequency value
-        freq = rack::clamp(freq, 512.f, 262143.f);
+        freq = Math::clip(freq, 512.f, 262143.f);
         // OR the waveform length into the high 6 bits of "frequency Hi"
         // register, which is the third bite, i.e. shift left 2 + 16
         return static_cast<uint32_t>(freq) | (wave_length << 18);
@@ -243,10 +244,10 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         inputs[INPUT_VOLUME + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
-        return rack::clamp(level, MIN, MAX);
+        return Math::clip(level, MIN, MAX);
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -254,7 +255,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    virtual void processAudio(const ProcessArgs &args, unsigned channel) override {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // set the frequency for all oscillators on the chip
         for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // extract the low, medium, and high frequency register values
@@ -276,7 +277,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) override {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         // get the number of active oscillators from the panel
         num_oscillators[channel] = getActiveOscillators(channel);
         // set the frequency for all oscillators on the chip
@@ -316,7 +317,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         // set the lights based on the accumulated brightness
         for (unsigned oscillator = 0; oscillator < Namco163::OSC_COUNT; oscillator++) {
             // accumulate brightness for all the channels

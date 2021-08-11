@@ -238,7 +238,7 @@ struct Voice4Op {
     /// @param value the amount of rate-scale applied to the FM operator
     ///
     inline void set_rate_scale(uint8_t op_index, uint8_t value) {
-        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_rs(value);
+        update_phase_increment |= operators[OPERATOR_INDEXES[op_index]].set_rate_scale(value);
     }
 
     /// @brief Set the attack rate (AR) register for the given voice and operator.
@@ -247,7 +247,7 @@ struct Voice4Op {
     /// @param value the rate of the attack stage of the envelope generator
     ///
     inline void set_attack_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_ar(value);
+        operators[OPERATOR_INDEXES[op_index]].set_attack_rate(value);
     }
 
     /// @brief Set the total level (TL) register for the given voice and operator.
@@ -256,7 +256,7 @@ struct Voice4Op {
     /// @param value the total amplitude of envelope generator
     ///
     inline void set_total_level(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_tl(value);
+        operators[OPERATOR_INDEXES[op_index]].set_total_level(value);
     }
 
     /// @brief Set the 1st decay rate (D1) register for the given voice and operator.
@@ -265,7 +265,7 @@ struct Voice4Op {
     /// @param value the rate of decay for the 1st decay stage of the envelope generator
     ///
     inline void set_decay_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_dr(value);
+        operators[OPERATOR_INDEXES[op_index]].set_decay_rate(value);
     }
 
     /// @brief Set the sustain level (SL) register for the given voice and operator.
@@ -274,7 +274,7 @@ struct Voice4Op {
     /// @param value the amplitude level at which the 2nd decay stage of the envelope generator begins
     ///
     inline void set_sustain_level(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_sl(value);
+        operators[OPERATOR_INDEXES[op_index]].set_sustain_level(value);
     }
 
     /// @brief Set the 2nd decay rate (D2) register for the given voice and operator.
@@ -283,7 +283,7 @@ struct Voice4Op {
     /// @param value the rate of decay for the 2nd decay stage of the envelope generator
     ///
     inline void set_sustain_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_sr(value);
+        operators[OPERATOR_INDEXES[op_index]].set_sustain_rate(value);
     }
 
     /// @brief Set the release rate (RR) register for the given voice and operator.
@@ -292,7 +292,7 @@ struct Voice4Op {
     /// @param value the rate of release of the envelope generator after key-off
     ///
     inline void set_release_rate(uint8_t op_index, uint8_t value) {
-        operators[OPERATOR_INDEXES[op_index]].set_rr(value);
+        operators[OPERATOR_INDEXES[op_index]].set_release_rate(value);
     }
 
     /// @brief Set the multiplier (MUL) register for the given voice and operator.

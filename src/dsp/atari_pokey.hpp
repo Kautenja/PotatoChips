@@ -125,7 +125,7 @@ class AtariPOKEY {
         uint8_t poly17[poly17_len / 8 + 1];
 
         /// the synthesizer for the Atari POKEY engine
-        BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+        BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> synth;
 
         // friend the container class to access member data
         friend class AtariPOKEY;
@@ -158,7 +158,7 @@ class AtariPOKEY {
         ///
         /// @param equalizer the equalization parameter for the synthesizers
         ///
-        inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+        inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
             synth.set_treble_eq(equalizer);
         }
     };
@@ -182,9 +182,9 @@ class AtariPOKEY {
         /// the last amplitude value of the oscillator
         int last_amp = 0;
         /// TODO:
-        blip_time_t delay = 0;
+        int32_t delay = 0;
         /// always recalculated before use; here for convenience
-        blip_time_t period = 0;
+        int32_t period = 0;
         /// the output buffer the oscillator writes samples to
         BLIPBuffer* output = nullptr;
 
@@ -201,7 +201,7 @@ class AtariPOKEY {
     /// the synthesizer implementation for computing samples
     Engine* impl = nullptr;
     /// has been run until this time in current frame
-    blip_time_t last_time = 0;
+    int32_t last_time = 0;
     /// the position in Poly5
     int poly5_pos = 0;
     /// the position in Poly4
@@ -241,7 +241,7 @@ class AtariPOKEY {
     ///
     /// @param end_time the number of elapsed cycles
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time)  // invalid end time
             throw Exception("final_end_time must be >= last_time");
         else if (end_time == last_time)  // no change in time
@@ -260,8 +260,8 @@ class AtariPOKEY {
 
         for (unsigned i = 0; i < OSC_COUNT; i++) {
             auto* const osc = &oscs[i];
-            blip_time_t time = last_time + osc->delay;
-            blip_time_t const period = osc->period;
+            int32_t time = last_time + osc->delay;
+            int32_t const period = osc->period;
             if (osc->output) {
                 uint8_t const osc_control = osc->regs[1];
                 int8_t volume = (osc_control & 0x0F) << 1;
@@ -283,8 +283,8 @@ class AtariPOKEY {
                 } else {
                     // high pass
                     static uint8_t const hipass_bits[OSC_COUNT] = { 1 << 2, 1 << 1, 0, 0 };
-                    blip_time_t period2 = 0; // unused if no high pass
-                    blip_time_t time2 = end_time;
+                    int32_t period2 = 0; // unused if no high pass
+                    int32_t time2 = end_time;
                     if (this->control & hipass_bits[i]) {
                         period2 = osc[2].period;
                         time2 = last_time + osc[2].delay;
@@ -344,7 +344,7 @@ class AtariPOKEY {
                             // must advance *past* time to avoid hang
                             while (time2 <= time) time2 += period2;
                             // run wave
-                            blip_time_t end = end_time;
+                            int32_t end = end_time;
                             if (end > time2) end = time2;
                             while (time < end) {
                                 if (wave & 1) {
@@ -376,7 +376,7 @@ class AtariPOKEY {
             }
 
             // maintain divider
-            blip_time_t remain = end_time - time;
+            int32_t remain = end_time - time;
             if (remain > 0) {
                 int32_t count = (remain + period - 1) / period;
                 osc->phase ^= count;
@@ -386,7 +386,7 @@ class AtariPOKEY {
         }
 
         // advance polys
-        blip_time_t duration = end_time - last_time;
+        int32_t duration = end_time - last_time;
         last_time = end_time;
         poly4_pos = (poly4_pos + duration) % poly4_len;
         poly5_pos = (poly5_pos + duration) % poly5_len;
@@ -438,7 +438,7 @@ class AtariPOKEY {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(const BLIPEqualizer& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         impl->set_treble_eq(equalizer);
     }
 
@@ -490,7 +490,7 @@ class AtariPOKEY {
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t end_time) {
+    inline void end_frame(int32_t end_time) {
         run_until(end_time);
         last_time -= end_time;
     }

@@ -15,7 +15,10 @@
 
 #include <functional>
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/yamaha_ym2612/feedback_operator.hpp"
+#include "engine/yamaha_ym2612_params.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -28,15 +31,14 @@ struct MiniBoss : rack::Module {
     YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
 
     /// triggers for opening and closing the oscillator gates
-    dsp::BooleanTrigger gates[PORT_MAX_CHANNELS];
+    Trigger::Threshold gates[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retriggers[PORT_MAX_CHANNELS];
+    Trigger::Threshold retriggers[PORT_MAX_CHANNELS];
 
     /// a clock divider for reducing computation (on CV acquisition)
-    dsp::ClockDivider cvDivider;
-
+    Trigger::Divider cvDivider;
     /// a light divider for updating the LEDs every 512 processing steps
-    dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// Return the binary value for the given parameter.
     ///
@@ -56,7 +58,11 @@ struct MiniBoss : rack::Module {
     ) {
         auto param = params[paramIndex].getValue();
         auto cv = max * inputs[inputIndex].getVoltage(channel) / 8.f;
-        return clamp(static_cast<int>(param + cv), min, max);
+        return Math::clip(
+            static_cast<int>(param + cv),
+            static_cast<int>(min),
+            static_cast<int>(max)
+        );
     }
 
  public:
@@ -127,7 +133,7 @@ struct MiniBoss : rack::Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         // global parameters
         configParam(PARAM_FB,  0, 7, 0, "Feedback");
-        configParam(PARAM_LFO, 0, 7, 0, "LFO frequency");
+        configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FM, -1, 1, 0, "Frequency Modulation");
@@ -138,11 +144,11 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_SL,  0,  15,  15, "Sustain Level");
         configParam(PARAM_D2,  0,  31,   0, "Sustain Rate");
         configParam(PARAM_RR,  0,  15,  15, "Release Rate");
-        configParam(PARAM_MUL, 0,  15,   1, "Multiplier");
         configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
-        configParam(PARAM_AMS, 0,   3,   0, "LFO amplitude modulation sensitivity");
-        configParam(PARAM_FMS, 0,   7,   0, "LFO frequency modulation sensitivity");
         configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
+        configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
+        configParam<AMSQuantity>(PARAM_AMS, 0, 3, 0);
+        configParam<FMSQuantity>(PARAM_FMS, 0, 7, 0);
         // reset the emulator
         onSampleRateChange();
         // set the rate of the CV acquisition clock divider
@@ -188,10 +194,10 @@ struct MiniBoss : rack::Module {
     ///
     inline int32_t getVolume(unsigned channel) {
         const float param = params[PARAM_VOLUME].getValue();
-        const float cv = inputs[INPUT_VOLUME].getPolyVoltage(channel) / 10.f;
+        const float cv = Math::Eurorack::fromDC(inputs[INPUT_VOLUME].getPolyVoltage(channel));
         const float mod = std::numeric_limits<int8_t>::max() * cv;
         static constexpr float MAX = std::numeric_limits<int8_t>::max();
-        return clamp(param + mod, 0.f, MAX);
+        return Math::clip(param + mod, 0.f, MAX);
     }
 
     /// @brief Process the gate trigger, high at 2V.
@@ -201,8 +207,8 @@ struct MiniBoss : rack::Module {
     ///
     inline bool getGate(unsigned channel) {
         const auto input = inputs[INPUT_GATE].getVoltage(channel);
-        gates[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
-        return gates[channel].state;
+        gates[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
+        return gates[channel].isHigh();
     }
 
     /// @brief Process the re-trig trigger, high at 2V.
@@ -212,7 +218,7 @@ struct MiniBoss : rack::Module {
     ///
     inline bool getRetrigger(unsigned channel) {
         const auto input = inputs[INPUT_RETRIG].getVoltage(channel);
-        return retriggers[channel].process(rescale(input, 0.f, 2.f, 0.f, 1.f));
+        return retriggers[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
     }
 
     /// @brief Return the frequency for the given channel.
@@ -223,7 +229,7 @@ struct MiniBoss : rack::Module {
     inline float getFrequency(unsigned channel) {
         const float base = params[PARAM_FREQ].getValue();
         const float voct = inputs[INPUT_VOCT].getVoltage(channel);
-        return dsp::FREQ_C4 * std::pow(2.f, clamp(base + voct, -6.5f, 6.5f));
+        return dsp::FREQ_C4 * std::pow(2.f, Math::clip(base + voct, -6.5f, 6.5f));
     }
 
     /// @brief Return the frequency mod for the given channel.
@@ -232,16 +238,16 @@ struct MiniBoss : rack::Module {
     /// @returns the 14-bit aigned frequency modulation signal
     ///
     inline int16_t getFM(unsigned channel) {
-        const auto input = inputs[INPUT_FM].getVoltage(channel) / 5.0;
+        const auto input = inputs[INPUT_FM].getVoltage(channel) / 5.f;
         const auto depth = params[PARAM_FM].getValue();
-        return (1 << 13) * clamp(depth * input, -1.f, 1.f);
+        return (1 << 13) * Math::clip(depth * input, -1.f, 1.f);
     }
 
     /// @brief Process a sample.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) override {
+    void process(const ProcessArgs& args) override {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -254,19 +260,19 @@ struct MiniBoss : rack::Module {
         // process control voltage when the CV divider is high
         if (cvDivider.process()) {
             for (unsigned channel = 0; channel < channels; channel++) {
-                apu[channel].set_ar            (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
-                apu[channel].set_tl            (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
-                apu[channel].set_dr            (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
-                apu[channel].set_sl            (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
-                apu[channel].set_sr            (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
-                apu[channel].set_rr            (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
+                apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
+                apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
+                apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
+                apu[channel].set_sustain_level (15 - getParam(channel,  PARAM_SL,  INPUT_SL, 0, 15 ));
+                apu[channel].set_sustain_rate  (getParam(channel,       PARAM_D2,  INPUT_D2, 0, 31 ));
+                apu[channel].set_release_rate  (getParam(channel,       PARAM_RR,  INPUT_RR, 0, 15 ));
                 apu[channel].set_multiplier    (params[PARAM_MUL].getValue());
                 apu[channel].set_feedback      (params[PARAM_FB].getValue());
                 apu[channel].set_lfo           (params[PARAM_LFO].getValue());
                 apu[channel].set_fm_sensitivity(params[PARAM_FMS].getValue());
                 apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
                 apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
-                apu[channel].set_rs            (params[PARAM_RS].getValue());
+                apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
                 // use the exclusive or of the gate and re-trigger. This ensures
                 // that when either gate or trigger alone is high, the gate is
                 // open, but when neither or both are high, the gate is closed.
@@ -299,10 +305,10 @@ struct MiniBoss : rack::Module {
                 }
                 if (value > 0) {  // green for positive voltage
                     lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(0, sample_time);
-                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 } else {  // red for negative voltage
-                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(-value / 10.f, sample_time);
+                    lights[LIGHT_AR + 3 * param + 0].setSmoothBrightness(-Math::Eurorack::fromDC(value), sample_time);
                     lights[LIGHT_AR + 3 * param + 1].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_AR + 3 * param + 2].setSmoothBrightness(0, sample_time);
                 }
@@ -387,7 +393,7 @@ struct MiniBossWidget : ModuleWidget {
         // add the envelope mode selection item to the menu
         menu->addChild(new MenuSeparator);
         auto item = createMenuItem<PreventClicksItem>(
-            "Prevent Envelope Generator Clicks",
+            "Soft Reset Envelope Generator",
             CHECKMARK(module->prevent_clicks)
         );
         item->module = module;

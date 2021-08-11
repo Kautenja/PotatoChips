@@ -16,7 +16,7 @@
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 44100,
-          "blockSize": 1024
+          "blockSize": 512
         }
       },
       "pos": [
@@ -40,7 +40,7 @@
         },
         {
           "id": 2,
-          "value": 0.613919795
+          "value": 0.0
         },
         {
           "id": 3,
@@ -134,12 +134,12 @@
     {
       "id": 16,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.1",
       "model": "AY_3_8910",
       "params": [
         {
           "id": 0,
-          "value": -5.0
+          "value": 0.0
         },
         {
           "id": 1,
@@ -147,19 +147,19 @@
         },
         {
           "id": 2,
-          "value": -2.94000196
+          "value": 0.0
         },
         {
           "id": 3,
-          "value": 1.75
+          "value": -0.468499899
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 6,
@@ -171,7 +171,7 @@
         },
         {
           "id": 8,
-          "value": 15.0
+          "value": 10.0
         },
         {
           "id": 9,
@@ -239,52 +239,52 @@
   ],
   "cables": [
     {
-      "id": 846,
+      "id": 1430,
       "outputModuleId": 5,
-      "outputId": 6,
+      "outputId": 0,
       "inputModuleId": 16,
-      "inputId": 25,
-      "color": "#c91847"
-    },
-    {
-      "id": 286,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
       "inputId": 0,
-      "color": "#0986ad"
+      "color": "#000000"
     },
     {
-      "id": 287,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 1,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 282,
-      "outputModuleId": 2,
-      "outputId": 0,
-      "inputModuleId": 7,
-      "inputId": 0,
-      "color": "#0986ad"
-    },
-    {
-      "id": 854,
+      "id": 1431,
       "outputModuleId": 16,
       "outputId": 2,
       "inputModuleId": 2,
       "inputId": 1,
-      "color": "#c9b70e"
+      "color": "#000000"
     },
     {
-      "id": 855,
-      "outputModuleId": 5,
+      "id": 1432,
+      "outputModuleId": 2,
       "outputId": 0,
-      "inputModuleId": 16,
+      "inputModuleId": 1,
       "inputId": 0,
-      "color": "#0986ad"
+      "color": "#000000"
+    },
+    {
+      "id": 1433,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 1,
+      "inputId": 1,
+      "color": "#000000"
+    },
+    {
+      "id": 1434,
+      "outputModuleId": 2,
+      "outputId": 0,
+      "inputModuleId": 7,
+      "inputId": 0,
+      "color": "#000000"
+    },
+    {
+      "id": 1429,
+      "outputModuleId": 5,
+      "outputId": 6,
+      "inputModuleId": 16,
+      "inputId": 25,
+      "color": "#000000"
     }
   ]
 }

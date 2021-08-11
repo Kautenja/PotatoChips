@@ -101,16 +101,16 @@ class SunSoftFME7 {
     uint16_t delays[OSC_COUNT] = {0, 0, 0};
 
     /// the last time the oscillators were updated
-    blip_time_t last_time;
+    int32_t last_time;
 
     /// the synthesizer for generating sound from the chip
-    BLIPSynthesizer<BLIP_QUALITY_GOOD, 1> synth;
+    BLIPSynthesizer<float, BLIP_QUALITY_GOOD, 1> synth;
 
     /// Run the oscillators until the given end time.
     ///
     /// @param end_time the time to run the oscillators until
     ///
-    void run_until(blip_time_t end_time) {
+    void run_until(int32_t end_time) {
         if (end_time < last_time)
             throw Exception("end_time must be >= last_time");
         else if (end_time == last_time)
@@ -145,7 +145,7 @@ class SunSoftFME7 {
                 }
             }
 
-            blip_time_t time = last_time + delays[index];
+            int32_t time = last_time + delays[index];
             if (time < end_time) {
                 int delta = amp * 2 - volume;
                 if (volume) {
@@ -228,7 +228,7 @@ class SunSoftFME7 {
     ///
     /// @param equalizer the equalization parameter for the synthesizers
     ///
-    inline void set_treble_eq(BLIPEqualizer const& equalizer) {
+    inline void set_treble_eq(const BLIPEqualizer<float>& equalizer) {
         synth.set_treble_eq(equalizer);
     }
 
@@ -241,7 +241,7 @@ class SunSoftFME7 {
     /// Sets the latch to address, then write the data using the latch
     ///
     inline void write(uint8_t address, uint8_t data) {
-        static constexpr blip_time_t time = 0;
+        static constexpr int32_t time = 0;
         if (address > ADDR_END)
             throw AddressSpaceException<uint16_t>(address, ADDR_START, ADDR_END);
         run_until(time);
@@ -253,7 +253,7 @@ class SunSoftFME7 {
     ///
     /// @param time the time to run the oscillators until
     ///
-    inline void end_frame(blip_time_t time) {
+    inline void end_frame(int32_t time) {
         run_until(time);
         last_time -= time;
     }

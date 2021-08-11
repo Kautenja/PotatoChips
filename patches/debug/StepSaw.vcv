@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.1.6",
   "modules": [
     {
       "id": 1,
@@ -147,7 +147,7 @@
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 3,
@@ -164,7 +164,7 @@
     {
       "id": 133,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.9.0",
       "model": "VRC6",
       "params": [
         {
@@ -173,15 +173,15 @@
         },
         {
           "id": 1,
-          "value": 0.0
+          "value": -1.59750021
         },
         {
           "id": 2,
-          "value": 0.0
+          "value": -2.41750002
         },
         {
           "id": 3,
-          "value": 1.0
+          "value": -1.0
         },
         {
           "id": 4,
@@ -189,27 +189,27 @@
         },
         {
           "id": 5,
-          "value": -1.0
+          "value": 1.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 7,
-          "value": 0.0
+          "value": 5.0
         },
         {
           "id": 8,
-          "value": 10.0
+          "value": 11.0
         },
         {
           "id": 9,
-          "value": 9.0
+          "value": 15.0
         },
         {
           "id": 10,
-          "value": 43.0
+          "value": 30.0
         }
       ],
       "leftModuleId": 132,
@@ -217,54 +217,6 @@
       "pos": [
         16,
         0
-      ]
-    },
-    {
-      "id": 134,
-      "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
-      "model": "FME7",
-      "params": [
-        {
-          "id": 0,
-          "value": 0.0
-        },
-        {
-          "id": 1,
-          "value": 0.0
-        },
-        {
-          "id": 2,
-          "value": 0.0
-        },
-        {
-          "id": 3,
-          "value": 0.0
-        },
-        {
-          "id": 4,
-          "value": 0.0
-        },
-        {
-          "id": 5,
-          "value": 0.0
-        },
-        {
-          "id": 6,
-          "value": 10.0
-        },
-        {
-          "id": 7,
-          "value": 10.0
-        },
-        {
-          "id": 8,
-          "value": 10.0
-        }
-      ],
-      "pos": [
-        17,
-        1
       ]
     }
   ],
@@ -284,22 +236,6 @@
       "inputModuleId": 7,
       "inputId": 0,
       "color": "#0986ad"
-    },
-    {
-      "id": 873,
-      "outputModuleId": 133,
-      "outputId": 2,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
-      "id": 874,
-      "outputModuleId": 132,
-      "outputId": 0,
-      "inputModuleId": 133,
-      "inputId": 6,
-      "color": "#c9b70e"
     },
     {
       "id": 875,
@@ -326,20 +262,28 @@
       "color": "#c9b70e"
     },
     {
-      "id": 878,
-      "outputModuleId": 132,
-      "outputId": 0,
-      "inputModuleId": 133,
-      "inputId": 8,
-      "color": "#c9b70e"
-    },
-    {
       "id": 879,
       "outputModuleId": 2,
       "outputId": 0,
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#c91847"
+    },
+    {
+      "id": 885,
+      "outputModuleId": 132,
+      "outputId": 0,
+      "inputModuleId": 133,
+      "inputId": 8,
+      "color": "#000000"
+    },
+    {
+      "id": 873,
+      "outputModuleId": 133,
+      "outputId": 2,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

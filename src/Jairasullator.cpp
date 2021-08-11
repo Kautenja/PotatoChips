@@ -14,8 +14,10 @@
 //
 
 #include "plugin.hpp"
-#include "engine/chip_module.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
+#include "engine/chip_module.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -25,16 +27,16 @@
 struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
  private:
     /// triggers for handling inputs to the tone and noise enable switches
-    rack::dsp::BooleanTrigger mixerTriggers[PORT_MAX_CHANNELS][2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
+    Trigger::Threshold mixerTriggers[PORT_MAX_CHANNELS][2 * GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the envelope enable switches
-    rack::dsp::BooleanTrigger envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
+    Trigger::Threshold envTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT];
 
     /// triggers for handling inputs to the sync ports and the envelope trig
-    rack::dsp::SchmittTrigger syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
+    Trigger::Threshold syncTriggers[PORT_MAX_CHANNELS][GeneralInstrumentAy_3_8910::OSC_COUNT + 1];
 
     /// a trigger for handling presses to the change mode button
-    rack::dsp::SchmittTrigger envModeTrigger;
+    Trigger::Threshold envModeTrigger;
 
  public:
     /// the mode the envelope generator is in
@@ -167,10 +169,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][oscillator].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
+        return Math::clip(freq, FREQ12BIT_MIN, FREQ12BIT_MAX);
     }
 
     /// @brief Return the level for the given channel.
@@ -203,12 +205,12 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
-        level = roundf(level * voltage / 10.f);
+        level = roundf(level * Math::Eurorack::fromDC(voltage));
         // get the 8-bit attenuation by inverting the level and clipping
         // to the legal bounds of the parameter
         // // the maximal value for the volume width register
         static constexpr float MAX = 15;
-        return rack::clamp(level, 0.f, MAX);
+        return Math::clip(level, 0.f, MAX);
     }
 
     /// @brief Return whether the given oscillator has the envelope enabled.
@@ -222,10 +224,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     inline bool isEnvelopeOn(unsigned osc, unsigned channel) {
         // clamp the input within [0, 10]. this allows bipolar signals to
         // be interpreted as unipolar signals for the trigger input
-        auto cv = math::clamp(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
-        envTriggers[channel][osc].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+        auto cv = Math::clip(inputs[INPUT_ENVELOPE_ON + osc].getVoltage(channel), 0.f, 10.f);
+        envTriggers[channel][osc].process(rescale(cv, 0.01f, 2.f, 0.f, 1.f));
         // return the state of the switch based on the parameter and trig input
-        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].state;
+        return params[PARAM_ENVELOPE_ON + osc].getValue() - envTriggers[channel][osc].isHigh();
     }
 
     /// @brief Return the noise period.
@@ -243,7 +245,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // scale such that [0,7]V controls the full range of the parameter
         const float mod = rescale(cv, 0.f, 7.f, 0.f, MAX);
         // invert the parameter so larger values have higher frequencies
-        return MAX - rack::clamp(floorf(param + mod), 0.f, MAX);
+        return MAX - Math::clip(floorf(param + mod), 0.f, MAX);
     }
 
     /// @brief Return the envelope period.
@@ -276,10 +278,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
         float freq = 1 * powf(2.0, pitch);
-        freq = rack::clamp(freq, 0.0f, 20000.0f);
+        freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to 12-bit
         freq = buffers[channel][0].get_clock_rate() / (CLOCK_DIVISION * freq);
-        return rack::clamp(freq, FREQ16BIT_MIN, FREQ16BIT_MAX);
+        return Math::clip(freq, FREQ16BIT_MIN, FREQ16BIT_MAX);
     }
 
     /// @brief Return the envelope mode.
@@ -326,10 +328,10 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         for (unsigned i = 0; i < 2 * GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // clamp the input within [0, 10]. this allows bipolar signals to
             // be interpreted as unipolar signals for the trigger input
-            auto cv = math::clamp(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
-            mixerTriggers[channel][i].process(rescale(cv, 0.f, 2.f, 0.f, 1.f));
+            auto cv = Math::clip(inputs[INPUT_TONE + i].getVoltage(channel), 0.f, 10.f);
+            mixerTriggers[channel][i].process(rescale(cv, 0.01f, 2.f, 0.f, 1.f));
             // get the state of the tone based on the parameter and trig input
-            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].state;
+            bool toneState = params[PARAM_TONE + i].getValue() - mixerTriggers[channel][i].isHigh();
             // invert the state to indicate "OFF" semantics instead of "ON"
             mixerByte |= !toneState << i;
         }
@@ -353,7 +355,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         // reset the voltage on this port for the next voice to normal to
         inputs[INPUT_RESET + index].setVoltage(sync, channel);
         // process the sync trigger and return the result
-        return syncTriggers[channel][index].process(rescale(sync, 0.f, 2.f, 0.f, 1.f));
+        return syncTriggers[channel][index].process(rescale(sync, 0.01f, 2.f, 0.f, 1.f));
     }
 
     /// @brief Process the audio rate inputs for the given channel.
@@ -361,7 +363,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the audio inputs to
     ///
-    inline void processAudio(const ProcessArgs &args, unsigned channel) final {
+    inline void processAudio(const ProcessArgs& args, const unsigned& channel) final {
         // oscillators (processed in order for port normalling)
         for (unsigned osc = 0; osc < GeneralInstrumentAy_3_8910::OSC_COUNT; osc++) {
             if (getReset(osc, channel)) apu[channel].reset_phase(osc);
@@ -378,7 +380,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processCV(const ProcessArgs &args, unsigned channel) final {
+    inline void processCV(const ProcessArgs& args, const unsigned& channel) final {
         apu[channel].set_channel_enables(getChannelEnables(channel));
         // envelope (processed after oscillators for port normalling)
         apu[channel].set_envelope_mode(getEnvelopeMode(channel));
@@ -392,7 +394,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
     /// @param args the sample arguments (sample rate, sample time, etc.)
     /// @param channels the number of active polyphonic channels
     ///
-    inline void processLights(const ProcessArgs &args, unsigned channels) final {
+    inline void processLights(const ProcessArgs& args, const unsigned& channels) final {
         for (unsigned voice = 0; voice < GeneralInstrumentAy_3_8910::OSC_COUNT; voice++) {
             // get the global brightness scale from -12 to 3
             auto brightness = vuMeter[voice].getBrightness(-12, 3);

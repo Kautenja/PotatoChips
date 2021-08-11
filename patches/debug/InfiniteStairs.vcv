@@ -84,7 +84,7 @@
     {
       "id": 59,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.2",
       "model": "2A03",
       "params": [
         {
@@ -105,15 +105,15 @@
         },
         {
           "id": 4,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 5,
-          "value": 0.0
+          "value": 1.0
         },
         {
           "id": 6,
-          "value": 0.0
+          "value": -1.0
         },
         {
           "id": 7,
@@ -121,11 +121,11 @@
         },
         {
           "id": 8,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 9,
-          "value": 0.0
+          "value": 10.0
         },
         {
           "id": 10,
@@ -133,15 +133,15 @@
         },
         {
           "id": 11,
-          "value": 9.0
+          "value": 5.0
         },
         {
           "id": 12,
-          "value": 2.0
+          "value": 0.0
         },
         {
           "id": 13,
-          "value": 2.0
+          "value": 0.0
         }
       ],
       "leftModuleId": 133,
@@ -282,12 +282,12 @@
       "color": "#c9b70e"
     },
     {
-      "id": 838,
+      "id": 1423,
       "outputModuleId": 133,
       "outputId": 0,
       "inputModuleId": 59,
       "inputId": 8,
-      "color": "#c91847"
+      "color": "#c9b70e"
     }
   ]
 }

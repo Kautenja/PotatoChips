@@ -14,6 +14,8 @@
 //
 
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
 
 // ---------------------------------------------------------------------------
@@ -64,13 +66,13 @@ struct SuperVCA : Module {
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
     SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-        configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Coefficients");
-        configParam(PARAM_GAIN + 0, 0, M_SQRT2, 1, "Input Gain (Left Lane)", " dB", -10, 40);
-        configParam(PARAM_GAIN + 1, 0, M_SQRT2, 1, "Input Gain (Right Lane)", " dB", -10, 40);
+        configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Mode");
+        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
+        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left Lane)");
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right Lane)");
-        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", 2, dsp::FREQ_C4);
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         lightDivider.setDivision(512);
     }
@@ -115,7 +117,7 @@ struct SuperVCA : Module {
     rack::dsp::SchmittTrigger filterModeTrigger;
 
     /// a clock divider for running LED updates slower than audio rate
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
     /// a VU meter for measuring the input audio levels
     rack::dsp::VuMeter2 inputVUMeter[LANES];
@@ -128,12 +130,10 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline uint16_t getFrequency(unsigned lane, unsigned channel) {
-        float param = params[PARAM_FREQ + lane].getValue();
-        const auto normal = lane ? inputs[INPUT_VOCT + lane - 1].getVoltage(channel) : 0.f;
-        param += inputs[INPUT_VOCT + lane].getNormalVoltage(normal, channel);
-        float frequency = rack::dsp::FREQ_C4 * powf(2.0, param);
-        frequency = rack::clamp(frequency, 0.0f, 20000.0f);
+    inline uint16_t getFrequency(const unsigned& lane, const unsigned& channel) {
+        const float param = params[PARAM_FREQ + lane].getValue();
+        const float input = normalChain(&inputs[INPUT_VOCT], lane, channel, 0.f);
+        const float frequency = Math::Eurorack::voct2freq(param + input);
         return SonyS_DSP::get_pitch(frequency);
     }
 
@@ -143,12 +143,10 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the volume of
     /// @returns the volume of the gate for given lane and channel
     ///
-    inline int8_t getVolume(unsigned lane, unsigned channel) {
-        const auto normal = lane ? inputs[INPUT_VOLUME + lane - 1].getVoltage(channel) : 10.f;
-        const float voltage = inputs[INPUT_VOLUME + lane].getNormalVoltage(normal, channel);
-        inputs[INPUT_VOLUME + lane].setVoltage(voltage, channel);
-        const auto param = params[PARAM_VOLUME + lane].getValue();
-        return math::clamp(param * voltage / 10.f, -128.f, 127.f);
+    inline int8_t getVolume(const unsigned& lane, const unsigned& channel) {
+        const float param = params[PARAM_VOLUME + lane].getValue();
+        const float cv = Math::Eurorack::fromDC(normalChain(&inputs[INPUT_VOLUME], lane, channel, 10.f));
+        return Math::clip(param * cv, -128.f, 127.f);
     }
 
     /// @brief Get the input signal.
@@ -157,25 +155,22 @@ struct SuperVCA : Module {
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline float getInput(unsigned lane, unsigned channel) {
-        const auto normal = lane ? inputs[INPUT_AUDIO + lane - 1].getVoltage(channel) : 0.f;
-        const auto voltage = inputs[INPUT_AUDIO + lane].getNormalVoltage(normal, channel);
-        const auto gain = std::pow(params[PARAM_GAIN + lane].getValue(), 2.f);
-        const auto input = gain * voltage;
-        // process the input on the VU meter
-        inputVUMeter[lane].process(APP->engine->getSampleTime(), input / 5.f);
-        // "quantize" the floating point value into an 8-bit container
+    inline float getInput(const unsigned& lane, const unsigned& channel) {
+        const float gain = params[PARAM_GAIN + lane].getValue();
+        const float input = gain * Math::Eurorack::fromAC(normalChain(&inputs[INPUT_AUDIO], lane, channel, 0.f));
+        inputVUMeter[lane].process(APP->engine->getSampleTime(), input);
         return input;
     }
 
-    /// @brief Get the input signal.
+    /// @brief Get the input signal in fixed point.
     ///
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphony channel to get the input signal of
     /// @returns the input signal for the given lane and polyphony channel
     ///
-    inline int8_t getInputFinite(unsigned lane, unsigned channel) {
-        return std::numeric_limits<int8_t>::max() * math::clamp(getInput(lane, channel) / 5.f, -1.f, 1.f);
+    inline int8_t getInputFixed(const unsigned& lane, const unsigned& channel) {
+        constexpr float MAX = std::numeric_limits<int8_t>::max();
+        return MAX * Math::clip(getInput(lane, channel), -1.f, 1.f);
     }
 
     /// @brief Process the CV inputs for the given channel.
@@ -183,41 +178,21 @@ struct SuperVCA : Module {
     /// @param lane the processing lane to get the input signal of
     /// @param channel the polyphonic channel to process the CV inputs to
     ///
-    inline void processChannel(unsigned lane, unsigned channel) {
+    inline void processChannel(const unsigned& lane, const unsigned& channel) {
         apu[lane][channel].setFrequency(getFrequency(lane, channel));
         apu[lane][channel].setFilter(3 - filterMode);
         apu[lane][channel].setVolume(getVolume(lane, channel));
-        float sample = apu[lane][channel].run(getInputFinite(lane, channel));
+        float sample = apu[lane][channel].run(getInputFixed(lane, channel));
         sample = loudnessCompensation * sample / (1 << 14);
         outputVUMeter[lane].process(APP->engine->getSampleTime(), sample);
-        const auto voltage = 5.f * sample;
-        // clamp to a real-world realistic boundary of 8V
-        outputs[OUTPUT_AUDIO + lane].setVoltage(math::clamp(voltage, -8.f, 8.f), channel);
-    }
-
-    /// @brief Set the given VU meter light based on given VU meter.
-    ///
-    /// @param vuMeter the VU meter to get the data from
-    /// @param light the light to update from the VU meter data
-    ///
-    inline void setVULight(rack::dsp::VuMeter2& vuMeter, rack::engine::Light* light) {
-        // get the global brightness scale from -12 to 3
-        auto brightness = vuMeter.getBrightness(-12, 3);
-        // set the red light based on total brightness and
-        // brightness from 0dB to 3dB
-        (light + 0)->setBrightness(brightness * vuMeter.getBrightness(0, 3));
-        // set the red light based on inverted total brightness and
-        // brightness from -12dB to 0dB
-        (light + 1)->setBrightness((1 - brightness) * vuMeter.getBrightness(-12, 0));
-        // set the blue light to off
-        (light + 2)->setBrightness(0);
+        outputs[OUTPUT_AUDIO + lane].setVoltage(Math::Eurorack::toAC(sample), channel);
     }
 
     /// @brief Process the CV inputs for the given channel.
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    void process(const ProcessArgs &args) final {
+    void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -239,9 +214,9 @@ struct SuperVCA : Module {
         if (params[PARAM_BYPASS].getValue()) {  // bypass the chip emulator
             for (unsigned lane = 0; lane < LANES; lane++) {
                 for (unsigned channel = 0; channel < channels; channel++) {
-                    auto input = getInput(lane, channel);
-                    outputVUMeter[lane].process(args.sampleTime, input / 5.f);
-                    outputs[OUTPUT_AUDIO + lane].setVoltage(input, channel);
+                    const float input = getInput(lane, channel);
+                    outputVUMeter[lane].process(args.sampleTime, input);
+                    outputs[OUTPUT_AUDIO + lane].setVoltage(Math::Eurorack::toAC(input), channel);
                 }
             }
         } else {  // process audio samples on the chip engine.
@@ -251,22 +226,19 @@ struct SuperVCA : Module {
             }
         }
         if (lightDivider.process()) {
-            setVULight(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
-            setVULight(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
-            setVULight(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
-            setVULight(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
+            setVULight3(inputVUMeter[0], &lights[LIGHT_VU_INPUT]);
+            setVULight3(inputVUMeter[1], &lights[LIGHT_VU_INPUT + 3]);
+            setVULight3(outputVUMeter[0], &lights[LIGHT_VU_OUTPUT]);
+            setVULight3(outputVUMeter[1], &lights[LIGHT_VU_OUTPUT + 3]);
             // set the envelope mode light in RGB order with the color code:
             // Red   <- filterMode == 0 -> Loud
             // Green <- filterMode == 1 -> Weird
             // Blue  <- filterMode == 2 -> Quiet
             // Black <- filterMode == 3 -> Barely Audible
-            auto deltaTime = args.sampleTime * lightDivider.getDivision();
-            bool red = filterMode == 0;
-            lights[LIGHTS_FILTER + 0].setSmoothBrightness(red, deltaTime);
-            bool green = filterMode == 1;
-            lights[LIGHTS_FILTER + 1].setSmoothBrightness(green, deltaTime);
-            bool blue = filterMode == 2;
-            lights[LIGHTS_FILTER + 2].setSmoothBrightness(blue, deltaTime);
+            const float deltaTime = args.sampleTime * lightDivider.getDivision();
+            lights[LIGHTS_FILTER + 0].setSmoothBrightness(filterMode == 0, deltaTime);
+            lights[LIGHTS_FILTER + 1].setSmoothBrightness(filterMode == 1, deltaTime);
+            lights[LIGHTS_FILTER + 2].setSmoothBrightness(filterMode == 2, deltaTime);
         }
     }
 };
@@ -281,7 +253,7 @@ struct SuperVCAWidget : ModuleWidget {
     ///
     /// @param module the back-end module to interact with
     ///
-    explicit SuperVCAWidget(SuperVCA *module) {
+    explicit SuperVCAWidget(SuperVCA* module) {
         setModule(module);
         static constexpr auto panel = "res/SuperVCA.svg";
         setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
@@ -310,6 +282,10 @@ struct SuperVCAWidget : ModuleWidget {
         }
     }
 
+    /// @brief Fill a context menu with information and controls for the module.
+    ///
+    /// @param menu the menu to fill with contents related to the module
+    ///
     void appendContextMenu(Menu* menu) override {
         // get a pointer to the module
         SuperVCA* const module = dynamic_cast<SuperVCA*>(this->module);

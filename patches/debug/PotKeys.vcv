@@ -1,5 +1,5 @@
 {
-  "version": "1.dev.2db08f1",
+  "version": "1.dev.476a49b",
   "modules": [
     {
       "id": 1,
@@ -10,12 +10,12 @@
       "leftModuleId": 2,
       "data": {
         "audio": {
-          "driver": 5,
-          "deviceName": "Apple Inc.: Built-in Output",
+          "driver": 1,
+          "deviceName": "default",
           "offset": 0,
           "maxChannels": 8,
           "sampleRate": 48000,
-          "blockSize": 2048
+          "blockSize": 512
         }
       },
       "pos": [
@@ -134,7 +134,7 @@
     {
       "id": 6,
       "plugin": "KautenjaDSP-PotatoChips",
-      "version": "1.8.0",
+      "version": "1.10.1",
       "model": "POKEY",
       "params": [
         {
@@ -322,20 +322,20 @@
       "color": "#c9b70e"
     },
     {
-      "id": 809,
-      "outputModuleId": 6,
-      "outputId": 3,
-      "inputModuleId": 2,
-      "inputId": 1,
-      "color": "#0986ad"
-    },
-    {
       "id": 811,
       "outputModuleId": 2,
       "outputId": 0,
       "inputModuleId": 1,
       "inputId": 1,
       "color": "#c91847"
+    },
+    {
+      "id": 809,
+      "outputModuleId": 6,
+      "outputId": 3,
+      "inputModuleId": 2,
+      "inputId": 1,
+      "color": "#0986ad"
     }
   ]
 }

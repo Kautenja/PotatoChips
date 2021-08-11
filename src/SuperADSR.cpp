@@ -15,10 +15,9 @@
 
 #include <limits>
 #include "plugin.hpp"
+#include "dsp/math.hpp"
+#include "dsp/trigger.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
-
-// TODO: inverted output
-// TODO: CV level control
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -33,11 +32,11 @@ struct SuperADSR : Module {
     /// the Sony S-DSP ADSR enveloper generator emulator
     SonyS_DSP::ADSR apus[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input trigger and gate signals
-    rack::dsp::BooleanTrigger gateTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Threshold gateTrigger[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
-    rack::dsp::BooleanTrigger retrigTrigger[LANES][PORT_MAX_CHANNELS];
+    Trigger::Threshold retrigTrigger[LANES][PORT_MAX_CHANNELS];
     /// a clock divider for light updates
-    rack::dsp::ClockDivider lightDivider;
+    Trigger::Divider lightDivider;
 
  public:
     /// the indexes of parameters (knobs, switches, etc.) on the module
@@ -95,12 +94,12 @@ struct SuperADSR : Module {
     /// @param lane the processing lane to get the trigger input for
     /// @returns True if the given envelope generator is triggered
     ///
-    inline bool getTrigger(unsigned channel, unsigned lane) {
+    inline bool getTrigger(const unsigned& channel, const unsigned& lane) {
         // get the trigger from the gate input
-        const auto gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const float gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
         const bool gate = gateTrigger[lane][channel].process(gateCV);
         // get the trigger from the re-trigger input
-        const auto retrigCV = rescale(inputs[INPUT_RETRIG + lane].getVoltage(channel), 0.f, 2.f, 0.f, 1.f);
+        const float retrigCV = rescale(inputs[INPUT_RETRIG + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
         const bool retrig = retrigTrigger[lane][channel].process(retrigCV);
         // OR the two boolean values together
         return gate || retrig;
@@ -111,7 +110,7 @@ struct SuperADSR : Module {
     /// @param channel the polyphonic channel to process the CV inputs to
     /// @param lane the processing lane on the module to process
     ///
-    inline void processChannel(unsigned channel, unsigned lane) {
+    inline void processChannel(const unsigned& channel, const unsigned& lane) {
         // cache the APU for this lane and channel
         SonyS_DSP::ADSR& apu = apus[lane][channel];
         // set the ADSR parameters for this APU
@@ -121,9 +120,9 @@ struct SuperADSR : Module {
         apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL + lane].getValue());
         apu.setAmplitude(params[PARAM_AMPLITUDE + lane].getValue());
         // trigger this APU and process the output
-        auto trigger = getTrigger(channel, lane);
-        auto sample = apu.run(trigger, gateTrigger[lane][channel].state);
-        const auto voltage = 10.f * sample / 128.f;
+        const bool trigger = getTrigger(channel, lane);
+        const float sample = apu.run(trigger, gateTrigger[lane][channel].isHigh());
+        const float voltage = Math::Eurorack::toDC(sample / 128.f);
         outputs[OUTPUT_ENVELOPE + lane].setVoltage(voltage, channel);
         outputs[OUTPUT_INVERTED + lane].setVoltage(-voltage, channel);
     }
@@ -132,7 +131,7 @@ struct SuperADSR : Module {
     ///
     /// @param args the sample arguments (sample rate, sample time, etc.)
     ///
-    inline void process(const ProcessArgs &args) final {
+    inline void process(const ProcessArgs& args) final {
         // get the number of polyphonic channels (defaults to 1 for monophonic).
         // also set the channels on the output ports based on the number of
         // channels
@@ -148,10 +147,10 @@ struct SuperADSR : Module {
                 processChannel(channel, lane);
         }
         if (lightDivider.process()) {
-            const auto sample_time = lightDivider.getDivision() * args.sampleTime;
+            const float sample_time = lightDivider.getDivision() * args.sampleTime;
             for (unsigned lane = 0; lane < LANES; lane++) {
                 // set amplitude light based on the output
-                auto output = (outputs[OUTPUT_ENVELOPE + lane].getVoltageSum() / channels) / 10.f;
+                const float output = Math::Eurorack::fromDC(outputs[OUTPUT_ENVELOPE + lane].getVoltageSum() / channels);
                 if (output > 0) {  // positive, green light
                     lights[LIGHT_AMPLITUDE + 3 * lane + 0].setSmoothBrightness(0, sample_time);
                     lights[LIGHT_AMPLITUDE + 3 * lane + 1].setSmoothBrightness(output, sample_time);

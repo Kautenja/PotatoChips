@@ -19,40 +19,9 @@
 #include <exception>
 #include <string>
 
-/// An exception class.
-class Exception: public std::exception {
- protected:
-    /// the error message.
-    const std::string message;
-
- public:
-    /// @brief Constructor (C strings).
-    /// @param message_ C-style string error message. The string contents are
-    /// copied upon construction. Hence, responsibility for deleting the char*
-    /// lies with the caller.
-    ///
-    explicit Exception(const char* message_) : message(message_) { }
-
-    /// @brief Constructor (C++ STL strings).
-    /// @param message_ The error message.
-    ///
-    explicit Exception(const std::string& message_) : message(message_) { }
-
-    /// @brief Destroy this exception.
-    ///
-    ~Exception() noexcept { }
-
-    /// @brief Returns a pointer to the (constant) error description.
-    /// @returns A pointer to a const char*. The underlying memory is in
-    /// possession of the Exception object. Callers must not attempt to free
-    /// the memory.
-    ///
-    const char* what() const noexcept override { return message.c_str(); }
-};
-
 
 /// An exception for trying to set a channel that is out of bounds.
-class ChannelOutOfBoundsException: public Exception {
+class ChannelOutOfBoundsException: public rack::Exception {
  public:
     /// @brief Constructor.
     ///

@@ -75,6 +75,8 @@ struct SuperEcho : Module {
     /// @brief Initialize a new S-DSP Chip module.
     SuperEcho() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        for (unsigned coeff = 0; coeff < SonyS_DSP::StereoSample::CHANNELS; coeff++)
+            configBypass(INPUT_AUDIO + coeff, OUTPUT_AUDIO + coeff);
         for (unsigned coeff = 0; coeff < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; coeff++) {
             configParam(PARAM_FIR_COEFFICIENT     + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
             configParam(PARAM_FIR_COEFFICIENT_ATT + coeff, -1.f, 1.f, 0, "FIR Coefficient " + std::to_string(coeff + 1) + " CV Attenuverter");

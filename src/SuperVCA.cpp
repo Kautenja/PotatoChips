@@ -66,6 +66,8 @@ struct SuperVCA : Module {
     /// @brief Initialize a new S-SMP(Gauss) Chip module.
     SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+        for (unsigned coeff = 0; coeff < LANES; coeff++)
+            configBypass(INPUT_AUDIO + coeff, OUTPUT_AUDIO + coeff);
         configButton(PARAM_FILTER, "Filter Mode");
         configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
         configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);

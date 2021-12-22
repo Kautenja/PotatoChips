@@ -81,7 +81,7 @@ struct SuperSampler : Module {
             configParam(PARAM_VOLUME_L + osc, -128, 127, 127, osc_name + " Volume (Left)");
             configParam(PARAM_VOLUME_R + osc, -128, 127, 127, osc_name + " Volume (Right)");
             osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
-            configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
+            configSwitch(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable", {"Off", "On"});
         }
         for (unsigned voice = 0; voice < NUM_VOICES; voice++)
             for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)

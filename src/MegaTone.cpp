@@ -73,7 +73,7 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
                 configParam(PARAM_LEVEL  + i,  0,   15,    7,   "Tone " + std::to_string(i + 1) + " Volume / Amplifier Attenuator");
             } else {  // noise generator
                 configParam(PARAM_FREQ   + i, 0,  3, 0, "Noise Mode");
-                configParam<BooleanParamQuantity>(PARAM_FM     + i, 0,  1, 0, "Linear Feedback Shift Register");
+                configSwitch(PARAM_FM + i, 0, 1, 0, "Linear Feedback Shift Register", {"Off", "On"});
                 configParam(PARAM_LEVEL  + i, 0, 15, 7, "Noise Volume / Amplifier Attenuator");
             }
         }

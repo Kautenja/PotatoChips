@@ -85,7 +85,7 @@ struct SuperEcho : Module {
         configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left Lane)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right Lane)");
-        configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
+        configSwitch(PARAM_BYPASS, 0, 1, 0, "Bypass", {"Off", "On"});
         lightDivider.setDivision(512);
     }
 

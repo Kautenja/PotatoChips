@@ -145,7 +145,7 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_D2,  0,  31,   0, "Sustain Rate");
         configParam(PARAM_RR,  0,  15,  15, "Release Rate");
         configParam(PARAM_RS,  0,   3,   0, "Rate Scaling");
-        configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope");
+        configSwitch(PARAM_SSG_ENABLE, 0, 1, 0, "Looping Envelope", {"Off", "On"});
         configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
         configParam<AMSQuantity>(PARAM_AMS, 0, 3, 0);
         configParam<FMSQuantity>(PARAM_FMS, 0, 7, 0);

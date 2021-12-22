@@ -150,7 +150,7 @@ struct BossFight : rack::Module {
             configParam(PARAM_D2         + i,  0,    31,   0, opName + " 2nd Decay Rate");
             configParam(PARAM_RR         + i,  0,    15,  15, opName + " Release Rate");
             configParam(PARAM_RS         + i,  0,     3,   0, opName + " Rate Scaling");
-            configParam<BooleanParamQuantity>(PARAM_SSG_ENABLE + i,  0, 1, 0, opName + " Looping Envelope");
+            configSwitch(PARAM_SSG_ENABLE + i,  0, 1, 0, opName + " Looping Envelope", {"Off", "On"});
             configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
             configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);

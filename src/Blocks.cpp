@@ -88,7 +88,7 @@ struct Blocks : rack::Module {
             configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, name + "Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + "FM");
             configParam(PARAM_LEVEL + i, 0, 255, 255, name + "Level");
-            configParam<TriggerParamQuantity>(PARAM_SHAPE + i, 0, 1, 0, name + "Shape");
+            configButton(PARAM_SHAPE + i, name + "Shape");
         }
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);

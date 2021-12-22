@@ -89,7 +89,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         configParam(PARAM_PW + 0, 0, 3, 2, "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1, 0, 3, 2, "Pulse 2 Duty Cycle");
         configParam(PARAM_WAVETABLE, 0, NUM_WAVEFORMS, 0, "Waveform morph");
-        configParam<BooleanParamQuantity>(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
+        configSwitch(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register", {"Off", "On"});
         configParam(PARAM_LEVEL + 0, 0, 15, 10, "Pulse 1 Volume");
         configParam(PARAM_LEVEL + 1, 0, 15, 10, "Pulse 2 Volume");
         configParam(PARAM_LEVEL + 2, 0, 3,  3,  "Wave Volume");

@@ -106,11 +106,11 @@ struct SuperSynth : Module {
             configParam(PARAM_DECAY         + osc,    0,   7,   0, osc_name + " Envelope Decay");
             configParam(PARAM_SUSTAIN_LEVEL + osc,    0,   7,   0, osc_name + " Envelope Sustain Level");
             configParam(PARAM_SUSTAIN_RATE  + osc,    0,  31,   0, osc_name + " Envelope Sustain Rate");
-            configParam(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable");
-            configParam(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable");
+            configSwitch(PARAM_NOISE_ENABLE  + osc,    0,   1,   0, osc_name + " Noise Enable", {"Off", "On"});
+            configSwitch(PARAM_ECHO_ENABLE   + osc,    0,   1,   1, osc_name + " Echo Enable", {"Off", "On"});
             if (osc > 0) {  // voice 0 does not have phase modulation
                 osc_name = "Voice " + std::to_string(osc) + " -> " + osc_name;
-                configParam(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable");
+                configSwitch(PARAM_PM_ENABLE + osc, 0, 1, 0, osc_name + " Phase Modulation Enable", {"Off", "On"});
             }
         }
         for (unsigned coeff = 0; coeff < SonyS_DSP::Processor::FIR_COEFFICIENT_COUNT; coeff++) {

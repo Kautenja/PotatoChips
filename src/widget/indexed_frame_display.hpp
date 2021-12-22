@@ -65,7 +65,7 @@ struct IndexedFrameDisplay : rack::LightWidget {
         }
     }
 
-    /// @brief Draw the display on the main context.
+    /// @brief Draw the display background and border on layer 0 of the main context.
     ///
     /// @param args the arguments for the draw context for this widget
     ///
@@ -85,12 +85,6 @@ struct IndexedFrameDisplay : rack::LightWidget {
         nvgFill(args.vg);
         nvgClosePath(args.vg);
         // -------------------------------------------------------------------
-        // draw the image
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        svgDraw(args.vg, frames[getIndex()]);
-        nvgClosePath(args.vg);
-        // -------------------------------------------------------------------
         // draw the border
         // -------------------------------------------------------------------
         nvgBeginPath(args.vg);
@@ -98,6 +92,21 @@ struct IndexedFrameDisplay : rack::LightWidget {
         nvgStrokeColor(args.vg, border);
         nvgStroke(args.vg);
         nvgClosePath(args.vg);
+    }
+    
+    /// @brief Draw the display contents on layer 1 of the main context.
+    ///
+    /// @param args the arguments for the draw context for this widget
+    ///
+    void drawLayer(const DrawArgs &args, int layer) override {
+        if (layer == 1) {
+            // -------------------------------------------------------------------
+            // draw the image
+            // -------------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            svgDraw(args.vg, frames[getIndex()]);
+            nvgClosePath(args.vg);
+        }
     }
 };
 

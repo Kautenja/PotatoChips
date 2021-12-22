@@ -170,7 +170,7 @@ struct WaveTableEditor : rack::LightWidget {
     ///
     void onDragStart(const rack::event::DragStart &e) override {
         // lock the cursor so it does not move in the engine during the edit
-        appGet()->window->cursorLock();
+        APP->window->cursorLock();
         // consume the event to prevent it from propagating
         e.consume(this);
     }
@@ -205,7 +205,7 @@ struct WaveTableEditor : rack::LightWidget {
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
         // unlock the cursor to return it to its normal state
-        appGet()->window->cursorUnlock();
+        APP->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);
         if (!drag_state.is_pressed) return;

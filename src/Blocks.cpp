@@ -84,11 +84,16 @@ struct Blocks : rack::Module {
     Blocks() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < NUM_VOICES; i++) {
-            std::string name = "Voice " + std::to_string(i + 1) + " ";
-            configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, name + "Frequency", " Hz", 2, dsp::FREQ_C4);
-            configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + "FM");
-            configParam(PARAM_LEVEL + i, 0, 255, 255, name + "Level");
-            configParam<TriggerParamQuantity>(PARAM_SHAPE + i, 0, 1, 0, name + "Shape");
+            std::string name = "Voice " + std::to_string(i + 1);
+            configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+            configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + " FM");
+            configParam(PARAM_LEVEL + i, 0, 255, 255, name + " Level");
+            configParam<TriggerParamQuantity>(PARAM_SHAPE + i, 0, 1, 0, name + " Shape");
+            configInput(INPUT_FREQ + i, name + " Frequency");
+            configInput(INPUT_FM + i, name + " FM");
+            configInput(INPUT_LEVEL + i, name + " Level");
+            configOutput(OUTPUT_AUDIO + i, name);
+            configButton(PARAM_SHAPE + i, name + " Shape");
         }
         // set the division of the CV and LED frame dividers
         cvDivider.setDivision(16);

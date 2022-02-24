@@ -79,14 +79,20 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(PARAM_NUM_OSCILLATORS,      1, Namco163::OSC_COUNT, 4, "Active Channels");
         configParam(PARAM_NUM_OSCILLATORS_ATT, -1, 1,                   0, "Active Channels Attenuverter");
+        configInput(INPUT_NUM_OSCILLATORS, "Active Channels");
         configParam(PARAM_WAVETABLE,            1, NUM_WAVEFORMS,       1, "Waveform Morph");
         configParam(PARAM_WAVETABLE_ATT,       -1, 1,                   0, "Waveform Morph Attenuverter");
+        configInput(INPUT_WAVETABLE, "Waveform Morph");
         // set the output buffer for each individual voice
         for (unsigned osc = 0; osc < Namco163::OSC_COUNT; osc++) {
             auto osc_name = "Voice " + std::to_string(osc + 1);
             configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, rack::dsp::FREQ_C4);
             configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
             configParam(PARAM_VOLUME + osc, 0, 15, 15, osc_name + " Volume");
+            configInput(INPUT_VOCT + osc, osc_name + " V/Oct");
+            configInput(INPUT_FM + osc, osc_name + " FM");
+            configInput(INPUT_VOLUME + osc, osc_name + " Volume");
+            configOutput(OUTPUT_OSCILLATOR + osc, osc_name + " Audio");
         }
         memset(num_oscillators, 1, sizeof num_oscillators);
         resetWavetable();

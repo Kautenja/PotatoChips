@@ -94,6 +94,31 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         configParam(PARAM_LEVEL + 1, 0, 15, 10, "Pulse 2 Volume");
         configParam(PARAM_LEVEL + 2, 0, 3,  3,  "Wave Volume");
         configParam(PARAM_LEVEL + 3, 0, 15, 10, "Noise Volume");
+
+        configInput(INPUT_VOCT + 0, "Pulse 1 V/Oct");
+        configInput(INPUT_VOCT + 1, "Pulse 2 V/Oct");
+        configInput(INPUT_VOCT + 2, "Wave V/Oct");
+        configInput(INPUT_NOISE_PERIOD, "Noise Period");
+
+        configInput(INPUT_FM + 0, "Pulse 1 FM");
+        configInput(INPUT_FM + 1, "Pulse 2 FM");
+        configInput(INPUT_FM + 2, "Wave FM");
+        configInput(INPUT_LFSR, "LFSR");
+
+        configInput(INPUT_PW + 0, "Pulse 1 Duty Cycle");
+        configInput(INPUT_PW + 1, "Pulse 2 Duty Cycle");
+        configInput(INPUT_WAVETABLE, "Waveform");
+
+        configInput(INPUT_LEVEL + 0, "Pulse 1 Volume");
+        configInput(INPUT_LEVEL + 1, "Pulse 2 Volume");
+        configInput(INPUT_LEVEL + 2, "Wave Volume");
+        configInput(INPUT_LEVEL + 3, "Noise Volume");
+
+        configOutput(OUTPUT_OSCILLATOR + 0, "Pulse 1 Audio");
+        configOutput(OUTPUT_OSCILLATOR + 1, "Pulse 2 Audio");
+        configOutput(OUTPUT_OSCILLATOR + 2, "Wave Audio");
+        configOutput(OUTPUT_OSCILLATOR + 3, "Noise Audio");
+
         resetWavetable();
     }
 

@@ -149,6 +149,22 @@ struct MiniBoss : rack::Module {
         configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
         configParam<AMSQuantity>(PARAM_AMS, 0, 3, 0);
         configParam<FMSQuantity>(PARAM_FMS, 0, 7, 0);
+
+        configInput(INPUT_AR, "Attack Rate");
+        configInput(INPUT_TL, "Total Level");
+        configInput(INPUT_D1, "1st Decay Rate");
+        configInput(INPUT_SL, "Sustain Level");
+        configInput(INPUT_D2, "2nd Decay Rate");
+        configInput(INPUT_RR, "Release Rate");
+
+        configInput(INPUT_GATE, "Gate");
+        configInput(INPUT_RETRIG, "Trigger");
+        configInput(INPUT_VOCT, "Pitch");
+        configInput(INPUT_FM, "FM");
+        configInput(INPUT_VOLUME, "Volume");
+
+        configOutput(OUTPUT_OSC, "Audio");
+
         // reset the emulator
         onSampleRateChange();
         // set the rate of the CV acquisition clock divider

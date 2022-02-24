@@ -82,6 +82,10 @@ struct SuperADSR : Module {
             configParam(PARAM_DECAY         + lane,    0,   7,   7, "Decay");
             configParam(PARAM_SUSTAIN_LEVEL + lane,    0,   7,   5, "Sustain Level", "%", 0, 100.f / 7.f);
             configParam(PARAM_SUSTAIN_RATE  + lane,    0,  31,  20, "Sustain Rate");
+            configInput(INPUT_GATE + lane, "Gate");
+            configInput(INPUT_RETRIG + lane, "Retrig");
+            configOutput(OUTPUT_ENVELOPE + lane, "Envelope");
+            configOutput(OUTPUT_INVERTED + lane, "Inverted");
         }
         lightDivider.setDivision(512);
     }

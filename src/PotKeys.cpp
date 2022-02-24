@@ -67,21 +67,35 @@ struct PotKeys : ChipModule<AtariPOKEY> {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {
-            auto name = "Voice " + std::to_string(i + 1);
+            auto name = "Tone " + std::to_string(i + 1);
             configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_FM    + i, -1.f,  1.f,  0.f, name + " FM");
             configParam(PARAM_NOISE + i,  0,    7,    7,   name + " Noise");
             configParam(PARAM_LEVEL + i,  0,   15,    7,   name + " Level");
+            configInput(INPUT_VOCT + i, name + " V/Oct");
+            configInput(INPUT_FM + i, name + " FM");
+            configInput(INPUT_NOISE + i, name + " Noise");
+            configInput(INPUT_LEVEL + i, name + " Level");
+            configOutput(OUTPUT_OSCILLATOR + i, name + " Audio");
         }
         // control register controls
         configParam<BooleanParamQuantity>(PARAM_CONTROL + 0, 0, 1, 0, "Low Frequency");
-        configParam<BooleanParamQuantity>(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Voice 2 from Voice 4");
-        configParam<BooleanParamQuantity>(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Voice 1 from Voice 3");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 1, 0, 1, 0, "High-Pass Tone 2 from Tone 4");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 2, 0, 1, 0, "High-Pass Tone 1 from Tone 3");
         // configParam<BooleanParamQuantity>(PARAM_CONTROL + 3, 0, 1, 0, "16-bit 4 + 3");  // ignore 16-bit
         // configParam<BooleanParamQuantity>(PARAM_CONTROL + 4, 0, 1, 0, "16-bit 1 + 2");  // ignore 16-bit
-        configParam<BooleanParamQuantity>(PARAM_CONTROL + 5, 0, 1, 0, "Voice 3 High Frequency");
-        configParam<BooleanParamQuantity>(PARAM_CONTROL + 6, 0, 1, 0, "Voice 1 High Frequency");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 5, 0, 1, 0, "Tone 3 High Frequency");
+        configParam<BooleanParamQuantity>(PARAM_CONTROL + 6, 0, 1, 0, "Tone 1 High Frequency");
         configParam<BooleanParamQuantity>(PARAM_CONTROL + 7, 0, 1, 0, "Linear Feedback Shift Register");
+
+        configInput(PARAM_CONTROL + 0, "Low Frequency");
+        configInput(PARAM_CONTROL + 1, "High-Pass Tone 2 from Tone 4");
+        configInput(PARAM_CONTROL + 2, "High-Pass Tone 1 from Tone 3");
+        // configInput(PARAM_CONTROL + 3, "16-bit 4 + 3");  // ignore 16-bit
+        // configInput(PARAM_CONTROL + 4, "16-bit 1 + 2");  // ignore 16-bit
+        configInput(PARAM_CONTROL + 5, "Tone 3 High Frequency");
+        configInput(PARAM_CONTROL + 6, "Tone 1 High Frequency");
+        configInput(PARAM_CONTROL + 7, "Linear Feedback Shift Register");
     }
 
  protected:

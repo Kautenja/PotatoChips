@@ -67,13 +67,21 @@ struct SuperVCA : Module {
     SuperVCA() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam<TriggerParamQuantity>(PARAM_FILTER, 0, 1, 0, "Filter Mode");
-        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left Lane)", " dB", -10, 20);
-        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right Lane)", " dB", -10, 20);
-        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left Lane)");
-        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right Lane)");
-        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left Lane)",  " Hz", 2, dsp::FREQ_C4);
-        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right Lane)", " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_GAIN + 0, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Left)", " dB", -10, 20);
+        configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right)", " dB", -10, 20);
+        configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left)");
+        configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right)");
+        configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left)",  " Hz", 2, dsp::FREQ_C4);
+        configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right)", " Hz", 2, dsp::FREQ_C4);
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
+        configInput(INPUT_VOLUME + 0, "Volume (Left)");
+        configInput(INPUT_VOLUME + 1, "Volume (Right)");
+        configInput(INPUT_AUDIO + 0, "Audio (Left)");
+        configInput(INPUT_AUDIO + 1, "Audio (Right)");
+        configInput(INPUT_VOCT + 0, "V/Oct (Left)");
+        configInput(INPUT_VOCT + 1, "V/Oct (Right)");
+        configOutput(OUTPUT_AUDIO + 0, "Audio (Left)");
+        configOutput(OUTPUT_AUDIO + 1, "Audio (Right)");
         lightDivider.setDivision(512);
     }
 

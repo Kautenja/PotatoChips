@@ -82,16 +82,25 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
             }
             if (i < 2) {  // only pulse channels have duty cycle
                 configParam(PARAM_PW + i, 0, 3, 2, name + " Duty Cycle");
+                configInput(INPUT_PW + i, name + " Width");
+            } else {
+                configInput(INPUT_SYNC + i - 2, name + " Sync");
             }
             if (i < 3) {  // only pulse and triangle channels have frequency
                 configParam(PARAM_FREQ + i,   -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
                 configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + " FM");
+                configInput(INPUT_VOCT + i, name + " V/Oct");
+                configInput(INPUT_FM + i, name + " FM");
             } else {  // noise channel has a period and LFSR setting
                 configParam(PARAM_NOISE_PERIOD, 0, 15, 7, "Noise Period");
                 configParam<BooleanParamQuantity>(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
+                configInput(INPUT_NOISE_PERIOD, "Noise Period");
+                configInput(INPUT_LFSR, name + " LFSR");
             }
             // all channels have a volume setting
             configParam(PARAM_LEVEL + i, 0, 15, 10, name + " Volume");
+            configInput(INPUT_LEVEL + i, name + " Volume");
+            configOutput(OUTPUT_OSCILLATOR + i, name + " Audio");
         }
     }
 

@@ -65,7 +65,7 @@ struct WaveTableAction : rack::history::Action {
 
 /// A widget that displays / edits a wave-table.
 template<typename Wavetable>
-struct WaveTableEditor : rack::LightWidget {
+struct WaveTableEditor : rack::TransparentWidget {
  private:
     /// the vector containing the waveform
     Wavetable* const waveform;
@@ -113,7 +113,7 @@ struct WaveTableEditor : rack::LightWidget {
         NVGcolor background_ = {{{0.f,  0.f,  0.f,  1.f}}},
         NVGcolor border_ =     {{{0.2f, 0.2f, 0.2f, 1.f}}}
     ) :
-        rack::LightWidget(),
+        rack::TransparentWidget(),
         waveform(waveform_),
         length(length_),
         bit_depth(bit_depth_),
@@ -170,7 +170,7 @@ struct WaveTableEditor : rack::LightWidget {
     ///
     void onDragStart(const rack::event::DragStart &e) override {
         // lock the cursor so it does not move in the engine during the edit
-        appGet()->window->cursorLock();
+        APP->window->cursorLock();
         // consume the event to prevent it from propagating
         e.consume(this);
     }
@@ -205,7 +205,7 @@ struct WaveTableEditor : rack::LightWidget {
     ///
     void onDragEnd(const rack::event::DragEnd &e) override {
         // unlock the cursor to return it to its normal state
-        appGet()->window->cursorUnlock();
+        APP->window->cursorUnlock();
         // consume the event to prevent it from propagating
         e.consume(this);
         if (!drag_state.is_pressed) return;
@@ -225,7 +225,7 @@ struct WaveTableEditor : rack::LightWidget {
     ///
     /// @param args the arguments for the draw context for this widget
     ///
-    void draw(const DrawArgs& args) override {
+    void drawLayer(const DrawArgs& args, int layer) override {
         // the x position of the widget
         static constexpr int x = 0;
         // the y position of the widget
@@ -234,41 +234,44 @@ struct WaveTableEditor : rack::LightWidget {
         static constexpr int corner_radius = 3;
         // arbitrary padding
         static constexpr int pad = 1;
-        // -------------------------------------------------------------------
-        // draw the background
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
-        nvgFillColor(args.vg, background);
-        nvgFill(args.vg);
-        nvgClosePath(args.vg);
-        // -------------------------------------------------------------------
-        // draw the waveform
-        // -------------------------------------------------------------------
-        nvgSave(args.vg);
-        nvgBeginPath(args.vg);
-        nvgScissor(args.vg, x, y, box.size.x, box.size.y);
-        // get the start pixel for the path (first sample in the table)
-        auto startY = box.size.y * (bit_depth - waveform[0]) / static_cast<float>(bit_depth);
-        nvgMoveTo(args.vg, x, startY);
-        for (uint32_t i = 0; i < length; i++) {
-            auto pixelX = box.size.x * i / static_cast<float>(length);
-            auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
-            nvgLineTo(args.vg, pixelX, pixelY);
+        if (layer == 1) {
+            // -----------------------------------------------------------------
+            // draw the background
+            // -----------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
+            nvgFillColor(args.vg, background);
+            nvgFill(args.vg);
+            nvgClosePath(args.vg);
+            // -----------------------------------------------------------------
+            // draw the waveform
+            // -----------------------------------------------------------------
+            nvgSave(args.vg);
+            nvgBeginPath(args.vg);
+            nvgScissor(args.vg, x, y, box.size.x, box.size.y);
+            // get the start pixel for the path (first sample in the table)
+            auto startY = box.size.y * (bit_depth - waveform[0]) / static_cast<float>(bit_depth);
+            nvgMoveTo(args.vg, x, startY);
+            for (uint32_t i = 0; i < length; i++) {
+                auto pixelX = box.size.x * i / static_cast<float>(length);
+                auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
+                nvgLineTo(args.vg, pixelX, pixelY);
+            }
+            nvgMoveTo(args.vg, x, startY);
+            nvgStrokeColor(args.vg, fill);
+            nvgStroke(args.vg);
+            nvgClosePath(args.vg);
+            nvgRestore(args.vg);
+            // -----------------------------------------------------------------
+            // draw the border
+            // -----------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
+            nvgStrokeColor(args.vg, border);
+            nvgStroke(args.vg);
+            nvgClosePath(args.vg);
         }
-        nvgMoveTo(args.vg, x, startY);
-        nvgStrokeColor(args.vg, fill);
-        nvgStroke(args.vg);
-        nvgClosePath(args.vg);
-        nvgRestore(args.vg);
-        // -------------------------------------------------------------------
-        // draw the border
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
-        nvgStrokeColor(args.vg, border);
-        nvgStroke(args.vg);
-        nvgClosePath(args.vg);
+        rack::TransparentWidget::drawLayer(args, layer);
     }
 };
 

@@ -22,7 +22,7 @@
 #define WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 
 /// A display for showing indexed images from a frame buffer.
-struct IndexedFrameDisplay : rack::LightWidget {
+struct IndexedFrameDisplay : rack::TransparentWidget {
  private:
     /// the function to call to get the index
     std::function<unsigned()> getIndex;
@@ -69,35 +69,38 @@ struct IndexedFrameDisplay : rack::LightWidget {
     ///
     /// @param args the arguments for the draw context for this widget
     ///
-    void draw(const DrawArgs &args) override {
+    void drawLayer(const DrawArgs &args, int layer) override {
         // the x position of the widget
         static constexpr int x = 0;
         // the y position of the widget
         static constexpr int y = 0;
         // the radius for the corner on the rectangle
         static constexpr int corner_radius = 3;
-        // -------------------------------------------------------------------
-        // draw the background
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
-        nvgFillColor(args.vg, background);
-        nvgFill(args.vg);
-        nvgClosePath(args.vg);
-        // -------------------------------------------------------------------
-        // draw the image
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        svgDraw(args.vg, frames[getIndex()]);
-        nvgClosePath(args.vg);
-        // -------------------------------------------------------------------
-        // draw the border
-        // -------------------------------------------------------------------
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
-        nvgStrokeColor(args.vg, border);
-        nvgStroke(args.vg);
-        nvgClosePath(args.vg);
+        if (layer == 1) {
+            // -----------------------------------------------------------------
+            // draw the background
+            // -----------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
+            nvgFillColor(args.vg, background);
+            nvgFill(args.vg);
+            nvgClosePath(args.vg);
+            // -----------------------------------------------------------------
+            // draw the image
+            // -----------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            svgDraw(args.vg, frames[getIndex()]);
+            nvgClosePath(args.vg);
+            // -----------------------------------------------------------------
+            // draw the border
+            // -----------------------------------------------------------------
+            nvgBeginPath(args.vg);
+            nvgRoundedRect(args.vg, x, y, box.size.x, box.size.y, corner_radius);
+            nvgStrokeColor(args.vg, border);
+            nvgStroke(args.vg);
+            nvgClosePath(args.vg);
+        }
+        rack::TransparentWidget::drawLayer(args, layer);
     }
 };
 

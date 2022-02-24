@@ -71,6 +71,21 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         configParam(PARAM_LEVEL + 0,  0,   15,   12,   "Pulse 1 Level");
         configParam(PARAM_LEVEL + 1,  0,   15,   12,   "Pulse 2 Level");
         configParam(PARAM_LEVEL + 2,  0,   63,   32,   "Saw Level");
+        configInput(INPUT_VOCT + 0, "Pulse 1 V/Oct");
+        configInput(INPUT_VOCT + 1, "Pulse 2 V/Oct");
+        configInput(INPUT_VOCT + 2, "Saw V/Oct");
+        configInput(INPUT_FM + 0, "Pulse 1 FM");
+        configInput(INPUT_FM + 1, "Pulse 2 FM");
+        configInput(INPUT_FM + 2, "Saw FM");
+        configInput(INPUT_PW + 0, "Pulse 1 Duty Cycle");
+        configInput(INPUT_PW + 1, "Pulse 2 Duty Cycle");
+        configInput(INPUT_SYNC, "Saw Sync");
+        configInput(INPUT_LEVEL + 0, "Pulse 1 Level");
+        configInput(INPUT_LEVEL + 1, "Pulse 2 Level");
+        configInput(INPUT_LEVEL + 2, "Saw Level");
+        configOutput(OUTPUT_OSCILLATOR + 0, "Pulse 1");
+        configOutput(OUTPUT_OSCILLATOR + 1, "Pulse 2");
+        configOutput(OUTPUT_OSCILLATOR + 2, "Saw");
     }
 
  protected:

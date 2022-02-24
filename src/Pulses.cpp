@@ -58,9 +58,13 @@ struct Pulses : ChipModule<SunSoftFME7> {
         for (unsigned oscillator = 0; oscillator < SunSoftFME7::OSC_COUNT; oscillator++) {
             // get the oscillator name starting with ACII code 65 (A)
             auto name = "Tone " + std::to_string(oscillator + 1);
-            configParam(PARAM_FREQ  + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
-            configParam(INPUT_FM    + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
-            configParam(PARAM_LEVEL + oscillator,   0,   15,    10,   name + " Level");
+            configParam(PARAM_FREQ   + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
+            configParam(INPUT_FM     + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
+            configParam(PARAM_LEVEL  + oscillator,   0,   15,    10,   name + " Level");
+            configInput(INPUT_VOCT   + oscillator, name + " V/Oct");
+            configInput(INPUT_FM     + oscillator, name + " FM");
+            configInput(INPUT_LEVEL + oscillator, name + " Level");
+            configOutput(OUTPUT_OSCILLATOR + oscillator, name + " Audio");
         }
     }
 

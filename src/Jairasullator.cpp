@@ -100,11 +100,21 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam<BooleanParamQuantity>(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone");
             configParam<BooleanParamQuantity>(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise");
             configParam<BooleanParamQuantity>(PARAM_ENVELOPE_ON + oscillator,  0,     1,    0,   name + " Envelope");
+            configInput(INPUT_VOCT + oscillator, name + " V/Oct");
+            configInput(INPUT_FM + oscillator, name + " FM");
+            configInput(INPUT_LEVEL + oscillator, name + " Level");
+            configInput(INPUT_TONE + oscillator, name + " Tone");
+            configInput(INPUT_NOISE + oscillator, name + " Noise");
+            configInput(INPUT_ENVELOPE_ON + oscillator, name + " Envelope");
+            configInput(INPUT_RESET + oscillator, name + " Sync");
+            configOutput(OUTPUT_OSCILLATOR + oscillator, name + " Audio");
         }
-        configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
+        configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
         configParam<TriggerParamQuantity>(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
+        configInput(INPUT_ENVELOPE_VOCT, "Envelope V/Oct");
+        configInput(INPUT_NOISE_PERIOD, "Noise Period");
     }
 
     /// @brief Respond to the module being reset by the engine.

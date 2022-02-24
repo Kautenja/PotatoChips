@@ -67,15 +67,21 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
         normal_outputs = true;
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
+            const auto name = i < TexasInstrumentsSN76489::TONE_COUNT ? "Tone " + std::to_string(i + 1) : "Noise";
             if (i < TexasInstrumentsSN76489::NOISE) {  // tone generator
-                configParam(PARAM_FREQ   + i, -2.5f, 2.5f, 0.f, "Tone " + std::to_string(i + 1) + " Frequency",  " Hz", 2, dsp::FREQ_C4);
-                configParam(PARAM_FM     + i, -1,    1,    0,   "Tone " + std::to_string(i + 1) + " Fine Tune / FM Attenuverter");
-                configParam(PARAM_LEVEL  + i,  0,   15,    7,   "Tone " + std::to_string(i + 1) + " Volume / Amplifier Attenuator");
+                configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
+                configParam(PARAM_FM + i, -1, 1, 0, name + " Fine Tune / FM Attenuverter");
+                configInput(INPUT_VOCT + i, name + " V/Oct");
+                configInput(INPUT_FM + i , name + " FM");
             } else {  // noise generator
-                configParam(PARAM_FREQ   + i, 0,  3, 0, "Noise Mode");
-                configParam<BooleanParamQuantity>(PARAM_FM     + i, 0,  1, 0, "Linear Feedback Shift Register");
-                configParam(PARAM_LEVEL  + i, 0, 15, 7, "Noise Volume / Amplifier Attenuator");
+                configParam(PARAM_NOISE_PERIOD, 0,  3, 0, name + " Period");
+                configParam<BooleanParamQuantity>(PARAM_LFSR, 0,  1, 0, "Linear Feedback Shift Register");
+                configInput(INPUT_NOISE_PERIOD, name + " Period");
+                configInput(INPUT_LFSR, "LFSR");
             }
+            configParam(PARAM_LEVEL  + i, 0, 15, 7, name + " Volume / Amplifier Attenuator");
+            configInput(PARAM_LEVEL + i, name + " Level");
+            configOutput(OUTPUT_OSCILLATOR + i, name + " Audio");
         }
     }
 

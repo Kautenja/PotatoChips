@@ -138,6 +138,15 @@ struct BossFight : rack::Module {
         configParam(PARAM_FB, 0, 7, 0, "Feedback");
         configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
+
+        configInput(INPUT_AL, "Algorithm");
+        configInput(INPUT_FB, "Feedback");
+        configInput(INPUT_LFO, "LFO Frequency");
+        configInput(INPUT_SATURATION, "Output saturation");
+
+        configOutput(OUTPUT_MASTER + 0, "Audio 1");
+        configOutput(OUTPUT_MASTER + 1, "Audio 2");
+
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {  // operator parameters
             auto opName = "Operator " + std::to_string(i + 1);
             // total level is defined on the domain [0, 127], but values above
@@ -154,6 +163,20 @@ struct BossFight : rack::Module {
             configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
             configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);
+
+            configInput(INPUT_AR + i, opName + " Attack Rate");
+            configInput(INPUT_TL + i, opName + " Total Level");
+            configInput(INPUT_D1 + i, opName + " 1st Decay Rate");
+            configInput(INPUT_SL + i, opName + " Sustain Level");
+            configInput(INPUT_D2 + i, opName + " 2nd Decay Rate");
+            configInput(INPUT_RR + i, opName + " Release Rate");
+
+            configInput(INPUT_GATE + i, opName + " Gate");
+            configInput(INPUT_RETRIG + i, opName + " Trigger");
+            configInput(INPUT_PITCH + i, opName + " Pitch");
+            configInput(INPUT_MUL + i, opName + " Multiplier");
+            configInput(INPUT_AMS + i, opName + " AM Strength");
+            configInput(INPUT_FMS + i, opName + " FM Strength");
         }
         // reset the emulator
         onSampleRateChange();

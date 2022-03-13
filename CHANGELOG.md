@@ -337,3 +337,8 @@
 ## 2.0.0 (2020-02-23)
 
 -   Rack v2 support
+
+## 2.0.1 (2022-03-14)
+
+-   redesigned Name Corp Octal Wave Generator panel
+-   fixed parameter quantization and snapping across all modules

@@ -90,6 +90,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
             configParam(PARAM_FREQ + osc, -2.5f, 2.5f, 0.f, osc_name + " Frequency", " Hz", 2, rack::dsp::FREQ_C4);
             configParam(PARAM_FM + osc, -1.f, 1.f, 0.f, osc_name + " FM");
             configParam(PARAM_VOLUME + osc, 0, 15, 15, osc_name + " Volume");
+            getParamQuantity(PARAM_VOLUME + osc)->snapEnabled = true;
             configInput(INPUT_VOCT + osc, osc_name + " V/Oct");
             configInput(INPUT_FM + osc, osc_name + " FM");
             configInput(INPUT_VOLUME + osc, osc_name + " Volume");

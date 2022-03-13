@@ -95,6 +95,11 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         configParam(PARAM_LEVEL + 2, 0, 3,  3,  "Wave Volume");
         configParam(PARAM_LEVEL + 3, 0, 15, 10, "Noise Volume");
 
+        getParamQuantity(PARAM_LEVEL + 0)->snapEnabled = true;
+        getParamQuantity(PARAM_LEVEL + 1)->snapEnabled = true;
+        getParamQuantity(PARAM_LEVEL + 2)->snapEnabled = true;
+        getParamQuantity(PARAM_LEVEL + 3)->snapEnabled = true;
+
         configInput(INPUT_VOCT + 0, "Pulse 1 V/Oct");
         configInput(INPUT_VOCT + 1, "Pulse 2 V/Oct");
         configInput(INPUT_VOCT + 2, "Wave V/Oct");
@@ -504,7 +509,7 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             else
                 addParam(createParam<CKSS>(    Vec(269, 141), module, PalletTownWavesSystem::PARAM_FM                  + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(162 + 35 * i, 170), module, PalletTownWavesSystem::PARAM_LEVEL       + i));
+            addParam(createParam<Trimpot>( Vec(162 + 35 * i, 170), module, PalletTownWavesSystem::PARAM_LEVEL       + i));
             addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
             // PW
             if (i < 3) {  // Pulse Width / Waveform

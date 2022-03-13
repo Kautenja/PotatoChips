@@ -68,9 +68,14 @@ struct StepSaw : ChipModule<KonamiVRC6> {
         configParam(PARAM_FM   + 2,  -1.f,  1.f,  0.f, "Saw FM");
         configParam(PARAM_PW + 0,     0,    7,    7,   "Pulse 1 Duty Cycle");
         configParam(PARAM_PW + 1,     0,    7,    7,   "Pulse 1 Duty Cycle");
+        getParamQuantity(PARAM_PW + 0)->snapEnabled = true;
+        getParamQuantity(PARAM_PW + 1)->snapEnabled = true;
         configParam(PARAM_LEVEL + 0,  0,   15,   12,   "Pulse 1 Level");
         configParam(PARAM_LEVEL + 1,  0,   15,   12,   "Pulse 2 Level");
         configParam(PARAM_LEVEL + 2,  0,   63,   32,   "Saw Level");
+        getParamQuantity(PARAM_LEVEL + 0)->snapEnabled = true;
+        getParamQuantity(PARAM_LEVEL + 1)->snapEnabled = true;
+        getParamQuantity(PARAM_LEVEL + 2)->snapEnabled = true;
         configInput(INPUT_VOCT + 0, "Pulse 1 V/Oct");
         configInput(INPUT_VOCT + 1, "Pulse 2 V/Oct");
         configInput(INPUT_VOCT + 2, "Saw V/Oct");
@@ -234,10 +239,10 @@ struct StepSawWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 99), module, StepSaw::INPUT_FM    + i));
             addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 144), module, StepSaw::PARAM_FM    + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 170), module, StepSaw::PARAM_LEVEL + i));
+            addParam(createParam<Trimpot>( Vec(15 + 35 * i, 170), module, StepSaw::PARAM_LEVEL + i));
             addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 210), module, StepSaw::INPUT_LEVEL + i));
             if (i < 2) {  // pulse width for tone generator
-                addParam(createSnapParam<Trimpot>(Vec(15 + 35 * i, 241), module, StepSaw::PARAM_PW + i));
+                addParam(createParam<Trimpot>(Vec(15 + 35 * i, 241), module, StepSaw::PARAM_PW + i));
                 addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 281), module, StepSaw::INPUT_PW + i));
             } else {  // sync for saw wave
                 addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 264), module, StepSaw::INPUT_SYNC));

@@ -71,7 +71,9 @@ struct PotKeys : ChipModule<AtariPOKEY> {
             configParam(PARAM_FREQ  + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", dsp::FREQ_SEMITONE, dsp::FREQ_C4);
             configParam(PARAM_FM    + i, -1.f,  1.f,  0.f, name + " FM");
             configParam(PARAM_NOISE + i,  0,    7,    7,   name + " Noise");
+            getParamQuantity(INPUT_NOISE + i)->snapEnabled = true;
             configParam(PARAM_LEVEL + i,  0,   15,    7,   name + " Level");
+            getParamQuantity(PARAM_LEVEL + i)->snapEnabled = true;
             configInput(INPUT_VOCT + i, name + " V/Oct");
             configInput(INPUT_FM + i, name + " FM");
             configInput(INPUT_NOISE + i, name + " Noise");
@@ -292,10 +294,10 @@ struct PotKeysWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 98), module, PotKeys::INPUT_FM          + i));
             addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 143), module, PotKeys::PARAM_FM          + i));
             // Level
-            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 169), module, PotKeys::PARAM_LEVEL       + i));
+            addParam(createParam<Trimpot>(Vec(13 + 35 * i, 169), module, PotKeys::PARAM_LEVEL       + i));
             addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 209), module, PotKeys::INPUT_LEVEL       + i));
             // Noise
-            addParam(createSnapParam<Trimpot>(Vec(13 + 35 * i, 241), module, PotKeys::PARAM_NOISE + i));
+            addParam(createParam<Trimpot>(Vec(13 + 35 * i, 241), module, PotKeys::PARAM_NOISE + i));
             addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 281), module, PotKeys::INPUT_NOISE + i));
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(30 + 35 * i, 319), module, PotKeys::LIGHTS_LEVEL + 3 * i));

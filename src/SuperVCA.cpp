@@ -71,6 +71,8 @@ struct SuperVCA : Module {
         configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right)", " dB", -10, 20);
         configParam(PARAM_VOLUME + 0, -128, 127, 60, "Output Level (Left)");
         configParam(PARAM_VOLUME + 1, -128, 127, 60, "Output Level (Right)");
+        getParamQuantity(PARAM_VOLUME + 0)->snapEnabled = true;
+        getParamQuantity(PARAM_VOLUME + 1)->snapEnabled = true;
         configParam(PARAM_FREQ + 0, -5, 5, 0, "Frequency (Left)",  " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FREQ + 1, -5, 5, 0, "Frequency (Right)", " Hz", 2, dsp::FREQ_C4);
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
@@ -278,7 +280,7 @@ struct SuperVCAWidget : ModuleWidget {
             addParam(createParam<Trimpot>(Vec(15 + 39 * i, 77), module, SuperVCA::PARAM_FREQ + i));
             addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 114), module, SuperVCA::INPUT_VOCT + i));
             // Volume
-            addParam(createSnapParam<Trimpot>(Vec(15 + 39 * i, 163), module, SuperVCA::PARAM_VOLUME + i));
+            addParam(createParam<Trimpot>(Vec(15 + 39 * i, 163), module, SuperVCA::PARAM_VOLUME + i));
             addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 200), module, SuperVCA::INPUT_VOLUME + i));
             // Stereo Input Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(5 + 39 * i, 236), module, SuperVCA::LIGHT_VU_INPUT + 3 * i));

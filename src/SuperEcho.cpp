@@ -86,6 +86,12 @@ struct SuperEcho : Module {
         configParam(PARAM_GAIN + 1, 0, Math::decibels2amplitude(6.f), 1, "Input Gain (Right)", " dB", -10, 20);
         configParam(PARAM_MIX + 0, -128, 127, 0, "Echo Mix (Left)");
         configParam(PARAM_MIX + 1, -128, 127, 0, "Echo Mix (Right)");
+
+        getParamQuantity(PARAM_DELAY)->snapEnabled = true;
+        getParamQuantity(PARAM_FEEDBACK)->snapEnabled = true;
+        getParamQuantity(PARAM_MIX + 0)->snapEnabled = true;
+        getParamQuantity(PARAM_MIX + 1)->snapEnabled = true;
+
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
         configInput(INPUT_DELAY, "Delay");
         configInput(INPUT_FEEDBACK, "Feedback");
@@ -305,10 +311,10 @@ struct SuperEchoWidget : ModuleWidget {
         addParam(createParam<CKSS>(Vec(15, 25), module, SuperEcho::PARAM_BYPASS));
         for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
-            addParam(createSnapParam<Trimpot>(Vec(13 + 39 * i, 77), module, SuperEcho::PARAM_DELAY + i));
+            addParam(createParam<Trimpot>(Vec(13 + 39 * i, 77), module, SuperEcho::PARAM_DELAY + i));
             addInput(createInput<PJ301MPort>(Vec(10 + 39 * i, 112), module, SuperEcho::INPUT_DELAY + i));
             // Echo Mix
-            addParam(createSnapParam<Trimpot>(Vec(13 + 39 * i, 163), module, SuperEcho::PARAM_MIX + i));
+            addParam(createParam<Trimpot>(Vec(13 + 39 * i, 163), module, SuperEcho::PARAM_MIX + i));
             addInput(createInput<PJ301MPort>(Vec(10 + 39 * i, 198), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 39 * i, 236), module, SuperEcho::LIGHT_VU_INPUT + 3 * i));

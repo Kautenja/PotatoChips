@@ -82,6 +82,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
             }
             if (i < 2) {  // only pulse channels have duty cycle
                 configParam(PARAM_PW + i, 0, 3, 2, name + " Duty Cycle");
+                getParamQuantity(PARAM_PW + i)->snapEnabled = true;
                 configInput(INPUT_PW + i, name + " Width");
             } else {
                 configInput(INPUT_SYNC + i - 2, name + " Sync");
@@ -93,12 +94,14 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
                 configInput(INPUT_FM + i, name + " FM");
             } else {  // noise channel has a period and LFSR setting
                 configParam(PARAM_NOISE_PERIOD, 0, 15, 7, "Noise Period");
+                getParamQuantity(PARAM_NOISE_PERIOD)->snapEnabled = true;
                 configParam<BooleanParamQuantity>(PARAM_LFSR, 0, 1, 0, "Linear Feedback Shift Register");
                 configInput(INPUT_NOISE_PERIOD, "Noise Period");
                 configInput(INPUT_LFSR, name + " LFSR");
             }
             // all channels have a volume setting
             configParam(PARAM_LEVEL + i, 0, 15, 10, name + " Volume");
+            getParamQuantity(PARAM_LEVEL + i)->snapEnabled = true;
             configInput(INPUT_LEVEL + i, name + " Volume");
             configOutput(OUTPUT_OSCILLATOR + i, name + " Audio");
         }
@@ -321,12 +324,12 @@ struct InfiniteStairsWidget : ModuleWidget {
                 addParam(createParam<CKSS>(    Vec(120, 141), module, InfiniteStairs::PARAM_FM                  + i));
             // Level
             if (i != Ricoh2A03::TRIANGLE) {
-                addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 170), module, InfiniteStairs::PARAM_LEVEL       + i));
+                addParam(createParam<Trimpot>( Vec(12 + 35 * i, 170), module, InfiniteStairs::PARAM_LEVEL       + i));
                 addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, InfiniteStairs::INPUT_LEVEL       + i));
             }
             // Pulse Width / Sync
             if (i < Ricoh2A03::TRIANGLE) {
-                addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 241), module, InfiniteStairs::PARAM_PW + i));
+                addParam(createParam<Trimpot>(Vec(12 + 35 * i, 241), module, InfiniteStairs::PARAM_PW + i));
                 addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, InfiniteStairs::INPUT_PW + i));
             } else {
                 addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 264), module, InfiniteStairs::INPUT_PW + i));

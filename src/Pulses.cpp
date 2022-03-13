@@ -61,6 +61,7 @@ struct Pulses : ChipModule<SunSoftFME7> {
             configParam(PARAM_FREQ   + oscillator,  -4.5f, 4.5f, 0.f,  name + " Frequency", " Hz", 2,   dsp::FREQ_C4);
             configParam(INPUT_FM     + oscillator,  -1.f,  1.f,  0.f,  name + " FM");
             configParam(PARAM_LEVEL  + oscillator,   0,   15,    10,   name + " Level");
+            getParamQuantity(PARAM_LEVEL + oscillator)->snapEnabled = true;
             configInput(INPUT_VOCT   + oscillator, name + " V/Oct");
             configInput(INPUT_FM     + oscillator, name + " FM");
             configInput(INPUT_LEVEL + oscillator, name + " Level");
@@ -214,7 +215,7 @@ struct PulsesWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 129), module, Pulses::INPUT_FM          + i));
             addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 173), module, Pulses::PARAM_FM          + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(15 + 35 * i, 221), module, Pulses::PARAM_LEVEL       + i));
+            addParam(createParam<Trimpot>( Vec(15 + 35 * i, 221), module, Pulses::PARAM_LEVEL       + i));
             addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 263), module, Pulses::INPUT_LEVEL       + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, Pulses::LIGHTS_LEVEL + 3 * i));
             // Output

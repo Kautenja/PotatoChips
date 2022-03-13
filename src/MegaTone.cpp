@@ -75,11 +75,13 @@ struct MegaTone : ChipModule<TexasInstrumentsSN76489> {
                 configInput(INPUT_FM + i , name + " FM");
             } else {  // noise generator
                 configParam(PARAM_NOISE_PERIOD, 0,  3, 0, name + " Period");
+                getParamQuantity(PARAM_NOISE_PERIOD)->snapEnabled = true;
                 configParam<BooleanParamQuantity>(PARAM_LFSR, 0,  1, 0, "Linear Feedback Shift Register");
                 configInput(INPUT_NOISE_PERIOD, name + " Period");
                 configInput(INPUT_LFSR, "LFSR");
             }
             configParam(PARAM_LEVEL  + i, 0, 15, 7, name + " Volume / Amplifier Attenuator");
+            getParamQuantity(PARAM_LEVEL + i)->snapEnabled = true;
             configInput(PARAM_LEVEL + i, name + " Level");
             configOutput(OUTPUT_OSCILLATOR + i, name + " Audio");
         }
@@ -250,7 +252,7 @@ struct MegaToneWidget : ModuleWidget {
             else
                 addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM                  + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i));
+            addParam(createParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i));
             addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, MegaTone::INPUT_LEVEL       + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, MegaTone::LIGHTS_LEVEL + 3 * i));
             // Output

@@ -20,20 +20,6 @@
 
 #include "rack.hpp"
 
-/// @brief Create a parameter that snaps to integer values.
-///
-/// @tparam P the type of the parameter to initialize
-/// @tparam Args the type of arguments to pass to the `createParam` function
-/// @param args the arguments to pass to the `createParam` function
-/// @returns a pointer to the freshly allocated parameter
-///
-template<typename P, typename... Args>
-inline rack::ParamWidget* createSnapParam(Args... args) {
-    auto param = rack::createParam<P>(args...);
-    param->snap = true;
-    return param;
-}
-
 /// @brief Set the given 3-color VU meter light based on given VU meter.
 ///
 /// @param vuMeter the VU meter to get the data from

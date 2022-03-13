@@ -137,6 +137,11 @@ struct MiniBoss : rack::Module {
         configParam(PARAM_VOLUME, 0, 127, 127, "Output Volume");
         configParam(PARAM_FREQ, -5.f, 5.f, 0.f, "Frequency", " Hz", 2, dsp::FREQ_C4);
         configParam(PARAM_FM, -1, 1, 0, "Frequency Modulation");
+
+        getParamQuantity(PARAM_FB)->snapEnabled = true;
+        getParamQuantity(PARAM_LFO)->snapEnabled = true;
+        getParamQuantity(PARAM_VOLUME)->snapEnabled = true;
+
         // operator parameters
         configParam(PARAM_AR,  1,  31,  31, "Attack Rate");
         configParam(PARAM_TL,  0, 100, 100, "Total Level");
@@ -149,6 +154,17 @@ struct MiniBoss : rack::Module {
         configParam<MultiplierQuantity>(PARAM_MUL, 0, 15, 1);
         configParam<AMSQuantity>(PARAM_AMS, 0, 3, 0);
         configParam<FMSQuantity>(PARAM_FMS, 0, 7, 0);
+
+        getParamQuantity(PARAM_AR)->snapEnabled = true;
+        getParamQuantity(PARAM_TL)->snapEnabled = true;
+        getParamQuantity(PARAM_D1)->snapEnabled = true;
+        getParamQuantity(PARAM_SL)->snapEnabled = true;
+        getParamQuantity(PARAM_D2)->snapEnabled = true;
+        getParamQuantity(PARAM_RR)->snapEnabled = true;
+        getParamQuantity(PARAM_RS)->snapEnabled = true;
+        getParamQuantity(PARAM_MUL)->snapEnabled = true;
+        getParamQuantity(PARAM_AMS)->snapEnabled = true;
+        getParamQuantity(PARAM_FMS)->snapEnabled = true;
 
         configInput(INPUT_AR, "Attack Rate");
         configInput(INPUT_TL, "Total Level");
@@ -363,7 +379,7 @@ struct MiniBossWidget : ModuleWidget {
         }
         // Looping ADSR, Key Scaling
         addParam(createParam<CKSS>(Vec(209, 43), module, MiniBoss::PARAM_SSG_ENABLE));
-        addParam(createSnapParam<Trimpot>(Vec(208, 98), module, MiniBoss::PARAM_RS));
+        addParam(createParam<Trimpot>(Vec(208, 98), module, MiniBoss::PARAM_RS));
         // Frequency, Multiplier, FM, LFO, Volume
         const unsigned KNOB_PER_ROW = 4;
         for (unsigned row = 0; row < 2; row++) {

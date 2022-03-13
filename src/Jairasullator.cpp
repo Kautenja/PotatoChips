@@ -97,6 +97,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
             configParam(PARAM_FREQ  + oscillator, -5.f,   5.f,  0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM    + oscillator, -1.f,   1.f,  0.f, name + " FM");
             configParam(PARAM_LEVEL + oscillator,  0,    15,   10,   name + " Level");
+            getParamQuantity(PARAM_LEVEL + oscillator)->snapEnabled = true;
             configParam<BooleanParamQuantity>(PARAM_TONE  + oscillator,  0,     1,    1,   name + " Tone");
             configParam<BooleanParamQuantity>(PARAM_NOISE + oscillator,  0,     1,    0,   name + " Noise");
             configParam<BooleanParamQuantity>(PARAM_ENVELOPE_ON + oscillator,  0,     1,    0,   name + " Envelope");
@@ -111,6 +112,7 @@ struct Jairasullator : ChipModule<GeneralInstrumentAy_3_8910> {
         }
         configParam(PARAM_ENVELOPE_FREQ, -5.5, 9, 1.75, "Envelope Frequency", " Hz", 2);
         configParam(PARAM_NOISE_PERIOD, 0, 31, 0, "Noise Period");
+        getParamQuantity(PARAM_NOISE_PERIOD)->snapEnabled = true;
         configParam(PARAM_ENVELOPE_FM, -1, 1, 0, "Envelope FM");
         configParam<TriggerParamQuantity>(PARAM_ENVELOPE_MODE, 0, 1, 0, "Envelope Mode");
         configInput(INPUT_ENVELOPE_VOCT, "Envelope V/Oct");
@@ -456,7 +458,7 @@ struct JairasullatorWidget : ModuleWidget {
             addInput(createInput<PJ301MPort>(  Vec(10 + 70 * i, 129), module, Jairasullator::INPUT_FM + i));
             addParam(createParam<Trimpot>(     Vec(12 + 70 * i, 173), module, Jairasullator::PARAM_FM + i));
             // Level
-            addParam(createSnapParam<Trimpot>( Vec(12 + 70 * i, 221), module, Jairasullator::PARAM_LEVEL + i));
+            addParam(createParam<Trimpot>( Vec(12 + 70 * i, 221), module, Jairasullator::PARAM_LEVEL + i));
             addInput(createInput<PJ301MPort>(  Vec(10 + 70 * i, 263), module, Jairasullator::INPUT_LEVEL + i));
             // Hard Sync
             addInput(createInput<PJ301MPort>(Vec(10 + 70 * i, 316), module, Jairasullator::INPUT_RESET + i));
@@ -482,7 +484,7 @@ struct JairasullatorWidget : ModuleWidget {
         // addParam(createParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_ENVELOPE_FM));
         // Noise Period
         addInput(createInput<PJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_NOISE_PERIOD));
-        addParam(createSnapParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_NOISE_PERIOD));
+        addParam(createParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_NOISE_PERIOD));
         // Envelope Mode
         addParam(createParam<TL1105>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE));
         addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(227, 272), module, Jairasullator::LIGHTS_ENV_MODE));

@@ -139,6 +139,11 @@ struct BossFight : rack::Module {
         configParam<LFOQuantity>(PARAM_LFO, 0, 7, 0);
         configParam(PARAM_SATURATION, 0, 127, 127, "Output Saturation");
 
+        getParamQuantity(PARAM_AL)->snapEnabled = true;
+        getParamQuantity(PARAM_FB)->snapEnabled = true;
+        getParamQuantity(PARAM_LFO)->snapEnabled = true;
+        getParamQuantity(PARAM_SATURATION)->snapEnabled = true;
+
         configInput(INPUT_AL, "Algorithm");
         configInput(INPUT_FB, "Feedback");
         configInput(INPUT_LFO, "LFO Frequency");
@@ -163,6 +168,17 @@ struct BossFight : rack::Module {
             configParam<MultiplierQuantity>(PARAM_MUL + i, 0, 15, 1);
             configParam<AMSQuantity>(PARAM_AMS + i, 0, 3, 0);
             configParam<FMSQuantity>(PARAM_FMS + i, 0, 7, 0);
+
+            getParamQuantity(PARAM_AR + i)->snapEnabled = true;
+            getParamQuantity(PARAM_TL + i)->snapEnabled = true;
+            getParamQuantity(PARAM_D1 + i)->snapEnabled = true;
+            getParamQuantity(PARAM_SL + i)->snapEnabled = true;
+            getParamQuantity(PARAM_D2 + i)->snapEnabled = true;
+            getParamQuantity(PARAM_RR + i)->snapEnabled = true;
+            getParamQuantity(PARAM_RS + i)->snapEnabled = true;
+            getParamQuantity(PARAM_MUL + i)->snapEnabled = true;
+            getParamQuantity(PARAM_AMS + i)->snapEnabled = true;
+            getParamQuantity(PARAM_FMS + i)->snapEnabled = true;
 
             configInput(INPUT_AR + i, opName + " Attack Rate");
             configInput(INPUT_TL + i, opName + " Total Level");
@@ -352,10 +368,10 @@ struct BossFightWidget : ModuleWidget {
             Vec(110, 70)
         ));
         // Algorithm, Feedback, LFO, Saturation
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 116),  module, BossFight::PARAM_AL));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 116),  module, BossFight::PARAM_FB));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(10, 187), module, BossFight::PARAM_LFO));
-        addParam(createSnapParam<Rogan3PWhite>(Vec(77, 187), module, BossFight::PARAM_SATURATION));
+        addParam(createParam<Rogan3PWhite>(Vec(10, 116),  module, BossFight::PARAM_AL));
+        addParam(createParam<Rogan3PWhite>(Vec(77, 116),  module, BossFight::PARAM_FB));
+        addParam(createParam<Rogan3PWhite>(Vec(10, 187), module, BossFight::PARAM_LFO));
+        addParam(createParam<Rogan3PWhite>(Vec(77, 187), module, BossFight::PARAM_SATURATION));
         // Saturation Indicator
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 270), module, BossFight::VU_LIGHTS + 0));
         addChild(createLightCentered<MediumLight<RedLight>>   (Vec(20, 285), module, BossFight::VU_LIGHTS + 1));
@@ -374,20 +390,20 @@ struct BossFightWidget : ModuleWidget {
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             auto offset = i * 210;
             // ADSR
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, BossFight::PARAM_AR + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, BossFight::PARAM_TL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 103), module, BossFight::PARAM_D1 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(223 + offset, 147), module, BossFight::PARAM_SL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 173), module, BossFight::PARAM_D2 + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(159 + offset, 242), module, BossFight::PARAM_RR + i));
+            addParam(createParam<Rogan2PWhite>(Vec(159 + offset, 35),  module, BossFight::PARAM_AR + i));
+            addParam(createParam<Rogan2PWhite>(Vec(223 + offset, 60),  module, BossFight::PARAM_TL + i));
+            addParam(createParam<Rogan2PWhite>(Vec(159 + offset, 103), module, BossFight::PARAM_D1 + i));
+            addParam(createParam<Rogan2PWhite>(Vec(223 + offset, 147), module, BossFight::PARAM_SL + i));
+            addParam(createParam<Rogan2PWhite>(Vec(159 + offset, 173), module, BossFight::PARAM_D2 + i));
+            addParam(createParam<Rogan2PWhite>(Vec(159 + offset, 242), module, BossFight::PARAM_RR + i));
             // Looping ADSR, Key Scaling
             addParam(createParam<CKSS>(Vec(216 + offset, 203), module, BossFight::PARAM_SSG_ENABLE + i));
-            addParam(createSnapParam<Trimpot>(Vec(248 + offset, 247), module, BossFight::PARAM_RS + i));
+            addParam(createParam<Trimpot>(Vec(248 + offset, 247), module, BossFight::PARAM_RS + i));
             // Frequency and modulation
             addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 35),  module, BossFight::PARAM_FREQ + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 103), module, BossFight::PARAM_MUL + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 173), module, BossFight::PARAM_AMS + i));
-            addParam(createSnapParam<Rogan2PWhite>(Vec(290 + offset, 242), module, BossFight::PARAM_FMS + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 103), module, BossFight::PARAM_MUL + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 173), module, BossFight::PARAM_AMS + i));
+            addParam(createParam<Rogan2PWhite>(Vec(290 + offset, 242), module, BossFight::PARAM_FMS + i));
             // Input Ports
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {

@@ -88,6 +88,7 @@ struct Blocks : rack::Module {
             configParam(PARAM_FREQ + i, -2.5f, 2.5f, 0.f, name + " Frequency", " Hz", 2, dsp::FREQ_C4);
             configParam(PARAM_FM + i, -1.f, 1.f, 0.f, name + " FM");
             configParam(PARAM_LEVEL + i, 0, 255, 255, name + " Level");
+            getParamQuantity(PARAM_LEVEL + i)->snapEnabled = true;
             configParam<TriggerParamQuantity>(PARAM_SHAPE + i, 0, 1, 0, name + " Shape");
             configInput(INPUT_FREQ + i, name + " Frequency");
             configInput(INPUT_FM + i, name + " FM");
@@ -294,7 +295,7 @@ struct BlocksWidget : rack::ModuleWidget {
             addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 71), module, Blocks::INPUT_FREQ + i));
             addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 99), module, Blocks::INPUT_FM + i));
             addParam(createParam<Trimpot>(Vec(12 + 35 * i, 144), module, Blocks::PARAM_FM + i));
-            addParam(createSnapParam<Trimpot>(Vec(12 + 35 * i, 170), module, Blocks::PARAM_LEVEL + i));
+            addParam(createParam<Trimpot>(Vec(12 + 35 * i, 170), module, Blocks::PARAM_LEVEL + i));
             addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 210), module, Blocks::INPUT_LEVEL + i));
             addChild(createLight<LargeLight<RedGreenBlueLight>>(Vec(14 + 35 * i, 246), module, Blocks::LIGHTS_SHAPE + 3 * i));
             addParam(createParam<TL1105>(Vec(14 + 35 * i, 282), module, Blocks::PARAM_SHAPE + i));

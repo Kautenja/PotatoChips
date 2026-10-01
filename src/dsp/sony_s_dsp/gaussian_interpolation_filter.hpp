@@ -58,7 +58,7 @@ class __attribute__((packed, aligned(16))) GaussianInterpolationFilter {
     // Byte 15,16
     // -----------------------------------------------------------------------
     /// a dummy byte for byte alignment to 16-bytes
-    const uint16_t unused_spacer_for_byte_alignment;
+    const uint16_t unused_spacer_for_byte_alignment __attribute__((unused));
 
  public:
     /// the sample rate of the S-DSP in Hz

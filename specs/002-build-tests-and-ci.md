@@ -236,6 +236,24 @@ is unavailable on this machine. This is not a passing content/version gate;
 no visual PDF review, negative TeX build, or publication workflow was completed.
 The legacy rules still mask TeX failures and remove their diagnostic logs.
 
+### Local Compiler Warning Follow-Up (2026-10-01)
+
+-   Apple Clang 21 reports deprecated literal-operator syntax in the local
+    Rack headers. Treat the SDK's two include directories as system headers
+    while retaining project warnings. Replace `-MMD` with `-MD` for plugin
+    and Rack test compilation so SDK header edits still invalidate objects.
+    The disposable SDK fixture now uses the same include-directory layout;
+    its existing header-change and no-op checks pass.
+-   Mark the Sony S-DSP ADSR and Gaussian filter's initialized padding fields
+    intentionally unused. Their types, layout, initialization and DSP logic
+    are unchanged; existing size and Rack audio contracts pass. Match the
+    signed Rack channel-count return type in the headless test comparison.
+-   `make -j2 all test-rack test`: the macOS ARM64 plugin and all 17 test
+    binaries pass, totaling 7,163 assertions in 50 cases. `make check-build`:
+    all three build/publication fixtures pass. SDK headers remain present in
+    generated dependency files. No GUI/listening or other-platform checks
+    were run for this warning-only follow-up.
+
 ### Remaining Verification And Handoffs
 
 003 supplies the committed three-byte PCM representation and boundary/byte

@@ -14,6 +14,10 @@ DISTRIBUTABLES += LICENSE LICENSING.md docs/licenses res presets
 override OBJECTS := $(patsubst %,.build/plugin/%.o,$(SOURCES))
 override DEPENDENCIES := $(patsubst %,.build/plugin/%.d,$(SOURCES))
 include $(RACK_DIR)/plugin.mk
+# Keep upstream SDK diagnostics separate from project warnings. Retain SDK
+# header dependencies with -MD because -MMD omits system headers.
+FLAGS := $(filter-out -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include -MMD,$(FLAGS))
+FLAGS += -isystem $(RACK_DIR)/include -isystem $(RACK_DIR)/dep/include -MD
 include mk/rack.mk
 clean: clean-local
 else

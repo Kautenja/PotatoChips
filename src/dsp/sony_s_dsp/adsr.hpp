@@ -41,7 +41,7 @@ class __attribute__((packed, aligned(8))) ADSR {
     /// the decay rate (3-bits)
     uint8_t decay : 3;
     /// a dummy bit for byte alignment
-    const uint8_t unused_spacer_for_byte_alignment : 1;
+    const uint8_t unused_spacer_for_byte_alignment : 1 __attribute__((unused));
     // -----------------------------------------------------------------------
     // Byte 2
     // -----------------------------------------------------------------------

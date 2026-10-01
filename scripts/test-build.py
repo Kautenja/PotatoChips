@@ -20,7 +20,7 @@ class BuildTests(unittest.TestCase):
         shutil.copy(ROOT / 'Makefile', self.root)
         for name in ('mk', 'scripts'):
             shutil.copytree(ROOT / name, self.root / name)
-        for name in ('src', 'test/dsp', 'dep/catch2-v3', 'sdk'):
+        for name in ('src', 'test/dsp', 'dep/catch2-v3', 'sdk/include', 'sdk/dep/include'):
             (self.root / name).mkdir(parents=True)
         (self.root / 'src/value.hpp').write_text('#define VALUE 0\n')
         (self.root / 'src/detail').mkdir()
@@ -34,8 +34,9 @@ int main() { return VALUE + helper(); }
 ''')
         (self.root / 'dep/catch2-v3/catch_amalgamated.cpp').write_text('int harness;\n')
         (self.root / 'src/plugin.cpp').write_text('#include "sdk_value.hpp"\nint main() { return SDK_VALUE; }\n')
-        (self.root / 'sdk/sdk_value.hpp').write_text('#define SDK_VALUE 0\n')
-        (self.root / 'sdk/plugin.mk').write_text('''CXXFLAGS += -std=c++11 -DRACK_FIXTURE -Isdk -MMD -MP
+        (self.root / 'sdk/include/sdk_value.hpp').write_text('#define SDK_VALUE 0\n')
+        (self.root / 'sdk/plugin.mk').write_text('''FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include -MMD -MP
+CXXFLAGS += -std=c++11 -DRACK_FIXTURE $(FLAGS)
 TARGET := plugin$(if $(filter Windows_NT,$(OS)),.dll,.so)
 OBJECTS := $(patsubst %,build/%.o,$(SOURCES))
 DEPENDENCIES := $(patsubst %,build/%.d,$(SOURCES))
@@ -81,7 +82,7 @@ clean:
         self.make('all', 'test', 'RACK_DIR=sdk')
         self.assertNotIn(' -c ', self.make('all', 'test', 'RACK_DIR=sdk'))
         time.sleep(1.05)
-        (self.root / 'sdk/sdk_value.hpp').write_text('#define SDK_VALUE 0\n// changed SDK header\n')
+        (self.root / 'sdk/include/sdk_value.hpp').write_text('#define SDK_VALUE 0\n// changed SDK header\n')
         self.assertIn(' -c ', self.make('all', 'RACK_DIR=sdk'))
         shutil.copytree(self.root / 'sdk', self.root / 'sdk2')
         self.assertIn(' -c ', self.make('all', 'RACK_DIR=sdk2'))

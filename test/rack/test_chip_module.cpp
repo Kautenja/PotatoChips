@@ -77,7 +77,7 @@ CATCH_TEST_CASE("ChipModule preserves rate conversion, channel independence and 
             args.sampleRate = rate;
             args.sampleTime = 1.f / rate;
             for (unsigned frame = 0; frame < 513; ++frame) module.process(args);
-            CATCH_CHECK(module.outputs[0].getChannels() == channels);
+            CATCH_CHECK(module.outputs[0].getChannels() == static_cast<int>(channels));
             CATCH_CHECK(module.lightsCount == 2);
             for (unsigned c = 0; c < 16; ++c) {
                 CATCH_CHECK(module.audio[c] == (c < channels ? 513 : 0));

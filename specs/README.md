@@ -6,8 +6,8 @@ Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
 engine work, plus the requested YM2151 module. They describe planned work,
 not release promises. As of October 1, 2026, 001 is implemented with native
 onboarding verification still pending (`IN PROGRESS`). Spec 002 is implemented
-with CI verification and the 004-dependent PDF integration pending
-(`IN PROGRESS`); specs 003-011 remain `PLANNED`. See each spec for evidence.
+with a Windows PCM regression assigned to 003 and the 004-dependent PDF
+integration pending (`IN PROGRESS`); specs 003-011 remain `PLANNED`. See each spec for evidence.
 
 ## Work Areas And Ownership
 
@@ -25,7 +25,7 @@ with CI verification and the 004-dependent PDF integration pending
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
 
-Use 001's inventory and establish 002's executable baseline. Then make 003's
+Use 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
 system, and complete 005's captures and diagrams. Finish the public links,
 publication CI, and full-manual review once those outputs exist. These are

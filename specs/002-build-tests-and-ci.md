@@ -105,7 +105,7 @@ for reports that PotatoChips does not have.
       with the documented SDK. Production remains C++11.
 - [x] Incremental, clean, mixed-goal, configuration-change, and failure
       propagation checks pass; dependencies are pinned and documented.
-- [ ] Linux, macOS, and Windows CI evidence is recorded, including explicit
+- [x] Linux, macOS, and Windows CI evidence is recorded, including explicit
       unavailable checks. Instrumentation failures are resolved or remain
       visible blockers with an owning regression.
 - [ ] All 14 manual PDFs and package notices are validated; disabled module
@@ -115,9 +115,9 @@ for reports that PotatoChips does not have.
 
 ## Validation
 
-From the root, baseline commands available today are `make -j2` and
-`scons -j2 test`. The following is the proposed public interface to implement;
-it is not available in the planning revision. Rack commands require a
+At planning time the baseline commands were `make -j2` and `scons -j2 test`.
+The replacement interface below is now implemented; `make -C manual` still
+uses legacy PDF rules pending 004. Rack commands require a
 prepared Rack 2 tree, or an explicit `RACK_DIR` override. Instrumentation
 requires Clang and matching LLVM tools:
 
@@ -140,8 +140,9 @@ version mismatch fail without publishing anything. Record artifact contents.
 
 ## Completion Evidence
 
-Implemented October 1, 2026; remote CI verification is in progress. Manual
-publication remains dependent on 004's reliable PDF rules.
+Implemented October 1, 2026. Status remains `IN PROGRESS`: Windows exposes
+the existing PCM storage defect assigned to 003, and manual publication
+remains dependent on 004's reliable PDF rules.
 
 ### Baseline And Suite Disposition
 
@@ -193,9 +194,36 @@ owns removing the production dependency. No assertions were dropped.
     accepts both workflows. Ordinary jobs are read-only; there is no release
     publication action. Tag builds only retain workflow artifacts.
 
+### Remote Verification
+
+[Build/platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36874253947)
+and [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36874253524)
+executed implementation commit `0480380b` on October 1, 2026:
+
+| Platform / Mode | Result |
+| --- | --- |
+| Linux x64, Ubuntu 24.04 | Build-rule fixtures, plugin, all 12 DSP suites, SDK host suite, package validation and artifact upload pass. |
+| macOS ARM64, macOS 14 | Same complete build/test/package path passes. |
+| Windows x64, Windows 2022 / MinGW64 MSVCRT | Build rules, plugin, SDK host, package validation and artifact upload pass. All 12 DSP suites execute: 11 pass; PCM has 5 passing assertions and one failure, `sizeof(int24_t) == 3` reports 4. The job remains failed. |
+| Linux Clang/LLVM 18 coverage | All 12 suites and separated coverage reports pass; artifact retained. |
+| Linux Clang/LLVM 18 ASan/UBSan | All 12 suites pass without sanitizer failures; diagnostics artifact retained. |
+
+Retained artifacts are `PotatoChips-lin-x64`, `PotatoChips-mac-arm64`,
+`PotatoChips-win-x64`, `dsp-coverage`, and `dsp-asan-ubsan`. These are workflow
+artifacts, not a release. The Windows package is inspectable despite its
+known failing DSP regression. No failure is converted into a successful job.
+
+The checked runs also verify the portability fixes in this implementation:
+byte-preserving dependency/license attributes for Windows, test-only host
+API declarations for GCC, and compiling only the primary translation unit
+when dependency files name an included module `.cpp`. All 155 local Markdown
+links resolve, workflow lint passes, and no production source, plugin
+manifest, or root GPL text changed relative to `cb2809a4`.
+
 ### Remaining Verification And Handoffs
 
-Record the actual remote platform/instrumentation jobs here after pushing.
+Keep the Windows PCM
+regression enabled until its production fix is verified under the same ABI.
 Spec 004 owns TeX failure propagation and actual 14-PDF builds/render review.
 The manual validator is implemented and its negative fixtures pass, but no
 real PDF collection, TeX failure fixture, or upload workflow is claimed to

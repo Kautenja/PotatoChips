@@ -172,8 +172,9 @@ native first-patch check below; archive after that verification succeeds.
       record the result and archive this spec with updated cross-references.
 
 The checked acceptance items describe the implemented repository scope.
-Conditional follow-through remains owned by the later specs: 002 updates
-CONTRIBUTING/style-guide commands and removes obsolete SCons/Travis guidance
-when its replacement exists; 004 verifies publication/manual workflow;
-005 supplies reviewed native screenshots for README. Current commands are
-explicitly labeled and no future workflow or screenshot is claimed to exist.
+Spec 002 has updated CONTRIBUTING/style-guide commands, removed obsolete
+SCons/Travis guidance, updated Catch2 provenance, and added a workflow badge.
+Conditional follow-through remains: 004 verifies publication/manual workflow,
+and 005 supplies reviewed native screenshots for README. Current commands
+are explicitly labeled; no future screenshot or PDF workflow is claimed to
+exist.

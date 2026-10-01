@@ -126,11 +126,11 @@ python3 scripts/validate.py dependencies
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.
-`make all test-rack` requires the SDK. Its four headless suites cover all 16
+`make all test-rack` requires the SDK. Its five headless suites cover all 16
 registered models, parameter/default/custom-JSON contracts, existing presets
 and project modules in debug patches, representative audio, common chip
-processing, and editor/display ownership. Fixture provenance and tolerances
-are documented in `test/rack/fixtures/README.md`. These checks do not replace
+processing, editor/display ownership, and Echo FIR/randomization behavior.
+Fixture provenance and tolerances are documented in `test/rack/fixtures/README.md`. These checks do not replace
 graphical or audible Rack checks.
 
 DSP exceptions use `std::runtime_error` without a Rack substitute. PCM's

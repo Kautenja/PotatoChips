@@ -13,7 +13,10 @@ RACK_TEST_SUFFIX := $(if $(ARCH_WIN),.exe)
 RACK_TEST_SOURCES := $(wildcard test/rack/*.cpp)
 RACK_TEST_OBJECTS := $(patsubst test/rack/%.cpp,$(RACK_TEST_BUILD)/%.o,$(RACK_TEST_SOURCES))
 RACK_TEST_BINARIES := $(RACK_TEST_OBJECTS:.o=$(RACK_TEST_SUFFIX))
-.PHONY: test-rack
+.PHONY: test-rack test-super-echo
+test-super-echo: $(RACK_TEST_BUILD)/test_super_echo$(RACK_TEST_SUFFIX)
+	DYLD_LIBRARY_PATH="$(abspath $(RACK_DIR))" LD_LIBRARY_PATH="$(abspath $(RACK_DIR))" $< $(TEST_ARGS)
+
 test-rack: $(RACK_TEST_BINARIES)
 	@set -e; for suite in $(RACK_TEST_BINARIES); do \
 		DYLD_LIBRARY_PATH="$(abspath $(RACK_DIR))" LD_LIBRARY_PATH="$(abspath $(RACK_DIR))" "$$suite" $(TEST_ARGS); \

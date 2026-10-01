@@ -48,6 +48,11 @@ The replacement Potato Chips social banner in
 CC-BY-NC-ND-4.0 artwork terms. Its original composition and embedded
 Arhythmetic Units logo provenance are recorded in the component inventory.
 
+The original horizontal Echo slider track and handle in
+`res/HorizontalSlider*.svg` were prepared with Codex in 2026 and use the
+same CC-BY-NC-ND-4.0 project artwork terms. They contain no copied Rack
+graphics; Rack supplies the RGB light and widget implementation.
+
 ## Dependencies And Tests
 
 Blargg-derived audio code retains its authorship and historical LGPL

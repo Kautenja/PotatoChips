@@ -13,7 +13,8 @@ The [design handoff](assets/012/README.md) and
 [integrated native gallery](assets/012/IMPLEMENTED.md) retain reproducible
 artwork and validation evidence.
 
-Specs 006/007/009-011 remain PLANNED: Echo and Contour fixes, YM2612 looping
+Spec 006 is implemented and verified, with issue publication in progress.
+Specs 007/009-011 remain PLANNED: Contour fixes, YM2612 looping
 envelopes and optional Nuked-OPN2 engines, and a YM2151 module. Specifications
 and source completion are not release promises; see each record for scope,
 platform validation and publication limits.

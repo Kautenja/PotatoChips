@@ -160,7 +160,7 @@ See [the capture guide](../tools/capture/README.md) for SDK/OpenGL/Pillow
 prerequisites, deterministic fixtures, reviewed geometry, failure checks and
 refresh commands. Ordinary manual builds need only the committed PNG and TeX
 sources; they never invoke the native renderer. Update the production capture
-and vector guide together when widget geometry changes. Covers use the dark theme for contrast on paper. Missing Echo sliders remain owned by spec 006.
+and vector guide together when widget geometry changes. Covers use the dark theme for contrast on paper. Echo includes the restored FIR sliders from spec 006.
 
 The shared wordmark `latex/ArhythmeticUnits.pdf` is a byte-for-byte copy of
 RackNES `manual/RackNES/img/ArhythmeticUnits.pdf` at commit

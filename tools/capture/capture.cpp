@@ -149,6 +149,8 @@ static int capture(ModuleWidget* widget, const std::string& filename,
     return ratio;
 }
 
+#include "inspect_super_echo.hpp"
+
 /// Construct, process and remove real modules without starting the engine thread.
 int main(int argc, char** argv) {
     if (argc != 6) {
@@ -167,6 +169,7 @@ int main(int argc, char** argv) {
     plugin.path = argv[2];
     plugin.slug = "KautenjaDSP-PotatoChips";
     init(&plugin);
+    plugin::plugins.push_back(&plugin);
     if (!glfwInit()) {
         std::cerr << "Capture requires a graphical desktop and OpenGL\n";
         return 2;
@@ -192,6 +195,7 @@ int main(int argc, char** argv) {
             if (!model) throw std::runtime_error("Unregistered model " + slug);
             json_t* report = json_object();
             json_object_set_new(report, "controls", json_array());
+            json_object_set_new(report, "rack_version", json_string(APP_VERSION.c_str()));
             for (bool preview : {false, true}) {
                 random::local().seed(0x504f5441544fULL, 0x4348495053ULL);
                 auto module = preview ? nullptr : model->createModule();
@@ -308,6 +312,10 @@ int main(int argc, char** argv) {
                     json_object_set_new(report, "polyphonic_audio_equal_after_toggles", json_true());
                     context.engine->removeModule(reference.get());
                 }
+                if (slug == "SuperEcho") {
+                    inspectSuperEcho(widget.get(), std::string(argv[3]) + "/SuperEcho-Probe");
+                    json_object_set_new(report, "echo_interactions_verified", json_true());
+                }
             }
             json_object_set_new(report, "theme_state_geometry_history_verified", json_true());
             const std::string filename = std::string(argv[3]) + "/" + name + ".json";
@@ -326,6 +334,7 @@ int main(int argc, char** argv) {
     delete context.window;
     context.window = nullptr;
     glfwTerminate();
+    plugin::plugins.clear();
     contextSet(nullptr);
     return result;
 }

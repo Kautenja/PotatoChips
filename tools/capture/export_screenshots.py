@@ -27,6 +27,18 @@ def prepare(capture_dir, module=None, theme="Dark"):
         name = row['manual'] or row['slug']
         report = json.loads((capture_dir / f'{name}.json').read_text())
         expected = next(m for m in baseline if m['slug'] == row['slug'])['controls']
+        if row['slug'] == 'SuperEcho':
+            # Spec 006 restores one slider after each existing FIR attenuverter.
+            # Keep spec 012's historical geometry intact for every old control.
+            restored = []
+            for control in expected:
+                restored.append(control)
+                if control['kind'] == 'knob' and 12 <= control['id'] < 20:
+                    i = control['id'] - 12
+                    restored.append(dict(kind='slider', label=f'FIR Coefficient {i + 1}',
+                                         id=4 + i, x=147, y=29 + 43 * i,
+                                         width=76, height=20))
+            expected = restored
         actual = report['controls']
         if len(actual) != len(expected) or any(
                 any(before[k] != value for k, value in after.items())

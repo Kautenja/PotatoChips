@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-   Restore Echo's eight horizontal FIR sliders, with signed integer edits
+    and RGB CV indicators in live modules and browser previews (#96). Legacy
+    fractional coefficients round to the nearest integer when loaded.
+-   Preserve Echo bypass, stereo Mix and stereo input gain during module
+    randomization; delay, feedback and FIR shaping still randomize (#97).
+
 -   Rebrand all 16 modules with shared outlined titles and hardware-inspired
     light/dark panels. Saved patch identifiers and control positions stay
     unchanged; see the README naming map.

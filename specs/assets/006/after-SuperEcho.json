@@ -1,0 +1,396 @@
+{
+  "controls": [
+    {
+      "kind": "switch",
+      "label": "Bypass",
+      "id": 22,
+      "x": 15.0,
+      "y": 25.0,
+      "width": 14.0,
+      "height": 20.641109466552734
+    },
+    {
+      "kind": "knob",
+      "label": "Echo Delay",
+      "id": 0,
+      "x": 13.0,
+      "y": 77.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "input",
+      "label": "Delay",
+      "id": 2,
+      "x": 10.0,
+      "y": 112.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "Echo Mix (Left)",
+      "id": 2,
+      "x": 13.0,
+      "y": 163.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "input",
+      "label": "Mix (Left)",
+      "id": 4,
+      "x": 10.0,
+      "y": 198.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "light",
+      "label": "",
+      "id": -1,
+      "x": 3.0,
+      "y": 236.0,
+      "width": 8.8582677841186523,
+      "height": 8.8582677841186523
+    },
+    {
+      "kind": "input",
+      "label": "Audio (Left)",
+      "id": 0,
+      "x": 10.0,
+      "y": 243.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "Input Gain (Left)",
+      "id": 20,
+      "x": 13.0,
+      "y": 278.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "light",
+      "label": "",
+      "id": -1,
+      "x": 3.0,
+      "y": 311.0,
+      "width": 8.8582677841186523,
+      "height": 8.8582677841186523
+    },
+    {
+      "kind": "output",
+      "label": "Audio (Left)",
+      "id": 0,
+      "x": 10.0,
+      "y": 323.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "Echo Feedback",
+      "id": 1,
+      "x": 52.0,
+      "y": 77.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "input",
+      "label": "Feedback",
+      "id": 3,
+      "x": 49.0,
+      "y": 112.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "Echo Mix (Right)",
+      "id": 3,
+      "x": 52.0,
+      "y": 163.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "input",
+      "label": "Mix (Right)",
+      "id": 5,
+      "x": 49.0,
+      "y": 198.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "light",
+      "label": "",
+      "id": -1,
+      "x": 42.0,
+      "y": 236.0,
+      "width": 8.8582677841186523,
+      "height": 8.8582677841186523
+    },
+    {
+      "kind": "input",
+      "label": "Audio (Right)",
+      "id": 1,
+      "x": 49.0,
+      "y": 243.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "Input Gain (Right)",
+      "id": 21,
+      "x": 52.0,
+      "y": 278.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "light",
+      "label": "",
+      "id": -1,
+      "x": 42.0,
+      "y": 311.0,
+      "width": 8.8582677841186523,
+      "height": 8.8582677841186523
+    },
+    {
+      "kind": "output",
+      "label": "Audio (Right)",
+      "id": 1,
+      "x": 49.0,
+      "y": 323.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 1",
+      "id": 6,
+      "x": 84.0,
+      "y": 28.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 1 CV Attenuverter",
+      "id": 12,
+      "x": 117.0,
+      "y": 30.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 1",
+      "id": 4,
+      "x": 147.0,
+      "y": 29.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 2",
+      "id": 7,
+      "x": 84.0,
+      "y": 71.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 2 CV Attenuverter",
+      "id": 13,
+      "x": 117.0,
+      "y": 73.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 2",
+      "id": 5,
+      "x": 147.0,
+      "y": 72.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 3",
+      "id": 8,
+      "x": 84.0,
+      "y": 114.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 3 CV Attenuverter",
+      "id": 14,
+      "x": 117.0,
+      "y": 116.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 3",
+      "id": 6,
+      "x": 147.0,
+      "y": 115.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 4",
+      "id": 9,
+      "x": 84.0,
+      "y": 157.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 4 CV Attenuverter",
+      "id": 15,
+      "x": 117.0,
+      "y": 159.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 4",
+      "id": 7,
+      "x": 147.0,
+      "y": 158.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 5",
+      "id": 10,
+      "x": 84.0,
+      "y": 200.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 5 CV Attenuverter",
+      "id": 16,
+      "x": 117.0,
+      "y": 202.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 5",
+      "id": 8,
+      "x": 147.0,
+      "y": 201.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 6",
+      "id": 11,
+      "x": 84.0,
+      "y": 243.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 6 CV Attenuverter",
+      "id": 17,
+      "x": 117.0,
+      "y": 245.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 6",
+      "id": 9,
+      "x": 147.0,
+      "y": 244.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 7",
+      "id": 12,
+      "x": 84.0,
+      "y": 286.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 7 CV Attenuverter",
+      "id": 18,
+      "x": 117.0,
+      "y": 288.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 7",
+      "id": 10,
+      "x": 147.0,
+      "y": 287.0,
+      "width": 76.0,
+      "height": 20.0
+    },
+    {
+      "kind": "input",
+      "label": "FIR Coefficient 8",
+      "id": 13,
+      "x": 84.0,
+      "y": 329.0,
+      "width": 23.700000762939453,
+      "height": 23.700000762939453
+    },
+    {
+      "kind": "knob",
+      "label": "FIR Coefficient 8 CV Attenuverter",
+      "id": 19,
+      "x": 117.0,
+      "y": 331.0,
+      "width": 17.855520248413086,
+      "height": 17.859380722045898
+    },
+    {
+      "kind": "slider",
+      "label": "FIR Coefficient 8",
+      "id": 11,
+      "x": 147.0,
+      "y": 330.0,
+      "width": 76.0,
+      "height": 20.0
+    }
+  ],
+  "rack_version": "2.6.0",
+  "pixel_ratio": 2,
+  "polyphonic_audio_equal_after_toggles": true,
+  "echo_interactions_verified": true,
+  "theme_state_geometry_history_verified": true
+}

@@ -2,7 +2,7 @@
 Panel map: \textbf{1} bypass;
 \textbf{2} delay, feedback, mix and CV;
 \textbf{3} audio inputs, gain and outputs;
-\textbf{4} eight FIR CV inputs and attenuverters (sliders absent).
+\textbf{4} eight FIR sliders, CV inputs and attenuverters.
 
 \subsection{Left side: delay, feedback and mix}
 Delay selects an integer level from 0 to 31, default 0. The CV is an additive
@@ -31,12 +31,16 @@ it bypasses the echo, not a Gaussian filter. The buffer continues advancing
 with zero input rather than freezing. Bypass does not apply the active path's
 $\pm5$ V limiter. Gain therefore remains relevant even when bypassed.
 \subsection{Right side: eight FIR coefficients}
-The current panel is missing the eight coefficient sliders. The numbered
-FIR rows show their CV inputs and attenuverters only; presets can still set
-the coefficient values. The panel map reflects this limitation.
+Each numbered FIR row has a horizontal coefficient slider. Drag right to
+increase its signed integer value; right-click to enter a number. The track
+and handle remain visible with no CV or with bypass enabled. The handle
+indicator shows positive CV in green and negative CV in red.
 
 Coefficients range from $-128$ to 127. Coefficient 1 defaults to 127; the
-others default to zero. Each CV attenuverter ranges from $-1$ to 1 and
+others default to zero. Edits snap to integers, including numeric entry.
+Older patches containing fractional coefficients round to the nearest
+integer on load; the bundled integer presets retain their stored values.
+Each CV attenuverter ranges from $-1$ to 1 and
 defaults to zero. CV adds $127aV/10$ to the coefficient, where $a$ is that
 attenuverter. The FIR CV inputs normal forward through all eight positions.
 An attenuverter at zero rejects CV regardless of the cable voltage.

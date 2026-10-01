@@ -68,9 +68,11 @@ compares 16-channel audio on the 2A03, 106, GBS and SuperEcho models against
 untouched twins during repeated theme changes; no device is opened.
 
 Octal 163 and Pocket APU show their five factory waveforms. Voice 2612
-shows the production default algorithm. Screenshots retain known runtime
-limitations: missing Super Echo FIR sliders (006) and Super ADSR's historical
-RR label (007). Diagrams never invent missing controls or live display data.
+shows the production default algorithm. Screenshots retain Super ADSR's historical RR label (007).
+Echo's eight FIR sliders are restored by spec 006. Its focused native probe
+checks bindings, horizontal hits/drags, numeric entry, reset, randomization,
+undo/redo and preset restoration, and captures bypass with lights off and
+alternating positive/negative CV at both themes, two zooms and dim lighting. Diagrams never invent missing controls or live display data.
 
 ## Failure And Lifecycle Checks
 

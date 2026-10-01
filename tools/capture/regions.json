@@ -740,7 +740,7 @@
       ]
     },
     {
-      "label": "Eight FIR CV inputs and attenuverters (sliders absent)",
+      "label": "Eight FIR sliders, CV inputs and attenuverters",
       "box": [
         80,
         24,

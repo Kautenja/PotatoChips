@@ -30,10 +30,11 @@ The widest input determines 1--16 output channels. Audio and most CV reads
 use matching channel indices: expand a mono source explicitly when every
 channel must receive it. Stereo normalling does not imply mono CV broadcast.
 
-Rack saves parameters and presets, but not the running echo buffer. Loading
-a new module starts with a cleared buffer; changing parameters or using Rack
-Initialize is not a dedicated buffer-clear command. Randomize currently
-includes gain, Mix and bypass, so check levels afterward (issue 97).
+Rack saves parameters, not the running buffer. A new module clears the
+buffer; Initialize only resets controls. Randomize preserves bypass, both
+Mix values and both input gains; delay, feedback, FIR coefficients and
+attenuverters still randomize. Protected controls support edits, reset,
+preset/patch loading and undo/redo.
 
 If there are no repeats, check nonzero Mix, nonzero FIR coefficients and
 bypass. Feedback zero still permits the first echo. If modulation does

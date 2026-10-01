@@ -262,14 +262,14 @@ Echo Delay 0 31 0 1
 Echo Feedback -128 127 0 1
 Echo Mix (Left) -128 127 0 1
 Echo Mix (Right) -128 127 0 1
-FIR Coefficient 1 -128 127 127 0
-FIR Coefficient 2 -128 127 0 0
-FIR Coefficient 3 -128 127 0 0
-FIR Coefficient 4 -128 127 0 0
-FIR Coefficient 5 -128 127 0 0
-FIR Coefficient 6 -128 127 0 0
-FIR Coefficient 7 -128 127 0 0
-FIR Coefficient 8 -128 127 0 0
+FIR Coefficient 1 -128 127 127 1
+FIR Coefficient 2 -128 127 0 1
+FIR Coefficient 3 -128 127 0 1
+FIR Coefficient 4 -128 127 0 1
+FIR Coefficient 5 -128 127 0 1
+FIR Coefficient 6 -128 127 0 1
+FIR Coefficient 7 -128 127 0 1
+FIR Coefficient 8 -128 127 0 1
 FIR Coefficient 1 CV Attenuverter -1 1 0 0
 FIR Coefficient 2 CV Attenuverter -1 1 0 0
 FIR Coefficient 3 CV Attenuverter -1 1 0 0

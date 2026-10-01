@@ -1,0 +1,592 @@
+[
+  {
+    "slug": "Blocks",
+    "theme": "light",
+    "file": "panels/Blocks.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      45.17862,
+      4,
+      59.64276,
+      11.0
+    ],
+    "subtitle_bounds": [
+      63.01207,
+      18,
+      23.97586,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "Blocks",
+    "theme": "dark",
+    "file": "panels/Blocks-dark.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      45.17862,
+      4,
+      59.64276,
+      11.0
+    ],
+    "subtitle_bounds": [
+      63.01207,
+      18,
+      23.97586,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "MiniBoss",
+    "theme": "light",
+    "file": "panels/MiniBoss.svg",
+    "width": 240,
+    "height": 380,
+    "title_bounds": [
+      57.88414,
+      4,
+      124.23172,
+      11.0
+    ],
+    "subtitle_bounds": [
+      107.05,
+      18,
+      25.9,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "MiniBoss",
+    "theme": "dark",
+    "file": "panels/MiniBoss-dark.svg",
+    "width": 240,
+    "height": 380,
+    "title_bounds": [
+      57.88414,
+      4,
+      124.23172,
+      11.0
+    ],
+    "subtitle_bounds": [
+      107.05,
+      18,
+      25.9,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "GBS",
+    "theme": "light",
+    "file": "panels/PalletTownWavesSystem.svg",
+    "width": 300,
+    "height": 380,
+    "title_bounds": [
+      100.35207,
+      4,
+      99.29586,
+      11.0
+    ],
+    "subtitle_bounds": [
+      142.21724,
+      18,
+      15.56552,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "GBS",
+    "theme": "dark",
+    "file": "panels/PalletTownWavesSystem-dark.svg",
+    "width": 300,
+    "height": 380,
+    "title_bounds": [
+      100.35207,
+      4,
+      99.29586,
+      11.0
+    ],
+    "subtitle_bounds": [
+      142.21724,
+      18,
+      15.56552,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2A03",
+    "theme": "light",
+    "file": "panels/InfiniteStairs.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      86.0,
+      7.34442
+    ],
+    "subtitle_bounds": [
+      66.82553,
+      18,
+      16.34893,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2A03",
+    "theme": "dark",
+    "file": "panels/InfiniteStairs-dark.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      86.0,
+      7.34442
+    ],
+    "subtitle_bounds": [
+      66.82553,
+      18,
+      16.34893,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "VRC6",
+    "theme": "light",
+    "file": "panels/StepSaw.svg",
+    "width": 120,
+    "height": 380,
+    "title_bounds": [
+      36.83586,
+      4,
+      73.32828,
+      9.0
+    ],
+    "subtitle_bounds": [
+      64.23276,
+      18,
+      18.53448,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "VRC6",
+    "theme": "dark",
+    "file": "panels/StepSaw-dark.svg",
+    "width": 120,
+    "height": 380,
+    "title_bounds": [
+      36.83586,
+      4,
+      73.32828,
+      9.0
+    ],
+    "subtitle_bounds": [
+      64.23276,
+      18,
+      18.53448,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "FME7",
+    "theme": "light",
+    "file": "panels/Pulses.svg",
+    "width": 120,
+    "height": 380,
+    "title_bounds": [
+      32.18069,
+      4,
+      82.63862,
+      9.0
+    ],
+    "subtitle_bounds": [
+      63.00142,
+      18,
+      20.99716,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "FME7",
+    "theme": "dark",
+    "file": "panels/Pulses-dark.svg",
+    "width": 120,
+    "height": 380,
+    "title_bounds": [
+      32.18069,
+      4,
+      82.63862,
+      9.0
+    ],
+    "subtitle_bounds": [
+      63.00142,
+      18,
+      20.99716,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "AY_3_8910",
+    "theme": "light",
+    "file": "panels/Jairasullator.svg",
+    "width": 255,
+    "height": 380,
+    "title_bounds": [
+      97.20828,
+      4,
+      60.58345,
+      11.0
+    ],
+    "subtitle_bounds": [
+      111.20957,
+      18,
+      32.58087,
+      5
+    ],
+    "old_title_groups_removed": 2
+  },
+  {
+    "slug": "AY_3_8910",
+    "theme": "dark",
+    "file": "panels/Jairasullator-dark.svg",
+    "width": 255,
+    "height": 380,
+    "title_bounds": [
+      97.20828,
+      4,
+      60.58345,
+      11.0
+    ],
+    "subtitle_bounds": [
+      111.20957,
+      18,
+      32.58087,
+      5
+    ],
+    "old_title_groups_removed": 2
+  },
+  {
+    "slug": "POKEY",
+    "theme": "light",
+    "file": "panels/PotKeys.svg",
+    "width": 210,
+    "height": 380,
+    "title_bounds": [
+      54.68448,
+      4,
+      100.63103,
+      11.0
+    ],
+    "subtitle_bounds": [
+      92.93103,
+      18,
+      24.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "POKEY",
+    "theme": "dark",
+    "file": "panels/PotKeys-dark.svg",
+    "width": 210,
+    "height": 380,
+    "title_bounds": [
+      54.68448,
+      4,
+      100.63103,
+      11.0
+    ],
+    "subtitle_bounds": [
+      92.93103,
+      18,
+      24.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SN76489",
+    "theme": "light",
+    "file": "panels/MegaTone.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      86.0,
+      10.55259
+    ],
+    "subtitle_bounds": [
+      60.50862,
+      18,
+      28.98276,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SN76489",
+    "theme": "dark",
+    "file": "panels/MegaTone-dark.svg",
+    "width": 150,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      86.0,
+      10.55259
+    ],
+    "subtitle_bounds": [
+      60.50862,
+      18,
+      28.98276,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2612",
+    "theme": "light",
+    "file": "panels/BossFight.svg",
+    "width": 975,
+    "height": 380,
+    "title_bounds": [
+      36.75103,
+      4,
+      86.49793,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2612",
+    "theme": "dark",
+    "file": "panels/BossFight-dark.svg",
+    "width": 975,
+    "height": 380,
+    "title_bounds": [
+      36.75103,
+      4,
+      86.49793,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "106",
+    "theme": "light",
+    "file": "panels/NameCorpOctalWaveGenerator.svg",
+    "width": 510,
+    "height": 380,
+    "title_bounds": [
+      214.52787,
+      4,
+      80.94425,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "106",
+    "theme": "dark",
+    "file": "panels/NameCorpOctalWaveGenerator-dark.svg",
+    "width": 510,
+    "height": 380,
+    "title_bounds": [
+      214.52787,
+      4,
+      80.94425,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperADSR",
+    "theme": "light",
+    "file": "panels/SuperADSR.svg",
+    "width": 180,
+    "height": 380,
+    "title_bounds": [
+      51.34828,
+      4,
+      77.30345,
+      11.0
+    ],
+    "subtitle_bounds": [
+      79.43103,
+      18,
+      21.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperADSR",
+    "theme": "dark",
+    "file": "panels/SuperADSR-dark.svg",
+    "width": 180,
+    "height": 380,
+    "title_bounds": [
+      51.34828,
+      4,
+      77.30345,
+      11.0
+    ],
+    "subtitle_bounds": [
+      79.43103,
+      18,
+      21.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperEcho",
+    "theme": "light",
+    "file": "panels/SuperEcho.svg",
+    "width": 240,
+    "height": 380,
+    "title_bounds": [
+      98.40207,
+      4,
+      43.19586,
+      11.0
+    ],
+    "subtitle_bounds": [
+      109.43103,
+      18,
+      21.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperEcho",
+    "theme": "dark",
+    "file": "panels/SuperEcho-dark.svg",
+    "width": 240,
+    "height": 380,
+    "title_bounds": [
+      98.40207,
+      4,
+      43.19586,
+      11.0
+    ],
+    "subtitle_bounds": [
+      109.43103,
+      18,
+      21.13793,
+      5
+    ],
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperVCA",
+    "theme": "light",
+    "file": "panels/SuperVCA.svg",
+    "width": 90,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      53.0,
+      7.25822
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "SuperVCA",
+    "theme": "dark",
+    "file": "panels/SuperVCA-dark.svg",
+    "width": 90,
+    "height": 380,
+    "title_bounds": [
+      32.0,
+      4,
+      53.0,
+      7.25822
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2612_Blank1",
+    "theme": "light",
+    "file": "panels/BossFight-Envelope.svg",
+    "width": 480,
+    "height": 380,
+    "title_bounds": [
+      182.06034,
+      4,
+      115.87931,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "2612_Blank1",
+    "theme": "dark",
+    "file": "panels/BossFight-Envelope-dark.svg",
+    "width": 480,
+    "height": 380,
+    "title_bounds": [
+      182.06034,
+      4,
+      115.87931,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 1
+  },
+  {
+    "slug": "Sony_S_SMP_Blank1",
+    "theme": "light",
+    "file": "panels/S-SMP-Chip.svg",
+    "width": 420,
+    "height": 380,
+    "title_bounds": [
+      152.22345,
+      4,
+      115.5531,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 0
+  },
+  {
+    "slug": "Sony_S_SMP_Blank1",
+    "theme": "dark",
+    "file": "panels/S-SMP-Chip-dark.svg",
+    "width": 420,
+    "height": 380,
+    "title_bounds": [
+      152.22345,
+      4,
+      115.5531,
+      11.0
+    ],
+    "subtitle_bounds": null,
+    "old_title_groups_removed": 0
+  }
+]

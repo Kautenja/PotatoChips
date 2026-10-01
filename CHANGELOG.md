@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+-   Rebrand all 16 modules with shared outlined titles and hardware-inspired
+    light/dark panels. Saved patch identifiers and control positions stay
+    unchanged; see the README naming map.
+-   Follow Rack's native dark-panel preference, including screws, ports and
+    browser previews. Require Rack 2.4.0 or newer.
+-   Update all 14 manuals and regenerate dark production cover images and
+    named wireframe guides. Remove unused legacy logos and illustrations.
+
 -   Improve module-browser and Library metadata with chip/console search
     keywords, specific module descriptions, accurate function tags, and
     spaced Arhythmetic Units branding. Point the changelog and manual index

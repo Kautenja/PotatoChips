@@ -198,18 +198,18 @@ struct SuperADSRWidget : ModuleWidget {
     explicit SuperADSRWidget(SuperADSR *module) {
         setModule(module);
         static constexpr auto panel = "res/SuperADSR.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SuperADSR::LANES; i++) {
             // Gate, Retrig, Output
-            addInput(createInput<PJ301MPort>(Vec(20 + 84 * i, 281), module, SuperADSR::INPUT_GATE + i));
-            addInput(createInput<PJ301MPort>(Vec(53 + 84 * i, 281), module, SuperADSR::INPUT_RETRIG + i));
-            addOutput(createOutput<PJ301MPort>(Vec(20 + 84 * i, 324), module, SuperADSR::OUTPUT_ENVELOPE + i));
-            addOutput(createOutput<PJ301MPort>(Vec(53 + 84 * i, 324), module, SuperADSR::OUTPUT_INVERTED + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(20 + 84 * i, 281), module, SuperADSR::INPUT_GATE + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(53 + 84 * i, 281), module, SuperADSR::INPUT_RETRIG + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(20 + 84 * i, 324), module, SuperADSR::OUTPUT_ENVELOPE + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(53 + 84 * i, 324), module, SuperADSR::OUTPUT_INVERTED + i));
             // Amplitude
             auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(12, 48 + 119 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
             amplitude->snap = true;

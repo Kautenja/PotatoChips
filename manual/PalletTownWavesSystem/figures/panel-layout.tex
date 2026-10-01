@@ -4,6 +4,7 @@
 \pgfmathsetlengthmacro{\panelunit}{min(\textwidth/370,.60*\textheight/420)}
 \begin{tikzpicture}[x=\panelunit,y=-\panelunit]
 \draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (300,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (150.0,10) {\MakeUppercase{\manualname}};
 \panelregion{1}{8}{24}{139}{336}
 \panelregion{2}{155}{28}{140}{104}
 \panelregion{3}{155}{137}{140}{99}

@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 import tempfile
 from unittest.mock import patch
-from PIL import Image
+from PIL import Image, ImageChops
 from export_screenshots import export
 from run import selected
 
@@ -53,6 +53,12 @@ def main():
         must_fail(lambda: export(captures, manuals))
         source.write_bytes(original)
         print('PASS: blank renderer output preserves all PNGs')
+        dark = captures / 'StepSaw-Dark.ppm'
+        dark_bytes = dark.read_bytes()
+        dark.write_bytes(original)
+        must_fail(lambda: export(captures, manuals))
+        dark.write_bytes(dark_bytes)
+        print('PASS: identical theme views rejected')
         batch_path = captures / 'batch.json'
         batch_text = batch_path.read_text()
         batch = json.loads(batch_text)
@@ -89,6 +95,10 @@ def main():
                 with Image.open(manuals / row['manual'] / 'img/Panel.png') as image:
                     ratio = json.loads((captures / f'{row["manual"]}.json').read_text())['pixel_ratio']
                     assert image.size == (row['width'] * ratio, 380 * ratio)
+                    with Image.open(captures / f'{row["manual"]}-Dark.ppm') as dark:
+                        crop = dark.crop(tuple(v * ratio for v in (10, 20, row['width'] + 10, 400)))
+                        assert not ImageChops.difference(image, crop).getbbox()
+        print('PASS: all publication images use the exact dark-theme crop')
         print('PASS: complete real batch crops at native pixel density')
 
 

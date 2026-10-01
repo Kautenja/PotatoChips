@@ -1,0 +1,302 @@
+{
+  "native": [
+    {
+      "slug": "Blocks",
+      "theme": "light",
+      "controls": 40,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "Blocks",
+      "theme": "dark",
+      "controls": 40,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "MiniBoss",
+      "theme": "light",
+      "controls": 28,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "MiniBoss",
+      "theme": "dark",
+      "controls": 28,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "106",
+      "theme": "light",
+      "controls": 83,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "106",
+      "theme": "dark",
+      "controls": 83,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2612",
+      "theme": "light",
+      "controls": 113,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2612",
+      "theme": "dark",
+      "controls": 113,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2612_Blank1",
+      "theme": "light",
+      "controls": 0,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2612_Blank1",
+      "theme": "dark",
+      "controls": 0,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2A03",
+      "theme": "light",
+      "controls": 36,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "2A03",
+      "theme": "dark",
+      "controls": 36,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "AY_3_8910",
+      "theme": "light",
+      "controls": 52,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "AY_3_8910",
+      "theme": "dark",
+      "controls": 52,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "FME7",
+      "theme": "light",
+      "controls": 24,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "FME7",
+      "theme": "dark",
+      "controls": 24,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "GBS",
+      "theme": "light",
+      "controls": 43,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "GBS",
+      "theme": "dark",
+      "controls": 43,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "POKEY",
+      "theme": "light",
+      "controls": 52,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "POKEY",
+      "theme": "dark",
+      "controls": 52,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperADSR",
+      "theme": "light",
+      "controls": 18,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperADSR",
+      "theme": "dark",
+      "controls": 18,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperEcho",
+      "theme": "light",
+      "controls": 35,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperEcho",
+      "theme": "dark",
+      "controls": 35,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperVCA",
+      "theme": "light",
+      "controls": 21,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SuperVCA",
+      "theme": "dark",
+      "controls": 21,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "Sony_S_SMP_Blank1",
+      "theme": "light",
+      "controls": 0,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "Sony_S_SMP_Blank1",
+      "theme": "dark",
+      "controls": 0,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SN76489",
+      "theme": "light",
+      "controls": 32,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "SN76489",
+      "theme": "dark",
+      "controls": 32,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "VRC6",
+      "theme": "light",
+      "controls": 29,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    },
+    {
+      "slug": "VRC6",
+      "theme": "dark",
+      "controls": 29,
+      "geometry_matches": true,
+      "context_restoration_matches": true,
+      "pixel_ratio": 2
+    }
+  ],
+  "render_method": "Existing production capture binary with isolated light/dark asset roots; no runtime theme wiring",
+  "sandbox_attempt": "Initial sandbox run timed out; native desktop run succeeded outside sandbox",
+  "date": "2026-10-01",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "swift": "Apple Swift 6.3.3",
+  "panel_sha256": {
+    "Blocks-dark.svg": "1e805498eab48013664a1f5a5e24c269bb539ce31ad12e3179a02aa9c1984bfa",
+    "Blocks.svg": "96b12bd8761acba7c493cf0ca22c41c579e32ed66f9da0aeb084b8ba349c6455",
+    "BossFight-Envelope-dark.svg": "497d65535fe2e76d9c1650e917b84b025fa89b2f9aa7b5481308400abc2a3dd7",
+    "BossFight-Envelope.svg": "2d61bcf183f46c6febc51a62e3a158590b01184b60312bfedcac0e8f748fe335",
+    "BossFight-dark.svg": "21345e6032b7ff6e82f80c80ded825e473dd674f08d98447c9784ce44b6231ba",
+    "BossFight.svg": "650c3e46b0fc1ba6ad77e87fca25b56fa9e1523e1dbb49225b2672ee55ada1a6",
+    "InfiniteStairs-dark.svg": "9b49883e561105edb49b5b4a54ebc79a662ebc82d1e3618a943dd56c8d2a66fb",
+    "InfiniteStairs.svg": "b821f467fbcfd0c56ebf5b6740e56ff35bf59abdd4da62663be9529a150abb06",
+    "Jairasullator-dark.svg": "d0443d363fe3d85fd6f620c59a0a059281ee5939b569367c78b2636da204c8ed",
+    "Jairasullator.svg": "eab22d0f922b2fbb788aa39ea48227005567f58fb1f99d8731634a811699fca7",
+    "MegaTone-dark.svg": "65e7c00055b8a8ed2546994392f048fa4476d29a0433185e418e36ac7cbba274",
+    "MegaTone.svg": "8980ada3bd097ef4802757fb8646e799ef97303545ed5d99d810a1aa436c695e",
+    "MiniBoss-dark.svg": "3f802ef6d59b5600331f3f103d377246035422f77cfe7e41b9dd9557f3f05193",
+    "MiniBoss.svg": "8f0a57f79045e4fc45a748edf6bd987b16623d0d3ab9e55e0dea298609805267",
+    "NameCorpOctalWaveGenerator-dark.svg": "33dd9f12a83b9180f8826c6603b45ae841e1c56b71e09723a537bb474fce1ead",
+    "NameCorpOctalWaveGenerator.svg": "ab9321a8201ff845c16dc9005f6c3fa2d75275bc8811408176ec587ea498d53e",
+    "PalletTownWavesSystem-dark.svg": "d662ddcd9ea5eab8bcce1554ac830c3d9573c8be4fda7f3d2b5712b6b5578f3b",
+    "PalletTownWavesSystem.svg": "7bb64105836f2f9cc6642d4fbd08886e3bbbddc66b446031c5ebadfb24eab86c",
+    "PotKeys-dark.svg": "2fe6e138b3ad315b8c2ee300df1546ac04b8ada934e835b9c1606c29383277df",
+    "PotKeys.svg": "08aa61e950dbee0f02d2acdb6b77f304a4c4dcd690c090de7049553aca86d82c",
+    "Pulses-dark.svg": "4cd0284c853493ef24ecda9bb1acf2e7a8a0f1a6e3172e124f99e4a491f9a5cd",
+    "Pulses.svg": "9e2f4f19eaae2daab726a7f47dc0967823ee9b9a314abc6aabf3ff302e9cf148",
+    "S-SMP-Chip-dark.svg": "675dd2c1107ac201434eb2c9049081f74a96c9bf41f4039f1f4303ec3727a5d8",
+    "S-SMP-Chip.svg": "cad0727d6e6c24ffd3e0b5ac762a96fca513c2a096b57d488b811948133680cb",
+    "StepSaw-dark.svg": "fd986ec89f63801fe43a683617ab1206a0327c1ada10861c43e00dbcf09a51dd",
+    "StepSaw.svg": "0f999e91cfa6b868b0b4d46706eea86a8d20b4ad125468f8fbc2bac2ee2d9a0b",
+    "SuperADSR-dark.svg": "66096ddc51ae533ed9eb8681c4d6295e0cfb273f29b855fcdc5ae2918cfd5383",
+    "SuperADSR.svg": "7022bfda02bd6e60a4e9c7160151ac4e8574236b2d3a93ccdbb71493c910ba1d",
+    "SuperEcho-dark.svg": "52d0eb005a998028ee528d1c95620246f318b421c377157f2a0c1c8375cbc861",
+    "SuperEcho.svg": "7b907407bc755929c93b1b671af7609230b3132d87560c1d405bdce6b55036ac",
+    "SuperVCA-dark.svg": "8b23644dd91aee9290c90d544ac3ca163f211ed884339214f33205faf822fc1e",
+    "SuperVCA.svg": "2cd969f7690d6c97fc3c16624b9c4f66e6602c192c51c4b9294047cfa02f611e"
+  },
+  "total_captured_controls": 606,
+  "total_fixed_widgets": 69,
+  "visual_review": "All 32 panels reviewed in native contact sheets; dark footer and output-label contrast corrected and rerendered. No component movements."
+}

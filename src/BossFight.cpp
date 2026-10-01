@@ -357,12 +357,12 @@ struct BossFightWidget : ModuleWidget {
     ///
     explicit BossFightWidget(BossFight *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
+        setPanel(createThemedPanel(plugin_instance, "res/BossFight.svg"));
         // Panel Screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Algorithm Display
         addChild(new IndexedFrameDisplay(
             [&]() {
@@ -386,12 +386,12 @@ struct BossFightWidget : ModuleWidget {
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, BossFight::VU_LIGHTS + 4));
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, BossFight::VU_LIGHTS + 5));
         // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
-        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
-        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
         // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             auto offset = i * 210;
@@ -414,8 +414,8 @@ struct BossFightWidget : ModuleWidget {
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {
                 const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
             }
         }
     }

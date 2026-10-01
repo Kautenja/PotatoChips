@@ -119,7 +119,7 @@ Manual assets are source/publication material, not part of the plugin archive.
 
 Arhythmetic Units runtime footer artwork
   Files: res/ArhythmeticUnits.svg and inline ArhythmeticUnits groups in the
-  16 registered-model panel SVGs (including blanks).
+  32 registered-model panel SVG variants (including blanks).
   Copyright 2025-2026 Arhythmetic Units. License: CC-BY-NC-ND-4.0.
   Copied from RackNES res/ArhythmeticUnits.svg; its outlines originate in
   Fourier src/rack_extensions/panel_artwork.hpp at revision
@@ -128,7 +128,7 @@ Arhythmetic Units runtime footer artwork
   Adaptation: centered footer placement at Fourier's native logo scale;
   panels below 12 HP use the unchanged square emblem without the wordmark.
   Existing control geometry, chip art, names, and collaborator credits remain.
-  Historical manual logos are unchanged. Unreferenced SCC/TurboGrafx16 panels
+  Unused historical manual logos were removed under spec 012. Unreferenced SCC/TurboGrafx16 panels
   were removed on October 1, 2026.
 
 Production panel captures and reference figures (spec 005)
@@ -140,12 +140,12 @@ Production panel captures and reference figures (spec 005)
   Renderer adapted from RackNES tools/capture and Fourier's native inspector,
   GPL-3.0-or-later, copyright 2026 Arhythmetic Units.
   Runtime footer outlines are unchanged, using Fourier's native scale with
-  the emblem alone below 12 HP; Pallet Town uses white fill. Title contours
+  the emblem alone below 12 HP; theme-appropriate ink is applied under spec 012. Title contours
   in Blocks and Name Corp are separated for Rack-compatible hole inference,
   preserving their silhouettes.
   Obsolete Module/Interface SVG/PDF exports were removed after replacement
-  review. Conceptual chip/envelope/operator figures and provenance gaps below
-  are retained. No new provenance or permission claim is made for those works.
+  review. Used envelope/operator figures and their provenance gaps below
+  are retained; unused chip, envelope-mode, VU and switch figures were retired. No new provenance or permission claim is made for those works.
 
 Arhythmetic Units shared manual wordmark
   File: manual/latex/ArhythmeticUnits.pdf.
@@ -175,11 +175,11 @@ Recorded provenance gaps and exceptions to blanket ownership assumptions:
     diagrams associated with the YM2612 envelope explanation; the Boss Fight
     bibliography cites Sega's Genesis Sound Software Manual (1992), but the
     exact image origin and redistribution permission are not recorded.
-  - manual/{SuperADSR,SuperEcho,SuperVCA}/img/Chip.png: raster board/chip
+  - Retired manual/{SuperADSR,SuperEcho,SuperVCA}/img/Chip.png: raster board/chip
     illustrations covered by the project's existing artwork declaration;
     the precise source/export chain is not recorded alongside the PNGs.
   - Outlined type and exports do not by themselves establish the original
-    font/design-source permissions. No standalone font files are bundled.
+    font/design-source permissions. These older font sources remain unknown; the new title font is recorded below.
 
 Keep these gaps visible during the artwork/manual work in specs 003-005/008.
 An original replacement or a verified upstream grant must have its own
@@ -223,3 +223,21 @@ canonical source https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.txt
 BSL-1.0.txt: exact pinned Catch2 LICENSE.txt (locally LICENSE_1_0.txt).
 MIT-TESTS.txt: exact notice text from test/dsp/test_pcm.cpp, comment prefixes removed.
 MAME-HISTORICAL.txt: exact notice text from the YM2612 import identified above.
+
+Shared panel title font (spec 012)
+---------------------------------
+Files: specs/assets/012/fonts/LiberationSans-Bold.ttf and LICENSE;
+       title-outlines.json, directions.json, outline-titles.swift,
+       build-artwork.py and generated title paths in res/*.svg.
+Liberation Sans Bold version 1.07.4; SIL Open Font License 1.1.
+Copyright (c) 2010 Google Corporation. Copyright (c) 2012 Red Hat, Inc.
+Full bundled copyright/reserved-name terms: OFL-Liberation.txt (identical
+copy of fonts/LICENSE). Font SHA-256:
+361c61b82d575c5c35fd9157fda8b0194bcfcd0d88ea8521a4fb5dd53d33dddc
+Source: Codex bundled LibreOffice font distribution, as documented in the
+artwork handoff. CoreText exporter converts pinned glyphs into SVG paths;
+ordinary builds require neither the font nor CoreText. Plugin packages
+contain only the generated panels and font notice, not the TTF/toolchain.
+Paired palette/title compositions prepared with Codex in October 2026.
+Built-in ImageGen concept sheets remain development references. Existing
+panel/control-label/chip illustrations retain their preceding provenance.

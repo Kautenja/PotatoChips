@@ -22,7 +22,7 @@ enum ScrewStyle { None, All, TopLeft, TopRight };
 /// @tparam panelPath the path to the SVG file for the panel graphic
 /// @tparam style the style for rendering screws on the panel
 /// @tparam Screw the type for the screw SVG to render
-template<const char* panelPath, ScrewStyle style, typename Screw = ScrewSilver>
+template<const char* panelPath, ScrewStyle style, typename Screw = ThemedScrew>
 struct BlankWidget : ModuleWidget {
     /// @brief Initialize a new blank panel widget.
     ///
@@ -31,7 +31,7 @@ struct BlankWidget : ModuleWidget {
     explicit BlankWidget(Module *module) {
         setModule(module);
         const std::string fileName(panelPath);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, fileName)));
+        setPanel(createThemedPanel(plugin_instance, fileName));
         switch (style) {  // panel screws
         case ScrewStyle::None:  // no screws
             break;
@@ -55,10 +55,10 @@ struct BlankWidget : ModuleWidget {
 
 extern constexpr char const blank1[] = "res/S-SMP-Chip.svg";
 rack::Model *modelChipS_SMP_Blank1 = createModel<Module,
-    BlankWidget<blank1, ScrewStyle::All, ScrewSilver>
+    BlankWidget<blank1, ScrewStyle::All, ThemedScrew>
 >("Sony_S_SMP_Blank1");
 
 extern constexpr char const blank2[] = "res/BossFight-Envelope.svg";
 rack::Model *modelBossFight_Blank1 = createModel<Module,
-    BlankWidget<blank2, ScrewStyle::All, ScrewSilver>
+    BlankWidget<blank2, ScrewStyle::All, ThemedScrew>
 >("2612_Blank1");

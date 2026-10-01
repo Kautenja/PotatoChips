@@ -46,16 +46,16 @@ recovery and cleaning. It runs real TeX without modifying these sources.
 
 | Source Directory | Collection Filename |
 | --- | --- |
-| `Blocks` | `Blocks.pdf` |
+| `Facets` | `Blocks.pdf` |
 | `BossFight` | `BossFight.pdf` |
 | `InfiniteStairs` | `InfiniteStairs.pdf` |
-| `Jairasullator` | `Jairasullator.pdf` |
+| `Trio AY` | `Jairasullator.pdf` |
 | `MegaTone` | `MegaTone.pdf` |
 | `MiniBoss` | `MiniBoss.pdf` |
 | `NameCorpOctalWaveGenerator` | `NameCorpOctalWaveGenerator.pdf` |
 | `PalletTownWavesSystem` | `PalletTownWavesSystem.pdf` |
 | `PotKeys` | `PotKeys.pdf` |
-| `Pulses` | `Pulses.pdf` |
+| `Pulse FME-7` | `Pulses.pdf` |
 | `StepSaw` | `StepSaw.pdf` |
 | `SuperADSR` | `SuperADSR.pdf` |
 | `SuperEcho` | `SuperEcho.pdf` |
@@ -97,7 +97,7 @@ For example, voice columns and polyphonic cable channels are different;
 mono CV repeats only where the implementation uses Rack's poly accessors.
 `normalChain()` by itself does not repeat mono CV.
 
-Existing `patches/debug/<Module>.vcv` files and Super Echo presets provide
+Existing `patches/debug/<Module>.vcv` files and Echo presets provide
 compatibility examples. The Rack contract test restores project modules
 from those files and checks their parameters, but does not load every
 third-party module or establish that a complete musical patch sounds right.
@@ -113,12 +113,12 @@ The 004 source audit corrected the following legacy claims:
 | Noise and pulse CV | Several old per-step voltages were incorrect; tables now follow the actual scaling, truncation and reversed chip registers. |
 | Mini Boss | One operator; VOL is additive, not a multiplicative VCA. Envelope CV uses an 8 V scale. |
 | Boss Fight | Algorithm/feedback/LFO CV uses 7/8 setting per volt. Only gate, retrigger and pitch forward across operators. Both outputs are identical. |
-| Name Corp | Active-count depth uses 1.25 V per voice at full depth; changing count changes pitch. One global morph control feeds all eight oscillators per chip instance. |
-| Pallet Town | Wave Level is off/25/50/100%; Morph 0--1 selects the first wave. No implemented noise-sync input, despite the legacy drawing. |
+| Octal 163 | Active-count depth uses 1.25 V per voice at full depth; changing count changes pitch. One global morph control feeds all eight oscillators per chip instance. |
+| Pocket APU | Wave Level is off/25/50/100%; Morph 0--1 selects the first wave. No implemented noise-sync input, despite the legacy drawing. |
 | Super ADSR | Last slider is sustain rate. Release is fixed; sustain threshold is 12.5--100%; envelope timing follows host samples. |
 | Super VCA | Input conversion is 8-bit; level is signed. Frequency drives interpolation and is not a measured cutoff. Mode selection has a compensation inconsistency. |
 
-The old Infinite Stairs exact noise-frequency/MIDI table and Super ADSR
+The old Staircase 2A03 exact noise-frequency/MIDI table and Contour
 schematic were retired because they imply calibration or stages not supported
 by the current implementation. Operator routing/envelope figures, LFO tables,
 shape/mode references and all existing bibliography entries are retained or
@@ -160,8 +160,7 @@ See [the capture guide](../tools/capture/README.md) for SDK/OpenGL/Pillow
 prerequisites, deterministic fixtures, reviewed geometry, failure checks and
 refresh commands. Ordinary manual builds need only the committed PNG and TeX
 sources; they never invoke the native renderer. Update the production capture
-and vector guide together when widget geometry changes. Dark artwork remains
-owned by spec 008. Missing Super Echo sliders remain owned by spec 006.
+and vector guide together when widget geometry changes. Covers use the dark theme for contrast on paper. Missing Echo sliders remain owned by spec 006.
 
 The shared wordmark `latex/ArhythmeticUnits.pdf` is a byte-for-byte copy of
 RackNES `manual/RackNES/img/ArhythmeticUnits.pdf` at commit
@@ -175,3 +174,9 @@ license guide rather than declaring one blanket license for the document.
 Spec 002 can consume `manual/.build/*.pdf` and the existing completeness
 validator. This migration does not enable release upload or claim that the
 new manuals have been published.
+
+Module titles use shared LaTeX text styling, with canonical names in
+`specs/assets/012/directions.json`. Retired per-module logos, chip pictures,
+unused envelope/mode drawings, VU and switch graphics are no longer build
+inputs. The two YM2612 envelope PNGs and the Voice 2612 operator PDF/SVG
+remain explanatory figures in active use. Historical filenames stay stable.

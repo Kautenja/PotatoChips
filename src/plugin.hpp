@@ -15,6 +15,7 @@
 
 #include "rack.hpp"
 #include "rack_extensions/helpers.hpp"
+#include "rack_extensions/panel.hpp"
 #include "rack_extensions/param_quantity.hpp"
 
 #ifndef PLUGIN_HPP

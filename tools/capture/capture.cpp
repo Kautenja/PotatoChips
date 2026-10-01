@@ -13,6 +13,31 @@
 
 void init(Plugin* plugin);
 
+/// Assert native panel, port and screw caches follow the global preference.
+static void themed(Widget* widget) {
+    const bool dark = settings::preferDarkPanels;
+    if (auto panel = dynamic_cast<ThemedSvgPanel*>(widget)) {
+        if (!panel->lightSvg || !panel->darkSvg || panel->lightSvg == panel->darkSvg
+            || panel->svg != (dark ? panel->darkSvg : panel->lightSvg))
+            throw std::runtime_error("Panel theme selection failed");
+    } else if (dynamic_cast<SvgPanel*>(widget)) {
+        throw std::runtime_error("Unthemed module panel");
+    }
+    if (auto port = dynamic_cast<ThemedSvgPort*>(widget)) {
+        if (port->sw->svg != (dark ? port->darkSvg : port->lightSvg))
+            throw std::runtime_error("Port theme selection failed");
+    } else if (dynamic_cast<SvgPort*>(widget)) {
+        throw std::runtime_error("Unthemed port");
+    }
+    if (auto screw = dynamic_cast<ThemedSvgScrew*>(widget)) {
+        if (screw->sw->svg != (dark ? screw->darkSvg : screw->lightSvg))
+            throw std::runtime_error("Screw theme selection failed");
+    } else if (dynamic_cast<SvgScrew*>(widget)) {
+        throw std::runtime_error("Unthemed screw");
+    }
+    for (auto child : widget->children) themed(child);
+}
+
 /// Check component caches and SVG resources, including late child controls.
 static bool ready(Widget* widget, bool nested = false) {
     if (auto svg = dynamic_cast<SvgWidget*>(widget))
@@ -67,9 +92,10 @@ static void geometry(Widget* widget, Vec offset, json_t* controls) {
 }
 
 /// Draw production layers until every component framebuffer settles.
-static int capture(ModuleWidget* widget, const std::string& filename) {
-    const int canvas_width = int(widget->box.size.x) + 20;
-    const int canvas_height = 420;
+static int capture(ModuleWidget* widget, const std::string& filename,
+    float zoom = 1.f, float brightness = 1.f) {
+    const int canvas_width = int(std::ceil(widget->box.size.x * zoom)) + 20;
+    const int canvas_height = int(std::ceil(380 * zoom)) + 40;
     glfwSetWindowSize(APP->window->win, canvas_width, canvas_height);
     glfwPollEvents();
     int width, height;
@@ -86,11 +112,20 @@ static int capture(ModuleWidget* widget, const std::string& filename) {
         nvgBeginFrame(vg, canvas_width, canvas_height, ratio);
         Widget::DrawArgs args = {};
         args.vg = vg;
-        args.clipBox = Rect(Vec(), Vec(canvas_width, canvas_height));
+        args.clipBox = Rect(Vec(-10.f / zoom, -20.f / zoom),
+            Vec(canvas_width / zoom, canvas_height / zoom));
         APP->window->fbCount() = 0;
         nvgSave(vg);
         nvgTranslate(vg, 10.f, 20.f);
+        nvgScale(vg, zoom, zoom);
         widget->draw(args);
+        // Rack's room dimming outside the mouse spotlight, before emissive lights.
+        if (brightness < 1.f) {
+            nvgBeginPath(vg);
+            nvgRect(vg, 0, 0, widget->box.size.x, widget->box.size.y);
+            nvgFillColor(vg, nvgRGBAf(0, 0, 0, 1.f - brightness));
+            nvgFill(vg);
+        }
         widget->drawLayer(args, 1);
         nvgRestore(vg);
         glViewport(0, 0, width, height);
@@ -160,9 +195,19 @@ int main(int argc, char** argv) {
             for (bool preview : {false, true}) {
                 random::local().seed(0x504f5441544fULL, 0x4348495053ULL);
                 auto module = preview ? nullptr : model->createModule();
+                std::unique_ptr<Module> reference;
+                if (!preview && (slug == "2A03" || slug == "106"
+                    || slug == "GBS" || slug == "SuperEcho")) {
+                    random::local().seed(0x504f5441544fULL, 0x4348495053ULL);
+                    reference.reset(model->createModule());
+                }
                 if (module) {
                     module->id = index + 1;
                     context.engine->addModule(module);
+                    if (reference) {
+                        reference->id = index + 1001;
+                        context.engine->addModule(reference.get());
+                    }
                     // Fixed defaults, no patched signals or randomize/reset calls.
                     Module::ProcessArgs args = {};
                     args.sampleRate = 48000.f;
@@ -170,6 +215,7 @@ int main(int argc, char** argv) {
                     for (int sample = 0; sample < 4800; ++sample) {
                         args.frame = sample;
                         module->process(args);
+                        if (reference) reference->process(args);
                     }
                 }
                 settings::preferDarkPanels = false;
@@ -177,12 +223,38 @@ int main(int argc, char** argv) {
                 if (widget->box.size != Vec(expected_width, 380))
                     throw std::runtime_error("Geometry changed: " + name);
                 if (!preview) geometry(widget.get(), Vec(), json_object_get(report, "controls"));
+                json_t* state = module ? module->toJson() : nullptr;
+                const int history_index = context.history->actionIndex;
+                const int saved_index = context.history->savedIndex;
                 for (const std::string theme : {"Light", "Dark", "Light"}) {
                     settings::preferDarkPanels = theme == "Dark";
                     const int ratio = capture(widget.get(), std::string(argv[3]) + "/" + name
                         + (preview ? "-Preview-" : "-") + theme + ".ppm");
                     json_object_set_new(report, "pixel_ratio", json_integer(ratio));
+                    themed(widget.get());
+                    if (theme == "Dark" || theme == "Light") {
+                        const std::string path = std::string(argv[3]) + "/" + name
+                            + (preview ? "-Preview-" : "-") + theme;
+                        capture(widget.get(), path + "-Zoom75.ppm", .75f);
+                        capture(widget.get(), path + "-Zoom150.ppm", 1.5f);
+                        capture(widget.get(), path + "-Dim.ppm", 1.f, .5f);
+                    }
+                    json_t* bounds = json_array();
+                    geometry(widget.get(), Vec(), bounds);
+                    if (!preview && !json_equal(bounds, json_object_get(report, "controls")))
+                        throw std::runtime_error("Theme changed control geometry");
+                    json_decref(bounds);
+                    if (module) {
+                        json_t* after = module->toJson();
+                        const bool equal = json_equal(state, after);
+                        json_decref(after);
+                        if (!equal) throw std::runtime_error("Theme changed module state");
+                    }
+                    if (context.history->actionIndex != history_index
+                        || context.history->savedIndex != saved_index)
+                        throw std::runtime_error("Theme changed patch history");
                 }
+                json_decref(state);
                 // Real context lifecycle events, then another complete render.
                 Widget::ContextDestroyEvent destroy;
                 destroy.vg = context.window->vg;
@@ -192,7 +264,52 @@ int main(int argc, char** argv) {
                 widget->onContextCreate(create);
                 capture(widget.get(), std::string(argv[3]) + "/" + name
                     + (preview ? "-Preview-Restored.ppm" : "-Restored.ppm"));
+                themed(widget.get());
+                // Also construct in dark mode, before any step/event callback.
+                settings::preferDarkPanels = true;
+                std::unique_ptr<ModuleWidget> initial(model->createModuleWidget(nullptr));
+                themed(initial.get());
+                if (reference) {
+                    // Compare a rendered/toggled instance to an untouched twin.
+                    // This is an offline deterministic probe, not an audio device.
+                    for (Module* target : {module, reference.get()}) {
+                        target->inputs[0].channels = 16;
+                        for (auto& output : target->outputs) output.channels = 16;
+                    }
+                    Module::ProcessArgs args = {};
+                    args.sampleRate = 48000.f;
+                    args.sampleTime = 1.f / args.sampleRate;
+                    for (int sample = 0; sample < 512; ++sample) {
+                        args.frame = 4800 + sample;
+                        if (sample % 64 == 0) {
+                            settings::preferDarkPanels = !settings::preferDarkPanels;
+                            widget->step();
+                            themed(widget.get());
+                            initial->step();
+                            themed(initial.get());
+                        }
+                        for (int channel = 0; channel < 16; ++channel) {
+                            const float voltage = slug == "SuperEcho"
+                                ? (sample % 32 < 16 ? 1.f : -1.f) : channel * .01f;
+                            module->inputs[0].setVoltage(voltage, channel);
+                            reference->inputs[0].setVoltage(voltage, channel);
+                        }
+                        module->process(args);
+                        reference->process(args);
+                        for (size_t port = 0; port < module->outputs.size(); ++port)
+                            for (int channel = 0; channel < 16; ++channel)
+                                if (module->outputs[port].getVoltage(channel)
+                                    != reference->outputs[port].getVoltage(channel))
+                                    throw std::runtime_error("Theme changed audio: " + name
+                                        + " frame " + std::to_string(sample)
+                                        + " port " + std::to_string(port)
+                                        + " channel " + std::to_string(channel));
+                    }
+                    json_object_set_new(report, "polyphonic_audio_equal_after_toggles", json_true());
+                    context.engine->removeModule(reference.get());
+                }
             }
+            json_object_set_new(report, "theme_state_geometry_history_verified", json_true());
             const std::string filename = std::string(argv[3]) + "/" + name + ".json";
             if (json_dump_file(report, filename.c_str(), JSON_INDENT(2)))
                 throw std::runtime_error("Cannot write geometry report");

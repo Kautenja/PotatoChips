@@ -267,10 +267,10 @@ struct SuperVCAWidget : ModuleWidget {
     explicit SuperVCAWidget(SuperVCA* module) {
         setModule(module);
         static constexpr auto panel = "res/SuperVCA.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Bypass
         addParam(createParam<CKSS>(Vec(15, 32), module, SuperVCA::PARAM_BYPASS));
         // Filter Mode
@@ -279,17 +279,17 @@ struct SuperVCAWidget : ModuleWidget {
         for (unsigned i = 0; i < SuperVCA::LANES; i++) {
             // Frequency
             addParam(createParam<Trimpot>(Vec(15 + 39 * i, 77), module, SuperVCA::PARAM_FREQ + i));
-            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 114), module, SuperVCA::INPUT_VOCT + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(12 + 39 * i, 114), module, SuperVCA::INPUT_VOCT + i));
             // Volume
             addParam(createParam<Trimpot>(Vec(15 + 39 * i, 163), module, SuperVCA::PARAM_VOLUME + i));
-            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 200), module, SuperVCA::INPUT_VOLUME + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(12 + 39 * i, 200), module, SuperVCA::INPUT_VOLUME + i));
             // Stereo Input Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(5 + 39 * i, 236), module, SuperVCA::LIGHT_VU_INPUT + 3 * i));
-            addInput(createInput<PJ301MPort>(Vec(12 + 39 * i, 243), module, SuperVCA::INPUT_AUDIO + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(12 + 39 * i, 243), module, SuperVCA::INPUT_AUDIO + i));
             addParam(createParam<Trimpot>(Vec(15 + 39 * i, 278), module, SuperVCA::PARAM_GAIN + i));
             // Stereo Output Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(5 + 39 * i, 311), module, SuperVCA::LIGHT_VU_OUTPUT + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(12 + 39 * i, 323), module, SuperVCA::OUTPUT_AUDIO + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(12 + 39 * i, 323), module, SuperVCA::OUTPUT_AUDIO + i));
         }
     }
 

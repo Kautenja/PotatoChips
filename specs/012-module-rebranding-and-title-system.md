@@ -3,11 +3,28 @@
 Apply the proposed names to every active Potato Chips module and replace
 the individual SVG title logos with a consistent typographic system. Keep
 the modules recognizable and patches compatible while establishing a
-reusable foundation for a later, broader graphical redesign.
+reusable visual system with a distinct hardware-inspired identity for each
+module. The prepared artwork includes light and dark variants for spec 008.
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 Planning baseline: `8d1b6681` (16 active models).
+
+## Prepared Artwork
+
+The [artwork handoff](assets/012/README.md) now supplies all 16 paired
+concept sheets, 32 exact-size SVG candidates, native Rack previews, fixed
+palettes, pinned title typography, and a per-control movement register.
+**No controls move.** Use the SVGs and numeric records for implementation;
+concept images are visual exploration and can omit or distort controls.
+
+This October 1 follow-up expands the original title-only scope to the
+prepared full-panel color treatments. It removes font/palette/layout
+selection from implementation. Integrate the supplied artwork rather than
+starting another design exercise. Spec 008 owns native theme selection and
+themed control behavior; both specs use this same prepared asset set.
+Runtime integration and manual migration are verified below. Release
+publication remains separate; design generation alone was not completion.
 
 ## Goal And Behavior Examples
 
@@ -85,8 +102,9 @@ shared title rules in coordination with 011 rather than silently omitting it.
     its font files or assume its artwork terms grant font redistribution.
 -   [003](archive/003-source-organization-and-rack-integration.md) retains general
     integration ownership. This spec owns intentional display-name and
-    title-logo changes, superseding earlier title-preservation constraints
-    only for that scope. Preserve the Arhythmetic Units footer treatment.
+    title-logo and prepared palette changes, superseding earlier artwork
+    preservation constraints only for that scope. Preserve the Arhythmetic
+    Units footer geometry and use the handoff's theme-appropriate ink.
 -   Coordinate public metadata and provenance with
     [001](archive/001-licensing-and-project-documentation.md), manual updates with
     [004](archive/004-manual-content-and-publication-style.md), captures with
@@ -122,12 +140,11 @@ shared title rules in coordination with 011 rather than silently omitting it.
 
 ### Replace SVG Title Logos With Shared Typography
 
-1.  Use one geometric sans-serif family with a consistent title weight,
-    uppercase treatment, spacing, alignment, and descriptor style. Select
-    and record the exact font file/version, source, checksum, license, and
-    outline-generation tool/version during implementation. Prefer a font
-    that permits redistribution and derivative outlines. Similarity to
-    Fourier is a visual direction, not a requirement to acquire Futura.
+1.  Use the prepared Liberation Sans Bold 1.07.4 uppercase title outlines.
+    The handoff includes the pinned font, checksum, SIL Open Font License,
+    source strings, and CoreText exporter. Match its shared spacing,
+    alignment, and descriptors. No font selection or acquisition is needed
+    during implementation; ordinary builds consume outlined SVG artwork.
 2.  Keep editable title strings and shared style settings in a small
     repository-owned data source keyed by stable slug. Record the old name,
     display name, full descriptor, compact descriptor, target SVGs, and
@@ -144,19 +161,16 @@ shared title rules in coordination with 011 rather than silently omitting it.
     IDs. Preserve unrelated control labels, routing arrows, artwork,
     illustration content, display bounds, and footer logos. Review XML
     diffs to prevent whole-panel rewrites or accidental embedded images.
-5.  Establish measured title-safe rectangles for every panel, accounting
-    for screws, first-row controls, and existing illustrations. Base these
-    on production SVGs/widgets, not the concept sheet. Pay particular
-    attention to 6 HP Gaussian, the two 8 HP panels, and longer names.
-    Use a small set of documented width classes and explicit exceptions;
-    avoid arbitrary horizontal distortion or per-module custom lettering.
-6.  Fit the complete new title legibly at normal Rack zoom. Target a minimum
-    10 Rack-pixel title size and 7 Rack-pixel descriptor size. If a full
-    descriptor cannot fit, use its chip/source identifier on the panel
-    (for example `S-DSP`, `FME-7`, or `EDGES`) and retain the full descriptor
-    in metadata/manuals. If there is no safe second line, omit the panel
-    descriptor and record that exception. Do not move controls or shrink
-    text below the reviewed minimum to force the full sentence onto a panel.
+5.  Use the measured title bounds and descriptor exceptions in the
+    [artwork index](assets/012/artwork-index.json). They account for the
+    existing header and screw clearances, including 6 HP Gaussian and both
+    8 HP panels. Do not change control positions to enlarge headers.
+6.  Preserve the prepared title sizing: 11-pixel cap-height limit on wider
+    panels, 9 on narrow panels, uniform width fitting, and 5-pixel compact
+    descriptor cap height where space permits. The handoff explicitly lists
+    omitted descriptors. Keep full descriptions in metadata/manuals. These
+    concrete, native-rendered bounds supersede the initial generic minimum
+    font-size proposal; do not stretch letters or copy concept-image sizing.
 7.  Use consistent title geometry across available light/dark variants,
     with contrast appropriate to each background. When 008 is pending,
     update existing production panels and make style colors reusable;
@@ -220,12 +234,13 @@ shared title rules in coordination with 011 rather than silently omitting it.
 1.  Snapshot the active inventory, state contracts, panel dimensions,
     geometry, and current native captures. Audit all affected name strings
     and title SVG groups. Reconcile any concurrently completed specs.
-2.  Select the font and document its provenance. Implement the small title
-    source and exporter/checker, then prove the width rules on Facets,
-    Operator 2612, Pocket APU, Gaussian, and both 8 HP modules.
-3.  Apply the naming map and regenerate titles for the full inventory,
-    including both blanks and all existing theme variants. Review contact
-    sheets at native scale before updating publication assets.
+2.  Verify the prepared artwork with its existing checker, reconcile any
+    source geometry changes against the movement register, and preserve
+    the pinned font/provenance. Promote the maintained title/export inputs
+    to their final tooling location if needed, without redesigning them.
+3.  Apply the naming map and integrate all 32 prepared SVGs, including both
+    blanks. Coordinate native theme wiring with 008. Review fresh production
+    captures at native scale before updating publication assets.
 4.  Update public prose, manuals, and captures together. Migrate logo
     consumers and remove unnecessary manual assets in the same change.
     Run compatibility, native rendering, clean manual builds, and package
@@ -235,40 +250,42 @@ shared title rules in coordination with 011 rather than silently omitting it.
 
 No DSP changes, new controls, repositioning, resized modules, new emulators,
 renamed slugs, plugin rebrand, or release-version selection. No implementation
-of specs 006-011 through this naming work. Do not reproduce the concept
-sheet's knobs, screen colors, panel textures, palettes, or decorative motifs
-in this phase. A later graphical rebrand can reuse the shared typography,
-color roles, and title bounds to unify the entire panel family. Publishing,
-release uploads, and VCV Library submission remain separate tasks.
+of specs 006-011 through this naming work. Do not reproduce invented knobs,
+omitted controls, stretched geometry, textures, or decorative motifs from
+concept images. Integrate the exact prepared SVG palette treatments and
+retained source artwork. Further creative redesign is outside implementation.
+Publishing, release uploads, and VCV Library submission remain separate tasks.
 
 ## Acceptance Criteria
 
-- [ ] All 16 names and descriptors match the mapping; both blanks are
+- [x] All 16 names and descriptors match the mapping; both blanks are
       clearly passive, and all active models are accounted for.
-- [ ] Browser, panel, README, and manual identities agree. Old-name guidance
+- [x] Browser, panel, README, and manual identities agree. Old-name guidance
       and historical PDF links remain usable without changing patch IDs.
-- [ ] All title logos use the shared font/text source and reproducible SVG
+- [x] All title logos use the shared font/text source and reproducible SVG
       outlines, with documented font provenance and no runtime font need.
-- [ ] Full names fit without collisions or illegible scaling. Compact or
+- [x] All 32 prepared SVGs are integrated with the documented per-module
+      palettes; control coordinates match the zero-movement register.
+- [x] Full names fit without collisions or illegible scaling. Compact or
       omitted descriptors are documented; unrelated panel art is preserved.
-- [ ] Native live widgets and browser previews render every title correctly
+- [x] Native live widgets and browser previews render every title correctly
       at normal and reduced zoom, including holes/counters in letters,
       digits, hyphens, and available themes. Theme toggles and graphics
       context restoration do not leave missing, stale, or duplicate titles.
-- [ ] Existing patch/preset contracts, geometry, and representative audio
+- [x] Existing patch/preset contracts, geometry, and representative audio
       checks pass unchanged apart from legitimate display-name expectations.
-- [ ] All 14 manuals build and pass metadata/name validation; refreshed
+- [x] All 14 manuals build and pass metadata/name validation; refreshed
       native panels and affected PDF pages have been visually inspected.
-- [ ] Manuals use the new names through shared text styling, with no
+- [x] Manuals use the new names through shared text styling, with no
       remaining old module-logo images or replacement per-module logo
       image sets. Obsolete assets are deleted, references/dependencies are
       updated, and any retained legacy assets have a documented purpose.
-- [ ] A clean build of all 14 manuals succeeds after asset removal, with
+- [x] A clean build of all 14 manuals succeeds after asset removal, with
       no missing-image placeholders or reliance on cached logo files.
       Covers, headers, and affected figures pass rendered-page review.
-- [ ] Package validation includes the revised SVGs and required notices.
+- [x] Package validation includes the revised SVGs and required notices.
       Ordinary builds work without artwork-generation dependencies installed.
-- [ ] Completion evidence records commands, platforms, manual observations,
+- [x] Completion evidence records commands, platforms, manual observations,
       font decision, exceptions, and remaining limitations. Archive only
       after implementation acceptance, not after committing this plan.
 
@@ -282,13 +299,13 @@ python3 -m json.tool plugin.json > /dev/null
 git diff --check
 ```
 
-The implementation should provide this proposed interface, or record its
-exact replacement here. It does not exist at planning time. `--write`
-regenerates only owned title groups; `--check` validates without mutation:
+The design exporter now exists and writes only under `specs/assets/012/`.
+Its check mode verifies frozen source hashes and exact generated bytes
+without mutation. Runtime integration is a separate implementation step:
 
 ```shell
-python3 tools/branding/titles.py --write
-python3 tools/branding/titles.py --check
+python3 specs/assets/012/build-artwork.py
+python3 specs/assets/012/build-artwork.py --check
 ```
 
 Existing implementation checks below require the prepared Rack SDK/tree
@@ -366,3 +383,142 @@ preserving or regenerating separate module-logo images.
 Planning checks: relative links and `git diff --check` passed; inspected
 manual image references and confirmed the existing `make -C manual clean`
 target. No assets were changed or manuals built for this documentation edit.
+
+### Prepared Design Evidence
+
+2026-10-01 follow-up: The user requested artwork before implementation,
+including spec 008's light/dark modes and a record of control movements.
+The [handoff](assets/012/README.md) fixes all 16 identities with 16 built-in
+ImageGen concept pairs, 32 dimensionally exact SVGs, a pinned licensed font,
+native panel previews, and exact palettes/title bounds. The SVGs resolve
+concept-image omissions and spacing errors; they are the implementation
+source of truth. No runtime panels, constructors, or published manual
+captures were changed by this design preparation.
+
+Validation performed:
+
+-   `python3 specs/assets/012/build-artwork.py --check`: all 32 SVGs and
+    their index match deterministic regeneration and frozen source hashes.
+-   Native rendering used the existing `tools/capture/.build/capture`
+    executable with separate temporary light/dark asset roots, the local
+    Rack runtime, and `tools/capture/modules.json`. Both complete inventory
+    runs passed live/preview construction, preference-toggle drawing, and
+    graphics-context restoration. This validates each supplied palette,
+    not production theme-switching integration. The initial sandboxed run
+    timed out; native desktop execution outside the sandbox succeeded.
+-   All 606 captured controls matched their baseline coordinates and sizes
+    in both palette runs. Another 69 screw/display/editor widgets were
+    recorded from source. All target positions equal the originals.
+-   All 32 panels were visually inspected in native review sheets. Dark
+    footer/output-label contrast defects were corrected and rerendered.
+    Generated concept errors are explicitly listed in the handoff.
+-   Font outlines were produced with Apple Swift 6.3.3/CoreText using the
+    bundled Liberation Sans Bold 1.07.4 file. The license, checksum, path
+    data, source text, and reproduction commands accompany the artwork.
+
+See [validation.json](assets/012/validation.json) for per-panel results,
+final SVG hashes, and platform details. Spec 006's missing Echo sliders and
+007's envelope-label decisions remain with those specs. Dim-room/themed
+component review, live global theme integration, minimum-Rack checks,
+manual builds, audio regression tests, and packaging remain implementation
+acceptance work. No release or runtime behavior is claimed by these assets.
+
+
+## Implementation Evidence — October 1, 2026
+
+Implemented all 16 identities and 32 SVG variants. The shared
+`createThemedPanel` helper uses Rack's two-path factory; every port and screw
+uses the native themed component. All production `.cpp` edits are confined
+to those substitutions. No DSP, IDs, parameters, JSON, preset data, panel
+sizes or control positions changed. Rack 2.4.0 is the minimum; version 2.1.0
+and all established manual URLs remain unchanged.
+
+The [integrated native gallery](assets/012/IMPLEMENTED.md) shows actual
+production controls. [Machine-readable evidence](assets/012/implementation.json)
+records input/library hashes, all model results and the verified minimum
+SDK/runtime download hashes. Design previews remain separately identified
+as pre-integration evidence. SVG whitespace is normalized; original frozen
+source hashes are retained. Ordinary builds require no artwork generator.
+
+### Validation Actually Run
+
+-   `python3 specs/assets/012/build-artwork.py --check --installed`: 32
+    byte-exact runtime panels, 16 active/name mappings, 14 manual names,
+    pinned font hash, outline text, title bounds and source hashes pass.
+-   `make -j2 all test-rack`: plugin and all four suites pass on macOS
+    arm64 with the local Rack 2.6.0 headers/library/resources. Assertion
+    counts: 608, 4,747, 67 and 464. Saved patches/presets and the existing
+    representative audio fixture remain unchanged.
+-   `make -j2 all test-rack RACK_DIR=/tmp/potato-rack-2.4/Rack-SDK`:
+    the same build and 5,886 assertions pass with official Rack 2.4.0.
+    Added an explicit `<plugin.hpp>` include to the contract test because
+    2.4's umbrella does not transitively expose the plugin registry.
+-   `make -C tools/capture capture`: all 16 live widgets and null previews
+    pass light/dark/light selection, initial dark construction, context
+    recreation, state/history checks and immutable geometry checks.
+    All 606 control/display bounds equal the frozen movement register.
+    Additional captures cover 75%/150% zoom and 50% room dimming outside
+    the mouse spotlight; 288 images per host include the 32 restored views.
+-   The post-capture audio probe compares 512 frames across 16 channels on
+    2A03, 106, GBS and SuperEcho against untouched twins, with eight theme
+    changes and two simultaneous widgets: exact sample equality. Both
+    instances receive identical host add/sample-rate events. This corrected
+    an initial harness mismatch; no production audio change was required.
+-   `make -C tools/capture capture BUILD=.build/minimum
+    RACK_DIR=/tmp/potato-rack-2.4/Rack-SDK`: all native checks also pass
+    against 2.4.0 and its matching extracted runtime graphics. SDK/resource
+    downloads and extraction remain outside the repository.
+-   `make -C tools/capture test` and `make -C tools/capture test-native`:
+    export rollback, stale/missing/blank/incorrect geometry, identical theme
+    rejection, exact dark crops, single-module isolation, native missing
+    light/dark panels and renderer failure checks pass.
+-   `python3 tools/capture/export_screenshots.py
+    tools/capture/.build/captures manual` and
+    `python3 tools/capture/draw_panels.py tools/capture/.build/captures`:
+    refreshed all 14 dark covers and all named wireframe diagrams. Export
+    defaults to Dark; `--theme Light` remains an explicit option.
+-   `make -C manual clean` then `make -C manual -j2`: all 14 PDFs build
+    from sources without cached obsolete assets. `python3
+    manual/latex/test-build.py` passes all failure/recovery checks.
+-   `python3 scripts/validate.py manuals manual/.build`: names, versions,
+    metadata, complete inventory and meaningful text pass. Used bundled
+    Poppler's `pdftotext` on PATH. Rendered and inspected all 115 pages,
+    including covers, headers, panel maps and retained YM2612 figures.
+-   `make -j2 dist` and `python3 scripts/validate.py package
+    dist/KautenjaDSP-PotatoChips-2.1.0-mac-arm64.vcvplugin`: package bytes,
+    32 panel files, manifest, presets and notices pass.
+-   `git diff --check`, local Markdown links, unchanged manifest identity,
+    slugs/tags/manual URLs/version and production-diff audit pass.
+
+### Visual And Publication Decisions
+
+All titles and descriptors use the pinned Liberation Sans Bold outlines;
+manual titles use existing shared LaTeX typography. New names appear in
+README guidance, browser metadata, all manuals, and wireframes. Former names
+remain in metadata and explicit lookup notes. Rack 2.6's local browser
+source indexes model descriptions; no unsupported alias field was added.
+
+The user selected dark-theme manual captures. New wireframe titles are
+text; control symbols, groups and coordinates are unchanged. Audited all
+repository consumers before removing 56 unused files: 28 module-logo
+SVG/PDFs, 16 AY envelope-mode SVG/PDFs, six Sony chip images, two obsolete
+ADSR envelope exports and four VU/on-off exports. Retained both used YM2612
+envelope PNGs, Voice 2612's Operators PDF and editable SVG, all Panel PNGs,
+and the shared Arhythmetic Units wordmark. The earlier KautenjaDSP PDF
+cleanup was already present. Font provenance and its OFL notice are included
+in the packaged license inventory; older illustration provenance is retained.
+
+Native review includes every module in both themes, narrow titles, passive
+blanks, slider handles, lit/unlit defaults, waveform traces and the algorithm
+display. No clipped titles, moved controls or context-cache artifacts were
+observed. The reduced-zoom harness clip rectangle was corrected to use
+module coordinates before final review. No additional creative decisions or
+control-layout changes were needed.
+
+Validation is macOS arm64/Retina 2x, Rack 2.4.0 and 2.6.0. Linux/Windows
+native capture and an audio-device listening session were not run; existing
+cross-platform CI remains the other platform gate. Dim captures reproduce
+Rack's outside-spotlight dimming and emissive layer order. Adjacent Echo FIR
+slider and Contour RR-label issues remain owned by 006/007 and are accurately
+shown/described in these manuals. No release upload or VCV Library publication
+is implied. Built PDFs/packages and temporary review pages stay ignored.

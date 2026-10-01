@@ -6,9 +6,12 @@ project documentation, build/test infrastructure, source organization,
 manuals, and production captures. Their completion records preserve prior
 validation evidence and limitations.
 
-Specs 006-012 remain PLANNED. They cover Super Echo and Super ADSR fixes,
+Specs 006/007/009-011 remain PLANNED. Specs 008/012 are implemented and
+verified, with 008 issue follow-through in progress. They cover Super Echo and Super ADSR fixes,
 native themes, YM2612 looping envelopes and optional Nuked-OPN2 engines,
-a YM2151 module, and module display-name rebranding with shared SVG titles.
+a YM2151 module, and module rebranding with prepared light/dark artwork.
+Spec 012 includes a [design handoff](assets/012/README.md) for all 16 models;
+design preparation does not complete runtime integration or manual updates.
 These plans are not release promises. See each spec for scope and evidence.
 
 ## Work Areas And Ownership
@@ -26,7 +29,7 @@ These plans are not release promises. See each spec for scope and evidence.
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
-| [012](012-module-rebranding-and-title-system.md) | Rename all 16 active modules and replace title logos with shared typography | Manifest display names, SVG title sources/exports, current documentation, manuals, captures, font provenance | Preserve slugs and geometry; coordinate 001/004/005 publication and 008 themes; broader panel redesign remains separate. |
+| [012](012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Preserve slugs and geometry; coordinate 001/004/005 publication and 008 themes; design choices are fixed in the handoff. |
 
 The archived specs establish the inventory, executable baseline, source
 organization, manual system, and capture tooling for subsequent work.
@@ -106,9 +109,10 @@ remain historical evidence rather than a fixed limit on future inventory.
 012 owns the display-name mapping and reproducible SVG title system for all
 active modules, including both blanks. It preserves saved-patch identifiers,
 control geometry, audio behavior, and historical PDF URLs. Coordinate its
-publication assets with 004/005 and title variants with 008; full-panel
-graphical redesign remains later work. Writing this spec does not rename
-the product's modules or implement the new title artwork.
+publication assets with 004/005 and native theme wiring with 008. Its
+prepared design handoff supplies the exact light/dark SVGs; integration
+does not require new creative choices. The runtime panels and product names
+remain unchanged until the implementation is run.
 
 ## Evidence And Baseline
 

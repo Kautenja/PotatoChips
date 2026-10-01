@@ -27,7 +27,8 @@ make -C manual
 ```
 
 `capture` only writes ignored `.build/captures/`. `screenshots` runs a fresh
-capture, validates the entire requested batch and updates `img/Panel.png`.
+capture, validates the entire requested batch and updates `img/Panel.png` from the **Dark** view by default.
+For an explicit light export, pass `--theme Light` to `export_screenshots.py`.
 `drawings` exports production control bounds through shared TikZ primitives,
 using the reviewed groups in `regions.json`. Select a manual directory name
 with `MODULE`; blank smoke captures accept their manifest slug. Neither
@@ -62,9 +63,11 @@ RNG is seeded with `0x504f5441544f, 0x4348495053` before each live/preview
 construction, making full and selected-module captures use the same fixture.
 There are no parameter overrides, synthetic gates, ROMs or sample files.
 The two blanks have no processing behavior. Untriggered envelopes and idle
-effects intentionally remain idle. This fixture validates visuals, not audio.
+effects intentionally remain idle. The publication fixture validates visuals. A separate post-capture probe
+compares 16-channel audio on the 2A03, 106, GBS and SuperEcho models against
+untouched twins during repeated theme changes; no device is opened.
 
-Name Corp and Pallet Town show their five factory waveforms. Boss Fight
+Octal 163 and Pocket APU show their five factory waveforms. Voice 2612
 shows the production default algorithm. Screenshots retain known runtime
 limitations: missing Super Echo FIR sliders (006) and Super ADSR's historical
 RR label (007). Diagrams never invent missing controls or live display data.
@@ -106,25 +109,25 @@ Do not expect pixel-identical output across different OS/font/graphics builds.
 macOS is verified; Linux's build path is provided but unverified. Windows
 native capture is unsupported. These limits do not affect normal PDF builds.
 
-All 16 live and preview panels were inspected, including factory waveforms,
-Boss Fight's algorithm, sliders, lights, titles and footer clearances. The
-64 light/dark preference views use the same current artwork: native dark
-panel pairs and actual theme selection remain **pending spec 008**. These
-captures do not claim that dark themes are implemented. Another 32 restored
-context views must match their initial light images exactly.
+All 16 live and preview panels use paired native artwork. The renderer
+asserts the selected panel, port and screw SVG pointers, unchanged control
+geometry, module JSON and patch history across each light/dark/light toggle.
+It also verifies immediate construction with dark preference selected.
+Additional views exercise 75%/150% zoom and 50% room dimming outside the
+mouse spotlight, retaining emissive light layers. The exporter rejects
+identical light/dark pixels and requires 32 restored
+context views to match their light images exactly.
 
-The Arhythmetic Units footer matches Fourier's native logo scale: the full
-wordmark is 120.4554 Rack pixels wide and 11.2471 high on panels 12 HP and
-wider. Narrower panels use the unchanged 11.3938-pixel-wide square emblem
-at the same scale, keeping its detail readable without crowding the screws.
-Both variants are horizontally centered with their top at 366.882 pixels,
-including blank and dormant panels. Boss Fight's wordmark moves from the
-left control block to the panel center. Pallet Town retains white fill for
-contrast.
-Blocks and Name Corp's title contours were separated into independent solids
-with their existing holes; contour starting points avoid touching boundaries.
-This preserves the original vector silhouettes while avoiding Rack's
-compound-path hole inference artifacts. No title font was replaced.
+Spec 012's [artwork source](../../specs/assets/012/README.md) pins all titles,
+palettes and geometry. Regeneration and runtime equality checks:
+
+```shell
+python3 specs/assets/012/build-artwork.py --check --installed
+```
+
+The shared footer geometry and all control positions are retained. Panel
+maps now show the current module name through shared LaTeX typography.
+The manual captures always depict actual native widgets, never AI concepts.
 
 Capture code adapts RackNES's `tools/capture/` and Fourier's native inspector
 under GPL-3.0-or-later. Panel art retains the separate terms in

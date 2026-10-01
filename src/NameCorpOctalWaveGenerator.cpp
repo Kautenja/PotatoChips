@@ -378,12 +378,12 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
     explicit NameCorpOctalWaveGeneratorWidget(NameCorpOctalWaveGenerator *module) {
         setModule(module);
         static constexpr auto panel = "res/NameCorpOctalWaveGenerator.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[NameCorpOctalWaveGenerator::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
@@ -422,21 +422,21 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         // oscillator select
         addParam(createParam<Rogan3PWhite>(Vec(165, 40), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS));
         addParam(createParam<Trimpot>(Vec(177, 108), module, NameCorpOctalWaveGenerator::PARAM_NUM_OSCILLATORS_ATT));
-        addInput(createInput<PJ301MPort>(Vec(174, 151), module, NameCorpOctalWaveGenerator::INPUT_NUM_OSCILLATORS));
+        addInput(createInput<ThemedPJ301MPort>(Vec(174, 151), module, NameCorpOctalWaveGenerator::INPUT_NUM_OSCILLATORS));
         // wave-table morph
         addParam(createParam<Rogan3PWhite>(Vec(165, 212), module, NameCorpOctalWaveGenerator::PARAM_WAVETABLE));
         addParam(createParam<Trimpot>(Vec(177, 280), module, NameCorpOctalWaveGenerator::PARAM_WAVETABLE_ATT));
-        addInput(createInput<PJ301MPort>(Vec(174, 323), module, NameCorpOctalWaveGenerator::INPUT_WAVETABLE));
+        addInput(createInput<ThemedPJ301MPort>(Vec(174, 323), module, NameCorpOctalWaveGenerator::INPUT_WAVETABLE));
         // individual oscillator controls
         for (unsigned i = 0; i < Namco163::OSC_COUNT; i++) {
             const auto offset = i * 35;
             addParam(createParam<Trimpot>(     Vec(228 + offset, 49), module, NameCorpOctalWaveGenerator::PARAM_FREQ + i    ));
             addParam(createParam<Trimpot>(     Vec(228 + offset, 92), module, NameCorpOctalWaveGenerator::PARAM_FM + i      ));
             addParam(createParam<Trimpot>(     Vec(228 + offset, 135), module, NameCorpOctalWaveGenerator::PARAM_VOLUME + i  ));
-            addInput(createInput<PJ301MPort>(  Vec(225 + offset, 187), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
-            addInput(createInput<PJ301MPort>(  Vec(225 + offset, 230), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
-            addInput(createInput<PJ301MPort>(  Vec(225 + offset, 273), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
-            addOutput(createOutput<PJ301MPort>(Vec(225 + offset, 316), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(225 + offset, 187), module, NameCorpOctalWaveGenerator::INPUT_VOCT + i    ));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(225 + offset, 230), module, NameCorpOctalWaveGenerator::INPUT_FM + i      ));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(225 + offset, 273), module, NameCorpOctalWaveGenerator::INPUT_VOLUME + i  ));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(225 + offset, 316), module, NameCorpOctalWaveGenerator::OUTPUT_OSCILLATOR + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(224 + offset, 305), module, NameCorpOctalWaveGenerator::LIGHT_CHANNEL + 3 * i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(239 + offset, 305), module, NameCorpOctalWaveGenerator::LIGHT_LEVEL + 3 * i));
         }

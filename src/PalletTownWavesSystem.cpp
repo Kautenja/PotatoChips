@@ -458,12 +458,12 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
     explicit PalletTownWavesSystemWidget(PalletTownWavesSystem *module) {
         setModule(module);
         static constexpr auto panel = "res/PalletTownWavesSystem.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[PalletTownWavesSystem::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
@@ -502,28 +502,28 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             auto freq = createParam<Trimpot>(  Vec(162 + 35 * i, 32),  module, PalletTownWavesSystem::PARAM_FREQ        + i);
             freq->snap = i == 3;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 71),  module, PalletTownWavesSystem::INPUT_VOCT        + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 71),  module, PalletTownWavesSystem::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 99), module, PalletTownWavesSystem::INPUT_FM          + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 99), module, PalletTownWavesSystem::INPUT_FM          + i));
             if (i < 3)
                 addParam(createParam<Trimpot>( Vec(162 + 35 * i, 144), module, PalletTownWavesSystem::PARAM_FM          + i));
             else
                 addParam(createParam<CKSS>(    Vec(269, 141), module, PalletTownWavesSystem::PARAM_FM                  + i));
             // Level
             addParam(createParam<Trimpot>( Vec(162 + 35 * i, 170), module, PalletTownWavesSystem::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
             // PW
             if (i < 3) {  // Pulse Width / Waveform
                 auto pw = createParam<Trimpot>(Vec(162 + 35 * i, 241), module, PalletTownWavesSystem::PARAM_PW + i);
                 pw->snap = i < 2;
                 addParam(pw);
-                addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 281), module, PalletTownWavesSystem::INPUT_PW + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(160 + 35 * i, 281), module, PalletTownWavesSystem::INPUT_PW + i));
             } else {  // LFSR Reset
-                // addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 264), module, PalletTownWavesSystem::INPUT_PW + i));
+                // addInput(createInput<ThemedPJ301MPort>(Vec(160 + 35 * i, 264), module, PalletTownWavesSystem::INPUT_PW + i));
             }
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(179 + 35 * i, 326), module, PalletTownWavesSystem::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(160 + 35 * i, 331), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(160 + 35 * i, 331), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
         }
     }
 };

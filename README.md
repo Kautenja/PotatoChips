@@ -16,12 +16,12 @@ support polyphonic Rack signals and expose chip controls as knobs and CV.
 
 ## Install
 
-1.  Install [VCV Rack 2](https://vcvrack.com/) for your platform.
+1.  Install [VCV Rack 2.4 or newer](https://vcvrack.com/) for your platform.
 2.  Sign in to the [VCV Library][library] and add Potato Chips to your account.
 3.  Sign in through Rack's **Library** menu, choose **Update all** when
     available, and restart Rack after the download.
 4.  Right-click empty rack space and search for a module such as
-    **Infinite Stairs** or **Boss Fight**.
+    **Staircase 2A03** or **Voice 2612**.
 
 The Library may still show **KautenjaDSP Potato Chips**. The saved plugin
 identifier remains `KautenjaDSP-PotatoChips`, so the brand change does not
@@ -36,9 +36,9 @@ Use the Library or an actual release asset; the source ZIP is not a plugin.
 
 ## Make A First Sound
 
-1.  Add **Infinite Stairs** and a VCV **Audio** module. Select your audio
+1.  Add **Staircase 2A03** and a VCV **Audio** module. Select your audio
     driver/device and begin with your monitoring level low.
-2.  Connect Infinite Stairs' leftmost output, **Pulse 1 Audio**, to Audio's
+2.  Connect Staircase 2A03' leftmost output, **Pulse 1 Audio**, to Audio's
     **To device 1** input. It is a free-running oscillator; no gate is needed.
 3.  Leave Pulse 1's frequency at its default C4, FM at zero, and volume at
     10. Turn its frequency and duty-cycle controls to hear the change.
@@ -46,7 +46,7 @@ Use the Library or an actual release asset; the source ZIP is not a plugin.
     connect **V/OCT** to Pulse 1's **V/Oct** input. Use a separate envelope
     and VCA if you want notes to become silent when the keys are released.
 
-The [Infinite Stairs manual][InfiniteStairs] explains its other voices,
+The [Staircase 2A03 manual][InfiniteStairs] explains its other voices,
 voltage ranges, and output mixing. Patching its first output separately
 keeps that voice out of the normalled mix at the next output.
 
@@ -59,31 +59,63 @@ lag the checkout; editable sources are in [manual/](manual/).
 
 | Module | Chip / Source | Use | Manual |
 | --- | --- | --- | --- |
-| Blocks | Mutable Instruments Edges | Digital waveforms and stepped noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf) |
-| Infinite Stairs | Ricoh 2A03 | NES pulse, triangle, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf) |
-| Step Saw | Konami VRC6 | Pulse and quantized saw voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf) |
-| Pulses | Sunsoft FME-7 | Three pulse voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf) |
-| Jairasullator | General Instrument AY-3-8910 | Tone, noise, and envelope synthesis | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf) |
-| Pot Keys | Atari POKEY | Pulse voices, noise, and distortion modes | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf) |
-| Mega Tone | Texas Instruments SN76489 | Pulse voices and periodic/white noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf) |
-| Boss Fight | Yamaha YM2612 | Four-operator FM voice | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf) |
-| Mini Boss | Yamaha YM2612 | Single FM operator with external modulation | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf) |
-| Name Corp Octal Wave Generator | Namco 163 | Eight voices with editable wavetables | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf) |
-| Pallet Town Waves System | Game Boy sound system | Pulse, wavetable, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf) |
-| Super ADSR | Sony S-DSP | Two envelope generators | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf) |
-| Super Echo | Sony S-DSP | Stereo echo with an eight-tap FIR filter | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf) |
-| Super VCA | Sony S-DSP | Two Gaussian interpolation filters/VCAs | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf) |
+| Facets | Mutable Instruments Edges | Digital waveforms and stepped noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf) |
+| Staircase 2A03 | Ricoh 2A03 | NES pulse, triangle, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf) |
+| Ramp VRC6 | Konami VRC6 | Pulse and quantized saw voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf) |
+| Pulse FME-7 | Sunsoft FME-7 | Three pulse voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf) |
+| Trio AY | General Instrument AY-3-8910 | Tone, noise, and envelope synthesis | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf) |
+| Polynomial | Atari POKEY | Pulse voices, noise, and distortion modes | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf) |
+| Tone 76489 | Texas Instruments SN76489 | Pulse voices and periodic/white noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf) |
+| Voice 2612 | Yamaha YM2612 | Four-operator FM voice | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf) |
+| Operator 2612 | Yamaha YM2612 | Single FM operator with external modulation | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf) |
+| Octal 163 | Namco 163 | Eight voices with editable wavetables | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf) |
+| Pocket APU | Game Boy sound system | Pulse, wavetable, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf) |
+| Contour | Sony S-DSP | Two envelope generators | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf) |
+| Echo | Sony S-DSP | Stereo echo with an eight-tap FIR filter | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf) |
+| Gaussian | Sony S-DSP | Two Gaussian interpolation filters/VCAs | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf) |
 
-The **Boss Fight Envelope Generator (Blank)** illustrates an envelope;
-the **S-SMP Blank** illustrates the chip. Both are passive panels.
+The **Contour 2612** illustrates an envelope;
+the **Silicon S-SMP** illustrates the chip. Both are passive panels.
+
+## Names And Panel Themes
+
+Choose **View > Use dark panels if available** in Rack 2.4 or newer. All
+16 modules follow this setting immediately, including browser previews.
+The module's sound, parameters and saved state are independent of this
+setting. Older Rack versions are unsupported; upgrade Rack before installing
+this build (pre-2.4 clients do not enforce the minimum-version download rule).
+
+Existing patches and presets use unchanged module identifiers. Manuals keep
+their established download filenames. Browser descriptions and keywords
+retain the former names; the following table also provides a direct lookup.
+These names and panels describe the checkout; published releases may lag it.
+
+| Former Name | Current Name |
+| --- | --- |
+| Blocks | Facets |
+| Mini Boss | Operator 2612 |
+| Pallet Town Waves System | Pocket APU |
+| Infinite Stairs | Staircase 2A03 |
+| Step Saw | Ramp VRC6 |
+| Pulses | Pulse FME-7 |
+| Jairasullator | Trio AY |
+| Pot Keys | Polynomial |
+| Mega Tone | Tone 76489 |
+| Boss Fight | Voice 2612 |
+| Name Corp Octal Wave Generator | Octal 163 |
+| Super ADSR | Contour |
+| Super Echo | Echo |
+| Super VCA | Gaussian |
+| Boss Fight Envelope Generator (Blank) | Contour 2612 |
+| S-SMP Blank | Silicon S-SMP |
 
 ## Patch Ideas
 
--   Combine Infinite Stairs' pulse and triangle voices for a melody and bass,
+-   Combine Staircase 2A03' pulse and triangle voices for a melody and bass,
     then add its noise voice for percussion.
--   Patch Mini Boss into its FM input, starting with a small modulation
-    depth, or use Boss Fight's algorithms for layered FM sounds.
--   Send a synth voice through Super VCA and Super Echo; modulate the echo
+-   Patch Operator 2612 into its FM input, starting with a small modulation
+    depth, or use Voice 2612's algorithms for layered FM sounds.
+-   Send a synth voice through Gaussian and Echo; modulate the echo
     filter coefficients to change the repeats' tone.
 
 [Debug patches](patches/debug/) and [older examples](patches/misc/) are

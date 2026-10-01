@@ -51,6 +51,12 @@ def main():
         assert result.returncode, result.stdout
         assert assets() == before
         print('PASS: native missing panel preserves publication PNGs')
+        (plugin / 'res/Blocks.svg').symlink_to(ROOT / 'res/Blocks.svg')
+        (plugin / 'res/Blocks-dark.svg').unlink()
+        result = render(plugin, INVENTORY)
+        assert result.returncode, result.stdout
+        assert assets() == before
+        print('PASS: native missing dark panel preserves publication PNGs')
         failed = output / 'failed-renderer'
         failed.mkdir()
         (failed / 'capture').write_text('#!/bin/sh\nexit 23\n')

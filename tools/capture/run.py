@@ -53,8 +53,9 @@ def main():
     build.mkdir(parents=True, exist_ok=True)
     # Validate assets before constructors can silently substitute empty panels.
     for row in rows:
-        if not (ROOT / 'res' / row['panel']).is_file():
-            raise ValueError(f'Missing panel: {row["panel"]}')
+        for panel in (row['panel'], row['panel'].replace('.svg', '-dark.svg')):
+            if not (ROOT / 'res' / panel).is_file():
+                raise ValueError(f'Missing panel: {panel}')
     for index in range(8):
         if not (ROOT / 'res/BossFight_algorithms' / f'{index}.svg').is_file():
             raise ValueError('Missing Boss Fight algorithm frame')
@@ -76,7 +77,7 @@ def main():
                       fixture='Constructor defaults; no patched signals; RNG seed 0x504f5441544f/0x4348495053',
                       rack_library_sha256={p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                                            for p in args.rack.glob('libRack.*')},
-                      themes='Preference exercised; dark artwork awaits spec 008')
+                      themes='Native light/dark panels, ports and screws; state/history/geometry unchanged')
         (output / 'batch.json').write_text(json.dumps(report, indent=2) + '\n')
         destination = build / 'captures'
         old = build / 'captures-old'

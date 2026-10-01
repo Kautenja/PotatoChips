@@ -305,20 +305,20 @@ struct InfiniteStairsWidget : ModuleWidget {
     explicit InfiniteStairsWidget(InfiniteStairs *module) {
         setModule(module);
         static constexpr auto panel = "res/InfiniteStairs.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT; i++) {
             // Frequency / Noise Period
             auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 32),  module, InfiniteStairs::PARAM_FREQ        + i);
             freq->snap = i == Ricoh2A03::NOISE;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 71),  module, InfiniteStairs::INPUT_VOCT        + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 71),  module, InfiniteStairs::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 99), module, InfiniteStairs::INPUT_FM          + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 99), module, InfiniteStairs::INPUT_FM          + i));
             if (i < Ricoh2A03::NOISE)
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 144), module, InfiniteStairs::PARAM_FM          + i));
             else
@@ -326,18 +326,18 @@ struct InfiniteStairsWidget : ModuleWidget {
             // Level
             if (i != Ricoh2A03::TRIANGLE) {
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 170), module, InfiniteStairs::PARAM_LEVEL       + i));
-                addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 210), module, InfiniteStairs::INPUT_LEVEL       + i));
+                addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 210), module, InfiniteStairs::INPUT_LEVEL       + i));
             }
             // Pulse Width / Sync
             if (i < Ricoh2A03::TRIANGLE) {
                 addParam(createParam<Trimpot>(Vec(12 + 35 * i, 241), module, InfiniteStairs::PARAM_PW + i));
-                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 281), module, InfiniteStairs::INPUT_PW + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(10 + 35 * i, 281), module, InfiniteStairs::INPUT_PW + i));
             } else {
-                addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 264), module, InfiniteStairs::INPUT_PW + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(10 + 35 * i, 264), module, InfiniteStairs::INPUT_PW + i));
             }
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(29 + 35 * i, 319), module, InfiniteStairs::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, InfiniteStairs::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(10 + 35 * i, 324), module, InfiniteStairs::OUTPUT_OSCILLATOR + i));
         }
     }
 };

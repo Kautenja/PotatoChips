@@ -35,6 +35,8 @@ def main():
                 r'\begin{tikzpicture}[x=\panelunit,y=-\panelunit]',
                 r'\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (' +
                 str(row['width']) + ',380);']
+        text.append(r'\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (' +
+                    str(row['width'] / 2) + r',10) {\MakeUppercase{\manualname}};')
         for i, region in enumerate(regions[name], 1):
             text.append(r'\panelregion' + ''.join('{' + str(v) + '}' for v in [i] + region['box']))
         for control in controls:

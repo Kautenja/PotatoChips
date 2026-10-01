@@ -24,6 +24,7 @@
 #include <engine/Engine.hpp>
 #undef PRIVATE
 #include <rack.hpp>
+#include <plugin.hpp>
 #define CATCH_CONFIG_PREFIX_ALL
 #include "catch_amalgamated.hpp"
 #include <fstream>

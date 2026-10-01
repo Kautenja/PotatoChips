@@ -66,3 +66,14 @@ Plugin packages include `LICENSE`, this guide, and `docs/licenses/` via
 the [Makefile](Makefile). Individual source notices remain authoritative
 evidence; uncertain provenance is recorded rather than replaced with a
 new grant of rights.
+
+## Rebranded Panel Lettering
+
+The shared title outlines use Liberation Sans Bold 1.07.4, under the
+[SIL Open Font License 1.1](docs/licenses/OFL-Liberation.txt). The pinned
+font, editable titles, palettes, original panel inputs and export scripts
+are retained in [the artwork handoff](specs/assets/012/README.md). Ordinary
+builds use committed SVG paths; no font is loaded by the plugin. The font
+license is separate from the project's panel composition/artwork terms.
+The module palettes and title compositions were prepared with Codex in 2026;
+AI concept sheets are design references, not runtime assets.

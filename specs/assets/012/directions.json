@@ -1,0 +1,338 @@
+[
+  {
+    "key": "Blocks",
+    "slug": "Blocks",
+    "name": "Facets",
+    "sub": "EDGES",
+    "palette": [
+      "#F1EFE7",
+      "#DDE6E4",
+      "#182329",
+      "#007E95",
+      "#17242B",
+      "#253740",
+      "#F0F3ED",
+      "#59CEE0"
+    ],
+    "identity": "Faceted geometric digital oscillator. Warm chalk with pale cool-gray voice strips, restrained cyan edge marks; dark blue-charcoal with muted slate strips and pale cyan. Sparse angular edge line accents in empty margins only. Four identical vertical strips.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"FACETS\". Optional compact subtitle \"EDGES\". Art direction: Faceted geometric digital oscillator. Warm chalk with pale cool-gray voice strips, restrained cyan edge marks; dark blue-charcoal with muted slate strips and pale cyan. Sparse angular edge line accents in empty margins only. Four identical vertical strips.\nExact palette light background #F1EFE7, secondary #DDE6E4, ink #182329, accent #007E95; dark background #17242B, secondary #253740, ink #F0F3ED, accent #59CEE0.",
+    "concept": "concepts/Blocks.png",
+    "former_name": "Blocks",
+    "descriptor": "EDGES / QUAD DIGITAL"
+  },
+  {
+    "key": "MiniBoss",
+    "slug": "MiniBoss",
+    "name": "Operator 2612",
+    "sub": "YM2612",
+    "palette": [
+      "#EEEAE4",
+      "#DED8D0",
+      "#242329",
+      "#B73831",
+      "#211E23",
+      "#332C31",
+      "#F6EDE3",
+      "#FF7664"
+    ],
+    "identity": "Sega-era FM instrument, cream/charcoal and vermilion red. A thin red header rule, retain the six envelope sliders and exact two-by-four knob grid. Restrained red outline around OUT.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"OPERATOR 2612\". Optional compact subtitle \"YM2612\". Art direction: Sega-era FM instrument, cream/charcoal and vermilion red. A thin red header rule, retain the six envelope sliders and exact two-by-four knob grid. Restrained red outline around OUT.\nExact palette light background #EEEAE4, secondary #DED8D0, ink #242329, accent #B73831; dark background #211E23, secondary #332C31, ink #F6EDE3, accent #FF7664.",
+    "concept": "concepts/MiniBoss.png",
+    "former_name": "Mini Boss",
+    "descriptor": "YM2612 / SINGLE FM OPERATOR"
+  },
+  {
+    "key": "PalletTownWavesSystem",
+    "slug": "GBS",
+    "name": "Pocket APU",
+    "sub": "DMG",
+    "palette": [
+      "#DCD0EB",
+      "#B5A0CE",
+      "#30203F",
+      "#693F91",
+      "#30213F",
+      "#49315F",
+      "#F0E6FC",
+      "#CAA5F2"
+    ],
+    "identity": "ATOMIC PURPLE Game Boy Color translucent-plastic inspired identity. BOTH themes purple: light translucent lilac with plum circuitry; dark smoked atomic purple with violet trace work. Preserve original circuit-board background motif as subtle silhouettes, not literal transparency. Five black waveform screens remain on left with original red green blue yellow white traces, exact four voice columns on right. No green LCD replacement, no added handheld buttons.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"POCKET APU\". Optional compact subtitle \"DMG\". Art direction: ATOMIC PURPLE Game Boy Color translucent-plastic inspired identity. BOTH themes purple: light translucent lilac with plum circuitry; dark smoked atomic purple with violet trace work. Preserve original circuit-board background motif as subtle silhouettes, not literal transparency. Five black waveform screens remain on left with original red green blue yellow white traces, exact four voice columns on right. No green LCD replacement, no added handheld buttons.\nExact palette light background #DCD0EB, secondary #B5A0CE, ink #30203F, accent #693F91; dark background #30213F, secondary #49315F, ink #F0E6FC, accent #CAA5F2.",
+    "concept": "concepts/PalletTownWavesSystem.png",
+    "former_name": "Pallet Town Waves System",
+    "descriptor": "DMG / HANDHELD SOUND SYSTEM"
+  },
+  {
+    "key": "InfiniteStairs",
+    "slug": "2A03",
+    "name": "Staircase 2A03",
+    "sub": "2A03",
+    "palette": [
+      "#E8E4DC",
+      "#D8D1C6",
+      "#27292C",
+      "#B5353C",
+      "#24272B",
+      "#35383D",
+      "#F0EBE2",
+      "#F27372"
+    ],
+    "identity": "Original NES warm gray and cartridge red, four restrained red-accent vertical channels. Fine stair-step border rhythm in empty margins; keep triangle channel intentionally sparse and all SYNC positions unchanged.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"STAIRCASE 2A03\". Optional compact subtitle \"2A03\". Art direction: Original NES warm gray and cartridge red, four restrained red-accent vertical channels. Fine stair-step border rhythm in empty margins; keep triangle channel intentionally sparse and all SYNC positions unchanged.\nExact palette light background #E8E4DC, secondary #D8D1C6, ink #27292C, accent #B5353C; dark background #24272B, secondary #35383D, ink #F0EBE2, accent #F27372.",
+    "concept": "concepts/InfiniteStairs.png",
+    "former_name": "Infinite Stairs",
+    "descriptor": "RICOH 2A03 / CONSOLE SOUND SYSTEM"
+  },
+  {
+    "key": "StepSaw",
+    "slug": "VRC6",
+    "name": "Ramp VRC6",
+    "sub": "VRC6",
+    "palette": [
+      "#EAE3F4",
+      "#D8CBEA",
+      "#2E2240",
+      "#7043AD",
+      "#241D32",
+      "#3B2B50",
+      "#F1E8FA",
+      "#BD95F0"
+    ],
+    "identity": "Konami expansion pulse and quantized saw, violet family; three voice strips, stair-step saw symbol only in empty header space. Preserve sparse third saw column and SYNC.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"RAMP VRC6\". Optional compact subtitle \"VRC6\". Art direction: Konami expansion pulse and quantized saw, violet family; three voice strips, stair-step saw symbol only in empty header space. Preserve sparse third saw column and SYNC.\nExact palette light background #EAE3F4, secondary #D8CBEA, ink #2E2240, accent #7043AD; dark background #241D32, secondary #3B2B50, ink #F1E8FA, accent #BD95F0. Keep the original aspect ratio rigorously, do not make panel taller for extra header/footer space.",
+    "concept": "concepts/StepSaw.png",
+    "former_name": "Step Saw",
+    "descriptor": "KONAMI VRC6 / PULSE + STEPPED SAW"
+  },
+  {
+    "key": "Pulses",
+    "slug": "FME7",
+    "name": "Pulse FME-7",
+    "sub": "FME-7",
+    "palette": [
+      "#F3E8D7",
+      "#E9D4BA",
+      "#382C22",
+      "#A94124",
+      "#2D231F",
+      "#48342A",
+      "#FAEDD8",
+      "#F3A36A"
+    ],
+    "identity": "Sunsoft cartridge audio in warm ivory, sun-baked copper-orange and amber. Keep THREE exact pulse strips, sparse geometric pulse motif near footer only.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"PULSE FME-7\". Optional compact subtitle \"FME-7\". Art direction: Sunsoft cartridge audio in warm ivory, sun-baked copper-orange and amber. Keep THREE exact pulse strips, sparse geometric pulse motif near footer only.\nExact palette light background #F3E8D7, secondary #E9D4BA, ink #382C22, accent #A94124; dark background #2D231F, secondary #48342A, ink #FAEDD8, accent #F3A36A. Keep the original aspect ratio rigorously, do not make panel taller for extra header/footer space.",
+    "concept": "concepts/Pulses.png",
+    "former_name": "Pulses",
+    "descriptor": "SUNSOFT FME-7 / TRIPLE PULSE"
+  },
+  {
+    "key": "Jairasullator",
+    "slug": "AY_3_8910",
+    "name": "Trio AY",
+    "sub": "AY-3-8910",
+    "palette": [
+      "#E4EAF1",
+      "#CDD9E8",
+      "#202E42",
+      "#315A96",
+      "#1D293A",
+      "#2D3D55",
+      "#E8F0FB",
+      "#88B5F0"
+    ],
+    "identity": "Early home-computer programmable sound instrument, disciplined cobalt blue with small burgundy title accent. Three dual-width tone/noise/envelope strips and one narrow shared noise/envelope strip, preserve ALL switches and jacks exactly.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"TRIO AY\". Optional compact subtitle \"AY-3-8910\". Art direction: Early home-computer programmable sound instrument, disciplined cobalt blue with small burgundy title accent. Three dual-width tone/noise/envelope strips and one narrow shared noise/envelope strip, preserve ALL switches and jacks exactly.\nExact palette light background #E4EAF1, secondary #CDD9E8, ink #202E42, accent #315A96; dark background #1D293A, secondary #2D3D55, ink #E8F0FB, accent #88B5F0. Keep the original aspect ratio rigorously, do not make panel taller for extra header/footer space.",
+    "concept": "concepts/Jairasullator.png",
+    "former_name": "Jairasullator",
+    "descriptor": "AY-3-8910 / PROGRAMMABLE SOUND GENERATOR"
+  },
+  {
+    "key": "PotKeys",
+    "slug": "POKEY",
+    "name": "Polynomial",
+    "sub": "POKEY",
+    "palette": [
+      "#EDE5D6",
+      "#D8D5BE",
+      "#293326",
+      "#477239",
+      "#242B23",
+      "#394332",
+      "#F0EBDC",
+      "#A9C879"
+    ],
+    "identity": "Atari laboratory/home-computer sound, warm parchment with olive channel strips and copper micro accents; dark olive charcoal. Retain four tone columns and right-side six switch/CV utility rows. Subtle feedback-register visual cue confined to header.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"POLYNOMIAL\". Optional compact subtitle \"POKEY\". Art direction: Atari laboratory/home-computer sound, warm parchment with olive channel strips and copper micro accents; dark olive charcoal. Retain four tone columns and right-side six switch/CV utility rows. Subtle feedback-register visual cue confined to header.\nExact palette light background #EDE5D6, secondary #D8D5BE, ink #293326, accent #477239; dark background #242B23, secondary #394332, ink #F0EBDC, accent #A9C879. Keep the original aspect ratio rigorously, do not make panel taller for extra header/footer space.",
+    "concept": "concepts/PotKeys.png",
+    "former_name": "Pot Keys",
+    "descriptor": "ATARI POKEY / TONE + NOISE"
+  },
+  {
+    "key": "MegaTone",
+    "slug": "SN76489",
+    "name": "Tone 76489",
+    "sub": "SN76489",
+    "palette": [
+      "#EFE3EB",
+      "#E1C9DB",
+      "#352539",
+      "#993E7C",
+      "#292030",
+      "#412C47",
+      "#F7E9F5",
+      "#ECA4D6"
+    ],
+    "identity": "Sega Master System sound, restrained magenta/plum with deep navy details. Four vertical strips including sparse noise lane. Preserve exact LFSR switch and outputs.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"TONE 76489\". Optional compact subtitle \"SN76489\". Art direction: Sega Master System sound, restrained magenta/plum with deep navy details. Four vertical strips including sparse noise lane. Preserve exact LFSR switch and outputs.\nExact palette light background #EFE3EB, secondary #E1C9DB, ink #352539, accent #993E7C; dark background #292030, secondary #412C47, ink #F7E9F5, accent #ECA4D6. Preserve EXACT source panel aspect ratio and all repeated columns (count them); no omitted rows or controls.",
+    "concept": "concepts/MegaTone.png",
+    "former_name": "Mega Tone",
+    "descriptor": "SN76489 / PROGRAMMABLE SOUND GENERATOR"
+  },
+  {
+    "key": "BossFight",
+    "slug": "2612",
+    "name": "Voice 2612",
+    "sub": "YM2612",
+    "palette": [
+      "#EEEAE4",
+      "#DED8D0",
+      "#242329",
+      "#B73831",
+      "#211E23",
+      "#332C31",
+      "#F6EDE3",
+      "#FF7664"
+    ],
+    "identity": "Same cream/charcoal and vermilion FM family as Operator 2612. VERY WIDE 975 by 380 panel: stack two full panels vertically, never compress width. Preserve left global block and all four operator banks and large low-contrast background numerals 1 2 3 4. Keep algorithm display with original magenta diagram. Title stays over global section at original location, not over operator controls.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"VOICE 2612\". Optional compact subtitle \"YM2612\". Art direction: Same cream/charcoal and vermilion FM family as Operator 2612. VERY WIDE 975 by 380 panel: stack two full panels vertically, never compress width. Preserve left global block and all four operator banks and large low-contrast background numerals 1 2 3 4. Keep algorithm display with original magenta diagram. Title stays over global section at original location, not over operator controls.\nExact palette light background #EEEAE4, secondary #DED8D0, ink #242329, accent #B73831; dark background #211E23, secondary #332C31, ink #F6EDE3, accent #FF7664. Preserve EXACT source panel aspect ratio and all repeated columns (count them); no omitted rows or controls.",
+    "concept": "concepts/BossFight.png",
+    "former_name": "Boss Fight",
+    "descriptor": "YM2612 / FOUR-OPERATOR FM"
+  },
+  {
+    "key": "NameCorpOctalWaveGenerator",
+    "slug": "106",
+    "name": "Octal 163",
+    "sub": "NAMCO 163",
+    "palette": [
+      "#E4EEE8",
+      "#CBDED3",
+      "#1F342D",
+      "#237A67",
+      "#192C28",
+      "#2C433A",
+      "#E6F4EB",
+      "#74D8B6"
+    ],
+    "identity": "Namco eight-voice wavetable laboratory, celadon mint/forest jade. Preserve five waveform screens at left, two global control groups beside them and exact eight-column matrix. Screens stay black with original multicolor traces. Clean horizontal group rules.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"OCTAL 163\". Optional compact subtitle \"NAMCO 163\". Art direction: Namco eight-voice wavetable laboratory, celadon mint/forest jade. Preserve five waveform screens at left, two global control groups beside them and exact eight-column matrix. Screens stay black with original multicolor traces. Clean horizontal group rules.\nExact palette light background #E4EEE8, secondary #CBDED3, ink #1F342D, accent #237A67; dark background #192C28, secondary #2C433A, ink #E6F4EB, accent #74D8B6. Preserve EXACT source panel aspect ratio and all repeated columns (count them); no omitted rows or controls.",
+    "concept": "concepts/NameCorpOctalWaveGenerator.png",
+    "former_name": "Name Corp Octal Wave Generator",
+    "descriptor": "NAMCO 163 / EIGHT-VOICE WAVETABLE"
+  },
+  {
+    "key": "SuperADSR",
+    "slug": "SuperADSR",
+    "name": "Contour",
+    "sub": "S-DSP",
+    "palette": [
+      "#EAE5EE",
+      "#D7CEDE",
+      "#342B42",
+      "#965574",
+      "#28222F",
+      "#3E324A",
+      "#F2EAF6",
+      "#E7A3C4"
+    ],
+    "identity": "Sony/SNES envelope family, warm lavender gray and muted rose accents. Retain the current two envelope groups, sliders, all toggles, labels and sockets. Subtle envelope-line motif only in existing blank panel space; no pictorial chip.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"CONTOUR\". Optional compact subtitle \"S-DSP\". Art direction: Sony/SNES envelope family, warm lavender gray and muted rose accents. Retain the current two envelope groups, sliders, all toggles, labels and sockets. Subtle envelope-line motif only in existing blank panel space; no pictorial chip.\nExact palette light background #EAE5EE, secondary #D7CEDE, ink #342B42, accent #965574; dark background #28222F, secondary #3E324A, ink #F2EAF6, accent #E7A3C4. Preserve EXACT source panel aspect ratio and all repeated columns (count them); no omitted rows or controls.",
+    "concept": "concepts/SuperADSR.png",
+    "former_name": "Super ADSR",
+    "descriptor": "S-DSP / DUAL ENVELOPE"
+  },
+  {
+    "key": "SuperEcho",
+    "slug": "SuperEcho",
+    "name": "Echo",
+    "sub": "S-DSP",
+    "palette": [
+      "#E2ECEB",
+      "#C8DBD9",
+      "#243B3B",
+      "#287D78",
+      "#1D2D30",
+      "#2D4246",
+      "#E4F2F0",
+      "#7AD2C9"
+    ],
+    "identity": "Sony/SNES delay instrument, pale sea-glass with lavender-gray details and teal accents; dark deep teal. Eight FIR slider tracks must remain precisely in their existing drawn positions even if no interactive slider handles are visible in the reference. Do not invent new controls or change their spacing.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"ECHO\". Optional compact subtitle \"S-DSP\". Art direction: Sony/SNES delay instrument, pale sea-glass with lavender-gray details and teal accents; dark deep teal. Eight FIR slider tracks must remain precisely in their existing drawn positions even if no interactive slider handles are visible in the reference. Do not invent new controls or change their spacing.\nExact palette light background #E2ECEB, secondary #C8DBD9, ink #243B3B, accent #287D78; dark background #1D2D30, secondary #2D4246, ink #E4F2F0, accent #7AD2C9.",
+    "concept": "concepts/SuperEcho.png",
+    "former_name": "Super Echo",
+    "descriptor": "S-DSP / STEREO FIR ECHO"
+  },
+  {
+    "key": "SuperVCA",
+    "slug": "SuperVCA",
+    "name": "Gaussian",
+    "sub": "S-DSP",
+    "palette": [
+      "#EEE9DE",
+      "#DDD5C4",
+      "#383226",
+      "#927038",
+      "#2D2930",
+      "#443B48",
+      "#F5EEDF",
+      "#E5C583"
+    ],
+    "identity": "Sony/SNES Gaussian interpolation instrument, champagne gray with muted plum and gold accents. Very narrow 90 by 380 module: preserve exact two-channel layout and all knob/port positions, simple restrained title fits top. No new graph inside control area.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"GAUSSIAN\". Optional compact subtitle \"S-DSP\". Art direction: Sony/SNES Gaussian interpolation instrument, champagne gray with muted plum and gold accents. Very narrow 90 by 380 module: preserve exact two-channel layout and all knob/port positions, simple restrained title fits top. No new graph inside control area.\nExact palette light background #EEE9DE, secondary #DDD5C4, ink #383226, accent #927038; dark background #2D2930, secondary #443B48, ink #F5EEDF, accent #E5C583.",
+    "concept": "concepts/SuperVCA.png",
+    "former_name": "Super VCA",
+    "descriptor": "S-DSP / DUAL INTERPOLATION VCA"
+  },
+  {
+    "key": "2612_Blank1",
+    "slug": "2612_Blank1",
+    "name": "Contour 2612",
+    "sub": "YM2612 / ENVELOPE REFERENCE",
+    "palette": [
+      "#EEEAE4",
+      "#DED8D0",
+      "#242329",
+      "#B73831",
+      "#211E23",
+      "#332C31",
+      "#F6EDE3",
+      "#FF7664"
+    ],
+    "identity": "Passive FM envelope reference plate in the same cream/charcoal and vermilion family as Voice 2612. Preserve the entire original envelope diagram, mathematical/parameter labels and timing relations. Rename title, recolor blue curve red. No knobs, switches, sockets or lights. Reference includes capture border: exclude border from panel.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"CONTOUR 2612\". Optional compact subtitle \"YM2612 / ENVELOPE REFERENCE\". Art direction: Passive FM envelope reference plate in the same cream/charcoal and vermilion family as Voice 2612. Preserve the entire original envelope diagram, mathematical/parameter labels and timing relations. Rename title, recolor blue curve red. No knobs, switches, sockets or lights. Reference includes capture border: exclude border from panel.\nExact palette light background #EEEAE4, secondary #DED8D0, ink #242329, accent #B73831; dark background #211E23, secondary #332C31, ink #F6EDE3, accent #FF7664.",
+    "concept": "concepts/2612_Blank1.png",
+    "former_name": "Boss Fight Envelope Generator (Blank)",
+    "descriptor": "YM2612 / ENVELOPE REFERENCE"
+  },
+  {
+    "key": "Sony_S_SMP_Blank1",
+    "slug": "Sony_S_SMP_Blank1",
+    "name": "Silicon S-SMP",
+    "sub": "SONY S-SMP",
+    "palette": [
+      "#E4EBDF",
+      "#CBD8C3",
+      "#253626",
+      "#39794A",
+      "#1D2B23",
+      "#2E4335",
+      "#E9F3E4",
+      "#9AD49C"
+    ],
+    "identity": "Passive Sony chip portrait, botanical PCB green and off-white/graphite. Preserve recognizable exact central chip illustration, legible chip lettering and original pin arrangement. Retain printed chip text unchanged, place new panel title in empty top margin. No new controls. Reference includes capture border: exclude border from panel.",
+    "prompt": "Use case: product-mockup. Create a precise front-on panel design sheet for ONE Eurorack synthesizer module showing TWO complete production-looking panels: LIGHT on the left and DARK on the right (for extremely wide panels, stack LIGHT above DARK). Small neutral margin and tiny outside LIGHT / DARK captions. This is a restrained rebrand of the supplied REFERENCE image. Preserve exactly its aspect ratio, panel width/height, ALL control centers, counts, types, labels, routing arrows, display rectangles, output groupings and screws. Both themes must have IDENTICAL geometry. Do not invent, remove, add or move controls. No perspective, no cables, no room. A crisp flat silk-screened instrument panel with realistic existing hardware. Keep every original function label unchanged and legible. Replace only the old module title with the specified new uppercase name. Use a consistent bold geometric sans-serif title, modest letterspacing, maximum original title/header footprint; tiny compact hardware subtitle ONLY if it fits without moving anything. Retain Arhythmetic Units footer wordmark or emblem as in reference. Preserve existing colored waveform traces and state LED meanings. Dark theme must remove broad bright surfaces and maintain legible light text; do not simply invert colors. Light theme uses dark text. Physical controls remain the same original black trimpots, silver sockets, white large knob caps, switches and sliders. Limit decorative artwork to existing background planes and empty margins; no new ornament through labels or controls. Each module has its own hardware-inspired identity. High resolution, exact functional layout more important than visual flair. No extra text or marketing copy.\nNew title: \"SILICON S-SMP\". Optional compact subtitle \"SONY S-SMP\". Art direction: Passive Sony chip portrait, botanical PCB green and off-white/graphite. Preserve recognizable exact central chip illustration, legible chip lettering and original pin arrangement. Retain printed chip text unchanged, place new panel title in empty top margin. No new controls. Reference includes capture border: exclude border from panel.\nExact palette light background #E4EBDF, secondary #CBD8C3, ink #253626, accent #39794A; dark background #1D2B23, secondary #2E4335, ink #E9F3E4, accent #9AD49C.",
+    "concept": "concepts/Sony_S_SMP_Blank1.png",
+    "former_name": "S-SMP Blank",
+    "descriptor": "SONY S-SMP / CHIP PORTRAIT"
+  }
+]

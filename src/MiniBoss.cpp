@@ -363,12 +363,12 @@ struct MiniBossWidget : ModuleWidget {
     ///
     explicit MiniBossWidget(MiniBoss *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/MiniBoss.svg")));
+        setPanel(createThemedPanel(plugin_instance, "res/MiniBoss.svg"));
         // Panel Screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // ADSR
         for (unsigned i = 0; i < 6; i++) {
             const auto pos = Vec(7 + 33 * i, 41);
@@ -398,11 +398,11 @@ struct MiniBossWidget : ModuleWidget {
         // ports
         for (unsigned j = 0; j < 6; j++) {
             const auto x = 13 + j * 37;
-            addInput(createInput<PJ301MPort>(Vec(x, 288), module, MiniBoss::INPUT_AR + j));
+            addInput(createInput<ThemedPJ301MPort>(Vec(x, 288), module, MiniBoss::INPUT_AR + j));
             if (j >= 5) continue;
-            addInput(createInput<PJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
+            addInput(createInput<ThemedPJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
         }
-        addOutput(createOutput<PJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
     }
 
     /// @brief Append the context menu to the module when right clicked.

@@ -83,6 +83,8 @@ clean:
         shutil.copytree(self.root / 'sdk', self.root / 'sdk2')
         self.assertIn(' -c ', self.make('all', 'RACK_DIR=sdk2'))
         self.assertIn(' -c ', self.make('all', 'RACK_DIR=sdk2', 'LDFLAGS=-g'))
+        (self.root / 'sdk2/libRack.so').write_text('changed SDK library identity')
+        self.assertIn(' -c ', self.make('all', 'RACK_DIR=sdk2', 'LDFLAGS=-g'))
         self.make('clean', 'RACK_DIR=missing-sdk')
         self.assertFalse((self.root / self.plugin).exists())
 

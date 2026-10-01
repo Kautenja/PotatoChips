@@ -34,7 +34,7 @@ Local evidence:
 -   [ChipModule](../src/engine/chip_module.hpp) assumes a Blargg/BLIP interface.
     A new clocked FM core need not fit that base class. Keep its reusable
     adapter free of Rack types and use a focused host wrapper.
--   [Makefile](../Makefile) and [SConstruct](../SConstruct) need explicit
+-   [Makefile](../Makefile) and [standalone Make rules](../mk/standalone.mk) need explicit
     source integration for a vendored C core. Neither currently builds a
     YM2151 dependency or focused test suite.
 

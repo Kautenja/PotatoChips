@@ -2,3 +2,8 @@ dep/** linguist-vendored=true
 manual/** linguist-documentation=true
 patches/** linguist-detectable=false
 presets/** linguist-detectable=false
+
+# Preserve upstream license/dependency bytes across Windows checkouts.
+/LICENSE -text
+/docs/licenses/** -text
+/dep/catch2-v3/** -text

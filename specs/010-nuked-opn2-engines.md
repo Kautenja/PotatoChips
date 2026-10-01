@@ -37,7 +37,8 @@ Relevant local evidence:
     separately owns its retrigger defect. Changing engines does not resolve
     #82 or excuse a regression in the existing engine.
 -   [Makefile](../Makefile) discovers top-level module/DSP C++ sources;
-    [SConstruct](../SConstruct) discovers DSP C++ recursively. Neither
+    [standalone Make rules](../mk/standalone.mk) discover the existing DSP test
+    directories. Neither
     currently integrates the upstream C core. The shared `CLOCK_RATE` and
     existing operator tuning must not be assumed to be a hardware master
     clock suitable for this core.

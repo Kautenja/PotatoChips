@@ -1,7 +1,7 @@
 # Super Echo FIR Controls And Randomization
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Issues: [#96](https://github.com/Kautenja/PotatoChips/issues/96),
 [#97](https://github.com/Kautenja/PotatoChips/issues/97)
 Planning baseline: `937b72d4` (product source unchanged from `33fb1554`).
@@ -19,7 +19,7 @@ Both issues were open when read on October 1, 2026, including all comments:
 | #96: Super Echo FIR coefficient sliders not rendering | Reported against plugin v2.0.0 in March 2022; an August 2023 comment reports the same symptom in VCV Rack Free 2.4.0. The thread includes two screenshots. | All eight FIR sliders render and work in the real module and browser preview. |
 | #97: SuperEcho paramQuantities[...]->randomizeEnabled = false; | Requests that the common Ctrl-R randomization exclude BYPASS, ECHO MIX left/right, and INPUT GAIN left/right. No comments at planning time. | Exactly those five controls retain their values during module randomization; sound-shaping controls remain randomizable. |
 
-[SuperEchoWidget](../src/SuperEcho.cpp) currently adds each FIR input and
+[SuperEchoWidget](../../src/SuperEcho.cpp) currently adds each FIR input and
 attenuverter but comments out the `LEDLightSliderHorizontal` construction,
 snapping, and `addParam` calls. Commit
 [`33fb1554`](https://github.com/Kautenja/PotatoChips/commit/33fb15540617038fea42c79be38452cb32c03933)
@@ -58,15 +58,15 @@ horizontal slider helper and assets only if needed, focused Rack tests,
 `presets/SuperEcho/` and `patches/debug/SuperEcho.vcv` fixtures.
 
 This fix need not wait for the broad modernization work. Reuse
-[002](archive/002-build-tests-and-ci.md)'s harness and
-[005](archive/005-production-panel-captures-and-figures.md)'s native capture tooling
+[002](002-build-tests-and-ci.md)'s harness and
+[005](005-production-panel-captures-and-figures.md)'s native capture tooling
 if implemented. Otherwise add only a focused SDK-backed test/inspection
 target, documenting its prerequisites. If Rack-only tests are added under
 `test/rack/` before 002, exclude them from SConstruct's recursive standalone
 test discovery and keep the existing DSP suites working.
 
-[003](archive/003-source-organization-and-rack-integration.md) must preserve these
-fixes during header/theme changes; [004](archive/004-manual-content-and-publication-style.md)
+[003](003-source-organization-and-rack-integration.md) must preserve these
+fixes during header/theme changes; [004](004-manual-content-and-publication-style.md)
 owns the broader manual rewrite. This spec owns both issue dispositions.
 
 ## Requirements
@@ -186,7 +186,7 @@ its own recorded scope. A planning commit must not auto-close either issue.
 - [x] Super Echo's manual and changelog describe the restored controls and
       randomization policy. Any updated figure is generated/reviewed from
       the fixed widget; do not substitute a drawing for rendering evidence.
-- [ ] Fix commits are recorded, each issue receives its own resolution
+- [x] Fix commits are recorded, each issue receives its own resolution
       comment with an accessible fix commit reference, and each verified
       issue is closed as completed. Comment URLs and final states are saved.
 
@@ -341,12 +341,12 @@ Rack session. No audio device or installed plugin/user patch was modified.
 
 | View | Evidence |
 | --- | --- |
-| Before live / preview | [Live](assets/006/before-SuperEcho-Light.png), [preview](assets/006/before-SuperEcho-Preview-Light.png) |
-| Restored live | [Light](assets/006/after-SuperEcho-Light.png), [dark](assets/006/after-SuperEcho-Dark.png) |
-| Browser preview | [Light](assets/006/after-SuperEcho-Preview-Light.png), [dark](assets/006/after-SuperEcho-Preview-Dark.png) |
-| Bypass, LEDs off, endpoint/zero positions | [Light](assets/006/after-SuperEcho-Probe-Off-Light.png), [dim dark](assets/006/after-SuperEcho-Probe-Off-Dark-Dim.png) |
-| Actual positive/negative CV | [Light](assets/006/after-SuperEcho-Probe-CV-Light.png), [dim dark](assets/006/after-SuperEcho-Probe-CV-Dark-Dim.png) |
-| Provenance and geometry | [Before batch](assets/006/before.json), [after batch](assets/006/after-batch.json), [native report](assets/006/after-SuperEcho.json) |
+| Before live / preview | [Live](../assets/006/before-SuperEcho-Light.png), [preview](../assets/006/before-SuperEcho-Preview-Light.png) |
+| Restored live | [Light](../assets/006/after-SuperEcho-Light.png), [dark](../assets/006/after-SuperEcho-Dark.png) |
+| Browser preview | [Light](../assets/006/after-SuperEcho-Preview-Light.png), [dark](../assets/006/after-SuperEcho-Preview-Dark.png) |
+| Bypass, LEDs off, endpoint/zero positions | [Light](../assets/006/after-SuperEcho-Probe-Off-Light.png), [dim dark](../assets/006/after-SuperEcho-Probe-Off-Dark-Dim.png) |
+| Actual positive/negative CV | [Light](../assets/006/after-SuperEcho-Probe-CV-Light.png), [dim dark](../assets/006/after-SuperEcho-Probe-CV-Dark-Dim.png) |
+| Provenance and geometry | [Before batch](../assets/006/before.json), [after batch](../assets/006/after-batch.json), [native report](../assets/006/after-SuperEcho.json) |
 
 Full zoom/dim intermediate renders remain ignored under
 `tools/capture/.build/captures/`. Capture required desktop access outside the
@@ -358,11 +358,15 @@ Library publication is claimed.
 
 ### Issue Publication
 
-Implementation and local verification are complete. Fix SHA, resolution
-comments and read-back closure states will be recorded after the authorized
-commit and push; retain IN PROGRESS until both issues are closed.
+Completed on 2026-10-01. The implementation commit
+[`72eb6b956c87af6d35a9458b3c0a7441bea66101`](https://github.com/Kautenja/PotatoChips/commit/72eb6b956c87af6d35a9458b3c0a7441bea66101)
+was pushed to `origin/v2.0.2`; GitHub's commit API confirmed its canonical
+public reference before commenting. Each issue received its own resolution
+comment and was closed with reason `completed`. Read-back confirmed both
+states and the comment URLs below. This follow-up archives the verified spec;
+release publication remains separate.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #96 | Pending push | Native before/after, interaction and preview checks passed | Pending | Open |
-| #97 | Pending push | Headless engine and native UI randomization checks passed | Pending | Open |
+| #96 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Native before/after, interaction and preview checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/96#issuecomment-5939430980) | CLOSED / COMPLETED |
+| #97 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Headless engine and native UI randomization checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/97#issuecomment-5939431618) | CLOSED / COMPLETED |

@@ -267,6 +267,37 @@ The legacy rules still mask TeX failures and remove their diagnostic logs.
     generated dependency files. No GUI/listening or other-platform checks
     were run for this warning-only follow-up.
 
+### Travis Cleanup And Windows Checkout Fix (2026-10-01)
+
+Removed the obsolete GitHub repository webhook `232405552`, which still
+sent events to `https://notify.travis-ci.org`. A subsequent hooks query
+returned an empty list. The Travis configuration and badge were already
+removed; historical migration evidence remains here.
+
+The [failing platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36940237330)
+for `d965c615` passed Linux/macOS but failed Windows dependency validation
+with `ymfm checksum mismatch: ymfm_fm.ipp`. Git's CRLF checkout conversion
+changed the newly vendored OPM dependencies, which lacked Catch2's existing
+byte-preservation rule. Extend that rule to all of `dep/`; keep source bytes,
+checksum pins and strict validation unchanged.
+
+Added a disposable Git checkout regression to `scripts/test-build.py` using
+`core.autocrlf=true`. It reproduced the exact ymfm failure before the fix
+and passes afterward. Also removed the stale contributor claim that the
+previously fixed Windows PCM regression still fails.
+
+Validation on macOS ARM64:
+
+-   `make check-build`: all four fixtures pass, including the CRLF checkout.
+-   `python3 scripts/validate.py dependencies`: passes.
+-   `make -k -j2 test RACK_DIR=/nonexistent-sdk`: all 13 DSP suites pass,
+    totaling 3,268,679 assertions in 44 cases.
+-   `git diff --check`: passes.
+
+At local validation time, a hosted Windows build of this fix had not run;
+the local regression verifies the observed checkout failure, not subsequent
+Windows compilation, host tests or packaging.
+
 ### Remaining Verification And Handoffs
 
 003 supplies the committed three-byte PCM representation and boundary/byte

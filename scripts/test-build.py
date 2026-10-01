@@ -133,5 +133,26 @@ clean:
         validate('tag', 'v' + manifest['version'], True)
         validate('tag', 'v0.0.0', False)
 
+    def test_dependency_bytes_survive_windows_checkout(self):
+        source = self.root / 'checkout-source'
+        source.mkdir()
+        for name in ('.gitattributes', 'plugin.json'):
+            shutil.copy(ROOT / name, source)
+        for name in ('dep', 'docs/licenses', 'scripts'):
+            shutil.copytree(ROOT / name, source / name)
+        def git(*args):
+            subprocess.run(['git', *args], cwd=source, check=True,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        git('init', '--quiet')
+        git('-c', 'core.autocrlf=false', 'add', '.')
+        # Exercise Git's real Windows conversion, including dependency suffixes
+        # such as .ipp that are not covered by C/C++-only attribute patterns.
+        git('-c', 'core.autocrlf=true', 'checkout-index', '--all',
+            '--prefix=checkout/')
+        result = subprocess.run(['python3', 'scripts/validate.py', 'dependencies'],
+                                cwd=source / 'checkout', capture_output=True,
+                                text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
 if __name__ == '__main__':
     unittest.main()

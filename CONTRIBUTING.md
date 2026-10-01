@@ -173,9 +173,9 @@ and extracts a separately verified Rack Free runtime for headless tests.
 It puts that DLL after the compiler runtime on PATH. Normal jobs have only
 read permissions and upload workflow artifacts, never release assets.
 Tags must match the manifest (an optional leading `v` is accepted).
-The Windows PCM size regression currently fails (`int24_t` is 4 bytes,
-expected 3); spec 003 owns the production fix. CI keeps that failure visible
-while still running the other suites and retaining packages for inspection.
+Vendored dependency and license bytes are preserved across Windows checkouts;
+`make check-build` verifies the pins after Git's CRLF checkout conversion.
+CI keeps test failures visible while retaining packages for inspection.
 Workflow artifacts from a failing run are not validated releases.
 [Instrumentation CI](.github/workflows/instrumentation.yml) uses Clang/LLVM 18.
 

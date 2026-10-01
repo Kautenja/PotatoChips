@@ -6,6 +6,6 @@ presets/** linguist-detectable=false
 # Preserve upstream license/dependency bytes across Windows checkouts.
 /LICENSE -text
 /docs/licenses/** -text
-/dep/catch2-v3/** -text
+/dep/** -text
 # Preserve the exact pinned Nuked-OPM bytes, including upstream blank-line spaces.
 dep/Nuked-OPM/opm.[ch] whitespace=-blank-at-eol

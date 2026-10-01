@@ -1,10 +1,10 @@
 # Implementation Specifications
 
 The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Specs 006-008 address reported Super Echo,
-Super ADSR, and native theme issues. They describe planned work, not
-implemented behavior or release promises. All eight are `PLANNED` as of
-October 1, 2026.
+maintenance work to PotatoChips. Specs 006-009 address reported Super Echo,
+Super ADSR, native theme, and YM2612 looping-envelope issues. They describe
+planned work, not implemented behavior or release promises. All nine are
+`PLANNED` as of October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -18,6 +18,7 @@ October 1, 2026.
 | [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
 | [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
 | [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
+| [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -44,10 +45,16 @@ previews, and readable controls. It authorizes useful issue updates and
 closure with an implementation commit reference after verification. Planning
 alone does not resolve the issue.
 
+009 independently owns [#82](https://github.com/Kautenja/PotatoChips/issues/82):
+reproduce and correct intermittent YM2612 looping-envelope retriggers in
+Mini Boss and Boss Fight, including both soft-reset settings. It includes
+issue updates and closure with verified fixing commit references. Writing
+the spec does not resolve the issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code
 changes and general integration regressions, 004 owns manual build rules
-and prose, and 005 owns the capture tool and panel figures. Specs 006-008
+and prose, and 005 owns the capture tool and panel figures. Specs 006-009
 own their focused fixes/features, tests, and issue follow-through. Update
 cross-references when a producer changes an agreed path or command.
 
@@ -64,6 +71,10 @@ behavior, terminology, and captures in their broader work.
 003 applies branding consistently to both variants; 001 preserves artwork
 terms/provenance; 004 documents usage; 005 captures both themes. Theme work
 can start before those broad changes and does not introduce patch state.
+
+009 owns the YM2612 trigger/envelope corrections and regression evidence;
+003 preserves their behavior and 004 incorporates the verified operating
+guidance. It does not add the Mini Boss hard-sync feature declined in #94.
 
 ## Evidence And Baseline
 

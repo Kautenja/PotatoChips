@@ -465,15 +465,18 @@ not a complete GUI gesture tour. Audible audio-device listening remains
 unperformed; native Scope confirms synthesis, not listening. No full hardware
 capture or bit-exact reference claim is made.
 
-The issue was re-read and remains open. The tested implementation is to be
-committed locally; no push or release is authorized by this spec. Therefore
+The issue was re-read and remains open. The tested implementation is committed locally as
+`5f16481982de976480f0cc6e680da500898a6d15`; no push or release is authorized
+by this spec. Its canonical URL after publication will be
+https://github.com/Kautenja/PotatoChips/commit/5f16481982de976480f0cc6e680da500898a6d15
+(currently a local commit, not claimed accessible). Therefore
 public fixing-commit links, the final resolution comment and issue closure
 remain pending. Do not mark COMPLETE or archive until these remaining
 acceptance items are satisfied.
 
 | Issue | Implementation Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #79 | Local implementation commit pending | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening pending | Progress update pending; closure pending publication | Open, re-read 2026-10-01 |
+| #79 | `5f16481982de976480f0cc6e680da500898a6d15` (local, not pushed) | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening pending | [Progress update](https://github.com/Kautenja/PotatoChips/issues/79#issuecomment-5942112372); resolution pending publication | OPEN, read back 2026-10-01 |
 
 [nuked-commit]: https://github.com/nukeykt/Nuked-OPM/commit/f209e6ed3712032b641d53ce8fb24824eae6adc3
 [nuked-header]: https://github.com/nukeykt/Nuked-OPM/blob/f209e6ed3712032b641d53ce8fb24824eae6adc3/opm.h

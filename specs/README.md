@@ -31,6 +31,11 @@ Spec 013 is PLANNED for Operator 2151: a compact polyphonic OPM operator
 with external audio-rate PM, native feedback, detune, envelopes and LFO.
 Its prototype must establish modulation quality, chain latency and CPU cost.
 
+Specs 014-017 are PLANNED for YMF262 (OPL3), YM2414 (OPZ), YM2413 (OPLL)
+and YMF271 (OPX). Each owns a chip-faithful voice and a single-operator
+module with external PM. They specify eight new modules, not an implemented
+inventory change. OPX includes an explicit research gate for PCM/FM behavior.
+
 ## Work Areas And Ownership
 
 | Spec | Focus | Primary Files | Dependencies |
@@ -48,6 +53,10 @@ Its prototype must establish modulation quality, chain latency and CPU cost.
 | [011](archive/011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Complete; archived by user decision with validation limitations retained. Implementation published and #79 closed. |
 | [012](archive/012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Complete; archived. All names, 32 panels, 14 manuals and reusable artwork sources integrated. |
 | [013](013-ym2151-operator.md) | Compact Operator 2151 with external audio-rate PM | OPM operator adapter, module/panels, presets, manual, reference/chain/performance tests | Planned; reuse 011's pinned core and 012's presentation, preserve existing voices, prototype PM and latency first. |
+| [014](014-ymf262-voice-and-operator.md) | Voice 262 and Operator 262: OPL3 melodic/rhythm modes and modular PM | OPL3 core/adapter, two modules, panels/manuals, native/rhythm/PM tests | Planned; share OPL import with 016, retain native pairing/output buses, prototype against independent reference. |
+| [015](015-ym2414-voice-and-operator.md) | Voice 2414 and Operator 2414: OPZ waveforms, ratio/fixed frequency and modular PM | OPZ core/adapter, two modules, panels/manuals, native/frequency/PM tests | Planned; resolve extended chip controls and multiplexed writes, preserve the existing OPM core contract. |
+| [016](016-ym2413-voice-and-operator.md) | Voice 2413 and Operator 2413: OPLL presets/custom instrument, rhythm and modular PM | OPLL core/bank, two modules, panels/manuals, role/rhythm/PM tests | Planned; share OPL import with 014, verify instrument provenance and native operator-role behavior. |
+| [017](017-ymf271-voice-and-operator.md) | Voice 271 and Operator 271: OPX group modes, FM/PCM and modular PM | OPX core/adapter, sample assets/storage, two modules, panels/manuals, hybrid/PM tests | Planned; research waveform/PFM/loop gaps and prove C++11, fidelity, sample lifecycle and performance before UI work. |
 
 The archived specs establish the inventory, executable baseline, source
 organization, manual system, and capture tooling for subsequent work.
@@ -92,6 +101,15 @@ closed as completed.
 core selection while independently validating external PM, isolated operator
 clocking, and multi-module latency/performance. It does not reopen #79 or
 change the existing Operator 2612 contract.
+
+014-017 each own two new module identities and all chip-specific acceptance
+and completion evidence. Reuse 013's external PM calibration while verifying
+each core's native timing and feedback independently. 014 and 016 coordinate
+one OPL-family dependency import; 015 extends OPZ only after checking the
+pinned core; 017 selects its own OPX implementation after its research gate.
+All four extend the established build, theme, manual and capture inventories
+when implemented. Do not count planned modules as shipped or overwrite the
+existing 2151/2612 audio and patch contracts.
 
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code
@@ -167,10 +185,11 @@ JSON, and preset compatibility.
 
 This plan includes the siblings' Arhythmetic Units presentation and native
 Rack theme conventions, while retaining Potato Chips' stable module identifiers.
-Beyond 010's optional YM2612/YM3438 engines, 011's YM2151 voice and 013's
-YM2151 operator, it does not schedule other new chips, enable unfinished
-modules, import NES mapper/ROM work, create an FFT research/benchmark program
-or whitepaper, or select a release version.
+Beyond 010's optional YM2612/YM3438 engines, 011's YM2151 voice, 013's
+YM2151 operator and 014-017's four Yamaha voice/operator pairs, it does not
+schedule other new chips, enable removed modules, import NES mapper/ROM
+work, create an FFT research/benchmark program or whitepaper, or select a
+release version.
 Historical `TBD` changelog entries are not automatically accepted feature
 requirements.
 

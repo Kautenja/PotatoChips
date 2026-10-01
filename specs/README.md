@@ -129,10 +129,10 @@ can lag their code: for example, Fourier's Catch2 README still mentions
 SCons although its active build is Make-based. Verify the implementation
 before transferring an instruction.
 
-The current manifest has 17 entries: 14 active sound modules with manuals,
-two active blank panels, and a disabled SuperSynth entry with no corresponding
-manual source. SuperSampler was removed on 2026-10-01; its underlying DSP
-and tests remain. Earlier model counts in completion evidence are historical.
+The current manifest has 16 entries: 14 active sound modules with manuals
+and two active blank panels. SuperSampler and SuperSynth were removed on
+2026-10-01; their underlying DSP and tests remain. Earlier model counts in
+completion evidence are historical.
 Keep those categories distinct in docs, capture coverage, and release checks.
 Preserve the existing plugin slug, remaining module slugs, Rack IDs, patch
 JSON, and preset compatibility.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+-   Remove the disabled experimental SuperSynth module, its panel, and its
+    debug patch. Preserve the underlying Sony S-DSP implementation and tests.
+    Experimental patches containing SuperSynth can no longer load that module.
+
 -   Remove the disabled SuperSampler prototype, its panel and example patches,
     and its instance from the combined demo patch. Preserve the underlying
     Sony S-DSP/BRR code and tests. Experimental patches using SuperSampler

@@ -27,8 +27,8 @@ implementation, not a requirement to use runtime inversion.
     [wavetable editors](../src/widget/wavetable_editor.hpp) have explicit
     colors and drawing layers. Recoloring only the panel cannot establish
     that the whole module is readable.
--   The [manifest](../plugin.json) contains 16 enabled entries and two
-    disabled entries. It currently has no `minRackVersion`.
+-   The [manifest](../plugin.json) contains 16 enabled entries after removal
+    of both disabled prototypes. It currently has no `minRackVersion`.
 -   Rack's [dark-panel API guide](https://vcvrack.com/manual/PluginGuide)
     documents native support since Rack 2.4. The inspected local headers
     expose `settings::preferDarkPanels`, two-path `createPanel()`,
@@ -90,9 +90,8 @@ manifest slugs. All panels are 380 Rack pixels tall.
 | `SN76489` | `MegaTone.svg` | 150 |
 | `VRC6` | `StepSaw.svg` | 120 |
 
-Disabled `SuperSynth` remains disabled. Keep its code building if shared
-helpers change, but do not require new public assets or enable it for this
-issue. Unused SVGs are not released modules.
+SuperSampler and SuperSynth were removed on 2026-10-01 and require no theme
+assets. Their underlying DSP remains outside this UI work.
 
 ## Requirements
 

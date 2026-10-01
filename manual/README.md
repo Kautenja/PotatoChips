@@ -3,7 +3,7 @@
 The 14 sound-module manuals share typography and build rules while keeping
 module-specific operating instructions in `manual/<Module>/sections/`.
 `manual.tex` declares the manifest name, explicit version and section order.
-The two blank panels and disabled SuperSynth have no manuals.
+The two blank panels have no manuals.
 
 ## Build And Check
 

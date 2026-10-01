@@ -39,7 +39,6 @@ extern rack::Model *modelPalletTownWavesSystem;
 extern rack::Model *modelMegaTone;
 extern rack::Model *modelBossFight;
 extern rack::Model *modelMiniBoss;
-extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperVCA;

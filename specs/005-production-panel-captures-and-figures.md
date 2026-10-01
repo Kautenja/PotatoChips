@@ -58,8 +58,7 @@ release filename, rather than assuming they are identical:
 | `VRC6` | `StepSaw` |
 
 The two enabled blanks (`2612_Blank1`, `Sony_S_SMP_Blank1`) need graphical
-smoke coverage but no invented manual. Disabled `SuperSynth` is not a required
-publication asset and remains disabled.
+smoke coverage but no invented manual.
 
 ## Requirements
 

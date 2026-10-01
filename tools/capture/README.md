@@ -31,7 +31,7 @@ capture, validates the entire requested batch and updates `img/Panel.png`.
 `drawings` exports production control bounds through shared TikZ primitives,
 using the reviewed groups in `regions.json`. Select a manual directory name
 with `MODULE`; blank smoke captures accept their manifest slug. Neither
-blank has a publication PNG. Disabled Super Synth is excluded.
+blank has a publication PNG.
 The [inventory](modules.json) explicitly maps all 16 enabled slugs, panel
 files, widths and 14 manual directories; changes in that inventory require
 review. No sibling checkout is a build dependency.

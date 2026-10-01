@@ -35,7 +35,6 @@ void init(Plugin* instance) {
     instance->addModel(modelMegaTone);
     instance->addModel(modelBossFight);
     instance->addModel(modelMiniBoss);
-    instance->addModel(modelSuperSynth);
     instance->addModel(modelSuperEcho);
     instance->addModel(modelSuperADSR);
     instance->addModel(modelSuperVCA);

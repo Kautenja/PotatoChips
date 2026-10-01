@@ -166,20 +166,6 @@
       ]
     },
     {
-      "slug": "SuperSynth",
-      "name": "Super Synth",
-      "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSynth.pdf",
-      "tags": [
-        "Multiple",
-        "Noise",
-        "Oscillator",
-        "Polyphonic",
-        "Synth voice"
-      ],
-      "disabled": true
-    },
-    {
       "slug": "SN76489",
       "name": "Mega Tone",
       "description": "An emulation of the Texas Instruments SN76489 chip from the Sega Master System, Sega Mega Drive, and Sega Genesis.",

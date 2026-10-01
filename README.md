@@ -95,8 +95,7 @@ They also appear on the manual covers.
 <img src="manual/StepSaw/img/Panel.png" height="190" alt="Step Saw panel">
 
 The **Boss Fight Envelope Generator (Blank)** illustrates an envelope;
-the **S-SMP Blank** illustrates the chip. Both are passive panels. Disabled
-experimental entries are not available modules or promised releases.
+the **S-SMP Blank** illustrates the chip. Both are passive panels.
 
 ## Patch Ideas
 

@@ -61,10 +61,9 @@ The current upstream file records LGPL-2.1-or-later; include LGPL-2.1.txt
 without replacing the local GPL notices. Exact imported upstream revision
 and the complete chain from OpenSPC are not recorded.
 common.hpp contains first-party shared definitions under its own GPL notice.
-ADSR, echo, and interpolation are used by enabled modules. The processor
-also supports disabled SuperSynth; its disabled manifest entry does not
-establish that its compiled code is absent. The standalone BRR sample player
-and its tests are retained after removal of the SuperSampler Rack module.
+ADSR, echo, and interpolation are used by enabled modules. The full processor
+and standalone BRR sample player remain as reusable DSP source with tests
+after removal of the SuperSynth and SuperSampler Rack modules.
 
 MAME-derived Yamaha YM2612
 -------------------------
@@ -122,7 +121,7 @@ Manual assets are source/publication material, not part of the plugin archive.
 
 Arhythmetic Units runtime footer artwork
   Files: res/ArhythmeticUnits.svg and inline ArhythmeticUnits groups in the
-  18 registered-model panel SVGs (including blanks and disabled modules).
+  16 registered-model panel SVGs (including blanks).
   Copyright 2025-2026 Arhythmetic Units. License: CC-BY-NC-ND-4.0.
   Copied from RackNES res/ArhythmeticUnits.svg; its outlines originate in
   Fourier src/rack_extensions/panel_artwork.hpp at revision

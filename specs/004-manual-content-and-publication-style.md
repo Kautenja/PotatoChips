@@ -21,8 +21,7 @@ improvements without relocating the whole documentation tree.
     "Super VCA", and its delay discussion includes 31 sixteen-millisecond
     levels and a 512 ms maximum. Resolve the timing from actual buffer/rate
     behavior instead of repeating either claim without verification.
--   The manifest's disabled SuperSynth entry points to a PDF with no manual
-    source. Two enabled blank panels have no manual URL.
+-   Two enabled blank panels have no manual URL.
 
 References: RackNES's [manual rewrite/build migration](https://github.com/Kautenja/RackNES/commit/d25ece1),
 current `manual/README.md`, `manual/latex/arhythmetic-manual.sty`, and

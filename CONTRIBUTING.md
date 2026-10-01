@@ -60,8 +60,8 @@ Do not renumber existing Rack parameter, port, or light IDs, rename module
 slugs, or change saved JSON meanings without an intentional compatibility
 plan and verification with existing patches. Display names and slugs can
 differ: preserve historical identifiers such as `106`, `2612`, and `2A03`.
-SuperSynth is marked disabled in `plugin.json`; its source and registration
-do not imply it is a released module.
+The experimental SuperSampler and SuperSynth modules have been removed;
+their underlying Sony S-DSP code and tests remain.
 
 ## Correctness And Real-Time Behavior
 
@@ -125,7 +125,7 @@ python3 scripts/validate.py dependencies
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.
-`make all test-rack` requires the SDK. Its four headless suites cover all 17
+`make all test-rack` requires the SDK. Its four headless suites cover all 16
 registered models, parameter/default/custom-JSON contracts, existing presets
 and project modules in debug patches, representative audio, common chip
 processing, and editor/display ownership. Fixture provenance and tolerances

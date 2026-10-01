@@ -1,7 +1,7 @@
 # Super ADSR Release Behavior
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Issue: [#98](https://github.com/Kautenja/PotatoChips/issues/98)
 Planning baseline: `4d162a02` (product source unchanged from `33fb1554`).
 
@@ -23,14 +23,14 @@ or prove that the release stage is absent.
 
 The current sources expose several distinctions that the fix must preserve:
 
--   [SuperADSR.cpp](../src/SuperADSR.cpp) configures the fifth slider as
+-   [SuperADSR.cpp](../../src/SuperADSR.cpp) configures the fifth slider as
     "Sustain Rate", with range 0-31 and default 20. It sends `31 - value`
     to `setSustainRate()`. There is no adjustable release parameter.
--   [ADSR::run()](../src/dsp/sony_s_dsp/adsr.hpp) enters `Release` when the
+-   [ADSR::run()](../../src/dsp/sony_s_dsp/adsr.hpp) enters `Release` when the
     gate is low, unless a trigger takes priority or the envelope is already
     off. Release subtracts 8 from the internal envelope each call and clamps
     to zero in `Off`; it does not consult the sustain-rate setting.
--   The DSP comments and [shared constants](../src/dsp/sony_s_dsp/common.hpp)
+-   The DSP comments and [shared constants](../../src/dsp/sony_s_dsp/common.hpp)
     describe a 32 kHz chip clock. The module currently calls `run()` once
     per Rack sample. Thus the maximum 256-call release corresponds to 8 ms
     at 32 kHz, about 5.33 ms at 48 kHz, and about 2.67 ms at 96 kHz. These
@@ -39,12 +39,12 @@ The current sources expose several distinctions that the fix must preserve:
 -   The legacy manual called the fifth slider "Release Rate (RR)" while
     describing decay during a held gate and a very short, uncontrollable
     key-off release. The 004 rewrite now calls it sustain rate and explains
-    the fixed release in [the manual](../manual/SuperADSR/manual.tex).
+    the fixed release in [the manual](../../manual/SuperADSR/manual.tex).
     Panel terminology and verified runtime fixes remain owned by this spec.
 -   Gate detection uses hysteresis: high at 2 V, low at 0.01 V, with the
     previous state retained between thresholds. RETRIG is a separate rising
     event; its priority over gate-off needs explicit regression coverage.
--   [The current ADSR test](../test/dsp/sony_s_dsp/test_adsr.cpp) checks only
+-   [The current ADSR test](../../test/dsp/sony_s_dsp/test_adsr.cpp) checks only
     the eight-byte object size. It does not verify envelope transitions or
     release. Historical commit
     [`535cd150`](https://github.com/Kautenja/PotatoChips/commit/535cd150281d7c28b08a0b8e8b3ee9064bb4c2ea)
@@ -65,12 +65,12 @@ Own the issue-specific changes in `src/SuperADSR.cpp`,
 its affected figures, and an unreleased changelog entry.
 
 This work can precede the modernization specs. Reuse
-[002](archive/002-build-tests-and-ci.md)'s harness when available; otherwise keep
+[002](002-build-tests-and-ci.md)'s harness when available; otherwise keep
 the current SCons tests working and add only the necessary Rack fixture.
 Exclude SDK-dependent fixtures from SConstruct's standalone test discovery.
-[003](archive/003-source-organization-and-rack-integration.md) must preserve the
-fix; [004](archive/004-manual-content-and-publication-style.md) carries the verified
-wording into its rewrite; [005](archive/005-production-panel-captures-and-figures.md)
+[003](003-source-organization-and-rack-integration.md) must preserve the
+fix; [004](004-manual-content-and-publication-style.md) carries the verified
+wording into its rewrite; [005](005-production-panel-captures-and-figures.md)
 can supply refreshed production captures. This spec owns #98's resolution.
 
 ## Requirements
@@ -190,7 +190,7 @@ publication. A spec-only commit must not auto-close #98.
       release; affected figures and changelog agree with verified behavior.
 - [x] Relevant automated tests and the plugin build pass; native Rack
       verification is complete with no unresolved symptom from #98.
-- [ ] #98 has a resolution comment with the actual fixing commit reference
+- [x] #98 has a resolution comment with the actual fixing commit reference
       and verification results, is closed as completed, and its comment URL
       and final state are recorded below.
 
@@ -244,7 +244,7 @@ resolution; avoid repetitive progress comments. Planning alone is not a fix.
     URL, fixing commit, results, date, and any availability limits here.
     Remote failures leave the corresponding acceptance item outstanding.
 5.  Mark this spec `COMPLETE` and archive it according to
-    [AGENTS.md](../AGENTS.md#planning-and-completion) only when all criteria,
+    [AGENTS.md](../../AGENTS.md#planning-and-completion) only when all criteria,
     including issue follow-through, are satisfied.
 
 For an authenticated GitHub CLI, prepare the factual comment body first.
@@ -265,7 +265,7 @@ Rack 2.6.0 and Fundamental 2.6.1. Native captures use the actual Rack library,
 module widget and Fundamental Scope binary in a standalone desktop harness.
 No audio device or user's running Rack session is needed. Binary/source hashes,
 exact settings and acquisition details are in
-[provenance.json](assets/007/provenance.json).
+[provenance.json](../assets/007/provenance.json).
 
 ### Findings And Clock Decision
 
@@ -283,7 +283,7 @@ unspecified historical settings or version.
 The explicit integration decision is a 32 kHz clock for **all stages**.
 For the same register settings, durations change by host-rate/32000:
 1.378125x at 44.1 kHz, 1.5x at 48 kHz and 3x at 96 kHz. Existing patches may
-need retuning. [stage-ticks.csv](assets/007/stage-ticks.csv) compares the same
+need retuning. [stage-ticks.csv](../assets/007/stage-ticks.csv) compares the same
 core event sequence (default settings, gate high for 22400 ticks) under
 both clocks. Attack/decay/sustain/release/Off transitions all follow this
 ratio. This comparison holds tick events fixed; the module regressions
@@ -316,11 +316,11 @@ Times measure key-off through first quantized zero; the core reaches Off
 within 8 ms. SR 31 gives the same tail from the same level. SR 0 decays
 while held, so its lower key-off level produces a shorter tail (about
 6.97 ms after correction). Complete nine-case
-[before](assets/007/before-measurements.csv) and
-[after](assets/007/after-measurements.csv) tables, raw 48 kHz waveforms and
-native PNGs are retained in [assets/007](assets/007/).
-The [48 kHz before](assets/007/before-scope-48000-sr20.png) and
-[after](assets/007/after-scope-48000-sr20.png) views make the timing change
+[before](../assets/007/before-measurements.csv) and
+[after](../assets/007/after-measurements.csv) tables, raw 48 kHz waveforms and
+native PNGs are retained in [assets/007](../assets/007/).
+The [48 kHz before](../assets/007/before-scope-48000-sr20.png) and
+[after](../assets/007/after-scope-48000-sr20.png) views make the timing change
 visible; all saved rate/SR variants were inspected.
 
 The device-free debug patch now uses Fundamental LFO at 50 Hz/5% duty,
@@ -370,4 +370,8 @@ remains. A pushed source fix does not imply VCV Library publication.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #98 | Pending commit/push | Core, module, sanitizer, native Scope and manual checks passed | Pending | Open pending upstream fixing reference |
+| #98 | [`fb850a118444d7bdca40c659a15a16f59e5171a2`](https://github.com/Kautenja/PotatoChips/commit/fb850a118444d7bdca40c659a15a16f59e5171a2) | Core, module, sanitizer, native Scope and manual checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/98#issuecomment-5939853629) | CLOSED / COMPLETED; read back 2026-10-01 |
+
+The fixing commit was pushed to `v2.0.2` and verified accessible through the
+GitHub API before the resolution comment and closure. No new reports were
+present on the final issue reread. All acceptance criteria are complete.

@@ -62,7 +62,7 @@ from SConstruct's standalone DSP discovery. Coordinate provenance with
 [001](001-licensing-and-project-documentation.md), wording with
 [004](004-manual-content-and-publication-style.md), restored Super Echo
 controls with [006](006-super-echo-controls-and-randomization.md), and Super
-ADSR labels with [007](../007-super-adsr-release.md). Do not duplicate those
+ADSR labels with [007](007-super-adsr-release.md). Do not duplicate those
 specs' implementation or completion evidence.
 
 ## Required Inventory

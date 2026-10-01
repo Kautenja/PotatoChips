@@ -15,8 +15,10 @@ artwork and validation evidence.
 
 Spec 006 is COMPLETE and archived: Echo FIR sliders are restored, level and
 bypass controls survive randomization, and issues #96/#97 are closed.
-Specs 007/009-011 remain PLANNED: Contour fixes, YM2612 looping
-envelopes and optional Nuked-OPN2 engines, and a YM2151 module. Specifications
+Spec 007 is COMPLETE and archived: Contour uses the 32 kHz envelope clock,
+releases and rearms reliably, labels sustain rate SR, and closes #98.
+Specs 009-011 remain PLANNED: YM2612 looping envelopes and optional
+Nuked-OPN2 engines, and a YM2151 module. Specifications
 and source completion are not release promises; see each record for scope,
 platform validation and publication limits.
 
@@ -30,7 +32,7 @@ platform validation and publication limits.
 | [004](archive/004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Complete; archived. Manual conventions for later changes. |
 | [005](archive/005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Complete; archived. Theme-specific capture updates remain with 008. |
 | [006](archive/006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Complete; archived. Native Rack rendering, interaction, randomization and audio compatibility verified. |
-| [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
+| [007](archive/007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Complete; archived. Core/module regressions, native Scope, panel/manual and #98 verified. |
 | [008](archive/008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Complete; archived. Native preference and #95 verified on Rack 2.4/2.6. |
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
@@ -47,11 +49,10 @@ resolution comments with fix commit references and closure after verification.
 Both issues are closed as completed; the archived spec records the fix and
 resolution comments.
 
-007 independently owns [#98](https://github.com/Kautenja/PotatoChips/issues/98):
-reproduce the reported gate-off behavior, correct demonstrated release
-defects, and align sustain-rate terminology. It includes meaningful issue
-updates and closure with a fixing commit reference after verification.
-Writing or committing the spec does not resolve the issue.
+007 completed the Contour gate-off fixes and sustain-rate terminology.
+It owns [#98](https://github.com/Kautenja/PotatoChips/issues/98), now closed
+as completed; its archived record includes native measurements, the timing
+compatibility change, the fixing commit and the resolution comment.
 
 008 independently owns [#95](https://github.com/Kautenja/PotatoChips/issues/95):
 native global light/dark support, including both blanks, live switching,

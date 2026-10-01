@@ -26,7 +26,7 @@ support polyphonic Rack signals and expose chip controls as knobs and CV.
 The Library may still show **KautenjaDSP Potato Chips**. The saved plugin
 identifier remains `KautenjaDSP-PotatoChips`, so the brand change does not
 rename existing patches. Library builds, GitHub releases, and this checkout
-can be at different versions. The current source manifest is `2.0.1`;
+can be at different versions. The current source manifest is `2.1.0`;
 changes under development are recorded in the [changelog](CHANGELOG.md).
 
 For a manually downloaded build, follow Rack's

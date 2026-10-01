@@ -38,7 +38,7 @@ CATCH_TEST_CASE("Registered models preserve saved-patch and audio contracts") {
     context.engine = new rack::engine::Engine;
     rack::Plugin plugin;
     plugin.slug = "KautenjaDSP-PotatoChips";
-    plugin.version = "2.0.1";
+    plugin.version = "2.1.0";
     init(&plugin);
     rack::plugin::plugins.push_back(&plugin);
     CATCH_REQUIRE(plugin.models.size() == 16);

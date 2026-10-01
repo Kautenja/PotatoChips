@@ -1,10 +1,11 @@
 # Implementation Specifications
 
 The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Specs 006-010 address reported Super Echo,
+maintenance work to PotatoChips. Specs 006-011 address reported Super Echo,
 Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
-engine work. They describe planned work, not implemented behavior or release
-promises. All ten are `PLANNED` as of October 1, 2026.
+engine work, plus the requested YM2151 module. They describe planned work,
+not implemented behavior or release promises. All eleven are `PLANNED` as
+of October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -20,6 +21,7 @@ promises. All ten are `PLANNED` as of October 1, 2026.
 | [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
+| [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -58,10 +60,16 @@ includes control-mapping and performance validation, useful issue updates,
 and closure with accessible implementation commit references after verified
 resolution. Writing the spec does not resolve the issue.
 
+011 owns [#79](https://github.com/Kautenja/PotatoChips/issues/79): a new
+YM2151 four-operator polyphonic synth voice with chip-specific modulation,
+detune, and noise. It includes core selection, performance/reference tests,
+complete module presentation, useful issue updates, and closure with verified
+implementation commit references. Planning alone does not resolve the issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code
 changes and general integration regressions, 004 owns manual build rules
-and prose, and 005 owns the capture tool and panel figures. Specs 006-010
+and prose, and 005 owns the capture tool and panel figures. Specs 006-011
 own their focused fixes/features, tests, and issue follow-through. Update
 cross-references when a producer changes an agreed path or command.
 
@@ -87,6 +95,11 @@ guidance. It does not add the Mini Boss hard-sync feature declined in #94.
 Preserve the legacy rendering baseline and reuse 009's event/loop evidence
 for the new modes. Coordinate changes to the shared module/DSP files rather
 than treating engine replacement as proof that #82 is resolved.
+
+011 owns the new YM2151 module and its artifacts. Extend 005's capture and
+008's theme inventories when it is registered, along with 001/002/004's
+public metadata, packaging, and manual coverage. Baseline module counts
+remain historical evidence rather than a fixed limit on future inventory.
 
 ## Evidence And Baseline
 
@@ -116,9 +129,10 @@ all module slugs, Rack IDs, patch JSON, and preset compatibility.
 
 This plan includes the siblings' Arhythmetic Units presentation and native
 Rack theme conventions, while retaining Potato Chips' module identities.
-Beyond 010's optional YM2612/YM3438 engines, it does not schedule new chips,
-enable unfinished modules, import NES mapper/ROM work, create an FFT
-research/benchmark program or whitepaper, or select a release version.
+Beyond 010's optional YM2612/YM3438 engines and 011's YM2151 module, it does
+not schedule other new chips, enable unfinished modules, import NES
+mapper/ROM work, create an FFT research/benchmark program or whitepaper,
+or select a release version.
 Historical `TBD` changelog entries are not automatically accepted feature
 requirements.
 

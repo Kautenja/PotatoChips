@@ -74,26 +74,6 @@ lag the checkout; editable sources are in [manual/](manual/).
 | Super Echo | Sony S-DSP | Stereo echo with an eight-tap FIR filter | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf) |
 | Super VCA | Sony S-DSP | Two Gaussian interpolation filters/VCAs | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf) |
 
-### Panel Gallery
-
-These production-widget captures show this checkout's default module states.
-They also appear on the manual covers.
-
-<img src="manual/Blocks/img/Panel.png" height="190" alt="Blocks panel">
-<img src="manual/MiniBoss/img/Panel.png" height="190" alt="Mini Boss panel">
-<img src="manual/NameCorpOctalWaveGenerator/img/Panel.png" height="190" alt="Name Corp Octal Wave Generator panel">
-<img src="manual/BossFight/img/Panel.png" height="190" alt="Boss Fight panel">
-<img src="manual/InfiniteStairs/img/Panel.png" height="190" alt="Infinite Stairs panel">
-<img src="manual/Jairasullator/img/Panel.png" height="190" alt="Jairasullator panel">
-<img src="manual/Pulses/img/Panel.png" height="190" alt="Pulses panel">
-<img src="manual/PalletTownWavesSystem/img/Panel.png" height="190" alt="Pallet Town Waves System panel">
-<img src="manual/PotKeys/img/Panel.png" height="190" alt="Pot Keys panel">
-<img src="manual/SuperADSR/img/Panel.png" height="190" alt="Super ADSR panel">
-<img src="manual/SuperEcho/img/Panel.png" height="190" alt="Super Echo panel">
-<img src="manual/SuperVCA/img/Panel.png" height="190" alt="Super VCA panel">
-<img src="manual/MegaTone/img/Panel.png" height="190" alt="Mega Tone panel">
-<img src="manual/StepSaw/img/Panel.png" height="190" alt="Step Saw panel">
-
 The **Boss Fight Envelope Generator (Blank)** illustrates an envelope;
 the **S-SMP Blank** illustrates the chip. Both are passive panels.
 

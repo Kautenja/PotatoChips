@@ -298,6 +298,16 @@ At local validation time, a hosted Windows build of this fix had not run;
 the local regression verifies the observed checkout failure, not subsequent
 Windows compilation, host tests or packaging.
 
+### Windows Build Fixture Dependency (2026-10-01)
+
+The [follow-up platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36942974718)
+for `e0954d39` passed dependency validation, Linux and macOS. Windows then
+failed the checkout regression because `git` was absent from the isolated
+MSYS2 environment. Add Git to that environment's explicit package list so
+the regression can exercise checkout conversion on Windows as intended.
+
+Hosted verification of this follow-up is pending.
+
 ### Remaining Verification And Handoffs
 
 003 supplies the committed three-byte PCM representation and boundary/byte

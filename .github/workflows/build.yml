@@ -76,6 +76,7 @@ jobs:
           msystem: MINGW64
           install: >-
             mingw-w64-x86_64-gcc
+            git
             jq
             make
             curl

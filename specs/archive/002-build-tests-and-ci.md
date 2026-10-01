@@ -1,14 +1,14 @@
 # Build, Tests, And Continuous Integration
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 
 Replace the legacy build/test split and Travis configuration with a small,
 reproducible Make and GitHub Actions workflow suited to this plugin.
 
 ## Evidence And Current Gaps
 
--   The root [Makefile](../Makefile) delegates to Rack's `plugin.mk`;
+-   The root [Makefile](../../Makefile) delegates to Rack's `plugin.mk`;
     the former `SConstruct` separately builds 12 DSP test executables,
     names the compiler `g++`, uses `-march=native`, and contains benchmark
     and shared-library scaffolding without corresponding current sources.
@@ -139,6 +139,19 @@ Use a disposable PDF fixture to prove TeX failure, missing manual, and
 version mismatch fail without publishing anything. Record artifact contents.
 
 ## Completion Evidence
+
+### Completion And Archive Decision
+
+2026-10-01: the user confirmed specs 001-005 are complete and requested
+archiving. Marked this spec COMPLETE and moved it to `specs/archive/`.
+This decision supersedes the earlier pending-status and acceptance notes
+below. Historical checkboxes, test results, and limitations are retained;
+no additional runtime, listening, CI, or publication checks are claimed.
+Work explicitly owned by specs 006-012 remains with those specs.
+
+Archive validation: checked relative links and heading anchors across the
+specs and manual guide, confirmed all five archived statuses and updated
+references, and ran `git diff --check`; all passed.
 
 Implemented October 1, 2026. Status remains `IN PROGRESS` because manual
 publication depends on 004's reliable PDF rules. The Windows PCM defect

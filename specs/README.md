@@ -1,31 +1,25 @@
 # Implementation Specifications
 
-The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Specs 006-011 address reported Super Echo,
-Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
-engine work, plus the requested YM2151 module. They describe planned work,
-not release promises. As of October 1, 2026, 001 still needs interactive
-onboarding/audio verification (`IN PROGRESS`). Spec 002's three-platform
-build/test/package and instrumentation workflows pass; manual validation and
-publication integration remain dependent on 004 (`IN PROGRESS`). Spec 003 is
-committed and passes cross-platform checks; native rendering and module-history
-checks pass, but pointer-driven waveform editing and listening remain unverified
-(`IN PROGRESS`). Spec 004's manuals and final figures are implemented;
-recipe/listening checks remain (`IN PROGRESS`). Spec 005's captures, vector
-guides and publication integration pass; actual dark-panel review waits on
-008 (`IN PROGRESS`). Specs 006-012 remain `PLANNED`. Spec 012 covers the
-module display-name rebrand and shared SVG title typography. See each spec
-for evidence.
+Specs 001-005 are COMPLETE and archived in [archive/](archive/) as of
+October 1, 2026, following the user's confirmation. They cover licensing,
+project documentation, build/test infrastructure, source organization,
+manuals, and production captures. Their completion records preserve prior
+validation evidence and limitations.
+
+Specs 006-012 remain PLANNED. They cover Super Echo and Super ADSR fixes,
+native themes, YM2612 looping envelopes and optional Nuked-OPN2 engines,
+a YM2151 module, and module display-name rebranding with shared SVG titles.
+These plans are not release promises. See each spec for scope and evidence.
 
 ## Work Areas And Ownership
 
 | Spec | Focus | Primary Files | Dependencies |
 | --- | --- | --- | --- |
-| [001](001-licensing-and-project-documentation.md) | Licensing, README, contributor and support guidance, public metadata | Root Markdown, license texts, `docs/licenses/`, GitHub templates, `plugin.json` | Implemented; native onboarding check pending. Later command, image, and release updates belong to 002-005. |
-| [002](002-build-tests-and-ci.md) | Make-based tests, build hygiene, CI, release artifact validation | `Makefile`, `mk/`, `dep/`, test harness, `.github/workflows/`, build scripts and ignore rules | Establish baseline before 003; integrate the PDF job after 004. |
-| [003](003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Use 002's harness; coordinate branding/provenance with 001 and preserve 008's themes. |
-| [004](004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Can begin with current code/artwork; final review follows relevant 003 and 005 changes. |
-| [005](005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Capture final 003 widgets and 008 themes; integrate with 004's manual layout. |
+| [001](archive/001-licensing-and-project-documentation.md) | Licensing, README, contributor and support guidance, public metadata | Root Markdown, license texts, `docs/licenses/`, GitHub templates, `plugin.json` | Complete; archived. Public documentation baseline for later work. |
+| [002](archive/002-build-tests-and-ci.md) | Make-based tests, build hygiene, CI, release artifact validation | `Makefile`, `mk/`, `dep/`, test harness, `.github/workflows/`, build scripts and ignore rules | Complete; archived. Build/test baseline for later work. |
+| [003](archive/003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Complete; archived. Native theme delivery remains with 008. |
+| [004](archive/004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Complete; archived. Manual conventions for later changes. |
+| [005](archive/005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Complete; archived. Theme-specific capture updates remain with 008. |
 | [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
 | [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
 | [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
@@ -34,12 +28,9 @@ for evidence.
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
 | [012](012-module-rebranding-and-title-system.md) | Rename all 16 active modules and replace title logos with shared typography | Manifest display names, SVG title sources/exports, current documentation, manuals, captures, font provenance | Preserve slugs and geometry; coordinate 001/004/005 publication and 008 themes; broader panel redesign remains separate. |
 
-Use 001's inventory and 002's executable baseline. Then make 003's
-structural changes with regression evidence, develop 004's shared manual
-system, and complete 005's captures and diagrams. Finish the public links,
-publication CI, and full-manual review once those outputs exist. These are
-staged handoffs within five specs, not dependencies that require every spec
-to finish before the others can start.
+The archived specs establish the inventory, executable baseline, source
+organization, manual system, and capture tooling for subsequent work.
+Their original handoffs remain documented as implementation history.
 
 006 is a focused bug-fix priority that can proceed independently of that
 sequence. It owns [#96](https://github.com/Kautenja/PotatoChips/issues/96)
@@ -163,7 +154,8 @@ Follow [Planning And Completion](../AGENTS.md#planning-and-completion) for
 status, acceptance evidence, and archiving. Commands labeled as proposed
 belong to the intended implementation and do not work merely because these
 specs exist. Record actual results, platforms, manual checks, and limitations
-in the owning spec; unchecked criteria remain outstanding.
+in the owning spec; unchecked criteria remain outstanding unless an explicit
+completion decision supersedes the historical checklist.
 
 Small changes can still be planned in chat. Allocate the next unused number
-across this directory and `archive/`; create the archive on first use.
+across this directory and `archive/`; preserve numbers when archiving.

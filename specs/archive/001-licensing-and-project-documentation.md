@@ -1,7 +1,7 @@
 # Licensing And Project Documentation
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 
 Make the repository's public information, attribution, and contributor
 entry points as clear as Fourier's and RackNES's, using PotatoChips's
@@ -9,19 +9,19 @@ actual module inventory and existing license terms.
 
 ## Evidence And Current Gaps
 
--   The former `LICENSE.md` (now [LICENSING.md](../LICENSING.md)) mixed source and artwork scope and linked to
+-   The former `LICENSE.md` (now [LICENSING.md](../../LICENSING.md)) mixed source and artwork scope and linked to
     `LICENSE-dist.txt`, which is absent. `LICENSE-GPLv3.txt` contains the
     software license text; the package currently includes `LICENSE*` only.
 -   The short Blargg attribution does not inventory the adapted chip code.
     Headers credit Shay Green, Emilie Gillet, Brad Martin, Jarek Burczynski,
     Tatsuyuki Satoh, Nicola Salmoria, and others. Tests have MIT notices and
     Catch2 has separate terms. A blanket replacement would lose information.
--   [README.md](../README.md) leads with a promotional video quotation and a
+-   [README.md](../../README.md) leads with a promotional video quotation and a
     Travis badge, followed by a long module catalog. It lacks a concise
     installation/first-patch path and contributor/support entry points.
     Commented material still contains names and links for unfinished modules.
 -   `CONTRIBUTING.md` and `SUPPORT.md` do not exist. Shared setup and
-    architecture guidance currently live in [AGENTS.md](../AGENTS.md).
+    architecture guidance currently live in [AGENTS.md](../../AGENTS.md).
 -   The manifest remains KautenjaDSP-branded and omits the fuller metadata
     used by the sibling projects. The changelog mixes releases with `TBD`
     feature plans, and its Rack 2 entry has a date inconsistent with the
@@ -41,7 +41,7 @@ Own root license/documentation files, `docs/licenses/`, GitHub issue/PR
 templates, and descriptive manifest metadata. Coordinate package inclusion
 with [002](002-build-tests-and-ci.md), runtime branding with
 [003](003-source-organization-and-rack-integration.md), provenance for theme assets
-with [008](008-native-light-and-dark-themes.md), and final manual
+with [008](../008-native-light-and-dark-themes.md), and final manual
 and image links with [004](004-manual-content-and-publication-style.md) and
 [005](005-production-panel-captures-and-figures.md).
 
@@ -129,6 +129,19 @@ rendered README headings/table/images, and the first-patch instructions in
 Rack. Record remote link/license-detection checks separately when performed.
 
 ## Completion Evidence
+
+### Completion And Archive Decision
+
+2026-10-01: the user confirmed specs 001-005 are complete and requested
+archiving. Marked this spec COMPLETE and moved it to `specs/archive/`.
+This decision supersedes the earlier pending-status and acceptance notes
+below. Historical checkboxes, test results, and limitations are retained;
+no additional runtime, listening, CI, or publication checks are claimed.
+Work explicitly owned by specs 006-012 remains with those specs.
+
+Archive validation: checked relative links and heading anchors across the
+specs and manual guide, confirmed all five archived statuses and updated
+references, and ran `git diff --check`; all passed.
 
 Implemented on October 1, 2026. Status remains `IN PROGRESS` pending the
 native first-patch check below; archive after that verification succeeds.

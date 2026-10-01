@@ -64,12 +64,12 @@ agreed path/name changes here and update consumers together.
 
 Own the chip adapter, host module, artwork, feature tests, presets, targeted
 manual, registration, and issue follow-through. Coordinate dependency
-provenance/public metadata with [001](001-licensing-and-project-documentation.md),
-build/test/package integration with [002](002-build-tests-and-ci.md),
+provenance/public metadata with [001](archive/001-licensing-and-project-documentation.md),
+build/test/package integration with [002](archive/002-build-tests-and-ci.md),
 helper locations/branding with
-[003](003-source-organization-and-rack-integration.md),
-manual conventions with [004](004-manual-content-and-publication-style.md),
-native panel captures with [005](005-production-panel-captures-and-figures.md),
+[003](archive/003-source-organization-and-rack-integration.md),
+manual conventions with [004](archive/004-manual-content-and-publication-style.md),
+native panel captures with [005](archive/005-production-panel-captures-and-figures.md),
 and global themes with [008](008-native-light-and-dark-themes.md).
 
 This spec explicitly adds a new chip/module beyond the modernization plan.

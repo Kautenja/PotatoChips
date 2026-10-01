@@ -58,15 +58,15 @@ horizontal slider helper and assets only if needed, focused Rack tests,
 `presets/SuperEcho/` and `patches/debug/SuperEcho.vcv` fixtures.
 
 This fix need not wait for the broad modernization work. Reuse
-[002](002-build-tests-and-ci.md)'s harness and
-[005](005-production-panel-captures-and-figures.md)'s native capture tooling
+[002](archive/002-build-tests-and-ci.md)'s harness and
+[005](archive/005-production-panel-captures-and-figures.md)'s native capture tooling
 if implemented. Otherwise add only a focused SDK-backed test/inspection
 target, documenting its prerequisites. If Rack-only tests are added under
 `test/rack/` before 002, exclude them from SConstruct's recursive standalone
 test discovery and keep the existing DSP suites working.
 
-[003](003-source-organization-and-rack-integration.md) must preserve these
-fixes during header/theme changes; [004](004-manual-content-and-publication-style.md)
+[003](archive/003-source-organization-and-rack-integration.md) must preserve these
+fixes during header/theme changes; [004](archive/004-manual-content-and-publication-style.md)
 owns the broader manual rewrite. This spec owns both issue dispositions.
 
 ## Requirements

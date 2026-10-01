@@ -1,7 +1,7 @@
 # Manual Content And Publication Style
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 
 Give all active modules practical, consistently styled user manuals with
 shared sources and reliable builds, following the siblings' publication
@@ -134,6 +134,19 @@ manual Rack checks and unresolved claims; do not mark them verified.
 
 ## Completion Evidence
 
+### Completion And Archive Decision
+
+2026-10-01: the user confirmed specs 001-005 are complete and requested
+archiving. Marked this spec COMPLETE and moved it to `specs/archive/`.
+This decision supersedes the earlier pending-status and acceptance notes
+below. Historical checkboxes, test results, and limitations are retained;
+no additional runtime, listening, CI, or publication checks are claimed.
+Work explicitly owned by specs 006-012 remains with those specs.
+
+Archive validation: checked relative links and heading anchors across the
+specs and manual guide, confirmed all five archived statuses and updated
+references, and ran `git diff --check`; all passed.
+
 2026-10-01: implemented the content and build migration in the requested
 order: Super Echo/Infinite Stairs, FM/wavetable modules, then the remaining
 modules. All 14 use identity-only `manual.tex`, lower-case section sources,
@@ -147,7 +160,7 @@ wordmark is copied unchanged from the recorded RackNES revision; its origin
 and terms are in the component inventory. Existing bibliography entries
 remain intact. Useful reference labels and figures were retained; obsolete
 noise-frequency calibration and ADSR schematic claims were retired with the
-reason recorded in [manual/README.md](../manual/README.md).
+reason recorded in [manual/README.md](../../manual/README.md).
 
 Each manual now has a working-patch recipe, spatial reference, defaults and
 CV scales, polyphony/normalling, reset/persistence behavior, variations and

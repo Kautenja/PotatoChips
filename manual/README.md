@@ -126,7 +126,7 @@ rewritten with current meanings. Unverified historical instrument assignments
 are replaced by patch starting points.
 
 Runtime discrepancies discovered during this work are routed to
-[003](../specs/003-source-organization-and-rack-integration.md#manual-audit-follow-ups-004).
+[003](../specs/archive/003-source-organization-and-rack-integration.md#manual-audit-follow-ups-004).
 The existing Echo, ADSR and YM2612 issue specs continue to own their fixes;
 manual edits do not resolve those reports.
 

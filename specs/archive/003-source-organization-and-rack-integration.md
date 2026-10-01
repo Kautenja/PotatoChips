@@ -1,7 +1,7 @@
 # Source Organization And Rack Integration
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 
 Make the DSP/Rack boundary easier to navigate, bring panel presentation in
 line with the sibling projects, and protect saved patches and audio behavior
@@ -42,7 +42,7 @@ Coordinate metadata/license scope with [001](001-licensing-and-project-documenta
 documented behavior with [004](004-manual-content-and-publication-style.md),
 and final figures with [005](005-production-panel-captures-and-figures.md).
 
-[008](008-native-light-and-dark-themes.md) owns native theme implementation,
+[008](../008-native-light-and-dark-themes.md) owns native theme implementation,
 panel pairs, theme regressions, and issue #95. This spec retains branding
 and structural/lifecycle work; preserve 008's theme contract during those
 changes rather than implementing a second theme system.
@@ -140,6 +140,19 @@ replace the interactive/audio checks. Record old/new file mapping and
 distinguish structural equivalence from intentional fixes.
 
 ## Completion Evidence
+
+### Completion And Archive Decision
+
+2026-10-01: the user confirmed specs 001-005 are complete and requested
+archiving. Marked this spec COMPLETE and moved it to `specs/archive/`.
+This decision supersedes the earlier pending-status and acceptance notes
+below. Historical checkboxes, test results, and limitations are retained;
+no additional runtime, listening, CI, or publication checks are claimed.
+Work explicitly owned by specs 006-012 remains with those specs.
+
+Archive validation: checked relative links and heading anchors across the
+specs and manual guide, confirmed all five archived statuses and updated
+references, and ran `git diff --check`; all passed.
 
 Implemented October 1, 2026, starting from `adebc068`, and committed/pushed as
 `b6e05564`. Follow-up fixes are `49cfc083` and `12e03225`. Status remains

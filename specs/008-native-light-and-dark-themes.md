@@ -48,19 +48,19 @@ check, or issue update has been completed.
 ## Scope And Ownership
 
 This spec takes ownership of native themes previously outlined in
-[003](003-source-organization-and-rack-integration.md): panel pairs, widget
+[003](archive/003-source-organization-and-rack-integration.md): panel pairs, widget
 wiring, theme-specific control/display changes, focused regressions,
 minimum-Rack metadata, user instructions, and #95's disposition. Spec 003
 retains source reorganization, branding, and general UI lifecycle repairs;
 it must preserve this contract and edit both artwork variants.
 
 Work can proceed before the modernization sequence. Reuse
-[002](002-build-tests-and-ci.md)'s test infrastructure and
-[005](005-production-panel-captures-and-figures.md)'s native renderer when
+[002](archive/002-build-tests-and-ci.md)'s test infrastructure and
+[005](archive/005-production-panel-captures-and-figures.md)'s native renderer when
 available. Otherwise add only a focused SDK-backed fixture and exclude it
 from SConstruct's standalone DSP discovery. Coordinate provenance with
-[001](001-licensing-and-project-documentation.md), wording with
-[004](004-manual-content-and-publication-style.md), restored Super Echo
+[001](archive/001-licensing-and-project-documentation.md), wording with
+[004](archive/004-manual-content-and-publication-style.md), restored Super Echo
 controls with [006](006-super-echo-controls-and-randomization.md), and Super
 ADSR labels with [007](007-super-adsr-release.md). Do not duplicate those
 specs' implementation or completion evidence.

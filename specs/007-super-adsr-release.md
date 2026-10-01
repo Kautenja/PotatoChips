@@ -65,12 +65,12 @@ Own the issue-specific changes in `src/SuperADSR.cpp`,
 its affected figures, and an unreleased changelog entry.
 
 This work can precede the modernization specs. Reuse
-[002](002-build-tests-and-ci.md)'s harness when available; otherwise keep
+[002](archive/002-build-tests-and-ci.md)'s harness when available; otherwise keep
 the current SCons tests working and add only the necessary Rack fixture.
 Exclude SDK-dependent fixtures from SConstruct's standalone test discovery.
-[003](003-source-organization-and-rack-integration.md) must preserve the
-fix; [004](004-manual-content-and-publication-style.md) carries the verified
-wording into its rewrite; [005](005-production-panel-captures-and-figures.md)
+[003](archive/003-source-organization-and-rack-integration.md) must preserve the
+fix; [004](archive/004-manual-content-and-publication-style.md) carries the verified
+wording into its rewrite; [005](archive/005-production-panel-captures-and-figures.md)
 can supply refreshed production captures. This spec owns #98's resolution.
 
 ## Requirements

@@ -1,7 +1,7 @@
 # Production Panel Captures And Reference Figures
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 
 Generate the manuals' module screenshots from production Rack widgets and
 maintain clear vector panel references beside the manual source.
@@ -33,7 +33,7 @@ Own new `tools/capture/`, reviewed `manual/*/img/Panel.png`, per-module
 figure inputs/build hooks with [004](004-manual-content-and-publication-style.md)
 and README image substitutions with [001](001-licensing-and-project-documentation.md).
 Use final runtime branding from [003](003-source-organization-and-rack-integration.md)
-and panel pairs/theme behavior from [008](008-native-light-and-dark-themes.md).
+and panel pairs/theme behavior from [008](../008-native-light-and-dark-themes.md).
 
 ## Required Inventory
 
@@ -156,6 +156,19 @@ manual builds in an environment without the capture runtime. Record actual
 OS/architecture and unavailable native checks separately from PDF success.
 
 ## Completion Evidence
+
+### Completion And Archive Decision
+
+2026-10-01: the user confirmed specs 001-005 are complete and requested
+archiving. Marked this spec COMPLETE and moved it to `specs/archive/`.
+This decision supersedes the earlier pending-status and acceptance notes
+below. Historical checkboxes, test results, and limitations are retained;
+no additional runtime, listening, CI, or publication checks are claimed.
+Work explicitly owned by specs 006-012 remains with those specs.
+
+Archive validation: checked relative links and heading anchors across the
+specs and manual guide, confirmed all five archived statuses and updated
+references, and ran `git diff --check`; all passed.
 
 ### Implemented And Verified On October 1, 2026
 

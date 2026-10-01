@@ -83,14 +83,14 @@ shared title rules in coordination with 011 rather than silently omitting it.
     it is not evidence that current Fourier titles use live font text.
     Fourier is reference material, never a build dependency. Do not copy
     its font files or assume its artwork terms grant font redistribution.
--   [003](003-source-organization-and-rack-integration.md) retains general
+-   [003](archive/003-source-organization-and-rack-integration.md) retains general
     integration ownership. This spec owns intentional display-name and
     title-logo changes, superseding earlier title-preservation constraints
     only for that scope. Preserve the Arhythmetic Units footer treatment.
 -   Coordinate public metadata and provenance with
-    [001](001-licensing-and-project-documentation.md), manual updates with
-    [004](004-manual-content-and-publication-style.md), captures with
-    [005](005-production-panel-captures-and-figures.md), and native theme
+    [001](archive/001-licensing-and-project-documentation.md), manual updates with
+    [004](archive/004-manual-content-and-publication-style.md), captures with
+    [005](archive/005-production-panel-captures-and-figures.md), and native theme
     selection with [008](008-native-light-and-dark-themes.md). Spec 008 owns
     actual light/dark support; this spec does not make it a prerequisite.
 

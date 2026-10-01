@@ -89,10 +89,10 @@ manual corrections, and an unreleased changelog entry. Existing
 fixtures, not substitutes for the issue's reproduction.
 
 This work can proceed independently of modernization. Reuse
-[002](002-build-tests-and-ci.md)'s harness when available, otherwise preserve
+[002](archive/002-build-tests-and-ci.md)'s harness when available, otherwise preserve
 the SCons/Catch2 v2 workflow and exclude SDK-dependent tests from standalone
-test discovery. [003](003-source-organization-and-rack-integration.md) must
-preserve this fix during refactoring; [004](004-manual-content-and-publication-style.md)
+test discovery. [003](archive/003-source-organization-and-rack-integration.md) must
+preserve this fix during refactoring; [004](archive/004-manual-content-and-publication-style.md)
 carries verified behavior into the broader manual rewrite. This spec owns
 #82's regression evidence and issue follow-through.
 

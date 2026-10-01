@@ -67,15 +67,15 @@ the reusable adapter independent of Rack. Vendor the reviewed core under
 patches. Preserve its LGPL-2.1-or-later notices and existing MAME attribution;
 include required dependency texts in source and distributed plugin packages.
 Coordinate the dependency inventory with
-[001](001-licensing-and-project-documentation.md).
+[001](archive/001-licensing-and-project-documentation.md).
 
-Reuse [002](002-build-tests-and-ci.md)'s build/test infrastructure when
+Reuse [002](archive/002-build-tests-and-ci.md)'s build/test infrastructure when
 available; otherwise extend the existing harness narrowly, including C
 compilation/linking and SDK-test isolation. Keep builds reproducible without
 fetching a moving upstream branch. Coordinate source moves with
-[003](003-source-organization-and-rack-integration.md), operating guidance
-with [004](004-manual-content-and-publication-style.md), and any needed
-captures with [005](005-production-panel-captures-and-figures.md).
+[003](archive/003-source-organization-and-rack-integration.md), operating guidance
+with [004](archive/004-manual-content-and-publication-style.md), and any needed
+captures with [005](archive/005-production-panel-captures-and-figures.md).
 
 ## Requirements
 

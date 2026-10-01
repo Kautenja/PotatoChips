@@ -1,9 +1,9 @@
 # Implementation Specifications
 
 The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Spec 006 addresses two reported Super Echo
-issues. They describe planned work, not implemented behavior or release
-promises. All six are `PLANNED` as of October 1, 2026.
+maintenance work to PotatoChips. Specs 006 and 007 address reported Super Echo
+and Super ADSR issues. They describe planned work, not implemented behavior
+or release promises. All seven are `PLANNED` as of October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -15,6 +15,7 @@ promises. All six are `PLANNED` as of October 1, 2026.
 | [004](004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Can begin with current code/artwork; final review follows relevant 003 and 005 changes. |
 | [005](005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Capture final 003 widgets and integrate with 004's manual layout. |
 | [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
+| [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -29,6 +30,12 @@ and [#97](https://github.com/Kautenja/PotatoChips/issues/97), including separate
 resolution comments with fix commit references and closure after verification.
 Writing or committing the spec does not resolve either issue.
 
+007 independently owns [#98](https://github.com/Kautenja/PotatoChips/issues/98):
+reproduce the reported gate-off behavior, correct demonstrated release
+defects, and align sustain-rate terminology. It includes meaningful issue
+updates and closure with a fixing commit reference after verification.
+Writing or committing the spec does not resolve the issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns production code
 and regression cases, 004 owns manual build rules and prose, and 005 owns
@@ -39,6 +46,10 @@ For Super Echo's missing FIR controls and randomization policy, 006 owns
 the fixes and regressions; 003 preserves them during refactoring, 004 carries
 their verified behavior into the manual rewrite, and 005 captures the fixed
 widget. Avoid duplicating implementation or completion evidence across specs.
+
+For Super ADSR's release report, 007 owns the fix, regressions, and targeted
+panel/manual corrections. Specs 003-005 preserve and incorporate its verified
+behavior, terminology, and captures in their broader work.
 
 ## Evidence And Baseline
 

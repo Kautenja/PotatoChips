@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+-   Replace SCons/Travis with SDK-free Make tests, a Rack-backed harness,
+    pinned Catch2/SDK dependencies, and three-platform GitHub Actions.
+-   Add separate coverage/sanitizer runs, incremental-build regression checks,
+    package validation, and publication completeness/version gates.
+
 -   Present Potato Chips as part of Arhythmetic Units while preserving plugin
     and module identifiers, version, and disabled-module flags.
 -   Separate source/artwork licensing, inventory imported components and

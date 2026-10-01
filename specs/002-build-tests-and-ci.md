@@ -1,7 +1,7 @@
 # Build, Tests, And Continuous Integration
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 
 Replace the legacy build/test split and Travis configuration with a small,
 reproducible Make and GitHub Actions workflow suited to this plugin.
@@ -9,7 +9,7 @@ reproducible Make and GitHub Actions workflow suited to this plugin.
 ## Evidence And Current Gaps
 
 -   The root [Makefile](../Makefile) delegates to Rack's `plugin.mk`;
-    [SConstruct](../SConstruct) separately builds 12 DSP test executables,
+    the former `SConstruct` separately builds 12 DSP test executables,
     names the compiler `g++`, uses `-march=native`, and contains benchmark
     and shared-library scaffolding without corresponding current sources.
 -   Catch2 is a pinned v2.13.1 submodule. There is no root `make test`,
@@ -100,17 +100,17 @@ for reports that PotatoChips does not have.
 
 ## Acceptance Criteria
 
-- [ ] Baseline results and one-to-one disposition of all 12 suites recorded.
-- [ ] Standalone tests run without Rack; plugin/package and Rack tests build
+- [x] Baseline results and one-to-one disposition of all 12 suites recorded.
+- [x] Standalone tests run without Rack; plugin/package and Rack tests build
       with the documented SDK. Production remains C++11.
-- [ ] Incremental, clean, mixed-goal, configuration-change, and failure
+- [x] Incremental, clean, mixed-goal, configuration-change, and failure
       propagation checks pass; dependencies are pinned and documented.
 - [ ] Linux, macOS, and Windows CI evidence is recorded, including explicit
       unavailable checks. Instrumentation failures are resolved or remain
       visible blockers with an owning regression.
 - [ ] All 14 manual PDFs and package notices are validated; disabled module
       manuals and blanks are handled explicitly, not accidentally required.
-- [ ] Source assets stay visible to Git, generated outputs stay ignored,
+- [x] Source assets stay visible to Git, generated outputs stay ignored,
       and contributor/agent commands describe the replacement workflow.
 
 ## Validation
@@ -140,5 +140,66 @@ version mismatch fail without publishing anything. Record artifact contents.
 
 ## Completion Evidence
 
-Only the existing command dry runs were checked during agent setup. No
-baseline tests, replacement targets, or CI runs have been completed here.
+Implemented October 1, 2026; remote CI verification is in progress. Manual
+publication remains dependent on 004's reliable PDF rules.
+
+### Baseline And Suite Disposition
+
+Baseline `make clean && make -j2` passed on macOS ARM64, Apple Clang 21.0.0,
+prepared Rack Free/SDK 2.6.0. SCons 4.4.0 `scons -k -j2 test` passed ten
+suites; BLIP buffer and Sony processor did not compile because the reusable
+DSP relies on an undeclared host `Exception`. In a disposable copy, supplying
+only `using Exception = std::runtime_error` allowed all 12 unmodified suites
+to pass. The replacement retains that test-only substitute explicitly; 003
+owns removing the production dependency. No assertions were dropped.
+
+| Suite Under `test/dsp/` | Baseline With Exception Substitute | Make/Catch2 3.16.0 |
+| --- | --- | --- |
+| `sony_s_dsp/test_adsr.cpp` | 1 assertion in 1 test case | Pass, unchanged |
+| `sony_s_dsp/test_brr_sample_player.cpp` | 1 assertion in 1 test case | Pass, unchanged |
+| `sony_s_dsp/test_common.cpp` | 20 assertions in 10 test cases | Pass, unchanged |
+| `sony_s_dsp/test_gaussian_interpolation_filter.cpp` | 1 assertion in 1 test case | Pass, unchanged |
+| `sony_s_dsp/test_processor.cpp` | 3 assertions in 2 test cases | Pass, unchanged |
+| `test_blip_buffer.cpp` | 36 assertions in 2 test cases | Pass, unchanged |
+| `test_pcm.cpp` | 6 assertions in 3 test cases | Pass, unchanged |
+| `trigger/test_boolean.cpp` | 12 assertions in 4 test cases | Pass, unchanged |
+| `trigger/test_divider.cpp` | 21 assertions in 2 test cases | Pass, unchanged |
+| `trigger/test_hold.cpp` | 30 assertions in 1 test case | Pass, unchanged |
+| `trigger/test_threshold.cpp` | 22 assertions in 5 test cases | Pass, unchanged |
+| `trigger/test_zero.cpp` | 7 assertions in 3 test cases | Pass, unchanged |
+
+### Local Verification
+
+-   `make -j2 test RACK_DIR=/nonexistent-sdk`: all 12 suites pass with exactly
+    the same case/assertion counts as the old harness. Catch2 files match
+    the pinned upstream commit byte-for-byte; dependency validation passes.
+-   `make -j2 all test-rack RACK_DIR=<verified-2.6.3-sdk>`: plugin and real
+    Rack engine/module smoke test pass. Production compiles as C++11;
+    Catch2 executables use C++14. The smoke test is not a GUI/audio check.
+-   `make check-build`: three disposable-fixture tests pass, covering
+    SDK-free/default/mixed goals, no-op builds, header/compiler/flag/SDK
+    changes, clean behavior, failed executables, missing PDF, metadata-tool
+    failure, wrong PDF version, unresolved references, and tag mismatch.
+    They caught and fixed same-second stamp changes with macOS Make 3.81.
+-   `make test-asan-ubsan`: all 12 suites pass with nonrecovering diagnostics;
+    `make test-coverage`: all pass and separate first-party/imported/harness
+    reports are generated. First-party mapped line coverage is 38% (76/200),
+    not whole-plugin coverage. No threshold or suppression was introduced.
+-   `make -j2 dist` and `scripts/validate.py package`: real macOS ARM64 archive
+    passes exact manifest/license/resource/preset content validation and
+    excludes development dependencies/tests. Source license text unchanged.
+-   Downloaded all three official Rack SDK 2.6.3 archives and the Windows
+    Free runtime, verified the recorded SHA-256 hashes. Actionlint 1.7.7
+    accepts both workflows. Ordinary jobs are read-only; there is no release
+    publication action. Tag builds only retain workflow artifacts.
+
+### Remaining Verification And Handoffs
+
+Record the actual remote platform/instrumentation jobs here after pushing.
+Spec 004 owns TeX failure propagation and actual 14-PDF builds/render review.
+The manual validator is implemented and its negative fixtures pass, but no
+real PDF collection, TeX failure fixture, or upload workflow is claimed to
+pass yet. Once 004 supplies reliable rules, add path-filtered manual CI and
+an explicit-dispatch-only existing-release upload job with scoped write
+permissions. Ordinary CI must consume committed PNGs. This dependency keeps
+the PDF acceptance item open; the plugin build/test migration is implemented.

@@ -7,9 +7,8 @@ build structure, and licensing.
 
 ## Project Defaults
 
--   Use C++11 for production headers, sources, and standalone tests, matching
-    the Rack build and `SConstruct`. Do not introduce newer language
-    requirements without an explicit build compatibility change.
+-   Use C++11 for production headers and sources. Test executables use
+    C++14 for Catch2 3.16.0; keep that requirement out of plugin sources.
 -   Use `.hpp` for C++ headers and `.cpp` for implementation and test files.
     Keep templates in headers. Preserve existing bundled-library extensions.
 -   Preserve the existing DSP namespaces, such as `Math`, `Trigger`, `PCM`,
@@ -147,8 +146,8 @@ and lifetime for buffers crossing that boundary.
 Follow [Development And Validation](../../CONTRIBUTING.md#development-and-validation)
 for build commands, regression evidence, fixtures, and manual Rack checks.
 Extend the focused deterministic checks in `test/` where relevant. They
-use the pinned Catch2 v2 single-header dependency and SCons; each test
-source builds as its own executable. Keep tests independent of Rack where
+use the pinned Catch2 v3 amalgamation and Make; each test source builds as
+its own executable, sharing one harness object per configuration. Keep tests independent of Rack where
 the DSP seam permits it.
 
 Before completing a change, check that its files have clear ownership,

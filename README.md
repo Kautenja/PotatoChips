@@ -1,5 +1,7 @@
 # Potato Chips
 
+[![Build and tests](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml/badge.svg)](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml)
+
 Potato Chips is an Arhythmetic Units plugin for VCV Rack 2, by Christian
 Kauten and contributors. Build chiptune voices from classic sound-chip
 oscillators, four-operator FM, wavetables, envelopes, and echo. The modules

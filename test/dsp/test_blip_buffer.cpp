@@ -21,9 +21,9 @@
 // SOFTWARE.
 //
 
+#include "../support/exception.hpp"
 #include "dsp/blip_buffer.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK:

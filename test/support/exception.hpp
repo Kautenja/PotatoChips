@@ -1,6 +1,6 @@
-// Test cases for the Sony S-DSP ADSR emulator.
+// Test-only exception compatibility for legacy DSP fixtures.
 //
-// Copyright (c) 2020 Christian Kauten
+// Copyright (c) 2026 Christian Kauten
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,11 @@
 // SOFTWARE.
 //
 
-#include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
-#include "catch_amalgamated.hpp"
-
-// ---------------------------------------------------------------------------
-// MARK: sizeof SonyS_DSP::GaussianInterpolationFilter
-// ---------------------------------------------------------------------------
-
-TEST_CASE("SonyS_DSP::GaussianInterpolationFilter should be 16 bytes") {
-    REQUIRE(16 == sizeof(SonyS_DSP::GaussianInterpolationFilter));
-}
+// Test-only substitute for the unqualified host Exception used by legacy DSP.
+// No Rack headers or production changes are needed to run the old DSP suites.
+// Removing this host coupling belongs to spec 003.
+#ifndef TEST_SUPPORT_EXCEPTION_HPP_
+#define TEST_SUPPORT_EXCEPTION_HPP_
+#include <stdexcept>
+using Exception = std::runtime_error;
+#endif  // TEST_SUPPORT_EXCEPTION_HPP_

@@ -22,8 +22,7 @@
 //
 
 #include "dsp/trigger/threshold.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 TEST_CASE("Trigger::Threshold should be false when initialized") {
     Trigger::Threshold trigger;

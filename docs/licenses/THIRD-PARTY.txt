@@ -148,12 +148,13 @@ it does not distribute the Rack application or SDK.
 
 Catch2 (test-only)
 -----------------
-Files: dep/Catch2/ (Git submodule).
+Files: dep/catch2-v3/ (unmodified amalgamated distribution).
 Origin: https://github.com/catchorg/Catch2
-Pinned revision: fba0feeba1e3b94b846d4c64338d53356671d44a
-Local git description: v2.13.1-8-gfba0feeb.
+Pinned revision: 317ac1ed4c0bb6e6b91eafc817e05c488feffcb3 (v3.16.0).
+Exact source/header/license SHA-256 hashes: dep/catch2-v3/provenance.json.
+Replaces test-only submodule fba0feeba1e3b94b846d4c64338d53356671d44a.
 Author: Phil Nash and Catch2 contributors; retain per-file notices.
-License: Boost Software License 1.0, copied from dep/Catch2/LICENSE.txt to
+License: Boost Software License 1.0, copied from dep/catch2-v3/LICENSE_1_0.txt to
 BSL-1.0.txt. Catch2 is used by standalone tests and is not linked into or
 packaged as code in the plugin.
 
@@ -171,6 +172,6 @@ LGPL-2.1.txt: standard text copied from the sibling RackNES docs/licenses/;
 canonical source https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 CC-BY-NC-ND-4.0.txt: standard text copied from the sibling RackNES;
 canonical source https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.txt
-BSL-1.0.txt: exact pinned Catch2 LICENSE.txt.
+BSL-1.0.txt: exact pinned Catch2 LICENSE.txt (locally LICENSE_1_0.txt).
 MIT-TESTS.txt: exact notice text from test/dsp/test_pcm.cpp, comment prefixes removed.
 MAME-HISTORICAL.txt: exact notice text from the YM2612 import identified above.

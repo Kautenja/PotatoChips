@@ -1,4 +1,4 @@
-patches/* linguist-vendored
-dep/* linguist-vendored
-manual/* linguist-vendored
-notebooks/* linguist-vendored
+dep/** linguist-vendored=true
+manual/** linguist-documentation=true
+patches/** linguist-detectable=false
+presets/** linguist-detectable=false

@@ -142,3 +142,13 @@ distinguish structural equivalence from intentional fixes.
 ## Completion Evidence
 
 Source moves, panel changes, reproductions, and regression runs are pending.
+
+## Build-Migration Findings
+
+Spec 002 confirmed that `src/dsp/exceptions.hpp` relies on Rack's unqualified
+`Exception` type; its independent implementation is commented out. The two
+standalone BLIP/processor fixtures use `test/support/exception.hpp` to retain
+the original suite coverage without importing Rack. Remove this host coupling
+as part of DSP organization and then retire that test substitute. PCM's broad
+comparison operators also require Catch2 to be included first; constrain
+those operators only with focused compatibility/regression evidence.

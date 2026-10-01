@@ -11,8 +11,8 @@ workflow lives in [AGENTS.md](AGENTS.md).
 
 | Work | Prerequisites |
 | --- | --- |
-| Plugin build | Git, GNU Make, C++11 compiler, `jq`, and a prepared Rack 2 SDK/tree for the target platform and architecture |
-| Standalone tests | SCons, a C++11 compiler available as `g++`, and the pinned Catch2 v2 submodule |
+| Plugin build | Git, Python 3.9+, GNU Make, C++11 compiler, `jq`, and a prepared Rack 2 SDK/tree for the target platform and architecture |
+| Standalone tests | GNU Make, Python 3.9+, and a C++14 compiler; Catch2 3.16.0 is vendored |
 | Package | Build tools plus `tar`, `zstd`, and the platform tools invoked by Rack's `plugin.mk` |
 | Native verification | A matching Rack 2 runtime and graphical desktop |
 | Manuals | Make, `pdflatex`, bibliography tools where used, and the packages listed in the LaTeX sources |
@@ -21,7 +21,7 @@ Clone from your projects directory, then run subsequent commands from the
 repository root unless a command explicitly changes directories:
 
 ```shell
-git clone --recurse-submodules https://github.com/Kautenja/PotatoChips.git
+git clone https://github.com/Kautenja/PotatoChips.git
 cd PotatoChips
 ```
 
@@ -45,8 +45,9 @@ do not require compiling the plugin or installing TeX.
 -   `res/` contains runtime panels, controls, and other assets. `presets/`
     contains saved module presets; `patches/` includes examples and debug
     patches for manual checks.
--   `test/` contains standalone DSP tests built by `SConstruct` using the
-    pinned Catch2 submodule in `dep/Catch2/`.
+-   `test/dsp/` contains SDK-free suites; `test/rack/` contains headless
+    SDK-backed suites. Make rules live in `mk/`, and Catch2 is vendored in
+    `dep/catch2-v3/`. Configurations and reports live under `.build/`.
 -   `manual/` contains per-module LaTeX manuals, figures, and shared style.
 
 Maintain source API documentation in code comments. This project does not
@@ -105,27 +106,67 @@ directory containing `plugin.mk`:
 make -j2 RACK_DIR=/path/to/Rack-SDK
 ```
 
-Standalone DSP tests require SCons, a C++11 compiler available as `g++`,
-and the pinned Catch2 v2 submodule. Initialize that dependency when needed,
-then build and run the suites:
+Standalone DSP tests use C++14 and the pinned Catch2 3.16.0 amalgamation.
+Production headers and plugin sources remain C++11. No SDK or submodules
+are needed for the following commands:
 
 ```shell
-git submodule update --init --recursive
-scons -j2 test
+make -j2 test RACK_DIR=/nonexistent-sdk
+make -j2 test-build
+make test/dsp/trigger/test_divider
+make check-build
+python3 scripts/validate.py dependencies
 ```
 
-For a focused suite, SCons aliases use the test source path, including its
-`.cpp` suffix. For example:
+`test` and `test-dsp` run all 12 DSP suites; `test-build` only compiles them.
+Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
+`CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
+Rack's own flags are isolated from them even in mixed invocations.
+`make all test-rack` requires the SDK and runs a headless module-construction
+smoke test. This does not replace graphical or audible Rack checks.
+
+The baseline tests relied on Rack's unqualified `Exception` type. Two DSP
+fixtures now include a test-only standard exception substitute; removing
+that production host coupling belongs to spec 003. No assertions were removed.
+Catch2 must be included before PCM's broad comparison operators.
+
+Ordinary DSP, Rack, and plugin builds occupy separate directories. Dependency
+files track headers, and configuration stamps track compiler identity,
+flags, SDK path/build rules/library bytes. `make clean` needs no SDK and
+removes `.build/`, plugin binaries, and packages. For plugin-specific flags,
+use the SDK's `EXTRA_CXXFLAGS`/`EXTRA_LDFLAGS` instead of replacing its defaults.
+
+Instrumentation runs all DSP suites, retains each suite's output even when
+another fails, and returns failure for any assertion or sanitizer diagnostic:
 
 ```shell
-scons test/dsp/trigger/test_divider.cpp
+make test-asan-ubsan
+make test-coverage
 ```
 
-There is no root `make test` target. Do not substitute Fourier's Catch2 v3
-targets or RackNES's `tests/` commands. The legacy `.travis.yml` downloads a
-Rack 1 SDK; it is not current Rack 2 validation evidence. Report missing
-prerequisites or stale harness failures explicitly without upgrading the
-toolchain as part of an unrelated change.
+These require Clang. Set `INSTRUMENT_CXX`, `LLVM_COV`, and `LLVM_PROFDATA`
+for a matching LLVM installation; on macOS LLVM tools default to `xcrun`.
+Reports live in `.build/<mode>/reports/`, separately from ordinary tests.
+Coverage reports distinguish first-party utilities, imported DSP, and test
+harnesses. Only code mapped by these suites is measured; many chip/audio
+paths are unexercised. There is no coverage threshold. ASan/UBSan failures
+are nonrecovering and must not be hidden with suppression flags.
+
+### CI And Editors
+
+[Build CI](.github/workflows/build.yml) runs Linux x64, macOS arm64, and
+Windows x64 on PRs, `master`/`v2.0.2` pushes, version tags, and manual dispatch.
+Rack SDK 2.6.3 downloads have checked SHA-256 pins. Windows uses MinGW64/MSVCRT,
+and extracts a separately verified Rack Free runtime for headless tests.
+It puts that DLL after the compiler runtime on PATH. Normal jobs have only
+read permissions and upload workflow artifacts, never release assets.
+Tags must match the manifest (an optional leading `v` is accepted).
+[Instrumentation CI](.github/workflows/instrumentation.yml) uses Clang/LLVM 18.
+
+For clangd or another C++ editor, generate a compilation database from a
+clean build using your preferred tool (for example Bear), or configure the
+actual SDK's `include/` and `dep/include/` plus `src/`. Use C++11 for production
+and C++14 for test files; old hardcoded dependency paths are no longer valid.
 
 For DSP changes, run relevant suites; for Rack integration, also build the
 plugin and check the affected module in Rack when available. Use relevant
@@ -161,9 +202,15 @@ inspect the rendered result. Keep intermediate files and compiled manuals
 in ignored build directories. Do not import sibling projects' screenshot
 or whitepaper commands without implementing and validating that workflow.
 
-The native capture tooling and Make-based test migration described in specs
-002/005 are planned. Until they land, use the commands above and existing
-source artwork. Do not label an SVG export as a production screenshot.
+Native capture tooling (spec 005) and reliable shared PDF build rules
+(spec 004) remain planned. Use existing source artwork in ordinary builds.
+Do not label an SVG export as a production screenshot. The strict future
+publication gate is `python3 scripts/validate.py manuals manual/build`;
+it requires exactly the 14 sound-module PDFs, meaningful extracted text,
+metadata, matching versions, and resolved references. It can reject the
+legacy manuals. Enabling manual CI/upload waits for spec 004; any later
+upload job must require explicit dispatch to an existing release and grant
+write permission only to that job.
 
 ## Prepare A Release
 
@@ -190,7 +237,9 @@ VCV Library. Work through these checks for an explicitly requested release:
     Check the plugin binary, manifest, `res/`, presets, `LICENSE`,
     `LICENSING.md`, and every file under `docs/licenses/`. Compare the
     extracted notice bytes with the source; a file-list check alone does
-    not verify their contents.
+    not verify their contents. Automate this with
+    `python3 scripts/validate.py package <archive.vcvplugin>`; it also checks
+    every resource/preset and rejects packaged test/dependency code.
 5.  Build and inspect all 14 manuals. The collection writes to
     `manual/build/`; preserve the PDF names used by `plugin.json` and README:
     `Blocks.pdf`, `InfiniteStairs.pdf`, `StepSaw.pdf`, `Pulses.pdf`,

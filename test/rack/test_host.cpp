@@ -1,6 +1,6 @@
-// Test cases for the Sony S-DSP processor.
+// Headless Rack construction smoke test.
 //
-// Copyright (c) 2020 Christian Kauten
+// Copyright (c) 2026 Christian Kauten
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,24 +21,22 @@
 // SOFTWARE.
 //
 
-#include "../../support/exception.hpp"
-#include "dsp/sony_s_dsp/processor.hpp"
 #include "catch_amalgamated.hpp"
+#include "../../src/InfiniteStairs.cpp"
+#include <memory>
 
-// ---------------------------------------------------------------------------
-// MARK: SonyS_DSP::Processor::GlobalData
-// ---------------------------------------------------------------------------
+Plugin* plugin_instance = nullptr;
 
-TEST_CASE("SonyS_DSP::Processor::GlobalData should be the size of NUM_REGISTERS") {
-    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS == sizeof(SonyS_DSP::Processor::GlobalData));
-}
-
-// ---------------------------------------------------------------------------
-// MARK: SonyS_DSP::Processor::RawVoice
-// ---------------------------------------------------------------------------
-
-TEST_CASE("SonyS_DSP::Processor::RawVoice should be NUM_REGISTERS / VOICE_COUNT bytes") {
-    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS / SonyS_DSP::Processor::VOICE_COUNT == sizeof(SonyS_DSP::Processor::RawVoice));
-    SonyS_DSP::Processor::RawVoice voices[SonyS_DSP::Processor::VOICE_COUNT];
-    REQUIRE(SonyS_DSP::Processor::NUM_REGISTERS == sizeof(voices));
+TEST_CASE("Infinite Stairs constructs under a real Rack engine") {
+    rack::Context context;
+    rack::contextSet(&context);
+    context.engine = new rack::engine::Engine;
+    context.engine->setSampleRate(48000.f);
+    {
+        std::unique_ptr<rack::engine::Module> module(modelInfiniteStairs->createModule());
+        REQUIRE(module != nullptr);
+        REQUIRE(module->outputs.size() == 4);
+        REQUIRE(modelInfiniteStairs->slug == "2A03");
+    }
+    rack::contextSet(nullptr);
 }

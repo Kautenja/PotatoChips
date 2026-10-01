@@ -1,6 +1,0 @@
--I../../include
--I../../dep/jansson-2.12/src
--I../../dep/nanovg/src
--I../../dep/nanosvg/src
--I../../dep/osdialog
--Idep/Catch2/single_include/catch2

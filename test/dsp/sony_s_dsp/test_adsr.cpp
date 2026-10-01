@@ -22,8 +22,7 @@
 //
 
 #include "dsp/sony_s_dsp/adsr.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: sizeof Sony_S_DSP_ADSR

@@ -22,8 +22,7 @@
 //
 
 #include "dsp/trigger/hold.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 SCENARIO("Trigger::Hold processes signals at 100Hz") {
     GIVEN("an initialized trigger and sample rate") {

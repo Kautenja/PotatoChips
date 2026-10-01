@@ -218,6 +218,19 @@
         "Oscillator",
         "Polyphonic"
       ]
+    },
+    {
+      "slug": "YM2151",
+      "name": "Voice 2151",
+      "description": "Four-operator Yamaha YM2151 OPM synth voice with independent polyphonic LFO, detune and noise.",
+      "keywords": "Yamaha YM2151 OPM FM chiptune arcade noise",
+      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/YM2151.pdf",
+      "tags": [
+        "Digital",
+        "Oscillator",
+        "Polyphonic",
+        "Synth voice"
+      ]
     }
   ],
   "minRackVersion": "2.4.0"

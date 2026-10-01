@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+-   Added Voice 2151 (`YM2151`), a 16-lane Yamaha OPM voice with four operators,
+    eight algorithms, independent LFO/noise, native detune and stereo routing.
+-   Added paired native panels, three original presets, a debug patch, manual,
+    pinned ymfm production core and an independent Nuked-OPM test reference.
+-   The historical YM2151 roadmap item below is implemented in current source;
+    it does not indicate that version 1.13.0 shipped.
+
 -   Read Voice 2612 and Operator 2612 gate/retrigger edges every host sample.
     Restart held notes without a 16-sample release gap, preserving chip
     attenuation, envelope/LFO clocks, soft-reset phase policy and SSG quirks.
@@ -445,7 +452,7 @@ in [specs/](specs/README.md); this list makes no new feature commitment.
 
 ### 1.13.0 (TBD)
 
--   Yamaha YM2151
+-   Yamaha YM2151 (historical plan; implemented as Voice 2151 under Unreleased).
 
 ### 1.14.0 (TBD)
 

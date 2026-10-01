@@ -20,7 +20,7 @@ $(error Capture currently supports macOS and Linux desktop sessions)
 else
 GL_LIBS := -lGL
 endif
-SOURCES := $(wildcard ../../src/*.cpp ../../src/dsp/*.cpp)
+SOURCES := $(wildcard ../../src/*.cpp ../../src/dsp/*.cpp) ../../dep/ymfm/ymfm_opm.cpp
 OBJECTS := $(patsubst ../../%.cpp,$(BUILD)/%.o,$(SOURCES))
 .PHONY: capture screenshots drawings test test-native
 drawings: capture

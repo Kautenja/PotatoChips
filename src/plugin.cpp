@@ -40,4 +40,5 @@ void init(Plugin* instance) {
     instance->addModel(modelSuperVCA);
     instance->addModel(modelChipS_SMP_Blank1);
     instance->addModel(modelBossFight_Blank1);
+    instance->addModel(modelYM2151);
 }

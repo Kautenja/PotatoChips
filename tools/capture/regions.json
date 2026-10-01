@@ -819,5 +819,72 @@
         -18
       ]
     }
+  ],
+  "YM2151": [
+    {
+      "label": "Shared pitch, modulation, routing and performance inputs",
+      "box": [
+        5,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        90,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 1: envelope, level, multiplier, detune and CV",
+      "box": [
+        185,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        270,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 2: envelope, level, multiplier, detune and CV",
+      "box": [
+        365,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        450,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 3: envelope, level, multiplier, detune and CV",
+      "box": [
+        545,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        630,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 4: envelope, level, multiplier, detune and CV",
+      "box": [
+        725,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        810,
+        -18
+      ]
+    }
   ]
 }

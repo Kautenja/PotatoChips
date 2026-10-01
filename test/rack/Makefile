@@ -14,3 +14,9 @@ super-adsr:
 .PHONY: ym2612-ssg
 ym2612-ssg:
 	$(MAKE) -C ../.. test-ym2612-ssg RACK_DIR="$(RACK_DIR)"
+
+.PHONY: ym2151 benchmark-ym2151
+ym2151:
+	$(MAKE) -C ../.. test-ym2151 RACK_DIR="$(RACK_DIR)"
+benchmark-ym2151:
+	$(MAKE) -C ../.. benchmark-ym2151 RACK_DIR="$(RACK_DIR)"

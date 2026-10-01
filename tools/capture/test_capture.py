@@ -43,7 +43,7 @@ def main():
             image.crop((0, 0, image.width - 1, image.height)).save(source)
         must_fail(lambda: export(captures, manuals))
         source.write_bytes(original)
-        print('PASS: late-batch geometry mismatch preserves all 14 existing PNGs')
+        print('PASS: late-batch geometry mismatch preserves all existing PNGs')
         source.unlink()
         must_fail(lambda: export(captures, manuals))
         source.write_bytes(original)

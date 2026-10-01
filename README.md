@@ -52,7 +52,7 @@ keeps that voice out of the normalled mix at the next output.
 
 ## Modules
 
-The released inventory represented by this source contains 14 sound modules
+The released inventory represented by this source contains 15 sound modules
 and two informational blank panels. Module manuals use the established PDF
 asset names below. These links target the latest GitHub release, which may
 lag the checkout; editable sources are in [manual/](manual/).
@@ -66,6 +66,7 @@ lag the checkout; editable sources are in [manual/](manual/).
 | Trio AY | General Instrument AY-3-8910 | Tone, noise, and envelope synthesis | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf) |
 | Polynomial | Atari POKEY | Pulse voices, noise, and distortion modes | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf) |
 | Tone 76489 | Texas Instruments SN76489 | Pulse voices and periodic/white noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf) |
+| Voice 2151 | Yamaha YM2151 | Four-operator FM, per-lane LFO and noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/YM2151.pdf) |
 | Voice 2612 | Yamaha YM2612 | Four-operator FM voice | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf) |
 | Operator 2612 | Yamaha YM2612 | Single FM operator with external modulation | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf) |
 | Octal 163 | Namco 163 | Eight voices with editable wavetables | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf) |
@@ -80,7 +81,7 @@ the **Silicon S-SMP** illustrates the chip. Both are passive panels.
 ## Names And Panel Themes
 
 Choose **View > Use dark panels if available** in Rack 2.4 or newer. All
-16 modules follow this setting immediately, including browser previews.
+17 modules follow this setting immediately, including browser previews.
 The module's sound, parameters and saved state are independent of this
 setting. Older Rack versions are unsupported; upgrade Rack before installing
 this build (pre-2.4 clients do not enforce the minimum-version download rule).

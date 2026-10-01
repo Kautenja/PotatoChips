@@ -42,7 +42,7 @@ CATCH_TEST_CASE("Registered models preserve saved-patch and audio contracts") {
     plugin.version = "2.1.0";
     init(&plugin);
     rack::plugin::plugins.push_back(&plugin);
-    CATCH_REQUIRE(plugin.models.size() == 16);
+    CATCH_REQUIRE(plugin.models.size() == 17);
     CATCH_CHECK(plugin.getModel("SuperSampler") == nullptr);
     CATCH_CHECK(plugin.getModel("SuperSynth") == nullptr);
     json_t* manifest = json_load_file("plugin.json", 0, nullptr);

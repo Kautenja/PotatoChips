@@ -82,3 +82,12 @@ builds use committed SVG paths; no font is loaded by the plugin. The font
 license is separate from the project's panel composition/artwork terms.
 The module palettes and title compositions were prepared with Codex in 2026;
 AI concept sheets are design references, not runtime assets.
+
+## YM2151 Dependencies
+
+Voice 2151 links the pinned ymfm OPM core under its
+[BSD 3-Clause license](docs/licenses/BSD-3-Clause-ymfm.txt). The independently
+pinned Nuked-OPM core is a test reference only, under
+[LGPL-2.1-or-later](docs/licenses/LGPL-2.1-Nuked-OPM.txt). Exact revisions,
+checksums and the mechanical ymfm C++11 changes are recorded in each
+`dep/` provenance file and the component inventory.

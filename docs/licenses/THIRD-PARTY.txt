@@ -241,3 +241,26 @@ contain only the generated panels and font notice, not the TTF/toolchain.
 Paired palette/title compositions prepared with Codex in October 2026.
 Built-in ImageGen concept sheets remain development references. Existing
 panel/control-label/chip illustrations retain their preceding provenance.
+
+Yamaha OPM engines (spec 011)
+----------------------------
+Production: dep/ymfm/ymfm_opm.cpp, ymfm_opm.h, ymfm_fm.ipp, ymfm_fm.h, ymfm.h.
+Origin: https://github.com/aaronsgiles/ymfm
+Revision: 81aec25ccbb98f4873a255f7551ac4dadac59b4a.
+Copyright 2021 Aaron Giles; BSD-3-Clause-ymfm.txt reproduces upstream LICENSE.
+Two mechanical C++11 compatibility changes only: replace make_unique with
+unique_ptr.reset(new ...), and remove constexpr on two assertion-bearing
+OPM offset helpers. No synthesis tables or algorithms changed.
+
+Independent test reference: dep/Nuked-OPM/opm.c and opm.h.
+Origin: https://github.com/nukeykt/Nuked-OPM
+Revision: f209e6ed3712032b641d53ce8fb24824eae6adc3.
+Copyright 2020, 2026 Nuke.YKT; LGPL-2.1-or-later.
+LGPL-2.1-Nuked-OPM.txt reproduces upstream LICENSE. Unmodified, compiled as
+C for tests only. Not linked into the plugin. No ROMs or voice banks used.
+Both dependencies have exact local checksums in dep/<name>/provenance.json.
+
+Voice 2151 panels and algorithm diagrams are original vector compositions,
+prepared with Codex in 2026, under the project's CC-BY-NC-ND-4.0 artwork
+terms. Lettering reuses the pinned Liberation Sans font above; editable
+sources and glyph outlines are retained in specs/assets/011/.

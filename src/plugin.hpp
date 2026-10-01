@@ -43,6 +43,7 @@ extern rack::Model *modelMiniBoss;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
 extern rack::Model *modelSuperVCA;
+extern rack::Model *modelYM2151;
 
 extern rack::Model *modelChipS_SMP_Blank1;
 extern rack::Model *modelBossFight_Blank1;

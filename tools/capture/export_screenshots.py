@@ -23,6 +23,7 @@ def prepare(capture_dir, module=None, theme="Dark"):
         raise ValueError('Stale or mismatched capture batch; run capture again')
     images = []
     baseline = json.loads((ROOT / 'specs/assets/012/layout.json').read_text())['modules']
+    baseline += json.loads((ROOT / 'specs/assets/011/layout.json').read_text())['modules']
     for row in rows:
         name = row['manual'] or row['slug']
         report = json.loads((capture_dir / f'{name}.json').read_text())

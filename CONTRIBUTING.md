@@ -122,11 +122,11 @@ make check-build
 python3 scripts/validate.py dependencies
 ```
 
-`test` and `test-dsp` run all 11 DSP suites; `test-build` only compiles them.
+`test` and `test-dsp` discover and run the DSP suites; `test-build` only compiles them.
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.
-`make all test-rack` requires the SDK. Its six headless suites cover all 16
+`make all test-rack` requires the SDK. Its headless suites cover all 17
 registered models, parameter/default/custom-JSON contracts, existing presets
 and project modules in debug patches, representative audio, common chip
 processing, editor/display ownership, Echo FIR/randomization, and Contour
@@ -200,7 +200,7 @@ build, and an actual manual Rack session in completion reports.
 Edit `manual/<Module>/sections/*.tex`; keep identity, explicit manifest
 version and section order in each `manual.tex`. Shared typography and build
 rules live in `manual/latex/`. See [the manual guide](manual/README.md) for
-prerequisites, the 14-file inventory, source audit and rendered-page review.
+prerequisites, the 15-file inventory, source audit and rendered-page review.
 
 ```shell
 make -C manual
@@ -247,13 +247,14 @@ VCV Library. Work through these checks for an explicitly requested release:
     not verify their contents. Automate this with
     `python3 scripts/validate.py package <archive.vcvplugin>`; it also checks
     every resource/preset and rejects packaged test/dependency code.
-5.  Build and inspect all 14 manuals. The collection writes to
+5.  Build and inspect all 15 manuals. The collection writes to
     `manual/.build/`; preserve the PDF names used by `plugin.json` and README:
     `Blocks.pdf`, `InfiniteStairs.pdf`, `StepSaw.pdf`, `Pulses.pdf`,
     `Jairasullator.pdf`, `PotKeys.pdf`, `MegaTone.pdf`, `BossFight.pdf`,
     `MiniBoss.pdf`, `NameCorpOctalWaveGenerator.pdf`,
-    `PalletTownWavesSystem.pdf`, `SuperADSR.pdf`, `SuperEcho.pdf`, and
-    `SuperVCA.pdf`. PDF assets are published separately from plugin packages.
+    `PalletTownWavesSystem.pdf`, `SuperADSR.pdf`, `SuperEcho.pdf`,
+    `SuperVCA.pdf`, and `YM2151.pdf`. PDF assets are published separately
+    from plugin packages.
 6.  Publish only when authorized. Confirm uploaded release assets and links;
     a checkout, tag, GitHub release, and PDF upload are different outputs.
 7.  Submit the release separately through the

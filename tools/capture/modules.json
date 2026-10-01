@@ -94,5 +94,11 @@
     "manual": "StepSaw",
     "width": 120,
     "panel": "StepSaw.svg"
+  },
+  {
+    "slug": "YM2151",
+    "manual": "YM2151",
+    "width": 900,
+    "panel": "YM2151.svg"
   }
 ]

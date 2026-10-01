@@ -8,7 +8,7 @@ SDK_FREE_GOALS += $(DSP_ALIASES)
 ifneq ($(strip $(filter-out $(SDK_FREE_GOALS),$(or $(MAKECMDGOALS),all))),)
 RACK_DIR ?= ../..
 FLAGS += -DTEST -Wno-unused-local-typedefs
-SOURCES += $(wildcard src/dsp/*.cpp src/*.cpp)
+SOURCES += $(wildcard src/dsp/*.cpp src/*.cpp) dep/ymfm/ymfm_opm.cpp
 DISTRIBUTABLES += LICENSE LICENSING.md docs/licenses res presets
 # Preserve SDK link/package/install recipes, but isolate project objects.
 override OBJECTS := $(patsubst %,.build/plugin/%.o,$(SOURCES))

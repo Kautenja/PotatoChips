@@ -1,0 +1,212 @@
+[
+  {
+    "key": "VOICE 2151",
+    "name": "VOICE 2151",
+    "sub": "VOICE 2151"
+  },
+  {
+    "key": "YAMAHA OPM",
+    "name": "YAMAHA OPM",
+    "sub": "YAMAHA OPM"
+  },
+  {
+    "key": "VOICE",
+    "name": "VOICE",
+    "sub": "VOICE"
+  },
+  {
+    "key": "OPERATOR 1",
+    "name": "OPERATOR 1",
+    "sub": "OPERATOR 1"
+  },
+  {
+    "key": "OPERATOR 2",
+    "name": "OPERATOR 2",
+    "sub": "OPERATOR 2"
+  },
+  {
+    "key": "OPERATOR 3",
+    "name": "OPERATOR 3",
+    "sub": "OPERATOR 3"
+  },
+  {
+    "key": "OPERATOR 4",
+    "name": "OPERATOR 4",
+    "sub": "OPERATOR 4"
+  },
+  {
+    "key": "TUNE",
+    "name": "TUNE",
+    "sub": "TUNE"
+  },
+  {
+    "key": "ALG",
+    "name": "ALG",
+    "sub": "ALG"
+  },
+  {
+    "key": "FB",
+    "name": "FB",
+    "sub": "FB"
+  },
+  {
+    "key": "LEVEL",
+    "name": "LEVEL",
+    "sub": "LEVEL"
+  },
+  {
+    "key": "LFO",
+    "name": "LFO",
+    "sub": "LFO"
+  },
+  {
+    "key": "AMD",
+    "name": "AMD",
+    "sub": "AMD"
+  },
+  {
+    "key": "PMD",
+    "name": "PMD",
+    "sub": "PMD"
+  },
+  {
+    "key": "AMS",
+    "name": "AMS",
+    "sub": "AMS"
+  },
+  {
+    "key": "PMS",
+    "name": "PMS",
+    "sub": "PMS"
+  },
+  {
+    "key": "WAVE",
+    "name": "WAVE",
+    "sub": "WAVE"
+  },
+  {
+    "key": "NOISE",
+    "name": "NOISE",
+    "sub": "NOISE"
+  },
+  {
+    "key": "RATE",
+    "name": "RATE",
+    "sub": "RATE"
+  },
+  {
+    "key": "ROUTE",
+    "name": "ROUTE",
+    "sub": "ROUTE"
+  },
+  {
+    "key": "AR",
+    "name": "AR",
+    "sub": "AR"
+  },
+  {
+    "key": "D1",
+    "name": "D1",
+    "sub": "D1"
+  },
+  {
+    "key": "SR",
+    "name": "SR",
+    "sub": "SR"
+  },
+  {
+    "key": "SL",
+    "name": "SL",
+    "sub": "SL"
+  },
+  {
+    "key": "RR",
+    "name": "RR",
+    "sub": "RR"
+  },
+  {
+    "key": "VOL",
+    "name": "VOL",
+    "sub": "VOL"
+  },
+  {
+    "key": "MUL",
+    "name": "MUL",
+    "sub": "MUL"
+  },
+  {
+    "key": "KS",
+    "name": "KS",
+    "sub": "KS"
+  },
+  {
+    "key": "DT1",
+    "name": "DT1",
+    "sub": "DT1"
+  },
+  {
+    "key": "DT2",
+    "name": "DT2",
+    "sub": "DT2"
+  },
+  {
+    "key": "AM",
+    "name": "AM",
+    "sub": "AM"
+  },
+  {
+    "key": "V/OCT",
+    "name": "V/OCT",
+    "sub": "V/OCT"
+  },
+  {
+    "key": "GATE",
+    "name": "GATE",
+    "sub": "GATE"
+  },
+  {
+    "key": "TRIG",
+    "name": "TRIG",
+    "sub": "TRIG"
+  },
+  {
+    "key": "L",
+    "name": "L",
+    "sub": "L"
+  },
+  {
+    "key": "R",
+    "name": "R",
+    "sub": "R"
+  },
+  {
+    "key": "1",
+    "name": "1",
+    "sub": "1"
+  },
+  {
+    "key": "2",
+    "name": "2",
+    "sub": "2"
+  },
+  {
+    "key": "3",
+    "name": "3",
+    "sub": "3"
+  },
+  {
+    "key": "4",
+    "name": "4",
+    "sub": "4"
+  },
+  {
+    "key": "OUT",
+    "name": "OUT",
+    "sub": "OUT"
+  },
+  {
+    "key": "ARHYTHMETIC UNITS",
+    "name": "ARHYTHMETIC UNITS",
+    "sub": "ARHYTHMETIC UNITS"
+  }
+]

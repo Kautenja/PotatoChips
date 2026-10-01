@@ -1,6 +1,6 @@
 # Stable release filenames; blanks and disabled models have no manuals.
 .DEFAULT_GOAL := all
-MODULES := SuperEcho InfiniteStairs BossFight MiniBoss NameCorpOctalWaveGenerator PalletTownWavesSystem Blocks Jairasullator MegaTone PotKeys Pulses StepSaw SuperADSR SuperVCA
+MODULES := YM2151 SuperEcho InfiniteStairs BossFight MiniBoss NameCorpOctalWaveGenerator PalletTownWavesSystem Blocks Jairasullator MegaTone PotKeys Pulses StepSaw SuperADSR SuperVCA
 .PHONY: all manual clean $(MODULES)
 all: manual
 manual: $(MODULES)

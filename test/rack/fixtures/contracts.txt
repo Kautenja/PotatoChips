@@ -314,3 +314,62 @@ Sony_S_SMP_Blank1 0 0 0 0
 null
 2612_Blank1 0 0 0 0
 null
+YM2151 57 38 2 0
+Tune -4 4 0 0
+Algorithm 0 7 0 1
+Operator 1 feedback 0 7 0 1
+Output level 0 1 0.80000001192092896 0
+LFO frequency register 0 255 0 1
+LFO AM depth 0 127 0 1
+LFO PM depth 0 127 0 1
+Channel AM sensitivity 0 3 0 1
+Channel PM sensitivity 0 7 0 1
+LFO waveform 0 3 0 1
+Operator 4 noise 0 1 0 1
+Noise rate 0 31 16 1
+Hardware output route 0 2 2 1
+Operator 1 Attack rate 0 31 31 1
+Operator 1 First decay rate 0 31 0 1
+Operator 1 Sustain rate 0 31 0 1
+Operator 1 Sustain level 0 15 15 1
+Operator 1 Release rate 0 15 15 1
+Operator 1 Operator level 0 127 100 1
+Operator 1 Multiplier 0 15 1 1
+Operator 1 Key-rate scaling 0 3 0 1
+Operator 1 DT1 0 7 0 1
+Operator 1 DT2 0 3 0 1
+Operator 1 AM enable 0 1 0 1
+Operator 2 Attack rate 0 31 31 1
+Operator 2 First decay rate 0 31 0 1
+Operator 2 Sustain rate 0 31 0 1
+Operator 2 Sustain level 0 15 15 1
+Operator 2 Release rate 0 15 15 1
+Operator 2 Operator level 0 127 100 1
+Operator 2 Multiplier 0 15 1 1
+Operator 2 Key-rate scaling 0 3 0 1
+Operator 2 DT1 0 7 0 1
+Operator 2 DT2 0 3 0 1
+Operator 2 AM enable 0 1 0 1
+Operator 3 Attack rate 0 31 31 1
+Operator 3 First decay rate 0 31 0 1
+Operator 3 Sustain rate 0 31 0 1
+Operator 3 Sustain level 0 15 15 1
+Operator 3 Release rate 0 15 15 1
+Operator 3 Operator level 0 127 100 1
+Operator 3 Multiplier 0 15 1 1
+Operator 3 Key-rate scaling 0 3 0 1
+Operator 3 DT1 0 7 0 1
+Operator 3 DT2 0 3 0 1
+Operator 3 AM enable 0 1 0 1
+Operator 4 Attack rate 0 31 31 1
+Operator 4 First decay rate 0 31 0 1
+Operator 4 Sustain rate 0 31 0 1
+Operator 4 Sustain level 0 15 15 1
+Operator 4 Release rate 0 15 15 1
+Operator 4 Operator level 0 127 127 1
+Operator 4 Multiplier 0 15 1 1
+Operator 4 Key-rate scaling 0 3 0 1
+Operator 4 DT1 0 7 0 1
+Operator 4 DT2 0 3 0 1
+Operator 4 AM enable 0 1 0 1
+null

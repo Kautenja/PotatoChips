@@ -1,7 +1,7 @@
 # Yamaha YM2151 Synth Voice
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 Issue: [#79](https://github.com/Kautenja/PotatoChips/issues/79)
 Planning baseline: `a6e7f086` (product source unchanged from `33fb1554`).
 
@@ -224,17 +224,17 @@ recording compiler flags, machine, worker settings, repeated-run median,
 tail, and maximum observed time. Establish the target-machine callback
 budget during the prototype and verify native Rack meets it at 16 voices.
 
-- [ ] A pinned, attributed core and documented prototype decision establish
+- [x] A pinned, attributed core and documented prototype decision establish
       accurate control mapping, C++11 integration, and feasible 16-voice cost.
-- [ ] The new registered module implements the interface, isolated voices,
+- [x] The new registered module implements the interface, isolated voices,
       event contract, clocking, noise, and outputs described above.
 - [ ] Core/adapter and real-module tests pass with reference evidence;
       applicable existing DSP suites and supported-platform builds pass.
 - [ ] Native Rack confirms four-voice playing, 16-voice stress, patch/preset
       reload, both themes, live switching, and browser preview safety.
-- [ ] Panel, original presets/debug patch, manual/capture, README, changelog,
+- [x] Panel, original presets/debug patch, manual/capture, README, changelog,
       dependency notices, and packaging/publication inventories are complete.
-- [ ] Existing module behavior and patch compatibility remain intact, and
+- [x] Existing module behavior and patch compatibility remain intact, and
       disabled modules remain disabled.
 - [ ] #79 has a verified resolution comment with accessible implementation
       commit links, is closed as completed, and its final state is recorded.
@@ -242,21 +242,22 @@ budget during the prototype and verify native Rack meets it at 16 voices.
 ## Validation Commands
 
 Run from the repository root with a prepared Rack 2 SDK/tree, matching
-runtime, C/C++11 compiler, SCons, and pinned Catch2 v2. Current commands:
+runtime, a C compiler, C++11 production/C++14 test compiler, Make, and the
+vendored Catch2 v3.16.0. Current commands:
 
 ```shell
 make -j2
-scons -j2 test
+make -j2 test test-rack
 python3 -m json.tool plugin.json > /dev/null
 git diff --check
 ```
 
-Implement these proposed targets, or record exact equivalents from 002;
-none exists at planning time. Wire dependency sources into standalone DSP
-tests explicitly and exclude SDK-dependent tests from SCons discovery:
+The originally proposed SCons commands are superseded by spec 002
+Make-based targets. The implemented equivalents compile the dependency
+explicitly and keep SDK-dependent tests separate:
 
 ```shell
-scons test/dsp/yamaha_ym2151/test_voice.cpp
+make test/dsp/yamaha_ym2151/test_voice
 make -C test/rack ym2151 RACK_DIR="$(pwd)/../.."
 make -C test/rack benchmark-ym2151 RACK_DIR="$(pwd)/../.."
 make -C manual/YM2151
@@ -309,13 +310,170 @@ this first module. No release/version selection or closure from planning.
 
 ## Completion Evidence
 
-Planning: issue/comment, local registration/DSP/build/manual paths, and
-upstream core candidates reviewed on 2026-10-01. Prototype, final core/
-panel decisions, implementation, and executable/native verification pending.
+Implemented locally on 2026-10-01. Keep this spec open for supported-platform
+CI, the remaining interactive checks below, and public commit/issue closure.
+The implementation is not a release or a claim that #79 is resolved remotely.
+
+### Core Decision And Prototype
+
+Selected ymfm at `81aec25ccbb98f4873a255f7551ac4dadac59b4a`, BSD-3-Clause.
+Production includes only its OPM translation unit. Two mechanical C++11
+changes replace `make_unique` and remove assertion-bearing `constexpr`;
+all synthesis logic and tables are unchanged. Original/local checksums and
+exact edits are in [provenance](../dep/ymfm/provenance.json). Nuked-OPM at
+`f209e6ed3712032b641d53ce8fb24824eae6adc3` remains an unmodified C test
+reference, never a production engine. Both license texts are packaged.
+
+Target: Apple M1 Pro, macOS 26.6.2 arm64, Apple Clang 21.0.0,
+production C++11, single processing thread. Chosen module budget is less
+than 50% median callback time at 16 lanes, leaving at least half for host and
+other modules. Record p99 and maximum separately; desktop scheduling can
+produce outliers. No claim of a hard real-time OS guarantee.
+
+The initial silent Nuked lower-bound probe already cost 183.71% of one
+thread's budget at 16 independent chips. A repeated probe measured
+12.23% / 47.43% / 181.26% at 1 / 4 / 16 chips. Active ymfm measured
+0.36% / 1.36% / 5.43%, before host/resampling work. This establishes why
+Nuked was rejected even before active-note costs; independent active-note
+reference tests subsequently verify its decoded output. Prototype sources
+are retained in `assets/011/prototype-*.cpp`.
+
+```shell
+clang -O3 -c dep/Nuked-OPM/opm.c -o /tmp/opm.o
+clang++ -O3 -std=c++11 -Idep/Nuked-OPM specs/assets/011/prototype-nuked.cpp /tmp/opm.o -o /tmp/opm-benchmark
+/tmp/opm-benchmark
+clang++ -O3 -std=c++11 -pedantic-errors -Idep/ymfm specs/assets/011/prototype-ymfm.cpp dep/ymfm/ymfm_opm.cpp -o /tmp/ymfm-benchmark
+/tmp/ymfm-benchmark
+```
+
+### Frozen Interface And Timing
+
+Display name **Voice 2151**, slug `YM2151`, 60 HP. No existing module IDs
+changed. The actual current inventory is 17 manifest/registered models,
+15 sound manuals and two blanks; removed experimental modules stay removed.
+The historical 19-entry planning count is superseded.
+
+The complete ranges, defaults, units, quantization, +8 V full-range additive
+CV scale and normalled behavior are in the new
+[control reference](../manual/YM2151/sections/controls.tex). Frozen IDs:
+
+| IDs | Meaning |
+| --- | --- |
+| Params 0-12 | Tune, algorithm, feedback, level, LFO frequency, AMD, PMD, AMS, PMS, waveform, noise enable, noise rate, route |
+| Params 13 + 11n through 23 + 11n | Operator n+1: AR, D1, SR, SL, RR, level, multiplier, KS, DT1, DT2, AM enable; n=0..3 |
+| Inputs 0-9 | V/oct, gate, retrigger, algorithm, feedback, LFO frequency, AMD, PMD, noise rate, output level |
+| Inputs 10 + 7n through 16 + 7n | Operator n+1: AR, D1, SR, SL, RR, level, multiplier CV |
+| Outputs 0-1 | Left, right; independently full-level, both routed by default |
+
+Master clock 3,579,545 Hz is traced to ymfm's OPM phase-table derivation in
+`ymfm_fm.ipp`; native rate is clock/64. Register KC zero corresponds to C#0;
+C4 is 47 semitones above it, KC 0x3e / KF 0. Fraction resolution is 1/64
+semitone. Clamp to C#0 through C#8 minus 1/64 semitone. The FIR is a causal
+32-tap Blackman low pass with cutoff min(20 kHz, 0.4 host rate), followed by
+fractional linear resampling. Filter group delay is 15.5 native samples;
+output gain is 10/32768 V per decoded PCM unit times LEVEL, bounded at +/-10 V.
+The measured full-level single carrier is about 2.5 V peak before LEVEL.
+
+One write transaction per native tick honors ymfm's 64-master-clock busy
+contract. Pitch code/fraction are snapshotted as a two-write transaction;
+AM/PM depth uses separate pending slots for the shared physical register.
+A fixed 256-slot control queue coalesces each replaceable register. A
+64-entry key FIFO preserves every accepted event. Rising/retrigger events
+reserve one release slot; overload rejects the whole new event and counts
+it. Sustained 1 kHz retrigger input is supported; unlimited audio-rate bus
+traffic is not. At steady state the tested retrigger reached both key writes
+within three 48 kHz frames despite control traffic. First notes wait for
+initial configuration; the worst initial control set is under 0.7 ms.
+The full FIFO drains within about 1.15 ms plus initial configuration.
+
+Gates and retriggers sample every host frame at 2 V / 0.01 V hysteresis,
+with the required coincidence/fall precedence. Mono CV broadcasts; missing
+lanes on a short poly cable are zero; the widest input sets 1-16 lanes.
+Removed lanes restore a constructor-prepared snapshot, including LFO/noise,
+without allocation. Rate changes preserve chip state. UI reads only an
+atomic algorithm index; all saved state uses Rack's parameter serializer.
+The audio callback does not allocate, log, lock or access files. Constructor
+allocations prepare ymfm channels/operators and reset snapshots.
+
+### Validation Run
+
+-   `make -j2`: passed, C++11 plugin on local Rack 2.6 headers/library.
+-   `make -j2 test test-rack`: all local suites passed, including unchanged
+    existing-module parameter/audio fixtures and concurrent spec 009 tests.
+-   `make test/dsp/yamaha_ym2151/test_voice`: passed, eight cases including
+    all algorithms, AM/PM and four waveforms, noise, detune/multiplier
+    extremes, zero attack, envelope behavior, clocking, reset, bus overload
+    and lane isolation. Independent pinned Nuked renders compare sine pitch
+    within 0.3%, sine RMS within 3%, algorithm RMS within 10%, and filtered
+    modulation/noise/envelope RMS within 10% or 0.002 normalized units.
+    The reference noise stream is filtered offline using the documented FIR
+    before comparison; comparing raw DAC noise against filtered output would
+    conflate the reconstruction filter with core behavior. These are numeric
+    feature checks, not a bit-identical-core claim.
+-   `make test/dsp/yamaha_ym2151/test_voice TEST_MODE=asan-ubsan CXX=clang++`:
+    passed. Adapter and production ymfm are instrumented; the independent
+    unmodified Nuked C reference is compiled ordinarily.
+-   `make -C test/rack ym2151 RACK_DIR="$(pwd)/../.."`: passed. Every divider
+    offset at 44.1/48/96 kHz, gate/retrigger precedence, mono broadcast,
+    uneven poly cables, shrink/grow, reset, all three preset reloads,
+    standard JSON duplicate/restore, randomize and concurrent instances.
+-   `make -C test/rack benchmark-ym2151 RACK_DIR="$(pwd)/../.."`: passed.
+    [Raw callback measurements](assets/011/benchmark.csv) contain 300
+    repeats per 1/4/16-lane, 64/256-frame, 44.1/48/96 kHz workload after
+    2,048 warmup frames. Compiler uses Rack's `-O3` and
+    `-funsafe-math-optimizations`; one thread, no audio device or I/O.
+    16-lane medians are about 10-12% of callback duration. Owned module
+    storage including chip heap payload is 165,368 bytes, excluding Rack
+    vectors, allocator bookkeeping and UI assets; it does not grow per frame.
+-   Native `tools/capture` renderer: live and null-module light/dark panels,
+    live preference switching and context recreation passed. Reviewed both
+    themes; fixed label overlaps, then exported the production dark capture
+    and geometry guide. Original panel/algorithm sources and approved
+    geometry are retained in `assets/011/`.
+-   Isolated official Rack Free 2.4.0 profiles loaded the packaged module
+    plus 8vert, LFO, Merge and Scope. Four distinct pitch lanes rendered on
+    Scope. A second dark-theme session showed Merge=16, active Scope traces
+    and approximately 14.3% average / 18.6% maximum total Rack CPU in the
+    observed frame at 48 kHz, one worker. No audio device was selected.
+    Rack Pro 2.6.3 loaded the patch but its fresh profile required activation;
+    no credentials were copied or entered. Temporary processes were closed.
+-   `make -C manual/YM2151` and `make -C manual`: passed, 15 manuals. All nine
+    new-manual pages rendered and reviewed; operator table moved to its own
+    page to avoid a stranded final row. `scripts/validate.py manuals` passed
+    with the bundled Poppler directory on PATH.
+-   `python3 scripts/validate.py dependencies`: passed pinned hashes/notices.
+-   `make -j2 dist` and `python3 scripts/validate.py package
+    dist/KautenjaDSP-PotatoChips-2.1.0-mac-arm64.vcvplugin`: passed.
+-   `make check-build`: passed after adding the new production translation
+    unit to the existing disposable build fixture. Manifest JSON and
+    `git diff --check`: passed.
+
+Exact capture/export commands (native renderer needs desktop access):
+
+```shell
+make -C tools/capture capture MODULE=YM2151
+python3 tools/capture/export_screenshots.py tools/capture/.build/captures manual --module YM2151
+python3 tools/capture/draw_panels.py tools/capture/.build/captures --module YM2151
+```
+
+### Remaining Acceptance And Issue Follow-Through
+
+Linux x64 and Windows x64 builds are not run locally; existing CI must verify
+them after an authorized push. Interactive preset-menu reload, reset and
+randomize/duplicate gestures were covered through the real-module harness,
+not a complete GUI gesture tour. Audible audio-device listening remains
+unperformed; native Scope confirms synthesis, not listening. No full hardware
+capture or bit-exact reference claim is made.
+
+The issue was re-read and remains open. The tested implementation is to be
+committed locally; no push or release is authorized by this spec. Therefore
+public fixing-commit links, the final resolution comment and issue closure
+remain pending. Do not mark COMPLETE or archive until these remaining
+acceptance items are satisfied.
 
 | Issue | Implementation Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #79 | Pending | Source review only; prototype/reference/native checks pending | Pending | Open at planning time |
+| #79 | Local implementation commit pending | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening pending | Progress update pending; closure pending publication | Open, re-read 2026-10-01 |
 
 [nuked-commit]: https://github.com/nukeykt/Nuked-OPM/commit/f209e6ed3712032b641d53ce8fb24824eae6adc3
 [nuked-header]: https://github.com/nukeykt/Nuked-OPM/blob/f209e6ed3712032b641d53ce8fb24824eae6adc3/opm.h

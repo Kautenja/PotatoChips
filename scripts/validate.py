@@ -28,6 +28,16 @@ def dependencies():
     if (ROOT / 'docs/licenses/BSL-1.0.txt').read_bytes() != (ROOT / 'dep/catch2-v3/LICENSE_1_0.txt').read_bytes():
         raise ValueError('Packaged Catch2 license differs from vendored license')
 
+    for dependency, notice in [('ymfm', 'BSD-3-Clause-ymfm.txt'),
+                               ('Nuked-OPM', 'LGPL-2.1-Nuked-OPM.txt')]:
+        folder = ROOT / 'dep' / dependency
+        pins = json.loads((folder / 'provenance.json').read_text())
+        for name, digest in pins['sha256'].items():
+            if hashlib.sha256((folder / name).read_bytes()).hexdigest() != digest:
+                raise ValueError(f'{dependency} checksum mismatch: {name}')
+        if (ROOT / 'docs/licenses' / notice).read_bytes() != (folder / 'LICENSE').read_bytes():
+            raise ValueError(f'{dependency} packaged license mismatch')
+
 
 def package(path):
     data = subprocess.check_output(['zstd', '-dc', str(path)])
@@ -52,11 +62,11 @@ def package(path):
 def manuals(directory):
     """Spec 004's strict publication gate; current legacy PDFs may fail."""
     expected = [m for m in MANIFEST['modules'] if not m.get('disabled') and m.get('manualUrl')]
-    if len(expected) != 14:
+    if len(expected) != 15:
         raise ValueError('Review manual inventory when enabled modules change')
     names = {Path(urlparse(m['manualUrl']).path).name for m in expected}
     if {p.name for p in directory.glob('*.pdf')} != names:
-        raise ValueError('Missing or unexpected manual PDF; require all 14 sound modules, no blanks/disabled entries')
+        raise ValueError('Missing or unexpected manual PDF; require all 15 sound modules, no blanks/disabled entries')
     for module in expected:
         path = directory / Path(urlparse(module['manualUrl']).path).name
         info = subprocess.check_output(['pdfinfo', str(path)], text=True)

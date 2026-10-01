@@ -19,8 +19,9 @@ Spec 007 is COMPLETE and archived: Contour uses the 32 kHz envelope clock,
 releases and rearms reliably, labels sustain rate SR, and closes #98.
 Spec 009 is IN PROGRESS: the YM2612 event-path fix is verified; the original
 one-shot report and upstream issue resolution remain outstanding.
-Specs 010-011 remain PLANNED: optional
-Nuked-OPN2 engines, and a YM2151 module. Specifications
+Spec 010 remains PLANNED for optional Nuked-OPN2 engines. Spec 011 is
+IN PROGRESS: Voice 2151 is implemented and locally verified; cross-platform
+checks, listening and public issue resolution remain outstanding. Specifications
 and source completion are not release promises; see each record for scope,
 platform validation and publication limits.
 
@@ -142,7 +143,7 @@ can lag their code: for example, Fourier's Catch2 README still mentions
 SCons although its active build is Make-based. Verify the implementation
 before transferring an instruction.
 
-The current manifest has 16 entries: 14 active sound modules with manuals
+The current manifest has 17 entries: 15 active sound modules with manuals
 and two active blank panels. SuperSampler and SuperSynth were removed on
 2026-10-01; their unused Sony S-DSP processor, BRR sample player, and tests
 were also removed. DSP components used by active modules remain. Earlier

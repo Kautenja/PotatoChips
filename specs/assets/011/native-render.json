@@ -1,0 +1,116 @@
+{
+  "source_sha256": "9d46caa1d05d5dc3db36d07f3fb7b62862eee341ba64724d4740ed620092bc23",
+  "inventory": [
+    {
+      "slug": "Blocks",
+      "manual": "Blocks",
+      "width": 150,
+      "panel": "Blocks.svg"
+    },
+    {
+      "slug": "MiniBoss",
+      "manual": "MiniBoss",
+      "width": 240,
+      "panel": "MiniBoss.svg"
+    },
+    {
+      "slug": "106",
+      "manual": "NameCorpOctalWaveGenerator",
+      "width": 510,
+      "panel": "NameCorpOctalWaveGenerator.svg"
+    },
+    {
+      "slug": "2612",
+      "manual": "BossFight",
+      "width": 975,
+      "panel": "BossFight.svg"
+    },
+    {
+      "slug": "2612_Blank1",
+      "manual": null,
+      "width": 480,
+      "panel": "BossFight-Envelope.svg"
+    },
+    {
+      "slug": "2A03",
+      "manual": "InfiniteStairs",
+      "width": 150,
+      "panel": "InfiniteStairs.svg"
+    },
+    {
+      "slug": "AY_3_8910",
+      "manual": "Jairasullator",
+      "width": 255,
+      "panel": "Jairasullator.svg"
+    },
+    {
+      "slug": "FME7",
+      "manual": "Pulses",
+      "width": 120,
+      "panel": "Pulses.svg"
+    },
+    {
+      "slug": "GBS",
+      "manual": "PalletTownWavesSystem",
+      "width": 300,
+      "panel": "PalletTownWavesSystem.svg"
+    },
+    {
+      "slug": "POKEY",
+      "manual": "PotKeys",
+      "width": 210,
+      "panel": "PotKeys.svg"
+    },
+    {
+      "slug": "SuperADSR",
+      "manual": "SuperADSR",
+      "width": 180,
+      "panel": "SuperADSR.svg"
+    },
+    {
+      "slug": "SuperEcho",
+      "manual": "SuperEcho",
+      "width": 240,
+      "panel": "SuperEcho.svg"
+    },
+    {
+      "slug": "SuperVCA",
+      "manual": "SuperVCA",
+      "width": 90,
+      "panel": "SuperVCA.svg"
+    },
+    {
+      "slug": "Sony_S_SMP_Blank1",
+      "manual": null,
+      "width": 420,
+      "panel": "S-SMP-Chip.svg"
+    },
+    {
+      "slug": "SN76489",
+      "manual": "MegaTone",
+      "width": 150,
+      "panel": "MegaTone.svg"
+    },
+    {
+      "slug": "VRC6",
+      "manual": "StepSaw",
+      "width": 120,
+      "panel": "StepSaw.svg"
+    },
+    {
+      "slug": "YM2151",
+      "manual": "YM2151",
+      "width": 900,
+      "panel": "YM2151.svg"
+    }
+  ],
+  "revision": "f1a6e531f3204826b44d7412b83358901574de10",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "sample_rate": 48000,
+  "samples": 4800,
+  "fixture": "Constructor defaults; no patched signals; RNG seed 0x504f5441544f/0x4348495053",
+  "rack_library_sha256": {
+    "libRack.dylib": "0ee091bb5065326c1e5a101d38ac2c3de00f962fd049294f50f11582b53a820e"
+  },
+  "themes": "Native light/dark panels, ports and screws; state/history/geometry unchanged"
+}

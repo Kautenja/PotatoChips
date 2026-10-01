@@ -33,8 +33,8 @@ For an explicit light export, pass `--theme Light` to `export_screenshots.py`.
 using the reviewed groups in `regions.json`. Select a manual directory name
 with `MODULE`; blank smoke captures accept their manifest slug. Neither
 blank has a publication PNG.
-The [inventory](modules.json) explicitly maps all 16 enabled slugs, panel
-files, widths and 14 manual directories; changes in that inventory require
+The [inventory](modules.json) explicitly maps all 17 enabled slugs, panel
+files, widths and 15 manual directories; changes in that inventory require
 review. No sibling checkout is a build dependency.
 
 For repeated export from an unchanged capture, without rerunning Rack:
@@ -111,13 +111,13 @@ Do not expect pixel-identical output across different OS/font/graphics builds.
 macOS is verified; Linux's build path is provided but unverified. Windows
 native capture is unsupported. These limits do not affect normal PDF builds.
 
-All 16 live and preview panels use paired native artwork. The renderer
+All 17 live and preview panels use paired native artwork. The renderer
 asserts the selected panel, port and screw SVG pointers, unchanged control
 geometry, module JSON and patch history across each light/dark/light toggle.
 It also verifies immediate construction with dark preference selected.
 Additional views exercise 75%/150% zoom and 50% room dimming outside the
 mouse spotlight, retaining emissive light layers. The exporter rejects
-identical light/dark pixels and requires 32 restored
+identical light/dark pixels and requires 34 restored
 context views to match their light images exactly.
 
 Spec 012's [artwork source](../../specs/assets/012/README.md) pins all titles,

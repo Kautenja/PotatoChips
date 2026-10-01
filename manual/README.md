@@ -1,6 +1,6 @@
 # Potato Chips Manuals
 
-The 14 sound-module manuals share typography and build rules while keeping
+The 15 sound-module manuals share typography and build rules while keeping
 module-specific operating instructions in `manual/<Module>/sections/`.
 `manual.tex` declares the manifest name, explicit version and section order.
 The two blank panels have no manuals.
@@ -60,6 +60,7 @@ recovery and cleaning. It runs real TeX without modifying these sources.
 | `SuperADSR` | `SuperADSR.pdf` |
 | `SuperEcho` | `SuperEcho.pdf` |
 | `SuperVCA` | `SuperVCA.pdf` |
+| `YM2151` | `YM2151.pdf` |
 
 With Poppler's `pdfinfo`, `pdftotext` and `pdftoppm` on PATH, validate the
 collection and render every page for inspection:
@@ -79,7 +80,7 @@ git diff --check
 Inspect every rendered page, including covers, contents, tables, figures and
 colophons. Check selectable text, linked contents, outline destinations,
 external links and English language metadata in a PDF reader. Rebuild and
-review all 14 after a shared-style or shared-figure change. Generated PDFs,
+review all 15 after a shared-style or shared-figure change. Generated PDFs,
 auxiliaries and temporary renders are not source files to commit.
 
 ## Writing And Source Checks

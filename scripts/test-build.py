@@ -20,7 +20,7 @@ class BuildTests(unittest.TestCase):
         shutil.copy(ROOT / 'Makefile', self.root)
         for name in ('mk', 'scripts'):
             shutil.copytree(ROOT / name, self.root / name)
-        for name in ('src', 'test/dsp', 'dep/catch2-v3', 'sdk/include', 'sdk/dep/include'):
+        for name in ('src', 'test/dsp', 'dep/catch2-v3', 'dep/ymfm', 'sdk/include', 'sdk/dep/include'):
             (self.root / name).mkdir(parents=True)
         (self.root / 'src/value.hpp').write_text('#define VALUE 0\n')
         (self.root / 'src/detail').mkdir()
@@ -33,6 +33,7 @@ class BuildTests(unittest.TestCase):
 int main() { return VALUE + helper(); }
 ''')
         (self.root / 'dep/catch2-v3/catch_amalgamated.cpp').write_text('int harness;\n')
+        (self.root / 'dep/ymfm/ymfm_opm.cpp').write_text('int ymfm_fixture;\n')
         (self.root / 'src/plugin.cpp').write_text('#include "sdk_value.hpp"\nint main() { return SDK_VALUE; }\n')
         (self.root / 'sdk/include/sdk_value.hpp').write_text('#define SDK_VALUE 0\n')
         (self.root / 'sdk/plugin.mk').write_text('''FLAGS += -I$(RACK_DIR)/include -I$(RACK_DIR)/dep/include -MMD -MP

@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/ricoh_2a03.hpp"
 #include "engine/chip_module.hpp"
 
@@ -136,8 +137,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 0V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getVoltage(channel) : 0.f;
-        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalVoltage(normalPitch, channel);
+        const auto normalPitch = oscillator ? inputs[INPUT_VOCT + oscillator - 1].getPolyVoltage(channel) : 0.f;
+        const auto pitchCV = inputs[INPUT_VOCT + oscillator].getNormalPolyVoltage(normalPitch, channel);
         inputs[INPUT_VOCT + oscillator].setVoltage(pitchCV, channel);
         pitch += pitchCV;
         // get the attenuverter parameter value
@@ -145,8 +146,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 5V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getVoltage(channel) : 5.f;
-        const auto mod = inputs[INPUT_FM + oscillator].getNormalVoltage(normalMod, channel);
+        const auto normalMod = oscillator ? inputs[INPUT_FM + oscillator - 1].getPolyVoltage(channel) : 5.f;
+        const auto mod = inputs[INPUT_FM + oscillator].getNormalPolyVoltage(normalMod, channel);
         inputs[INPUT_FM + oscillator].setVoltage(mod, channel);
         pitch += att * mod / 5.f;
         // convert the pitch to frequency based on standard exponential scale
@@ -173,8 +174,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 5V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getVoltage(channel) : 0.f;
-        const auto mod = inputs[INPUT_PW + oscillator].getNormalVoltage(normalMod, channel);
+        const auto normalMod = oscillator ? inputs[INPUT_PW + oscillator - 1].getPolyVoltage(channel) : 0.f;
+        const auto mod = inputs[INPUT_PW + oscillator].getNormalPolyVoltage(normalMod, channel);
         inputs[INPUT_PW + oscillator].setVoltage(mod, channel);
         // get the 8-bit pulse width clamped within legal limits
         uint8_t pw = Math::clip(param + rescale(mod, 0.f, 7.f, 0, 4), PW_MIN, PW_MAX);
@@ -218,8 +219,8 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // get the normalled input voltage based on the voice index. Voice 0
         // has no prior voltage, and is thus normalled to 10V. Reset this port's
         // voltage afterward to propagate the normalling chain forward.
-        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getVoltage(channel) : 10.f;
-        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalVoltage(normal, channel);
+        const auto normal = oscillator ? inputs[INPUT_LEVEL + oscillator - 1].getPolyVoltage(channel) : 10.f;
+        const auto voltage = inputs[INPUT_LEVEL + oscillator].getNormalPolyVoltage(normal, channel);
         inputs[INPUT_LEVEL + oscillator].setVoltage(voltage, channel);
         // apply the control voltage to the level. Normal to a constant
         // 10V source instead of checking if the cable is connected
@@ -242,7 +243,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         apu[channel].set_frequency(Ricoh2A03::TRIANGLE, getFrequency(Ricoh2A03::TRIANGLE, channel, 2, 2047, 32));
         // sync input (for triangle and noise oscillator)
         for (unsigned i = 0; i < Ricoh2A03::OSC_COUNT - Ricoh2A03::TRIANGLE; i++) {
-            const float sync = inputs[INPUT_SYNC + i].getVoltage(channel);
+            const float sync = inputs[INPUT_SYNC + i].getPolyVoltage(channel);
             if (syncTriggers[channel][i].process(rescale(sync, 0.01f, 0.02f, 0.f, 1.f)))
                 apu[channel].reset_phase(Ricoh2A03::TRIANGLE + i);
         }
@@ -264,7 +265,7 @@ struct InfiniteStairs : ChipModule<Ricoh2A03> {
         // triangle wave
         apu[channel].set_voice_volume(Ricoh2A03::TRIANGLE, getVolume(Ricoh2A03::TRIANGLE, channel));
         // noise oscillator
-        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
+        lfsr[channel].process(rescale(inputs[INPUT_LFSR].getPolyVoltage(channel), 0.01f, 2.f, 0.f, 1.f));
         const bool is_lfsr = params[PARAM_LFSR].getValue() - lfsr[channel].isHigh();
         apu[channel].set_noise_period(getNoisePeriod(channel), is_lfsr);
         apu[channel].set_voice_volume(Ricoh2A03::NOISE, getVolume(Ricoh2A03::NOISE, channel));

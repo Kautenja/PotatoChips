@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/atari_pokey.hpp"
 #include "engine/chip_module.hpp"
 

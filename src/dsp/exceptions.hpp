@@ -16,50 +16,24 @@
 #ifndef DSP_EXCEPTIONS_HPP_
 #define DSP_EXCEPTIONS_HPP_
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
-// /// An exception class.
-// class Exception: public std::exception {
-//  protected:
-//     /// the error message.
-//     const std::string message;
-
-//  public:
-//     /// @brief Constructor (C strings).
-//     /// @param message_ C-style string error message. The string contents are
-//     /// copied upon construction. Hence, responsibility for deleting the char*
-//     /// lies with the caller.
-//     ///
-//     explicit Exception(const char* message_) : message(message_) { }
-
-//     /// @brief Constructor (C++ STL strings).
-//     /// @param message_ The error message.
-//     ///
-//     explicit Exception(const std::string& message_) : message(message_) { }
-
-//     /// @brief Destroy this exception.
-//     ///
-//     ~Exception() noexcept { }
-
-//     /// @brief Returns a pointer to the (constant) error description.
-//     /// @returns A pointer to a const char*. The underlying memory is in
-//     /// possession of the Exception object. Callers must not attempt to free
-//     /// the memory.
-//     ///
-//     const char* what() const noexcept override { return message.c_str(); }
-// };
-
+/// A DSP error independent of the Rack host.
+class DSPException : public std::runtime_error {
+ public:
+    explicit DSPException(const std::string& message) : std::runtime_error(message) {}
+};
 
 /// An exception for trying to set a channel that is out of bounds.
-class ChannelOutOfBoundsException: public Exception {
+class ChannelOutOfBoundsException: public DSPException {
  public:
     /// @brief Constructor.
     ///
     /// @param index the channel index that was requested
     /// @param count the number of channels that are available
     ///
-    ChannelOutOfBoundsException(unsigned index, unsigned count) : Exception(
+    ChannelOutOfBoundsException(unsigned index, unsigned count) : DSPException(
         "tried to set output for channel index " +
         std::to_string(index) +
         ", but the chip has " +
@@ -71,7 +45,7 @@ class ChannelOutOfBoundsException: public Exception {
 
 /// An exception for trying to set an address that is out of bounds.
 template<typename Address>
-class AddressSpaceException: public Exception {
+class AddressSpaceException: public DSPException {
  public:
     /// @brief Constructor.
     ///
@@ -79,7 +53,7 @@ class AddressSpaceException: public Exception {
     /// @param start the first address in the address space
     /// @param stop the last address in the address space
     ///
-    AddressSpaceException(Address at, Address start, Address stop) : Exception(
+    AddressSpaceException(Address at, Address start, Address stop) : DSPException(
         "tried to access address " +
         std::to_string(at) +
         ", but the chip has address space [" +

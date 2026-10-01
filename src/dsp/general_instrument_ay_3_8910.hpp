@@ -221,7 +221,7 @@ class GeneralInstrumentAy_3_8910 {
     ///
     void run_until(int32_t final_end_time) {
         if (final_end_time < last_time)  // invalid end time
-            throw Exception("final_end_time must be >= last_time");
+            throw DSPException("final_end_time must be >= last_time");
         else if (final_end_time == last_time)  // no change in time
             return;
 

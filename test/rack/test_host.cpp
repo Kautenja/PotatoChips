@@ -45,3 +45,27 @@ CATCH_TEST_CASE("Infinite Stairs constructs under a real Rack engine") {
     }
     rack::contextSet(nullptr);
 }
+
+CATCH_TEST_CASE("Infinite Stairs reuses monophonic CV on all voices") {
+    rack::Context context;
+    rack::contextSet(&context);
+    context.engine = new rack::engine::Engine;
+    context.engine->setSampleRate(48000.f);
+    struct Probe : InfiniteStairs { using InfiniteStairs::getFrequency; };
+    Probe module;
+    module.inputs[InfiniteStairs::INPUT_VOCT].channels = 1;
+    module.inputs[InfiniteStairs::INPUT_VOCT].setVoltage(1.f);
+    auto first = module.getFrequency(0, 0, 8, 1023, 16);
+    for (unsigned channel = 1; channel < 16; ++channel)
+        CATCH_CHECK(module.getFrequency(0, channel, 8, 1023, 16) == first);
+    rack::contextSet(nullptr);
+}
+
+CATCH_TEST_CASE("Ricoh reset initializes registers even in reused storage") {
+    alignas(Ricoh2A03) unsigned char storage[sizeof(Ricoh2A03)];
+    std::memset(storage, 2, sizeof(storage));
+    auto chip = new (storage) Ricoh2A03;
+    chip->reset();
+    chip->~Ricoh2A03();
+    CATCH_SUCCEED("Construction/reset did not read an uninitialized bool under UBSan");
+}

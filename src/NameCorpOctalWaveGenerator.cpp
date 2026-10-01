@@ -16,6 +16,7 @@
 #include "plugin.hpp"
 #include "engine/chip_module.hpp"
 #include "dsp/math.hpp"
+#include "dsp/eurorack.hpp"
 #include "dsp/namco_163.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "widget/wavetable_editor.hpp"
@@ -25,7 +26,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Namco 163 chip emulator module.
-struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
+struct NameCorpOctalWaveGenerator : ChipModule<Namco163>, WavetableOwner {
  private:
     /// the number of active oscillators on the chip
     unsigned num_oscillators[PORT_MAX_CHANNELS];
@@ -71,7 +72,7 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
     static constexpr int NUM_WAVEFORMS = 5;
 
     /// the wave-tables to morph between
-    uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
+    std::atomic<uint8_t> (&wavetable)[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE] = waveBank->samples;
 
     /// @brief Initialize a new 106 Chip module.
     NameCorpOctalWaveGenerator() : ChipModule<Namco163>() {
@@ -110,7 +111,8 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
             RAMP_DOWN
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
-            memcpy(wavetable[i], WAVETABLE[i], SAMPLES_PER_WAVETABLE);
+            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; ++sample)
+                wavetable[i][sample].store(WAVETABLE[i][sample], std::memory_order_relaxed);
     }
 
     /// @brief Respond to the module being reset by the host environment.
@@ -126,8 +128,8 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
                 wavetable[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
-                    auto last = wavetable[table][sample - 1];
-                    auto next = wavetable[table][sample];
+                    auto last = wavetable[table][sample - 1].load(std::memory_order_relaxed);
+                    auto next = wavetable[table][sample].load(std::memory_order_relaxed);
                     wavetable[table][sample] = (last + next) / 2;
                 }
             }
@@ -307,11 +309,11 @@ struct NameCorpOctalWaveGenerator : ChipModule<Namco163> {
         float interpolate = position - wavetable0;
         for (int i = 0; i < SAMPLES_PER_WAVETABLE / 2; i++) {  // iterate over nibbles
             // get the first waveform data
-            auto nibbleLo0 = wavetable[wavetable0][2 * i];
-            auto nibbleHi0 = wavetable[wavetable0][2 * i + 1];
+            auto nibbleLo0 = wavetable[wavetable0][2 * i].load(std::memory_order_relaxed);
+            auto nibbleHi0 = wavetable[wavetable0][2 * i + 1].load(std::memory_order_relaxed);
             // get the second waveform data
-            auto nibbleLo1 = wavetable[wavetable1][2 * i];
-            auto nibbleHi1 = wavetable[wavetable1][2 * i + 1];
+            auto nibbleLo1 = wavetable[wavetable1][2 * i].load(std::memory_order_relaxed);
+            auto nibbleHi1 = wavetable[wavetable1][2 * i + 1].load(std::memory_order_relaxed);
             // floating point interpolation
             uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
             uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
@@ -403,10 +405,9 @@ struct NameCorpOctalWaveGeneratorWidget : ModuleWidget {
         // waveform is displayed
         for (int waveform = 0; waveform < NameCorpOctalWaveGenerator::NUM_WAVEFORMS; waveform++) {
             // get the wave-table buffer for this editor
-            uint8_t* wavetable = module ? &module->wavetable[waveform][0] : &wavetables[waveform][0];
             // setup a table editor for the buffer
-            auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,                       // wave-table buffer
+            auto table_editor = new WaveTableEditor(
+                module, waveform, wavetables[waveform], // live storage or browser preview
                 NameCorpOctalWaveGenerator::SAMPLES_PER_WAVETABLE,  // wave-table length
                 NameCorpOctalWaveGenerator::BIT_DEPTH,              // waveform bit depth
                 Vec(10, 26 + 68 * waveform),     // position

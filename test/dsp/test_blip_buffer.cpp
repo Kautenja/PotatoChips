@@ -21,7 +21,6 @@
 // SOFTWARE.
 //
 
-#include "../support/exception.hpp"
 #include "dsp/blip_buffer.hpp"
 #include "catch_amalgamated.hpp"
 
@@ -162,3 +161,41 @@ SCENARIO("Set the sample rate and clock rate to realistic values") {
 //         }
 //     }
 // }
+
+TEST_CASE("Reading the BLIP tail stays inside the allocated sample buffer") {
+    // A separate heap allocation lets ASan detect both the old over-read and
+    // the following one-element overwrite, even if embedded buffers abut.
+    auto buffer = new BLIPBuffer;
+    buffer->set_sample_rate(48000, 768000);
+    auto samples = buffer->get_buffer();
+    samples[BLIPBuffer::WIDEST_IMPULSE] = 123;
+    REQUIRE(buffer->read_sample() == 0.f);
+    REQUIRE(samples[BLIPBuffer::WIDEST_IMPULSE - 1] == 123);
+    REQUIRE(samples[BLIPBuffer::WIDEST_IMPULSE] == 0);
+    for (unsigned i = 0; i < 64; ++i) buffer->read_sample();
+    delete buffer;
+}
+
+namespace {
+template<BLIPQuality Quality>
+void checkImpulseBounds() {
+    BLIPBuffer buffer;
+    buffer.set_sample_rate(48000, 768000);
+    auto synth = new BLIPSynthesizer<float, Quality, 15>;
+    synth->set_output(&buffer);
+    for (float volume : {1.f, 0.001f, 3.f}) {
+        synth->set_volume(volume);
+        synth->offset_resampled(0, 1, &buffer);
+        synth->offset_resampled((1 << BLIPBuffer::ACCURACY) - 1, -1, &buffer);
+        for (unsigned i = 0; i < 32; ++i) REQUIRE(std::isfinite(buffer.read_sample()));
+        buffer.flush();
+    }
+    delete synth;
+}
+}
+
+TEST_CASE("BLIP impulse initialization and attenuation stay within every quality buffer") {
+    checkImpulseBounds<BLIP_QUALITY_MEDIUM>();
+    checkImpulseBounds<BLIP_QUALITY_GOOD>();
+    checkImpulseBounds<BLIP_QUALITY_HIGH>();
+}

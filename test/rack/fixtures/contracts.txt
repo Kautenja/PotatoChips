@@ -1,0 +1,447 @@
+Blocks 16 12 4 24
+Voice 1 Frequency -2.5 2.5 0 0
+Voice 2 Frequency -2.5 2.5 0 0
+Voice 3 Frequency -2.5 2.5 0 0
+Voice 4 Frequency -2.5 2.5 0 0
+Voice 1 FM -1 1 0 0
+Voice 2 FM -1 1 0 0
+Voice 3 FM -1 1 0 0
+Voice 4 FM -1 1 0 0
+Voice 1 Level 0 255 255 1
+Voice 2 Level 0 255 255 1
+Voice 3 Level 0 255 255 1
+Voice 4 Level 0 255 255 1
+Voice 1 Shape 0 1 0 1
+Voice 2 Shape 0 1 0 1
+Voice 3 Shape 0 1 0 1
+Voice 4 Shape 0 1 0 1
+{"shape1": 0, "shape2": 0, "shape3": 0, "shape4": 0}
+AY_3_8910 22 26 3 12
+Pulse A Frequency -5 5 0 0
+Pulse B Frequency -5 5 0 0
+Pulse C Frequency -5 5 0 0
+Envelope Frequency -5.5 9 1.75 0
+Pulse A FM -1 1 0 0
+Pulse B FM -1 1 0 0
+Pulse C FM -1 1 0 0
+Envelope FM -1 1 0 0
+Pulse A Level 0 15 10 1
+Pulse B Level 0 15 10 1
+Pulse C Level 0 15 10 1
+Pulse A Tone 0 1 1 0
+Pulse B Tone 0 1 1 0
+Pulse C Tone 0 1 1 0
+Pulse A Noise 0 1 0 0
+Pulse B Noise 0 1 0 0
+Pulse C Noise 0 1 0 0
+Pulse A Envelope 0 1 0 0
+Pulse B Envelope 0 1 0 0
+Pulse C Envelope 0 1 0 0
+Noise Period 0 31 0 1
+Envelope Mode 0 1 0 0
+{"envMode": 0}
+2A03 14 16 4 12
+Pulse 1 Frequency -2.5 2.5 0 0
+Pulse 2 Frequency -2.5 2.5 0 0
+Triangle Frequency -2.5 2.5 0 0
+Noise Period 0 15 7 1
+Pulse 1 FM -1 1 0 0
+Pulse 2 FM -1 1 0 0
+Triangle FM -1 1 0 0
+Linear Feedback Shift Register 0 1 0 0
+Pulse 1 Volume 0 15 10 1
+Pulse 2 Volume 0 15 10 1
+Triangle Volume 0 15 10 1
+Noise Volume 0 15 10 1
+Pulse 1 Duty Cycle 0 3 2 1
+Pulse 2 Duty Cycle 0 3 2 1
+null
+44100 1 4500.179281918332 37048.431059076822
+44100 16 73142.772468657233 590343.07094945223
+48000 1 4468.1449233423918 36900.701752038018
+48000 16 71501.942071433179 588004.80108684616
+96000 1 7069.722893320024 39169.657074354764
+96000 16 106342.9513536999 617898.2147677188
+POKEY 24 24 4 12
+Tone 1 Frequency -2.5 2.5 0 0
+Tone 2 Frequency -2.5 2.5 0 0
+Tone 3 Frequency -2.5 2.5 0 0
+Tone 4 Frequency -2.5 2.5 0 0
+Tone 1 FM -1 1 0 0
+Tone 2 FM -1 1 0 0
+Tone 3 FM -1 1 0 0
+Tone 4 FM -1 1 0 0
+Tone 1 Noise 0 7 7 1
+Tone 2 Noise 0 7 7 1
+Tone 3 Noise 0 7 7 1
+Tone 4 Noise 0 7 7 1
+Tone 1 Level 0 15 7 1
+Tone 2 Level 0 15 7 1
+Tone 3 Level 0 15 7 1
+Tone 4 Level 0 15 7 1
+Low Frequency 0 1 0 0
+High-Pass Tone 2 from Tone 4 0 1 0 0
+High-Pass Tone 1 from Tone 3 0 1 0 0
+ 0 1 0 0
+ 0 1 0 0
+Tone 3 High Frequency 0 1 0 0
+Tone 1 High Frequency 0 1 0 0
+Linear Feedback Shift Register 0 1 0 0
+null
+VRC6 11 12 3 9
+Pulse 1 Frequency -2.5 2.5 0 0
+Pulse 2 Frequency -2.5 2.5 0 0
+Saw Frequency -2.5 2.5 0 0
+Pulse 1 FM -1 1 0 0
+Pulse 2 FM -1 1 0 0
+Saw FM -1 1 0 0
+Pulse 1 Duty Cycle 0 7 7 1
+Pulse 1 Duty Cycle 0 7 7 1
+Pulse 1 Level 0 15 12 1
+Pulse 2 Level 0 15 12 1
+Saw Level 0 63 32 1
+null
+FME7 9 9 3 9
+Tone 1 Frequency -4.5 4.5 0 0
+Tone 2 Frequency -4.5 4.5 0 0
+Tone 3 Frequency -4.5 4.5 0 0
+Tone 1 FM -1 1 0 0
+Tone 2 FM -1 1 0 0
+Tone 3 FM -1 1 0 0
+Tone 1 Level 0 15 10 1
+Tone 2 Level 0 15 10 1
+Tone 3 Level 0 15 10 1
+null
+106 28 26 8 48
+Voice 1 Frequency -2.5 2.5 0 0
+Voice 2 Frequency -2.5 2.5 0 0
+Voice 3 Frequency -2.5 2.5 0 0
+Voice 4 Frequency -2.5 2.5 0 0
+Voice 5 Frequency -2.5 2.5 0 0
+Voice 6 Frequency -2.5 2.5 0 0
+Voice 7 Frequency -2.5 2.5 0 0
+Voice 8 Frequency -2.5 2.5 0 0
+Voice 1 FM -1 1 0 0
+Voice 2 FM -1 1 0 0
+Voice 3 FM -1 1 0 0
+Voice 4 FM -1 1 0 0
+Voice 5 FM -1 1 0 0
+Voice 6 FM -1 1 0 0
+Voice 7 FM -1 1 0 0
+Voice 8 FM -1 1 0 0
+Voice 1 Volume 0 15 15 1
+Voice 2 Volume 0 15 15 1
+Voice 3 Volume 0 15 15 1
+Voice 4 Volume 0 15 15 1
+Voice 5 Volume 0 15 15 1
+Voice 6 Volume 0 15 15 1
+Voice 7 Volume 0 15 15 1
+Voice 8 Volume 0 15 15 1
+Active Channels 8 1 4 1
+Active Channels Attenuverter -1 1 0 0
+Waveform Morph 1 5 1 0
+Waveform Morph Attenuverter -1 1 0 0
+{"wavetable0": [8, 9, 10, 12, 13, 14, 14, 15, 15, 15, 14, 14, 13, 12, 10, 9, 8, 6, 5, 3, 2, 1, 1, 0, 0, 0, 1, 1, 2, 3, 5, 6], "wavetable1": [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "wavetable2": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15], "wavetable3": [8, 6, 9, 8, 11, 10, 13, 12, 15, 12, 13, 10, 11, 8, 9, 6, 8, 5, 6, 3, 4, 1, 2, 0, 0, 0, 2, 1, 4, 3, 6, 5], "wavetable4": [15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0]}
+44100 1 4564.5600611120462 41414.678651227121
+44100 16 86806.302040040493 667927.87123290054
+48000 1 5308.2448741681874 42305.368733806361
+48000 16 75768.385197017342 672830.43721001945
+96000 1 12510.745547346771 54892.380300496603
+96000 16 202703.15295299888 862405.23650143389
+GBS 15 15 4 12
+Pulse 1 Frequency -2.5 2.5 0 0
+Pulse 2 Frequency -2.5 2.5 0 0
+Wave Frequency -2.5 2.5 0 0
+Noise Period 0 7 0 0
+Pulse 1 FM -1 1 0 0
+Pulse 2 FM -1 1 0 0
+Wave FM -1 1 0 0
+Linear Feedback Shift Register 0 1 0 0
+Pulse 1 Duty Cycle 0 3 2 0
+Pulse 2 Duty Cycle 0 3 2 0
+Waveform morph 0 5 0 0
+Pulse 1 Volume 0 15 10 1
+Pulse 2 Volume 0 15 10 1
+Wave Volume 0 3 3 1
+Noise Volume 0 15 10 1
+{"wavetable0": [8, 9, 10, 12, 13, 14, 14, 15, 15, 15, 14, 14, 13, 12, 10, 9, 8, 6, 5, 3, 2, 1, 1, 0, 0, 0, 1, 1, 2, 3, 5, 6], "wavetable1": [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "wavetable2": [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15], "wavetable3": [8, 6, 9, 8, 11, 10, 13, 12, 15, 12, 13, 10, 11, 8, 9, 6, 8, 5, 6, 3, 4, 1, 2, 0, 0, 0, 2, 1, 4, 3, 6, 5], "wavetable4": [15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0]}
+44100 1 1338.5032174037769 18704.329269536818
+44100 16 23303.502591935918 299677.90220253891
+48000 1 1511.4470353173092 18816.218136202573
+48000 16 21580.88606100902 301337.69297301257
+96000 1 2507.4774963892996 20922.630935959722
+96000 16 37297.083187109791 331741.579139843
+SN76489 12 12 4 12
+Tone 1 Frequency -2.5 2.5 0 0
+Tone 2 Frequency -2.5 2.5 0 0
+Tone 3 Frequency -2.5 2.5 0 0
+Noise Period 0 3 0 1
+Tone 1 Fine Tune / FM Attenuverter -1 1 0 0
+Tone 2 Fine Tune / FM Attenuverter -1 1 0 0
+Tone 3 Fine Tune / FM Attenuverter -1 1 0 0
+Linear Feedback Shift Register 0 1 0 0
+Tone 1 Volume / Amplifier Attenuator 0 15 7 1
+Tone 2 Volume / Amplifier Attenuator 0 15 7 1
+Tone 3 Volume / Amplifier Attenuator 0 15 7 1
+Noise Volume / Amplifier Attenuator 0 15 7 1
+null
+2612 52 52 2 6
+Algorithm 0 7 7 1
+Feedback 0 7 0 1
+ 0 7 0 1
+Output Saturation 0 127 127 1
+Operator 1 Attack Rate 1 31 31 1
+Operator 2 Attack Rate 1 31 31 1
+Operator 3 Attack Rate 1 31 31 1
+Operator 4 Attack Rate 1 31 31 1
+Operator 1 Total Level 0 100 100 1
+Operator 2 Total Level 0 100 100 1
+Operator 3 Total Level 0 100 100 1
+Operator 4 Total Level 0 100 100 1
+Operator 1 1st Decay Rate 0 31 0 1
+Operator 2 1st Decay Rate 0 31 0 1
+Operator 3 1st Decay Rate 0 31 0 1
+Operator 4 1st Decay Rate 0 31 0 1
+Operator 1 Sustain Level 0 15 15 1
+Operator 2 Sustain Level 0 15 15 1
+Operator 3 Sustain Level 0 15 15 1
+Operator 4 Sustain Level 0 15 15 1
+Operator 1 2nd Decay Rate 0 31 0 1
+Operator 2 2nd Decay Rate 0 31 0 1
+Operator 3 2nd Decay Rate 0 31 0 1
+Operator 4 2nd Decay Rate 0 31 0 1
+Operator 1 Release Rate 0 15 15 1
+Operator 2 Release Rate 0 15 15 1
+Operator 3 Release Rate 0 15 15 1
+Operator 4 Release Rate 0 15 15 1
+Operator 1 Frequency -5 5 0 0
+Operator 2 Frequency -5 5 0 0
+Operator 3 Frequency -5 5 0 0
+Operator 4 Frequency -5 5 0 0
+ 0 15 1 1
+ 0 15 1 1
+ 0 15 1 1
+ 0 15 1 1
+ 0 3 0 1
+ 0 3 0 1
+ 0 3 0 1
+ 0 3 0 1
+ 0 7 0 1
+ 0 7 0 1
+ 0 7 0 1
+ 0 7 0 1
+Operator 1 Rate Scaling 0 3 0 1
+Operator 2 Rate Scaling 0 3 0 1
+Operator 3 Rate Scaling 0 3 0 1
+Operator 4 Rate Scaling 0 3 0 1
+Operator 1 Looping Envelope 0 1 0 0
+Operator 2 Looping Envelope 0 1 0 0
+Operator 3 Looping Envelope 0 1 0 0
+Operator 4 Looping Envelope 0 1 0 0
+{"prevent_clicks": false}
+MiniBoss 16 11 1 18
+Attack Rate 1 31 31 1
+Total Level 0 100 100 1
+Decay Rate 0 31 0 1
+Sustain Level 0 15 15 1
+Sustain Rate 0 31 0 1
+Release Rate 0 15 15 1
+Looping Envelope 0 1 0 0
+Rate Scaling 0 3 0 1
+Frequency -5 5 0 0
+ 0 7 0 1
+ 0 7 0 1
+ 0 3 0 1
+Frequency Modulation -1 1 0 0
+ 0 15 1 1
+Feedback 0 7 0 1
+Output Volume 0 127 127 1
+{"prevent_clicks": false}
+SuperSynth 95 111 2 0
+Voice 1 Frequency -4 4 2 0
+Voice 2 Frequency -4 4 2 0
+Voice 3 Frequency -4 4 2 0
+Voice 4 Frequency -4 4 2 0
+Voice 5 Frequency -4 4 2 0
+Voice 6 Frequency -4 4 2 0
+Voice 7 Frequency -4 4 2 0
+Voice 8 Frequency -4 4 2 0
+ 0 1 0 0
+Voice 1 -> Voice 2 Phase Modulation Enable 0 1 0 0
+Voice 2 -> Voice 3 Phase Modulation Enable 0 1 0 0
+Voice 3 -> Voice 4 Phase Modulation Enable 0 1 0 0
+Voice 4 -> Voice 5 Phase Modulation Enable 0 1 0 0
+Voice 5 -> Voice 6 Phase Modulation Enable 0 1 0 0
+Voice 6 -> Voice 7 Phase Modulation Enable 0 1 0 0
+Voice 7 -> Voice 8 Phase Modulation Enable 0 1 0 0
+Voice 1 Noise Enable 0 1 0 0
+Voice 2 Noise Enable 0 1 0 0
+Voice 3 Noise Enable 0 1 0 0
+Voice 4 Noise Enable 0 1 0 0
+Voice 5 Noise Enable 0 1 0 0
+Voice 6 Noise Enable 0 1 0 0
+Voice 7 Noise Enable 0 1 0 0
+Voice 8 Noise Enable 0 1 0 0
+Noise Frequency 0 31 16 0
+Voice 1 Volume (Left) -128 127 127 0
+Voice 2 Volume (Left) -128 127 127 0
+Voice 3 Volume (Left) -128 127 127 0
+Voice 4 Volume (Left) -128 127 127 0
+Voice 5 Volume (Left) -128 127 127 0
+Voice 6 Volume (Left) -128 127 127 0
+Voice 7 Volume (Left) -128 127 127 0
+Voice 8 Volume (Left) -128 127 127 0
+Voice 1 Volume (Right) -128 127 127 0
+Voice 2 Volume (Right) -128 127 127 0
+Voice 3 Volume (Right) -128 127 127 0
+Voice 4 Volume (Right) -128 127 127 0
+Voice 5 Volume (Right) -128 127 127 0
+Voice 6 Volume (Right) -128 127 127 0
+Voice 7 Volume (Right) -128 127 127 0
+Voice 8 Volume (Right) -128 127 127 0
+Voice 1 Envelope Attack 0 15 0 0
+Voice 2 Envelope Attack 0 15 0 0
+Voice 3 Envelope Attack 0 15 0 0
+Voice 4 Envelope Attack 0 15 0 0
+Voice 5 Envelope Attack 0 15 0 0
+Voice 6 Envelope Attack 0 15 0 0
+Voice 7 Envelope Attack 0 15 0 0
+Voice 8 Envelope Attack 0 15 0 0
+Voice 1 Envelope Decay 0 7 0 0
+Voice 2 Envelope Decay 0 7 0 0
+Voice 3 Envelope Decay 0 7 0 0
+Voice 4 Envelope Decay 0 7 0 0
+Voice 5 Envelope Decay 0 7 0 0
+Voice 6 Envelope Decay 0 7 0 0
+Voice 7 Envelope Decay 0 7 0 0
+Voice 8 Envelope Decay 0 7 0 0
+Voice 1 Envelope Sustain Level 0 7 0 0
+Voice 2 Envelope Sustain Level 0 7 0 0
+Voice 3 Envelope Sustain Level 0 7 0 0
+Voice 4 Envelope Sustain Level 0 7 0 0
+Voice 5 Envelope Sustain Level 0 7 0 0
+Voice 6 Envelope Sustain Level 0 7 0 0
+Voice 7 Envelope Sustain Level 0 7 0 0
+Voice 8 Envelope Sustain Level 0 7 0 0
+Voice 1 Envelope Sustain Rate 0 31 0 0
+Voice 2 Envelope Sustain Rate 0 31 0 0
+Voice 3 Envelope Sustain Rate 0 31 0 0
+Voice 4 Envelope Sustain Rate 0 31 0 0
+Voice 5 Envelope Sustain Rate 0 31 0 0
+Voice 6 Envelope Sustain Rate 0 31 0 0
+Voice 7 Envelope Sustain Rate 0 31 0 0
+Voice 8 Envelope Sustain Rate 0 31 0 0
+Voice 1 Echo Enable 0 1 1 0
+Voice 2 Echo Enable 0 1 1 0
+Voice 3 Echo Enable 0 1 1 0
+Voice 4 Echo Enable 0 1 1 0
+Voice 5 Echo Enable 0 1 1 0
+Voice 6 Echo Enable 0 1 1 0
+Voice 7 Echo Enable 0 1 1 0
+Voice 8 Echo Enable 0 1 1 0
+Echo Delay 0 15 0 0
+Echo Feedback -128 127 0 0
+Echo Volume (Left) -128 127 127 0
+Echo Volume (Right) -128 127 127 0
+Main Volume (Left) -128 127 127 0
+Main Volume (Right) -128 127 127 0
+FIR Coefficient 1 -128 127 127 0
+FIR Coefficient 2 -128 127 0 0
+FIR Coefficient 3 -128 127 0 0
+FIR Coefficient 4 -128 127 0 0
+FIR Coefficient 5 -128 127 0 0
+FIR Coefficient 6 -128 127 0 0
+FIR Coefficient 7 -128 127 0 0
+FIR Coefficient 8 -128 127 0 0
+null
+SuperEcho 23 14 2 36
+Echo Delay 0 31 0 1
+Echo Feedback -128 127 0 1
+Echo Mix (Left) -128 127 0 1
+Echo Mix (Right) -128 127 0 1
+FIR Coefficient 1 -128 127 127 0
+FIR Coefficient 2 -128 127 0 0
+FIR Coefficient 3 -128 127 0 0
+FIR Coefficient 4 -128 127 0 0
+FIR Coefficient 5 -128 127 0 0
+FIR Coefficient 6 -128 127 0 0
+FIR Coefficient 7 -128 127 0 0
+FIR Coefficient 8 -128 127 0 0
+FIR Coefficient 1 CV Attenuverter -1 1 0 0
+FIR Coefficient 2 CV Attenuverter -1 1 0 0
+FIR Coefficient 3 CV Attenuverter -1 1 0 0
+FIR Coefficient 4 CV Attenuverter -1 1 0 0
+FIR Coefficient 5 CV Attenuverter -1 1 0 0
+FIR Coefficient 6 CV Attenuverter -1 1 0 0
+FIR Coefficient 7 CV Attenuverter -1 1 0 0
+FIR Coefficient 8 CV Attenuverter -1 1 0 0
+Input Gain (Left) 0 1.9952623844146729 1 0
+Input Gain (Right) 0 1.9952623844146729 1 0
+Bypass 0 1 0 0
+null
+44100 1 0 0
+44100 16 4910.7748756408691 507.16491648326473
+48000 1 0 0
+48000 16 4910.7748756408691 507.16491648326473
+96000 1 0 0
+96000 16 4910.7748756408691 507.16491648326473
+SuperADSR 10 4 4 30
+Amplitude -128 127 127 0
+Amplitude -128 127 127 0
+Attack 0 15 10 0
+Attack 0 15 10 0
+Decay 0 7 7 0
+Decay 0 7 7 0
+Sustain Level 0 7 5 0
+Sustain Level 0 7 5 0
+Sustain Rate 0 31 20 0
+Sustain Rate 0 31 20 0
+null
+SuperSampler 32 48 16 0
+Voice 1 Frequency -6 6 4 0
+Voice 2 Frequency -6 6 4 0
+Voice 3 Frequency -6 6 4 0
+Voice 4 Frequency -6 6 4 0
+Voice 5 Frequency -6 6 4 0
+Voice 6 Frequency -6 6 4 0
+Voice 7 Frequency -6 6 4 0
+Voice 8 Frequency -6 6 4 0
+Voice 0 -> Voice 1 Phase Modulation Enable 0 1 0 0
+Voice 1 -> Voice 2 Phase Modulation Enable 0 1 0 0
+Voice 2 -> Voice 3 Phase Modulation Enable 0 1 0 0
+Voice 3 -> Voice 4 Phase Modulation Enable 0 1 0 0
+Voice 4 -> Voice 5 Phase Modulation Enable 0 1 0 0
+Voice 5 -> Voice 6 Phase Modulation Enable 0 1 0 0
+Voice 6 -> Voice 7 Phase Modulation Enable 0 1 0 0
+Voice 7 -> Voice 8 Phase Modulation Enable 0 1 0 0
+Voice 1 Volume (Left) -128 127 127 0
+Voice 2 Volume (Left) -128 127 127 0
+Voice 3 Volume (Left) -128 127 127 0
+Voice 4 Volume (Left) -128 127 127 0
+Voice 5 Volume (Left) -128 127 127 0
+Voice 6 Volume (Left) -128 127 127 0
+Voice 7 Volume (Left) -128 127 127 0
+Voice 8 Volume (Left) -128 127 127 0
+Voice 1 Volume (Right) -128 127 127 0
+Voice 2 Volume (Right) -128 127 127 0
+Voice 3 Volume (Right) -128 127 127 0
+Voice 4 Volume (Right) -128 127 127 0
+Voice 5 Volume (Right) -128 127 127 0
+Voice 6 Volume (Right) -128 127 127 0
+Voice 7 Volume (Right) -128 127 127 0
+Voice 8 Volume (Right) -128 127 127 0
+null
+SuperVCA 8 7 2 15
+Filter Mode 0 1 0 0
+Input Gain (Left) 0 1.9952623844146729 1 0
+Input Gain (Right) 0 1.9952623844146729 1 0
+Output Level (Left) -128 127 60 1
+Output Level (Right) -128 127 60 1
+Frequency (Left) -5 5 0 0
+Frequency (Right) -5 5 0 0
+Bypass 0 1 0 0
+{"filterMode": 0}
+Sony_S_SMP_Blank1 0 0 0 0
+null
+2612_Blank1 0 0 0 0
+null

@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/boolean.hpp"
+#include "dsp/trigger_boolean.hpp"
 #include "catch_amalgamated.hpp"
 
 TEST_CASE("Trigger::Boolean should be false when initialized") {

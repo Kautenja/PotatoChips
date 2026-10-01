@@ -7,7 +7,9 @@ engine work, plus the requested YM2151 module. They describe planned work,
 not release promises. As of October 1, 2026, 001 is implemented with native
 onboarding verification still pending (`IN PROGRESS`). Spec 002 is implemented
 with a Windows PCM regression assigned to 003 and the 004-dependent PDF
-integration pending (`IN PROGRESS`); specs 003-011 remain `PLANNED`. See each spec for evidence.
+integration pending (`IN PROGRESS`). Spec 003 is implemented and staged for
+review, with native Rack and cross-platform verification pending (`IN PROGRESS`);
+specs 004-011 remain `PLANNED`. See each spec for evidence.
 
 ## Work Areas And Ownership
 

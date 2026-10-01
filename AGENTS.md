@@ -37,7 +37,7 @@ the relevant sections before changing code or build/publication behavior.
     names and local conventions in adapted third-party code rather than
     reformatting whole files.
 -   Keep reusable DSP independent of Rack and UI types. Put host integration
-    in module code, `src/engine/`, `src/widget/`, or `src/kautenja_rack/`.
+    in module code, `src/engine/`, `src/widget/`, or `src/rack_extensions/`.
 -   Preserve file-level attribution and dependency license notices,
     including the adapted chip emulators and BLIP code. Do not replace
     existing notices with a generic project header.

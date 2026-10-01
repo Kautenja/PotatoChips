@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
 
 // ---------------------------------------------------------------------------

@@ -14,8 +14,11 @@
 //
 
 #include "plugin.hpp"
+#include <atomic>
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "engine/yamaha_ym2612_params.hpp"
 #include "widget/indexed_frame_display.hpp"
@@ -126,6 +129,8 @@ struct BossFight : rack::Module {
         ENUMS(VU_LIGHTS, 6),
         NUM_LIGHTS
     };
+
+    std::atomic<unsigned> displayAlgorithm{0};
 
     /// the current FM algorithm
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -255,6 +260,7 @@ struct BossFight : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
+        if (channel == 0) displayAlgorithm.store(algorithm[channel], std::memory_order_relaxed);
         apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
         apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
@@ -360,9 +366,9 @@ struct BossFightWidget : ModuleWidget {
         // Algorithm Display
         addChild(new IndexedFrameDisplay(
             [&]() {
-                return this->module ? reinterpret_cast<BossFight*>(this->module)->algorithm[0] : 0;
+                return this->module ? reinterpret_cast<BossFight*>(this->module)->displayAlgorithm.load(std::memory_order_relaxed) : 0;
             },
-            "res/BossFight_algorithms/",
+            asset::plugin(plugin_instance, "res/BossFight_algorithms/"),
             YamahaYM2612::Voice4Op::NUM_ALGORITHMS,
             Vec(10, 20),
             Vec(110, 70)

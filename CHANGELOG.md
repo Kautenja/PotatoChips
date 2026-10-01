@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+-   Flatten DSP math/trigger headers, move Rack helpers to `rack_extensions`,
+    and remove Rack dependencies from DSP exceptions and pitch conversions.
+-   Update registered module and blank-panel footers to Arhythmetic Units,
+    preserving other artwork, control positions, and patch identifiers.
+-   Fix wavetable right-edge writes and incomplete drags; make previews
+    read-only, resolve undo/redo against current module IDs, and use lock-free
+    samples for engine/editor access. Release indexed SVG frames and guard
+    missing assets/invalid indices; publish the Boss Fight display index atomically.
+-   Fix BLIP sample-tail and impulse-initialization/rescaling loop bounds.
+    Corrected impulse generation intentionally changes affected chip audio;
+    source-move equivalence and before/after captures are recorded separately.
+-   Initialize all Ricoh 2A03 oscillator registers and write flags on reset,
+    avoiding reads of uninitialized state during construction.
+-   Reuse mono CV on every Infinite Stairs polyphonic channel, including
+    pitch, FM, level, pulse width, and sync inputs.
+-   Store 24-bit PCM in three explicit little-endian bytes on every ABI,
+    correct signed limits, and constrain numeric comparison overloads.
+-   Add Rack registration, saved-patch/preset, polyphony, audio, widget-history,
+    and sanitizer regressions alongside the existing DSP suites.
+
 -   Replace SCons/Travis with SDK-free Make tests, a Rack-backed harness,
     pinned Catch2/SDK dependencies, and three-platform GitHub Actions.
 -   Add separate coverage/sanitizer runs, incremental-build regression checks,

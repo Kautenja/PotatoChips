@@ -34,9 +34,11 @@ The source-code license is not an alternative artwork license.
 The component inventory separately identifies imported algorithm diagrams
 and manual raster illustrations whose original author/license is not
 fully established. The project artwork declaration does not establish
-third-party ownership. No artwork is replaced or relicensed by this change.
-Arhythmetic Units is the current project brand; existing KautenjaDSP panel
-artwork and attribution remain present.
+third-party ownership. The runtime footer replacement uses Arhythmetic Units vector artwork,
+copyright 2025-2026 Arhythmetic Units, under the same CC-BY-NC-ND-4.0 terms.
+Its sibling-project source and revision are recorded in the inventory and
+`res/ArhythmeticUnits.svg`. Other panel artwork and attribution are preserved;
+legacy manual figures await regeneration under spec 005.
 
 ## Dependencies And Tests
 

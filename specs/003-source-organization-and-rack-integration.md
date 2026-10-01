@@ -1,7 +1,7 @@
 # Source Organization And Rack Integration
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 
 Make the DSP/Rack boundary easier to navigate, bring panel presentation in
 line with the sibling projects, and protect saved patches and audio behavior
@@ -104,19 +104,19 @@ because they are not registered modules.
 
 ## Acceptance Criteria
 
-- [ ] Header/helper moves have explicit includes and no remaining obsolete
+- [x] Header/helper moves have explicit includes and no remaining obsolete
       consumers; source attribution and C++11 compatibility are retained.
-- [ ] Registration, IDs, JSON, presets, and representative audio fixtures
+- [x] Registration, IDs, JSON, presets, and representative audio fixtures
       agree with the baseline except for separately documented bug fixes.
 - [ ] Branding and structural changes preserve 008's theme support across
       all 16 enabled entries, including blanks, with safe null-module
       previews; disabled status remains unchanged. Theme delivery is tracked
       in 008 rather than duplicated here.
-- [ ] Targeted display ownership/editor edge/undo regressions pass, with
+- [x] Targeted display ownership/editor edge/undo regressions pass, with
       sanitizer evidence where the platform permits it.
-- [ ] Mono/polyphony, reset, sample rates, and normalling are checked at the
+- [x] Mono/polyphony, reset, sample rates, and normalling are checked at the
       integration boundary; affected manual claims are reconciled.
-- [ ] Final runtime artwork is handed to 005 for regenerated figures.
+- [x] Final runtime artwork is handed to 005 for regenerated figures.
 
 ## Validation
 
@@ -141,7 +141,136 @@ distinguish structural equivalence from intentional fixes.
 
 ## Completion Evidence
 
-Source moves, panel changes, reproductions, and regression runs are pending.
+Implemented October 1, 2026, starting from `adebc068`. Changes are staged for
+review without a commit or push. Status remains `IN PROGRESS` for native Rack
+preview/patch/audio verification and cross-platform confirmation; the Mac was
+locked when the native-app tool attempted to inspect it. Theme implementation
+still belongs to 008, and production figure capture belongs to 005.
+
+### Structural Increment
+
+| Before | After |
+| --- | --- |
+| `dsp/math/constants.hpp` | `dsp/constants.hpp` |
+| `dsp/math/eurorack.hpp` | `dsp/eurorack.hpp` |
+| `dsp/math/functions.hpp` plus umbrella | `dsp/math.hpp` |
+| `dsp/trigger/{boolean,divider,hold,threshold,zero}.hpp` plus umbrella | `dsp/trigger_<name>.hpp` |
+| `kautenja_rack/{helpers,param_quantity}.hpp` | `rack_extensions/{helpers,param_quantity}.hpp` |
+
+All paths above are relative to `src/`. Consumers use the specific trigger and
+voltage headers. The ten utility headers compile individually as C++11 without
+Rack. DSP exceptions now derive from `std::runtime_error`; the temporary test
+substitute is removed. The pitch reference retains Rack's exact `261.6256f`
+constant without including Rack. Chip family directories and attribution remain.
+
+Eighteen registered-model SVGs, including two disabled modules and both blanks,
+use the sibling Arhythmetic Units vector footer. XML comparison confirmed that
+all other attributes and geometry are unchanged. NanoSVG raster previews of
+Super Echo, Name Corp, Boss Fight, and Super VCA were generated; Super Echo and
+Name Corp were visually inspected. Asset provenance is in `LICENSING.md`,
+`docs/licenses/THIRD-PARTY.txt`, and `res/ArhythmeticUnits.svg`. Dormant SCC and
+TurboGrafx16 artwork is unchanged. No paired themes existed to update; 008 must
+carry the new footer into both variants. Existing manual figures are deliberately
+left for 005 to regenerate from the final widgets.
+
+### Behavioral Increment And Reproductions
+
+-   The old editor's `x == width` click produced an ASan heap-buffer-overflow.
+    Undo after deleting its raw sample storage produced heap-use-after-free.
+    Editing now clamps to the last sample, includes both drag endpoints, and
+    supports vertical changes within a sample. Only live left-button presses
+    edit; previews own a read-only copy and right clicks tolerate missing parents.
+-   History owns before/after values and resolves a Rack module ID on undo/redo.
+    Tests remove/delete and recreate the module under the same ID before redo.
+    An expired editor cannot write to a former module. Unchanged edits release
+    their pending action; cursor locking is paired with end/destruction.
+-   Name Corp/Pallet Town use fixed, module-owned arrays of lock-free atomic
+    samples. Storage is allocated at construction, with no new process-time
+    allocation or locking. Concurrent edits are per-sample updates, not atomic
+    whole-waveform transactions; DSP sees updates at its next CV acquisition.
+    Boss Fight publishes its display index atomically as well.
+-   Index 8 into the old eight-frame display reproduced an ASan heap overflow.
+    Parsed SVGs now have RAII deletion; missing/invalid indices return no frame.
+    Tests cover empty callbacks, absent files, and 100 complete frame lifetimes.
+-   PCM's Windows bitfield failure was already reproduced by 002. Three explicit
+    little-endian bytes replace implementation-dependent packing. Tests cover
+    size, signed boundaries, truncation, assignment, comparisons and numeric
+    limits. Minimum/lowest are now -8388608, with 23 value bits. Including PCM
+    before Catch2 also compiles after restricting numeric comparison templates.
+    The pinned Windows ABI still needs its first run of this staged revision.
+-   A separately allocated BLIPBuffer reproduced an ASan over-read/write when
+    advancing its tail. The old count advanced 17 elements in a 17-element
+    array; the corrected move advances the remaining 16 and clears the tail.
+    Expanded Rack UBSan testing also reproduced index -1 in impulse adjustment.
+    Hamming-window, mirror, phase-adjustment and attenuation loops now respect
+    their array bounds. All three quality levels and low-volume rescaling have
+    focused sanitizer regressions. This is a local bounds correction, not an
+    import of RackNES's already-present `memmove` change.
+-   Infinite Stairs returned period 182 on higher voices versus 90 on voice 0
+    with a mono 1 V pitch input. Mono-aware Rack reads now reuse CV on all
+    channels, including forward normalling, while polyphonic reads stay separate.
+-   The instrumented Infinite Stairs constructor reproduced a bool value of 2
+    in Ricoh reset. Two assignment chains had omitted their final initializer.
+    Reset now writes zero/false to all registers/write flags; a poisoned-storage
+    construction/reset fixture guards this independently of allocator contents.
+
+The changelog lists these behavioral increments separately from the source
+moves. Focused manual notes describe mono reuse and bounded undoable editing;
+manual formatting/publication remains with 004.
+
+### Compatibility And Validation
+
+`test/rack/fixtures/README.md` records the fixture procedure. All 18 models have
+exact counts, parameter names/ranges/defaults/snap flags and custom JSON fixtures.
+All 60 Super Echo presets and the registered project modules in all 24 debug
+patches restore under the headless Rack engine. Historical unregistered models
+and external plugins are excluded. The manifest, saved patches and presets are
+unchanged; both disabled flags remain intact.
+
+The original 2A03/106/GBS/SuperEcho audio aggregates are retained separately.
+BLIP bounds corrections intentionally change the chip output. A separate copy
+of `adebc068` with only the BLIP bounds corrections produced the accepted audio
+fixture; the reorganized implementation agrees exactly on this machine.
+Fixtures allow relative `1e-5`/absolute `1e-7` floating-point differences across
+compilers. Tests use 44.1/48/96 kHz and 1/16 genuinely connected channels.
+Deterministic probe-chip tests separately exercise clock quantization, CV/light
+cadence, channel independence, reset, sample-rate changes, normalling and clipping.
+
+Commands run locally with Apple Clang and Rack SDK 2.6.3 on macOS arm64:
+
+```shell
+make -j2 all test test-rack RACK_DIR=/path/to/Rack-SDK
+make -j2 test-asan-ubsan
+make -j2 test-rack RACK_TEST_MODE=asan-ubsan RACK_DIR=/path/to/Rack-SDK
+make check-build
+python3 scripts/validate.py dependencies
+git diff --check
+git diff --exit-code -- plugin.json presets patches/debug
+```
+
+All commands pass. The ordinary suite passes 7,111 assertions in 48 cases across 12 DSP and four
+Rack binaries; the same assertions pass in the two sanitizer runs.
+The Rack sanitizer run instruments the widget/common-integration tests and
+Infinite Stairs included by the host fixture. Its contract executable links
+ordinary production objects, so this is not a sanitizer audit of every chip or
+the Rack runtime. macOS ASan does not supply LeakSanitizer accounting; resource
+ownership is explicit and repeated destruction is exercised without claiming
+an OS-level leak report. Existing SDK deprecation warnings remain.
+
+### Remaining Verification
+
+-   On an unlocked Mac, inspect all 16 enabled browser previews and live modules,
+    reopen affected debug patches, listen to representative 1/16-channel output,
+    and interactively edit/undo/redo/remove both wavetable modules. Source SVG
+    rasterization and headless events do not replace that check.
+-   After review/commit, run the existing three-platform CI, particularly the
+    Windows three-byte PCM assertion and audio tolerance fixtures. No commit,
+    push, or remote CI run is authorized for this implementation turn.
+-   005 receives the updated runtime SVGs and ownership-safe widgets for figure
+    generation. 008 remains responsible for native theme switching and preview
+    verification in both modes. The branding/preview acceptance item remains
+    unchecked until the native check above is performed.
+
 
 ## Build-Migration Findings
 

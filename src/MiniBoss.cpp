@@ -16,7 +16,9 @@
 #include <functional>
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/yamaha_ym2612/feedback_operator.hpp"
 #include "engine/yamaha_ym2612_params.hpp"
 

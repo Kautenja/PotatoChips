@@ -119,6 +119,18 @@ PDF exports, and existing manual cover/interface/control illustrations.
 All of res/ is currently packaged, including unused legacy panel files.
 Manual assets are source/publication material, not part of the plugin archive.
 
+Arhythmetic Units runtime footer artwork
+  Files: res/ArhythmeticUnits.svg and inline ArhythmeticUnits groups in the
+  18 registered-model panel SVGs (including blanks and disabled modules).
+  Copyright 2025-2026 Arhythmetic Units. License: CC-BY-NC-ND-4.0.
+  Copied from RackNES res/ArhythmeticUnits.svg; its outlines originate in
+  Fourier src/rack_extensions/panel_artwork.hpp at revision
+  12ac3236e332b7d0a01b2d750fa07a0849132341.
+  Origin: https://github.com/Kautenja/ArhythmeticUnits-Fourier
+  Adaptation: uniform scaling/placement within each former brand's bounds.
+  Existing control geometry, chip art, names, and collaborator credits remain.
+  Historical manual logos and dormant SCC/TurboGrafx16 panels are unchanged.
+
 Recorded provenance gaps and exceptions to blanket ownership assumptions:
   - res/BossFight_algorithms/0.svg through 7.svg arrived with the TercerBrazo
     import a36d8867. Their metadata does not establish a separate author or

@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/divider.hpp"
+#include "dsp/trigger_divider.hpp"
 #include "catch_amalgamated.hpp"
 
 SCENARIO("Trigger::Divider accessors and mutators are used") {

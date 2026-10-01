@@ -41,7 +41,10 @@ do not require compiling the plugin or installing TeX.
     conversion, output normalling, and clipping. Other modules have their
     own processing paths; inspect the affected module's implementation.
 -   `src/widget/` contains display and wavetable editing widgets;
-    `src/kautenja_rack/` contains Rack helpers and parameter quantities.
+    `src/rack_extensions/` contains Rack helpers, parameter quantities, and
+    module-owned wavetable storage. Generic math is in `dsp/math.hpp`, constants
+    in `dsp/constants.hpp`, voltage conversions in `dsp/eurorack.hpp`, and
+    triggers in the five `dsp/trigger_*.hpp` headers.
 -   `res/` contains runtime panels, controls, and other assets. `presets/`
     contains saved module presets; `patches/` includes examples and debug
     patches for manual checks.
@@ -122,13 +125,15 @@ python3 scripts/validate.py dependencies
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.
-`make all test-rack` requires the SDK and runs a headless module-construction
-smoke test. This does not replace graphical or audible Rack checks.
+`make all test-rack` requires the SDK. Its four headless suites cover all 18
+registered models, parameter/default/custom-JSON contracts, existing presets
+and project modules in debug patches, representative audio, common chip
+processing, and editor/display ownership. Fixture provenance and tolerances
+are documented in `test/rack/fixtures/README.md`. These checks do not replace
+graphical or audible Rack checks.
 
-The baseline tests relied on Rack's unqualified `Exception` type. Two DSP
-fixtures now include a test-only standard exception substitute; removing
-that production host coupling belongs to spec 003. No assertions were removed.
-Catch2 must be included before PCM's broad comparison operators.
+DSP exceptions use `std::runtime_error` without a Rack substitute. PCM's
+numeric comparison overloads permit either Catch2 include order.
 
 Ordinary DSP, Rack, and plugin builds occupy separate directories. Dependency
 files track headers, and configuration stamps track compiler identity,
@@ -142,11 +147,16 @@ another fails, and returns failure for any assertion or sanitizer diagnostic:
 ```shell
 make test-asan-ubsan
 make test-coverage
+make -j2 test-rack RACK_TEST_MODE=asan-ubsan RACK_DIR=/path/to/Rack-SDK
 ```
 
 These require Clang. Set `INSTRUMENT_CXX`, `LLVM_COV`, and `LLVM_PROFDATA`
 for a matching LLVM installation; on macOS LLVM tools default to `xcrun`.
 Reports live in `.build/<mode>/reports/`, separately from ordinary tests.
+Rack sanitizer binaries live in `.build/asan-ubsan/rack/`. Widget and common
+integration sources are instrumented; the contract executable links the same
+ordinary production objects used by the plugin. Neither the Rack SDK library
+nor every chip implementation is instrumented by that contract run.
 Coverage reports distinguish first-party utilities, imported DSP, and test
 harnesses. Only code mapped by these suites is measured; many chip/audio
 paths are unexercised. There is no coverage threshold. ASan/UBSan failures

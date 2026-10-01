@@ -62,8 +62,8 @@ class Ricoh2A03 {
 
         /// @brief Reset the oscillator to it initial state.
         inline void reset() {
-            regs[0] = regs[1] = regs[2] = regs[3];
-            reg_written[0] = reg_written[1] = reg_written[2] = reg_written[3];
+            regs[0] = regs[1] = regs[2] = regs[3] = 0;
+            reg_written[0] = reg_written[1] = reg_written[2] = reg_written[3] = false;
             length_counter = 0;
             delay = 0;
             last_amp = 0;
@@ -435,7 +435,7 @@ class Ricoh2A03 {
     ///
     void run_until(int32_t end_time) {
         if (end_time < last_time)
-            throw Exception("end_time must be >= last_time");
+            throw DSPException("end_time must be >= last_time");
         else if (end_time == last_time)
             return;
 

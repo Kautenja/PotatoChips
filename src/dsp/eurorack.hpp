@@ -18,7 +18,7 @@
 #ifndef DSP_EURORACK_HPP
 #define DSP_EURORACK_HPP
 
-#include "functions.hpp"
+#include "math.hpp"
 
 /// @brief Basic mathematical functions.
 namespace Math {
@@ -96,7 +96,7 @@ inline float toAC(const float& value) {
 /// The frequency will be clamped to the audible range of \f$[0, 20000]Hz\f$.
 ///
 inline float voct2freq(float voltage) {
-    return clip(rack::dsp::FREQ_C4 * powf(2.0, voltage), 0.0f, 20000.0f);
+    return clip(261.6256f * powf(2.0, voltage), 0.0f, 20000.0f);
 }
 
 }  // namespace Eurorack

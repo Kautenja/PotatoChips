@@ -126,9 +126,9 @@ class BLIPBuffer {
     ///
     void set_sample_rate(const uint32_t& sample_rate_, const uint32_t& clock_rate_) {
         if (!(sample_rate_ > 0))  // sample rate must be positive
-            throw Exception("sample_rate must be greater than 0.");
+            throw DSPException("sample_rate must be greater than 0.");
         if (!(clock_rate_ > 0))  // clock rate must be positive
-            throw Exception("clock_rate must be greater than 0.");
+            throw DSPException("clock_rate must be greater than 0.");
         // Calculate the number of clock cycles per sample, quantize by
         // truncation, and re-calculate the clock rate with rounding error
         // accounted for.
@@ -137,7 +137,7 @@ class BLIPBuffer {
         float ratio = static_cast<float>(sample_rate_) / quantized_clock_rate;
         int32_t factor_ = floor(ratio * (1L << ACCURACY) + 0.5);
         if (!(factor_ > 0))  // factor must be positive
-            throw Exception("sample_rate : clock_rate ratio is too large.");
+            throw DSPException("sample_rate : clock_rate ratio is too large.");
         // update the instance variables atomically after error handling
         sample_rate = sample_rate_;
         clock_rate = quantized_clock_rate;
@@ -200,7 +200,7 @@ class BLIPBuffer {
         accumulator += *buffer - (accumulator >> (bass_shift));
         // copy remaining samples to beginning and clear old samples
         static constexpr auto count = 1;
-        auto remain = count + WIDEST_IMPULSE;
+        auto remain = WIDEST_IMPULSE + 1 - count;
         memmove(buffer, buffer + count, remain * sizeof *buffer);
         memset(buffer + remain, 0, count * sizeof *buffer);
         // scale the sample by the scale factor and the binary code space for
@@ -303,7 +303,7 @@ class BLIPEqualizer {
         gen_sinc(out, count, BLIPBuffer::RESOLUTION * oversample, treble, cutoff);
         // apply (half of) hamming window
         const T to_fraction = PI / (count - 1);
-        for (uint32_t i = count; i > 0; i--)
+        for (uint32_t i = 0; i < count; ++i)
             out[i] *= 0.54 - 0.46 * cos(i * to_fraction);
     }
 };
@@ -350,7 +350,7 @@ class BLIPSynthesizer {
     void adjust_impulse() {
         // sum pairs for each phase and add error correction to end of 1st half
         static const int32_t SIZE = impulses_size();
-        for (int32_t p = BLIPBuffer::RESOLUTION; p >= BLIPBuffer::RESOLUTION / 2; p--) {
+        for (int32_t p = BLIPBuffer::RESOLUTION - 1; p >= BLIPBuffer::RESOLUTION / 2; --p) {
             const int32_t p2 = BLIPBuffer::RESOLUTION - 2 - p;
             int32_t error = kernel_unit;
             for (int32_t i = 1; i < SIZE; i += BLIPBuffer::RESOLUTION) {
@@ -390,12 +390,12 @@ class BLIPSynthesizer {
             if (shift) {
                 kernel_unit >>= shift;
                 if (kernel_unit <= 0)
-                    throw Exception("volume level is too low");
+                    throw DSPException("volume level is too low");
                 // keep values positive to avoid round-towards-zero of
                 // sign-preserving right shift for negative values
                 int32_t offset_hi = 0x8000 + (1 << (shift - 1));
                 int32_t offset_lo = 0x8000 >> shift;
-                for (int32_t i = impulses_size(); i > 0; i--)
+                for (int32_t i = 0; i < impulses_size(); ++i)
                     impulses[i] = ((impulses[i] + offset_hi) >> shift) - offset_lo;
                 adjust_impulse();
             }
@@ -415,7 +415,7 @@ class BLIPSynthesizer {
         equalizer(&fimpulse[BLIPBuffer::RESOLUTION], HALF_SIZE);
         int32_t i;
         // need mirror slightly past center for calculation
-        for (i = BLIPBuffer::RESOLUTION; i > 0; i--)
+        for (i = 0; i < BLIPBuffer::RESOLUTION; ++i)
             fimpulse[BLIPBuffer::RESOLUTION + HALF_SIZE + i] = fimpulse[BLIPBuffer::RESOLUTION + HALF_SIZE - 1 - i];
         // starts at 0
         for (i = 0; i < BLIPBuffer::RESOLUTION; i++)
@@ -480,7 +480,7 @@ class BLIPSynthesizer {
         static constexpr int32_t mid = QUALITY / 2 - 1;
         // ensure the time is valid with respect to the accuracy of the buffer
         if (!((time >> BLIPBuffer::ACCURACY) < 1))
-            throw Exception("time goes beyond end of buffer");
+            throw DSPException("time goes beyond end of buffer");
         // update the delta by the delta factor and cache necessary structures
         delta *= delta_factor;
 

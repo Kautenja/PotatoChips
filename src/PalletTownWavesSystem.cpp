@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "engine/chip_module.hpp"
@@ -26,7 +27,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Nintendo GameBoy Sound System chip emulator module.
-struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
+struct PalletTownWavesSystem : ChipModule<NintendoGBS>, WavetableOwner {
  private:
     /// a Trigger for handling inputs to the LFSR port
     Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
@@ -73,7 +74,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     static constexpr int NUM_WAVEFORMS = 5;
 
     /// the wave-tables to morph between
-    uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
+    std::atomic<uint8_t> (&wavetable)[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE] = waveBank->samples;
 
     /// @brief Initialize a new GBS Chip module.
     PalletTownWavesSystem() : ChipModule<NintendoGBS>() {
@@ -137,7 +138,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             RAMP_DOWN
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
-            memcpy(wavetable[i], wavetables[i], SAMPLES_PER_WAVETABLE);
+            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; ++sample)
+                wavetable[i][sample].store(wavetables[i][sample], std::memory_order_relaxed);
     }
 
     /// @brief Respond to the module being reset by the host environment.
@@ -153,8 +155,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
                 wavetable[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
-                    auto last = wavetable[table][sample - 1];
-                    auto next = wavetable[table][sample];
+                    auto last = wavetable[table][sample - 1].load(std::memory_order_relaxed);
+                    auto next = wavetable[table][sample].load(std::memory_order_relaxed);
                     wavetable[table][sample] = (last + next) / 2;
                 }
             }
@@ -409,11 +411,11 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             // in pairs (e.g., two at a time)
             auto sample = i << 1;
             // get the first waveform data
-            auto nibbleHi0 = wavetable[wavetable0][sample];
-            auto nibbleLo0 = wavetable[wavetable0][sample + 1];
+            auto nibbleHi0 = wavetable[wavetable0][sample].load(std::memory_order_relaxed);
+            auto nibbleLo0 = wavetable[wavetable0][sample + 1].load(std::memory_order_relaxed);
             // get the second waveform data
-            auto nibbleHi1 = wavetable[wavetable1][sample];
-            auto nibbleLo1 = wavetable[wavetable1][sample + 1];
+            auto nibbleHi1 = wavetable[wavetable1][sample].load(std::memory_order_relaxed);
+            auto nibbleLo1 = wavetable[wavetable1][sample + 1].load(std::memory_order_relaxed);
             // floating point interpolation between both samples
             uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
             uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
@@ -483,10 +485,9 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             // get the wave-table buffer for this editor. if the module is
             // displaying in/being rendered for the library, the module will
             // be null and a dummy waveform is displayed
-            uint8_t* wavetable = module ? &module->wavetable[wave][0] : &wavetables[wave][0];
             // setup a table editor for the buffer
-            auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,                       // wave-table buffer
+            auto table_editor = new WaveTableEditor(
+                module, wave, wavetables[wave], // live storage or browser preview
                 PalletTownWavesSystem::SAMPLES_PER_WAVETABLE,  // wave-table length
                 PalletTownWavesSystem::BIT_DEPTH,              // waveform bit depth
                 Vec(11, 26 + 67 * wave),         // position

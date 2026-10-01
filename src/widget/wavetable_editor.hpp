@@ -13,260 +13,181 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "rack.hpp"
-#include <cstdint>
-#include <algorithm>
-
 #ifndef WIDGETS_WAVETABLE_EDITOR_HPP_
 #define WIDGETS_WAVETABLE_EDITOR_HPP_
 
-/// @brief An action for an update to a wavetable.
-template<typename Wavetable>
-struct WaveTableAction : rack::history::Action {
- private:
-    /// the vector containing the waveform
-    Wavetable* const waveform;
-    /// the length of the wave-table to edit
-    const uint32_t length;
-    /// the waveform before the edit
-    Wavetable* before;
-    /// the waveform after the edit
-    Wavetable* after;
+#include <rack.hpp>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <memory>
+#include "../rack_extensions/wavetable.hpp"
 
- public:
-    /// @brief Initialize a new wavetable update action.
-    explicit WaveTableAction(Wavetable* waveform_, uint32_t length_) :
-        rack::history::Action(),
-        waveform(waveform_),
-        length(length_) {
-        name = "KautenjaDSP Wavetable Edit";
-        before = new Wavetable[length];
-        after = new Wavetable[length];
+/// History resolves a module ID so deletion and deletion-undo cannot leave a
+/// dangling buffer pointer or target the storage of a former module instance.
+struct WaveTableAction : rack::history::ModuleAction {
+    using Samples = std::array<uint8_t, WavetableBank::SAMPLES>;
+    unsigned page;
+    Samples before{};
+    Samples after{};
+
+    WaveTableAction(int64_t id, unsigned page_) : page(page_) {
+        moduleId = id;
+        name = "Arhythmetic Units wavetable edit";
     }
 
-    /// @brief Delete the action.
-    ~WaveTableAction() { delete[] before; delete[] after; }
+    static Samples snapshot(const WavetableBank& bank, unsigned page) {
+        Samples result{};
+        if (page < WavetableBank::TABLES)
+            for (unsigned i = 0; i < result.size(); ++i)
+                result[i] = bank.samples[page][i].load(std::memory_order_relaxed);
+        return result;
+    }
 
-    /// @brief copy the waveform into the before buffer.
-    inline void copy_before() { std::copy(waveform, waveform + length, before); }
+    void apply(const Samples& samples) {
+        if (!APP || !APP->engine || page >= WavetableBank::TABLES) return;
+        auto owner = dynamic_cast<WavetableOwner*>(APP->engine->getModule(moduleId));
+        if (!owner) return;
+        for (unsigned i = 0; i < samples.size(); ++i)
+            owner->waveBank->samples[page][i].store(samples[i], std::memory_order_relaxed);
+    }
 
-    /// @brief copy the waveform into the after buffer.
-    inline void copy_after() { std::copy(waveform, waveform + length, after); }
-
-    /// @brief Return true if the action is a commit-able update.
-    inline bool is_diff() { return std::memcmp(before, after, length); }
-
-    /// @brief De-commit the action.
-    inline void undo() final { std::copy(before, before + length, waveform); }
-
-    /// @brief Commit the action.
-    inline void redo() final { std::copy(after, after + length, waveform); }
+    void undo() override { apply(before); }
+    void redo() override { apply(after); }
 };
 
-/// A widget that displays / edits a wave-table.
-template<typename Wavetable>
+/// The browser draws a private, read-only preview. Live editors hold only a weak
+/// reference, so they stop editing when their module's storage disappears.
 struct WaveTableEditor : rack::TransparentWidget {
- private:
-    /// the vector containing the waveform
-    Wavetable* const waveform;
-    /// the length of the wave-table to edit
-    const uint32_t length;
-    /// the bit depth of the waveform
-    const uint64_t bit_depth;
-    /// the fill color for the widget
-    NVGcolor fill;
-    /// the background color for the widget
-    NVGcolor background;
-    /// the border color for the widget
-    NVGcolor border;
-    /// the state of the drag operation
-    struct {
-        /// whether a drag is currently active
-        bool is_pressed = false;
-        /// whether the drag operation is being modified
-        bool is_modified = false;
-        /// the current position of the mouse pointer during the drag
-        rack::Vec position = {0, 0};
-    } drag_state;
-    /// the active action to commit to history
-    WaveTableAction<Wavetable>* action = nullptr;
+    std::weak_ptr<WavetableBank> bank;
+    WaveTableAction::Samples preview{};
+    int64_t moduleId = -1;
+    unsigned page;
+    unsigned length;
+    unsigned bit_depth;
+    NVGcolor fill, background, border;
+    rack::Vec dragPosition;
+    bool cursorLocked = false;
+    std::unique_ptr<WaveTableAction> action;
 
- public:
-    /// @brief Initialize a new wave-table editor widget.
-    ///
-    /// @param waveform_ the waveform buffer to read and update
-    /// @param length_ the length of the wave-table to edit
-    /// @param bit_depth_ the bit-depth of the waveform samples to generate
-    /// @param position the position of the screen on the module
-    /// @param size the output size of the display to render
-    /// @param fill_ the fill color for the widget
-    /// @param background_ the background color for the widget
-    /// @param border_ the border color for the widget
-    ///
-    explicit WaveTableEditor(
-        Wavetable* waveform_,
-        uint32_t length_,
-        uint64_t bit_depth_,
-        rack::Vec position,
-        rack::Vec size,
-        NVGcolor fill_ =       {{{0.f,  0.f,  1.f,  1.f}}},
-        NVGcolor background_ = {{{0.f,  0.f,  0.f,  1.f}}},
-        NVGcolor border_ =     {{{0.2f, 0.2f, 0.2f, 1.f}}}
-    ) :
-        rack::TransparentWidget(),
-        waveform(waveform_),
-        length(length_),
-        bit_depth(bit_depth_),
-        fill(fill_),
-        background(background_),
-        border(border_) {
+    WaveTableEditor(rack::engine::Module* module, unsigned page_, const uint8_t* preview_,
+        unsigned length_, unsigned bit_depth_, rack::Vec position, rack::Vec size,
+        NVGcolor fill_ = {{{0.f, 0.f, 1.f, 1.f}}},
+        NVGcolor background_ = {{{0.f, 0.f, 0.f, 1.f}}},
+        NVGcolor border_ = {{{0.2f, 0.2f, 0.2f, 1.f}}}) :
+        page(page_), length(std::min(length_, unsigned(WavetableBank::SAMPLES))),
+        bit_depth(std::min(bit_depth_, 255u)), fill(fill_), background(background_), border(border_) {
         setPosition(position);
         setSize(size);
+        if (auto owner = dynamic_cast<WavetableOwner*>(module)) {
+            bank = owner->waveBank;
+            moduleId = module->id;
+        }
+        if (preview_) std::copy(preview_, preview_ + length, preview.begin());
     }
 
-    /// @brief Delete the wavetable editor.
-    ~WaveTableEditor() { if (action != nullptr) delete action; }
+    ~WaveTableEditor() override { unlockCursor(); }
 
-    /// Respond to a button event on this widget.
-    void onButton(const rack::event::Button &e) override {
-        // Consume the event to prevent it from propagating.
+    void unlockCursor() {
+        if (cursorLocked && APP && APP->window) APP->window->cursorUnlock();
+        cursorLocked = false;
+    }
+
+    bool editable() const {
+        return page < WavetableBank::TABLES && length && bit_depth &&
+            box.size.x > 0 && box.size.y > 0 &&
+            std::isfinite(box.size.x) && std::isfinite(box.size.y) && !bank.expired();
+    }
+
+    unsigned sampleIndex(float x) const {
+        float normalized = std::max(0.f, std::min(1.f, x / box.size.x));
+        return std::min(length - 1, static_cast<unsigned>(normalized * length));
+    }
+
+    /// Inclusive endpoints also allow vertical edits within a single sample.
+    void edit(rack::Vec from, rack::Vec to) {
+        if (!editable() || !std::isfinite(from.x) || !std::isfinite(to.x) || !std::isfinite(to.y)) return;
+        auto storage = bank.lock();
+        if (!storage) return;
+        unsigned first = sampleIndex(from.x), last = sampleIndex(to.x);
+        if (first > last) std::swap(first, last);
+        float y = std::max(0.f, std::min(1.f, 1.f - to.y / box.size.y));
+        uint8_t value = y * bit_depth;
+        for (unsigned i = first; i <= last; ++i)
+            storage->samples[page][i].store(value, std::memory_order_relaxed);
+    }
+
+    void onButton(const rack::event::Button& e) override {
         e.consume(this);
-        // Handle right clicks.
-        if (e.action == GLFW_PRESS && e.button == GLFW_MOUSE_BUTTON_RIGHT) {
-            auto widget = dynamic_cast<ModuleWidget*>(parent);
-            widget->createContextMenu();
+        if (e.action != GLFW_PRESS) return;
+        if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+            if (auto widget = getAncestorOfType<rack::app::ModuleWidget>())
+                if (widget->module) widget->createContextMenu();
             return;
         }
-        // setup the drag state
-        drag_state.is_modified = e.mods & GLFW_MOD_CONTROL;
-        // set the position of the drag operation to the position of the mouse
-        drag_state.position = e.pos;
-        // calculate the normalized x position in [0, 1]
-        float x = drag_state.position.x / box.size.x;
-        x = Math::clip(x, 0.f, 1.f);
-        // calculate the position in the wave-table
-        uint32_t index = x * length;
-        // calculate the normalized y position in [0, 1]
-        // y increases downward in pixel space, so invert about 1
-        float y = 1.f - drag_state.position.y / box.size.y;
-        y = Math::clip(y, 0.f, 1.f);
-        // calculate the value of the wave-table at this index
-        uint64_t value = y * bit_depth;
-        // if the action is a press copy the waveform before updating
-        if (e.action == GLFW_PRESS) {
-            drag_state.is_pressed = true;
-            action = new WaveTableAction<Wavetable>(waveform, length);
-            action->copy_before();
-            // update the waveform, we need to check if the button is pressed
-            // this could be a mouse up event from a click that started
-            // somewhere else
-            waveform[index] = value;
+        if (e.button != GLFW_MOUSE_BUTTON_LEFT || !editable()) return;
+        auto storage = bank.lock();
+        if (!storage) return;
+        action.reset(new WaveTableAction(moduleId, page));
+        action->before = WaveTableAction::snapshot(*storage, page);
+        dragPosition = e.pos;
+        edit(e.pos, e.pos);
+    }
+
+    void onDragStart(const rack::event::DragStart& e) override {
+        if (action && APP && APP->window) {
+            APP->window->cursorLock();
+            cursorLocked = true;
         }
-    }
-
-    /// @brief Respond to drag start event on this widget.
-    /// @details
-    /// This allows detection of mouse-down events to lock the cursor.
-    ///
-    void onDragStart(const rack::event::DragStart &e) override {
-        // lock the cursor so it does not move in the engine during the edit
-        APP->window->cursorLock();
-        // consume the event to prevent it from propagating
         e.consume(this);
     }
 
-    /// @brief Respond to drag move event on this widget.
-    void onDragMove(const rack::event::DragMove &e) override {
-        // consume the event to prevent it from propagating
+    void onDragMove(const rack::event::DragMove& e) override {
         e.consume(this);
-        // if the drag operation is not active, return early
-        if (!drag_state.is_pressed) return;
-        // update the drag state based on the change in position from the mouse
-        uint32_t index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
-        drag_state.position.x += e.mouseDelta.x / APP->scene->rackScroll->zoomWidget->zoom;
-        uint32_t next_index = length * Math::clip(drag_state.position.x / box.size.x, 0.f, 1.f);
-        drag_state.position.y += e.mouseDelta.y / APP->scene->rackScroll->zoomWidget->zoom;
-        // calculate the normalized y position in [0, 1]
-        // y increases downward in pixel space, so invert about 1
-        float y = 1.f - drag_state.position.y / box.size.y;
-        y = Math::clip(y, 0.f, 1.f);
-        // calculate the value of the wave-table at this index
-        uint64_t value = y * bit_depth;
-        if (next_index < index)  // swap next index if it's less the current
-            (index ^= next_index), (next_index ^= index), (index ^= next_index);
-        // update the waveform (use memset for SIMD; opposed to a loop)
-        memset(waveform + index, value, next_index - index);
+        if (!action) return;
+        float zoom = APP && APP->scene ? APP->scene->rackScroll->zoomWidget->zoom : 1.f;
+        auto next = dragPosition.plus(e.mouseDelta.div(zoom));
+        edit(dragPosition, next);
+        dragPosition = next;
     }
 
-    /// @brief Respond to drag end event on this widget.
-    /// @details
-    /// This allows detection of mouse-up events that occur both inside and
-    /// outside the widget to push the update onto the undo/redo history.
-    ///
-    void onDragEnd(const rack::event::DragEnd &e) override {
-        // unlock the cursor to return it to its normal state
-        APP->window->cursorUnlock();
-        // consume the event to prevent it from propagating
+    void onDragEnd(const rack::event::DragEnd& e) override {
+        unlockCursor();
         e.consume(this);
-        if (!drag_state.is_pressed) return;
-        // disable the drag state and commit the action
-        drag_state.is_pressed = false;
-        action->copy_after();
-        if (action->is_diff()) {  // the action has a change
-            // add the action to the global undo/redo history
-            APP->history->push(action);
-            // clear the pointer to the action since it's no longer delegated
-            // to this wavetable editor
-            action = nullptr;
+        auto storage = bank.lock();
+        if (action && storage && APP && APP->history) {
+            action->after = WaveTableAction::snapshot(*storage, page);
+            if (action->before != action->after) APP->history->push(action.release());
         }
+        action.reset();
     }
 
-    /// @brief Draw the display on the main context.
-    ///
-    /// @param args the arguments for the draw context for this widget
-    ///
     void drawLayer(const DrawArgs& args, int layer) override {
-        // the x position of the widget
-        static constexpr int x = 0;
-        // the y position of the widget
-        static constexpr int y = 0;
-        // the radius for the corner on the rectangle
-        static constexpr int corner_radius = 3;
-        // arbitrary padding
-        static constexpr int pad = 1;
         if (layer == 1) {
-            // -----------------------------------------------------------------
-            // draw the background
-            // -----------------------------------------------------------------
             nvgBeginPath(args.vg);
-            nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
+            nvgRoundedRect(args.vg, -1, -1, box.size.x + 2, box.size.y + 2, 3);
             nvgFillColor(args.vg, background);
             nvgFill(args.vg);
             nvgClosePath(args.vg);
-            // -----------------------------------------------------------------
-            // draw the waveform
-            // -----------------------------------------------------------------
-            nvgSave(args.vg);
-            nvgBeginPath(args.vg);
-            nvgScissor(args.vg, x, y, box.size.x, box.size.y);
-            // get the start pixel for the path (first sample in the table)
-            auto startY = box.size.y * (bit_depth - waveform[0]) / static_cast<float>(bit_depth);
-            nvgMoveTo(args.vg, x, startY);
-            for (uint32_t i = 0; i < length; i++) {
-                auto pixelX = box.size.x * i / static_cast<float>(length);
-                auto pixelY = box.size.y * (bit_depth - waveform[i]) / static_cast<float>(bit_depth);
-                nvgLineTo(args.vg, pixelX, pixelY);
+            auto samples = preview;
+            if (auto storage = bank.lock()) samples = WaveTableAction::snapshot(*storage, page);
+            if (length && bit_depth) {
+                nvgSave(args.vg);
+                nvgScissor(args.vg, 0, 0, box.size.x, box.size.y);
+                nvgBeginPath(args.vg);
+                for (unsigned i = 0; i < length; ++i) {
+                    float x = box.size.x * i / length;
+                    float y = box.size.y * (static_cast<float>(bit_depth) - samples[i]) / bit_depth;
+                    if (i == 0) nvgMoveTo(args.vg, x, y);
+                    else nvgLineTo(args.vg, x, y);
+                }
+                nvgStrokeColor(args.vg, fill);
+                nvgStroke(args.vg);
+                nvgClosePath(args.vg);
+                nvgRestore(args.vg);
             }
-            nvgMoveTo(args.vg, x, startY);
-            nvgStrokeColor(args.vg, fill);
-            nvgStroke(args.vg);
-            nvgClosePath(args.vg);
-            nvgRestore(args.vg);
-            // -----------------------------------------------------------------
-            // draw the border
-            // -----------------------------------------------------------------
             nvgBeginPath(args.vg);
-            nvgRoundedRect(args.vg, x - pad, y - pad, box.size.x + 2 * pad, box.size.y + 2 * pad, corner_radius);
+            nvgRoundedRect(args.vg, -1, -1, box.size.x + 2, box.size.y + 2, 3);
             nvgStrokeColor(args.vg, border);
             nvgStroke(args.vg);
             nvgClosePath(args.vg);

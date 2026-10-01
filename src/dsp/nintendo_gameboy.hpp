@@ -458,7 +458,7 @@ class NintendoGBS {
     ///
     void run_until(int32_t end_time) {
         if (end_time < last_time)
-            throw Exception("end_time must be >= last_time");
+            throw DSPException("end_time must be >= last_time");
         else if (end_time == last_time)
             return;
 
@@ -575,7 +575,7 @@ class NintendoGBS {
         if (channel >= OSC_COUNT)  // make sure the channel is within bounds
             throw ChannelOutOfBoundsException(channel, OSC_COUNT);
         if (!((center && left && right) or (!center && !left && !right)))
-            throw Exception("center, left, and right must be specified or NULL");
+            throw DSPException("center, left, and right must be specified or NULL");
         Oscillator& osc = *oscs[channel];
         osc.outputs[1] = right;
         osc.outputs[2] = left;

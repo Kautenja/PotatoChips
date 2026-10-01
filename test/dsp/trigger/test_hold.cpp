@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/hold.hpp"
+#include "dsp/trigger_hold.hpp"
 #include "catch_amalgamated.hpp"
 
 SCENARIO("Trigger::Hold processes signals at 100Hz") {

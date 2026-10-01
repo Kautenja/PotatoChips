@@ -80,8 +80,8 @@ struct OperatorContext {
     /// @param clock_rate the number of source clock cycles per second
     ///
     void set_sample_rate(float sample_rate, float clock_rate) {
-        if (sample_rate == 0) throw Exception("sample_rate must be above 0");
-        if (clock_rate == 0) throw Exception("clock_rate must be above 0");
+        if (sample_rate == 0) throw DSPException("sample_rate must be above 0");
+        if (clock_rate == 0) throw DSPException("clock_rate must be above 0");
 
         // frequency base
         freqbase = clock_rate / sample_rate;

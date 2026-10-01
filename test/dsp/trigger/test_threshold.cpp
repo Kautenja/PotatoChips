@@ -21,7 +21,7 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/threshold.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "catch_amalgamated.hpp"
 
 TEST_CASE("Trigger::Threshold should be false when initialized") {

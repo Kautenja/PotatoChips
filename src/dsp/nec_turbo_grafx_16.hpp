@@ -129,7 +129,7 @@ class NECTurboGrafx16 {
         ///
         void run_until(const Synthesizer& synth, int32_t end_time) {
             if (end_time < last_time)
-                throw Exception("end_time must be >= last_time");
+                throw DSPException("end_time must be >= last_time");
             else if (end_time == last_time)
                 return;
             // cache often-used values

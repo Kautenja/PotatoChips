@@ -21,8 +21,8 @@
 // SOFTWARE.
 //
 
-#include "catch_amalgamated.hpp"
 #include "dsp/pcm.hpp"
+#include "catch_amalgamated.hpp"
 
 using namespace PCM;
 
@@ -66,6 +66,26 @@ TEST_CASE("Should create 24-bit signed value from 8-bit signed value") {
 
 TEST_CASE("numeric limits should be correct") {
     REQUIRE(std::numeric_limits<int24_t>::max() == int24_t(0x7fffff));
-    REQUIRE(std::numeric_limits<int24_t>::min() == int24_t(0xffffff));
-    REQUIRE(std::numeric_limits<int24_t>::lowest() == int24_t(0xffffff));
+    REQUIRE(std::numeric_limits<int24_t>::min() == int24_t(-0x800000));
+    REQUIRE(std::numeric_limits<int24_t>::lowest() == int24_t(-0x800000));
+}
+
+TEST_CASE("24-bit storage preserves signed values and little-endian bytes") {
+    for (int32_t value : {0, 1, -1, 0x7fffff, -0x800000, 0x123456, -0x123456}) {
+        int24_t sample(value);
+        REQUIRE(int32_t(sample) == value);
+        REQUIRE(int64_t(sample) == value);
+        REQUIRE(sample.bytes[0] == uint8_t(value));
+        REQUIRE(sample.bytes[1] == uint8_t(uint32_t(value) >> 8));
+        REQUIRE(sample.bytes[2] == uint8_t(uint32_t(value) >> 16));
+    }
+    REQUIRE(int32_t(int24_t(uint64_t(0xabcdef123456))) == 0x123456);
+    REQUIRE(int32_t(int24_t(0x800000)) == -0x800000);
+    REQUIRE(int32_t(int24_t(0xffffff)) == -1);
+    int24_t assigned(int8_t(0));
+    assigned = int16_t(-123);
+    REQUIRE(assigned == -123);
+    REQUIRE(-123 == assigned);
+    REQUIRE(std::numeric_limits<int24_t>::digits == 23);
+    REQUIRE(std::numeric_limits<int24_t>::digits10 == 6);
 }

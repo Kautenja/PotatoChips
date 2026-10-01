@@ -243,7 +243,7 @@ class AtariPOKEY {
     ///
     void run_until(int32_t end_time) {
         if (end_time < last_time)  // invalid end time
-            throw Exception("final_end_time must be >= last_time");
+            throw DSPException("final_end_time must be >= last_time");
         else if (end_time == last_time)  // no change in time
             return;
 
@@ -448,7 +448,7 @@ class AtariPOKEY {
     ///
     inline void reset(Engine* new_engine = nullptr) {
         if (new_engine == nullptr && impl == nullptr)  // cannot reset without engine
-            throw Exception("cannot reset with implied engine without setting engine");
+            throw DSPException("cannot reset with implied engine without setting engine");
         else if (new_engine != nullptr)  // set the engine
             impl = new_engine;
         // reset the instance variables

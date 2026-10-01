@@ -222,8 +222,10 @@ manifest, or root GPL text changed relative to `cb2809a4`.
 
 ### Remaining Verification And Handoffs
 
-Keep the Windows PCM
-regression enabled until its production fix is verified under the same ABI.
+003 now supplies the staged three-byte PCM representation and boundary/byte
+regressions, and removes the temporary DSP exception substitute. Keep the
+Windows PCM regression enabled until that revision is verified under the same
+ABI; the earlier CI result above remains historical evidence.
 Spec 004 owns TeX failure propagation and actual 14-PDF builds/render review.
 The manual validator is implemented and its negative fixtures pass, but no
 real PDF collection, TeX failure fixture, or upload workflow is claimed to

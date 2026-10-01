@@ -17,9 +17,10 @@
 
 #include "plugin.hpp"
 #include "dsp/mi_edges/wavetable.hpp"
-#include "dsp/trigger/threshold.hpp"
-#include "dsp/trigger/divider.hpp"
+#include "dsp/trigger_threshold.hpp"
+#include "dsp/trigger_divider.hpp"
 #include "dsp/math.hpp"
+#include "dsp/eurorack.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module

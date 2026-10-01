@@ -1,8 +1,9 @@
 # Implementation Specifications
 
-These five specifications adapt the recent Fourier and RackNES maintenance
-work to PotatoChips. They describe planned work, not implemented behavior
-or release promises. All five are `PLANNED` as of October 1, 2026.
+The first five specifications adapt the recent Fourier and RackNES
+maintenance work to PotatoChips. Spec 006 addresses two reported Super Echo
+issues. They describe planned work, not implemented behavior or release
+promises. All six are `PLANNED` as of October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -13,6 +14,7 @@ or release promises. All five are `PLANNED` as of October 1, 2026.
 | [003](003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity and theme, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Use 002's harness; coordinate branding and provenance with 001. |
 | [004](004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Can begin with current code/artwork; final review follows relevant 003 and 005 changes. |
 | [005](005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Capture final 003 widgets and integrate with 004's manual layout. |
+| [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -21,11 +23,22 @@ publication CI, and full-manual review once those outputs exist. These are
 staged handoffs within five specs, not dependencies that require every spec
 to finish before the others can start.
 
+006 is a focused bug-fix priority that can proceed independently of that
+sequence. It owns [#96](https://github.com/Kautenja/PotatoChips/issues/96)
+and [#97](https://github.com/Kautenja/PotatoChips/issues/97), including separate
+resolution comments with fix commit references and closure after verification.
+Writing or committing the spec does not resolve either issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns production code
 and regression cases, 004 owns manual build rules and prose, and 005 owns
 the capture tool and panel figures. Update cross-references when a producer
 changes an agreed path or command.
+
+For Super Echo's missing FIR controls and randomization policy, 006 owns
+the fixes and regressions; 003 preserves them during refactoring, 004 carries
+their verified behavior into the manual rewrite, and 005 captures the fixed
+widget. Avoid duplicating implementation or completion evidence across specs.
 
 ## Evidence And Baseline
 

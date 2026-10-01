@@ -13,7 +13,9 @@ checks pass, but pointer-driven waveform editing and listening remain unverified
 (`IN PROGRESS`). Spec 004's manuals and final figures are implemented;
 recipe/listening checks remain (`IN PROGRESS`). Spec 005's captures, vector
 guides and publication integration pass; actual dark-panel review waits on
-008 (`IN PROGRESS`). Specs 006-011 remain `PLANNED`. See each spec for evidence.
+008 (`IN PROGRESS`). Specs 006-012 remain `PLANNED`. Spec 012 covers the
+module display-name rebrand and shared SVG title typography. See each spec
+for evidence.
 
 ## Work Areas And Ownership
 
@@ -30,6 +32,7 @@ guides and publication integration pass; actual dark-panel review waits on
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
+| [012](012-module-rebranding-and-title-system.md) | Rename all 16 active modules and replace title logos with shared typography | Manifest display names, SVG title sources/exports, current documentation, manuals, captures, font provenance | Preserve slugs and geometry; coordinate 001/004/005 publication and 008 themes; broader panel redesign remains separate. |
 
 Use 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -109,6 +112,13 @@ than treating engine replacement as proof that #82 is resolved.
 public metadata, packaging, and manual coverage. Baseline module counts
 remain historical evidence rather than a fixed limit on future inventory.
 
+012 owns the display-name mapping and reproducible SVG title system for all
+active modules, including both blanks. It preserves saved-patch identifiers,
+control geometry, audio behavior, and historical PDF URLs. Coordinate its
+publication assets with 004/005 and title variants with 008; full-panel
+graphical redesign remains later work. Writing this spec does not rename
+the product's modules or implement the new title artwork.
+
 ## Evidence And Baseline
 
 The comparison used local changelogs, commit diffs, and checked-out sources:
@@ -139,7 +149,7 @@ Preserve the existing plugin slug, remaining module slugs, Rack IDs, patch
 JSON, and preset compatibility.
 
 This plan includes the siblings' Arhythmetic Units presentation and native
-Rack theme conventions, while retaining Potato Chips' module identities.
+Rack theme conventions, while retaining Potato Chips' stable module identifiers.
 Beyond 010's optional YM2612/YM3438 engines and 011's YM2151 module, it does
 not schedule other new chips, enable unfinished modules, import NES
 mapper/ROM work, create an FFT research/benchmark program or whitepaper,

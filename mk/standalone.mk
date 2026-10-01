@@ -33,7 +33,7 @@ $(DSP_OBJECTS): $(TEST_BUILD)/%.o: test/%.cpp
 $(DSP_CATCH): dep/catch2-v3/catch_amalgamated.cpp
 $(DSP_OBJECTS) $(DSP_CATCH): $(TEST_BUILD)/config Makefile mk/standalone.mk
 	@mkdir -p $(@D)
-	$(TEST_CXX) $(TEST_CPPFLAGS) $(TEST_FLAGS) -MMD -MP -c -o $@ $(filter %.cpp,$^)
+	$(TEST_CXX) $(TEST_CPPFLAGS) $(TEST_FLAGS) -MMD -MP -c -o $@ $(firstword $(filter %.cpp,$^))
 $(TEST_BUILD)/config: FORCE
 	@python3 scripts/build-config.py $@ --compiler $(call shell-quote,$(TEST_CXX)) --flags $(call shell-quote,$(TEST_CPPFLAGS) $(TEST_FLAGS) $(TEST_LINK))
 -include $(DSP_OBJECTS:.o=.d) $(DSP_CATCH:.o=.d)

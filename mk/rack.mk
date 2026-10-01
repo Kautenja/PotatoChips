@@ -17,7 +17,7 @@ $(RACK_TEST_OBJECTS): $(RACK_TEST_BUILD)/%.o: test/rack/%.cpp
 $(RACK_TEST_BUILD)/catch.o: dep/catch2-v3/catch_amalgamated.cpp
 $(RACK_TEST_OBJECTS) $(RACK_TEST_BUILD)/catch.o: $(RACK_TEST_BUILD)/config Makefile mk/rack.mk
 	@mkdir -p $(@D)
-	$(CXX) $(RACK_TEST_FLAGS) -MMD -MP -c -o $@ $(filter %.cpp,$^)
+	$(CXX) $(RACK_TEST_FLAGS) -MMD -MP -c -o $@ $(firstword $(filter %.cpp,$^))
 .build/plugin/%.cpp.o: %.cpp .build/plugin/config Makefile mk/rack.mk
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

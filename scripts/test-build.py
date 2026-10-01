@@ -23,11 +23,14 @@ class BuildTests(unittest.TestCase):
         for name in ('src', 'test/dsp', 'dep/catch2-v3', 'sdk'):
             (self.root / name).mkdir(parents=True)
         (self.root / 'src/value.hpp').write_text('#define VALUE 0\n')
+        (self.root / 'src/detail').mkdir()
+        (self.root / 'src/detail/helper.cpp').write_text('int helper() { return 0; }\n')
         (self.root / 'test/dsp/test_one.cpp').write_text('''#include "value.hpp"
+#include "detail/helper.cpp"
 #ifdef RACK_FIXTURE
 #error Rack flags leaked into standalone tests
 #endif
-int main() { return VALUE; }
+int main() { return VALUE + helper(); }
 ''')
         (self.root / 'dep/catch2-v3/catch_amalgamated.cpp').write_text('int harness;\n')
         (self.root / 'src/plugin.cpp').write_text('#include "sdk_value.hpp"\nint main() { return SDK_VALUE; }\n')

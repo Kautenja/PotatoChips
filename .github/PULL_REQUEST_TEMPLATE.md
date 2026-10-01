@@ -33,5 +33,5 @@ your test configuration
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation following the
-      [Doxygen](https://www.doxygen.nl/manual/docblocks.html) style
+      [project style guides](../docs/style-guides/)
 - [ ] I have tested that my fix is effective or that my feature works

@@ -66,7 +66,9 @@ build dependency. Setup and architecture guidance currently live here.
 -   `test/` contains standalone DSP tests built by `SConstruct` using the
     pinned Catch2 submodule in `dep/Catch2/`.
 -   `manual/` contains per-module LaTeX manuals, figures, and shared style.
-    `Doxyfile` and `doxygen/` configure generated source documentation.
+
+Maintain source API documentation in code comments. This project does not
+build generated API documentation.
 
 Do not renumber existing Rack parameter, port, or light IDs, rename module
 slugs, or change saved JSON meanings without an intentional compatibility

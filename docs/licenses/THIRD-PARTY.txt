@@ -47,8 +47,7 @@ retain the references and do not treat them as a new permission grant.
 
 Sony S-DSP / OpenSPC-derived processing
 -------------------------------------
-Files: src/dsp/sony_s_dsp/{adsr,brr_sample_player,echo,
-       gaussian_interpolation_filter,processor}.hpp
+Files: src/dsp/sony_s_dsp/{adsr,echo,gaussian_interpolation_filter}.hpp
 Authors credited locally: Christian Kauten (2020), Shay Green (2006),
 Brad Martin (2002).
 Local import: 680ac4fa51caf00a57638f09a71497ee9f3f8d45, src/dsp/Spc_Dsp.cpp.
@@ -59,9 +58,10 @@ The current upstream file records LGPL-2.1-or-later; include LGPL-2.1.txt
 without replacing the local GPL notices. Exact imported upstream revision
 and the complete chain from OpenSPC are not recorded.
 common.hpp contains first-party shared definitions under its own GPL notice.
-ADSR, echo, and interpolation are used by enabled modules. The full processor
-and standalone BRR sample player remain as reusable DSP source with tests
-after removal of the SuperSynth and SuperSampler Rack modules.
+ADSR, echo, and interpolation are used by enabled modules. The unused full
+processor and standalone BRR sample player, their sample-format helpers,
+and their tests were removed on October 1, 2026 after removal of the
+SuperSynth and SuperSampler Rack modules.
 
 MAME-derived Yamaha YM2612
 -------------------------

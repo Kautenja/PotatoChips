@@ -2,16 +2,19 @@
 
 ## Unreleased
 
+-   Remove the unused Sony S-DSP processor, BRR sample player, sample-format
+    helpers, and their tests. Preserve ADSR, echo, interpolation, and shared
+    DSP used by active modules.
+
 -   Remove the unused Konami SCC and NEC TurboGrafx-16 emulator headers.
 
 -   Remove the disabled experimental SuperSynth module, its panel, and its
-    debug patch. Preserve the underlying Sony S-DSP implementation and tests.
-    Experimental patches containing SuperSynth can no longer load that module.
+    debug patch. Experimental patches containing SuperSynth can no longer
+    load that module.
 
 -   Remove the disabled SuperSampler prototype, its panel and example patches,
-    and its instance from the combined demo patch. Preserve the underlying
-    Sony S-DSP/BRR code and tests. Experimental patches using SuperSampler
-    will no longer find that module.
+    and its instance from the combined demo patch. Experimental patches using
+    SuperSampler will no longer find that module.
 
 -   Generate manual covers and README panels from real Rack widgets; add
     numbered vector panel guides and optional capture/validation tooling.

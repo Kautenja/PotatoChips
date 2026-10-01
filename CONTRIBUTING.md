@@ -61,7 +61,8 @@ slugs, or change saved JSON meanings without an intentional compatibility
 plan and verification with existing patches. Display names and slugs can
 differ: preserve historical identifiers such as `106`, `2612`, and `2A03`.
 The experimental SuperSampler and SuperSynth modules have been removed;
-their underlying Sony S-DSP code and tests remain.
+their unused Sony S-DSP processor and BRR sample player were also removed.
+The ADSR, echo, interpolation, and shared DSP used by active modules remain.
 
 ## Correctness And Real-Time Behavior
 
@@ -121,7 +122,7 @@ make check-build
 python3 scripts/validate.py dependencies
 ```
 
-`test` and `test-dsp` run all 13 DSP suites; `test-build` only compiles them.
+`test` and `test-dsp` run all 11 DSP suites; `test-build` only compiles them.
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.

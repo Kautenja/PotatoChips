@@ -131,8 +131,9 @@ before transferring an instruction.
 
 The current manifest has 16 entries: 14 active sound modules with manuals
 and two active blank panels. SuperSampler and SuperSynth were removed on
-2026-10-01; their underlying DSP and tests remain. Earlier model counts in
-completion evidence are historical.
+2026-10-01; their unused Sony S-DSP processor, BRR sample player, and tests
+were also removed. DSP components used by active modules remain. Earlier
+model and DSP suite counts in completion evidence are historical.
 Keep those categories distinct in docs, capture coverage, and release checks.
 Preserve the existing plugin slug, remaining module slugs, Rack IDs, patch
 JSON, and preset compatibility.

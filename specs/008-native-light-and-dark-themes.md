@@ -91,7 +91,8 @@ manifest slugs. All panels are 380 Rack pixels tall.
 | `VRC6` | `StepSaw.svg` | 120 |
 
 SuperSampler and SuperSynth were removed on 2026-10-01 and require no theme
-assets. Their underlying DSP remains outside this UI work.
+assets. The unused Sony S-DSP processor and BRR sample player were also
+removed; DSP used by active modules remains outside this UI work.
 
 ## Requirements
 

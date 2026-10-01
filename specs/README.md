@@ -17,7 +17,9 @@ Spec 006 is COMPLETE and archived: Echo FIR sliders are restored, level and
 bypass controls survive randomization, and issues #96/#97 are closed.
 Spec 007 is COMPLETE and archived: Contour uses the 32 kHz envelope clock,
 releases and rearms reliably, labels sustain rate SR, and closes #98.
-Specs 009-011 remain PLANNED: YM2612 looping envelopes and optional
+Spec 009 is IN PROGRESS: the YM2612 event-path fix is verified; the original
+one-shot report and upstream issue resolution remain outstanding.
+Specs 010-011 remain PLANNED: optional
 Nuked-OPN2 engines, and a YM2151 module. Specifications
 and source completion are not release promises; see each record for scope,
 platform validation and publication limits.

@@ -1,7 +1,7 @@
 # Reliable YM2612 Looping Envelope Retriggers
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 Issue: [#82](https://github.com/Kautenja/PotatoChips/issues/82)
 Planning baseline: `59638fd9` (product source unchanged from `33fb1554`).
 
@@ -9,6 +9,21 @@ Make Mini Boss and Boss Fight reliably restart their looping envelopes
 under polyphonic gate/retrigger input. Eliminate the reported intermittent
 one-shot envelope in looping mode, preserve ordinary envelope behavior,
 and verify both soft-reset settings before resolving #82.
+
+## Hardware-Fidelity Constraint
+
+The implementation request on 2026-10-01 explicitly prioritizes preserving
+hardware quirks over making the envelope behave like an ideal hard-reset
+LFO. This supersedes any reading of the original cycle-restart requirement
+that would clear attenuation, reset the shared envelope clock, force AR 31,
+or make zero-rate envelopes loop. Key-on enters attack from the current
+attenuation; the first contour depends on the previous contour and the
+free-running envelope clock. The regression oracle uses identical incoming
+state and clock position, rather than assuming every note starts at silence.
+
+The existing implementation is a simplified repeating SSG contour, not a
+complete hardware SSG emulator. This change preserves its envelope behavior;
+it does not certify all of that pre-existing behavior as hardware accurate.
 
 ## Report And Source Evidence
 
@@ -207,15 +222,15 @@ a release or close #82 from a planning commit.
 
 - [ ] A current reproduction or verified intervening fix is linked to a
       deterministic before/after case, with exact settings and root cause.
-- [ ] Accepted events reliably restart looping envelopes in both modules
+- [x] Accepted events reliably restart looping envelopes in both modules
       and soft-reset settings, without one-shot leaks or lost/duplicate
       triggers across the timing and polyphony matrix.
-- [ ] Non-looping envelopes, gate-off release, phase policy, operator/voice
+- [x] Non-looping envelopes, gate-off release, phase policy, operator/voice
       independence, normalling, reset, reload, and sample-rate checks pass.
-- [ ] Focused regressions, bounded stress replay, applicable DSP suites, and
+- [x] Focused regressions, bounded stress replay, applicable DSP suites, and
       the Rack build pass. Native Rack confirms the reported four-or-more
       voice workflow; automated success alone is not native verification.
-- [ ] Mini Boss/Boss Fight manuals and changelog describe verified looping,
+- [x] Mini Boss/Boss Fight manuals and changelog describe verified looping,
       retrigger, and soft-reset behavior without promising full SSG hardware
       modes or unrelated oscillator synchronization.
 - [ ] #82 receives a resolution comment with the actual fixing commit and
@@ -290,10 +305,180 @@ gh issue view 82 --repo Kautenja/PotatoChips --json state,stateReason,comments,u
 
 ## Completion Evidence
 
-Planning: issue body, embedded patch, comments, module/DSP paths, trigger
-history, tests, and manuals reviewed on 2026-10-01. Reproduction, root-cause
-confirmation, implementation, and executable/native verification are pending.
+Implementation commit: `b7f1684db6e3617986e43d1da0860048648f3010` (local; not pushed).
+
+Implemented on 2026-10-01 against baseline `3cff51d2`, on macOS arm64 with
+Apple Clang, the local Rack 2.6.0 SDK/runtime, and Catch2 3.16.0. Source work,
+regressions, native replay and manuals are implemented. Status remains
+IN PROGRESS because the original report's separate accepted-event one-shot
+symptom is not reproduced, and upstream issue resolution is pending.
+
+### Findings And Scope
+
+Issue #82 was re-read via GitHub CLI on 2026-10-01: OPEN, no comments.
+Its embedded Rack 1 patch confirms all 16 parameter values listed above,
+rotation allocation (`polyMode: 0`), four MIDI channels, and `prevent_clicks:
+true`. The [Rack 2 fixture](../patches/debug/YM2612-SSG-Retrigger.vcv)
+retains the MIDI pitch/gate/retrigger cables and zero-depth OUT-to-FM cable.
+It omits obsolete analyzers/audio modules and device selection. No physical
+MIDI device or audio device was selected during verification.
+
+Two integration defects are established, independently of the older report:
+
+-   The pre-fix real module fails the event-order regression: a simultaneous
+    gate/retrigger rise between CV frames leaves the operator silent when
+    the explicit chip-key reference has entered attack.
+-   The [before trace](assets/009/before-events.csv) records an accepted
+    retrigger at frame 96 inserting RELEASE until frame 112. The
+    [after trace](assets/009/after-events.csv) stays keyed on and attacking.
+    A one-sample pulse at frame 65 also exercises the divider blind spot.
+    Settings are the report's, at 48 kHz, soft reset on, four voices, with
+    voice 0 held at 5 V. Stage values: 0 silent, 1 release, 2 sustain,
+    3 decay, 4 attack. EG count and fractional timer are recorded each frame.
+
+The core did not produce an accepted-event one-shot in the tested sequences.
+A held key with nonzero rates keeps traversing attack/decay/sustain. This
+is not proof that the 2020 report was solely a missed pulse, nor evidence
+of a historical fixing commit. No unproven envelope-state repair was made.
+
+[Nemesis's corrected hardware research](https://gendev.spritesmind.net/forum/viewtopic.php?f=24&start=410&t=386)
+and the [Genesis Plus GX implementation](https://github.com/ekeeke/Genesis-Plus-GX/blob/master/core/sound/ym2612.c)
+were consulted for the distinction between key-on, attenuation and SSG phase
+behavior. The implementation keeps slow attacks, zero-rate holds, current
+attenuation, the shared EG/LFO clocks, and the existing loop-boundary phase
+resets. Full SSG modes, release-model changes, and chip clock/tuning changes
+remain outside this fix.
+
+The only DSP arithmetic changes replace signed negative left shifts in
+feedback and modulation with bounded multiplication. UBSan reproduced the
+old error (`left shift of negative value -49`). Products fit in `int32_t`.
+[Before](assets/009/audio-before.csv) and [after](assets/009/audio-after.csv)
+fingerprints agree in all 108 configurations: three host rates, two phase
+policies, loop on/off, the single operator with bipolar external modulation,
+and all eight four-operator algorithms. Each renders 48,000 samples with
+feedback 7 and nonzero AM/FM sensitivity. The sanitized renderer also matches.
+These are host-local equivalence checks, not hardware reference recordings.
+Original attribution is retained. Test friends expose read-only state in
+test code; there are no runtime diagnostic counters, logging or allocation.
+
+### Event Contract And Compatibility
+
+-   Gate/retrigger detection now runs every host sample, with unchanged
+    2 V/0.01 V hysteresis. Parameter CV stays divided by 16; newly activated
+    lanes acquire controls before their first key event.
+-   A retrigger completes key-off/key-on before rendering. Simultaneous
+    gate rise/retrigger produces one key-on. Held-high retrigger produces
+    one edge; a sampled low rearms it.
+-   Retrigger with gate low, including coincident gate fall, keys on for one
+    host sample and releases on the next. Previously that pulse lasted a
+    CV interval. Disconnect releases keys; retired lanes release and rearm
+    their detectors. Dormant DSP clocks are not advanced or reset.
+-   Module reset still resets the soft-reset option, without resetting the
+    live DSP or input detectors. DSP reset is tested separately. Reloaded
+    modules start with fresh DSP progress. IDs, defaults, routing, JSON key
+    and parameter ranges remain unchanged.
+-   Soft reset preserves oscillator phase only on external key-on. Both
+    settings keep the existing SSG phase resets and current attenuation.
+    No promise of click-free audio or identical fresh-note contours is made.
+
+### Automated And Native Evidence
+
+The focused Rack suite compares production module state against explicit
+chip key writes on every tested frame, including envelope state, attenuation,
+phase, gate/loop flags, EG count/timer and LFO timer. It covers both modules,
+all 16 divider offsets, 1/4/16 channels, 44.1/48/96 kHz, loop on/off,
+both soft settings, one-sample/1 ms/held-high pulses, event priority,
+hysteresis, normalling/each operator override, inactive voice rearming,
+module reset/custom-JSON reload and active sample-rate change. Comparison
+uses the same incoming clock phase: tolerance is zero host frames.
+
+The bounded stress generator runs 10,000 scheduled events per module per
+soft-reset setting (40,000 total), spaced 521 frames apart, rotating through
+four voices. Every seventh event combines a gate fall and retrigger; other
+events include held-key retriggers and reopened keys. It checks every
+operator's state against explicit chip events and then verifies at least
+two natural loop repetitions per operator after the last event. No state
+mismatches, stuck release or one-shot leakage occurred. Event counts describe
+the fixed stimulus; production code has no event-count instrumentation.
+
+Pure DSP tests exercise Operator, FeedbackOperator and Voice4Op, key-on
+attenuation/phase semantics, shared-clock independence, continuing loops,
+key-off release, repeated phase resets above 0x200, zero-rate holds, rate
+scaling, and loop toggles across AR/decay/SL boundaries.
+
+[Native replay source](assets/009/native_replay.cpp) uses Rack's actual
+`dsp::MidiParser<16>` in rotation mode to generate rapid notes, overlapping
+notes, chords, stealing, key-off and voice reuse at 48 kHz. Core's 1 ms
+retrigger pulses are 10 V. The change-only per-channel streams and sampled
+states are retained for [Operator/hard](assets/009/MiniBoss-hard-midi.csv),
+[Operator/soft](assets/009/MiniBoss-soft-midi.csv),
+[Voice/hard](assets/009/2612-hard-midi.csv), and
+[Voice/soft](assets/009/2612-soft-midi.csv).
+The harness processes all four voices and every operator, asserting loop
+continuation, and renders actual module widgets with Fundamental 2.6.1
+Scope. The upper Scope trace is audio; the lower is a diagnostic linear
+mapping of internal attenuation (not a new module output). All four native
+captures were visually inspected. This is a device-free native replay, not
+a physical keyboard performance, listening test, or original failing trace.
+
+### Commands And Results
+
+The implemented Make harness supersedes the historical SCons commands above.
+Run from the repository root with the prepared local Rack SDK/runtime:
+
+```shell
+make test/dsp/yamaha_ym2612/test_ssg_retrigger
+make -C test/rack ym2612-ssg RACK_DIR="$(pwd)/../.."
+make test/dsp/yamaha_ym2612/test_ssg_retrigger TEST_MODE=asan-ubsan
+make test-ym2612-ssg RACK_TEST_MODE=asan-ubsan TEST_ARGS='*coincident*,*reset*,*overrides*'
+make -j2 all test-rack test
+make -j2 test
+make -j2 test-rack
+make -C manual/MiniBoss
+make -C manual/BossFight
+git diff --check
+```
+
+Focused DSP: 4 cases, 1,248,994 assertions, ordinary and ASan/UBSan pass.
+Focused Rack: 6 cases, 9,850,532 assertions pass. Focused Rack sanitizer:
+3 event/lifecycle/routing cases, 17,012 assertions pass. The complete
+standalone DSP suite passes. C++11 plugin builds. The first combined full
+run was interrupted by concurrent spec 011 registration changing the model
+count from 16 to 17; no YM2151 code or expectations were changed by this task.
+The five other existing Rack suites were run independently and passed.
+After the concurrent contract update, the full Rack run passes all eight
+suites (including the separate YM2151 suite). The complete standalone run
+passes all 13 suites, including the separate YM2151 work.
+
+Both manuals rebuilt successfully. All 20 rendered pages were inspected,
+including full-size changed operation pages; no overflow or clipping was
+seen. Generated PDFs remain ignored build products.
+
+Reproduce the native renderer on macOS with Fundamental built in its usual
+Rack plugin directory (Linux needs its OpenGL/dl link equivalents):
+
+```shell
+c++ -std=c++11 -O2 -DTEST -Wno-unused-local-typedefs -Wno-deprecated-declarations -I. -isystem ../../include -isystem ../../dep/include specs/assets/009/native_replay.cpp -L../.. -lRack -framework OpenGL -o /tmp/009-native-replay
+mkdir -p /tmp/009-native/user
+DYLD_LIBRARY_PATH=../.. /tmp/009-native-replay ../.. . ../../plugins/Fundamental /tmp/009-native
+c++ -std=c++11 -O2 -I. specs/assets/009/audio_fingerprint.cpp -o /tmp/009-audio
+/tmp/009-audio > /tmp/009-audio.csv
+cmp specs/assets/009/audio-after.csv /tmp/009-audio.csv
+make test-ym2612-ssg TEST_ARGS='[.trace]'
+```
+
+### Outstanding Resolution Work
+
+Do not close #82 on the strength of the input-path fix alone. An accepted
+retrigger that subsequently becomes a one-shot has not been reproduced;
+there is no verified historical fixing commit. A captured failing event
+stream is still needed to distinguish a remaining defect from the expected
+state-dependent chip contour. The implementation request's hardware-fidelity
+constraint rules out forcing an idealized hard-reset LFO as a workaround.
+No upstream push or release was requested; upstream fixing links and the
+resolution comment/closure remain pending. Native Linux/Windows and physical
+MIDI/audio listening checks were not performed. This spec is not archived.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #82 | Pending | Source/history review only; regression/native checks pending | Pending | Open at planning time |
+| #82 | `b7f1684db6e3617986e43d1da0860048648f3010` (local; not pushed) | Focused DSP/Rack/stress, sanitizer, native replay, audio equivalence and manuals verified; original accepted-event one-shot unconfirmed | Pending | OPEN when re-read 2026-10-01 |

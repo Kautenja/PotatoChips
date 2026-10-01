@@ -6,7 +6,9 @@
 /plugin.dylib
 /plugin.dll
 /plugin.so
-/docs
+# Keep generated Doxygen output ignored while tracking contributor style guides.
+/docs/*
+!/docs/style-guides/
 .DS_Store
 
 # MARK: Python gitignore

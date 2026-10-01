@@ -69,7 +69,7 @@ if mode == 'coverage':
         except ValueError:
             continue
         if relative.startswith('src/dsp/trigger_') or relative in (
-                'src/dsp/math.hpp', 'src/dsp/constants.hpp', 'src/dsp/eurorack.hpp',
+                'src/dsp/math.hpp', 'src/dsp/eurorack.hpp',
                 'src/dsp/pcm.hpp', 'src/dsp/exceptions.hpp', 'src/dsp/sony_s_dsp/common.hpp'):
             group = 'first-party'
         elif relative.startswith('src/dsp/'):

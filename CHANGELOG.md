@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+-   Remove unused math functions and constants while retaining unused methods
+    on the remaining DSP classes.
+
 -   Remove the unused Edges umbrella header and standalone LFSR/sample-and-hold
     oscillators. Preserve the digital oscillator and tables used by Blocks.
 

@@ -42,8 +42,8 @@ do not require compiling the plugin or installing TeX.
     own processing paths; inspect the affected module's implementation.
 -   `src/widget/` contains display and wavetable editing widgets;
     `src/rack_extensions/` contains Rack helpers, parameter quantities, and
-    module-owned wavetable storage. Generic math is in `dsp/math.hpp`, constants
-    in `dsp/constants.hpp`, voltage conversions in `dsp/eurorack.hpp`, and
+    module-owned wavetable storage. Generic math is in `dsp/math.hpp`,
+    voltage conversions in `dsp/eurorack.hpp`, and
     triggers in the five `dsp/trigger_*.hpp` headers.
 -   `res/` contains runtime panels, controls, and other assets. `presets/`
     contains saved module presets; `patches/` includes examples and debug

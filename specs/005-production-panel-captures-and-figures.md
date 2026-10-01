@@ -32,7 +32,8 @@ Own new `tools/capture/`, reviewed `manual/*/img/Panel.png`, per-module
 `figures/panel-layout.tex`, and `manual/latex/panel-drawing.tex`. Coordinate
 figure inputs/build hooks with [004](004-manual-content-and-publication-style.md)
 and README image substitutions with [001](001-licensing-and-project-documentation.md).
-Use final runtime artwork from [003](003-source-organization-and-rack-integration.md).
+Use final runtime branding from [003](003-source-organization-and-rack-integration.md)
+and panel pairs/theme behavior from [008](008-native-light-and-dark-themes.md).
 
 ## Required Inventory
 
@@ -73,7 +74,7 @@ smoke coverage but no invented manual. Disabled `SuperSampler` and
     nondefaults. No game ROM or sample fixture is needed for these active
     modules, and visual fixtures are not audio validation.
 3.  Render light/dark live widgets and null-module browser previews. Include
-    theme toggles and the relevant display/editor lifecycle checks owned by
+    theme toggles owned by 008 and display/editor lifecycle checks owned by
     003. Wait for component framebuffers with a bounded retry; fail on
     initialization, missing asset, invalid geometry, incomplete rendering,
     or GL errors. Record unsupported platforms rather than writing a mockup.

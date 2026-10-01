@@ -98,7 +98,7 @@ owns the broader manual rewrite. This spec owns both issue dispositions.
 5.  Preserve normal Rack interactions: drag, numeric entry, reset, value
     display, module randomize, undo/redo, preset loading, and patch reload.
     Validate the browser preview without dereferencing a null module.
-    Verify supported theme behavior, including light/dark if 003 has landed,
+    Verify supported theme behavior, including light/dark if 008 has landed,
     and normal/dim room lighting at more than one Rack zoom level.
 
 ### Preserve Five Controls During Randomization (#97)

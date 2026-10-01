@@ -42,6 +42,11 @@ Coordinate metadata/license scope with [001](001-licensing-and-project-documenta
 documented behavior with [004](004-manual-content-and-publication-style.md),
 and final figures with [005](005-production-panel-captures-and-figures.md).
 
+[008](008-native-light-and-dark-themes.md) owns native theme implementation,
+panel pairs, theme regressions, and issue #95. This spec retains branding
+and structural/lifecycle work; preserve 008's theme contract during those
+changes rather than implementing a second theme system.
+
 ## Requirements
 
 1.  Establish a small source map and direct includes. Move math constants
@@ -58,11 +63,10 @@ and final figures with [005](005-production-panel-captures-and-figures.md).
     ownership or test needs, not to reach an arbitrary file-length limit.
 3.  Adapt Arhythmetic Units branding to the existing panels, retaining module
     names, control geometry, chip illustrations, and collaborator/upstream
-    credits. Preserve asset provenance under 001. Provide coherent light/dark
-    panels using Rack's global preference, including browser previews and
-    live theme changes; do not add plugin-specific theme JSON. If the API
-    requires a newer Rack minimum, verify and declare it in the manifest
-    with matching contributor/user guidance before using that API.
+    credits. Preserve asset provenance under 001 and coordinate both panel
+    variants with 008, which owns native theme support and minimum-Rack
+    metadata. Branding changes must apply consistently to light/dark assets
+    and preserve live switching and safe browser previews.
 4.  Make custom display/editor lifecycle and preview behavior explicit.
     Verify null-module construction, invalid SVG/index handling, release of
     parsed resources, editor edge coordinates, undo/redo, module deletion,
@@ -104,8 +108,10 @@ because they are not registered modules.
       consumers; source attribution and C++11 compatibility are retained.
 - [ ] Registration, IDs, JSON, presets, and representative audio fixtures
       agree with the baseline except for separately documented bug fixes.
-- [ ] All 16 enabled entries, including blanks, support native theme changes
-      and safe null-module previews; disabled status remains unchanged.
+- [ ] Branding and structural changes preserve 008's theme support across
+      all 16 enabled entries, including blanks, with safe null-module
+      previews; disabled status remains unchanged. Theme delivery is tracked
+      in 008 rather than duplicated here.
 - [ ] Targeted display ownership/editor edge/undo regressions pass, with
       sanitizer evidence where the platform permits it.
 - [ ] Mono/polyphony, reset, sample rates, and normalling are checked at the

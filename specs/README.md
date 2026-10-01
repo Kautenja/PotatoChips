@@ -1,9 +1,10 @@
 # Implementation Specifications
 
 The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Specs 006 and 007 address reported Super Echo
-and Super ADSR issues. They describe planned work, not implemented behavior
-or release promises. All seven are `PLANNED` as of October 1, 2026.
+maintenance work to PotatoChips. Specs 006-008 address reported Super Echo,
+Super ADSR, and native theme issues. They describe planned work, not
+implemented behavior or release promises. All eight are `PLANNED` as of
+October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -11,11 +12,12 @@ or release promises. All seven are `PLANNED` as of October 1, 2026.
 | --- | --- | --- | --- |
 | [001](001-licensing-and-project-documentation.md) | Licensing, README, contributor and support guidance, public metadata | Root Markdown, license texts, `docs/licenses/`, GitHub templates, `plugin.json` | Can start immediately; finish command, image, and release guidance as 002-005 land. |
 | [002](002-build-tests-and-ci.md) | Make-based tests, build hygiene, CI, release artifact validation | `Makefile`, `mk/`, `dep/`, test harness, `.github/workflows/`, build scripts and ignore rules | Establish baseline before 003; integrate the PDF job after 004. |
-| [003](003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity and theme, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Use 002's harness; coordinate branding and provenance with 001. |
+| [003](003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Use 002's harness; coordinate branding/provenance with 001 and preserve 008's themes. |
 | [004](004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Can begin with current code/artwork; final review follows relevant 003 and 005 changes. |
-| [005](005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Capture final 003 widgets and integrate with 004's manual layout. |
+| [005](005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Capture final 003 widgets and 008 themes; integrate with 004's manual layout. |
 | [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
 | [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
+| [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -36,11 +38,18 @@ defects, and align sustain-rate terminology. It includes meaningful issue
 updates and closure with a fixing commit reference after verification.
 Writing or committing the spec does not resolve the issue.
 
+008 independently owns [#95](https://github.com/Kautenja/PotatoChips/issues/95):
+native global light/dark support, including both blanks, live switching,
+previews, and readable controls. It authorizes useful issue updates and
+closure with an implementation commit reference after verification. Planning
+alone does not resolve the issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
-prose, 002 owns workflow and test-build plumbing, 003 owns production code
-and regression cases, 004 owns manual build rules and prose, and 005 owns
-the capture tool and panel figures. Update cross-references when a producer
-changes an agreed path or command.
+prose, 002 owns workflow and test-build plumbing, 003 owns structural code
+changes and general integration regressions, 004 owns manual build rules
+and prose, and 005 owns the capture tool and panel figures. Specs 006-008
+own their focused fixes/features, tests, and issue follow-through. Update
+cross-references when a producer changes an agreed path or command.
 
 For Super Echo's missing FIR controls and randomization policy, 006 owns
 the fixes and regressions; 003 preserves them during refactoring, 004 carries
@@ -50,6 +59,11 @@ widget. Avoid duplicating implementation or completion evidence across specs.
 For Super ADSR's release report, 007 owns the fix, regressions, and targeted
 panel/manual corrections. Specs 003-005 preserve and incorporate its verified
 behavior, terminology, and captures in their broader work.
+
+008 owns theme wiring, paired artwork, and minimum-Rack compatibility.
+003 applies branding consistently to both variants; 001 preserves artwork
+terms/provenance; 004 documents usage; 005 captures both themes. Theme work
+can start before those broad changes and does not introduce patch state.
 
 ## Evidence And Baseline
 

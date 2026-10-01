@@ -1,10 +1,10 @@
 # Implementation Specifications
 
 The first five specifications adapt the recent Fourier and RackNES
-maintenance work to PotatoChips. Specs 006-009 address reported Super Echo,
-Super ADSR, native theme, and YM2612 looping-envelope issues. They describe
-planned work, not implemented behavior or release promises. All nine are
-`PLANNED` as of October 1, 2026.
+maintenance work to PotatoChips. Specs 006-010 address reported Super Echo,
+Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
+engine work. They describe planned work, not implemented behavior or release
+promises. All ten are `PLANNED` as of October 1, 2026.
 
 ## Work Areas And Ownership
 
@@ -19,6 +19,7 @@ planned work, not implemented behavior or release promises. All nine are
 | [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
 | [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
+| [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 
 Begin with 001's inventory and 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
@@ -51,10 +52,16 @@ Mini Boss and Boss Fight, including both soft-reset settings. It includes
 issue updates and closure with verified fixing commit references. Writing
 the spec does not resolve the issue.
 
+010 owns [#83](https://github.com/Kautenja/PotatoChips/issues/83): selectable
+Nuked-OPN2 engines with the existing engine retained as the default. It
+includes control-mapping and performance validation, useful issue updates,
+and closure with accessible implementation commit references after verified
+resolution. Writing the spec does not resolve the issue.
+
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code
 changes and general integration regressions, 004 owns manual build rules
-and prose, and 005 owns the capture tool and panel figures. Specs 006-009
+and prose, and 005 owns the capture tool and panel figures. Specs 006-010
 own their focused fixes/features, tests, and issue follow-through. Update
 cross-references when a producer changes an agreed path or command.
 
@@ -75,6 +82,11 @@ can start before those broad changes and does not introduce patch state.
 009 owns the YM2612 trigger/envelope corrections and regression evidence;
 003 preserves their behavior and 004 incorporates the verified operating
 guidance. It does not add the Mini Boss hard-sync feature declined in #94.
+
+010 owns engine selection and its adapter, not 009's existing-engine defect.
+Preserve the legacy rendering baseline and reuse 009's event/loop evidence
+for the new modes. Coordinate changes to the shared module/DSP files rather
+than treating engine replacement as proof that #82 is resolved.
 
 ## Evidence And Baseline
 
@@ -104,10 +116,11 @@ all module slugs, Rack IDs, patch JSON, and preset compatibility.
 
 This plan includes the siblings' Arhythmetic Units presentation and native
 Rack theme conventions, while retaining Potato Chips' module identities.
-It does not schedule new chips, enable unfinished modules, import NES
-mapper/ROM work, create an FFT research/benchmark program or whitepaper,
-or select a release version. Historical `TBD` changelog entries are not
-automatically accepted feature requirements.
+Beyond 010's optional YM2612/YM3438 engines, it does not schedule new chips,
+enable unfinished modules, import NES mapper/ROM work, create an FFT
+research/benchmark program or whitepaper, or select a release version.
+Historical `TBD` changelog entries are not automatically accepted feature
+requirements.
 
 ## Spec Lifecycle
 

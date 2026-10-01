@@ -127,7 +127,8 @@ Arhythmetic Units runtime footer artwork
   Fourier src/rack_extensions/panel_artwork.hpp at revision
   12ac3236e332b7d0a01b2d750fa07a0849132341.
   Origin: https://github.com/Kautenja/ArhythmeticUnits-Fourier
-  Adaptation: uniform scaling/placement within each former brand's bounds.
+  Adaptation: centered footer placement at Fourier's native logo scale;
+  panels below 12 HP use the unchanged square emblem without the wordmark.
   Existing control geometry, chip art, names, and collaborator credits remain.
   Historical manual logos and dormant SCC/TurboGrafx16 panels are unchanged.
 
@@ -139,9 +140,10 @@ Production panel captures and reference figures (spec 005)
   host-provided Rack controls. Rack resources are not copied or relicensed.
   Renderer adapted from RackNES tools/capture and Fourier's native inspector,
   GPL-3.0-or-later, copyright 2026 Arhythmetic Units.
-  Runtime footer outlines are unchanged, uniformly scaled to 60 Rack pixels
-  wide; Pallet Town uses white fill. Blocks and Name Corp title contours are
-  separated for Rack-compatible hole inference, preserving their silhouettes.
+  Runtime footer outlines are unchanged, using Fourier's native scale with
+  the emblem alone below 12 HP; Pallet Town uses white fill. Title contours
+  in Blocks and Name Corp are separated for Rack-compatible hole inference,
+  preserving their silhouettes.
   Obsolete Module/Interface SVG/PDF exports were removed after replacement
   review. Conceptual chip/envelope/operator figures and provenance gaps below
   are retained. No new provenance or permission claim is made for those works.

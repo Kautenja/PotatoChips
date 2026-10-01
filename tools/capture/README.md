@@ -113,9 +113,14 @@ panel pairs and actual theme selection remain **pending spec 008**. These
 captures do not claim that dark themes are implemented. Another 32 restored
 context views must match their initial light images exactly.
 
-The Arhythmetic Units footer is 60 Rack pixels wide (5.60229 high), centered
-on its existing horizontal anchor at vertical center 370.5 on every registered
-panel, including dormant panels. Pallet Town uses a white footer for contrast.
+The Arhythmetic Units footer matches Fourier's native logo scale: the full
+wordmark is 120.4554 Rack pixels wide and 11.2471 high on panels 12 HP and
+wider. Narrower panels use the unchanged 11.3938-pixel-wide square emblem
+at the same scale, keeping its detail readable without crowding the screws.
+Both variants are horizontally centered with their top at 366.882 pixels,
+including blank and dormant panels. Boss Fight's wordmark moves from the
+left control block to the panel center. Pallet Town retains white fill for
+contrast.
 Blocks and Name Corp's title contours were separated into independent solids
 with their existing holes; contour starting points avoid touching boundaries.
 This preserves the original vector silhouettes while avoiding Rack's

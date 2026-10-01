@@ -170,8 +170,9 @@ OS/architecture and unavailable native checks separately from PDF success.
     matched their initial light pixels exactly. Reviewed actual algorithm,
     factory waveforms, control caches, sliders, lights, titles and blanks.
 -   Addressed the user's additional artwork findings: all 18 registered
-    panel footers now use a 60-pixel-wide wordmark with a 370.5 vertical
-    center, retaining horizontal anchors. Pallet Town uses white for contrast.
+    panel footers initially used a 60-pixel-wide wordmark with a 370.5
+    vertical center; the legibility follow-up below supersedes that size
+    and placement. Pallet Town uses white for contrast.
     Blocks and Name Corp title contours now render as independent solids and
     holes, retaining their outlines without Rack's compound-path artifacts.
 -   Produced 14 native-density 760-pixel-high `Panel.png` crops and 14 vector
@@ -216,6 +217,31 @@ OS/architecture and unavailable native checks separately from PDF success.
     The publication completeness validator passed with Poppler on PATH.
 -   Documentation consumers, manifest mapping, source input paths and
     `git diff --check` passed. No DSP change or listening claim is made.
+
+### Brand Legibility Follow-Up On October 1, 2026
+
+-   Matched Fourier's native footer scale: 120.4554 by 11.2471 Rack pixels
+    for the full mark. Panels below 12 HP use its unchanged square emblem,
+    11.3938 by 11.2471 pixels, instead of shrinking the lettering. All 18
+    registered panel SVGs center their selected mark at a top of 366.882
+    pixels. Boss Fight moves its mark to the full panel's horizontal center;
+    Pallet Town retains white fill. No control or title artwork changed.
+-   `make -C tools/capture screenshots`: passed on the same macOS arm64 /
+    Rack 2.6.0 / 2x Retina setup. Reviewed footer clearance on all 16 enabled
+    panels, including both blanks and the tight 12 HP Super ADSR layout.
+    Footer pixels matched across all six live/preview/preference/context
+    views per panel. Disabled panels received the same SVG placement rule
+    but remain outside the native capture inventory.
+-   Refreshed all 14 publication PNGs. Pixel comparisons against the previous
+    committed images confirmed that every change is confined to the footer;
+    dimensions and all artwork above image row 733 remain unchanged. All 18
+    SVGs parse and their content preceding the footer is byte-identical.
+-   `make -C tools/capture test`: all seven export/rollback checks passed.
+    `make -C manual`: all 14 PDFs rebuilt; all 115 pages were rendered and
+    their layouts reviewed. Metadata, outlines, links and text checks passed,
+    as did `python3 scripts/validate.py manuals manual/.build` with Poppler
+    on PATH and `git diff --check`. This artwork-only follow-up adds no DSP
+    or listening verification; the dark-panel dependency below remains.
 
 ### Remaining Dependency
 

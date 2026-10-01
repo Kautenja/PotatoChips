@@ -4,8 +4,9 @@
 
 -   Generate manual covers and README panels from real Rack widgets; add
     numbered vector panel guides and optional capture/validation tooling.
--   Standardize footer logo size, improve Pallet Town footer contrast, and
-    repair compound-path artifacts in the Blocks and Name Corp titles.
+-   Match Fourier's larger footer wordmark, use the square brand emblem on
+    panels below 12 HP, and improve Pallet Town footer contrast. Repair
+    compound-path artifacts in the Blocks and Name Corp titles.
 
 -   Replace the legacy social banner with Arhythmetic Units artwork in SVG,
     PNG, and PDF, and display the new banner in the repository README.

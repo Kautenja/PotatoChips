@@ -27,6 +27,10 @@ Cross-platform and listening limitations remain recorded. Specifications and
 source completion are not release promises; see each record for scope,
 platform validation and publication limits.
 
+Spec 013 is PLANNED for Operator 2151: a compact polyphonic OPM operator
+with external audio-rate PM, native feedback, detune, envelopes and LFO.
+Its prototype must establish modulation quality, chain latency and CPU cost.
+
 ## Work Areas And Ownership
 
 | Spec | Focus | Primary Files | Dependencies |
@@ -43,6 +47,7 @@ platform validation and publication limits.
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](archive/011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Complete; archived by user decision with validation limitations retained. Implementation published and #79 closed. |
 | [012](archive/012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Complete; archived. All names, 32 panels, 14 manuals and reusable artwork sources integrated. |
+| [013](013-ym2151-operator.md) | Compact Operator 2151 with external audio-rate PM | OPM operator adapter, module/panels, presets, manual, reference/chain/performance tests | Planned; reuse 011's pinned core and 012's presentation, preserve existing voices, prototype PM and latency first. |
 
 The archived specs establish the inventory, executable baseline, source
 organization, manual system, and capture tooling for subsequent work.
@@ -82,6 +87,11 @@ detune, and noise. It includes core selection, performance/reference tests,
 complete module presentation, and issue follow-through. The implementation
 commit and resolution comment are recorded in the archived spec; #79 is
 closed as completed.
+
+013 owns Operator 2151 and its new module artifacts. It builds on 011's
+core selection while independently validating external PM, isolated operator
+clocking, and multi-module latency/performance. It does not reopen #79 or
+change the existing Operator 2612 contract.
 
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code
@@ -157,10 +167,10 @@ JSON, and preset compatibility.
 
 This plan includes the siblings' Arhythmetic Units presentation and native
 Rack theme conventions, while retaining Potato Chips' stable module identifiers.
-Beyond 010's optional YM2612/YM3438 engines and 011's YM2151 module, it does
-not schedule other new chips, enable unfinished modules, import NES
-mapper/ROM work, create an FFT research/benchmark program or whitepaper,
-or select a release version.
+Beyond 010's optional YM2612/YM3438 engines, 011's YM2151 voice and 013's
+YM2151 operator, it does not schedule other new chips, enable unfinished
+modules, import NES mapper/ROM work, create an FFT research/benchmark program
+or whitepaper, or select a release version.
 Historical `TBD` changelog entries are not automatically accepted feature
 requirements.
 

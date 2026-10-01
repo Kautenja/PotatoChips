@@ -21,22 +21,27 @@
 // SOFTWARE.
 //
 
+// This executable acts as a host. Read host-only declarations before rack.hpp
+// restricts internal APIs; production plugin sources still use rack.hpp.
+#include <engine/Engine.hpp>
+#undef PRIVATE
+#define CATCH_CONFIG_PREFIX_ALL
 #include "catch_amalgamated.hpp"
 #include "../../src/InfiniteStairs.cpp"
 #include <memory>
 
 Plugin* plugin_instance = nullptr;
 
-TEST_CASE("Infinite Stairs constructs under a real Rack engine") {
+CATCH_TEST_CASE("Infinite Stairs constructs under a real Rack engine") {
     rack::Context context;
     rack::contextSet(&context);
     context.engine = new rack::engine::Engine;
     context.engine->setSampleRate(48000.f);
     {
         std::unique_ptr<rack::engine::Module> module(modelInfiniteStairs->createModule());
-        REQUIRE(module != nullptr);
-        REQUIRE(module->outputs.size() == 4);
-        REQUIRE(modelInfiniteStairs->slug == "2A03");
+        CATCH_REQUIRE(module != nullptr);
+        CATCH_REQUIRE(module->outputs.size() == 4);
+        CATCH_REQUIRE(modelInfiniteStairs->slug == "2A03");
     }
     rack::contextSet(nullptr);
 }

@@ -118,6 +118,8 @@ clean:
         validate('manuals', pdfs, False)
         sample.write_text(text.replace(manifest['version'], '0.0.0'))
         validate('manuals', pdfs, False)
+        sample.write_text(text.replace(manifest['version'], manifest['version'] + '0'))
+        validate('manuals', pdfs, False)
         sample.write_text(text + ' ??')
         validate('manuals', pdfs, False)
         sample.write_text(text)

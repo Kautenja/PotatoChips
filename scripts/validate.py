@@ -67,7 +67,8 @@ def manuals(directory):
             raise ValueError(f'Missing metadata or meaningful text: {path.name}')
         if module['name'].lower() not in (title[1] + ' ' + text).lower():
             raise ValueError(f'Module identity missing: {path.name}')
-        if MANIFEST['version'] not in text or '??' in text:
+        version = r'(?<![\w.])v?' + re.escape(MANIFEST['version']) + r'(?![\w.])'
+        if not re.search(version, text) or '??' in text:
             raise ValueError(f'Wrong/missing version or unresolved references: {path.name}')
 
 

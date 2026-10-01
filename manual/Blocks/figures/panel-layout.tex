@@ -1,0 +1,108 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/220,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (150,380);
+\panelregion{1}{5}{28}{140}{101}
+\panelregion{2}{5}{137}{140}{28}
+\panelregion{3}{5}{167}{140}{70}
+\panelregion{4}{5}{242}{140}{62}
+\panelregion{5}{5}{308}{140}{49}
+% knob 0: Voice 1 Frequency
+\panelknob{12.0000}{32.0000}{17.8555}{17.8594}
+% input 0: Voice 1 Frequency
+\panelinput{10.0000}{71.0000}{23.7000}{23.7000}
+% input 4: Voice 1 FM
+\panelinput{10.0000}{99.0000}{23.7000}{23.7000}
+% knob 4: Voice 1 FM
+\panelknob{12.0000}{144.0000}{17.8555}{17.8594}
+% knob 8: Voice 1 Level
+\panelknob{12.0000}{170.0000}{17.8555}{17.8594}
+% input 8: Voice 1 Level
+\panelinput{10.0000}{210.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{14.0000}{246.0000}{14.7638}{14.7638}
+% switch 12: Voice 1 Shape
+\panelswitch{14.0000}{282.0000}{15.3600}{15.3577}
+% light -1:
+\panellight{29.0000}{319.0000}{5.9055}{5.9055}
+% output 0: Voice 1
+\paneloutput{10.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Voice 2 Frequency
+\panelknob{47.0000}{32.0000}{17.8555}{17.8594}
+% input 1: Voice 2 Frequency
+\panelinput{45.0000}{71.0000}{23.7000}{23.7000}
+% input 5: Voice 2 FM
+\panelinput{45.0000}{99.0000}{23.7000}{23.7000}
+% knob 5: Voice 2 FM
+\panelknob{47.0000}{144.0000}{17.8555}{17.8594}
+% knob 9: Voice 2 Level
+\panelknob{47.0000}{170.0000}{17.8555}{17.8594}
+% input 9: Voice 2 Level
+\panelinput{45.0000}{210.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{49.0000}{246.0000}{14.7638}{14.7638}
+% switch 13: Voice 2 Shape
+\panelswitch{49.0000}{282.0000}{15.3600}{15.3577}
+% light -1:
+\panellight{64.0000}{319.0000}{5.9055}{5.9055}
+% output 1: Voice 2
+\paneloutput{45.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Voice 3 Frequency
+\panelknob{82.0000}{32.0000}{17.8555}{17.8594}
+% input 2: Voice 3 Frequency
+\panelinput{80.0000}{71.0000}{23.7000}{23.7000}
+% input 6: Voice 3 FM
+\panelinput{80.0000}{99.0000}{23.7000}{23.7000}
+% knob 6: Voice 3 FM
+\panelknob{82.0000}{144.0000}{17.8555}{17.8594}
+% knob 10: Voice 3 Level
+\panelknob{82.0000}{170.0000}{17.8555}{17.8594}
+% input 10: Voice 3 Level
+\panelinput{80.0000}{210.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{84.0000}{246.0000}{14.7638}{14.7638}
+% switch 14: Voice 3 Shape
+\panelswitch{84.0000}{282.0000}{15.3600}{15.3577}
+% light -1:
+\panellight{99.0000}{319.0000}{5.9055}{5.9055}
+% output 2: Voice 3
+\paneloutput{80.0000}{324.0000}{23.7000}{23.7000}
+% knob 3: Voice 4 Frequency
+\panelknob{117.0000}{32.0000}{17.8555}{17.8594}
+% input 3: Voice 4 Frequency
+\panelinput{115.0000}{71.0000}{23.7000}{23.7000}
+% input 7: Voice 4 FM
+\panelinput{115.0000}{99.0000}{23.7000}{23.7000}
+% knob 7: Voice 4 FM
+\panelknob{117.0000}{144.0000}{17.8555}{17.8594}
+% knob 11: Voice 4 Level
+\panelknob{117.0000}{170.0000}{17.8555}{17.8594}
+% input 11: Voice 4 Level
+\panelinput{115.0000}{210.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{119.0000}{246.0000}{14.7638}{14.7638}
+% switch 15: Voice 4 Shape
+\panelswitch{119.0000}{282.0000}{15.3600}{15.3577}
+% light -1:
+\panellight{134.0000}{319.0000}{5.9055}{5.9055}
+% output 3: Voice 4
+\paneloutput{115.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{168}{78.5}
+\panelmarker{2}{168}{151.0}
+\panelmarker{3}{168}{202.0}
+\panelmarker{4}{168}{273.0}
+\panelmarker{5}{168}{332.5}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch and pitch/FM inputs}
+\panelkey{2}{FM depth}
+\panelkey{3}{Level and level CV}
+\panelkey{4}{Shape buttons and indicators}
+\panelkey{5}{Audio outputs}
+\end{tabularx}
+\end{minipage}

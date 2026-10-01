@@ -1,7 +1,7 @@
 # Production Panel Captures And Reference Figures
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 
 Generate the manuals' module screenshots from production Rack widgets and
 maintain clear vector panel references beside the manual source.
@@ -122,15 +122,15 @@ sibling tools' module coordinates or assume their platform coverage here.
 
 ## Acceptance Criteria
 
-- [ ] All 14 manuals have reviewed production PNGs and vector panel guides;
+- [x] All 14 manuals have reviewed production PNGs and vector panel guides;
       both blank widgets have smoke coverage and disabled entries are excluded.
-- [ ] Geometry, fixtures, crop rules, and module mapping are documented;
+- [x] Geometry, fixtures, crop rules, and module mapping are documented;
       failed/incomplete rendering preserves existing tracked assets.
 - [ ] Light/dark themes and previews are reviewed, including custom displays;
       captured controls match current constructors and runtime SVGs.
-- [ ] Callouts agree with manual sections and source positions; captures
+- [x] Callouts agree with manual sections and source positions; captures
       and complete rebuilt manuals are reviewed at readable resolution.
-- [ ] README/covers use the same PNGs; stale exports have no remaining
+- [x] README/covers use the same PNGs; stale exports have no remaining
       consumers; normal PDF builds run without capture dependencies.
 
 ## Validation
@@ -158,5 +158,75 @@ OS/architecture and unavailable native checks separately from PDF success.
 
 ## Completion Evidence
 
-Capture tooling, fixtures, panel drawings, PNGs, and rendered review are
-pending. Preserve the existing assets until replacements are validated.
+### Implemented And Verified On October 1, 2026
+
+-   Added `tools/capture/` using production `init()` and registered widget
+    constructors, an isolated user directory, fixed RNG seed, defaults at
+    48 kHz and 4,800 process calls. No patch, audio device or ROM is used.
+    `modules.json` reviews all 16 enabled identities and actual widths.
+-   Captured all 16 live/null-module widgets, light/dark/light preference
+    toggles and Rack context destroy/create events. All 96 retained images
+    passed asset, geometry, framebuffer and GL checks. The 32 restored views
+    matched their initial light pixels exactly. Reviewed actual algorithm,
+    factory waveforms, control caches, sliders, lights, titles and blanks.
+-   Addressed the user's additional artwork findings: all 18 registered
+    panel footers now use a 60-pixel-wide wordmark with a 370.5 vertical
+    center, retaining horizontal anchors. Pallet Town uses white for contrast.
+    Blocks and Name Corp title contours now render as independent solids and
+    holes, retaining their outlines without Rack's compound-path artifacts.
+-   Produced 14 native-density 760-pixel-high `Panel.png` crops and 14 vector
+    guides. Shared TikZ symbols use exported production bounds; reviewed
+    numbered regions match each control reference. Corrected Boss Fight's
+    mistaken slider wording. Super Echo's missing sliders are explicitly
+    absent in both screenshot and guide; 006 still owns their repair.
+-   README and covers share the PNGs. Removed the interim artwork note and
+    all 56 obsolete Module/Interface SVG/PDF exports after replacement review.
+    Retained conceptual operator/envelope/chip illustrations and attribution.
+    Recorded capture/figure provenance without relicensing artwork or Rack
+    component graphics.
+
+### Validation
+
+-   `make -C tools/capture capture`: passed on macOS 26.6.2 arm64, matching
+    local Rack 2.6.0 headers/library/resources, OpenGL, 2x Retina density.
+    The guide records the base revision; ignored `batch.json` records the
+    exact source-input and library hashes, fixture and geometry per run.
+-   Full `screenshots` export and `draw_panels.py`: passed for all 14 manuals.
+    A real `make -C tools/capture screenshots MODULE=PotKeys` changed only
+    Pot Keys' file timestamp and reproduced its full-batch PNG bytes exactly.
+    The other 13 timestamps and all image hashes remained unchanged.
+-   `make -C tools/capture test`: seven groups passed using real native
+    images in a disposable publication tree: late-batch geometry mismatch,
+    missing output, blank rendering, stale sources, destination-I/O rollback,
+    selected-module isolation and complete native-density export.
+-   `make -C tools/capture test-native`: wrong geometry and a missing panel
+    failed through the native renderer in disposable directories. A renderer
+    process returning failure preserved the prior intermediate batch. All
+    existing publication PNGs remained byte-identical in every failure case.
+-   `make -C manual`: passed after removing legacy exports. All 14 PDFs
+    (115 pages) were rendered with Poppler and visually reviewed, including
+    complete page layouts and readable cover/control-map details. Metadata,
+    outlines, links, text extraction, source-relative outputs and identical
+    collection copies passed. No unresolved references or overflow survived.
+-   `python3 manual/latex/test-build.py`: all seven build-failure/recovery
+    groups passed in a disposable source tree with no Rack/capture runtime.
+    A separate
+    copy containing only `plugin.json` and `manual/` built all 14 PDFs with
+    `RACK_DIR=/nonexistent-sdk`; it had no `src/`, `tools/`, SDK or Rack library.
+    The publication completeness validator passed with Poppler on PATH.
+-   Documentation consumers, manifest mapping, source input paths and
+    `git diff --check` passed. No DSP change or listening claim is made.
+
+### Remaining Dependency
+
+Keep this spec IN PROGRESS solely for the actual light/dark artwork and
+native selection review owned by 008. This implementation exercises the
+preference in all live/preview widgets, but all currently use their existing
+single SVG. Identical light/dark images are not evidence of dark-theme
+support. After 008 supplies panel pairs and wiring, add its panel-selection
+assertions here, regenerate the 64 theme/preview views and review them,
+then mark the remaining criterion complete and archive this spec.
+
+Linux native rendering is unverified; Windows capture is unsupported. Normal
+manual builds are independent of those graphical-platform limitations.
+No commit, push, issue update or release was requested for this turn.

@@ -1,0 +1,81 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/310,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (240,380);
+\panelregion{1}{5}{35}{230}{91}
+\panelregion{2}{5}{151}{230}{113}
+\panelregion{3}{5}{283}{230}{29}
+\panelregion{4}{5}{326}{230}{31}
+% slider 0: Attack Rate
+\panelslider{7.0000}{41.0000}{19.8426}{76.5352}
+% slider 1: Total Level
+\panelslider{40.0000}{41.0000}{19.8426}{76.5352}
+% slider 2: Decay Rate
+\panelslider{73.0000}{41.0000}{19.8426}{76.5352}
+% slider 3: Sustain Level
+\panelslider{106.0000}{41.0000}{19.8426}{76.5352}
+% slider 4: Sustain Rate
+\panelslider{139.0000}{41.0000}{19.8426}{76.5352}
+% slider 5: Release Rate
+\panelslider{172.0000}{41.0000}{19.8426}{76.5352}
+% switch 6: Looping Envelope
+\panelswitch{209.0000}{43.0000}{14.0000}{20.6411}
+% knob 7: Rate Scaling
+\panelknob{208.0000}{98.0000}{17.8555}{17.8594}
+% knob 8: Frequency
+\panelknob{13.0000}{157.0000}{34.2930}{34.2930}
+% knob 9:
+\panelknob{73.0000}{157.0000}{34.2930}{34.2930}
+% knob 10:
+\panelknob{133.0000}{157.0000}{34.2930}{34.2930}
+% knob 11:
+\panelknob{193.0000}{157.0000}{34.2930}{34.2930}
+% knob 12: Frequency Modulation
+\panelknob{13.0000}{225.0000}{34.2930}{34.2930}
+% knob 13:
+\panelknob{73.0000}{225.0000}{34.2930}{34.2930}
+% knob 14: Feedback
+\panelknob{133.0000}{225.0000}{34.2930}{34.2930}
+% knob 15: Output Volume
+\panelknob{193.0000}{225.0000}{34.2930}{34.2930}
+% input 0: Attack Rate
+\panelinput{13.0000}{288.0000}{23.7000}{23.7000}
+% input 6: Gate
+\panelinput{13.0000}{331.0000}{23.7000}{23.7000}
+% input 1: Total Level
+\panelinput{50.0000}{288.0000}{23.7000}{23.7000}
+% input 7: Trigger
+\panelinput{50.0000}{331.0000}{23.7000}{23.7000}
+% input 2: 1st Decay Rate
+\panelinput{87.0000}{288.0000}{23.7000}{23.7000}
+% input 8: Pitch
+\panelinput{87.0000}{331.0000}{23.7000}{23.7000}
+% input 3: Sustain Level
+\panelinput{124.0000}{288.0000}{23.7000}{23.7000}
+% input 9: FM
+\panelinput{124.0000}{331.0000}{23.7000}{23.7000}
+% input 4: 2nd Decay Rate
+\panelinput{161.0000}{288.0000}{23.7000}{23.7000}
+% input 10: Volume
+\panelinput{161.0000}{331.0000}{23.7000}{23.7000}
+% input 5: Release Rate
+\panelinput{198.0000}{288.0000}{23.7000}{23.7000}
+% output 0: Audio
+\paneloutput{198.0000}{331.0000}{23.7000}{23.7000}
+\panelmarker{1}{258}{80.5}
+\panelmarker{2}{258}{207.5}
+\panelmarker{3}{258}{297.5}
+\panelmarker{4}{258}{341.5}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Envelope sliders, Loop and Rate Scale}
+\panelkey{2}{Tuning and modulation knobs}
+\panelkey{3}{Envelope CV inputs}
+\panelkey{4}{Performance inputs and audio output}
+\end{tabularx}
+\end{minipage}

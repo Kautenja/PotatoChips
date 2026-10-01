@@ -131,6 +131,21 @@ Arhythmetic Units runtime footer artwork
   Existing control geometry, chip art, names, and collaborator credits remain.
   Historical manual logos and dormant SCC/TurboGrafx16 panels are unchanged.
 
+Production panel captures and reference figures (spec 005)
+  Files: manual/*/img/Panel.png, manual/*/figures/panel-layout.tex,
+  manual/latex/panel-drawing.tex; capture tools under tools/capture/.
+  Generated from current production module widgets and reviewed control groups.
+  First-party visual assets retain CC-BY-NC-ND-4.0; screenshots also depict
+  host-provided Rack controls. Rack resources are not copied or relicensed.
+  Renderer adapted from RackNES tools/capture and Fourier's native inspector,
+  GPL-3.0-or-later, copyright 2026 Arhythmetic Units.
+  Runtime footer outlines are unchanged, uniformly scaled to 60 Rack pixels
+  wide; Pallet Town uses white fill. Blocks and Name Corp title contours are
+  separated for Rack-compatible hole inference, preserving their silhouettes.
+  Obsolete Module/Interface SVG/PDF exports were removed after replacement
+  review. Conceptual chip/envelope/operator figures and provenance gaps below
+  are retained. No new provenance or permission claim is made for those works.
+
 Arhythmetic Units shared manual wordmark
   File: manual/latex/ArhythmeticUnits.pdf.
   Copyright 2025-2026 Arhythmetic Units. License: CC-BY-NC-ND-4.0.

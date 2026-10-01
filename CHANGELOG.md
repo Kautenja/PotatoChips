@@ -2,14 +2,18 @@
 
 ## Unreleased
 
+-   Generate manual covers and README panels from real Rack widgets; add
+    numbered vector panel guides and optional capture/validation tooling.
+-   Standardize footer logo size, improve Pallet Town footer contrast, and
+    repair compound-path artifacts in the Blocks and Name Corp titles.
+
 -   Replace the legacy social banner with Arhythmetic Units artwork in SVG,
     PNG, and PDF, and display the new banner in the repository README.
 
 -   Rewrite all 14 active sound-module manuals with practical patches,
     source-checked controls and shared Arhythmetic Units publication styling.
 -   Replace copied-source TeX recipes with checked, source-relative latexmk
-    builds, stable `.build/` PDF names and build-failure regressions. Legacy
-    panel illustrations remain pending the production-figure work in 005.
+    builds, stable `.build/` PDF names and build-failure regressions.
 
 -   Flatten DSP math/trigger headers, move Rack helpers to `rack_extensions`,
     and remove Rack dependencies from DSP exceptions and pitch conversions.

@@ -1,4 +1,9 @@
 \manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} bypass;
+\textbf{2} delay, feedback, mix and CV;
+\textbf{3} audio inputs, gain and outputs;
+\textbf{4} eight FIR CV inputs and attenuverters (sliders absent).
+
 \subsection{Left side: delay, feedback and mix}
 Delay selects an integer level from 0 to 31, default 0. The CV is an additive
 $31V/10$ offset in levels, clipped to the same range and truncated to an
@@ -26,6 +31,10 @@ it bypasses the echo, not a Gaussian filter. The buffer continues advancing
 with zero input rather than freezing. Bypass does not apply the active path's
 $\pm5$ V limiter. Gain therefore remains relevant even when bypassed.
 \subsection{Right side: eight FIR coefficients}
+The current panel is missing the eight coefficient sliders. The numbered
+FIR rows show their CV inputs and attenuverters only; presets can still set
+the coefficient values. The panel map reflects this limitation.
+
 Coefficients range from $-128$ to 127. Coefficient 1 defaults to 127; the
 others default to zero. Each CV attenuverter ranges from $-1$ to 1 and
 defaults to zero. CV adds $127aV/10$ to the coefficient, where $a$ is that

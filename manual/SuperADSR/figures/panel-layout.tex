@@ -1,0 +1,61 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/250,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (180,380);
+\panelregion{1}{5}{42}{170}{99}
+\panelregion{2}{5}{161}{170}{100}
+\panelregion{3}{5}{288}{170}{30}
+\panelregion{4}{5}{330}{170}{31}
+% input 0: Gate
+\panelinput{20.0000}{281.0000}{23.7000}{23.7000}
+% input 2: Retrig
+\panelinput{53.0000}{281.0000}{23.7000}{23.7000}
+% output 0: Envelope
+\paneloutput{20.0000}{324.0000}{23.7000}{23.7000}
+% output 2: Inverted
+\paneloutput{53.0000}{324.0000}{23.7000}{23.7000}
+% slider 0: Amplitude
+\panelslider{12.0000}{48.0000}{19.8426}{76.5352}
+% slider 2: Attack
+\panelslider{46.0000}{48.0000}{19.8426}{76.5352}
+% slider 4: Decay
+\panelslider{80.0000}{48.0000}{19.8426}{76.5352}
+% slider 6: Sustain Level
+\panelslider{114.0000}{48.0000}{19.8426}{76.5352}
+% slider 8: Sustain Rate
+\panelslider{148.0000}{48.0000}{19.8426}{76.5352}
+% input 1: Gate
+\panelinput{104.0000}{281.0000}{23.7000}{23.7000}
+% input 3: Retrig
+\panelinput{137.0000}{281.0000}{23.7000}{23.7000}
+% output 1: Envelope
+\paneloutput{104.0000}{324.0000}{23.7000}{23.7000}
+% output 3: Inverted
+\paneloutput{137.0000}{324.0000}{23.7000}{23.7000}
+% slider 1: Amplitude
+\panelslider{12.0000}{167.0000}{19.8426}{76.5352}
+% slider 3: Attack
+\panelslider{46.0000}{167.0000}{19.8426}{76.5352}
+% slider 5: Decay
+\panelslider{80.0000}{167.0000}{19.8426}{76.5352}
+% slider 7: Sustain Level
+\panelslider{114.0000}{167.0000}{19.8426}{76.5352}
+% slider 9: Sustain Rate
+\panelslider{148.0000}{167.0000}{19.8426}{76.5352}
+\panelmarker{1}{198}{91.5}
+\panelmarker{2}{198}{211.0}
+\panelmarker{3}{198}{303.0}
+\panelmarker{4}{198}{345.5}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Lane 1 envelope sliders}
+\panelkey{2}{Lane 2 envelope sliders}
+\panelkey{3}{Gate and Retrig inputs}
+\panelkey{4}{Normal and inverted outputs}
+\end{tabularx}
+\end{minipage}

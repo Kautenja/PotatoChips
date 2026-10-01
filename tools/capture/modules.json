@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "Blocks",
+    "manual": "Blocks",
+    "width": 150,
+    "panel": "Blocks.svg"
+  },
+  {
+    "slug": "MiniBoss",
+    "manual": "MiniBoss",
+    "width": 240,
+    "panel": "MiniBoss.svg"
+  },
+  {
+    "slug": "106",
+    "manual": "NameCorpOctalWaveGenerator",
+    "width": 510,
+    "panel": "NameCorpOctalWaveGenerator.svg"
+  },
+  {
+    "slug": "2612",
+    "manual": "BossFight",
+    "width": 975,
+    "panel": "BossFight.svg"
+  },
+  {
+    "slug": "2612_Blank1",
+    "manual": null,
+    "width": 480,
+    "panel": "BossFight-Envelope.svg"
+  },
+  {
+    "slug": "2A03",
+    "manual": "InfiniteStairs",
+    "width": 150,
+    "panel": "InfiniteStairs.svg"
+  },
+  {
+    "slug": "AY_3_8910",
+    "manual": "Jairasullator",
+    "width": 255,
+    "panel": "Jairasullator.svg"
+  },
+  {
+    "slug": "FME7",
+    "manual": "Pulses",
+    "width": 120,
+    "panel": "Pulses.svg"
+  },
+  {
+    "slug": "GBS",
+    "manual": "PalletTownWavesSystem",
+    "width": 300,
+    "panel": "PalletTownWavesSystem.svg"
+  },
+  {
+    "slug": "POKEY",
+    "manual": "PotKeys",
+    "width": 210,
+    "panel": "PotKeys.svg"
+  },
+  {
+    "slug": "SuperADSR",
+    "manual": "SuperADSR",
+    "width": 180,
+    "panel": "SuperADSR.svg"
+  },
+  {
+    "slug": "SuperEcho",
+    "manual": "SuperEcho",
+    "width": 240,
+    "panel": "SuperEcho.svg"
+  },
+  {
+    "slug": "SuperVCA",
+    "manual": "SuperVCA",
+    "width": 90,
+    "panel": "SuperVCA.svg"
+  },
+  {
+    "slug": "Sony_S_SMP_Blank1",
+    "manual": null,
+    "width": 420,
+    "panel": "S-SMP-Chip.svg"
+  },
+  {
+    "slug": "SN76489",
+    "manual": "MegaTone",
+    "width": 150,
+    "panel": "MegaTone.svg"
+  },
+  {
+    "slug": "VRC6",
+    "manual": "StepSaw",
+    "width": 120,
+    "panel": "StepSaw.svg"
+  }
+]

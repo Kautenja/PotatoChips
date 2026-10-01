@@ -59,7 +59,7 @@
   {\fontsize{26}{31}\selectfont\bfseries\manualname\par}
   \vspace{10pt}{\large #1\par}
   \vfill
-  \includegraphics[width=.95\textwidth,height=.47\textheight,keepaspectratio]{img/Module.pdf}\par
+  \includegraphics[width=.95\textwidth,height=.47\textheight,keepaspectratio]{img/Panel.png}\par
   \vfill
   \includegraphics[width=.65\textwidth]{../latex/ArhythmeticUnits.pdf}\par
   \vspace{22pt}{\large User manual\quad /\quad Version \manualversion}\par
@@ -68,17 +68,18 @@
   \clearpage\nopagecolor\hypersetup{pageanchor=true}
   \pagenumbering{roman}\pdfbookmark[1]{Contents}{contents}\tableofcontents
   \vfill{\small Use the linked contents or PDF outline to navigate.
-  Panel illustrations are legacy artwork; control names and text describe the
-  current implementation. Production captures and updated drawings are pending.}\par
+  Covers show the production Rack widget. Numbered panel maps identify
+  control groups; the control reference explains their operation.}\par
   \clearpage\pagenumbering{arabic}}
 \newcommand{\manualpanel}{%
   \manualchapter{Panel map}{sec:panel}
   \begin{center}
-  \includegraphics[width=\textwidth,height=.72\textheight,keepaspectratio]{img/Interface.pdf}
+  \input{figures/panel-layout.tex}
   \end{center}
-  {\small Read the controls from top to bottom and left to right. Labels in this
-  legacy reference image can differ from current hover help; the following
-  control reference identifies those differences.}}
+  {\small Numbers identify the groups used in the control reference. Pale circles
+  are inputs; dark centers are outputs. Display areas and indicators are shown
+  without live values. Knob pointers identify controls, not prescribed settings.}}
+\input{panel-drawing.tex}
 \newcommand{\manualcolophon}{%
   \clearpage\thispagestyle{empty}\thispdfpagelabel{Publication details}
   \pdfbookmark[1]{Publication details}{colophon}\pagecolor{manualCover}

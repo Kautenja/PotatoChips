@@ -1,0 +1,70 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/160,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (90,380);
+\panelregion{1}{5}{27}{80}{29}
+\panelregion{2}{5}{71}{80}{85}
+\panelregion{3}{5}{157}{80}{85}
+\panelregion{4}{5}{243}{80}{63}
+\panelregion{5}{5}{318}{80}{40}
+% switch 7: Bypass
+\panelswitch{15.0000}{32.0000}{14.0000}{20.6411}
+% switch 0: Filter Mode
+\panelswitch{49.0000}{32.0000}{15.3600}{15.3577}
+% light -1:
+\panellight{67.0000}{44.0000}{8.8583}{8.8583}
+% knob 5: Frequency (Left)
+\panelknob{15.0000}{77.0000}{17.8555}{17.8594}
+% input 5: V/Oct (Left)
+\panelinput{12.0000}{114.0000}{23.7000}{23.7000}
+% knob 3: Output Level (Left)
+\panelknob{15.0000}{163.0000}{17.8555}{17.8594}
+% input 1: Volume (Left)
+\panelinput{12.0000}{200.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{5.0000}{236.0000}{8.8583}{8.8583}
+% input 3: Audio (Left)
+\panelinput{12.0000}{243.0000}{23.7000}{23.7000}
+% knob 1: Input Gain (Left)
+\panelknob{15.0000}{278.0000}{17.8555}{17.8594}
+% light -1:
+\panellight{5.0000}{311.0000}{8.8583}{8.8583}
+% output 0: Audio (Left)
+\paneloutput{12.0000}{323.0000}{23.7000}{23.7000}
+% knob 6: Frequency (Right)
+\panelknob{54.0000}{77.0000}{17.8555}{17.8594}
+% input 6: V/Oct (Right)
+\panelinput{51.0000}{114.0000}{23.7000}{23.7000}
+% knob 4: Output Level (Right)
+\panelknob{54.0000}{163.0000}{17.8555}{17.8594}
+% input 2: Volume (Right)
+\panelinput{51.0000}{200.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{44.0000}{236.0000}{8.8583}{8.8583}
+% input 4: Audio (Right)
+\panelinput{51.0000}{243.0000}{23.7000}{23.7000}
+% knob 2: Input Gain (Right)
+\panelknob{54.0000}{278.0000}{17.8555}{17.8594}
+% light -1:
+\panellight{44.0000}{311.0000}{8.8583}{8.8583}
+% output 1: Audio (Right)
+\paneloutput{51.0000}{323.0000}{23.7000}{23.7000}
+\panelmarker{1}{108}{41.5}
+\panelmarker{2}{108}{113.5}
+\panelmarker{3}{108}{199.5}
+\panelmarker{4}{108}{274.5}
+\panelmarker{5}{108}{338.0}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Bypass and filter mode}
+\panelkey{2}{Frequency and frequency CV}
+\panelkey{3}{Output level and level CV}
+\panelkey{4}{Audio inputs and input gain}
+\panelkey{5}{Audio outputs}
+\end{tabularx}
+\end{minipage}

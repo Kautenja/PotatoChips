@@ -1,6 +1,9 @@
 \manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} global controls;
+\textbf{2--5} operators 1--4.
+
 The left block selects algorithm, feedback, LFO and output saturation. Four
-repeated operator columns contain envelope sliders above tuning and modulation
+repeated operator blocks contain envelope knobs beside tuning and modulation
 controls; each column has its own CV, gate, retrigger and pitch sockets.
 
 Algorithm spans 0--7 (default 7); feedback spans 0--7 (default 0) and feeds
@@ -13,7 +16,7 @@ SAT spans 0--127 (default 127). Its CV adds $127V/10$, clamped to 0--127.
 Lower values attenuate the operator sum before 14-bit clipping; SAT does not
 invert polarity. Both outputs carry the same approximately $\pm5$\,V signal.
 
-\subsection{Envelope sliders, left to right}
+\subsection{Envelope knobs in each operator block}
 \begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule Control & Range; default & Result \\\midrule
 AR & 1--31; 31 & Attack rate; larger values rise faster. \\
@@ -32,7 +35,7 @@ mode. Use it for repeating contours after first establishing a gated sound.
 The hardware envelope terminology is retained in the reference figure and
 in \citet{genesis-sound-software-manual}.
 
-Each envelope CV adds $mV/8$ to its slider, where $m$ is that slider's maximum.
+Each envelope CV adds $mV/8$ to its knob, where $m$ is that knob's maximum.
 The sum is truncated to an integer and clamped to the control range. For
 example, with AR at 15, $+4$\,V adds 15.5 before truncation, giving 30.
 This is an offset; a 0\,V cable leaves the slider's setting intact.

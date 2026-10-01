@@ -150,14 +150,18 @@ update that upload. Artwork terms and provenance are in
 
 ### Module Artwork
 
-Current builds use the tracked legacy `img/Module.pdf` and
-`img/Interface.pdf`. These are illustrations, not native screenshots. The
-contents page explicitly identifies this interim artwork. Final acceptance
-of [004](../specs/004-manual-content-and-publication-style.md) requires
-[005](../specs/005-production-panel-captures-and-figures.md)'s reviewed cover
-PNGs and vector control references, followed by another full-page review.
-005 should replace the figure inputs in `latex/arhythmetic-manual.sty` and
-remove the interim note only after the artwork agrees with the current UI.
+Covers and the root README use `img/Panel.png`, lossless crops from the real
+Rack widgets. Panel maps use `figures/panel-layout.tex` and shared primitives
+in `latex/panel-drawing.tex`. Their numbered groups match each manual's
+control reference. Display rectangles and indicators intentionally carry no
+live values; the cover shows an actual default-state fixture.
+
+See [the capture guide](../tools/capture/README.md) for SDK/OpenGL/Pillow
+prerequisites, deterministic fixtures, reviewed geometry, failure checks and
+refresh commands. Ordinary manual builds need only the committed PNG and TeX
+sources; they never invoke the native renderer. Update the production capture
+and vector guide together when widget geometry changes. Dark artwork remains
+owned by spec 008. Missing Super Echo sliders remain owned by spec 006.
 
 The shared wordmark `latex/ArhythmeticUnits.pdf` is a byte-for-byte copy of
 RackNES `manual/RackNES/img/ArhythmeticUnits.pdf` at commit

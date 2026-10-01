@@ -1,0 +1,89 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/220,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (150,380);
+\panelregion{1}{5}{39}{140}{117}
+\panelregion{2}{5}{165}{140}{37}
+\panelregion{3}{5}{213}{140}{91}
+\panelregion{4}{5}{308}{140}{48}
+% knob 0: Tone 1 Frequency
+\panelknob{12.0000}{45.0000}{17.8555}{17.8594}
+% input 0: Tone 1 V/Oct
+\panelinput{10.0000}{85.0000}{23.7000}{23.7000}
+% input 4: Tone 1 FM
+\panelinput{10.0000}{129.0000}{23.7000}{23.7000}
+% knob 4: Tone 1 Fine Tune / FM Attenuverter
+\panelknob{12.0000}{173.0000}{17.8555}{17.8594}
+% knob 8: Tone 1 Volume / Amplifier Attenuator
+\panelknob{12.0000}{221.0000}{17.8555}{17.8594}
+% input 8: Tone 1 Level
+\panelinput{10.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{17.0000}{297.0000}{8.8583}{8.8583}
+% output 0: Tone 1 Audio
+\paneloutput{10.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Tone 2 Frequency
+\panelknob{47.0000}{45.0000}{17.8555}{17.8594}
+% input 1: Tone 2 V/Oct
+\panelinput{45.0000}{85.0000}{23.7000}{23.7000}
+% input 5: Tone 2 FM
+\panelinput{45.0000}{129.0000}{23.7000}{23.7000}
+% knob 5: Tone 2 Fine Tune / FM Attenuverter
+\panelknob{47.0000}{173.0000}{17.8555}{17.8594}
+% knob 9: Tone 2 Volume / Amplifier Attenuator
+\panelknob{47.0000}{221.0000}{17.8555}{17.8594}
+% input 9: Tone 2 Level
+\panelinput{45.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{52.0000}{297.0000}{8.8583}{8.8583}
+% output 1: Tone 2 Audio
+\paneloutput{45.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Tone 3 Frequency
+\panelknob{82.0000}{45.0000}{17.8555}{17.8594}
+% input 2: Tone 3 V/Oct
+\panelinput{80.0000}{85.0000}{23.7000}{23.7000}
+% input 6: Tone 3 FM
+\panelinput{80.0000}{129.0000}{23.7000}{23.7000}
+% knob 6: Tone 3 Fine Tune / FM Attenuverter
+\panelknob{82.0000}{173.0000}{17.8555}{17.8594}
+% knob 10: Tone 3 Volume / Amplifier Attenuator
+\panelknob{82.0000}{221.0000}{17.8555}{17.8594}
+% input 10: Tone 3 Level
+\panelinput{80.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{87.0000}{297.0000}{8.8583}{8.8583}
+% output 2: Tone 3 Audio
+\paneloutput{80.0000}{324.0000}{23.7000}{23.7000}
+% knob 3: Noise Period
+\panelknob{117.0000}{45.0000}{17.8555}{17.8594}
+% input 3: Noise Period
+\panelinput{115.0000}{85.0000}{23.7000}{23.7000}
+% input 7: LFSR
+\panelinput{115.0000}{129.0000}{23.7000}{23.7000}
+% switch 7: Linear Feedback Shift Register
+\panelswitch{120.0000}{173.0000}{14.0000}{20.6411}
+% knob 11: Noise Volume / Amplifier Attenuator
+\panelknob{117.0000}{221.0000}{17.8555}{17.8594}
+% input 11: Noise Level
+\panelinput{115.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{122.0000}{297.0000}{8.8583}{8.8583}
+% output 3: Noise Audio
+\paneloutput{115.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{168}{97.5}
+\panelmarker{2}{168}{183.5}
+\panelmarker{3}{168}{258.5}
+\panelmarker{4}{168}{332.0}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch, period and pitch/FM inputs}
+\panelkey{2}{FM and noise mode}
+\panelkey{3}{Level and level CV}
+\panelkey{4}{Audio outputs}
+\end{tabularx}
+\end{minipage}

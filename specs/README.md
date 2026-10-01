@@ -10,7 +10,10 @@ build/test/package and instrumentation workflows pass; manual validation and
 publication integration remain dependent on 004 (`IN PROGRESS`). Spec 003 is
 committed and passes cross-platform checks; native rendering and module-history
 checks pass, but pointer-driven waveform editing and listening remain unverified
-(`IN PROGRESS`). Specs 004-011 remain `PLANNED`. See each spec for evidence.
+(`IN PROGRESS`). Spec 004's manuals and final figures are implemented;
+recipe/listening checks remain (`IN PROGRESS`). Spec 005's captures, vector
+guides and publication integration pass; actual dark-panel review waits on
+008 (`IN PROGRESS`). Specs 006-011 remain `PLANNED`. See each spec for evidence.
 
 ## Work Areas And Ownership
 

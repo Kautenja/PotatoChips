@@ -21,3 +21,6 @@ __pycache__/
 *.pyc
 /.venv/
 .DS_Store
+
+# Optional native panel capture intermediates.
+/tools/capture/.build/

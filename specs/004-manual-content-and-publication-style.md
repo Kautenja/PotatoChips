@@ -107,9 +107,9 @@ with identical boilerplate across every manual.
       against code and relevant Rack behavior; discrepancies are recorded.
 - [x] No swallowed TeX errors, stale source copies, undefined references,
       unresolved layout overflow, clipped figures, or unintended blank pages.
-- [ ] Metadata, bookmarks, links, text extraction, and citations work; all
+- [x] Metadata, bookmarks, links, text extraction, and citations work; all
       pages are visually reviewed after the final shared-style/figure change.
-- [ ] Normal builds use reviewed tracked PNGs and require no Rack session;
+- [x] Normal builds use reviewed tracked PNGs and require no Rack session;
       final manual inventory is available to 002's completeness check.
 
 ## Validation
@@ -213,12 +213,16 @@ basis are listed in the manual guide. Runtime follow-ups were recorded in
 
 ### Remaining Acceptance Work
 
-Keep this spec IN PROGRESS. Requirement 6 explicitly requires 005's reviewed
-production cover PNGs and updated vector control references; 005 has not
-supplied them. Current builds use legacy tracked PDF artwork with an explicit
-interim note. The current review establishes layout quality for that artwork,
-not final agreement between the drawings and native controls. Integrate the
-005 figures, remove the interim notice, rebuild and review every page again.
+Spec 005 has now supplied the production cover PNGs and numbered vector
+control references. The interim artwork note and obsolete exports are gone.
+All 14 manuals (115 pages) rebuilt and passed another complete rendered
+layout review, with readable inspection of the new figures and revised
+control references. README and covers consume the same native PNGs. This
+satisfies the artwork/publication handoff; 005 records capture evidence.
+
+Keep 004 IN PROGRESS for the remaining native recipe/listening acceptance.
+The capture harness exercises real widgets but starts no audio device and
+cannot verify the musical instructions by itself.
 
 Native Rack 2.6.3 Pro launched, but automation could not reliably enter the
 debug-patch path: text input was truncated/reset and clipboard paste timed

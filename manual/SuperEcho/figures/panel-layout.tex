@@ -1,0 +1,95 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/310,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (240,380);
+\panelregion{1}{9}{20}{68}{34}
+\panelregion{2}{6}{70}{73}{167}
+\panelregion{3}{6}{240}{73}{112}
+\panelregion{4}{80}{24}{147}{333}
+% switch 22: Bypass
+\panelswitch{15.0000}{25.0000}{14.0000}{20.6411}
+% knob 0: Echo Delay
+\panelknob{13.0000}{77.0000}{17.8555}{17.8594}
+% input 2: Delay
+\panelinput{10.0000}{112.0000}{23.7000}{23.7000}
+% knob 2: Echo Mix (Left)
+\panelknob{13.0000}{163.0000}{17.8555}{17.8594}
+% input 4: Mix (Left)
+\panelinput{10.0000}{198.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{3.0000}{236.0000}{8.8583}{8.8583}
+% input 0: Audio (Left)
+\panelinput{10.0000}{243.0000}{23.7000}{23.7000}
+% knob 20: Input Gain (Left)
+\panelknob{13.0000}{278.0000}{17.8555}{17.8594}
+% light -1:
+\panellight{3.0000}{311.0000}{8.8583}{8.8583}
+% output 0: Audio (Left)
+\paneloutput{10.0000}{323.0000}{23.7000}{23.7000}
+% knob 1: Echo Feedback
+\panelknob{52.0000}{77.0000}{17.8555}{17.8594}
+% input 3: Feedback
+\panelinput{49.0000}{112.0000}{23.7000}{23.7000}
+% knob 3: Echo Mix (Right)
+\panelknob{52.0000}{163.0000}{17.8555}{17.8594}
+% input 5: Mix (Right)
+\panelinput{49.0000}{198.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{42.0000}{236.0000}{8.8583}{8.8583}
+% input 1: Audio (Right)
+\panelinput{49.0000}{243.0000}{23.7000}{23.7000}
+% knob 21: Input Gain (Right)
+\panelknob{52.0000}{278.0000}{17.8555}{17.8594}
+% light -1:
+\panellight{42.0000}{311.0000}{8.8583}{8.8583}
+% output 1: Audio (Right)
+\paneloutput{49.0000}{323.0000}{23.7000}{23.7000}
+% input 6: FIR Coefficient 1
+\panelinput{84.0000}{28.0000}{23.7000}{23.7000}
+% knob 12: FIR Coefficient 1 CV Attenuverter
+\panelknob{117.0000}{30.0000}{17.8555}{17.8594}
+% input 7: FIR Coefficient 2
+\panelinput{84.0000}{71.0000}{23.7000}{23.7000}
+% knob 13: FIR Coefficient 2 CV Attenuverter
+\panelknob{117.0000}{73.0000}{17.8555}{17.8594}
+% input 8: FIR Coefficient 3
+\panelinput{84.0000}{114.0000}{23.7000}{23.7000}
+% knob 14: FIR Coefficient 3 CV Attenuverter
+\panelknob{117.0000}{116.0000}{17.8555}{17.8594}
+% input 9: FIR Coefficient 4
+\panelinput{84.0000}{157.0000}{23.7000}{23.7000}
+% knob 15: FIR Coefficient 4 CV Attenuverter
+\panelknob{117.0000}{159.0000}{17.8555}{17.8594}
+% input 10: FIR Coefficient 5
+\panelinput{84.0000}{200.0000}{23.7000}{23.7000}
+% knob 16: FIR Coefficient 5 CV Attenuverter
+\panelknob{117.0000}{202.0000}{17.8555}{17.8594}
+% input 11: FIR Coefficient 6
+\panelinput{84.0000}{243.0000}{23.7000}{23.7000}
+% knob 17: FIR Coefficient 6 CV Attenuverter
+\panelknob{117.0000}{245.0000}{17.8555}{17.8594}
+% input 12: FIR Coefficient 7
+\panelinput{84.0000}{286.0000}{23.7000}{23.7000}
+% knob 18: FIR Coefficient 7 CV Attenuverter
+\panelknob{117.0000}{288.0000}{17.8555}{17.8594}
+% input 13: FIR Coefficient 8
+\panelinput{84.0000}{329.0000}{23.7000}{23.7000}
+% knob 19: FIR Coefficient 8 CV Attenuverter
+\panelknob{117.0000}{331.0000}{17.8555}{17.8594}
+\panelmarker{1}{-18}{37}
+\panelmarker{2}{-18}{151}
+\panelmarker{3}{-18}{296}
+\panelmarker{4}{154}{12}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Bypass}
+\panelkey{2}{Delay, feedback, mix and CV}
+\panelkey{3}{Audio inputs, gain and outputs}
+\panelkey{4}{Eight FIR CV inputs and attenuverters (sliders absent)}
+\end{tabularx}
+\end{minipage}

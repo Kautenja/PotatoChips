@@ -39,7 +39,9 @@ copyright 2025-2026 Arhythmetic Units, under the same CC-BY-NC-ND-4.0 terms.
 The shared manual wordmark uses the same terms; its RackNES PDF source and
 revision are recorded in the inventory. The runtime footer source is also in
 `res/ArhythmeticUnits.svg`. Other panel artwork and attribution are preserved;
-legacy manual figures await regeneration under spec 005.
+production captures and vector panel guides replace the legacy module
+illustrations. Screenshots also depict Rack-provided controls, whose terms
+remain separate from project artwork. See the component inventory.
 
 The replacement Potato Chips social banner in
 `manual/PotatoChips-SocialMedia.svg`, `.png`, and `.pdf` follows the same

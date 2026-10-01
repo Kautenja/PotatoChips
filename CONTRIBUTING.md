@@ -212,10 +212,10 @@ is `manual/.build/`. Builds use `latexmk` with shell escape disabled, reject
 copied sources/version drift and fail on unresolved references or overflow.
 The validator needs Poppler on PATH. Generated outputs remain ignored.
 
-Current builds use tracked legacy illustrations. Production captures and
-updated control drawings remain owned by spec 005; they are required for
-004's final acceptance. Spec 002 owns later manual CI and authorized upload
-to an existing release. Normal PDF builds do not launch Rack.
+Covers use committed production captures and panel maps use vector guides.
+Refresh both after UI changes with the optional [capture tools](tools/capture/README.md).
+Spec 002 owns later manual CI and authorized upload to an existing release.
+Normal PDF builds need no Rack SDK, OpenGL session, Pillow or capture tool.
 
 ## Prepare A Release
 

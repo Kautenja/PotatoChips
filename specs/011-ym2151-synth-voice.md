@@ -74,7 +74,7 @@ and global themes with [008](archive/008-native-light-and-dark-themes.md).
 
 This spec explicitly adds a new chip/module beyond the modernization plan.
 It does not depend on [010](010-nuked-opn2-engines.md)'s selectable YM2612
-engines, nor own [009](009-ym2612-ssg-retriggering.md)'s trigger fix. Reuse
+engines, nor own [009](archive/009-ym2612-ssg-retriggering.md)'s trigger fix. Reuse
 proven harnesses and event conventions where useful without coupling the
 cores or changing Boss Fight/Mini Boss behavior.
 

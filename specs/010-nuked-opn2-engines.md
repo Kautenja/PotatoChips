@@ -33,7 +33,7 @@ Relevant local evidence:
     The modules scale the operator output and clamp to signed 14-bit audio;
     that clamp is not a model of the YM2612 output DAC's ladder behavior.
 -   The current looping-envelope switch is a simplified behavior, not a
-    selector for all hardware SSG modes. [009](009-ym2612-ssg-retriggering.md)
+    selector for all hardware SSG modes. [009](archive/009-ym2612-ssg-retriggering.md)
     separately owns its retrigger defect. Changing engines does not resolve
     #82 or excuse a regression in the existing engine.
 -   [Makefile](../Makefile) discovers top-level module/DSP C++ sources;

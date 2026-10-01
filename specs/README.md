@@ -17,8 +17,9 @@ Spec 006 is COMPLETE and archived: Echo FIR sliders are restored, level and
 bypass controls survive randomization, and issues #96/#97 are closed.
 Spec 007 is COMPLETE and archived: Contour uses the 32 kHz envelope clock,
 releases and rearms reliably, labels sustain rate SR, and closes #98.
-Spec 009 is IN PROGRESS: the YM2612 event-path fix is verified; the original
-one-shot report and upstream issue resolution remain outstanding.
+Spec 009 is COMPLETE and archived by the user's 2026-10-01 decision. The
+verified YM2612 event-path fix preserves the existing SSG behavior; the
+unconfirmed original one-shot report and open #82 remain documented limitations.
 Spec 010 remains PLANNED for optional Nuked-OPN2 engines. Spec 011 is
 IN PROGRESS: Voice 2151 is implemented and locally verified; cross-platform
 checks, listening and public issue resolution remain outstanding. Specifications
@@ -37,7 +38,7 @@ platform validation and publication limits.
 | [006](archive/006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Complete; archived. Native Rack rendering, interaction, randomization and audio compatibility verified. |
 | [007](archive/007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Complete; archived. Core/module regressions, native Scope, panel/manual and #98 verified. |
 | [008](archive/008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Complete; archived. Native preference and #95 verified on Rack 2.4/2.6. |
-| [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
+| [009](archive/009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Complete; archived by user decision with verification evidence and original-report limitations retained. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
 | [012](archive/012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Complete; archived. All names, 32 panels, 14 manuals and reusable artwork sources integrated. |
@@ -62,11 +63,11 @@ native global light/dark support, including both blanks, live switching,
 previews, and readable controls. Its verified implementation and resolution
 comment are recorded in the archived spec; #95 is closed as completed.
 
-009 independently owns [#82](https://github.com/Kautenja/PotatoChips/issues/82):
-reproduce and correct intermittent YM2612 looping-envelope retriggers in
-Mini Boss and Boss Fight, including both soft-reset settings. It includes
-issue updates and closure with verified fixing commit references. Writing
-the spec does not resolve the issue.
+009 records the verified YM2612 gate/retrigger corrections in Mini Boss and
+Boss Fight, including both soft-reset settings. It is complete and archived
+by user decision. The original accepted-event one-shot symptom remains
+unconfirmed, and [#82](https://github.com/Kautenja/PotatoChips/issues/82) remains
+open; archiving the spec does not claim issue closure.
 
 010 owns [#83](https://github.com/Kautenja/PotatoChips/issues/83): selectable
 Nuked-OPN2 engines with the existing engine retained as the default. It

@@ -1,7 +1,7 @@
 # Reliable YM2612 Looping Envelope Retriggers
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Issue: [#82](https://github.com/Kautenja/PotatoChips/issues/82)
 Planning baseline: `59638fd9` (product source unchanged from `33fb1554`).
 
@@ -59,8 +59,8 @@ not prerequisites for reproduction.
 
 Relevant current implementation:
 
--   [MiniBoss.cpp](../src/MiniBoss.cpp) owns one `FeedbackOperator` and gate/
-    retrigger detector pair per polyphonic voice. [BossFight.cpp](../src/BossFight.cpp)
+-   [MiniBoss.cpp](../../src/MiniBoss.cpp) owns one `FeedbackOperator` and gate/
+    retrigger detector pair per polyphonic voice. [BossFight.cpp](../../src/BossFight.cpp)
     owns one `Voice4Op` per voice and detectors per operator/voice. Both
     acquire gate and retrigger inside a CV update divided by 16.
 -   Both modules XOR the sustained gate with a detected retrigger edge,
@@ -68,14 +68,14 @@ Relevant current implementation:
     intervening low interval entirely between acquisition frames can be
     missed. This is an input-timing risk, not proof of the reported one-shot
     failure. Test normal MIDI-width pulses as well as short-pulse edges.
--   [Operator::set_gate()](../src/dsp/yamaha_ym2612/operator.hpp) ignores an
+-   [Operator::set_gate()](../../src/dsp/yamaha_ym2612/operator.hpp) ignores an
     unchanged gate. Key-on selects attack and optionally resets oscillator
     phase; it does not explicitly reset envelope attenuation or the global
     envelope counter. Key-off selects release for an active envelope.
 -   `update_ssg_envelope_generator()` loops only when SSG is enabled,
     attenuation is at least `0x200`, and the stage is above release. Both
-    [FeedbackOperator](../src/dsp/yamaha_ym2612/feedback_operator.hpp) and
-    [Voice4Op](../src/dsp/yamaha_ym2612/voice4op.hpp) call it before output,
+    [FeedbackOperator](../../src/dsp/yamaha_ym2612/feedback_operator.hpp) and
+    [Voice4Op](../../src/dsp/yamaha_ym2612/voice4op.hpp) call it before output,
     then advance envelope timers afterward. Trace this ordering and the
     sustain-stage restart path; do not assume the module XOR is the sole
     cause. Boss Fight shares one envelope context across its four operators.
@@ -99,15 +99,15 @@ Own the focused changes in `src/MiniBoss.cpp`, `src/BossFight.cpp`, and
 `src/dsp/yamaha_ym2612/` where evidence requires them; add pure DSP and
 SDK-backed module regressions, a minimal debug patch/event fixture, targeted
 manual corrections, and an unreleased changelog entry. Existing
-[Mini Boss](../patches/debug/MiniBoss.vcv) and
-[Boss Fight](../patches/debug/BossFight.vcv) debug patches are compatibility
+[Mini Boss](../../patches/debug/MiniBoss.vcv) and
+[Boss Fight](../../patches/debug/BossFight.vcv) debug patches are compatibility
 fixtures, not substitutes for the issue's reproduction.
 
 This work can proceed independently of modernization. Reuse
-[002](archive/002-build-tests-and-ci.md)'s harness when available, otherwise preserve
+[002](002-build-tests-and-ci.md)'s harness when available, otherwise preserve
 the SCons/Catch2 v2 workflow and exclude SDK-dependent tests from standalone
-test discovery. [003](archive/003-source-organization-and-rack-integration.md) must
-preserve this fix during refactoring; [004](archive/004-manual-content-and-publication-style.md)
+test discovery. [003](003-source-organization-and-rack-integration.md) must
+preserve this fix during refactoring; [004](004-manual-content-and-publication-style.md)
 carries verified behavior into the broader manual rewrite. This spec owns
 #82's regression evidence and issue follow-through.
 
@@ -220,6 +220,12 @@ a release or close #82 from a planning commit.
 
 ## Acceptance Criteria
 
+The unchecked items below are retained as historical limitations. The user's
+2026-10-01 completion decision accepts the verified implementation and
+supersedes the original requirement to resolve those items before archiving.
+It does not assert that the original one-shot symptom was reproduced or
+that GitHub issue #82 was closed.
+
 - [ ] A current reproduction or verified intervening fix is linked to a
       deterministic before/after case, with exact settings and root cause.
 - [x] Accepted events reliably restart looping envelopes in both modules
@@ -291,7 +297,7 @@ or verified results; avoid repetitive progress comments. Planning is not a fix.
     fixing SHAs, date, and validation here. Failed remote actions remain
     outstanding rather than being reported as complete.
 5.  Mark `COMPLETE` and archive according to
-    [AGENTS.md](../AGENTS.md#planning-and-completion) only after all criteria
+    [AGENTS.md](../../AGENTS.md#planning-and-completion) only after all criteria
     and issue follow-through are satisfied.
 
 With authenticated GitHub CLI, prepare a factual body file first. Comments
@@ -305,20 +311,33 @@ gh issue view 82 --repo Kautenja/PotatoChips --json state,stateReason,comments,u
 
 ## Completion Evidence
 
-Implementation commit: `b7f1684db6e3617986e43d1da0860048648f3010` (local; not pushed).
+Implementation commit: [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Kautenja/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010).
 
 Implemented on 2026-10-01 against baseline `3cff51d2`, on macOS arm64 with
 Apple Clang, the local Rack 2.6.0 SDK/runtime, and Catch2 3.16.0. Source work,
-regressions, native replay and manuals are implemented. Status remains
-IN PROGRESS because the original report's separate accepted-event one-shot
-symptom is not reproduced, and upstream issue resolution is pending.
+regressions, native replay and manuals are implemented.
+
+### Completion Decision
+
+On 2026-10-01, the user explicitly requested marking this spec complete,
+archiving it, committing and pushing. Status is COMPLETE and the spec is
+archived with the verification evidence and known limitations retained.
+This decision supersedes the original reproduction/issue-closure archival
+gates; it does not turn the unconfirmed accepted-event one-shot report into
+a verified fix. Issue #82 remains separate follow-up work. The user authorized
+pushing the current branch; no release was requested.
+
+Archive validation: local Markdown links and incoming spec references were
+checked, and `git diff --check` passed. This archival change does not alter
+code; the implementation's executable/native results below remain the
+validation evidence.
 
 ### Findings And Scope
 
 Issue #82 was re-read via GitHub CLI on 2026-10-01: OPEN, no comments.
 Its embedded Rack 1 patch confirms all 16 parameter values listed above,
 rotation allocation (`polyMode: 0`), four MIDI channels, and `prevent_clicks:
-true`. The [Rack 2 fixture](../patches/debug/YM2612-SSG-Retrigger.vcv)
+true`. The [Rack 2 fixture](../../patches/debug/YM2612-SSG-Retrigger.vcv)
 retains the MIDI pitch/gate/retrigger cables and zero-depth OUT-to-FM cable.
 It omits obsolete analyzers/audio modules and device selection. No physical
 MIDI device or audio device was selected during verification.
@@ -328,9 +347,9 @@ Two integration defects are established, independently of the older report:
 -   The pre-fix real module fails the event-order regression: a simultaneous
     gate/retrigger rise between CV frames leaves the operator silent when
     the explicit chip-key reference has entered attack.
--   The [before trace](assets/009/before-events.csv) records an accepted
+-   The [before trace](../assets/009/before-events.csv) records an accepted
     retrigger at frame 96 inserting RELEASE until frame 112. The
-    [after trace](assets/009/after-events.csv) stays keyed on and attacking.
+    [after trace](../assets/009/after-events.csv) stays keyed on and attacking.
     A one-sample pulse at frame 65 also exercises the divider blind spot.
     Settings are the report's, at 48 kHz, soft reset on, four voices, with
     voice 0 held at 5 V. Stage values: 0 silent, 1 release, 2 sustain,
@@ -352,7 +371,7 @@ remain outside this fix.
 The only DSP arithmetic changes replace signed negative left shifts in
 feedback and modulation with bounded multiplication. UBSan reproduced the
 old error (`left shift of negative value -49`). Products fit in `int32_t`.
-[Before](assets/009/audio-before.csv) and [after](assets/009/audio-after.csv)
+[Before](../assets/009/audio-before.csv) and [after](../assets/009/audio-after.csv)
 fingerprints agree in all 108 configurations: three host rates, two phase
 policies, loop on/off, the single operator with bipolar external modulation,
 and all eight four-operator algorithms. Each renders 48,000 samples with
@@ -406,14 +425,14 @@ attenuation/phase semantics, shared-clock independence, continuing loops,
 key-off release, repeated phase resets above 0x200, zero-rate holds, rate
 scaling, and loop toggles across AR/decay/SL boundaries.
 
-[Native replay source](assets/009/native_replay.cpp) uses Rack's actual
+[Native replay source](../assets/009/native_replay.cpp) uses Rack's actual
 `dsp::MidiParser<16>` in rotation mode to generate rapid notes, overlapping
 notes, chords, stealing, key-off and voice reuse at 48 kHz. Core's 1 ms
 retrigger pulses are 10 V. The change-only per-channel streams and sampled
-states are retained for [Operator/hard](assets/009/MiniBoss-hard-midi.csv),
-[Operator/soft](assets/009/MiniBoss-soft-midi.csv),
-[Voice/hard](assets/009/2612-hard-midi.csv), and
-[Voice/soft](assets/009/2612-soft-midi.csv).
+states are retained for [Operator/hard](../assets/009/MiniBoss-hard-midi.csv),
+[Operator/soft](../assets/009/MiniBoss-soft-midi.csv),
+[Voice/hard](../assets/009/2612-hard-midi.csv), and
+[Voice/soft](../assets/009/2612-soft-midi.csv).
 The harness processes all four voices and every operator, asserting loop
 continuation, and renders actual module widgets with Fundamental 2.6.1
 Scope. The upper Scope trace is audio; the lower is a diagnostic linear
@@ -467,7 +486,7 @@ cmp specs/assets/009/audio-after.csv /tmp/009-audio.csv
 make test-ym2612-ssg TEST_ARGS='[.trace]'
 ```
 
-### Outstanding Resolution Work
+### Retained Limitations And Issue Follow-Up
 
 Do not close #82 on the strength of the input-path fix alone. An accepted
 retrigger that subsequently becomes a one-shot has not been reproduced;
@@ -475,10 +494,11 @@ there is no verified historical fixing commit. A captured failing event
 stream is still needed to distinguish a remaining defect from the expected
 state-dependent chip contour. The implementation request's hardware-fidelity
 constraint rules out forcing an idealized hard-reset LFO as a workaround.
-No upstream push or release was requested; upstream fixing links and the
-resolution comment/closure remain pending. Native Linux/Windows and physical
-MIDI/audio listening checks were not performed. This spec is not archived.
+The completion request authorizes committing and pushing, but the resolution
+comment/closure remains pending. Native Linux/Windows and physical MIDI/audio
+listening checks were not performed. These limitations are retained in the
+completed archive rather than treated as outstanding implementation work.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #82 | `b7f1684db6e3617986e43d1da0860048648f3010` (local; not pushed) | Focused DSP/Rack/stress, sanitizer, native replay, audio equivalence and manuals verified; original accepted-event one-shot unconfirmed | Pending | OPEN when re-read 2026-10-01 |
+| #82 | [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Kautenja/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010) | Focused DSP/Rack/stress, sanitizer, native replay, audio equivalence and manuals verified; original accepted-event one-shot unconfirmed | Pending | OPEN when re-read 2026-10-01 |

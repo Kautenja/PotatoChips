@@ -152,3 +152,13 @@ the original suite coverage without importing Rack. Remove this host coupling
 as part of DSP organization and then retire that test substitute. PCM's broad
 comparison operators also require Catch2 to be included first; constrain
 those operators only with focused compatibility/regression evidence.
+
+On Windows x64 with the pinned Rack 2.6.3 MinGW64/MSVCRT toolchain, the
+existing `test/dsp/test_pcm.cpp` regression fails: `sizeof(PCM::int24_t)`
+is 4, but the storage contract requires 3. Linux and macOS report 3.
+Investigate the packed bitfield in `src/dsp/pcm.hpp` and choose a portable
+representation with conversion/sign-extension and byte-layout regressions.
+Preserve the SDK ABI; do not hide this with a Windows-only expected size,
+a disabled assertion, or an unrelated global bitfield flag. Spec 002 leaves
+the Windows job failing and runs the remaining suites/package checks so
+other failures remain observable.

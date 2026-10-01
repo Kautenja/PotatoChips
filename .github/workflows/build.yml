@@ -135,21 +135,27 @@ jobs:
         run: python3 scripts/validate.py tag "$RELEASE_TAG"
 
       - name: Build Rack plugin
+        id: plugin
         run: |
           make -j2 all
           test -s "$PLUGIN_BINARY"
 
-      - name: Run headless regression checks
+      - name: Run SDK-free DSP regressions
+        run: make -k -j2 test RACK_DIR=/nonexistent-sdk
+
+      - name: Run SDK-backed host checks
+        if: ${{ !cancelled() && steps.plugin.outcome == 'success' }}
         run: |
           if [ "$RUNNER_OS" = Windows ]; then
             # Prefer the compiler's current C++ runtime over the installer's
             # older copies, while making libRack.dll discoverable.
             export PATH="$PATH:$(cygpath -u "$RACK_RUNTIME_DIR")"
           fi
-          make -j2 test RACK_DIR=/nonexistent-sdk
           make -j2 test-rack
 
       - name: Package and verify contents
+        id: package
+        if: ${{ !cancelled() && steps.plugin.outcome == 'success' }}
         run: |
           make -j2 dist
           for package in dist/*.vcvplugin; do
@@ -157,6 +163,7 @@ jobs:
           done
 
       - name: Retain plugin package
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: PotatoChips-${{ matrix.platform }}

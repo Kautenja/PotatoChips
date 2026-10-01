@@ -21,6 +21,9 @@ Planning baseline: `8d1b6681` (16 active models).
     production geometry or required implementation assets.
 -   A user following an older Blocks tutorial can find the old-to-new
     mapping and read the Facets manual at the established `Blocks.pdf` URL.
+-   Manuals render module names as shared styled text instead of loading
+    individual legacy logo images. Obsolete logo files are removed, and a
+    clean manual build succeeds without cached copies of those assets.
 -   A maintainer changes a title string or shared typographic setting and
     regenerates consistent SVG lettering without hand-drawing a new logo
     for each module. An ordinary plugin build uses committed SVGs without
@@ -99,9 +102,12 @@ shared title rules in coordination with 011 rather than silently omitting it.
     Preserve plugin identity, module slugs, registration, tags except for
     justified descriptive corrections, and existing `manualUrl` asset names.
     Do not select a new release version as part of this work.
-2.  Preserve C++ model identifiers, source/resource filenames, preset
-    directories, manual directories, and historical patch filenames. Names
+2.  Preserve C++ model identifiers and source filenames, runtime resource
+    filenames, preset directories, manual directories, and historical patch
+    filenames. Names
     visible to users can change without renaming these implementation paths.
+    Obsolete manual image assets are removed under the cleanup rules below;
+    this path-stability requirement does not preserve unused logo files.
 3.  Preserve Rack parameter, input, output, and light IDs; control geometry;
     panel dimensions; defaults and ranges; custom JSON keys and semantics;
     presets; and all audio processing. No patch migration is required.
@@ -177,17 +183,34 @@ shared title rules in coordination with 011 rather than silently omitting it.
     prose, cross-module references, and illustration captions. Preserve
     published PDF filenames and existing links. Add a brief former-name
     note where useful for readers of old tutorials.
-3.  Audit `manual/*/img/Logo.*` and similar legacy logo assets for actual
-    consumers. Update still-used module logos through the same text source;
-    identify unreferenced historical assets without bulk-renaming or
-    deleting them. Covers currently use production panels and the shared
-    Arhythmetic Units wordmark, so replacing a legacy logo alone is not
-    sufficient to update a cover.
-4.  Refresh production captures and affected panel guides using the existing
+3.  Replace every remaining use of an old module logo in manuals, covers,
+    headers, and figures with the new module name rendered through shared
+    LaTeX typography. Reuse the canonical naming data and shared title
+    conventions; do not create a new per-module `Logo.svg`, `Logo.pdf`, or
+    raster title image as its replacement. Normal manual builds must not
+    require the SVG exporter. Covers currently use production panels and
+    the shared Arhythmetic Units wordmark, so their panel captures must
+    also be refreshed to remove the old embedded module titles.
+4.  Remove obsolete `manual/*/img/Logo.*` files after migrating consumers,
+    including unused SVG sources and PDF/raster copies. Remove leftover
+    per-manual `KautenjaDSP.pdf` duplicates if still present. Audit other
+    manual image assets and delete those proven unnecessary, including
+    obsolete derivatives and their unused sources. Check references in
+    LaTeX, shared styles, build/export scripts, documentation, and other
+    repository consumers before removal; an unused filename in a TeX
+    search alone is not proof that an editable source is unnecessary.
+5.  Retain production `Panel.png` captures, the shared Arhythmetic Units
+    wordmark, and explanatory figures still used by the manuals, along
+    with source artwork needed to maintain them. Update build dependencies,
+    asset documentation, and current provenance inventories when removing
+    files. Keep historical attribution evidence and applicable notices;
+    Git history preserves retired artwork without keeping unused copies
+    in the active tree. Record any justified retained legacy asset here.
+6.  Refresh production captures and affected panel guides using the existing
     005 tooling. Keep native images for all 16 models as review evidence;
     only the 14 sound modules currently have publication panel PNGs/manuals.
     Never substitute the AI concept sheet for a production capture.
-5.  Reconcile capture inventories, manual validation, and fixture name
+7.  Reconcile capture inventories, manual validation, and fixture name
     expectations without weakening slug, state, geometry, or audio checks.
     Preserve serialized patch/preset data unless a visible annotation needs
     a targeted update; do not rewrite fixtures through a general re-save.
@@ -203,8 +226,10 @@ shared title rules in coordination with 011 rather than silently omitting it.
 3.  Apply the naming map and regenerate titles for the full inventory,
     including both blanks and all existing theme variants. Review contact
     sheets at native scale before updating publication assets.
-4.  Update public prose, manuals, and captures together. Run compatibility,
-    native rendering, manual, and package checks; record exact evidence here.
+4.  Update public prose, manuals, and captures together. Migrate logo
+    consumers and remove unnecessary manual assets in the same change.
+    Run compatibility, native rendering, clean manual builds, and package
+    checks; record exact evidence here.
 
 ## Non-Goals
 
@@ -234,6 +259,13 @@ release uploads, and VCV Library submission remain separate tasks.
       checks pass unchanged apart from legitimate display-name expectations.
 - [ ] All 14 manuals build and pass metadata/name validation; refreshed
       native panels and affected PDF pages have been visually inspected.
+- [ ] Manuals use the new names through shared text styling, with no
+      remaining old module-logo images or replacement per-module logo
+      image sets. Obsolete assets are deleted, references/dependencies are
+      updated, and any retained legacy assets have a documented purpose.
+- [ ] A clean build of all 14 manuals succeeds after asset removal, with
+      no missing-image placeholders or reliance on cached logo files.
+      Covers, headers, and affected figures pass rendered-page review.
 - [ ] Package validation includes the revised SVGs and required notices.
       Ordinary builds work without artwork-generation dependencies installed.
 - [ ] Completion evidence records commands, platforms, manual observations,
@@ -273,6 +305,7 @@ make -C tools/capture test
 make -C tools/capture test-native
 make -C tools/capture screenshots
 make -C tools/capture drawings
+make -C manual clean
 make -C manual
 python3 scripts/validate.py manuals manual/.build
 make -j2 dist
@@ -281,8 +314,12 @@ git diff --check
 ```
 
 After visually reviewing the captures before publication export, inspect
-the manuals and native Rack session separately. Load existing patches and
-presets, save/reload representative modules, and verify unchanged controls
+the manuals and native Rack session separately. Audit retired asset paths
+with `git ls-files manual` and repository-wide reference searches; distinguish
+intentional historical mentions from live build inputs. Inspect clean-build
+logs for missing images and verify rendered pages, not just PDF existence.
+Load existing patches and presets, save/reload representative modules,
+and verify unchanged controls
 and state. Use 002's supported-platform builds and package checks; native
 capture tooling currently supports macOS/Linux, not Windows. Available
 theme toggles do not prove dark artwork exists while 008 remains pending.
@@ -319,3 +356,13 @@ Planning validation on 2026-10-01:
 
 Record subsequent implementation evidence here without marking the feature
 complete prematurely.
+
+2026-10-01 clarification: Manual logo migration and asset removal are
+required implementation work. Current shared covers already use panel
+captures and the Arhythmetic Units wordmark, while legacy `Logo.svg` and
+`Logo.pdf` files remain in all 14 manual image directories. Replace any
+remaining consumers with styled text and remove unused copies rather than
+preserving or regenerating separate module-logo images.
+Planning checks: relative links and `git diff --check` passed; inspected
+manual image references and confirmed the existing `make -C manual clean`
+target. No assets were changed or manuals built for this documentation edit.

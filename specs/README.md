@@ -4,12 +4,13 @@ The first five specifications adapt the recent Fourier and RackNES
 maintenance work to PotatoChips. Specs 006-011 address reported Super Echo,
 Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
 engine work, plus the requested YM2151 module. They describe planned work,
-not release promises. As of October 1, 2026, 001 is implemented with native
-onboarding verification still pending (`IN PROGRESS`). Spec 002 is implemented
-with a Windows PCM regression assigned to 003 and the 004-dependent PDF
-integration pending (`IN PROGRESS`). Spec 003 is implemented and staged for
-review, with native Rack and cross-platform verification pending (`IN PROGRESS`);
-specs 004-011 remain `PLANNED`. See each spec for evidence.
+not release promises. As of October 1, 2026, 001 still needs interactive
+onboarding/audio verification (`IN PROGRESS`). Spec 002's three-platform
+build/test/package and instrumentation workflows pass; manual validation and
+publication integration remain dependent on 004 (`IN PROGRESS`). Spec 003 is
+committed and passes cross-platform checks; native rendering and module-history
+checks pass, but pointer-driven waveform editing and listening remain unverified
+(`IN PROGRESS`). Specs 004-011 remain `PLANNED`. See each spec for evidence.
 
 ## Work Areas And Ownership
 

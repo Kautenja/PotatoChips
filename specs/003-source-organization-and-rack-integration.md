@@ -141,10 +141,9 @@ distinguish structural equivalence from intentional fixes.
 
 ## Completion Evidence
 
-Implemented October 1, 2026, starting from `adebc068`. Changes are staged for
-review without a commit or push. Status remains `IN PROGRESS` for native Rack
-preview/patch/audio verification and cross-platform confirmation; the Mac was
-locked when the native-app tool attempted to inspect it. Theme implementation
+Implemented October 1, 2026, starting from `adebc068`, and committed/pushed as
+`b6e05564`. Follow-up fixes are `49cfc083` and `12e03225`. Status remains
+`IN PROGRESS` for the remaining native interaction/listening checks below. Theme implementation
 still belongs to 008, and production figure capture belongs to 005.
 
 ### Structural Increment
@@ -197,7 +196,7 @@ left for 005 to regenerate from the final widgets.
     size, signed boundaries, truncation, assignment, comparisons and numeric
     limits. Minimum/lowest are now -8388608, with 23 value bits. Including PCM
     before Catch2 also compiles after restricting numeric comparison templates.
-    The pinned Windows ABI still needs its first run of this staged revision.
+    The pinned Windows ABI passes the expanded PCM tests in the follow-up runs.
 -   A separately allocated BLIPBuffer reproduced an ASan over-read/write when
     advancing its tail. The old count advanced 17 elements in a 17-element
     array; the corrected move advances the remaining 16 and clears the tail.
@@ -257,19 +256,58 @@ the Rack runtime. macOS ASan does not supply LeakSanitizer accounting; resource
 ownership is explicit and repeated destruction is exercised without claiming
 an OS-level leak report. Existing SDK deprecation warnings remain.
 
+### Unlocked-Desktop And CI Follow-Up
+
+-   `49cfc083` fixes GCC's host-only API compile error by including Rack history
+    declarations before `rack.hpp` in the widget test host.
+-   `12e03225` fixes two Game Boy/Pallet Town bounds errors exposed during
+    cross-platform verification. The final legal register `0xFF3F` indexed
+    beyond a 47-byte array; its inclusive range needs 48 bytes. Polyphonic
+    pitch transposed the buffer's channel and oscillator indices, so channels
+    above three indexed beyond the second dimension. UBSan reproduced both.
+    A new SDK-free register-boundary test and a 48-check Rack clock-index test
+    guard the fixes. Existing metadata and audio fixtures remain unchanged.
+-   The ordinary local run passes 7,163 assertions in 50 cases across 13 DSP
+    and four Rack binaries. The targeted Rack ASan/UBSan run passes all four
+    binaries, including the newly instrumented Pallet Town probe. The new
+    standalone Game Boy regression also passes ASan/UBSan.
+-   A broader diagnostic run additionally compiled every production object
+    with ASan/UBSan through `EXTRA_FLAGS`. After the two bounds fixes it reaches
+    a separate signed-negative shift in disabled `SuperSampler.cpp:124` during
+    construction. This is not a passing full-plugin sanitizer audit. The
+    module remains disabled; its unfinished sample encoder needs correction
+    before it can pass that broader audit or be enabled. The ordinary contract
+    tests and documented targeted sanitizer configuration still execute all
+    registered model constructions.
+-   Native Free 2.6.0 on the unlocked Mac loaded all 16 enabled models in an
+    isolated profile. Inspected browser previews and live panels, including
+    both blanks, the two wavetable displays and Boss Fight's algorithm display.
+    The live fixture restored the project modules' saved data from the Name
+    Corp and Pallet Town debug patches; their waveforms rendered correctly.
+    Native select-all/delete, undo restoration and redo deletion succeeded
+    without a crash. These were module-history operations, not waveform edits.
+-   A separate native Infinite Stairs/VCV Scope fixture displays a live output
+    at approximately 4.83 V peak-to-peak. No listening result is claimed.
+    Automated pointer events did not target Rack controls correctly even with
+    the desktop unlocked; keyboard input did. User patches/settings were not
+    changed: all native work used a temporary profile and fixture patches.
+
+The final [platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102314)
+for `12e03225` passes on Linux x64, macOS arm64 and Windows x64: build-rule
+fixtures, plugin build, 13 DSP binaries, four Rack binaries, package validation
+and artifact retention. The [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102334)
+also passes Linux DSP coverage and ASan/UBSan. Windows PCM and the original
+cross-platform metadata/audio fixtures pass without relaxed tolerances.
+
 ### Remaining Verification
 
--   On an unlocked Mac, inspect all 16 enabled browser previews and live modules,
-    reopen affected debug patches, listen to representative 1/16-channel output,
-    and interactively edit/undo/redo/remove both wavetable modules. Source SVG
-    rasterization and headless events do not replace that check.
--   After review/commit, run the existing three-platform CI, particularly the
-    Windows three-byte PCM assertion and audio tolerance fixtures. No commit,
-    push, or remote CI run is authorized for this implementation turn.
+-   With working native pointer input, finish README's first patch, change
+    pitch/duty, listen to representative 1/16-channel output, and drag-edit,
+    undo/redo and remove both wavetable modules. The headless editor checks
+    and native module-history checks above do not replace waveform interaction.
 -   005 receives the updated runtime SVGs and ownership-safe widgets for figure
     generation. 008 remains responsible for native theme switching and preview
-    verification in both modes. The branding/preview acceptance item remains
-    unchecked until the native check above is performed.
+    verification in both modes; there were no paired themes to preserve here.
 
 
 ## Build-Migration Findings

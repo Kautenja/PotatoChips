@@ -140,9 +140,9 @@ version mismatch fail without publishing anything. Record artifact contents.
 
 ## Completion Evidence
 
-Implemented October 1, 2026. Status remains `IN PROGRESS`: Windows exposes
-the existing PCM storage defect assigned to 003, and manual publication
-remains dependent on 004's reliable PDF rules.
+Implemented October 1, 2026. Status remains `IN PROGRESS` because manual
+publication depends on 004's reliable PDF rules. The Windows PCM defect
+assigned to 003 is fixed and its regression now passes.
 
 ### Baseline And Suite Disposition
 
@@ -220,16 +220,32 @@ when dependency files name an included module `.cpp`. All 155 local Markdown
 links resolve, workflow lint passes, and no production source, plugin
 manifest, or root GPL text changed relative to `cb2809a4`.
 
+### Final Platform Verification
+
+The [platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102314)
+and [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102334)
+for `12e03225` pass. Linux x64, macOS arm64 and Windows x64 each complete
+build-rule checks, the plugin, all 13 DSP binaries, all four Rack binaries,
+package validation and artifact retention. Coverage and DSP ASan/UBSan pass.
+003 records the GCC host declaration fix and two Game Boy/Pallet Town bounds
+fixes found during this follow-up. Windows PCM is no longer a blocker.
+
+`make -j2 -C manual` produced all 14 legacy PDFs locally. The subsequent
+`python3 scripts/validate.py manuals manual/build` failed because `pdftotext`
+is unavailable on this machine. This is not a passing content/version gate;
+no visual PDF review, negative TeX build, or publication workflow was completed.
+The legacy rules still mask TeX failures and remove their diagnostic logs.
+
 ### Remaining Verification And Handoffs
 
-003 now supplies the staged three-byte PCM representation and boundary/byte
-regressions, and removes the temporary DSP exception substitute. Keep the
-Windows PCM regression enabled until that revision is verified under the same
-ABI; the earlier CI result above remains historical evidence.
+003 supplies the committed three-byte PCM representation and boundary/byte
+regressions, and removes the temporary DSP exception substitute. The Windows
+PCM regression passes under the pinned MinGW64/MSVCRT ABI. The earlier failed
+run above remains historical evidence; follow-up results are recorded below.
 Spec 004 owns TeX failure propagation and actual 14-PDF builds/render review.
 The manual validator is implemented and its negative fixtures pass, but no
-real PDF collection, TeX failure fixture, or upload workflow is claimed to
-pass yet. Once 004 supplies reliable rules, add path-filtered manual CI and
+real PDF collection is claimed to pass validation, and the TeX failure fixture
+and upload workflow remain unimplemented. Once 004 supplies reliable rules, add path-filtered manual CI and
 an explicit-dispatch-only existing-release upload job with scoped write
 permissions. Ordinary CI must consume committed PNGs. This dependency keeps
 the PDF acceptance item open; the plugin build/test migration is implemented.

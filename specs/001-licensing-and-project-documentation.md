@@ -163,11 +163,19 @@ native first-patch check below; archive after that verification succeeds.
     verification was attempted in temporary isolated Rack profiles. The
     installed Pro build required activation; the local Free 2.6.0 build
     launched, but the locked macOS desktop prevented GUI/audio checks.
-    No successful native patch or listening check is claimed.
+    No successful native patch or listening check was claimed at that point.
+-   Unlocked-desktop follow-up: the isolated Free 2.6.0 host loads the plugin,
+    shows Infinite Stairs in the browser, and renders a live Pulse 1 output
+    into VCV Scope (approximately 4.83 V peak-to-peak at defaults). The patch
+    was prepared as a temporary fixture. Automated keyboard input works, but
+    mouse clicks/drags do not reach the intended Rack controls; a keyboard-added
+    module was placed at grid position `[-2005, -101]` instead of the visible
+    pointer. This verifies native rendering/signal production, not README's
+    interactive Audio-device, cabling, pitch/duty, or listening steps.
 
 ### Remaining Verification And Handoffs
 
-- [ ] On an unlocked desktop, follow README's Infinite Stairs/Audio steps
+- [ ] With working native pointer input, follow README's Infinite Stairs/Audio steps
       in Rack, verify pitch/duty changes and the named ports/defaults, then
       record the result and archive this spec with updated cross-references.
 

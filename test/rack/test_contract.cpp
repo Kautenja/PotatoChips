@@ -41,7 +41,8 @@ CATCH_TEST_CASE("Registered models preserve saved-patch and audio contracts") {
     plugin.version = "2.0.1";
     init(&plugin);
     rack::plugin::plugins.push_back(&plugin);
-    CATCH_REQUIRE(plugin.models.size() == 18);
+    CATCH_REQUIRE(plugin.models.size() == 17);
+    CATCH_CHECK(plugin.getModel("SuperSampler") == nullptr);
     json_t* manifest = json_load_file("plugin.json", 0, nullptr);
     CATCH_REQUIRE(manifest != nullptr);
     json_t* models = json_object_get(manifest, "modules");
@@ -54,11 +55,11 @@ CATCH_TEST_CASE("Registered models preserve saved-patch and audio contracts") {
         CATCH_REQUIRE(slug != nullptr);
         CATCH_CHECK(plugin.getModel(slug) != nullptr);
         if (json_is_true(json_object_get(modelData, "disabled"))) {
-            CATCH_CHECK((std::string(slug) == "SuperSampler" || std::string(slug) == "SuperSynth"));
+            CATCH_CHECK(std::string(slug) == "SuperSynth");
             ++disabled;
         }
     }
-    CATCH_CHECK(disabled == 2);
+    CATCH_CHECK(disabled == 1);
     json_decref(manifest);
     std::ostringstream out;
     out << std::setprecision(17);

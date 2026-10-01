@@ -38,7 +38,6 @@ void init(Plugin* instance) {
     instance->addModel(modelSuperSynth);
     instance->addModel(modelSuperEcho);
     instance->addModel(modelSuperADSR);
-    instance->addModel(modelSuperSampler);
     instance->addModel(modelSuperVCA);
     instance->addModel(modelChipS_SMP_Blank1);
     instance->addModel(modelBossFight_Blank1);

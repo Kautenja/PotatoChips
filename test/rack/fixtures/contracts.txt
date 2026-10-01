@@ -397,40 +397,6 @@ Sustain Level 0 7 5 0
 Sustain Rate 0 31 20 0
 Sustain Rate 0 31 20 0
 null
-SuperSampler 32 48 16 0
-Voice 1 Frequency -6 6 4 0
-Voice 2 Frequency -6 6 4 0
-Voice 3 Frequency -6 6 4 0
-Voice 4 Frequency -6 6 4 0
-Voice 5 Frequency -6 6 4 0
-Voice 6 Frequency -6 6 4 0
-Voice 7 Frequency -6 6 4 0
-Voice 8 Frequency -6 6 4 0
-Voice 0 -> Voice 1 Phase Modulation Enable 0 1 0 0
-Voice 1 -> Voice 2 Phase Modulation Enable 0 1 0 0
-Voice 2 -> Voice 3 Phase Modulation Enable 0 1 0 0
-Voice 3 -> Voice 4 Phase Modulation Enable 0 1 0 0
-Voice 4 -> Voice 5 Phase Modulation Enable 0 1 0 0
-Voice 5 -> Voice 6 Phase Modulation Enable 0 1 0 0
-Voice 6 -> Voice 7 Phase Modulation Enable 0 1 0 0
-Voice 7 -> Voice 8 Phase Modulation Enable 0 1 0 0
-Voice 1 Volume (Left) -128 127 127 0
-Voice 2 Volume (Left) -128 127 127 0
-Voice 3 Volume (Left) -128 127 127 0
-Voice 4 Volume (Left) -128 127 127 0
-Voice 5 Volume (Left) -128 127 127 0
-Voice 6 Volume (Left) -128 127 127 0
-Voice 7 Volume (Left) -128 127 127 0
-Voice 8 Volume (Left) -128 127 127 0
-Voice 1 Volume (Right) -128 127 127 0
-Voice 2 Volume (Right) -128 127 127 0
-Voice 3 Volume (Right) -128 127 127 0
-Voice 4 Volume (Right) -128 127 127 0
-Voice 5 Volume (Right) -128 127 127 0
-Voice 6 Volume (Right) -128 127 127 0
-Voice 7 Volume (Right) -128 127 127 0
-Voice 8 Volume (Right) -128 127 127 0
-null
 SuperVCA 8 7 2 15
 Filter Mode 0 1 0 0
 Input Gain (Left) 0 1.9952623844146729 1 0

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+-   Remove the disabled SuperSampler prototype, its panel and example patches,
+    and its instance from the combined demo patch. Preserve the underlying
+    Sony S-DSP/BRR code and tests. Experimental patches using SuperSampler
+    will no longer find that module.
+
 -   Generate manual covers and README panels from real Rack widgets; add
     numbered vector panel guides and optional capture/validation tooling.
 -   Match Fourier's larger footer wordmark, use the square brand emblem on

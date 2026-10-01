@@ -166,21 +166,6 @@
       ]
     },
     {
-      "slug": "SuperSampler",
-      "name": "Super Sampler",
-      "description": "An emulation of the BRR sample playback engine from the S-SMP chip on the Super Nintendo Entertainment System (SNES).",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperSampler.pdf",
-      "tags": [
-        "Multiple",
-        "Effect",
-        "Filter",
-        "Panning",
-        "Polyphonic",
-        "Sampler"
-      ],
-      "disabled": true
-    },
-    {
       "slug": "SuperSynth",
       "name": "Super Synth",
       "description": "An emulation of the Sony S-SMP chip from the Super Nintendo Entertainment System (SNES).",

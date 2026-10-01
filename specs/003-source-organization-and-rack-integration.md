@@ -96,7 +96,7 @@ changes rather than implementing a second theme system.
 
 ## Non-Goals
 
-No new chips, enabled SuperSampler/SuperSynth, universal emulator rewrite,
+No new chips, enabled SuperSynth, universal emulator rewrite,
 algorithm optimization, namespace-wide rename, changed patch format, or
 new public controls. Do not adopt Fourier's FFT scheduling or RackNES's
 mapper/ROM changes. Do not delete dormant chip implementations merely

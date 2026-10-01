@@ -42,7 +42,6 @@ extern rack::Model *modelMiniBoss;
 extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
-extern rack::Model *modelSuperSampler;
 extern rack::Model *modelSuperVCA;
 
 extern rack::Model *modelChipS_SMP_Blank1;

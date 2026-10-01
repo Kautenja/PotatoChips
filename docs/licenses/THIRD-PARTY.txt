@@ -62,8 +62,9 @@ without replacing the local GPL notices. Exact imported upstream revision
 and the complete chain from OpenSPC are not recorded.
 common.hpp contains first-party shared definitions under its own GPL notice.
 ADSR, echo, and interpolation are used by enabled modules. The processor
-and sample-player paths also support disabled SuperSynth/SuperSampler;
-disabled manifest entries do not establish that their compiled code is absent.
+also supports disabled SuperSynth; its disabled manifest entry does not
+establish that its compiled code is absent. The standalone BRR sample player
+and its tests are retained after removal of the SuperSampler Rack module.
 
 MAME-derived Yamaha YM2612
 -------------------------

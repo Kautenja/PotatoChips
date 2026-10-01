@@ -15,14 +15,16 @@ aggregates. The accepted audio fixture comes from a separate checkout of
 `adebc068` with only those BLIP loop bounds corrected; it agrees exactly with
 the reorganized sources on the same machine. Thus the fixture does not use
 source reorganization itself to define expected audio. Both original and
-corrected captures were repeatable locally.
+corrected captures were repeatable locally. The SuperSampler metadata block
+was removed on 2026-10-01 with the retired Rack module; all other fixture
+values are unchanged.
 
 Metadata must match exactly. Audio permits relative error `1e-5` and absolute
 error `1e-7` for compiler floating-point differences in synthesis and aggregate
 summation; these tolerances are not permission for audible behavior changes.
 The first local run agrees exactly; other architectures require CI verification.
 The restored-patch tests also load all 60 Super Echo presets and registered
-project modules from all 24 debug patches. They preserve Rack's handling of
+project modules from all 23 debug patches. They preserve Rack's handling of
 reversed parameter ranges. Unregistered historical SCC/TurboGrafx16 and
 external plugins are excluded from this headless restoration test.
 

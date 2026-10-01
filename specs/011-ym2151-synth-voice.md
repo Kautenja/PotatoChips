@@ -203,7 +203,7 @@ Reconcile the old `1.13.0 (TBD)` item without claiming that version shipped.
 Extend enabled-model, theme, capture, and publication inventories when the
 module is added. Relative to the planning baseline, it makes 19 manifest
 entries, 17 enabled models, and 15 sound-module manuals. Keep both existing
-blanks and the two disabled modules in their current categories. Derive
+blanks and any remaining disabled modules in their current categories. Derive
 final counts from the actual manifest if other work lands first.
 
 ## Verification And Acceptance

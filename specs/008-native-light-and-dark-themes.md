@@ -90,9 +90,9 @@ manifest slugs. All panels are 380 Rack pixels tall.
 | `SN76489` | `MegaTone.svg` | 150 |
 | `VRC6` | `StepSaw.svg` | 120 |
 
-Disabled `SuperSampler` and `SuperSynth` remain disabled. Keep their code
-building if shared helpers change, but do not require new public assets or
-enable them for this issue. Unused SVGs are not released modules.
+Disabled `SuperSynth` remains disabled. Keep its code building if shared
+helpers change, but do not require new public assets or enable it for this
+issue. Unused SVGs are not released modules.
 
 ## Requirements
 

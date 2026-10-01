@@ -225,7 +225,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS>, WavetableOwner {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
+        freq = 2048.f - (static_cast<uint32_t>(buffers[channel][oscillator].get_clock_rate() / freq) >> 5);
         return Math::clip(freq, 8.f, 2035.f);
     }
 

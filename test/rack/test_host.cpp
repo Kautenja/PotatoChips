@@ -28,9 +28,32 @@
 #define CATCH_CONFIG_PREFIX_ALL
 #include "catch_amalgamated.hpp"
 #include "../../src/InfiniteStairs.cpp"
+#include "../../src/PalletTownWavesSystem.cpp"
 #include <memory>
 
 Plugin* plugin_instance = nullptr;
+
+CATCH_TEST_CASE("Pallet Town reads each channel's oscillator clock") {
+    rack::Context context;
+    rack::contextSet(&context);
+    context.engine = new rack::engine::Engine;
+    context.engine->setSampleRate(48000.f);
+    struct Probe : PalletTownWavesSystem {
+        using PalletTownWavesSystem::getFrequency;
+        using ChipModule<NintendoGBS>::buffers;
+    };
+    Probe module;
+    for (unsigned channel = 0; channel < 16; ++channel) {
+        for (unsigned oscillator = 0; oscillator < 3; ++oscillator) {
+            auto& buffer = module.buffers[channel][oscillator];
+            buffer.set_sample_rate(48000, 500000 + channel * 48000 + oscillator * 96000);
+            auto expected = 2048 - (static_cast<uint32_t>(
+                buffer.get_clock_rate() / rack::dsp::FREQ_C4) >> 5);
+            CATCH_CHECK(module.getFrequency(oscillator, channel) == expected);
+        }
+    }
+    rack::contextSet(nullptr);
+}
 
 CATCH_TEST_CASE("Infinite Stairs constructs under a real Rack engine") {
     rack::Context context;

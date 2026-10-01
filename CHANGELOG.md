@@ -15,6 +15,8 @@
     source-move equivalence and before/after captures are recorded separately.
 -   Initialize all Ricoh 2A03 oscillator registers and write flags on reset,
     avoiding reads of uninitialized state during construction.
+-   Include the final Game Boy wavetable register in its storage and correct
+    Pallet Town's channel/oscillator buffer indexing for polyphonic pitch.
 -   Reuse mono CV on every Infinite Stairs polyphonic channel, including
     pitch, FM, level, pulse width, and sync inputs.
 -   Store 24-bit PCM in three explicit little-endian bytes on every ABI,

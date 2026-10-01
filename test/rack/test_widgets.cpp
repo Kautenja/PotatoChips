@@ -21,7 +21,9 @@
 // SOFTWARE.
 //
 
+// This fixture is a host: expose host-only declarations before rack.hpp.
 #include <engine/Engine.hpp>
+#include <history.hpp>
 #undef PRIVATE
 #include <rack.hpp>
 #define CATCH_CONFIG_PREFIX_ALL

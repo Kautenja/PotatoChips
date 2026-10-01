@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+-   Read Voice 2612 and Operator 2612 gate/retrigger edges every host sample.
+    Restart held notes without a 16-sample release gap, preserving chip
+    attenuation, envelope/LFO clocks, soft-reset phase policy and SSG quirks.
+    Rearm removed polyphonic lanes; preserve parameter CV's divided cadence.
+-   Replace undefined signed shifts in YM2612 feedback/modulation with
+    equivalent bounded multiplication; before/after audio is unchanged.
+
 -   Correct Contour's envelope clock to 32 kHz at every host sample rate.
     Attack, decay and sustain now also keep fixed durations in seconds;
     existing patches run these stages host-rate/32000 times longer than

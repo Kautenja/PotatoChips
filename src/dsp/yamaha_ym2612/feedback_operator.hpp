@@ -27,6 +27,8 @@ namespace YamahaYM2612 {
 
 /// @brief A single 4-operator FM voice.
 struct FeedbackOperator : public Operator {
+    // Read-only state inspection is defined only by the regression harness.
+    friend struct TestAccess;
  private:
     /// general state
     OperatorContext state;
@@ -151,7 +153,9 @@ struct FeedbackOperator : public Operator {
             // 1. shift mod by the bit-depth
             // 1. shift carrier by the feedback amount
             // 1. sum into phase modulation signal for operator
-            const auto pm = (static_cast<int32_t>(mod) << 15) + (fb_carrier << feedback);
+            // Signed samples can be negative; multiplication preserves their
+            // scaled value without undefined signed left shifts.
+            const auto pm = static_cast<int32_t>(mod) * (1 << 15) + fb_carrier * (1 << feedback);
             output_feedback[1] = calculate_output(envelope, pm);
         } else {  // clear the next output from operator
             output_feedback[1] = 0;

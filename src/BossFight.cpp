@@ -29,6 +29,8 @@
 
 /// A Eurorack module based on the Yamaha YM2612.
 struct BossFight : rack::Module {
+    // Read-only regression access; no diagnostics run in the audio path.
+    friend struct YM2612ModuleTestAccess;
  private:
     /// a YM2612 chip emulator
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
@@ -37,6 +39,9 @@ struct BossFight : rack::Module {
     Trigger::Threshold gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
     Trigger::Threshold retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+
+    /// Voices processed on the preceding sample; removed lanes must release.
+    unsigned activeChannels = 0;
 
     /// a VU meter for measuring the output audio level from the emulator
     rack::dsp::VuMeter2 vuMeter;
@@ -265,9 +270,6 @@ struct BossFight : rack::Module {
         // set the global parameters
         apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
         apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
-        // normal pitch gate and re-trigger
-        float gate = 0;
-        float retrig = 0;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 1, 31 ));
@@ -282,18 +284,6 @@ struct BossFight : rack::Module {
             // SSG and rate scale
             apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
-            // process the gate trigger, high at 2V
-            gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
-            gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
-            // process the retrig trigger, high at 2V
-            retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
-            // use the exclusive or of the gate and retrigger. This ensures that
-            // when either gate or trigger alone is high, the gate is open,
-            // but when neither or both are high, the gate is closed. This
-            // causes the gate to get shut for a sample when re-triggering an
-            // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh(), prevent_clicks);
         }
     }
 
@@ -312,13 +302,32 @@ struct BossFight : rack::Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process control voltage when the CV divider is high
-        if (cvDivider.process())
-            for (unsigned channel = 0; channel < channels; channel++)
-                processCV(args, channel);
+        const bool updateCV = cvDivider.process();
+        for (unsigned channel = 0; channel < channels; channel++)
+            if (updateCV || channel >= activeChannels) processCV(args, channel);
+        for (unsigned channel = channels; channel < activeChannels; channel++) {
+            for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
+                apu[channel].set_gate(op, false, prevent_clicks);
+                gate_triggers[op][channel].reset();
+                retrig_triggers[op][channel].reset();
+            }
+        }
+        activeChannels = channels;
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
             float pitch = 0;
+            float gate = 0;
+            float retrig = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
+                // Preserve forward normalling and per-operator overrides while
+                // observing every host sample, including sampled low intervals.
+                gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
+                gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
+                retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
+                const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
+                // Complete the key pair before stepping the shared chip context.
+                if (trigger) apu[channel].set_gate(op, false, prevent_clicks);
+                apu[channel].set_gate(op, gate_triggers[op][channel].isHigh() || trigger, prevent_clicks);
                 const float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
                 apu[channel].set_frequency(op, Math::Eurorack::voct2freq(Math::clip(frequency + pitch, -6.5f, 6.5f)));

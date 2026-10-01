@@ -171,6 +171,8 @@ struct OperatorContext {
 
 /// @brief A single FM operator
 struct Operator {
+    // Read-only state inspection is defined only by the regression harness.
+    friend struct TestAccess;
  private:
     /// attack rate
     uint32_t ar = 0;

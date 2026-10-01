@@ -10,3 +10,7 @@ inspect-super-echo:
 .PHONY: super-adsr
 super-adsr:
 	$(MAKE) -C ../.. test-super-adsr RACK_DIR="$(RACK_DIR)"
+
+.PHONY: ym2612-ssg
+ym2612-ssg:
+	$(MAKE) -C ../.. test-ym2612-ssg RACK_DIR="$(RACK_DIR)"

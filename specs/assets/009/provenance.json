@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-01",
+  "baseline": "3cff51d2",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "rack": "2.6.0",
+  "fundamental": "2.6.1",
+  "native_sample_rate": 48000,
+  "native_channels": 4,
+  "poly_mode": "rotate",
+  "source_sha256": {
+    "src/MiniBoss.cpp": "21a2d582077ca44f8c6c57c0d3612f6a059f54a31d67cd1d566f76b5315f7dfd",
+    "src/BossFight.cpp": "558eb59a5032ce251eded4a072ad5d436b32eecac515d8200494801747b4879f",
+    "src/dsp/yamaha_ym2612/operator.hpp": "f5b223995b82e69828e0310e4b84a9f5f1a54742403f876fa470a82a25cbad88",
+    "src/dsp/yamaha_ym2612/feedback_operator.hpp": "50bddf8f4f77c13a64a7a750cd1c24e9f94c0ee6606659f88e844663741cb352",
+    "src/dsp/yamaha_ym2612/voice4op.hpp": "1d367bde83e27229f4499552f01daa249d4a9631c3adf96b75671f5c2a8e3ddc",
+    "specs/assets/009/native_replay.cpp": "b7c60b20b72387187eee4576f5f8b5f85663453c5c37c3c57eab79f6ad58909c",
+    "specs/assets/009/audio_fingerprint.cpp": "49e9745eb86bd03e4ba754dfb9bf47027f679fd59afe6c87c98454fe569b76cf"
+  },
+  "runtime_sha256": {
+    "libRack.dylib": "0ee091bb5065326c1e5a101d38ac2c3de00f962fd049294f50f11582b53a820e",
+    "Fundamental/plugin.dylib": "b174b0b046bc75753fa84ed92622ce9b20164ce48402489e938f36f7fca01d90"
+  },
+  "limitations": [
+    "No physical MIDI or listening test",
+    "Original accepted-event one-shot not reproduced",
+    "No upstream push or issue closure"
+  ]
+}

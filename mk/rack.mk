@@ -42,3 +42,7 @@ $(RACK_TEST_BUILD)/config: FORCE
 
 # Contract tests link the production registration and all model implementations.
 $(RACK_TEST_BUILD)/test_contract$(RACK_TEST_SUFFIX): $(OBJECTS)
+
+.PHONY: test-ym2612-ssg
+test-ym2612-ssg: $(RACK_TEST_BUILD)/test_ym2612_ssg$(RACK_TEST_SUFFIX)
+	DYLD_LIBRARY_PATH="$(abspath $(RACK_DIR))" LD_LIBRARY_PATH="$(abspath $(RACK_DIR))" $< $(TEST_ARGS)

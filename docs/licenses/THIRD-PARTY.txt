@@ -96,7 +96,7 @@ whole module solely to the emulator authors.
 
 Mutable Instruments Edges
 -------------------------
-Files: src/dsp/mi_edges.hpp and src/dsp/mi_edges/*.hpp; used by src/Blocks.cpp.
+Files: src/dsp/mi_edges/{wavetable,wavetables}.hpp; used by src/Blocks.cpp.
 Authors credited locally: Christian Kauten (2020), Emilie Gillet (2015).
 Origin: https://github.com/pichenettes/eurorack/tree/master/edges
 Local import: fefe6d997abda1d462d094f530f193e6d57adfdf (Blocks).

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+-   Remove the unused Edges umbrella header and standalone LFSR/sample-and-hold
+    oscillators. Preserve the digital oscillator and tables used by Blocks.
+
 -   Remove the unused Sony S-DSP processor, BRR sample player, sample-format
     helpers, and their tests. Preserve ADSR, echo, interpolation, and shared
     DSP used by active modules.

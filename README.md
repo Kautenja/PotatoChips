@@ -1,5 +1,7 @@
 # Potato Chips
 
+![Arhythmetic Units Potato Chips: a golden potato crisp on a rainbow-pinned sound chip](manual/PotatoChips-SocialMedia.png)
+
 [![Build and tests](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml/badge.svg)](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml)
 
 Potato Chips is an Arhythmetic Units plugin for VCV Rack 2, by Christian

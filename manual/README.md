@@ -132,6 +132,24 @@ manual edits do not resolve those reports.
 
 ## Artwork And Handoffs
 
+### Repository And Social Banner
+
+`PotatoChips-SocialMedia.svg` is the vector master for the Arhythmetic Units
+banner. Its text is outlined and its logo is embedded from
+`../res/ArhythmeticUnits.svg`, so it needs no external fonts or images.
+The matching PNG is 1280 by 640 pixels; the PDF is a single vector page
+with the same 2:1 aspect ratio. Keep all three exports aligned when editing
+the master. These tracked publication assets retain their established names
+so existing links continue to work. The root README embeds the PNG.
+
+GitHub's custom social preview is a separate uploaded image. After changing
+the banner, upload `PotatoChips-SocialMedia.png` in the repository's
+**Settings > General > Social preview**; changing the tracked file does not
+update that upload. Artwork terms and provenance are in
+[the component inventory](../docs/licenses/THIRD-PARTY.txt).
+
+### Module Artwork
+
 Current builds use the tracked legacy `img/Module.pdf` and
 `img/Interface.pdf`. These are illustrations, not native screenshots. The
 contents page explicitly identifies this interim artwork. Final acceptance

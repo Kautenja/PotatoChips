@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+-   Replace the legacy social banner with Arhythmetic Units artwork in SVG,
+    PNG, and PDF, and display the new banner in the repository README.
+
 -   Rewrite all 14 active sound-module manuals with practical patches,
     source-checked controls and shared Arhythmetic Units publication styling.
 -   Replace copied-source TeX recipes with checked, source-relative latexmk

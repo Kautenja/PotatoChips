@@ -41,6 +41,11 @@ revision are recorded in the inventory. The runtime footer source is also in
 `res/ArhythmeticUnits.svg`. Other panel artwork and attribution are preserved;
 legacy manual figures await regeneration under spec 005.
 
+The replacement Potato Chips social banner in
+`manual/PotatoChips-SocialMedia.svg`, `.png`, and `.pdf` follows the same
+CC-BY-NC-ND-4.0 artwork terms. Its original composition and embedded
+Arhythmetic Units logo provenance are recorded in the component inventory.
+
 ## Dependencies And Tests
 
 Blargg-derived audio code retains its authorship and historical LGPL

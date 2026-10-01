@@ -23,8 +23,6 @@ Files and upstream family mapping:
   src/dsp/general_instrument_ay_3_8910.hpp   Ay_Apu
   src/dsp/atari_pokey.hpp                   Sap_Apu
   src/dsp/texas_instruments_sn76489.hpp      Sms_Apu / Sms_Oscs
-  src/dsp/konami_scc.hpp                    Kss_Scc_Apu (unused chip header)
-  src/dsp/nec_turbo_grafx_16.hpp             Hes_Apu (unused chip header)
   src/dsp/wavetable4bit.hpp                 shared adapted wavetable helper
 
 The initial import d60296c541e65acc9f144f36619c99e03e176db0 contains
@@ -38,9 +36,9 @@ inventory of all chip code. LGPL text: LGPL-2.1.txt.
 
 Exact upstream revisions for these extensively refactored families are not
 recorded. The version labels above apply to identified historical files,
-not every current chip. The SCC and TurboGrafx headers are source-only in
-the active module inventory. Shared wavetable code is covered conservatively
-because its header also credits Shay Green.
+not every current chip. The unused SCC and TurboGrafx headers were removed
+on October 1, 2026. Shared wavetable code is covered conservatively because
+its header also credits Shay Green.
 
 The bit-scan implementation in blip_buffer.hpp cites a Stack Overflow
 question and Fabian Giesen's article as implementation references. History

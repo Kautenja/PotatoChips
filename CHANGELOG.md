@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+-   Remove the unused Konami SCC and NEC TurboGrafx-16 emulator headers.
+
 -   Remove the disabled experimental SuperSynth module, its panel, and its
     debug patch. Preserve the underlying Sony S-DSP implementation and tests.
     Experimental patches containing SuperSynth can no longer load that module.

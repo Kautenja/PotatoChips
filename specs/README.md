@@ -4,14 +4,15 @@ The first five specifications adapt the recent Fourier and RackNES
 maintenance work to PotatoChips. Specs 006-011 address reported Super Echo,
 Super ADSR, native theme, YM2612 looping-envelope, and optional Nuked-OPN2
 engine work, plus the requested YM2151 module. They describe planned work,
-not implemented behavior or release promises. All eleven are `PLANNED` as
-of October 1, 2026.
+not release promises. As of October 1, 2026, 001 is implemented with native
+onboarding verification still pending (`IN PROGRESS`); specs 002-011 remain
+`PLANNED`. See each spec for actual completion evidence.
 
 ## Work Areas And Ownership
 
 | Spec | Focus | Primary Files | Dependencies |
 | --- | --- | --- | --- |
-| [001](001-licensing-and-project-documentation.md) | Licensing, README, contributor and support guidance, public metadata | Root Markdown, license texts, `docs/licenses/`, GitHub templates, `plugin.json` | Can start immediately; finish command, image, and release guidance as 002-005 land. |
+| [001](001-licensing-and-project-documentation.md) | Licensing, README, contributor and support guidance, public metadata | Root Markdown, license texts, `docs/licenses/`, GitHub templates, `plugin.json` | Implemented; native onboarding check pending. Later command, image, and release updates belong to 002-005. |
 | [002](002-build-tests-and-ci.md) | Make-based tests, build hygiene, CI, release artifact validation | `Makefile`, `mk/`, `dep/`, test harness, `.github/workflows/`, build scripts and ignore rules | Establish baseline before 003; integrate the PDF job after 004. |
 | [003](003-source-organization-and-rack-integration.md) | DSP header organization, Rack helpers, panel identity, UI lifecycle | `src/`, runtime `res/`, focused regression fixtures | Use 002's harness; coordinate branding/provenance with 001 and preserve 008's themes. |
 | [004](004-manual-content-and-publication-style.md) | Manual source structure, shared typography, operating guides, reliable PDF builds | `manual/`, shared LaTeX/build rules | Can begin with current code/artwork; final review follows relevant 003 and 005 changes. |
@@ -23,7 +24,7 @@ of October 1, 2026.
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
 
-Begin with 001's inventory and 002's executable baseline. Then make 003's
+Use 001's inventory and establish 002's executable baseline. Then make 003's
 structural changes with regression evidence, develop 004's shared manual
 system, and complete 005's captures and diagrams. Finish the public links,
 publication CI, and full-manual review once those outputs exist. These are

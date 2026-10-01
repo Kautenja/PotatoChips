@@ -2,8 +2,8 @@
   "slug": "KautenjaDSP-PotatoChips",
   "version": "2.0.1",
   "license": "GPL-3.0-or-later",
-  "name": "KautenjaDSP Potato Chips",
-  "brand": "KautenjaDSP",
+  "name": "Potato Chips",
+  "brand": "ArhythmeticUnits",
   "author": "Christian Kauten",
   "authorEmail": "KautenjaDSP@gmail.com",
   "sourceUrl": "https://github.com/Kautenja/PotatoChips",
@@ -215,5 +215,10 @@
         "Polyphonic"
       ]
     }
-  ]
+  ],
+  "description": "Polyphonic retro sound-chip oscillators, FM voices, envelopes, and effects",
+  "authorUrl": "https://github.com/Kautenja",
+  "pluginUrl": "https://github.com/Kautenja/PotatoChips",
+  "manualUrl": "https://github.com/Kautenja/PotatoChips#modules",
+  "supportUrl": "https://github.com/Kautenja/PotatoChips/issues"
 }

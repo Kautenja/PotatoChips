@@ -1,7 +1,7 @@
 # Licensing And Project Documentation
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 
 Make the repository's public information, attribution, and contributor
 entry points as clear as Fourier's and RackNES's, using PotatoChips's
@@ -9,7 +9,7 @@ actual module inventory and existing license terms.
 
 ## Evidence And Current Gaps
 
--   [LICENSE.md](../LICENSE.md) mixes source and artwork scope and links to
+-   The former `LICENSE.md` (now [LICENSING.md](../LICENSING.md)) mixed source and artwork scope and linked to
     `LICENSE-dist.txt`, which is absent. `LICENSE-GPLv3.txt` contains the
     software license text; the package currently includes `LICENSE*` only.
 -   The short Blargg attribution does not inventory the adapted chip code.
@@ -97,17 +97,17 @@ Runtime logo replacement belongs to 003; manual layout belongs to 004.
 
 ## Acceptance Criteria
 
-- [ ] Every imported code family and shipped asset family has an evidenced
+- [x] Every imported code family and shipped asset family has an evidenced
       scope/notice entry; missing provenance is explicitly identified.
-- [ ] The root license text is unchanged in substance and the broken
+- [x] The root license text is unchanged in substance and the broken
       `LICENSE-dist.txt` reference is gone. All local links resolve.
-- [ ] README and manifest describe the actual active module inventory;
+- [x] README and manifest describe the actual active module inventory;
       slugs and disabled flags match the baseline exactly.
-- [ ] Contributor, agent, style, and support guidance have clear ownership
+- [x] Contributor, agent, style, and support guidance have clear ownership
       and no obsolete SCons/Travis instructions after 002 is complete.
-- [ ] All 14 active manual links retain their release filenames. README
+- [x] All 14 active manual links retain their release filenames. README
       uses reviewed screenshots when 005 is complete.
-- [ ] The built archive contains the required license texts and notices.
+- [x] The built archive contains the required license texts and notices.
 
 ## Validation
 
@@ -130,5 +130,50 @@ Rack. Record remote link/license-detection checks separately when performed.
 
 ## Completion Evidence
 
-Implementation, package inspection, link checks, and manual onboarding
-verification are pending. Record commands/results and exceptions here.
+Implemented on October 1, 2026. Status remains `IN PROGRESS` pending the
+native first-patch check below; archive after that verification succeeds.
+
+-   Added unchanged root GPL text, licensing scope, complete applicable
+    notices, and an evidence-based component/artwork inventory. Preserved
+    source notices and recorded the historical YM2612 MAME discrepancy,
+    TercerBrazo lineage, and incomplete artwork provenance. These records
+    do not establish new rights or resolve the underlying permission gaps.
+-   Rewrote README, added contributor/support guides, shortened AGENTS,
+    aligned templates/style-guide links, updated descriptive metadata,
+    and reconciled historical/unreleased changelog entries.
+-   `make -j2 dist` passed using the prepared Rack 2.6.0 macOS ARM64 tree.
+    This packaged the existing plugin binary; no DSP source changed and
+    no clean rebuild or standalone DSP test run was required/performed.
+-   Decompressed the real Zstandard/tar `.vcvplugin`: 210 entries, plugin
+    binary and manifest present, all eight license/scope/notice files
+    byte-identical to their sources, and no packaged Catch2 code.
+-   Programmatic comparison with `d1821c9f` passed: exact GPL bytes, plugin
+    slug/version unchanged, and all 18 module objects unchanged, including
+    every slug, disabled flag, and manual URL. Catch2 license text matches
+    the pinned submodule exactly. JSON parsing and `git diff --check` passed.
+-   Checked all 151 local links/heading anchors across 23 first-party
+    Markdown files. Rendered README through Pandoc's GFM reader and reviewed
+    the complete browser rendering: one title, ordered onboarding steps,
+    all 14 module rows, blank-panel explanation, and support/license links.
+-   Remote check: GitHub's latest release API returned tag `2.0.0` with
+    all 14 referenced PDF asset names. This does not imply source `2.0.1`
+    was released. GitHub's license detection was not checked.
+-   Reviewed Infinite Stairs' source for default C4 pitch, FM zero, volume
+    10, output names, free-running behavior, and output normalling. Native
+    verification was attempted in temporary isolated Rack profiles. The
+    installed Pro build required activation; the local Free 2.6.0 build
+    launched, but the locked macOS desktop prevented GUI/audio checks.
+    No successful native patch or listening check is claimed.
+
+### Remaining Verification And Handoffs
+
+- [ ] On an unlocked desktop, follow README's Infinite Stairs/Audio steps
+      in Rack, verify pitch/duty changes and the named ports/defaults, then
+      record the result and archive this spec with updated cross-references.
+
+The checked acceptance items describe the implemented repository scope.
+Conditional follow-through remains owned by the later specs: 002 updates
+CONTRIBUTING/style-guide commands and removes obsolete SCons/Travis guidance
+when its replacement exists; 004 verifies publication/manual workflow;
+005 supplies reviewed native screenshots for README. Current commands are
+explicitly labeled and no future workflow or screenshot is claimed to exist.

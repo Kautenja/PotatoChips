@@ -1,6 +1,6 @@
 # PotatoChips Agent Instructions
 
-PotatoChips is the KautenjaDSP Potato Chips plugin for VCV Rack 2. It turns
+PotatoChips is the Arhythmetic Units Potato Chips plugin for VCV Rack 2. It turns
 classic sound-chip emulations into polyphonic oscillators, synthesizers,
 envelopes, and effects. Preserve musical timing, chip behavior, audio
 quality, and compatibility with users' saved patches.
@@ -12,16 +12,19 @@ Read this file and the relevant sources before editing:
 -   [README.md](README.md): project overview, modules, and user manual links.
 -   [plugin.json](plugin.json): plugin identity, module slugs, and version.
 -   [CHANGELOG.md](CHANGELOG.md): historical behavior and compatibility fixes.
--   [LICENSE.md](LICENSE.md): source, visual-asset, and dependency terms.
+-   [LICENSING.md](LICENSING.md): source, visual-asset, and dependency terms.
 -   [C++ Style Guide](docs/style-guides/cpp.md): required for C++ source,
     headers, and tests.
 -   [Markdown Style Guide](docs/style-guides/markdown.md): required for
     documentation changes.
+-   [CONTRIBUTING.md](CONTRIBUTING.md): setup, architecture, compatibility,
+    real-time constraints, validation, manuals, and release preparation.
 -   [Specifications](specs/README.md): durable plans and acceptance evidence.
 
 These instructions and style guides adapt the shared Fourier and RackNES
 workflow to this repository. They are self-contained; neither project is a
-build dependency. Setup and architecture guidance currently live here.
+build dependency. Shared development guidance lives in CONTRIBUTING.md; read
+the relevant sections before changing code or build/publication behavior.
 
 ## Working In This Repository
 
@@ -46,138 +49,6 @@ build dependency. Setup and architecture guidance currently live here.
 -   Commit only when requested or included in the task. Push, publish, and
     release only when requested. Keep credentials and private local paths
     out of tracked files.
-
-## Architecture And Compatibility
-
--   `src/plugin.cpp` and `src/plugin.hpp` register models and shared Rack
-    declarations. Module `.cpp` files in `src/` contain processing and UI.
--   `src/dsp/` contains chip emulators, BLIP buffering, PCM conversion,
-    math, and triggers. The Sony S-DSP, Yamaha YM2612, and Mutable Instruments
-    Edges helpers have their own subdirectories.
--   `src/engine/chip_module.hpp` provides the common polyphonic chip module,
-    with per-channel emulators and buffers, CV/light dividers, voltage
-    conversion, output normalling, and clipping. Other modules have their
-    own processing paths; inspect the affected module's implementation.
--   `src/widget/` contains display and wavetable editing widgets;
-    `src/kautenja_rack/` contains Rack helpers and parameter quantities.
--   `res/` contains runtime panels, controls, and other assets. `presets/`
-    contains saved module presets; `patches/` includes examples and debug
-    patches for manual checks.
--   `test/` contains standalone DSP tests built by `SConstruct` using the
-    pinned Catch2 submodule in `dep/Catch2/`.
--   `manual/` contains per-module LaTeX manuals, figures, and shared style.
-
-Maintain source API documentation in code comments. This project does not
-build generated API documentation.
-
-Do not renumber existing Rack parameter, port, or light IDs, rename module
-slugs, or change saved JSON meanings without an intentional compatibility
-plan and verification with existing patches. Display names and slugs can
-differ: preserve historical identifiers such as `106`, `2612`, and `2A03`.
-SuperSampler and SuperSynth are marked disabled in `plugin.json`; their
-source and registration do not imply they are released modules.
-
-## Correctness And Real-Time Behavior
-
-Chip emulation, CV processing, and audio rendering run on Rack's audio
-engine thread. Keep per-sample work bounded and avoid adding allocation,
-blocking, file I/O, logging, or drawing to that path. Document existing
-limitations touched by a change rather than claiming the implementation
-is fully real-time safe.
-
-Preserve or explicitly test changes to:
-
--   Chip clocking, register semantics, oscillator tuning, and BLIP scheduling.
--   Polyphonic channel independence, disconnected inputs, output normalling,
-    audio voltage scaling, and clipping.
--   CV/light divider cadence, trigger ordering, reset behavior, and host
-    sample-rate changes.
--   PCM and BRR formats, envelope stages, interpolation, echo feedback,
-    integer widths, saturation, and buffer bounds where applicable.
-
-Review engine/UI handoffs when changing wavetable editing or shared display
-state. A shared flag or pointer is not a synchronization contract. Check
-Jansson ownership and error paths when changing saved patch data.
-
-Behavior changes need evidence at the appropriate seam. Reproduce bugs
-when practical and add focused deterministic regression tests where useful.
-Do not weaken assertions or hide failures. Performance claims require
-comparable before/after workloads, compiler settings, repeated measurements,
-and a meaningful effect; a successful build is not evidence of a speedup.
-
-## Development And Validation
-
-Run commands from the repository root unless a different directory is
-specified. The plugin uses the Rack 2 build system and a C++11 compiler.
-The root `Makefile` defaults `RACK_DIR` to `../..`, suitable for a checkout
-inside Rack's `plugins/` directory. With a prepared Rack tree:
-
-```shell
-make -j2
-```
-
-For a separate Rack 2 SDK, replace the example path with the actual SDK
-directory containing `plugin.mk`:
-
-```shell
-make -j2 RACK_DIR=/path/to/Rack-SDK
-```
-
-Standalone DSP tests require SCons, a C++11 compiler available as `g++`,
-and the pinned Catch2 v2 submodule. Initialize that dependency when needed,
-then build and run the suites:
-
-```shell
-git submodule update --init --recursive
-scons -j2 test
-```
-
-For a focused suite, SCons aliases use the test source path, including its
-`.cpp` suffix. For example:
-
-```shell
-scons test/dsp/trigger/test_divider.cpp
-```
-
-There is no root `make test` target. Do not substitute Fourier's Catch2 v3
-targets or RackNES's `tests/` commands. The legacy `.travis.yml` downloads a
-Rack 1 SDK; it is not current Rack 2 validation evidence. Report missing
-prerequisites or stale harness failures explicitly without upgrading the
-toolchain as part of an unrelated change.
-
-For DSP changes, run relevant suites; for Rack integration, also build the
-plugin and check the affected module in Rack when available. Use relevant
-`patches/debug/` fixtures and exercise mono/polyphony, reset, sample-rate
-changes, and saved patch reloads as appropriate. Existing test coverage
-does not cover every chip or module.
-
-Documentation-only edits need link, path, command, and diff checks rather
-than a mandatory C++ build. Run `git diff --check` and review the complete
-diff, including new files. Distinguish passing DSP tests, a successful Rack
-build, and an actual manual Rack session in completion reports.
-
-## Manuals And Assets
-
-Edit manual sources in `manual/<Module>/manual.tex` and the corresponding
-`img/` assets. The shared stylesheet is `manual/KautenjaDSP.sty`; runtime
-panel assets live in `res/`. Preserve source/export relationships and
-review figures against the actual module when controls or layout change.
-
-Manual builds require `pdflatex` and the packages used by the affected
-manual; manuals with bibliographies also invoke `bibtex`. For example,
-build Super Echo or the full manual collection from the repository root:
-
-```shell
-make -C manual/SuperEcho
-make -C manual
-```
-
-The per-module output is `manual/<Module>/build/manual.pdf`; the collection
-target copies PDFs into `manual/build/`. Existing make recipes filter TeX
-output and can mask failures, so verify that the expected PDF exists and
-inspect the rendered result. Keep intermediate files and compiled manuals
-in ignored build directories. Do not import sibling projects' screenshot
-or whitepaper commands without implementing and validating that workflow.
 
 ## Planning And Completion
 

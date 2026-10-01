@@ -25,7 +25,8 @@ project names and documentation locations adapted to this repository.
 ## Content And Maintenance
 
 Keep public product information in `README.md` and the user manuals.
-Keep setup, architecture, validation guidance, and agent workflow in
+Keep setup, architecture, and validation guidance in
+[CONTRIBUTING.md](../../CONTRIBUTING.md), agent workflow in
 [AGENTS.md](../../AGENTS.md), style guides in `docs/style-guides/`, and
 feature-specific acceptance/completion evidence in its own
 [spec](../../specs/README.md) when one exists. Manual sources live in

@@ -1,5 +1,21 @@
 # Change Log
 
+## Unreleased
+
+-   Present Potato Chips as part of Arhythmetic Units while preserving plugin
+    and module identifiers, version, and disabled-module flags.
+-   Separate source/artwork licensing, inventory imported components and
+    provenance gaps, and include complete notices in plugin packages.
+-   Add installation/first-patch guidance, contributor/support documentation,
+    and focused issue/PR templates.
+-   Add agent instructions, shared style guides, and implementation specs.
+-   Remove Doxygen configuration and generated-API-documentation assets.
+
+Historical release notes below retain their original order and wording
+except documented corrections. GitHub, PDF, and VCV Library publication
+may differ from the source version; see
+[release preparation](CONTRIBUTING.md#prepare-a-release).
+
 ## 1.0.0 (2020-06-22)
 
 -   2A03 implementation
@@ -315,26 +331,35 @@
     - InfiniteStairs looked liked an input was missing for a VCA on the NES triangle
     - PalletTownWavesSystem had a missing sync input that has been removed from the panel
 
-## 1.11.1 (TBD)
+## Historical Unreleased Plans
+
+The following entries were labeled `TBD`; these version numbers and features
+were never established here as released. Current accepted work is tracked
+in [specs/](specs/README.md); this list makes no new feature commitment.
+
+### 1.11.1 (TBD)
 
 -   Fix gain control on Super Echo and Super VCA to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
 
-## 1.12.0 (TBD)
+### 1.12.0 (TBD)
 
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip
 
-## 1.13.0 (TBD)
+### 1.13.0 (TBD)
 
 -   Yamaha YM2151
 
-## 1.14.0 (TBD)
+### 1.14.0 (TBD)
 
 -   Yamaha YM2413
 
-## 2.0.0 (2020-02-23)
+## 2.0.0 (2022-02-23)
+
+Date corrected from the 2020 typo using commit
+[`50fd2e73`](https://github.com/Kautenja/PotatoChips/commit/50fd2e7362e4f18e060f2ebbbc4b12d01ef14d58).
 
 -   Rack v2 support
 

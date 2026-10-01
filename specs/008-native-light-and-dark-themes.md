@@ -158,7 +158,7 @@ enable them for this issue. Unused SVGs are not released modules.
 Implement maintained first-party variants under this request. The issue's
 runtime-only suggestion does not require a license workaround, and adding
 dark assets does not itself change public derivative-work permissions.
-Preserve the source/artwork split and notices in [LICENSE.md](../LICENSE.md)
+Preserve the source/artwork split and notices in [LICENSING.md](../LICENSING.md)
 or 001's replacement documents. Record changed assets' origins in 001's
 inventory and retain collaborator/third-party attribution. Do not import
 artwork from the example PR, relicense assets, or make new permission claims

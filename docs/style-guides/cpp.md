@@ -134,7 +134,7 @@ Keep failures and exceptions from escaping Rack processing callbacks.
 Do not add blocking locks, waits, file I/O, logging, drawing, or allocation
 to repeated engine processing. Prefer preallocated buffers and bounded work.
 Document preparation costs and ownership changes explicitly. Follow
-[Correctness And Real-Time Behavior](../../AGENTS.md#correctness-and-real-time-behavior)
+[Correctness And Real-Time Behavior](../../CONTRIBUTING.md#correctness-and-real-time-behavior)
 for chip timing, polyphony, and shared-state checks. Existing allocations or
 other processing limitations do not justify adding new hot-path costs.
 
@@ -144,7 +144,7 @@ and lifetime for buffers crossing that boundary.
 
 ## Tests And Review
 
-Follow [Development And Validation](../../AGENTS.md#development-and-validation)
+Follow [Development And Validation](../../CONTRIBUTING.md#development-and-validation)
 for build commands, regression evidence, fixtures, and manual Rack checks.
 Extend the focused deterministic checks in `test/` where relevant. They
 use the pinned Catch2 v2 single-header dependency and SCons; each test

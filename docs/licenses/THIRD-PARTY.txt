@@ -1,0 +1,176 @@
+Potato Chips component and provenance inventory
+==============================================
+
+Scope reviewed at 9b12527d, 2026-10-01. Paths are repository-relative.
+See ../../LICENSING.md for project scope and ../../LICENSE for GPLv3.
+Individual source notices remain intact. An import commit is local evidence,
+not a claim that it identifies the exact upstream revision. License texts
+in this directory accompany the package; test-only entries are marked below.
+
+Blargg / Game_Music_Emu / Nes_Snd_Emu / Blip_Buffer
+-------------------------------------------------
+Author: Shay Green (blargg); local adaptations by Christian Kauten.
+Origins: https://www.slack.net/~ant/libs/audio.html
+         https://github.com/libgme/game-music-emu
+         https://github.com/amhndu/SimpleNES (credited by the old LICENSE.md)
+Files and upstream family mapping:
+  src/dsp/blip_buffer.hpp                   Blip_Buffer / Blip_Synth
+  src/dsp/ricoh_2a03.hpp                    Nes_Apu / Nes_Oscs
+  src/dsp/namco_163.hpp                     Nes_Namco
+  src/dsp/konami_vrc6.hpp                   Nes_Vrc6
+  src/dsp/sunsoft_fme7.hpp                  Nes_Fme7
+  src/dsp/nintendo_gameboy.hpp              Gb_Apu / Gb_Oscs
+  src/dsp/general_instrument_ay_3_8910.hpp   Ay_Apu
+  src/dsp/atari_pokey.hpp                   Sap_Apu
+  src/dsp/texas_instruments_sn76489.hpp      Sms_Apu / Sms_Oscs
+  src/dsp/konami_scc.hpp                    Kss_Scc_Apu (unused chip header)
+  src/dsp/nec_turbo_grafx_16.hpp             Hes_Apu (unused chip header)
+  src/dsp/wavetable4bit.hpp                 shared adapted wavetable helper
+
+The initial import d60296c541e65acc9f144f36619c99e03e176db0 contains
+src/2A03/Blip_Buffer.cpp, identifying Blip_Buffer 0.3.3 and copyright
+2003-2005 Shay Green under LGPL-2.1-or-later. Later history and the 1.3.4
+changelog record an update to Blip_Buffer 0.4.1. Current headers credit
+Shay Green (2006) and Christian Kauten (2020), and state GPL-3.0-or-later
+for the adaptations. Preserve both the upstream attribution and local
+notices; the old project license page's LGPL attribution was not a complete
+inventory of all chip code. LGPL text: LGPL-2.1.txt.
+
+Exact upstream revisions for these extensively refactored families are not
+recorded. The version labels above apply to identified historical files,
+not every current chip. The SCC and TurboGrafx headers are source-only in
+the active module inventory. Shared wavetable code is covered conservatively
+because its header also credits Shay Green.
+
+The bit-scan implementation in blip_buffer.hpp cites a Stack Overflow
+question and Fabian Giesen's article as implementation references. History
+does not establish an additional copied-code license from those links;
+retain the references and do not treat them as a new permission grant.
+
+Sony S-DSP / OpenSPC-derived processing
+-------------------------------------
+Files: src/dsp/sony_s_dsp/{adsr,brr_sample_player,echo,
+       gaussian_interpolation_filter,processor}.hpp
+Authors credited locally: Christian Kauten (2020), Shay Green (2006),
+Brad Martin (2002).
+Local import: 680ac4fa51caf00a57638f09a71497ee9f3f8d45, src/dsp/Spc_Dsp.cpp.
+That file explicitly identifies Game_Music_Emu 0.5.2 and Brad Martin's
+OpenSPC DSP emulator as its basis. It already states GPL-3.0-or-later.
+Upstream family: https://github.com/libgme/game-music-emu/blob/master/gme/Spc_Dsp.cpp
+The current upstream file records LGPL-2.1-or-later; include LGPL-2.1.txt
+without replacing the local GPL notices. Exact imported upstream revision
+and the complete chain from OpenSPC are not recorded.
+common.hpp contains first-party shared definitions under its own GPL notice.
+ADSR, echo, and interpolation are used by enabled modules. The processor
+and sample-player paths also support disabled SuperSynth/SuperSampler;
+disabled manifest entries do not establish that their compiled code is absent.
+
+MAME-derived Yamaha YM2612
+-------------------------
+Files: src/dsp/yamaha_ym2612/{operator,feedback_operator,voice4op,tables}.hpp
+Authors credited locally: Christian Kauten (2020), Shay Green (2006),
+Jarek Burczynski (2001), Tatsuyuki Satoh (1998), Nicola Salmoria and the
+MAME team (1997).
+Local import: 8131f7dc515daee5710d88e21bdb42464d7c26b0,
+src/dsp/Ym2612_Emu.cpp. Its header identifies Game_Music_Emu 0.3.0,
+fm.c version 1.4 (final beta), Jarek Burczynski (2001-2003), Tatsuyuki
+Satoh (1998), and Nicola Salmoria and the MAME team (1997-2005).
+Origins: https://www.slack.net/~ant/libs/audio.html
+         https://github.com/libgme/game-music-emu
+         https://github.com/mamedev/mame
+
+IMPORTANT HISTORICAL DISCREPANCY: the import includes MAME's historical
+noncommercial redistribution notice. Its full text is reproduced verbatim
+in MAME-HISTORICAL.txt. Current local headers instead state GPL-3.0-or-later.
+Modern Game_Music_Emu identifies its MAME engine as GPL-2.0-or-later, but
+that alone does not prove the relicensing provenance of this older fork.
+The exact upstream revision and evidence covering all retained portions
+under the later terms remain unresolved. No GPL-only clearance is asserted
+for this family, and this documentation does not change its terms.
+
+The module import a36d88673d66a374f6366d0ff32e4ab3602248c4 explicitly says
+"copy CV2612 from TercerBrazo to be modified". Imported src/YM2616.cpp has
+Christian Kauten's GPL-3.0-or-later header and evolved into BossFight.cpp;
+MiniBoss.cpp was subsequently derived from that module. An upstream URL,
+revision, and any additional TercerBrazo notices are not established by
+that commit. Preserve this additional lineage rather than attributing the
+whole module solely to the emulator authors.
+
+Mutable Instruments Edges
+-------------------------
+Files: src/dsp/mi_edges.hpp and src/dsp/mi_edges/*.hpp; used by src/Blocks.cpp.
+Authors credited locally: Christian Kauten (2020), Emilie Gillet (2015).
+Origin: https://github.com/pichenettes/eurorack/tree/master/edges
+Local import: fefe6d997abda1d462d094f530f193e6d57adfdf (Blocks).
+The upstream edges/digital_oscillator.h carries Emilie Gillet's copyright
+(2012) and GPL-3.0-or-later terms. The local oscillator helpers and tables
+retain their own years and GPL-3.0-or-later notices. Exact upstream import
+revision is unknown. Full GPL text: ../../LICENSE.
+
+Project panels, illustrations, logos, and manual figures
+------------------------------------------------------
+Files: res/*.svg; res/BossFight_algorithms/*.svg;
+       manual/*/img/*; manual/PotatoChips-SocialMedia.svg and .png.
+The project's historical LICENSE.md declares its visual designs and
+KautenjaDSP logo/icon copyright 2020-2024 Christian Kauten under
+CC-BY-NC-ND-4.0. Full text: CC-BY-NC-ND-4.0.txt.
+This includes runtime panels/blank panels, logos, source SVG drawings,
+PDF exports, and existing manual cover/interface/control illustrations.
+All of res/ is currently packaged, including unused legacy panel files.
+Manual assets are source/publication material, not part of the plugin archive.
+
+Recorded provenance gaps and exceptions to blanket ownership assumptions:
+  - res/BossFight_algorithms/0.svg through 7.svg arrived with the TercerBrazo
+    import a36d8867. Their metadata does not establish a separate author or
+    license. Do not assume project CC terms grant rights in upstream artwork.
+  - manual/BossFight/img/envelope.png and manual/MiniBoss/img/envelope.png:
+    diagrams associated with the YM2612 envelope explanation; the Boss Fight
+    bibliography cites Sega's Genesis Sound Software Manual (1992), but the
+    exact image origin and redistribution permission are not recorded.
+  - manual/{SuperADSR,SuperEcho,SuperVCA}/img/Chip.png: raster board/chip
+    illustrations covered by the project's existing artwork declaration;
+    the precise source/export chain is not recorded alongside the PNGs.
+  - Outlined type and exports do not by themselves establish the original
+    font/design-source permissions. No standalone font files are bundled.
+
+Keep these gaps visible during the artwork/manual work in specs 003-005/008.
+An original replacement or a verified upstream grant must have its own
+recorded provenance. This inventory does not invent attribution or permission.
+
+Host resources
+--------------
+Rack component SVGs, fonts, headers, and libRack are supplied by VCV Rack
+and its SDK, not copied into this plugin's res/ or license directory.
+Origin and host terms: https://vcvrack.com/manual/PluginLicensing
+System toolchain/runtime libraries keep their own terms. Packaging copies
+the plugin binary, project resources/presets, manifest, and listed notices;
+it does not distribute the Rack application or SDK.
+
+Catch2 (test-only)
+-----------------
+Files: dep/Catch2/ (Git submodule).
+Origin: https://github.com/catchorg/Catch2
+Pinned revision: fba0feeba1e3b94b846d4c64338d53356671d44a
+Local git description: v2.13.1-8-gfba0feeb.
+Author: Phil Nash and Catch2 contributors; retain per-file notices.
+License: Boost Software License 1.0, copied from dep/Catch2/LICENSE.txt to
+BSL-1.0.txt. Catch2 is used by standalone tests and is not linked into or
+packaged as code in the plugin.
+
+Project tests (test-only)
+------------------------
+Files: test/dsp/**/*.cpp and test/dsp/*.cpp.
+Copyright (c) 2020 Christian Kauten, as recorded by individual files.
+License: MIT; the existing complete notice is reproduced in MIT-TESTS.txt.
+The runtime source GPL declaration does not replace these test notices.
+
+License text provenance
+-----------------------
+../../LICENSE: byte-for-byte former LICENSE-GPLv3.txt at d1821c9f.
+LGPL-2.1.txt: standard text copied from the sibling RackNES docs/licenses/;
+canonical source https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+CC-BY-NC-ND-4.0.txt: standard text copied from the sibling RackNES;
+canonical source https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.txt
+BSL-1.0.txt: exact pinned Catch2 LICENSE.txt.
+MIT-TESTS.txt: exact notice text from test/dsp/test_pcm.cpp, comment prefixes removed.
+MAME-HISTORICAL.txt: exact notice text from the YM2612 import identified above.

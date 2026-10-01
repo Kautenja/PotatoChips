@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+-   Improve module-browser and Library metadata with chip/console search
+    keywords, specific module descriptions, accurate function tags, and
+    spaced Arhythmetic Units branding. Point the changelog and manual index
+    at the maintained branch; preserve module names, slugs, and PDF links.
+
 -   Remove unused math functions and constants while retaining unused methods
     on the remaining DSP classes.
 

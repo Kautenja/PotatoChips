@@ -173,6 +173,40 @@ native first-patch check below; archive after that verification succeeds.
     pointer. This verifies native rendering/signal production, not README's
     interactive Audio-device, cabling, pitch/duty, or listening steps.
 
+### Manifest Audit (2026-10-01)
+
+-   Reviewed the current [VCV manifest reference](https://vcvrack.com/manual/Manifest)
+    and Rack's plugin/model readers against the 16 registered modules and
+    current module/manual sources. Added keyword strings for chip, console,
+    synthesis, and historical-brand searches; clarified descriptions and
+    spaced the Arhythmetic Units display brand.
+-   Added Digital to sound modules, Quad to Blocks/Pot Keys, and Filter/Effect
+    to Super VCA. Removed Blocks' Synth voice tag (no internal envelope),
+    the FM modules' Noise tags (no noise generator), and Super Echo's Dual
+    and Reverb tags (shared stereo delay/filter controls, discrete echoes).
+    Normalized canonical tag spelling and corrected SNES DSP attribution.
+-   Preserved version `2.1.0`, module names/order/slugs, visibility, license,
+    author/contact, and all 14 PDF URLs. Updated the changelog and fallback
+    manual index to `v2.0.2`, the maintained branch. Removed `supportUrl`,
+    which is absent from VCV's manifest contract and Rack's reader; existing
+    author email and repository support guidance remain available.
+-   Optional fields were evaluated for applicability: no verified donation
+    destination, no exact hardware-panel clone requiring ModularGrid, and
+    no deprecated active model requiring `hidden`. A newer minimum Rack
+    version remains owned by spec 008 when its theme APIs are implemented;
+    this metadata edit does not introduce a new runtime requirement.
+-   `python3 -m json.tool plugin.json` and `git diff --check` passed. A
+    one-off Python comparison checked unchanged identities/manual URLs,
+    unique slugs, registration coverage, canonical tags against Rack's
+    `src/tag.cpp`, keyword types, and all 14 local manual sources.
+-   `make -j2 .build/ordinary/rack/test_contract` and
+    `DYLD_LIBRARY_PATH=../.. .build/ordinary/rack/test_contract` passed on
+    macOS ARM64 with the prepared Rack tree: 4,747 assertions, one test case.
+-   GitHub API checks confirmed the maintained README/changelog exist and
+    latest release `2.0.0` has all 14 expected, nonempty uploaded PDFs.
+    This does not publish source version `2.1.0`. Native browser search and
+    Library reindexing were not verified; no DSP or UI code changed.
+
 ### Remaining Verification And Handoffs
 
 - [ ] With working native pointer input, follow README's Infinite Stairs/Audio steps

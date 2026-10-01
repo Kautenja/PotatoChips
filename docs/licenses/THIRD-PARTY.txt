@@ -116,7 +116,7 @@ KautenjaDSP logo/icon copyright 2020-2024 Christian Kauten under
 CC-BY-NC-ND-4.0. Full text: CC-BY-NC-ND-4.0.txt.
 This includes runtime panels/blank panels, logos, source SVG drawings,
 PDF exports, and existing manual cover/interface/control illustrations.
-All of res/ is currently packaged, including unused legacy panel files.
+All of res/ is currently packaged.
 Manual assets are source/publication material, not part of the plugin archive.
 
 Arhythmetic Units runtime footer artwork
@@ -130,7 +130,8 @@ Arhythmetic Units runtime footer artwork
   Adaptation: centered footer placement at Fourier's native logo scale;
   panels below 12 HP use the unchanged square emblem without the wordmark.
   Existing control geometry, chip art, names, and collaborator credits remain.
-  Historical manual logos and dormant SCC/TurboGrafx16 panels are unchanged.
+  Historical manual logos are unchanged. Unreferenced SCC/TurboGrafx16 panels
+  were removed on October 1, 2026.
 
 Production panel captures and reference figures (spec 005)
   Files: manual/*/img/Panel.png, manual/*/figures/panel-layout.tex,

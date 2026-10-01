@@ -1,0 +1,31 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{A three-note chord}
+Set frequency offsets to 0, $4/12$ and $7/12$ octaves. Patch one pitch source
+to the first V/OCT and one envelope to its Level; leave the corresponding
+later inputs empty. Monitor the third output for a major triad. To sequence
+the third note independently, patch its V/OCT; that replaces the inherited
+pitch without changing the other two.
+
+For a changing timbre, patch an audio oscillator into the first FM and raise
+the depth from zero. FM is exponential, so strong modulation changes perceived
+tuning. Use a small depth when a stable note center matters.
+
+For silence, check Level and its CV. For a missing voice in the final mix,
+check whether an earlier output is patched. For distortion, lower all three
+levels before looking for a fault in the downstream mixer.
+
+\subsection{Cable channels, outputs and saved patches}
+The widest input selects 1--16 polyphonic chip instances. Voice columns are
+oscillators within each instance, not separate cable channels. Inputs read
+the matching channel; supply matching pitch and level channel counts rather
+than expecting a mono envelope to repeat across a polyphonic pitch cable.
+
+Each output adds the preceding output when that earlier socket is unpatched.
+The accumulated signal clips at approximately $\pm5$\,V. To hear the complete
+mix, use the last output and leave earlier outputs empty. Patching an earlier
+output removes that signal from the following mix. Lower source levels if
+the sum clips.
+
+Rack saves the panel parameters. Reset initializes the chip; oscillator
+phase is not preserved by a patch save. Pitch/FM update each sample, while
+level and other register controls update every 16 samples.

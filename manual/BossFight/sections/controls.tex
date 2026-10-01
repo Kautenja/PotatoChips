@@ -1,0 +1,38 @@
+\manualchapter{Control reference}{sec:controls}
+The left block selects algorithm, feedback, LFO and output saturation. Four
+repeated operator columns contain envelope sliders above tuning and modulation
+controls; each column has its own CV, gate, retrigger and pitch sockets.
+
+Algorithm spans 0--7 (default 7); feedback spans 0--7 (default 0) and feeds
+operator 1. LFO spans 0--7 (default 0). Their CV inputs add $7V/8$ to the
+knob, truncate, and clamp. A 1\,V algorithm step is therefore not a reliable
+one-index step. The current diagram display uses a different CV scale from
+the audio engine; use the knob without CV when learning the routings.
+
+SAT spans 0--127 (default 127). Its CV adds $127V/10$, clamped to 0--127.
+Lower values attenuate the operator sum before 14-bit clipping; SAT does not
+invert polarity. Both outputs carry the same approximately $\pm5$\,V signal.
+
+\subsection{Envelope sliders, left to right}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Result \\\midrule
+AR & 1--31; 31 & Attack rate; larger values rise faster. \\
+TL & 0--100; 100 & Peak level; larger values are louder. \\
+D1R & 0--31; 0 & First decay rate; zero holds the peak. \\
+SL / T1L & 0--15; 15 & Level at which the second decay begins. \\
+D2R & 0--31; 0 & Second decay rate; zero holds this level. \\
+RR & 0--15; 15 & Release rate after gate falls. \\
+\bottomrule
+\end{tabularx}
+
+These are chip rate and attenuation settings, not seconds or linear amplitude
+percentages. Rate scaling (0--3, default 0) makes envelopes respond more quickly
+at higher pitches. Loop is off by default; it enables the chip's SSG envelope
+mode. Use it for repeating contours after first establishing a gated sound.
+The hardware envelope terminology is retained in the reference figure and
+in \citet{genesis-sound-software-manual}.
+
+Each envelope CV adds $mV/8$ to its slider, where $m$ is that slider's maximum.
+The sum is truncated to an integer and clamped to the control range. For
+example, with AR at 15, $+4$\,V adds 15.5 before truncation, giving 30.
+This is an offset; a 0\,V cable leaves the slider's setting intact.

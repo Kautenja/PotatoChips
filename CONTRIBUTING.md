@@ -121,7 +121,7 @@ make check-build
 python3 scripts/validate.py dependencies
 ```
 
-`test` and `test-dsp` run all 12 DSP suites; `test-build` only compiles them.
+`test` and `test-dsp` run all 13 DSP suites; `test-build` only compiles them.
 Individual aliases omit `.cpp`. `TEST_ARGS` passes Catch2 filters/options.
 `CXX`, `CPPFLAGS`, `CXXFLAGS`, and `LDFLAGS` configure standalone builds;
 Rack's own flags are isolated from them even in mixed invocations.
@@ -195,36 +195,27 @@ build, and an actual manual Rack session in completion reports.
 
 ## Manuals And Assets
 
-Edit manual sources in `manual/<Module>/manual.tex` and the corresponding
-`img/` assets. The shared stylesheet is `manual/KautenjaDSP.sty`; runtime
-panel assets live in `res/`. Preserve source/export relationships and
-review figures against the actual module when controls or layout change.
-
-Manual builds require `pdflatex` and the packages used by the affected
-manual; manuals with bibliographies also invoke `bibtex`. For example,
-build Super Echo or the full manual collection from the repository root:
+Edit `manual/<Module>/sections/*.tex`; keep identity, explicit manifest
+version and section order in each `manual.tex`. Shared typography and build
+rules live in `manual/latex/`. See [the manual guide](manual/README.md) for
+prerequisites, the 14-file inventory, source audit and rendered-page review.
 
 ```shell
-make -C manual/SuperEcho
 make -C manual
+make -C manual/SuperEcho
+python3 manual/latex/test-build.py
+python3 scripts/validate.py manuals manual/.build
 ```
 
-The per-module output is `manual/<Module>/build/manual.pdf`; the collection
-target copies PDFs into `manual/build/`. Existing make recipes filter TeX
-output and can mask failures, so verify that the expected PDF exists and
-inspect the rendered result. Keep intermediate files and compiled manuals
-in ignored build directories. Do not import sibling projects' screenshot
-or whitepaper commands without implementing and validating that workflow.
+The individual output is `manual/<Module>/.build/manual.pdf`; the collection
+is `manual/.build/`. Builds use `latexmk` with shell escape disabled, reject
+copied sources/version drift and fail on unresolved references or overflow.
+The validator needs Poppler on PATH. Generated outputs remain ignored.
 
-Native capture tooling (spec 005) and reliable shared PDF build rules
-(spec 004) remain planned. Use existing source artwork in ordinary builds.
-Do not label an SVG export as a production screenshot. The strict future
-publication gate is `python3 scripts/validate.py manuals manual/build`;
-it requires exactly the 14 sound-module PDFs, meaningful extracted text,
-metadata, matching versions, and resolved references. It can reject the
-legacy manuals. Enabling manual CI/upload waits for spec 004; any later
-upload job must require explicit dispatch to an existing release and grant
-write permission only to that job.
+Current builds use tracked legacy illustrations. Production captures and
+updated control drawings remain owned by spec 005; they are required for
+004's final acceptance. Spec 002 owns later manual CI and authorized upload
+to an existing release. Normal PDF builds do not launch Rack.
 
 ## Prepare A Release
 
@@ -255,7 +246,7 @@ VCV Library. Work through these checks for an explicitly requested release:
     `python3 scripts/validate.py package <archive.vcvplugin>`; it also checks
     every resource/preset and rejects packaged test/dependency code.
 5.  Build and inspect all 14 manuals. The collection writes to
-    `manual/build/`; preserve the PDF names used by `plugin.json` and README:
+    `manual/.build/`; preserve the PDF names used by `plugin.json` and README:
     `Blocks.pdf`, `InfiniteStairs.pdf`, `StepSaw.pdf`, `Pulses.pdf`,
     `Jairasullator.pdf`, `PotKeys.pdf`, `MegaTone.pdf`, `BossFight.pdf`,
     `MiniBoss.pdf`, `NameCorpOctalWaveGenerator.pdf`,

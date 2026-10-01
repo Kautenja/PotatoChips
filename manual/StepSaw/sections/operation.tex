@@ -1,0 +1,31 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{Pulse-width movement}
+Set Pulse 1 Duty to 0 and patch a slow 0--7\,V ramp into its duty input.
+The width walks through eight steps. Leave Pulse 2's input empty to share
+the ramp, then offset its knob for a different sequence of widths. Lower
+both levels if the normalled sum clips.
+
+For a stable saw bass, keep its Level fixed near the initialized value and
+use an external VCA. Modulating the internal Level intentionally changes
+the staircase and can produce abrupt timbral changes. If the saw repeatedly
+restarts, disconnect SYNC while diagnosing the pitch.
+
+If a fine-tuning setting differs from another chip module, remember that
+Step Saw's FM scale is $V/10$. A Level CV of zero silences the corresponding
+voice; negative CV also clips to silence rather than inverting it.
+
+\subsection{Cable channels, outputs and saved patches}
+The widest input selects 1--16 polyphonic chip instances. Voice columns are
+oscillators within each instance, not separate cable channels. Inputs read
+the matching channel; supply matching pitch and level channel counts rather
+than expecting a mono envelope to repeat across a polyphonic pitch cable.
+
+Each output adds the preceding output when that earlier socket is unpatched.
+The accumulated signal clips at approximately $\pm5$\,V. To hear the complete
+mix, use the last output and leave earlier outputs empty. Patching an earlier
+output removes that signal from the following mix. Lower source levels if
+the sum clips.
+
+Rack saves the panel parameters. Reset initializes the chip; oscillator
+phase is not preserved by a patch save. Pitch/FM update each sample, while
+level and other register controls update every 16 samples.

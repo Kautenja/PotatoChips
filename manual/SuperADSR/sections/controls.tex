@@ -1,0 +1,24 @@
+\manualchapter{Control reference}{sec:controls}
+The upper and lower slider rows belong to lanes 1 and 2. Within each row,
+read Amplitude, Attack, Decay, Sustain Level and Sustain Rate left to right.
+The bottom socket groups provide each lane's Gate, Retrig, Envelope and
+Inverted connections. Timing sliders have no CV inputs.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Slider & Range; default & Implemented behavior \\\midrule
+Amplitude & $-128$--127; 127 & Signed 8-bit gain; zero silences, negative values invert. \\
+Attack & 0--15; 10 & Reversed before reaching the chip; larger settings are slower. \\
+Decay & 0--7; 7 & Reversed before reaching the chip; larger settings are slower. \\
+Sustain Level & 0--7; 5 & Decay threshold $(s+1)/8$ of the internal peak. \\
+Sustain Rate & 0--31; 20 & Reversed chip sustain-decay rate; panel may say RR. \\
+\bottomrule
+\end{tabularx}
+
+The sustain threshold spans 12.5--100\%, not the 0--100\% suggested by the
+current tooltip. It marks the transition into sustain decay, not necessarily
+a held plateau. These are discrete register settings, not milliseconds.
+
+GATE and RETRIG detect a rising edge at 2\,V and rearm below 0.01\,V. Either
+rising edge retriggers, but GATE's held state decides whether the envelope
+remains active. A retrigger without a held gate immediately proceeds toward
+release on subsequent samples. Keep the gate high for a full contour.

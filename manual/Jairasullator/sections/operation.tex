@@ -1,0 +1,29 @@
+\manualchapter{Envelopes, DAC mode and patches}{sec:operation}
+\subsection{Eight envelope shapes}
+The mode button cycles through the eight shapes in
+Table~\ref{tab:envelope-generator}.
+\begin{table}[ht]\centering
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule Index & Shape \\\midrule
+0 & Rise, then return to zero \\
+1 & Fall, then stay at zero \\
+2 & Rise, then hold high \\
+3 & Fall, then return high \\
+4 & Repeating rise \\
+5 & Repeating fall \\
+6 & Repeating triangle, starting upward \\
+7 & Repeating triangle, starting downward \\\bottomrule
+\end{tabularx}
+\caption{Shared envelope modes.}\label{tab:envelope-generator}
+\end{table}
+
+The first is the
+reset/default mode. Mode is saved in the patch; randomize chooses one of
+the eight shapes. Sync restarts the sequence. Envelope frequency controls
+the traversal rate, not a separate attack and release pair.
+
+For a repeating bass, enable Envelope on A, choose repeating fall, and lower
+Envelope Frequency. For noise percussion, disable Tone, enable Noise and
+Envelope, and send a trigger to envelope sync with a falling one-shot shape.
+The internal envelope controls the chip amplitude when selected; it is not
+an independent voltage output.

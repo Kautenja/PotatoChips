@@ -1,7 +1,7 @@
 # Manual Content And Publication Style
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 
 Give all active modules practical, consistently styled user manuals with
 shared sources and reliable builds, following the siblings' publication
@@ -101,11 +101,11 @@ with identical boilerplate across every manual.
 
 ## Acceptance Criteria
 
-- [ ] All 14 active module manuals use the shared build/style and organized
+- [x] All 14 active module manuals use the shared build/style and organized
       sources, with correct manifest versions and stable release filenames.
 - [ ] Quick starts, control values, patches, and troubleshooting are checked
       against code and relevant Rack behavior; discrepancies are recorded.
-- [ ] No swallowed TeX errors, stale source copies, undefined references,
+- [x] No swallowed TeX errors, stale source copies, undefined references,
       unresolved layout overflow, clipped figures, or unintended blank pages.
 - [ ] Metadata, bookmarks, links, text extraction, and citations work; all
       pages are visually reviewed after the final shared-style/figure change.
@@ -135,4 +135,98 @@ manual Rack checks and unresolved claims; do not mark them verified.
 
 ## Completion Evidence
 
-Content audit, builds, rendered-page review, and patch checks are pending.
+2026-10-01: implemented the content and build migration in the requested
+order: Super Echo/Infinite Stairs, FM/wavetable modules, then the remaining
+modules. All 14 use identity-only `manual.tex`, lower-case section sources,
+one shared style and one build include. The obsolete `KautenjaDSP.sty` was
+removed after checking all consumers. Manifest version remains 2.0.1.
+
+The shared style supplies gray covers/colophons, sans-serif hierarchy,
+module accents, linked contents, valid outline destinations, searchable text,
+English language/title/version metadata and scoped licensing links. The new
+wordmark is copied unchanged from the recorded RackNES revision; its origin
+and terms are in the component inventory. Existing bibliography entries
+remain intact. Useful reference labels and figures were retained; obsolete
+noise-frequency calibration and ADSR schematic claims were retired with the
+reason recorded in [manual/README.md](../manual/README.md).
+
+Each manual now has a working-patch recipe, spatial reference, defaults and
+CV scales, polyphony/normalling, reset/persistence behavior, variations and
+troubleshooting. Constructor, processing, quantity, widget and DSP sources
+were compared during writing. Important corrections and their implementation
+basis are listed in the manual guide. Runtime follow-ups were recorded in
+[003](003-source-organization-and-rack-integration.md#manual-audit-follow-ups-004);
+004 changes no production DSP and resolves no issue automatically.
+
+### Validation Performed
+
+-   `make -C manual clean` and `make -C manual`: passed. The final rebuild
+    contains exactly 14 stable filenames in `manual/.build/`, byte-identical
+    to their individual PDFs. Successful individual output directories
+    contain only `manual.pdf`.
+-   `python3 manual/latex/test-build.py`: seven reported check groups passed
+    in a disposable source copy. Real TeX tests cover fresh build/collection
+    copying, missing inputs, undefined references, layout overflow, version
+    mismatch, stale copied sources, recovery and clean. Failures preserve
+    logs and remove the failed PDF and old collection copy. Clean does not
+    require the previous manifest version. The disposable tree has no SDK.
+-   `python3 scripts/validate.py manuals manual/.build`: passed with Poppler
+    on PATH. This is the new collection path for spec 002's publication gate.
+-   All PDFs were inspected with Poppler text extraction and rendered at
+    `pdftoppm -scale-to 1400 -png`. All 115 pages were visually reviewed,
+    including covers, contents, figures, tables, references and colophons.
+    Short spill pages in Boss Fight and Mini Boss were replaced with
+    intentional tuning/modulation chapters, then rebuilt and reviewed.
+    The shared style's final form was reviewed across all 14 manuals.
+-   A Python/pypdf pass checked identity/version/author, `en-US`, nonempty
+    page text, link annotations, and every outline/named destination's page
+    bounds for all 14 PDFs. No unresolved `??` references were extracted.
+    Existing citations converged through BibTeX; no overfull boxes survived
+    the log guard. This is not a PDF/A or accessibility certification.
+-   `DYLD_LIBRARY_PATH=../.. .build/ordinary/rack/test_contract`: passed
+    5,527 assertions in one test case against the existing built runtime.
+    This includes restoring the 60 Super Echo presets and project modules
+    in existing debug patches, saved-state/parameter contracts and selected
+    audio checks. It does not execute every complete third-party patch or
+    replace listening to the newly written recipes.
+-   Relative documentation links, all section input paths, manifest versions,
+    obsolete style consumers, copied wordmark bytes and `git diff --check`
+    were checked successfully. No runtime rebuild was needed for these
+    documentation/build-rule changes.
+
+| Manual | Reviewed Pages |
+| --- | --- |
+| Blocks | 8 |
+| Boss Fight | 10 |
+| Infinite Stairs | 8 |
+| Jairasullator | 9 |
+| Mega Tone | 8 |
+| Mini Boss | 10 |
+| Name Corp Octal Wave Generator | 8 |
+| Pallet Town Waves System | 8 |
+| Pot Keys | 9 |
+| Pulses | 8 |
+| Step Saw | 8 |
+| Super ADSR | 7 |
+| Super Echo | 7 |
+| Super VCA | 7 |
+
+### Remaining Acceptance Work
+
+Keep this spec IN PROGRESS. Requirement 6 explicitly requires 005's reviewed
+production cover PNGs and updated vector control references; 005 has not
+supplied them. Current builds use legacy tracked PDF artwork with an explicit
+interim note. The current review establishes layout quality for that artwork,
+not final agreement between the drawings and native controls. Integrate the
+005 figures, remove the interim notice, rebuild and review every page again.
+
+Native Rack 2.6.3 Pro launched, but automation could not reliably enter the
+debug-patch path: text input was truncated/reset and clipboard paste timed
+out. No complete native patch/listening check was obtained. The final recipe
+check remains outstanding, particularly Echo timing/FIR controls, signed
+ADSR/VCA behavior, FM gates/loops and editable wave banks. Do not promote the
+headless fixture check to a claim of native verification.
+
+The build/content handoff is ready for 002 to consume; publication/upload,
+issue comments/closures and runtime fixes are outside this change. No commit
+or push was requested for this implementation turn.

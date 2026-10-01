@@ -1,0 +1,37 @@
+\manualchapter{Control reference}{sec:controls}
+The top mode button is shared by both lanes. Left and right columns contain
+Frequency at the top, Output Level in the middle and Input Gain above the
+audio inputs at the bottom, with the corresponding CV sockets.
+Bypass switches both lanes together.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Input Gain & Silence--$+6$\,dB; 0\,dB & Scales audio before input clipping and conversion. \\
+Output Level & $-128$--127; 60 & Multiplies by $V/10$, truncates and clamps to signed 8 bits. \\
+Frequency & $\pm5$ oct.; 0 & C4-based pitch conversion; V/OCT adds octaves. \\
+Mode & Four choices; Loud & Button cycles; context menu selects a named mode. \\
+Bypass & Off/on; off & Passes input through the input-gain controls. \\
+\bottomrule
+\end{tabularx}
+
+
+\begin{table}[ht]\centering
+\begin{tabular}{@{}ll@{}}
+\toprule Mode & Indicator \\\midrule
+Loud & Red \\
+Weird & Green \\
+Quiet & Blue \\
+Barely Audible & Unlit \\\bottomrule
+\end{tabular}
+\caption{Mode names and panel indicator colors.}\label{tab:filter-modes}
+\end{table}
+
+Audio, frequency CV and level CV normal from left to right, starting
+at 0, 0 and 10\,V respectively. Patch a right-hand socket to override its
+left-hand counterpart. Outputs remain separate rather than summing together.
+
+Active processing clips the gained input at approximately $\pm5$\,V and
+converts it to signed 8-bit samples. Negative Output Level or negative level
+CV inverts polarity. At zero level the lane is silent. Bypass retains Input
+Gain but skips level, filtering and input quantization/clipping; switching
+it can therefore change the level substantially.

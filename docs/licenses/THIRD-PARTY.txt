@@ -131,6 +131,15 @@ Arhythmetic Units runtime footer artwork
   Existing control geometry, chip art, names, and collaborator credits remain.
   Historical manual logos and dormant SCC/TurboGrafx16 panels are unchanged.
 
+Arhythmetic Units shared manual wordmark
+  File: manual/latex/ArhythmeticUnits.pdf.
+  Copyright 2025-2026 Arhythmetic Units. License: CC-BY-NC-ND-4.0.
+  Copied without modification from RackNES
+  manual/RackNES/img/ArhythmeticUnits.pdf at revision
+  b783a8e473f00242773e3fccbd4ed9e1a6ae17d5.
+  Origin: https://github.com/Kautenja/RackNES
+  This is a branded vector export, not a native module screenshot.
+
 Recorded provenance gaps and exceptions to blanket ownership assumptions:
   - res/BossFight_algorithms/0.svg through 7.svg arrived with the TercerBrazo
     import a36d8867. Their metadata does not establish a separate author or

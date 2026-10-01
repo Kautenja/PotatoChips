@@ -1,0 +1,31 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{External FM pair}
+Patch a second Mini Boss OUT into FM. Give both modules the same pitch and
+gate, set the modulator's multiplier to 2, and raise the receiving module's
+FM depth from zero. A short modulator envelope changes the tone at the start
+of each note; a sustained modulator changes the whole note. Reduce either
+FM depth or modulator volume if the pitch becomes hard to hear.
+
+\subsection{When a control seems inactive}
+Check GATE, TL and output volume first if there is no sound. A zero D1R
+prevents the envelope reaching the second decay stage. AMS and FMS must be
+nonzero to hear the internal LFO. The FM knob only has an effect with an
+external signal. A patch to VOL is additive, so 0\,V does not mute a raised knob.
+
+\subsection{Gates, polyphony and saved patches}
+GATE opens at 2\,V and closes below 0.01\,V. RTRG uses the same thresholds;
+its rising edge briefly changes the gate state. Hold GATE high while sending
+retrigger pulses. Gate and envelope controls update every 16 host samples,
+so use pulses comfortably longer than that interval (for example 1\,ms at
+48\,kHz). Pitch is evaluated every sample.
+
+The widest input sets 1--16 polyphonic voices. Most inputs read the matching
+channel directly; a mono gate does not automatically open every channel of
+a polyphonic pitch cable. Supply matching gate and pitch channel counts.
+Volume CV does repeat a mono voltage across active channels.
+
+Parameters and the context option \textbf{Soft Reset Envelope Generator}
+are saved in patches. The option is off by default and after reset; enable
+it to try the alternate envelope restart behavior when notes click. Oscillator
+phase and envelope progress are not saved. Loop/retrigger behavior is under
+separate investigation; this guide does not claim that report is resolved.

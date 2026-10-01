@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+-   Rewrite all 14 active sound-module manuals with practical patches,
+    source-checked controls and shared Arhythmetic Units publication styling.
+-   Replace copied-source TeX recipes with checked, source-relative latexmk
+    builds, stable `.build/` PDF names and build-failure regressions. Legacy
+    panel illustrations remain pending the production-figure work in 005.
+
 -   Flatten DSP math/trigger headers, move Rack helpers to `rack_extensions`,
     and remove Rack dependencies from DSP exceptions and pitch conversions.
 -   Update registered module and blank-panel footers to Arhythmetic Units,

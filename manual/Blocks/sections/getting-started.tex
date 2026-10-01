@@ -1,0 +1,19 @@
+\manualchapter{Start with a four-voice bank}{sec:start}
+Blocks provides four digital oscillators based on the Mutable Instruments
+Edges algorithms. Each voice selects a tonal or noise waveform and can have
+its own pitch and stepped 8-bit level.
+
+\begin{enumerate}
+\item Initialize Blocks and connect output 1 to a mixer at a low level.
+Use the context menu to select Sine for voice 1.
+\item Patch pitch into voice 1 V/OCT. Leave FM at zero and Level at 255.
+No gate is required for a continuous tone.
+\item Patch a 0--10\,V envelope into voice 1 Level for articulation. Its
+level input forwards to later voices until a cable overrides it.
+\item Set voices 2--4 to different shapes, tune their frequency knobs,
+and listen at output 4 with outputs 1--3 empty to hear the sum.
+\end{enumerate}
+
+For a simple bass, use NES Triangle at a low octave, reduce its level and
+shape it with the Level input. Sample+Hold and LFSR shapes make rhythmic or
+pitched noise as their clock rate changes.

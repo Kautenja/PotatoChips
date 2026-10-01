@@ -1,0 +1,20 @@
+\manualchapter{Start with a colored VCA}{sec:start}
+Super VCA processes audio through Sony S-DSP-style Gaussian interpolation
+and signed integer gain. It can soften or reshape a signal while adding
+8-bit input quantization. Its frequency control drives the interpolation
+engine; it is not a calibrated analog-filter cutoff.
+
+\begin{enumerate}
+\item Initialize Super VCA. Patch an oscillator into the left audio input
+and connect the left output to a mixer at a low level.
+\item Leave Input Gain at 0\,dB, Output Level at 60 and Frequency at its
+center setting. Keep Bypass off.
+\item Patch a 0--10\,V envelope into the left Level input. Its voltage
+multiplies the signed level knob; 0\,V closes the lane.
+\item Sweep Frequency and compare the four modes using the top button.
+Readjust monitoring level when changing modes.
+\end{enumerate}
+
+For a stereo source, connect both audio inputs and outputs. With only the
+left input patched, its signal forwards to the right lane so the two sides
+can apply different settings to the same source.

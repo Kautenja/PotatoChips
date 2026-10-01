@@ -1,0 +1,15 @@
+\manualchapter{Start with tone and noise}{sec:start}
+Mega Tone emulates the Texas Instruments SN76489: three square-wave tone
+channels and one noise generator. The noise can use a fixed clock or follow
+the third tone's period.
+
+\begin{enumerate}
+\item Initialize the module and connect Tone 1 output to a mixer at a low
+level. Patch a sequencer's pitch to Tone 1 V/OCT.
+\item Patch a 0--10\,V envelope to Tone 1 Level. Its default knob value is 7;
+raise it for more output, allowing headroom when summing several voices.
+\item For a noise-only patch, set all three tone levels to zero and monitor
+the final Noise output. Patch a short envelope directly to Noise Level.
+\item Leave Noise Period at 0 and sweep Tone 3's frequency. The noise follows
+that tone's period even when Tone 3's own Level is zero.
+\end{enumerate}

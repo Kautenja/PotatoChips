@@ -329,3 +329,42 @@ Preserve the SDK ABI; do not hide this with a Windows-only expected size,
 a disabled assertion, or an unrelated global bitfield flag. Spec 002 leaves
 the Windows job failing and runs the remaining suites/package checks so
 other failures remain observable.
+
+## Manual Audit Follow-Ups (004)
+
+2026-10-01: the manual rewrite found the following source-level control/UI
+inconsistencies. These are follow-up runtime work, not fixes delivered by
+004, and do not invalidate the earlier source-move equivalence checks.
+Reproduce each in the Rack harness and native UI before choosing a compatible
+fix; keep the manuals aligned with the resulting contract.
+
+-   `BossFight::getParam()` selects algorithm with `int(knob + 7 * V / 8)`,
+    while the display index uses `knob + V`. With knob 0 and CV 1 V, audio
+    selects 0 but the diagram selects 1. Unify their effective index.
+    `processCV()` also allows AMS 4 while the parameter quantity supports
+    only 0--3; bound the CV path to the supported chip range after a regression.
+-   `SuperVCA` updates `loudnessCompensation` only from its mode button.
+    `dataFromJson()`, reset, randomize and the context menu change `filterMode`
+    without updating that multiplier. Compare the same mode selected by each
+    route with fixed input; output gain should not depend on selection history.
+-   `Jairasullator::getEnvelopePeriod()` ignores the configured envelope FM
+    parameter/input. `getReset(0, channel)` takes its fallback from
+    `INPUT_RESET - 1`, the envelope-mode input. Decide and test the intended
+    behavior of those dormant paths before exposing them in the manual.
+-   Pot Keys and Step Saw frequency quantities display with a semitone base,
+    but their processing treats the knob as octaves. Step Saw's second duty
+    quantity is named Pulse 1. Check tooltip names and conversion against a
+    tuner without changing serialized parameter values. Pot Keys also calls
+    `configInput(PARAM_CONTROL + bit, ...)` instead of the input offset and
+    uses `INPUT_NOISE` for a parameter snap setting; cover metadata separately
+    from intentional coarse POKEY tuning.
+-   Pallet Town's configured Wave Morph starts at 0, but processing clamps
+    it to 1--5; 0--1 selects the same wave. Its legacy panel drawing includes
+    a noise SYNC socket absent from the widget. Preserve patch compatibility
+    when considering range changes; coordinate the drawing with 005.
+
+Super Echo's host-rate delay versus 16 ms tooltip discrepancy is recorded
+in 004's manual audit; coordinate a tooltip correction with 006, preserving
+current audio timing. 006 still owns the FIR widget/randomization issues,
+007 owns Super ADSR release/terminology, and 009 owns YM2612 loop/retrigger
+behavior. No issue was commented on or closed by this documentation work.

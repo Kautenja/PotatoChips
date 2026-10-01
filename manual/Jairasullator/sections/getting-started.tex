@@ -1,0 +1,19 @@
+\manualchapter{Start with an AY tone}{sec:start}
+Jairasullator exposes the General Instrument AY-3-8910's three tone channels,
+shared noise generator and shared envelope generator. Each channel can mix
+tone and noise and choose fixed or envelope-controlled amplitude.
+
+\begin{enumerate}
+\item Initialize the module and connect Pulse A's output to a mixer at a
+low level. Keep its Tone on, Noise off and Envelope off.
+\item Patch pitch to Pulse A V/OCT. Patch a 0--10\,V external envelope to its
+Level input for a straightforward articulated tone; Level defaults to 10.
+\item To try the internal envelope, enable Pulse A Envelope. Choose a
+repeating mode with the envelope mode button and adjust Envelope Frequency.
+\item Turn Noise on for Pulse A and sweep Noise Period to add a shared noise
+texture. Leave the other two columns silent or route them independently.
+\end{enumerate}
+
+Tone, noise and internal envelope can be combined per column. The internal
+envelope's rate and shape are shared by all columns using it, so separate
+external Level envelopes are useful when each voice needs its own contour.

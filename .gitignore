@@ -12,6 +12,7 @@
 
 # Manual products. Source PDFs/SVGs/PNGs elsewhere remain trackable.
 /manual/build/
+/manual/.build/
 /manual/*/build/
 /manual/*/.build/
 

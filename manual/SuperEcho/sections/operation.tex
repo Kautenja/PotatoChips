@@ -1,0 +1,42 @@
+\manualchapter{Timing and patch ideas}{sec:operation}
+\subsection{Delay at your sample rate}
+The ring advances by one four-byte stereo sample on each host sample. Each
+positive delay level contains 512 samples, so its buffer time is
+\[
+ t(d,f_s)=1000\,\frac{512d}{f_s}\ \mathrm{ms},\qquad d=1,\ldots,31.
+\]
+Level zero uses one sample, not a true zero-latency wire. The FIR adds up to
+seven more samples depending on the selected taps. Changes to delay can
+produce discontinuities; this is a stepped delay rather than a tape model.
+\begin{center}\begin{tabular}{lrr}\toprule
+Host rate & One level & Level 31\\\midrule
+32 kHz & 16.000 ms & 496.000 ms\\
+44.1 kHz & 11.610 ms & 359.909 ms\\
+48 kHz & 10.667 ms & 330.667 ms\\
+96 kHz & 5.333 ms & 165.333 ms\\\bottomrule
+\end{tabular}\end{center}
+The longest buffer is 63,488 bytes. Neither 512 ms nor a sample-rate-independent
+496 ms is the maximum of this implementation.
+\subsection{Two useful patches}
+For a metallic resonator, send a short noise burst into IN-L, choose a small
+positive Delay, increase Feedback slowly and keep Mix below full scale.
+FIR changes alter the resonant color; reduce feedback if it runs away.
+
+For a wide echo, feed a mono voice to IN-L, monitor both outputs, then use
+opposite Mix polarities. Patch independent Mix CVs to break their normalled
+connection. Check the result in mono because opposite wet signals can cancel.
+\subsection{Polyphony, state and troubleshooting}
+The widest input determines 1--16 output channels. Audio and most CV reads
+use matching channel indices: expand a mono source explicitly when every
+channel must receive it. Stereo normalling does not imply mono CV broadcast.
+
+Rack saves parameters and presets, but not the running echo buffer. Loading
+a new module starts with a cleared buffer; changing parameters or using Rack
+Initialize is not a dedicated buffer-clear command. Randomize currently
+includes gain, Mix and bypass, so check levels afterward (issue 97).
+
+If there are no repeats, check nonzero Mix, nonzero FIR coefficients and
+bypass. Feedback zero still permits the first echo. If modulation does
+nothing, check the FIR attenuverter. If timings change with the audio device,
+use the sample-rate table rather than the hover label. FIR preset names are
+sound starting points; loading a preset can also change other parameters.

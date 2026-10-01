@@ -1,0 +1,28 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{Pitch-tracking percussion}
+Keep Noise Period at 0, mute Tone 3's audio, and patch pitch to Tone 3 V/OCT.
+Use a short envelope on Noise Level and compare the two LFSR settings.
+This gives pitched, repeating noise or a broader noise texture using the
+same clock. For fixed-rate percussion, select Noise Period 1--3 instead.
+
+For a bass plus percussion patch, take Tone 1 and Noise on separate outputs.
+Remember that taking Tone 1 out breaks its forward contribution to later
+outputs. If the noise changes unexpectedly with a melody, check whether its
+period is at 0 and following Tone 3. If a mix sounds flattened, lower the
+individual level settings before increasing downstream gain.
+
+\subsection{Cable channels, outputs and saved patches}
+The widest input selects 1--16 polyphonic chip instances. Voice columns are
+oscillators within each instance, not separate cable channels. Inputs read
+the matching channel; supply matching pitch and level channel counts rather
+than expecting a mono envelope to repeat across a polyphonic pitch cable.
+
+Each output adds the preceding output when that earlier socket is unpatched.
+The accumulated signal clips at approximately $\pm5$\,V. To hear the complete
+mix, use the last output and leave earlier outputs empty. Patching an earlier
+output removes that signal from the following mix. Lower source levels if
+the sum clips.
+
+Rack saves the panel parameters. Reset initializes the chip; oscillator
+phase is not preserved by a patch save. Pitch/FM update each sample, while
+level and other register controls update every 16 samples.

@@ -1,0 +1,33 @@
+\manualchapter{Control reference}{sec:controls}
+Four matching columns run from tuning at the top through FM, level and
+shape to the bottom outputs. The CV sockets sit alongside their controls. A column's shape button advances through Sine,
+Triangle, NES Triangle, Sample+Hold, LFSR Long and LFSR Short. The context
+menu selects a named shape directly.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Frequency & $\pm2.5$ oct.; 0 & C4 reference; V/OCT adds one octave per volt. \\
+FM & $-1$--$+1$; 0 & Bipolar depth $a$ adds $aV/5$ octaves. \\
+Level & 0--255; 255 & Multiplied by $V/10$, rounded and clipped to 8 bits. \\
+Shape & Six choices & Button advances; context menu names each choice. \\
+\bottomrule
+\end{tabularx}
+
+Pitch, FM and Level normal forward across the columns. Their first inputs
+normal to 0, 5 and 10\,V respectively. With FM unpatched, its knob is a
+fine-tuning control spanning an octave either side of the main setting.
+At zero FM depth an external FM signal has no effect. Level is a unipolar
+amplitude control; negative CV closes it rather than inverting the waveform.
+
+\begin{table}[ht]\centering
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule Shape & Use \\\midrule
+Sine & A simple tonal reference for tuning or modulation. \\
+Triangle & A brighter tonal source with a triangular shape. \\
+NES Triangle & A stepped triangle for coarse digital bass. \\
+Sample+Hold & Clocked random levels; tune the update rate. \\
+LFSR Long / Short & Shift-register patterns with different repetition lengths. \\
+\bottomrule
+\end{tabularx}
+\caption{Selectable oscillator shapes.}\label{tab:oscillator-shapes}
+\end{table}

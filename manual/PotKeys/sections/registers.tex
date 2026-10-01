@@ -1,0 +1,34 @@
+\manualchapter{Noise and clock reference}{sec:registers}
+\begin{table}[ht]\centering
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule Noise setting & Pattern selection \\\midrule
+0 & 5-bit then long polynomial \\
+1, 3 & 5-bit polynomial \\
+2 & 5-bit then 4-bit polynomial \\
+4 & Long polynomial \\
+5, 7 & Pure tone \\
+6 & 4-bit polynomial \\\bottomrule
+\end{tabularx}
+\caption{Noise-register combinations. The long polynomial is 17-bit by
+default or 9-bit with the global LFSR switch.}
+\label{tab:shift-register}
+\end{table}
+
+\begin{table}[ht]\centering
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule Global switch & Effect when enabled \\\midrule
+Low Frequency & Selects the slower shared divider. \\
+High-Pass 2 from 4 & Uses Tone 4 to filter Tone 2. \\
+High-Pass 1 from 3 & Uses Tone 3 to filter Tone 1. \\
+Tone 3 High Frequency & Runs Tone 3 from the faster clock. \\
+Tone 1 High Frequency & Runs Tone 1 from the faster clock. \\
+LFSR & Selects the shorter 9-bit long polynomial. \\\bottomrule
+\end{tabularx}
+\caption{Exposed audio-control register switches.}
+\label{tab:audio-control}
+\end{table}
+
+Choose a noise setting with the global switches unchanged, then vary one
+switch at a time. The switches affect the synthesis clock and coupling;
+they are not independent post-processing effects. Settings 5 and 7 are
+useful references when comparing a noisy patch with a simple tone.

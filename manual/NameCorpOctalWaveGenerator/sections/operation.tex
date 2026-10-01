@@ -1,0 +1,32 @@
+\manualchapter{Editing waves and building patches}{sec:operation}
+\subsection{Five shared waves}
+Each editor holds 32 unsigned 4-bit samples (0--15). Drag to draw; the bank is
+shared by all eight oscillators and polyphonic channels. Module-browser previews are read-only. Edits support
+Rack undo/redo. Save the patch or a module preset to keep all five waves.
+
+Reset restores the supplied sine, pulse, rising ramp, distorted triangle and
+falling ramp. Randomize generates new smoothed waves as well as Rack's
+parameter changes. Phase is not stored in the patch. There is no independent
+wave bank per cable channel.
+
+\subsection{A moving chord}
+Set four active voices, tune voices 5--8 to a chord, and keep that count fixed.
+Patch a slow LFO to the global Morph input and raise its depth from zero.
+Patch one envelope to voice 5 Level to shape the four levels together. Leave
+outputs 5--7 empty and monitor output 8 for their sum; connect an earlier
+output when you want to take that voice out of the forward mix.
+
+Every output clips its accumulated signal to approximately $\pm5$\,V. Reduce
+individual levels if the combined output distorts. Changing active count
+mid-note changes pitch; use morph for timbral movement without that change.
+
+\subsection{Polyphony and troubleshooting}
+The widest input sets 1--16 independent chip instances. Most voice CV inputs
+read the corresponding cable channel without repeating a mono voltage over
+all voices; active-count CV does repeat mono. Use matched pitch/envelope
+channel counts. All instances share the drawn wave bank.
+
+For silence, check that the monitored voice is active and its level CV is
+positive. With one active voice, output 1 is silent: use output 8. If morph
+CV has no effect, raise its depth from zero. If tuning changes, check the
+active-count knob and CV before adjusting the pitch sequence.

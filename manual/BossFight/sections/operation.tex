@@ -1,0 +1,38 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{From organ to moving FM tone}
+At algorithm 7, use multipliers 1, 2, 3 and 4 and balance each TL for an organ
+sound. Switch to algorithm 0 for a serial chain. Keep the final carrier's TL
+high, reduce the upstream operator levels, then raise them one at a time.
+Faster decays on modulators create a bright attack that settles into a simpler
+tone. In a chain, changing TL changes modulation depth as well as loudness.
+
+\subsection{Operator CV routing}
+GATE, RTRG and V/OCT normal forward from operator 1 to 4; inserting a cable
+replaces that signal from that point onward. Envelope, MUL, AMS and FMS
+sockets are independent, despite older guides saying all inputs normal forward.
+MUL and FMS use the same additive $mV/8$ rule as the sliders, with maxima
+15 and 7. AMS's processing currently allows index 4 even though its knob
+ends at 3; keep AMS CV within the documented 0--3 range.
+
+If the tone disappears after an algorithm change, check its carrier levels
+and gates. If it sounds harsh, lower SAT and the modulator TLs. LFO movement
+requires nonzero sensitivity on an audible operator. For separate notes on
+individual operators, patch each pitch and gate rather than relying on the chain.
+
+\subsection{Gates, polyphony and saved patches}
+GATE opens at 2\,V and closes below 0.01\,V. RTRG uses the same thresholds;
+its rising edge briefly changes the gate state. Hold GATE high while sending
+retrigger pulses. Gate and envelope controls update every 16 host samples,
+so use pulses comfortably longer than that interval (for example 1\,ms at
+48\,kHz). Pitch is evaluated every sample.
+
+The widest input sets 1--16 polyphonic voices. Most inputs read the matching
+channel directly; a mono gate does not automatically open every channel of
+a polyphonic pitch cable. Supply matching gate and pitch channel counts.
+Volume CV does repeat a mono voltage across active channels.
+
+Parameters and the context option \textbf{Soft Reset Envelope Generator}
+are saved in patches. The option is off by default and after reset; enable
+it to try the alternate envelope restart behavior when notes click. Oscillator
+phase and envelope progress are not saved. Loop/retrigger behavior is under
+separate investigation; this guide does not claim that report is resolved.

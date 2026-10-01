@@ -267,3 +267,14 @@ and upload workflow remain unimplemented. Once 004 supplies reliable rules, add 
 an explicit-dispatch-only existing-release upload job with scoped write
 permissions. Ordinary CI must consume committed PNGs. This dependency keeps
 the PDF acceptance item open; the plugin build/test migration is implemented.
+
+
+### Manual Build Handoff From 004
+
+2026-10-01: the 004 migration now builds all 14 manuals with shared latexmk
+rules into `manual/.build/`. `python3 scripts/validate.py manuals manual/.build` passed with Poppler
+available. Use that collection path for
+future workflow wiring; the earlier `manual/build` failure above is
+historical evidence. 004 remains open for 005's production figures and native
+recipe checks, so this handoff does not claim final publication acceptance
+or authorize a release upload.

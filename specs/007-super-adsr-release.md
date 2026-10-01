@@ -36,11 +36,11 @@ The current sources expose several distinctions that the fix must preserve:
     at 32 kHz, about 5.33 ms at 48 kHz, and about 2.67 ms at 96 kHz. These
     are source-derived durations, not native Rack measurements. Determine
     whether this timing discrepancy contributes to the report.
--   The [manual](../manual/SuperADSR/manual.tex) calls the fifth slider
-    "Release Rate (RR)" while describing decay during a held gate. It also
-    explicitly describes a very short, uncontrollable key-off release.
-    That terminology conflicts with the parameter name and can suggest a
-    conventional adjustable release that the implementation does not have.
+-   The legacy manual called the fifth slider "Release Rate (RR)" while
+    describing decay during a held gate and a very short, uncontrollable
+    key-off release. The 004 rewrite now calls it sustain rate and explains
+    the fixed release in [the manual](../manual/SuperADSR/manual.tex).
+    Panel terminology and verified runtime fixes remain owned by this spec.
 -   Gate detection uses hysteresis: high at 2 V, low at 0.01 V, with the
     previous state retained between thresholds. RETRIG is a separate rising
     event; its priority over gate-off needs explicit regression coverage.
@@ -217,7 +217,7 @@ make -C test/rack super-adsr RACK_DIR="$(pwd)/../.."
 
 Run the broader applicable DSP suite (`scons -j2 test`, or `make -j2 test`
 after 002), and record the exact replacement commands if paths change.
-Inspect `manual/SuperADSR/build/manual.pdf`; the legacy build can mask TeX
+Inspect `manual/SuperADSR/.build/manual.pdf`; the shared build rejects TeX
 failures. Record native Rack actions, scope measurements, and capture paths
 separately. Missing runtime access leaves native acceptance outstanding.
 

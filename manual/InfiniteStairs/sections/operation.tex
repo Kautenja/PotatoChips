@@ -1,0 +1,28 @@
+\manualchapter{Patching and operation}{sec:operation}
+\subsection{Pulse duet}
+Use the first two pulse outputs separately, tune the second slightly sharp
+with MOD and send both through an external mixer. A pitch cable in the first
+V/OCT input controls both until the second input is patched. Different PW
+settings make the two voices easier to distinguish.
+\subsection{Noise percussion and sync}
+Patch a short envelope to the noise AMP input and monitor NOISE. Patch the
+other outputs, or lower their levels, when you want to exclude their normalled
+mix. Change Period and LFSR for different textures. A trigger into noise SYNC
+makes repeated hits start from a consistent noise phase.
+\subsection{Polyphony and saved patches}
+The widest input selects 1--16 channels. This module reuses a mono CV on every
+active channel; polyphonic CV controls channels independently. Pitch, FM and
+sync are processed each sample; volume, duty and noise controls update every
+16 samples. Changing sample rate adjusts clock quantization and can shift
+extreme register-limited pitches slightly.
+
+Rack saves controls and cables. There is no custom oscillator-state save or
+extra module context menu. Initialize restores controls and resets the chip;
+reloading a patch does not resume oscillator phase at its saved point.
+\subsection{Troubleshooting}
+If several sounds appear at one jack, check output normalling before changing
+oscillator settings. If an envelope sounds stepped, lower its speed or use an
+external VCA. If the triangle does not fade smoothly, use an external VCA
+rather than treating its chip level as a linear amplitude control. If a gate
+does not restart a pulse, use an amplitude envelope; only Triangle and Noise
+have SYNC inputs.

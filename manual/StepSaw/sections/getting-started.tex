@@ -1,0 +1,17 @@
+\manualchapter{Start with the saw voice}{sec:start}
+Step Saw exposes the Konami VRC6's two pulse channels and accumulating saw
+channel. The saw's level changes its stepped shape as well as its amplitude.
+
+\begin{enumerate}
+\item Initialize Step Saw. Set both pulse levels to zero and connect the
+rightmost Saw output to a mixer at a low level.
+\item Leave Saw Level at 32 and FM at zero. Patch pitch to Saw V/OCT.
+\item Sweep Saw Level across 0--63 to hear how the accumulator changes the
+waveform. Use an external VCA if you need amplitude movement without this change.
+\item Restore the pulse levels, set their widths differently, and monitor
+the same last output with the earlier outputs empty for a combined voice.
+\end{enumerate}
+
+For a sharper saw lead, patch a higher-frequency pulse into Saw Sync and
+sweep the saw pitch. Sync restarts the saw sequence; it is not a gate or
+amplitude envelope.

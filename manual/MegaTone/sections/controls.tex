@@ -1,0 +1,24 @@
+\manualchapter{Control reference}{sec:controls}
+Three tone columns are followed by the noise column. Tones have frequency
+and FM controls; noise has period and LFSR controls. Every column has level
+CV and an audio output.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Tone frequency & $\pm2.5$ oct.; 0 & C4 reference; V/OCT adds octaves. \\
+FM depth & $-1$--$+1$; 0 & Adds $aV/5$ octaves to the tone. \\
+Noise period & 0--3; 0 & Adds $V/2$, floors/clamps, then reverses the register. \\
+Level & 0--15; 7 & Multiplies by $V/10$, rounds and clamps. \\
+LFSR & Off/on; off & Chooses the noise sequence; CV changes the switch state. \\
+\bottomrule
+\end{tabularx}
+
+Noise setting 0 uses Tone 3's period. Settings 1--3 select fixed chip periods
+of 1024, 512 and 256 clock units, respectively. Each 2\,V of period CV advances
+one setting. The LFSR CV has 2\,V high and 0.01\,V low thresholds.
+
+Tone pitch and FM normal forward from Tone 1 to 3; their first inputs default
+to 0 and 5\,V. Level normals through all four columns from an initial 10\,V.
+FM is exponential and its depth knob also serves as fine tuning when empty.
+The chip's frequency and amplitude registers introduce discrete steps;
+they are part of the oscillator response.

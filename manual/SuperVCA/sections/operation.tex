@@ -1,0 +1,31 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{Two colors from one source}
+Patch audio and an envelope to the left lane and leave the corresponding
+right inputs empty. Set different frequency knobs and route the two outputs
+to separate mixer channels. Lower the right Output Level below zero to invert
+it before summing externally; compare the resulting cancellation and color.
+For conventional stereo processing, use explicit left and right audio cables
+and matching settings.
+
+The frequency control changes the interpolation phase increment, with a
+response affected by the mode and host sample rate. Tune it by ear; its Hz
+label is a pitch conversion and should not be read as a measured cutoff.
+Coarse or gritty audio can be the 8-bit conversion rather than unwanted
+feedback. Reduce Input Gain to avoid additional clipping.
+
+\subsection{Saved modes and polyphony}
+Parameters and the chosen filter mode are saved in patches. Reset selects
+Loud, and randomize chooses a mode. The current button updates a loudness
+compensation value that the context menu and patch recall do not update.
+If the recalled mode has a different level, cycle through the modes with the
+button to return to the desired one; this known inconsistency is recorded
+for a runtime fix. Filter history is not serialized.
+
+The widest input selects 1--16 channels for both lanes. Inputs read matching
+polyphonic channels rather than repeating a mono envelope across all of them.
+Match audio and envelope channel counts. The audio path evaluates its controls
+every sample; only meter updates are divided down.
+
+For silence, check Input Gain, signed Output Level and its CV. If level or
+frequency CV has no effect, check Bypass. When comparing modes, use the same
+selection method and allow for level changes before judging the timbre.

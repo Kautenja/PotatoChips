@@ -1,0 +1,23 @@
+\manualchapter{DAC operation and routing}{sec:dac}
+Disabling both Tone and Noise makes the channel act as a stepped DAC driven
+by Level. In this mode the tuning controls instead offset and scale its CV:
+\[
+ V_\mathrm{effective}=(a+V_\mathrm{FM}/5)
+ \bigl(V_\mathrm{Level}+(p+5)/2+V_\mathrm{pitch}/2\bigr),
+\]
+where $p$ is the frequency knob and $a$ is FM depth. The level knob multiplies
+this result by $1/10$ before rounding/clamping to 0--15. Start with explicit
+CV cables and modest offsets; the adjusted level voltage also forwards to
+the next column. For ordinary pitched sound, turn Tone back on.
+
+\subsection{Routing and troubleshooting}
+The widest input sets 1--16 chip instances. Inputs use indexed channels;
+match pitch and envelope channel counts. Each unpatched output forwards
+its signal into the next, clipped at approximately $\pm5$\,V per stage.
+Monitor C for a complete sum or patch earlier outputs separately.
+
+Reset initializes the chip and envelope mode; phase is not stored. Tone
+pitch, level and sync run each sample, while shared envelope/noise settings
+and switches update every 16 samples. If a voice unexpectedly follows another
+pitch, check normalling into its V/OCT and into Envelope V/OCT. If an envelope
+runs only once, choose a repeating mode or provide sync triggers.

@@ -1,0 +1,22 @@
+\manualchapter{Control reference}{sec:controls}
+The three columns repeat frequency, bipolar FM depth and level, followed by
+V/OCT, FM, Level and output sockets. There is no duty-cycle, noise or sync
+control on this module.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Frequency & $\pm4.5$ oct.; 0 & Reference C4; V/OCT adds one octave per volt. \\
+FM depth & $-1$--$+1$; 0 & Adds $aV/5$ octaves to tuning. \\
+Level & 0--15; 10 & Knob times $V/10$, rounded and clamped to 0--15. \\
+\bottomrule
+\end{tabularx}
+
+V/OCT, FM and Level normal forward independently from column to column.
+The first sockets normal to 0, 5 and 10\,V, respectively. An empty FM socket
+therefore makes its depth knob a fine-tuning control. An inserted cable
+replaces the normal from that point onward. Negative Level CV silences the
+voice; it does not invert it.
+
+The chip's integer frequency register limits the extremes of tuning.
+At high pitches, nearby CV values can select the same register value.
+Level has sixteen states, so slow amplitude ramps can reveal steps.

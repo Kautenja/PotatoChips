@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+-   Correct Contour's envelope clock to 32 kHz at every host sample rate.
+    Attack, decay and sustain now also keep fixed durations in seconds;
+    existing patches run these stages host-rate/32000 times longer than
+    before (1.5x at 48 kHz, 3x at 96 kHz). Key-off remains fixed, at most 8 ms.
+-   Correct Contour's two RR labels to SR (Sustain Rate), preserve sub-tick
+    trigger edges, release disconnected voices, and fix exact 0.01 V gate
+    rearming under optimized builds (#98). No adjustable release is added.
+
 -   Restore Echo's eight horizontal FIR sliders, with signed integer edits
     and RGB CV indicators in live modules and browser previews (#96). Legacy
     fractional coefficients round to the nearest integer when loaded.

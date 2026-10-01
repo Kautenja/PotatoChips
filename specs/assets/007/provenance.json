@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-01",
+  "baseline_commit": "0fe59e6cdaf779aa153c9db4ff14fe5bb4fb15b8",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "rack_version": "2.6.0",
+  "fundamental_version": "2.6.1",
+  "rack_library_sha256": "0ee091bb5065326c1e5a101d38ac2c3de00f962fd049294f50f11582b53a820e",
+  "fundamental_library_sha256": "b174b0b046bc75753fa84ed92622ce9b20164ce48402489e938f36f7fca01d90",
+  "before_module_sha256": "b416c2d05c7a4f62bd70fc284acc2f3e12044e9f2e43c02c285f20046f782d6c",
+  "after_module_sha256": "1271f12b8ac34a968b7a647b46e0306fddbbfaafceb8ed569d50531702d205fa",
+  "capture_source_sha256": "ea0b5891df56894ba868060dbd08004774a910361f07fc69bef96b8f73d26c5b",
+  "fixture": {
+    "amplitude": 127,
+    "attack": 0,
+    "decay": 0,
+    "sustain_level": 7,
+    "sustain_rate_sliders": [
+      0,
+      20,
+      31
+    ],
+    "gate_v": [
+      0,
+      5
+    ],
+    "gate_high_ms": 1,
+    "retrigger": "disconnected",
+    "sample_rates_hz": [
+      44100,
+      48000,
+      96000
+    ],
+    "scope_requested_ms": 10,
+    "scope_acquisition": "0.5 ms pre-key-off, 256 buckets rounded up to host samples",
+    "scope_gate_offset": 3,
+    "scope_out_offset": -7,
+    "scope_gains": 0,
+    "native_pixel_ratio": 2,
+    "zoom": 1
+  },
+  "notes": [
+    "Native Rack libRack and real Fundamental Scope binary; optional standalone desktop harness, no audio device.",
+    "Before and after use the same fixture and scope harness. PNGs are lossless conversions of native PPM captures.",
+    "stage-ticks.csv compares the same core tick sequence under old and new clocks, not an identical wall-clock gate across old host rates.",
+    "Historical reporter settings and plugin/Rack versions are unknown. Linux/Windows native checks and VCV Library publication were not performed."
+  ]
+}

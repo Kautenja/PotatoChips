@@ -115,7 +115,7 @@ The 004 source audit corrected the following legacy claims:
 | Boss Fight | Algorithm/feedback/LFO CV uses 7/8 setting per volt. Only gate, retrigger and pitch forward across operators. Both outputs are identical. |
 | Octal 163 | Active-count depth uses 1.25 V per voice at full depth; changing count changes pitch. One global morph control feeds all eight oscillators per chip instance. |
 | Pocket APU | Wave Level is off/25/50/100%; Morph 0--1 selects the first wave. No implemented noise-sync input, despite the legacy drawing. |
-| Super ADSR | Last slider is sustain rate. Release is fixed; sustain threshold is 12.5--100%; envelope timing follows host samples. |
+| Super ADSR | Last slider is SR (sustain rate). Release is fixed at up to 8 ms; sustain threshold is 12.5--100%; all stages use a 32 kHz clock. |
 | Super VCA | Input conversion is 8-bit; level is signed. Frequency drives interpolation and is not a measured cutoff. Mode selection has a compensation inconsistency. |
 
 The old Staircase 2A03 exact noise-frequency/MIDI table and Contour

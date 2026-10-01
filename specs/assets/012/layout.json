@@ -6848,7 +6848,7 @@
       "width": 180,
       "panel": "SuperADSR.svg",
       "height": 380,
-      "source_sha256": "59110a2f3d6f91c3ee6bef0dad340ccba00fd3c40bce73e0321257338fa688db",
+      "source_sha256": "6d0c5ab8f155b6d13dc4a702fbeba582526962cd23066250e5976cc840211191",
       "controls": [
         {
           "kind": "input",

@@ -53,3 +53,16 @@ FORCE:
 $(BUILD)/config: FORCE
 	$(PYTHON) ../../scripts/build-config.py $@ --compiler '$(CXX)' --flags '$(CPPFLAGS) $(CXXFLAGS) $(GL_LIBS)' --sdk '$(RACK_DIR)'
 $(OBJECTS) $(BUILD)/capture.o: $(BUILD)/config Makefile
+
+# Optional real Fundamental Scope; ordinary builds have no Fundamental dependency.
+FUNDAMENTAL_DIR ?= $(RACK_DIR)/plugins/Fundamental
+.PHONY: adsr-scope
+adsr-scope: $(BUILD)/adsr_scope
+	@mkdir -p $(BUILD)/adsr-scope/user
+	DYLD_LIBRARY_PATH="$(RACK_DIR)" LD_LIBRARY_PATH="$(RACK_DIR)" $< "$(RACK_DIR)" "$(abspath ../..)" "$(FUNDAMENTAL_DIR)" "$(abspath $(BUILD)/adsr-scope)"
+$(BUILD)/adsr_scope: $(BUILD)/adsr_scope.o $(BUILD)/src/SuperADSR.o
+	$(CXX) $(CXXFLAGS) $^ -L$(RACK_DIR) -lRack $(GL_LIBS) $(if $(ARCH_LIN),-ldl) -o $@
+$(BUILD)/adsr_scope.o: adsr_scope.cpp $(BUILD)/config Makefile
+	@mkdir -p $(BUILD)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MD -MP -c $< -o $@
+-include $(BUILD)/adsr_scope.d

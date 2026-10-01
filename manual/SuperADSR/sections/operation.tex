@@ -1,10 +1,17 @@
 \manualchapter{Response and troubleshooting}{sec:operation}
-\subsection{Host-rate timing and quantized level}
-The envelope advances once per host sample rather than running at a fixed
-32\,kHz chip rate. Changing Rack's sample rate changes its timing. Release
-subtracts eight internal units per sample from a maximum of 2048, giving at
-most 256 samples (about 5.33\,ms at 48\,kHz). Output quantization can reach
-zero sooner. There is no adjustable release-rate control in the current path.
+\subsection{Fixed chip timing and quantized level}
+The envelope now advances at 32\,kHz, independent of Rack's sample rate.
+Gate-off subtracts eight internal units per chip tick, reaching Off in at
+most 256 ticks (8\,ms). A lower level at key-off takes less time; output
+quantization can reach zero sooner. There is no adjustable release control.
+With Amplitude 127, Attack/Decay 0, Sustain Level 7 and SR 20, a 1\,ms gate
+produces about 7.87\,ms from key-off to zero at 44.1, 48 and 96\,kHz.
+
+Older builds advanced once per host sample. All stages now last
+$f_s/32000$ times as long for the same settings: 1.378 at 44.1\,kHz,
+1.5 at 48\,kHz and 3 at 96\,kHz. Existing patches may need retuning.
+Changing sample rate preserves fractional clock progress; gate/retrigger
+edges are detected every host sample and applied at the next chip tick.
 
 The output passes through signed 8-bit scaling and is approximately
 $\pm10$\,V at full amplitude. Small amplitude values expose coarse steps and
@@ -20,11 +27,11 @@ Use a clock on RETRIG while holding GATE to repeat the attack.
 Both lanes use the widest gate/retrigger input's channel count, from 1--16.
 Each socket reads matching cable channels without mono-to-poly repetition.
 Panel settings are shared across those channels and saved by Rack; envelope
-progress is not serialized. Reset restores parameters, but this module has
-no extra envelope-state reset handler or custom context option.
+progress is not serialized. Reloading a module starts it Off. Initialize
+restores parameters while the current envelope continues. Disconnected
+voices release and rearm, including voices removed by a narrower cable.
 
 If there is no contour, check Amplitude and GATE, then remove RETRIG while
-diagnosing. If the tail is too short, the RR-marked slider cannot change the
-fixed release. A reported Contour behavior bug remains tracked separately
-in issue \href{https://github.com/Kautenja/PotatoChips/issues/98}{\#98}; this
-manual documents the current path and does not claim that bug is fixed.
+diagnosing. A gate at or below 0.01\,V releases reliably. If the tail is too
+short, SR cannot lengthen it: the old RR label did not mean adjustable
+release. Use a different envelope when a longer key-off fade is needed.

@@ -1,7 +1,7 @@
 # Super ADSR Release Behavior
 
 Created: 2026-10-01
-Status: PLANNED
+Status: IN PROGRESS
 Issue: [#98](https://github.com/Kautenja/PotatoChips/issues/98)
 Planning baseline: `4d162a02` (product source unchanged from `33fb1554`).
 
@@ -176,19 +176,19 @@ publication. A spec-only commit must not auto-close #98.
 
 ## Acceptance Criteria
 
-- [ ] Current Rack reproduction, exact settings, zoomed gate-off evidence,
+- [x] Current Rack reproduction, exact settings, zoomed gate-off evidence,
       and the identified cause are recorded; unknown historical details
       are distinguished from verified current behavior.
-- [ ] Every demonstrated release defect is fixed with a regression that
+- [x] Every demonstrated release defect is fixed with a regression that
       detects the original failure. Fixed-release and sustain-rate behavior
       are verified separately, including stage transitions and zero clamp.
-- [ ] Clocking has an explicit evidence-backed decision; any timing change
+- [x] Clocking has an explicit evidence-backed decision; any timing change
       has cross-rate and saved-patch compatibility evidence.
-- [ ] Both lanes, polyphony, polarity, thresholds, retrigger ordering,
+- [x] Both lanes, polyphony, polarity, thresholds, retrigger ordering,
       disconnect/reset/reload, and host-rate changes pass focused checks.
-- [ ] The panel and rendered manual consistently explain SR and the fixed
+- [x] The panel and rendered manual consistently explain SR and the fixed
       release; affected figures and changelog agree with verified behavior.
-- [ ] Relevant automated tests and the plugin build pass; native Rack
+- [x] Relevant automated tests and the plugin build pass; native Rack
       verification is complete with no unresolved symptom from #98.
 - [ ] #98 has a resolution comment with the actual fixing commit reference
       and verification results, is closed as completed, and its comment URL
@@ -259,12 +259,115 @@ gh issue view 98 --repo Kautenja/PotatoChips --json state,stateReason,comments,u
 
 ## Completion Evidence
 
-Planning: issue body, comments, and screenshot inspected on 2026-10-01;
-module, DSP, trigger, manual, tests, and historical release fix reviewed.
-A temporary probe compiled with `c++ -std=c++11 -Isrc` passed both
-256-call release checks described above. No production code changed and
-no native Rack reproduction or fix has been completed.
+Implemented and verified on 2026-10-01, from baseline
+`0fe59e6cdaf779aa153c9db4ff14fe5bb4fb15b8`, on macOS 26.6.2 arm64,
+Rack 2.6.0 and Fundamental 2.6.1. Native captures use the actual Rack library,
+module widget and Fundamental Scope binary in a standalone desktop harness.
+No audio device or user's running Rack session is needed. Binary/source hashes,
+exact settings and acquisition details are in
+[provenance.json](assets/007/provenance.json).
+
+### Findings And Clock Decision
+
+The core release works: from internal peak 2047 it subtracts 8 on each of
+256 ticks, reaches Off, and clamps at zero with consistent signed scaling.
+The emulator is unchanged. The old host-sample clock makes this short tail
+shorter at higher Rack rates; the RR label incorrectly suggests adjustable
+release. Separately, optimized rescaling of exactly 0.01 V can leave a gate
+high. A production-flags baseline probe still output 9.21875 V after 1000
+low-gate samples; direct threshold comparisons fix that demonstrated defect.
+Disconnected/removed voices now receive low gates and continue releasing.
+These are current verified findings, not a claim to know the reporter's
+unspecified historical settings or version.
+
+The explicit integration decision is a 32 kHz clock for **all stages**.
+For the same register settings, durations change by host-rate/32000:
+1.378125x at 44.1 kHz, 1.5x at 48 kHz and 3x at 96 kHz. Existing patches may
+need retuning. [stage-ticks.csv](assets/007/stage-ticks.csv) compares the same
+core event sequence (default settings, gate high for 22400 ticks) under
+both clocks. Attack/decay/sustain/release/Off transitions all follow this
+ratio. This comparison holds tick events fixed; the module regressions
+separately hold the gate's wall-clock duration fixed across host rates.
+
+Every host sample detects gate/retrigger edges; a pending edge survives to
+the next chip tick. Retrigger has priority over coincident key-off, resumes
+attack from the current level, then a low gate releases on the following
+tick. Fractional clock progress survives rate changes. Both lanes/all 16
+voices remain independent, including removed cable channels. Parameter,
+port/light IDs, ranges/defaults, slug and JSON stay unchanged; Initialize
+restores controls while envelope progress continues, and reload starts Off.
+Processing uses fixed storage and bounded per-voice work; no allocation or
+Rack types were added to the core.
+
+### Native Reproduction
+
+Amplitude 127, Attack/Decay 0, Sustain Level 7, SR 0/20/31; a 1 ms 0/5 V gate,
+RETRIG disconnected. Scope shows gate above OUT beginning 0.5 ms before
+key-off. The requested width is 10 ms; rounding its 256 acquisition buckets
+to host samples gives 11.6099773 ms at 44.1 kHz and 10.6666667 ms at 48/96 kHz.
+
+| Host Rate | Old SR 20 Tail | Corrected SR 20 Tail |
+| --- | --- | --- |
+| 44.1 kHz | 252 samples / 5.714286 ms | 347 samples / 7.868481 ms |
+| 48 kHz | 252 samples / 5.25 ms | 378 samples / 7.875 ms |
+| 96 kHz | 252 samples / 2.625 ms | 756 samples / 7.875 ms |
+
+Times measure key-off through first quantized zero; the core reaches Off
+within 8 ms. SR 31 gives the same tail from the same level. SR 0 decays
+while held, so its lower key-off level produces a shorter tail (about
+6.97 ms after correction). Complete nine-case
+[before](assets/007/before-measurements.csv) and
+[after](assets/007/after-measurements.csv) tables, raw 48 kHz waveforms and
+native PNGs are retained in [assets/007](assets/007/).
+The [48 kHz before](assets/007/before-scope-48000-sr20.png) and
+[after](assets/007/after-scope-48000-sr20.png) views make the timing change
+visible; all saved rate/SR variants were inspected.
+
+The device-free debug patch now uses Fundamental LFO at 50 Hz/5% duty,
+8vert at 0.5, Contour and Scope with the same settings. A temporary native
+JSON-loading driver processed the actual four modules and cables for 60 ms
+at each host rate: 0/5 V only, three approximately 1 ms pulses, nonzero
+release and zero before the next pulse. High-sample totals were 135, 143 and
+287 at 44.1/48/96 kHz (host-sample pulse rounding). Both panel rows show SR
+in live and null-module light/dark previews; source SVGs, exports and manual
+cover agree. All seven rendered PDF pages were visually reviewed.
+
+### Validation Results
+
+The implemented Make/Catch2 harness replaces the planning-time SCons commands:
+
+```shell
+make -j2 test/dsp/sony_s_dsp/test_adsr test/dsp/trigger/test_threshold
+make -C test/rack super-adsr
+make -j2 all test-rack test
+make test-super-adsr RACK_TEST_MODE=asan-ubsan
+make -C tools/capture adsr-scope
+make -C tools/capture screenshots MODULE=SuperADSR
+python3 tools/capture/draw_panels.py tools/capture/.build/captures --module SuperADSR
+python3 specs/assets/012/build-artwork.py --check --installed
+make -C manual/SuperADSR
+git diff --check
+```
+
+All commands passed. The C++11 plugin, all 11 DSP suites and six Rack suites
+pass. The focused core suite has 10503 assertions in five cases; the module
+suite has 1090402 assertions in five cases and also passes ASan/UBSan.
+The new module regression against baseline source fails four of five cases
+(32 assertions), detecting the original clock, threshold and disconnected
+voice failures. Module comparisons cover every envelope stage at 22.05,
+32, 44.1, 48 and 96 kHz, signed/zero amplitude, INV, short pulses, hysteresis,
+retrigger priority, polyphony, disconnect, reset/reload and mid-release rate
+changes. Native reproduction produced nine captures before and after;
+standard capture checked both themes, live/preview, dimming and 75/150% zoom.
+Artwork validation passed all 32 installed panels. The manual built to
+seven pages with no unresolved errors or visual layout defects.
+
+Limitations: native desktop evidence is macOS arm64 only; Linux/Windows
+native checks and audible listening were not performed. This is an envelope
+CV timing/visual check with no audio device. The original reporter's exact
+historical patch is unavailable. No current demonstrated release failure
+remains. A pushed source fix does not imply VCV Library publication.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #98 | Pending | Core planning probe only; full regression/native checks pending | Pending | Open at planning time |
+| #98 | Pending commit/push | Core, module, sanitizer, native Scope and manual checks passed | Pending | Open pending upstream fixing reference |

@@ -68,7 +68,7 @@ compares 16-channel audio on the 2A03, 106, GBS and SuperEcho models against
 untouched twins during repeated theme changes; no device is opened.
 
 Octal 163 and Pocket APU show their five factory waveforms. Voice 2612
-shows the production default algorithm. Screenshots retain Super ADSR's historical RR label (007).
+shows the production default algorithm. Contour's former RR labels now read SR (007).
 Echo's eight FIR sliders are restored by spec 006. Its focused native probe
 checks bindings, horizontal hits/drags, numeric entry, reset, randomization,
 undo/redo and preset restoration, and captures bypass with lights off and
@@ -135,3 +135,29 @@ Capture code adapts RackNES's `tools/capture/` and Fourier's native inspector
 under GPL-3.0-or-later. Panel art retains the separate terms in
 [LICENSING.md](../../LICENSING.md); native screenshots also depict Rack's
 host-provided component graphics. No host resource files are copied here.
+
+## Contour Gate-Off Scope
+
+Spec 007's optional probe loads the real Fundamental Scope binary and
+resources from `FUNDAMENTAL_DIR` (default `$(RACK_DIR)/plugins/Fundamental`).
+It renders real module/Scope widgets and records measured samples; it does
+not draw a replacement scope or open a user's Rack session. Build Fundamental
+for the matching Rack ABI first. This is not a normal plugin dependency.
+
+```shell
+make -C tools/capture adsr-scope
+```
+
+Output is ignored under `.build/adsr-scope/`: nine native PPMs, measurements
+and sample CSVs, for 44.1/48/96 kHz and SR 0/20/31. The stimulus is one
+1 ms 0/5 V gate, amplitude 127, Attack/Decay 0, Sustain Level 7, RETRIG
+disconnected. Scope shows Gate in the upper trace and OUT below it, starting
+0.5 ms before key-off. Requested width is 10 ms; its 256 acquisition buckets
+round up to host frames (actual width is recorded). No audio device is used.
+
+`patches/debug/SuperADSR.vcv` is the interactive Rack 2 counterpart: a 50 Hz
+LFO with 5% pulse width, followed by 8vert at 0.5, supplies 1 ms 0/5 V gates.
+Scope captures both Gate and OUT, triggered at 2.5 V. Sweep SR through 0, 20
+and 31; lengthen the pulse to distinguish held decay from fixed key-off.
+The second lane is intentionally idle until patched. The fixture contains
+no audio/MIDI device configuration.

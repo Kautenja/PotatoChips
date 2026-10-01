@@ -7,12 +7,12 @@ reusable visual system with a distinct hardware-inspired identity for each
 module. The prepared artwork includes light and dark variants for spec 008.
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Planning baseline: `8d1b6681` (16 active models).
 
 ## Prepared Artwork
 
-The [artwork handoff](assets/012/README.md) now supplies all 16 paired
+The [artwork handoff](../assets/012/README.md) now supplies all 16 paired
 concept sheets, 32 exact-size SVG candidates, native Rack previews, fixed
 palettes, pinned title typography, and a per-control movement register.
 **No controls move.** Use the SVGs and numeric records for implementation;
@@ -86,12 +86,12 @@ shared title rules in coordination with 011 rather than silently omitting it.
 
 ## Source Evidence And Ownership
 
--   [Manifest](../plugin.json), [registration](../src/plugin.cpp), and the
-    [capture inventory](../tools/capture/modules.json) establish the current
+-   [Manifest](../../plugin.json), [registration](../../src/plugin.cpp), and the
+    [capture inventory](../../tools/capture/modules.json) establish the current
     models, stable slugs, exact widths, panel filenames, and manual paths.
     Preserve those mappings, including the two differently named blank SVGs.
 -   Runtime panels currently load SVG artwork. The
-    [capture guide](../tools/capture/README.md) records existing title-path
+    [capture guide](../../tools/capture/README.md) records existing title-path
     repairs, footer geometry, and native rendering limitations.
 -   Fourier at `29561591653dada5a697a53d5a6047dddf9db84c` uses
     `src/rack_extensions/panel.hpp` and `panel_artwork.hpp` to draw fixed
@@ -100,15 +100,15 @@ shared title rules in coordination with 011 rather than silently omitting it.
     it is not evidence that current Fourier titles use live font text.
     Fourier is reference material, never a build dependency. Do not copy
     its font files or assume its artwork terms grant font redistribution.
--   [003](archive/003-source-organization-and-rack-integration.md) retains general
+-   [003](003-source-organization-and-rack-integration.md) retains general
     integration ownership. This spec owns intentional display-name and
     title-logo and prepared palette changes, superseding earlier artwork
     preservation constraints only for that scope. Preserve the Arhythmetic
     Units footer geometry and use the handoff's theme-appropriate ink.
 -   Coordinate public metadata and provenance with
-    [001](archive/001-licensing-and-project-documentation.md), manual updates with
-    [004](archive/004-manual-content-and-publication-style.md), captures with
-    [005](archive/005-production-panel-captures-and-figures.md), and native theme
+    [001](001-licensing-and-project-documentation.md), manual updates with
+    [004](004-manual-content-and-publication-style.md), captures with
+    [005](005-production-panel-captures-and-figures.md), and native theme
     selection with [008](008-native-light-and-dark-themes.md). Spec 008 owns
     actual light/dark support; this spec does not make it a prerequisite.
 
@@ -162,7 +162,7 @@ shared title rules in coordination with 011 rather than silently omitting it.
     illustration content, display bounds, and footer logos. Review XML
     diffs to prevent whole-panel rewrites or accidental embedded images.
 5.  Use the measured title bounds and descriptor exceptions in the
-    [artwork index](assets/012/artwork-index.json). They account for the
+    [artwork index](../assets/012/artwork-index.json). They account for the
     existing header and screw clearances, including 6 HP Gaussian and both
     8 HP panels. Do not change control positions to enlarge headers.
 6.  Preserve the prepared title sizing: 11-pixel cap-height limit on wider
@@ -182,8 +182,8 @@ shared title rules in coordination with 011 rather than silently omitting it.
     or unexpected modifications outside designated title regions. Document
     any metadata normalization needed for reproducible SVG comparison.
 9.  Keep artwork tooling outside the audio path and ordinary build.
-    Update [licensing](../LICENSING.md) and the
-    [component inventory](../docs/licenses/THIRD-PARTY.txt) for font/tool
+    Update [licensing](../../LICENSING.md) and the
+    [component inventory](../../docs/licenses/THIRD-PARTY.txt) for font/tool
     provenance as applicable. Preserve existing source and artwork notices.
 
 ### Align User-Facing Materials
@@ -312,7 +312,7 @@ Existing implementation checks below require the prepared Rack SDK/tree
 at the repository's default `../..`, matching runtime resources, compiler,
 Make, Python/Pillow, and a graphical desktop for captures. Manual checks
 also require the TeX tools and Poppler documented in
-[CONTRIBUTING.md](../CONTRIBUTING.md) and [manual/README.md](../manual/README.md).
+[CONTRIBUTING.md](../../CONTRIBUTING.md) and [manual/README.md](../../manual/README.md).
 Packaging requires `jq`, `tar`, and `zstd` plus the SDK's platform tools.
 
 ```shell
@@ -388,7 +388,7 @@ target. No assets were changed or manuals built for this documentation edit.
 
 2026-10-01 follow-up: The user requested artwork before implementation,
 including spec 008's light/dark modes and a record of control movements.
-The [handoff](assets/012/README.md) fixes all 16 identities with 16 built-in
+The [handoff](../assets/012/README.md) fixes all 16 identities with 16 built-in
 ImageGen concept pairs, 32 dimensionally exact SVGs, a pinned licensed font,
 native panel previews, and exact palettes/title bounds. The SVGs resolve
 concept-image omissions and spacing errors; they are the implementation
@@ -416,7 +416,7 @@ Validation performed:
     bundled Liberation Sans Bold 1.07.4 file. The license, checksum, path
     data, source text, and reproduction commands accompany the artwork.
 
-See [validation.json](assets/012/validation.json) for per-panel results,
+See [validation.json](../assets/012/validation.json) for per-panel results,
 final SVG hashes, and platform details. Spec 006's missing Echo sliders and
 007's envelope-label decisions remain with those specs. Dim-room/themed
 component review, live global theme integration, minimum-Rack checks,
@@ -433,8 +433,8 @@ to those substitutions. No DSP, IDs, parameters, JSON, preset data, panel
 sizes or control positions changed. Rack 2.4.0 is the minimum; version 2.1.0
 and all established manual URLs remain unchanged.
 
-The [integrated native gallery](assets/012/IMPLEMENTED.md) shows actual
-production controls. [Machine-readable evidence](assets/012/implementation.json)
+The [integrated native gallery](../assets/012/IMPLEMENTED.md) shows actual
+production controls. [Machine-readable evidence](../assets/012/implementation.json)
 records input/library hashes, all model results and the verified minimum
 SDK/runtime download hashes. Design previews remain separately identified
 as pre-integration evidence. SVG whitespace is normalized; original frozen
@@ -522,3 +522,8 @@ Rack's outside-spotlight dimming and emissive layer order. Adjacent Echo FIR
 slider and Contour RR-label issues remain owned by 006/007 and are accurately
 shown/described in these manuals. No release upload or VCV Library publication
 is implied. Built PDFs/packages and temporary review pages stay ignored.
+
+Implementation committed and pushed as
+[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Kautenja/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403).
+All implementation acceptance is verified; archive with spec 008 after its
+issue follow-through. Publication remains a separate authorized task.

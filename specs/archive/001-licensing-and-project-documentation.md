@@ -41,7 +41,7 @@ Own root license/documentation files, `docs/licenses/`, GitHub issue/PR
 templates, and descriptive manifest metadata. Coordinate package inclusion
 with [002](002-build-tests-and-ci.md), runtime branding with
 [003](003-source-organization-and-rack-integration.md), provenance for theme assets
-with [008](../008-native-light-and-dark-themes.md), and final manual
+with [008](008-native-light-and-dark-themes.md), and final manual
 and image links with [004](004-manual-content-and-publication-style.md) and
 [005](005-production-panel-captures-and-figures.md).
 

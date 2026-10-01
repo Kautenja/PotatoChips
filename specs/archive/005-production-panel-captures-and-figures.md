@@ -33,7 +33,7 @@ Own new `tools/capture/`, reviewed `manual/*/img/Panel.png`, per-module
 figure inputs/build hooks with [004](004-manual-content-and-publication-style.md)
 and README image substitutions with [001](001-licensing-and-project-documentation.md).
 Use final runtime branding from [003](003-source-organization-and-rack-integration.md)
-and panel pairs/theme behavior from [008](../008-native-light-and-dark-themes.md).
+and panel pairs/theme behavior from [008](008-native-light-and-dark-themes.md).
 
 ## Required Inventory
 

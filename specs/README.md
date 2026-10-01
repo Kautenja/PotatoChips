@@ -6,13 +6,17 @@ project documentation, build/test infrastructure, source organization,
 manuals, and production captures. Their completion records preserve prior
 validation evidence and limitations.
 
-Specs 006/007/009-011 remain PLANNED. Specs 008/012 are implemented and
-verified, with 008 issue follow-through in progress. They cover Super Echo and Super ADSR fixes,
-native themes, YM2612 looping envelopes and optional Nuked-OPN2 engines,
-a YM2151 module, and module rebranding with prepared light/dark artwork.
-Spec 012 includes a [design handoff](assets/012/README.md) for all 16 models;
-design preparation does not complete runtime integration or manual updates.
-These plans are not release promises. See each spec for scope and evidence.
+Specs 008 and 012 are also COMPLETE and archived as of October 1, 2026.
+All 16 modules now have native light/dark panels and new names. Dark captures,
+manuals, wireframes and compatibility checks are complete; #95 is closed.
+The [design handoff](assets/012/README.md) and
+[integrated native gallery](assets/012/IMPLEMENTED.md) retain reproducible
+artwork and validation evidence.
+
+Specs 006/007/009-011 remain PLANNED: Echo and Contour fixes, YM2612 looping
+envelopes and optional Nuked-OPN2 engines, and a YM2151 module. Specifications
+and source completion are not release promises; see each record for scope,
+platform validation and publication limits.
 
 ## Work Areas And Ownership
 
@@ -25,11 +29,11 @@ These plans are not release promises. See each spec for scope and evidence.
 | [005](archive/005-production-panel-captures-and-figures.md) | Native module screenshots and source-controlled panel reference drawings | `tools/capture/`, `manual/*/img/`, `manual/*/figures/`, shared drawing primitives | Complete; archived. Theme-specific capture updates remain with 008. |
 | [006](006-super-echo-controls-and-randomization.md) | Restore FIR sliders (#96) and protect level/bypass controls from randomization (#97) | `src/SuperEcho.cpp`, a scoped slider helper if needed, focused Rack regressions, Super Echo manual | Can proceed before the modernization specs; reuse 002/005 infrastructure if available. |
 | [007](007-super-adsr-release.md) | Resolve Super ADSR release behavior and sustain-rate labeling (#98) | `src/SuperADSR.cpp`, Sony S-DSP ADSR, focused regressions, panel, debug patch, Super ADSR manual | Can proceed independently; reuse 002/005 infrastructure if available. |
-| [008](008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Owns theme work formerly in 003; coordinate branding with 003 and captures with 005. |
+| [008](archive/008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Complete; archived. Native preference and #95 verified on Rack 2.4/2.6. |
 | [009](009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Can proceed independently; reuse 002's harness and preserve the fix during 003. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
 | [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
-| [012](012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Preserve slugs and geometry; coordinate 001/004/005 publication and 008 themes; design choices are fixed in the handoff. |
+| [012](archive/012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Complete; archived. All names, 32 panels, 14 manuals and reusable artwork sources integrated. |
 
 The archived specs establish the inventory, executable baseline, source
 organization, manual system, and capture tooling for subsequent work.
@@ -49,9 +53,8 @@ Writing or committing the spec does not resolve the issue.
 
 008 independently owns [#95](https://github.com/Kautenja/PotatoChips/issues/95):
 native global light/dark support, including both blanks, live switching,
-previews, and readable controls. It authorizes useful issue updates and
-closure with an implementation commit reference after verification. Planning
-alone does not resolve the issue.
+previews, and readable controls. Its verified implementation and resolution
+comment are recorded in the archived spec; #95 is closed as completed.
 
 009 independently owns [#82](https://github.com/Kautenja/PotatoChips/issues/82):
 reproduce and correct intermittent YM2612 looping-envelope retriggers in
@@ -111,8 +114,8 @@ active modules, including both blanks. It preserves saved-patch identifiers,
 control geometry, audio behavior, and historical PDF URLs. Coordinate its
 publication assets with 004/005 and native theme wiring with 008. Its
 prepared design handoff supplies the exact light/dark SVGs; integration
-does not require new creative choices. The runtime panels and product names
-remain unchanged until the implementation is run.
+does not require new creative choices. The runtime panels, names and manuals
+now use that handoff; all identifiers and geometry remain compatible.
 
 ## Evidence And Baseline
 

@@ -1,7 +1,7 @@
 # Native Rack Light And Dark Themes
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Issue: [#95](https://github.com/Kautenja/PotatoChips/issues/95)
 Planning baseline: `e169db73` (product source unchanged from `33fb1554`).
 
@@ -20,14 +20,14 @@ implementation, not a requirement to use runtime inversion.
 
 -   Enabled widgets load one SVG with `setPanel()` and
     `APP->window->loadSvg()`. There is no global theme integration. The
-    [blank widgets](../src/Blanks.cpp) have a separate templated loading
+    [blank widgets](../../src/Blanks.cpp) have a separate templated loading
     path and must be included, not just the sound-producing modules.
 -   Screws and ports generally use fixed variants. Boss Fight's
-    [algorithm display](../src/widget/indexed_frame_display.hpp) and the
-    [wavetable editors](../src/widget/wavetable_editor.hpp) have explicit
+    [algorithm display](../../src/widget/indexed_frame_display.hpp) and the
+    [wavetable editors](../../src/widget/wavetable_editor.hpp) have explicit
     colors and drawing layers. Recoloring only the panel cannot establish
     that the whole module is readable.
--   The [manifest](../plugin.json) contains 16 enabled entries after removal
+-   The [manifest](../../plugin.json) contains 16 enabled entries after removal
     of both disabled prototypes. It currently has no `minRackVersion`.
 -   Rack's [dark-panel API guide](https://vcvrack.com/manual/PluginGuide)
     documents native support since Rack 2.4. The inspected local headers
@@ -48,21 +48,21 @@ check, or issue update has been completed.
 ## Scope And Ownership
 
 This spec takes ownership of native themes previously outlined in
-[003](archive/003-source-organization-and-rack-integration.md): panel pairs, widget
+[003](003-source-organization-and-rack-integration.md): panel pairs, widget
 wiring, theme-specific control/display changes, focused regressions,
 minimum-Rack metadata, user instructions, and #95's disposition. Spec 003
 retains source reorganization, branding, and general UI lifecycle repairs;
 it must preserve this contract and edit both artwork variants.
 
 Work can proceed before the modernization sequence. Reuse
-[002](archive/002-build-tests-and-ci.md)'s test infrastructure and
-[005](archive/005-production-panel-captures-and-figures.md)'s native renderer when
+[002](002-build-tests-and-ci.md)'s test infrastructure and
+[005](005-production-panel-captures-and-figures.md)'s native renderer when
 available. Otherwise add only a focused SDK-backed fixture and exclude it
 from SConstruct's standalone DSP discovery. Coordinate provenance with
-[001](archive/001-licensing-and-project-documentation.md), wording with
-[004](archive/004-manual-content-and-publication-style.md), restored Super Echo
-controls with [006](006-super-echo-controls-and-randomization.md), and Super
-ADSR labels with [007](007-super-adsr-release.md). Do not duplicate those
+[001](001-licensing-and-project-documentation.md), wording with
+[004](004-manual-content-and-publication-style.md), restored Super Echo
+controls with [006](../006-super-echo-controls-and-randomization.md), and Super
+ADSR labels with [007](../007-super-adsr-release.md). Do not duplicate those
 specs' implementation or completion evidence.
 
 ## Required Inventory
@@ -127,7 +127,7 @@ removed; DSP used by active modules remains outside this UI work.
 
 ### Provide Deliberate, Readable Artwork
 
-Spec 012 now supplies the [prepared artwork handoff](assets/012/README.md):
+Spec 012 now supplies the [prepared artwork handoff](../assets/012/README.md):
 32 exact-size SVG panel candidates, both palette variants for all 16 models,
 native preview evidence, and unchanged control coordinates. Use that shared
 asset set for theme implementation. Its per-module identities and palettes
@@ -166,7 +166,7 @@ Do not start a separate creative redesign when implementing this spec.
 Implement maintained first-party variants under this request. The issue's
 runtime-only suggestion does not require a license workaround, and adding
 dark assets does not itself change public derivative-work permissions.
-Preserve the source/artwork split and notices in [LICENSING.md](../LICENSING.md)
+Preserve the source/artwork split and notices in [LICENSING.md](../../LICENSING.md)
 or 001's replacement documents. Record changed assets' origins in 001's
 inventory and retain collaborator/third-party attribution. Do not import
 artwork from the example PR, relicense assets, or make new permission claims
@@ -229,7 +229,7 @@ their owning specs. The planning commit must not auto-close #95.
       and representative audio/state compatibility checks pass.
 - [x] Documentation describes the View-menu setting, supported Rack version,
       artwork terms, and tested availability without false release claims.
-- [ ] #95 has a resolution comment with the implementation commit reference
+- [x] #95 has a resolution comment with the implementation commit reference
       and verification evidence, is closed as completed, and its comment URL
       and final state are recorded below.
 
@@ -288,7 +288,7 @@ status comments, and do not close the issue merely because this spec exists.
     reason `completed`, read back its state, and record the URL, SHA, date,
     and results here. Remote failures leave their acceptance items pending.
 5.  Mark `COMPLETE` and archive according to
-    [AGENTS.md](../AGENTS.md#planning-and-completion) only after all work,
+    [AGENTS.md](../../AGENTS.md#planning-and-completion) only after all work,
     including issue follow-through, is verified.
 
 With authenticated GitHub CLI, prepare the factual comment body first.
@@ -313,102 +313,56 @@ reviewed on 2026-10-01. Implementation and native verification are pending.
 
 ## Implementation Evidence — October 1, 2026
 
-Implemented all 16 identities and 32 SVG variants. The shared
-`createThemedPanel` helper uses Rack's two-path factory; every port and screw
-uses the native themed component. All production `.cpp` edits are confined
-to those substitutions. No DSP, IDs, parameters, JSON, preset data, panel
-sizes or control positions changed. Rack 2.4.0 is the minimum; version 2.1.0
-and all established manual URLs remain unchanged.
+All 16 modules now use Rack's two-path panel factory through
+`createThemedPanel`, with native themed screws and ports. The manifest
+requires Rack 2.4.0. Each theme uses a committed SVG; no runtime recoloring,
+module preference, JSON field or audio-thread work was introduced.
+Production `.cpp` diffs contain only panel/screw/port substitutions.
 
-The [integrated native gallery](assets/012/IMPLEMENTED.md) shows actual
-production controls. [Machine-readable evidence](assets/012/implementation.json)
-records input/library hashes, all model results and the verified minimum
-SDK/runtime download hashes. Design previews remain separately identified
-as pre-integration evidence. SVG whitespace is normalized; original frozen
-source hashes are retained. Ordinary builds require no artwork generator.
+[Spec 012's shared validation record](012-module-rebranding-and-title-system.md#implementation-evidence--october-1-2026)
+contains the complete commands, manual/artwork decisions and limits.
+[Machine-readable native evidence](../assets/012/implementation.json)
+records rendering inputs, minimum SDK/runtime hashes and per-model results.
+The [integrated gallery](../assets/012/IMPLEMENTED.md) contains all 16 pairs.
 
-### Validation Actually Run
+Theme-specific checks on macOS arm64, Retina 2x:
 
--   `python3 specs/assets/012/build-artwork.py --check --installed`: 32
-    byte-exact runtime panels, 16 active/name mappings, 14 manual names,
-    pinned font hash, outline text, title bounds and source hashes pass.
--   `make -j2 all test-rack`: plugin and all four suites pass on macOS
-    arm64 with the local Rack 2.6.0 headers/library/resources. Assertion
-    counts: 608, 4,747, 67 and 464. Saved patches/presets and the existing
-    representative audio fixture remain unchanged.
--   `make -j2 all test-rack RACK_DIR=/tmp/potato-rack-2.4/Rack-SDK`:
-    the same build and 5,886 assertions pass with official Rack 2.4.0.
-    Added an explicit `<plugin.hpp>` include to the contract test because
-    2.4's umbrella does not transitively expose the plugin registry.
--   `make -C tools/capture capture`: all 16 live widgets and null previews
-    pass light/dark/light selection, initial dark construction, context
-    recreation, state/history checks and immutable geometry checks.
-    All 606 control/display bounds equal the frozen movement register.
-    Additional captures cover 75%/150% zoom and 50% room dimming outside
-    the mouse spotlight; 288 images per host include the 32 restored views.
--   The post-capture audio probe compares 512 frames across 16 channels on
-    2A03, 106, GBS and SuperEcho against untouched twins, with eight theme
-    changes and two simultaneous widgets: exact sample equality. Both
-    instances receive identical host add/sample-rate events. This corrected
-    an initial harness mismatch; no production audio change was required.
--   `make -C tools/capture capture BUILD=.build/minimum
-    RACK_DIR=/tmp/potato-rack-2.4/Rack-SDK`: all native checks also pass
-    against 2.4.0 and its matching extracted runtime graphics. SDK/resource
-    downloads and extraction remain outside the repository.
--   `make -C tools/capture test` and `make -C tools/capture test-native`:
-    export rollback, stale/missing/blank/incorrect geometry, identical theme
-    rejection, exact dark crops, single-module isolation, native missing
-    light/dark panels and renderer failure checks pass.
--   `python3 tools/capture/export_screenshots.py
-    tools/capture/.build/captures manual` and
-    `python3 tools/capture/draw_panels.py tools/capture/.build/captures`:
-    refreshed all 14 dark covers and all named wireframe diagrams. Export
-    defaults to Dark; `--theme Light` remains an explicit option.
--   `make -C manual clean` then `make -C manual -j2`: all 14 PDFs build
-    from sources without cached obsolete assets. `python3
-    manual/latex/test-build.py` passes all failure/recovery checks.
--   `python3 scripts/validate.py manuals manual/.build`: names, versions,
-    metadata, complete inventory and meaningful text pass. Used bundled
-    Poppler's `pdftotext` on PATH. Rendered and inspected all 115 pages,
-    including covers, headers, panel maps and retained YM2612 figures.
+-   `make -j2 all test-rack`: 5,886 assertions and the plugin build pass
+    against both local Rack 2.6.0 and official 2.4.0 via `RACK_DIR`.
+    The contract test now explicitly includes `<plugin.hpp>` for 2.4.
+-   `make -C tools/capture capture` and the same command with
+    `BUILD=.build/minimum RACK_DIR=/tmp/potato-rack-2.4/Rack-SDK`:
+    live/null widgets, initial dark construction, repeated toggles,
+    unchanged state/history/606 bounds and context recreation pass.
+    Matching host resources were used in each run. All 288 views per
+    host include 75%/150% zoom and dimming outside the mouse spotlight.
+-   Four representative chips/effects compare sample-identical 16-channel
+    audio against untouched twins through eight preference toggles.
+    Both twins receive identical host initialization events. Existing
+    patch, preset and audio fixtures also pass unchanged.
+-   `make -C tools/capture test` and `test-native`: stale/missing/blank
+    captures, identical themes, geometry failures, export rollback and
+    missing light/dark SVG rejection pass. Publication crops are exactly
+    the dark views. Both host batches pass full geometry/export checks.
 -   `make -j2 dist` and `python3 scripts/validate.py package
-    dist/KautenjaDSP-PotatoChips-2.1.0-mac-arm64.vcvplugin`: package bytes,
-    32 panel files, manifest, presets and notices pass.
--   `git diff --check`, local Markdown links, unchanged manifest identity,
-    slugs/tags/manual URLs/version and production-diff audit pass.
+    dist/KautenjaDSP-PotatoChips-2.1.0-mac-arm64.vcvplugin`: all 32 panels,
+    resources and license notices match the packaged files.
 
-### Visual And Publication Decisions
+All native module pairs were visually reviewed, including narrow headers,
+blank illustrations, slider handles, lit/unlit defaults and display traces.
+No control moves, clipped titles or cache artifacts were found. Linux and
+Windows native rendering and audio-device listening were not run; the
+existing cross-platform CI remains the other platform gate. This is source
+implementation, not release or VCV Library publication.
 
-All titles and descriptors use the pinned Liberation Sans Bold outlines;
-manual titles use existing shared LaTeX typography. New names appear in
-README guidance, browser metadata, all manuals, and wireframes. Former names
-remain in metadata and explicit lookup notes. Rack 2.6's local browser
-source indexes model descriptions; no unsupported alias field was added.
+### Issue Follow-Through
 
-The user selected dark-theme manual captures. New wireframe titles are
-text; control symbols, groups and coordinates are unchanged. Audited all
-repository consumers before removing 56 unused files: 28 module-logo
-SVG/PDFs, 16 AY envelope-mode SVG/PDFs, six Sony chip images, two obsolete
-ADSR envelope exports and four VU/on-off exports. Retained both used YM2612
-envelope PNGs, Voice 2612's Operators PDF and editable SVG, all Panel PNGs,
-and the shared Arhythmetic Units wordmark. The earlier KautenjaDSP PDF
-cleanup was already present. Font provenance and its OFL notice are included
-in the packaged license inventory; older illustration provenance is retained.
-
-Native review includes every module in both themes, narrow titles, passive
-blanks, slider handles, lit/unlit defaults, waveform traces and the algorithm
-display. No clipped titles, moved controls or context-cache artifacts were
-observed. The reduced-zoom harness clip rectangle was corrected to use
-module coordinates before final review. No additional creative decisions or
-control-layout changes were needed.
-
-Validation is macOS arm64/Retina 2x, Rack 2.4.0 and 2.6.0. Linux/Windows
-native capture and an audio-device listening session were not run; existing
-cross-platform CI remains the other platform gate. Dim captures reproduce
-Rack's outside-spotlight dimming and emissive layer order. Adjacent Echo FIR
-slider and Contour RR-label issues remain owned by 006/007 and are accurately
-shown/described in these manuals. No release upload or VCV Library publication
-is implied. Built PDFs/packages and temporary review pages stay ignored.
-
-Issue follow-through: verified implementation awaits its upstream commit
-reference and resolution comment before closure/archive.
+Implementation commit
+[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Kautenja/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403)
+was pushed to `origin/v2.0.2` and verified through GitHub's commit API.
+Re-read #95 before posting; it remained open with no intervening comments.
+The [resolution comment](https://github.com/Kautenja/PotatoChips/issues/95#issuecomment-5938819683)
+records the native setting, minimum version, fixing commit, paired images,
+validation and release availability. Closed as `COMPLETED` on October 1,
+2026 and verified the returned `CLOSED`/`COMPLETED` state. This resolves
+first-party native themes without changing artwork licensing.

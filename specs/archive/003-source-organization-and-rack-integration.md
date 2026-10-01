@@ -42,7 +42,7 @@ Coordinate metadata/license scope with [001](001-licensing-and-project-documenta
 documented behavior with [004](004-manual-content-and-publication-style.md),
 and final figures with [005](005-production-panel-captures-and-figures.md).
 
-[008](../008-native-light-and-dark-themes.md) owns native theme implementation,
+[008](008-native-light-and-dark-themes.md) owns native theme implementation,
 panel pairs, theme regressions, and issue #95. This spec retains branding
 and structural/lifecycle work; preserve 008's theme contract during those
 changes rather than implementing a second theme system.

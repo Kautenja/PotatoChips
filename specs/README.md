@@ -20,10 +20,11 @@ releases and rearms reliably, labels sustain rate SR, and closes #98.
 Spec 009 is COMPLETE and archived by the user's 2026-10-01 decision. The
 verified YM2612 event-path fix preserves the existing SSG behavior; the
 unconfirmed original one-shot report and open #82 remain documented limitations.
-Spec 010 remains PLANNED for optional Nuked-OPN2 engines. Spec 011 is
-IN PROGRESS: Voice 2151 is implemented and locally verified; cross-platform
-checks, listening and public issue resolution remain outstanding. Specifications
-and source completion are not release promises; see each record for scope,
+Spec 010 remains PLANNED for optional Nuked-OPN2 engines. Spec 011 is COMPLETE
+and archived by the user's 2026-10-01 decision: Voice 2151 is implemented,
+locally verified and published on the development branch; #79 is closed.
+Cross-platform and listening limitations remain recorded. Specifications and
+source completion are not release promises; see each record for scope,
 platform validation and publication limits.
 
 ## Work Areas And Ownership
@@ -40,7 +41,7 @@ platform validation and publication limits.
 | [008](archive/008-native-light-and-dark-themes.md) | Native Rack light/dark preference across all 16 enabled models (#95) | Runtime panel pairs, widget helpers/controls, theme regressions, minimum-Rack metadata and usage docs | Complete; archived. Native preference and #95 verified on Rack 2.4/2.6. |
 | [009](archive/009-ym2612-ssg-retriggering.md) | Reliable polyphonic looping-envelope retriggers in Mini Boss and Boss Fight (#82) | Module gate/retrigger paths, shared YM2612 operator/voice DSP, focused tests and event fixtures, manuals | Complete; archived by user decision with verification evidence and original-report limitations retained. |
 | [010](010-nuked-opn2-engines.md) | Optional Nuked-OPN2 YM2612/YM3438 engines in Mini Boss and Boss Fight (#83) | Vendored core, DSP adapter, module menus/state, focused audio/control/performance tests, manuals | Prototype control mapping and cost first; coordinate dependency/build work with 001/002 and preserve 009's loop contract. |
-| [011](011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Prototype core and 16-voice cost first; coordinate 001-005 and 008 inventories; independent of 009/010. |
+| [011](archive/011-ym2151-synth-voice.md) | New polyphonic Yamaha YM2151 synth voice (#79) | Core/adapter, new module and panel, registration, presets, manual, reference/performance tests | Complete; archived by user decision with validation limitations retained. Implementation published and #79 closed. |
 | [012](archive/012-module-rebranding-and-title-system.md) | Rename all 16 active modules and integrate prepared paired panel artwork | Manifest display names, SVG title sources/exports, design handoff, current documentation, manuals, captures, font provenance | Complete; archived. All names, 32 panels, 14 manuals and reusable artwork sources integrated. |
 
 The archived specs establish the inventory, executable baseline, source
@@ -78,8 +79,9 @@ resolution. Writing the spec does not resolve the issue.
 011 owns [#79](https://github.com/Kautenja/PotatoChips/issues/79): a new
 YM2151 four-operator polyphonic synth voice with chip-specific modulation,
 detune, and noise. It includes core selection, performance/reference tests,
-complete module presentation, useful issue updates, and closure with verified
-implementation commit references. Planning alone does not resolve the issue.
+complete module presentation, and issue follow-through. The implementation
+commit and resolution comment are recorded in the archived spec; #79 is
+closed as completed.
 
 Shared files have explicit owners: 001 owns public metadata and contributor
 prose, 002 owns workflow and test-build plumbing, 003 owns structural code

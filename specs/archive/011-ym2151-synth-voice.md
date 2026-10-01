@@ -1,7 +1,7 @@
 # Yamaha YM2151 Synth Voice
 
 Created: 2026-10-01
-Status: IN PROGRESS
+Status: COMPLETE
 Issue: [#79](https://github.com/Kautenja/PotatoChips/issues/79)
 Planning baseline: `a6e7f086` (product source unchanged from `33fb1554`).
 
@@ -21,20 +21,20 @@ a reference recording with known registers, clock, or output processing.
 
 Local evidence:
 
--   [CHANGELOG.md](../CHANGELOG.md) lists YM2151 under `1.13.0 (TBD)`, but
-    [plugin.json](../plugin.json), [plugin.cpp](../src/plugin.cpp), and
-    [plugin.hpp](../src/plugin.hpp) contain no YM2151 model. The current
+-   [CHANGELOG.md](../../CHANGELOG.md) lists YM2151 under `1.13.0 (TBD)`, but
+    [plugin.json](../../plugin.json), [plugin.cpp](../../src/plugin.cpp), and
+    [plugin.hpp](../../src/plugin.hpp) contain no YM2151 model. The current
     source search finds only a shared phase-table comment mentioning it.
     The historical roadmap is not evidence of an implemented module.
--   [BossFight.cpp](../src/BossFight.cpp) demonstrates four operator control
+-   [BossFight.cpp](../../src/BossFight.cpp) demonstrates four operator control
     groups, algorithm display, polyphony, and gate/retrigger handling. Its
     YM2612 code also implements independent operator pitch and simplified
     looping envelopes. Reusing that implementation with a new label would
     not establish YM2151 behavior.
--   [ChipModule](../src/engine/chip_module.hpp) assumes a Blargg/BLIP interface.
+-   [ChipModule](../../src/engine/chip_module.hpp) assumes a Blargg/BLIP interface.
     A new clocked FM core need not fit that base class. Keep its reusable
     adapter free of Rack types and use a focused host wrapper.
--   [Makefile](../Makefile) and [standalone Make rules](../mk/standalone.mk) need explicit
+-   [Makefile](../../Makefile) and [standalone Make rules](../../mk/standalone.mk) need explicit
     source integration for a vendored C core. Neither currently builds a
     YM2151 dependency or focused test suite.
 
@@ -64,17 +64,17 @@ agreed path/name changes here and update consumers together.
 
 Own the chip adapter, host module, artwork, feature tests, presets, targeted
 manual, registration, and issue follow-through. Coordinate dependency
-provenance/public metadata with [001](archive/001-licensing-and-project-documentation.md),
-build/test/package integration with [002](archive/002-build-tests-and-ci.md),
+provenance/public metadata with [001](001-licensing-and-project-documentation.md),
+build/test/package integration with [002](002-build-tests-and-ci.md),
 helper locations/branding with
-[003](archive/003-source-organization-and-rack-integration.md),
-manual conventions with [004](archive/004-manual-content-and-publication-style.md),
-native panel captures with [005](archive/005-production-panel-captures-and-figures.md),
-and global themes with [008](archive/008-native-light-and-dark-themes.md).
+[003](003-source-organization-and-rack-integration.md),
+manual conventions with [004](004-manual-content-and-publication-style.md),
+native panel captures with [005](005-production-panel-captures-and-figures.md),
+and global themes with [008](008-native-light-and-dark-themes.md).
 
 This spec explicitly adds a new chip/module beyond the modernization plan.
-It does not depend on [010](010-nuked-opn2-engines.md)'s selectable YM2612
-engines, nor own [009](archive/009-ym2612-ssg-retriggering.md)'s trigger fix. Reuse
+It does not depend on [010](../010-nuked-opn2-engines.md)'s selectable YM2612
+engines, nor own [009](009-ym2612-ssg-retriggering.md)'s trigger fix. Reuse
 proven harnesses and event conventions where useful without coupling the
 cores or changing Boss Fight/Mini Boss behavior.
 
@@ -289,7 +289,7 @@ commit is not the implementation reference.
 After the comment succeeds, close #79 with reason `completed` and read back
 its state. Record the comment URL, fixing SHAs, date, and validation below.
 Failed remote actions remain outstanding. Mark `COMPLETE` and archive under
-[AGENTS.md](../AGENTS.md#planning-and-completion) only after all acceptance
+[AGENTS.md](../../AGENTS.md#planning-and-completion) only after all acceptance
 and issue follow-through are satisfied.
 
 Prepare a factual comment body file before using the authenticated CLI:
@@ -310,9 +310,11 @@ this first module. No release/version selection or closure from planning.
 
 ## Completion Evidence
 
-Implemented locally on 2026-10-01. Keep this spec open for supported-platform
-CI, the remaining interactive checks below, and public commit/issue closure.
-The implementation is not a release or a claim that #79 is resolved remotely.
+Completed and archived on 2026-10-01 at the user's explicit request to mark
+complete, commit, and push. This completion decision supersedes the historical
+acceptance checklist for the unperformed checks recorded below; it does not
+claim those checks passed. The implementation is publicly available, and #79
+is closed as completed. No VCV Library release is claimed.
 
 ### Core Decision And Prototype
 
@@ -320,7 +322,7 @@ Selected ymfm at `81aec25ccbb98f4873a255f7551ac4dadac59b4a`, BSD-3-Clause.
 Production includes only its OPM translation unit. Two mechanical C++11
 changes replace `make_unique` and remove assertion-bearing `constexpr`;
 all synthesis logic and tables are unchanged. Original/local checksums and
-exact edits are in [provenance](../dep/ymfm/provenance.json). Nuked-OPM at
+exact edits are in [provenance](../../dep/ymfm/provenance.json). Nuked-OPM at
 `f209e6ed3712032b641d53ce8fb24824eae6adc3` remains an unmodified C test
 reference, never a production engine. Both license texts are packaged.
 
@@ -336,7 +338,7 @@ thread's budget at 16 independent chips. A repeated probe measured
 0.36% / 1.36% / 5.43%, before host/resampling work. This establishes why
 Nuked was rejected even before active-note costs; independent active-note
 reference tests subsequently verify its decoded output. Prototype sources
-are retained in `assets/011/prototype-*.cpp`.
+are retained in `specs/assets/011/prototype-*.cpp`.
 
 ```shell
 clang -O3 -c dep/Nuked-OPM/opm.c -o /tmp/opm.o
@@ -355,7 +357,7 @@ The historical 19-entry planning count is superseded.
 
 The complete ranges, defaults, units, quantization, +8 V full-range additive
 CV scale and normalled behavior are in the new
-[control reference](../manual/YM2151/sections/controls.tex). Frozen IDs:
+[control reference](../../manual/YM2151/sections/controls.tex). Frozen IDs:
 
 | IDs | Meaning |
 | --- | --- |
@@ -418,7 +420,7 @@ allocations prepare ymfm channels/operators and reset snapshots.
     uneven poly cables, shrink/grow, reset, all three preset reloads,
     standard JSON duplicate/restore, randomize and concurrent instances.
 -   `make -C test/rack benchmark-ym2151 RACK_DIR="$(pwd)/../.."`: passed.
-    [Raw callback measurements](assets/011/benchmark.csv) contain 300
+    [Raw callback measurements](../assets/011/benchmark.csv) contain 300
     repeats per 1/4/16-lane, 64/256-frame, 44.1/48/96 kHz workload after
     2,048 warmup frames. Compiler uses Rack's `-O3` and
     `-funsafe-math-optimizations`; one thread, no audio device or I/O.
@@ -429,7 +431,7 @@ allocations prepare ymfm channels/operators and reset snapshots.
     live preference switching and context recreation passed. Reviewed both
     themes; fixed label overlaps, then exported the production dark capture
     and geometry guide. Original panel/algorithm sources and approved
-    geometry are retained in `assets/011/`.
+    geometry are retained in `specs/assets/011/`.
 -   Isolated official Rack Free 2.4.0 profiles loaded the packaged module
     plus 8vert, LFO, Merge and Scope. Four distinct pitch lanes rendered on
     Scope. A second dark-theme session showed Merge=16, active Scope traces
@@ -456,27 +458,31 @@ python3 tools/capture/export_screenshots.py tools/capture/.build/captures manual
 python3 tools/capture/draw_panels.py tools/capture/.build/captures --module YM2151
 ```
 
-### Remaining Acceptance And Issue Follow-Through
+### Completion Decision, Limitations And Issue Follow-Through
 
-Linux x64 and Windows x64 builds are not run locally; existing CI must verify
-them after an authorized push. Interactive preset-menu reload, reset and
-randomize/duplicate gestures were covered through the real-module harness,
-not a complete GUI gesture tour. Audible audio-device listening remains
-unperformed; native Scope confirms synthesis, not listening. No full hardware
-capture or bit-exact reference claim is made.
+Linux x64 and Windows x64 builds were not run locally. Interactive preset-menu
+reload, reset and randomize/duplicate gestures were covered through the
+real-module harness, not a complete GUI gesture tour. Audible audio-device
+listening remains unperformed; native Scope confirms synthesis, not listening.
+No full hardware capture or bit-exact reference claim is made. The user's
+2026-10-01 completion decision accepts these recorded limitations rather than
+requiring them to block archival.
 
-The issue was re-read and remains open. The tested implementation is committed locally as
-`5f16481982de976480f0cc6e680da500898a6d15`; no push or release is authorized
-by this spec. Its canonical URL after publication will be
-https://github.com/Kautenja/PotatoChips/commit/5f16481982de976480f0cc6e680da500898a6d15
-(currently a local commit, not claimed accessible). Therefore
-public fixing-commit links, the final resolution comment and issue closure
-remain pending. Do not mark COMPLETE or archive until these remaining
-acceptance items are satisfied.
+The user explicitly authorized pushing on 2026-10-01. `git push origin v2.0.2`
+confirmed the implementation was already published. A GitHub API read of
+commit `5f16481982de976480f0cc6e680da500898a6d15` verified its accessible
+canonical URL before issue closure. The issue and comments were re-read,
+a resolution comment was posted, and `gh issue close 79 --repo
+Kautenja/PotatoChips --reason completed` succeeded. The final issue read-back
+reported `CLOSED` with `stateReason: COMPLETED` on 2026-10-01.
+
+This archive-only follow-up validates relative Markdown links and runs
+`git diff --check`; it does not change executable code or repeat the prior
+build/test results above.
 
 | Issue | Implementation Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #79 | `5f16481982de976480f0cc6e680da500898a6d15` (local, not pushed) | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening pending | [Progress update](https://github.com/Kautenja/PotatoChips/issues/79#issuecomment-5942112372); resolution pending publication | OPEN, read back 2026-10-01 |
+| #79 | [`5f16481982de976480f0cc6e680da500898a6d15`](https://github.com/Kautenja/PotatoChips/commit/5f16481982de976480f0cc6e680da500898a6d15) | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening limitations accepted by user decision | [Resolution](https://github.com/Kautenja/PotatoChips/issues/79#issuecomment-5942175136) | CLOSED / COMPLETED, read back 2026-10-01 |
 
 [nuked-commit]: https://github.com/nukeykt/Nuked-OPM/commit/f209e6ed3712032b641d53ce8fb24824eae6adc3
 [nuked-header]: https://github.com/nukeykt/Nuked-OPM/blob/f209e6ed3712032b641d53ce8fb24824eae6adc3/opm.h

@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include <memory>
 
 #ifndef WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
 #define WIDGETS_INDEXED_FRAME_DISPLAY_HPP_
@@ -27,7 +28,8 @@ struct IndexedFrameDisplay : rack::TransparentWidget {
     /// the function to call to get the index
     std::function<unsigned()> getIndex;
     /// the SVG images representing the algorithms
-    std::vector<NSVGimage*> frames;
+    struct SVGDeleter { void operator()(NSVGimage* image) const { nsvgDelete(image); } };
+    std::vector<std::unique_ptr<NSVGimage, SVGDeleter>> frames;
     /// the background color for the widget
     NVGcolor background;
     /// the border color for the widget
@@ -60,9 +62,15 @@ struct IndexedFrameDisplay : rack::TransparentWidget {
         setPosition(position);
         setSize(size);
         for (unsigned i = 0; i < num_images; i++) {  // load each image
-            auto imagePath = asset::plugin(plugin_instance, path + std::to_string(i) + ".svg");
-            frames.push_back(nsvgParseFromFile(imagePath.c_str(), unit.c_str(), dpi));
+            auto imagePath = path + std::to_string(i) + ".svg";
+            frames.emplace_back(nsvgParseFromFile(imagePath.c_str(), unit.c_str(), dpi));
         }
+    }
+
+    /// Missing assets, preview callbacks, and invalid indices produce an empty display.
+    NSVGimage* currentFrame() const {
+        unsigned index = getIndex ? getIndex() : 0;
+        return index < frames.size() ? frames[index].get() : nullptr;
     }
 
     /// @brief Draw the display on the main context.
@@ -89,7 +97,7 @@ struct IndexedFrameDisplay : rack::TransparentWidget {
             // draw the image
             // -----------------------------------------------------------------
             nvgBeginPath(args.vg);
-            svgDraw(args.vg, frames[getIndex()]);
+            if (auto frame = currentFrame()) rack::svgDraw(args.vg, frame);
             nvgClosePath(args.vg);
             // -----------------------------------------------------------------
             // draw the border

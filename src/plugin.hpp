@@ -14,8 +14,9 @@
 //
 
 #include "rack.hpp"
-#include "kautenja_rack/helpers.hpp"
-#include "kautenja_rack/param_quantity.hpp"
+#include "rack_extensions/helpers.hpp"
+#include "rack_extensions/panel.hpp"
+#include "rack_extensions/param_quantity.hpp"
 
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
@@ -39,11 +40,10 @@ extern rack::Model *modelPalletTownWavesSystem;
 extern rack::Model *modelMegaTone;
 extern rack::Model *modelBossFight;
 extern rack::Model *modelMiniBoss;
-extern rack::Model *modelSuperSynth;
 extern rack::Model *modelSuperEcho;
 extern rack::Model *modelSuperADSR;
-extern rack::Model *modelSuperSampler;
 extern rack::Model *modelSuperVCA;
+extern rack::Model *modelYM2151;
 
 extern rack::Model *modelChipS_SMP_Blank1;
 extern rack::Model *modelBossFight_Blank1;

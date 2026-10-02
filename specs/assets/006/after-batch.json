@@ -1,0 +1,20 @@
+{
+  "source_sha256": "88b893e68157bf1f38961c9e01082a1422787d4aba46909e651d5543a9efd6c3",
+  "inventory": [
+    {
+      "slug": "SuperEcho",
+      "manual": "SuperEcho",
+      "width": 240,
+      "panel": "SuperEcho.svg"
+    }
+  ],
+  "revision": "6e5547e52b858486274c9a1c0a0c131f1b369bd6",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "sample_rate": 48000,
+  "samples": 4800,
+  "fixture": "Constructor defaults; no patched signals; RNG seed 0x504f5441544f/0x4348495053",
+  "rack_library_sha256": {
+    "libRack.dylib": "0ee091bb5065326c1e5a101d38ac2c3de00f962fd049294f50f11582b53a820e"
+  },
+  "themes": "Native light/dark panels, ports and screws; state/history/geometry unchanged"
+}

@@ -1,37 +1,20 @@
-### Description
+# Change
 
-Please include a summary of the change and which issue is fixed. Please also
-include relevant motivation and context. List any dependencies that are
-required for this change.
+Describe the problem and resulting behavior. Link the relevant issue/spec
+and state any patch, parameter, asset, or dependency compatibility effects.
 
--   Fixes #<issue>
+## Validation
 
-### Type of change
+List commands/results and Rack/plugin/OS/architecture/sample-rate details
+for native checks. Distinguish tests, plugin builds, and manual Rack
+verification. Identify skipped checks and explain why they were skipped.
 
-Please select all relevant options:
+## Checklist
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-
-### How Has This Been Tested?
-
-Please describe the tests that you ran to verify your changes. Provide
-instructions so we can reproduce. Please also list any relevant details for
-your test configuration
-
-- [ ] Test A
-- [ ] Test B
-
-### Test Configuration
-
--   Operating System:
--   Python version:
--   C++ compiler version:
-
-### Checklist
-
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation following the
-      [Doxygen](https://www.doxygen.nl/manual/docblocks.html) style
-- [ ] I have tested that my fix is effective or that my feature works
+- [ ] I reviewed the complete diff and followed CONTRIBUTING.md/style guides.
+- [ ] Existing slugs, parameter/port IDs, and saved patch behavior are preserved
+      or have an explicit compatibility plan and verification.
+- [ ] I ran checks appropriate to this change and documented the results.
+- [ ] Documentation, manifest, manuals, and fixtures match changed behavior.
+- [ ] Dependency/artwork origins and notices are preserved or updated.
+- [ ] Generated files and personal device settings are excluded.

@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/atari_pokey.hpp"
 #include "engine/chip_module.hpp"
 
@@ -279,35 +280,35 @@ struct PotKeysWidget : ModuleWidget {
     explicit PotKeysWidget(PotKeys *module) {
         setModule(module);
         static constexpr auto panel = "res/PotKeys.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the vertical spacing between the same component on different oscillators
         for (unsigned i = 0; i < AtariPOKEY::OSC_COUNT; i++) {  // oscillator control
             // Frequency
             addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 31),  module, PotKeys::PARAM_FREQ        + i));
-            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 70),  module, PotKeys::INPUT_VOCT        + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(11 + 35 * i, 70),  module, PotKeys::INPUT_VOCT        + i));
             // FM
-            addInput(createInput<PJ301MPort>(Vec(11 + 35 * i, 98), module, PotKeys::INPUT_FM          + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(11 + 35 * i, 98), module, PotKeys::INPUT_FM          + i));
             addParam(createParam<Trimpot>(   Vec(13 + 35 * i, 143), module, PotKeys::PARAM_FM          + i));
             // Level
             addParam(createParam<Trimpot>(Vec(13 + 35 * i, 169), module, PotKeys::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 209), module, PotKeys::INPUT_LEVEL       + i));
+            addInput(createInput<ThemedPJ301MPort>( Vec(11 + 35 * i, 209), module, PotKeys::INPUT_LEVEL       + i));
             // Noise
             addParam(createParam<Trimpot>(Vec(13 + 35 * i, 241), module, PotKeys::PARAM_NOISE + i));
-            addInput(createInput<PJ301MPort>( Vec(11 + 35 * i, 281), module, PotKeys::INPUT_NOISE + i));
+            addInput(createInput<ThemedPJ301MPort>( Vec(11 + 35 * i, 281), module, PotKeys::INPUT_NOISE + i));
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(30 + 35 * i, 319), module, PotKeys::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(11 + 35 * i, 324), module, PotKeys::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(11 + 35 * i, 324), module, PotKeys::OUTPUT_OSCILLATOR + i));
         }
         float offset = 0;
         for (unsigned i = 0; i < AtariPOKEY::CTL_FLAGS; i++) {  // Global control
             if (i == 3 or i == 4) continue;  // ignore 16-bit (not implemented)
             addParam(createParam<CKSS>(Vec(152, 45 + offset), module, PotKeys::PARAM_CONTROL + i));
-            addInput(createInput<PJ301MPort>(Vec(175, 44 + offset), module, PotKeys::INPUT_CONTROL + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(175, 44 + offset), module, PotKeys::INPUT_CONTROL + i));
             offset += 56;
         }
     }

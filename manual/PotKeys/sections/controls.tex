@@ -1,0 +1,31 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} pitch and pitch/FM inputs;
+\textbf{2} FM and level;
+\textbf{3} noise mode and CV;
+\textbf{4} audio outputs;
+\textbf{5} shared clock, filter and LFSR switches/CV.
+
+The four voice columns repeat frequency, FM, noise and level controls above
+their sockets and outputs. The right-hand switches and CV inputs affect shared
+clocking, filtering and the shift register.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Frequency & $\pm2.5$ oct.; 0 & C4 reference in the calculation; V/OCT adds octaves. \\
+FM depth & $-1$--$+1$; 0 & Adds $aV/5$ octaves. \\
+Noise & 0--7; 7 & Adds one setting per volt, truncates and clamps. \\
+Level & 0--15; 7 & Knob times $V/10$, rounded and clamped. \\
+\bottomrule
+\end{tabularx}
+
+Pitch, FM, Noise and Level normal forward independently, starting at 0, 5,
+0 and 10\,V. Noise selects register-bit combinations, not a smooth wet/dry
+mix. Its setting can change whether the clock produces a periodic tone or
+a shift-register pattern.
+
+The global switches default off. Low Frequency changes the shared clock;
+Tone 1 and Tone 3 High Frequency select faster clocks for those channels.
+High-Pass Tone 1 from Tone 3 and Tone 2 from Tone 4 couple the named channels.
+LFSR changes the shared noise sequence. Their CV inputs switch at 2\,V high
+and 0.01\,V low, reversing the panel state while high. The hardware's paired
+16-bit modes are not exposed by this module.

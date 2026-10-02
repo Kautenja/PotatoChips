@@ -1,0 +1,152 @@
+{
+  "date": "2026-10-01",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "capture_source_sha256": "6454bcc57e417779fcf0d7b54aa4b04298d4800705b4c183339e5bdfa5651d18",
+  "rack_library_sha256": {
+    "libRack.dylib": "0ee091bb5065326c1e5a101d38ac2c3de00f962fd049294f50f11582b53a820e"
+  },
+  "views": 288,
+  "pixel_ratio": 2,
+  "geometry_count": 606,
+  "manual_pages_reviewed": 115,
+  "modules": [
+    {
+      "slug": "Blocks",
+      "name": "Facets",
+      "file": "implemented/Blocks.png",
+      "controls": 40,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "MiniBoss",
+      "name": "Operator 2612",
+      "file": "implemented/MiniBoss.png",
+      "controls": 28,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "106",
+      "name": "Octal 163",
+      "file": "implemented/NameCorpOctalWaveGenerator.png",
+      "controls": 83,
+      "state_geometry_history": true,
+      "audio_probe": true
+    },
+    {
+      "slug": "2612",
+      "name": "Voice 2612",
+      "file": "implemented/BossFight.png",
+      "controls": 113,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "2612_Blank1",
+      "name": "Contour 2612",
+      "file": "implemented/2612_Blank1.png",
+      "controls": 0,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "2A03",
+      "name": "Staircase 2A03",
+      "file": "implemented/InfiniteStairs.png",
+      "controls": 36,
+      "state_geometry_history": true,
+      "audio_probe": true
+    },
+    {
+      "slug": "AY_3_8910",
+      "name": "Trio AY",
+      "file": "implemented/Jairasullator.png",
+      "controls": 52,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "FME7",
+      "name": "Pulse FME-7",
+      "file": "implemented/Pulses.png",
+      "controls": 24,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "GBS",
+      "name": "Pocket APU",
+      "file": "implemented/PalletTownWavesSystem.png",
+      "controls": 43,
+      "state_geometry_history": true,
+      "audio_probe": true
+    },
+    {
+      "slug": "POKEY",
+      "name": "Polynomial",
+      "file": "implemented/PotKeys.png",
+      "controls": 52,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "SuperADSR",
+      "name": "Contour",
+      "file": "implemented/SuperADSR.png",
+      "controls": 18,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "SuperEcho",
+      "name": "Echo",
+      "file": "implemented/SuperEcho.png",
+      "controls": 35,
+      "state_geometry_history": true,
+      "audio_probe": true
+    },
+    {
+      "slug": "SuperVCA",
+      "name": "Gaussian",
+      "file": "implemented/SuperVCA.png",
+      "controls": 21,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "Sony_S_SMP_Blank1",
+      "name": "Silicon S-SMP",
+      "file": "implemented/Sony_S_SMP_Blank1.png",
+      "controls": 0,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "SN76489",
+      "name": "Tone 76489",
+      "file": "implemented/MegaTone.png",
+      "controls": 32,
+      "state_geometry_history": true,
+      "audio_probe": false
+    },
+    {
+      "slug": "VRC6",
+      "name": "Ramp VRC6",
+      "file": "implemented/StepSaw.png",
+      "controls": 29,
+      "state_geometry_history": true,
+      "audio_probe": false
+    }
+  ],
+  "minimum": {
+    "version": "2.4.0",
+    "capture_source_sha256": "6454bcc57e417779fcf0d7b54aa4b04298d4800705b4c183339e5bdfa5651d18",
+    "rack_library_sha256": {
+      "libRack.dylib": "3e0332e0be49075f4b6af9cfe8e30b8a3f89cb015079f0eff10af25cca5819f0"
+    },
+    "sdk_archive_sha256": "28c3a1f980bd0a83e63bdd86dafa60d22b0b082b57dce805b72dfa00eaa5678e",
+    "runtime_package_sha256": "dcc9f0dec531b500bc06b54966f019f39fdd78263e9ef597b118ec9178fa72f9"
+  },
+  "runtime_version": "2.6.0"
+}

@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/konami_vrc6.hpp"
 #include "engine/chip_module.hpp"
 
@@ -225,31 +226,31 @@ struct StepSawWidget : ModuleWidget {
     explicit StepSawWidget(StepSaw *module) {
         setModule(module);
         static constexpr auto panel = "res/StepSaw.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        // addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        // addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        // addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < KonamiVRC6::OSC_COUNT; i++) {
             // Frequency
             addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 32),  module, StepSaw::PARAM_FREQ  + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 71),  module, StepSaw::INPUT_VOCT  + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(13 + 35 * i, 71),  module, StepSaw::INPUT_VOCT  + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 99), module, StepSaw::INPUT_FM    + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(13 + 35 * i, 99), module, StepSaw::INPUT_FM    + i));
             addParam(createParam<Trimpot>(     Vec(15 + 35 * i, 144), module, StepSaw::PARAM_FM    + i));
             // Level
             addParam(createParam<Trimpot>( Vec(15 + 35 * i, 170), module, StepSaw::PARAM_LEVEL + i));
-            addInput(createInput<PJ301MPort>(  Vec(13 + 35 * i, 210), module, StepSaw::INPUT_LEVEL + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(13 + 35 * i, 210), module, StepSaw::INPUT_LEVEL + i));
             if (i < 2) {  // pulse width for tone generator
                 addParam(createParam<Trimpot>(Vec(15 + 35 * i, 241), module, StepSaw::PARAM_PW + i));
-                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 281), module, StepSaw::INPUT_PW + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(13 + 35 * i, 281), module, StepSaw::INPUT_PW + i));
             } else {  // sync for saw wave
-                addInput(createInput<PJ301MPort>(Vec(13 + 35 * i, 264), module, StepSaw::INPUT_SYNC));
+                addInput(createInput<ThemedPJ301MPort>(Vec(13 + 35 * i, 264), module, StepSaw::INPUT_SYNC));
             }
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(32 + 35 * i, 319), module, StepSaw::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(13 + 35 * i, 324), module, StepSaw::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(13 + 35 * i, 324), module, StepSaw::OUTPUT_OSCILLATOR + i));
         }
     }
 };

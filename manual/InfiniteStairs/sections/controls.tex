@@ -1,0 +1,39 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} pitch, period and pitch/FM inputs;
+\textbf{2} FM and level;
+\textbf{3} pulse width and sync;
+\textbf{4} audio outputs.
+
+\subsection{Top: pitch and noise period}
+The first three V/OCT knobs span $-2.5$ to $+2.5$ octaves around C4, default
+0. The pitch inputs add 1 V/octave and normal from Tone 1 through Tone 2 to
+Triangle. Hardware period rounding makes extreme pitches less accurate.
+
+The Noise Period knob ranges from 0 to 15, default 7. Its CV adds one panel
+step per 2 V before flooring and clipping; the panel value is reversed when
+written to the chip. It is not a calibrated noise V/octave input. LFSR
+switches the noise pattern. Its gate input changes the switch state while
+high (2 V rising, 0.01 V falling); it does not latch a new knob setting.
+\subsection{Middle: MOD and AMP}
+MOD ranges from $-1$ to 1, default 0. It adds $aV/5$ octaves, so the FM path
+is exponential pitch modulation. The unpatched first MOD input supplies 5 V
+for fine tuning; that voltage normals forward to the following pitched voices.
+
+AMP multiplies the volume setting by input voltage divided by 10, then rounds
+and clips to the chip's 0--15 level. Defaults are 10. The unpatched first
+AMP input supplies 10 V and normals onward. Pulse/noise levels are stepped;
+the triangle's hardware gating differs from a smooth VCA. Use an external
+VCA when you need a continuous triangle fade.
+\subsection{Lower panel: PW, SYNC and outputs}
+The two PW controls select 0--3, default 2, corresponding to 12.5, 25, 50 and
+75 percent duty. CV adds $4V/7$ before truncation and clipping; an interior
+step spans 1.75 V. PW normals from the first pulse to the second.
+
+Triangle and noise SYNC detect rising crossings of 0.02 V and re-arm below
+0.01 V. They operate at audio rate and restart the corresponding phase.
+The very low threshold also responds to a bipolar oscillator crossing zero.
+
+Outputs run left to right: Tone 1, Tone 2, Triangle, Noise. An unplugged
+output is added into the next; plugging an earlier output removes that voice
+from the downstream mix. Each stage clips to $\pm5$ V, so the sum can distort
+before it reaches the final jack. Reduce component levels to keep a mix clean.

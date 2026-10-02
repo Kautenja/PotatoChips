@@ -1,0 +1,50 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} bypass;
+\textbf{2} delay, feedback, mix and CV;
+\textbf{3} audio inputs, gain and outputs;
+\textbf{4} eight FIR sliders, CV inputs and attenuverters.
+
+\subsection{Left side: delay, feedback and mix}
+Delay selects an integer level from 0 to 31, default 0. The CV is an additive
+$31V/10$ offset in levels, clipped to the same range and truncated to an
+integer. A positive 10 V spans the full range. The hover display reports
+$16d$ ms for level $d$; it is calibrated for 32 kHz only.
+
+Feedback ranges from $-128$ to 127, default 0. CV adds $127V/10$ before
+clipping and integer conversion. Negative feedback reverses the repeated
+signal's polarity. High feedback combined with a strong FIR response can
+build up into clipping; reduce input gain and feedback before changing a
+filter preset.
+
+Each Mix control ranges from $-128$ to 127, default 0. Its CV adds
+$127V/10$ to the knob; the knob is a base value, not a CV attenuverter.
+The left Mix CV normals to the right. Zero Mix removes the wet contribution
+while retaining the dry input. There is no wet-only crossfade position.
+\subsection{Lower left: audio and bypass}
+Input gain ranges from silence to +6 dB, default 0 dB. After gain, active
+processing clips each input to $\pm5$ V and converts it to signed 16-bit
+samples. The output sums dry and filtered wet signals and clips to about
+$\pm5$ V. The right audio input normals to the left; the outputs stay separate.
+
+Bypass defaults off. When enabled it routes gained input directly to output;
+it bypasses the echo, not a Gaussian filter. The buffer continues advancing
+with zero input rather than freezing. Bypass does not apply the active path's
+$\pm5$ V limiter. Gain therefore remains relevant even when bypassed.
+\subsection{Right side: eight FIR coefficients}
+Each numbered FIR row has a horizontal coefficient slider. Drag right to
+increase its signed integer value; right-click to enter a number. The track
+and handle remain visible with no CV or with bypass enabled. The handle
+indicator shows positive CV in green and negative CV in red.
+
+Coefficients range from $-128$ to 127. Coefficient 1 defaults to 127; the
+others default to zero. Edits snap to integers, including numeric entry.
+Older patches containing fractional coefficients round to the nearest
+integer on load; the bundled integer presets retain their stored values.
+Each CV attenuverter ranges from $-1$ to 1 and
+defaults to zero. CV adds $127aV/10$ to the coefficient, where $a$ is that
+attenuverter. The FIR CV inputs normal forward through all eight positions.
+An attenuverter at zero rejects CV regardless of the cable voltage.
+
+The FIR shapes the wet signal as well as the feedback path. Feedback can be
+zero and the filter remains audible when Mix is nonzero. Coefficient 8 acts
+on the newest buffer sample; coefficient 1 is seven samples older.

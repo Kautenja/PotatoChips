@@ -1,0 +1,9 @@
+{
+  "version": "3.16.0",
+  "commit": "317ac1ed4c0bb6e6b91eafc817e05c488feffcb3",
+  "sha256": {
+    "LICENSE_1_0.txt": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+    "catch_amalgamated.cpp": "1fe7f10334e0ae5494419cfa84c270f15235eada0fc02bdb493d1def537601f3",
+    "catch_amalgamated.hpp": "d4cc143ea76ae212204363922d8adf376d66a1fda5a33ac73f93a7d1c119f4e0"
+  }
+}

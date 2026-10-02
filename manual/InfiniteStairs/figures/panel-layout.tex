@@ -1,0 +1,98 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/220,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (150,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (75.0,10) {\MakeUppercase{\manualname}};
+\panelregion{1}{5}{28}{140}{103}
+\panelregion{2}{5}{137}{140}{98}
+\panelregion{3}{5}{237}{140}{77}
+\panelregion{4}{5}{316}{140}{42}
+% knob 0: Pulse 1 Frequency
+\panelknob{12.0000}{32.0000}{17.8555}{17.8594}
+% input 0: Pulse 1 V/Oct
+\panelinput{10.0000}{71.0000}{23.7000}{23.7000}
+% input 4: Pulse 1 FM
+\panelinput{10.0000}{99.0000}{23.7000}{23.7000}
+% knob 4: Pulse 1 FM
+\panelknob{12.0000}{144.0000}{17.8555}{17.8594}
+% knob 8: Pulse 1 Volume
+\panelknob{12.0000}{170.0000}{17.8555}{17.8594}
+% input 8: Pulse 1 Volume
+\panelinput{10.0000}{210.0000}{23.7000}{23.7000}
+% knob 12: Pulse 1 Duty Cycle
+\panelknob{12.0000}{241.0000}{17.8555}{17.8594}
+% input 12: Pulse 1 Width
+\panelinput{10.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{29.0000}{319.0000}{5.9055}{5.9055}
+% output 0: Pulse 1 Audio
+\paneloutput{10.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Pulse 2 Frequency
+\panelknob{47.0000}{32.0000}{17.8555}{17.8594}
+% input 1: Pulse 2 V/Oct
+\panelinput{45.0000}{71.0000}{23.7000}{23.7000}
+% input 5: Pulse 2 FM
+\panelinput{45.0000}{99.0000}{23.7000}{23.7000}
+% knob 5: Pulse 2 FM
+\panelknob{47.0000}{144.0000}{17.8555}{17.8594}
+% knob 9: Pulse 2 Volume
+\panelknob{47.0000}{170.0000}{17.8555}{17.8594}
+% input 9: Pulse 2 Volume
+\panelinput{45.0000}{210.0000}{23.7000}{23.7000}
+% knob 13: Pulse 2 Duty Cycle
+\panelknob{47.0000}{241.0000}{17.8555}{17.8594}
+% input 13: Pulse 2 Width
+\panelinput{45.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{64.0000}{319.0000}{5.9055}{5.9055}
+% output 1: Pulse 2 Audio
+\paneloutput{45.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Triangle Frequency
+\panelknob{82.0000}{32.0000}{17.8555}{17.8594}
+% input 2: Triangle V/Oct
+\panelinput{80.0000}{71.0000}{23.7000}{23.7000}
+% input 6: Triangle FM
+\panelinput{80.0000}{99.0000}{23.7000}{23.7000}
+% knob 6: Triangle FM
+\panelknob{82.0000}{144.0000}{17.8555}{17.8594}
+% input 14: Triangle Sync
+\panelinput{80.0000}{264.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{99.0000}{319.0000}{5.9055}{5.9055}
+% output 2: Triangle Audio
+\paneloutput{80.0000}{324.0000}{23.7000}{23.7000}
+% knob 3: Noise Period
+\panelknob{117.0000}{32.0000}{17.8555}{17.8594}
+% input 3: Noise Period
+\panelinput{115.0000}{71.0000}{23.7000}{23.7000}
+% input 7: Noise LFSR
+\panelinput{115.0000}{99.0000}{23.7000}{23.7000}
+% switch 7: Linear Feedback Shift Register
+\panelswitch{120.0000}{141.0000}{14.0000}{20.6411}
+% knob 11: Noise Volume
+\panelknob{117.0000}{170.0000}{17.8555}{17.8594}
+% input 11: Noise Volume
+\panelinput{115.0000}{210.0000}{23.7000}{23.7000}
+% input 15: Noise Sync
+\panelinput{115.0000}{264.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{134.0000}{319.0000}{5.9055}{5.9055}
+% output 3: Noise Audio
+\paneloutput{115.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{168}{79.5}
+\panelmarker{2}{168}{186.0}
+\panelmarker{3}{168}{275.5}
+\panelmarker{4}{168}{337.0}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch, period and pitch/FM inputs}
+\panelkey{2}{FM and level}
+\panelkey{3}{Pulse width and sync}
+\panelkey{4}{Audio outputs}
+\end{tabularx}
+\end{minipage}

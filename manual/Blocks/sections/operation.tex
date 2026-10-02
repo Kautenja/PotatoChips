@@ -1,0 +1,33 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{Layered tone and noise}
+Use Triangle on voice 1 and Sample+Hold on voice 2. Give them the same pitch
+via normalling, then tune voice 2 higher. Patch separate envelopes to the two
+Level inputs: a short noise envelope makes a percussive attack over a longer
+tonally stable voice. Take each output separately for external mixing, or
+use the forward sum and reduce both levels to leave headroom.
+
+The four selected shapes are saved alongside parameters in patches and
+presets. Reset restores Sine on every oscillator; randomize chooses each voice's shape
+as well as changing parameters. All polyphonic channels of a voice share its
+shape, while their pitch and amplitude can differ.
+
+If a voice is silent, check its Level CV and output routing. If the sound
+becomes noisy after a shape change, choose Sine explicitly before checking
+tuning. The sample-and-hold and shift-register modes are not sine oscillators
+with added distortion; their clocked patterns are the intended source.
+
+\subsection{Cable channels, outputs and saved patches}
+The widest input selects 1--16 polyphonic chip instances. Voice columns are
+oscillators within each instance, not separate cable channels. Inputs read
+the matching channel; supply matching pitch and level channel counts rather
+than expecting a mono envelope to repeat across a polyphonic pitch cable.
+
+Each output adds the preceding output when that earlier socket is unpatched.
+The accumulated signal clips at approximately $\pm5$\,V. To hear the complete
+mix, use the last output and leave earlier outputs empty. Patching an earlier
+output removes that signal from the following mix. Lower source levels if
+the sum clips.
+
+Rack saves the panel parameters. Reset initializes the chip; oscillator
+phase is not preserved by a patch save. Pitch, FM and level are read each sample; the oscillators render their
+waveforms in internal blocks.

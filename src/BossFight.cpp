@@ -14,8 +14,11 @@
 //
 
 #include "plugin.hpp"
+#include <atomic>
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/yamaha_ym2612/voice4op.hpp"
 #include "engine/yamaha_ym2612_params.hpp"
 #include "widget/indexed_frame_display.hpp"
@@ -26,6 +29,8 @@
 
 /// A Eurorack module based on the Yamaha YM2612.
 struct BossFight : rack::Module {
+    // Read-only regression access; no diagnostics run in the audio path.
+    friend struct YM2612ModuleTestAccess;
  private:
     /// a YM2612 chip emulator
     YamahaYM2612::Voice4Op apu[PORT_MAX_CHANNELS];
@@ -34,6 +39,9 @@ struct BossFight : rack::Module {
     Trigger::Threshold gate_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
     Trigger::Threshold retrig_triggers[YamahaYM2612::Voice4Op::NUM_OPERATORS][PORT_MAX_CHANNELS];
+
+    /// Voices processed on the preceding sample; removed lanes must release.
+    unsigned activeChannels = 0;
 
     /// a VU meter for measuring the output audio level from the emulator
     rack::dsp::VuMeter2 vuMeter;
@@ -126,6 +134,8 @@ struct BossFight : rack::Module {
         ENUMS(VU_LIGHTS, 6),
         NUM_LIGHTS
     };
+
+    std::atomic<unsigned> displayAlgorithm{0};
 
     /// the current FM algorithm
     uint8_t algorithm[PORT_MAX_CHANNELS] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -255,13 +265,11 @@ struct BossFight : rack::Module {
         // this value is used in the algorithm widget
         algorithm[channel] = params[PARAM_AL].getValue() + inputs[INPUT_AL].getVoltage(channel);
         algorithm[channel] = Math::clip(static_cast<int>(algorithm[channel]), 0, 7);
+        if (channel == 0) displayAlgorithm.store(algorithm[channel], std::memory_order_relaxed);
         apu[channel].set_lfo(getParam(channel, PARAM_LFO, INPUT_LFO, 0, 7));
         // set the global parameters
         apu[channel].set_algorithm(getParam(channel, PARAM_AL,  INPUT_AL, 0, 7));
         apu[channel].set_feedback(getParam(channel, PARAM_FB,  INPUT_FB, 0, 7));
-        // normal pitch gate and re-trigger
-        float gate = 0;
-        float retrig = 0;
         // set the operator parameters
         for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
             apu[channel].set_attack_rate   (op, getParam(channel, PARAM_AR         + op, INPUT_AR         + op, 1, 31 ));
@@ -276,18 +284,6 @@ struct BossFight : rack::Module {
             // SSG and rate scale
             apu[channel].set_ssg_enabled(op, params[PARAM_SSG_ENABLE + op].getValue());
             apu[channel].set_rate_scale(op, params[PARAM_RS + op].getValue());
-            // process the gate trigger, high at 2V
-            gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
-            gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
-            // process the retrig trigger, high at 2V
-            retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
-            const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
-            // use the exclusive or of the gate and retrigger. This ensures that
-            // when either gate or trigger alone is high, the gate is open,
-            // but when neither or both are high, the gate is closed. This
-            // causes the gate to get shut for a sample when re-triggering an
-            // already gated voice
-            apu[channel].set_gate(op, trigger ^ gate_triggers[op][channel].isHigh(), prevent_clicks);
         }
     }
 
@@ -306,13 +302,32 @@ struct BossFight : rack::Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process control voltage when the CV divider is high
-        if (cvDivider.process())
-            for (unsigned channel = 0; channel < channels; channel++)
-                processCV(args, channel);
+        const bool updateCV = cvDivider.process();
+        for (unsigned channel = 0; channel < channels; channel++)
+            if (updateCV || channel >= activeChannels) processCV(args, channel);
+        for (unsigned channel = channels; channel < activeChannels; channel++) {
+            for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
+                apu[channel].set_gate(op, false, prevent_clicks);
+                gate_triggers[op][channel].reset();
+                retrig_triggers[op][channel].reset();
+            }
+        }
+        activeChannels = channels;
         // set the operator parameters
         for (unsigned channel = 0; channel < channels; channel++) {
             float pitch = 0;
+            float gate = 0;
+            float retrig = 0;
             for (unsigned op = 0; op < YamahaYM2612::Voice4Op::NUM_OPERATORS; op++) {
+                // Preserve forward normalling and per-operator overrides while
+                // observing every host sample, including sampled low intervals.
+                gate = inputs[INPUT_GATE + op].getNormalVoltage(gate, channel);
+                gate_triggers[op][channel].process(rescale(gate, 0.01f, 2.f, 0.f, 1.f));
+                retrig = inputs[INPUT_RETRIG + op].getNormalVoltage(retrig, channel);
+                const bool trigger = retrig_triggers[op][channel].process(rescale(retrig, 0.01f, 2.f, 0.f, 1.f));
+                // Complete the key pair before stepping the shared chip context.
+                if (trigger) apu[channel].set_gate(op, false, prevent_clicks);
+                apu[channel].set_gate(op, gate_triggers[op][channel].isHigh() || trigger, prevent_clicks);
                 const float frequency = params[PARAM_FREQ + op].getValue();
                 pitch = inputs[INPUT_PITCH + op].getNormalVoltage(pitch, channel);
                 apu[channel].set_frequency(op, Math::Eurorack::voct2freq(Math::clip(frequency + pitch, -6.5f, 6.5f)));
@@ -351,18 +366,18 @@ struct BossFightWidget : ModuleWidget {
     ///
     explicit BossFightWidget(BossFight *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/BossFight.svg")));
+        setPanel(createThemedPanel(plugin_instance, "res/BossFight.svg"));
         // Panel Screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // Algorithm Display
         addChild(new IndexedFrameDisplay(
             [&]() {
-                return this->module ? reinterpret_cast<BossFight*>(this->module)->algorithm[0] : 0;
+                return this->module ? reinterpret_cast<BossFight*>(this->module)->displayAlgorithm.load(std::memory_order_relaxed) : 0;
             },
-            "res/BossFight_algorithms/",
+            asset::plugin(plugin_instance, "res/BossFight_algorithms/"),
             YamahaYM2612::Voice4Op::NUM_ALGORITHMS,
             Vec(10, 20),
             Vec(110, 70)
@@ -380,12 +395,12 @@ struct BossFightWidget : ModuleWidget {
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 330), module, BossFight::VU_LIGHTS + 4));
         addChild(createLightCentered<MediumLight<GreenLight>> (Vec(20, 345), module, BossFight::VU_LIGHTS + 5));
         // Global Ports
-        addInput(createInput<PJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
-        addInput(createInput<PJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
-        addInput(createInput<PJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
-        addInput(createInput<PJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
-        addOutput(createOutput<PJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
-        addOutput(createOutput<PJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(63, 249), module, BossFight::INPUT_AL));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(98, 249), module, BossFight::INPUT_FB));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(63, 293), module, BossFight::INPUT_LFO));
+        addInput(createInput<ThemedPJ301MPort>  (Vec(98, 293), module, BossFight::INPUT_SATURATION));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(63, 337), module, BossFight::OUTPUT_MASTER + 0));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(98, 337), module, BossFight::OUTPUT_MASTER + 1));
         // Operator Parameters and Inputs
         for (unsigned i = 0; i < YamahaYM2612::Voice4Op::NUM_OPERATORS; i++) {
             auto offset = i * 210;
@@ -408,8 +423,8 @@ struct BossFightWidget : ModuleWidget {
             const auto op_offset = 210 * i;
             for (unsigned j = 0; j < 6; j++) {
                 const auto x = 140 + op_offset + j * 35;
-                addInput(createInput<PJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
-                addInput(createInput<PJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(x, 295), module, BossFight::INPUT_AR + 4 * j + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(x, 339), module, BossFight::INPUT_GATE + 4 * j + i));
             }
         }
     }

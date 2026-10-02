@@ -21,9 +21,8 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/zero.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "dsp/trigger_zero.hpp"
+#include "catch_amalgamated.hpp"
 
 TEST_CASE("Trigger::Boolean should be false when processing 0s") {
     Trigger::Zero trigger;

@@ -1,0 +1,21 @@
+\manualchapter{Start here}{sec:start}
+Formerly Infinite Stairs. Existing patches and presets remain compatible.
+
+Staircase 2A03 brings the Ricoh 2A03's pulse, triangle and noise voices into
+Rack. It runs continuously without a gate. Use the individual outputs for
+separate voices, or leave earlier outputs unplugged to mix them into a later
+one. The original console's sampled-audio channel is not included.
+\subsection{First patch}
+\begin{enumerate}
+\item Add Staircase 2A03 and VCV Audio. Choose your output device and turn
+monitoring down before connecting audio.
+\item Connect TONE1 (Pulse 1 Audio in hover help) to Audio's To device 1.
+The initial pitch is C4, FM is zero and Pulse 1 Volume is 10.
+\item Turn the top-left V/OCT control to change pitch. Turn its PW control
+through the four pulse shapes; narrower pulses sound brighter.
+\item Patch a sequencer's pitch to the first V/OCT input. For articulated
+notes, send the gate to an envelope and its 0--10 V output to the first AMP
+input. Alternatively use an external VCA.
+\end{enumerate}
+The triangle and noise have their own SYNC inputs. Pulse voices have no
+phase-reset input; do not patch a gate expecting to start their oscillators.

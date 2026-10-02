@@ -1,0 +1,33 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} five waveform editors;
+\textbf{2} pitch, period and pitch/FM inputs;
+\textbf{3} FM, noise mode and level;
+\textbf{4} pulse width and Wave Morph;
+\textbf{5} audio outputs.
+
+Five editors run down the left edge. To their right, the voice columns run
+left to right: Pulse 1, Pulse 2, Wave and Noise. Tuning and modulation are
+above level; pulse duty and Wave Morph are below level, above the outputs.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & CV behavior \\\midrule
+Tone frequency & $\pm2.5$ oct.; 0 & C4 reference; V/OCT adds octaves. \\
+Tone FM depth & $-1$--$+1$; 0 & Adds $aV/5$ octaves; first FM input normals to 5\,V. \\
+Pulse duty & 0--3; 2 & Adds $4V/7$, then truncates/clamps. Widths: 12.5, 25, 50, 75\%. \\
+Wave morph & 0--5; 0 & Adds $5V/7$, then clamps to 1--5. Settings 0--1 select wave 1. \\
+Noise period & 0--7; 0 & Adds $V/2$, floors/clamps, then reverses the chip register. \\
+Pulse/noise level & 0--15; 10 & Multiplies by $V/10$; integer steps. \\
+Wave level & 0--3; 3 & Off, 25\%, 50\%, 100\% of the wave channel. \\
+\bottomrule
+\end{tabularx}
+
+Level CV normals to 10\,V at the first column and forwards through the other
+columns. Pitch and FM normal through the three pitched voices; pulse-duty
+CV normals from Pulse 1 to Pulse 2, then into the wave-morph CV. Insert a
+cable to override a normalled source. Wave Morph has no separate depth knob.
+
+The LFSR switch changes the noise sequence. Its CV switches at 2\,V high and
+0.01\,V low relative to the panel state. The legacy drawing shows an unused noise SYNC socket; no such input is
+provided by the current widget.
+changing the LFSR sequence is not a sync trigger. Pitch/FM run each sample;
+the other controls update every 16 host samples.

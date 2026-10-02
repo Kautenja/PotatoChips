@@ -1,5 +1,11 @@
-patches/* linguist-vendored
-dep/* linguist-vendored
-doxygen/* linguist-vendored
-manual/* linguist-vendored
-notebooks/* linguist-vendored
+dep/** linguist-vendored=true
+manual/** linguist-documentation=true
+patches/** linguist-detectable=false
+presets/** linguist-detectable=false
+
+# Preserve upstream license/dependency bytes across Windows checkouts.
+/LICENSE -text
+/docs/licenses/** -text
+/dep/** -text
+# Preserve the exact pinned Nuked-OPM bytes, including upstream blank-line spaces.
+dep/Nuked-OPM/opm.[ch] whitespace=-blank-at-eol

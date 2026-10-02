@@ -18,161 +18,60 @@
 
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
-// TODO: constructors from float and double?
-// TODO: casters to float and double?
-/// A 24-bit signed integer data-type.
-using int24_t = struct _int24_t {
-    /// internal data for the 24-bit integer
-    int32_t data : 24;
+/// A signed 24-bit PCM integer with explicit little-endian byte storage.
+/// Narrowing retains the low 24 bits; decoding sign-extends without relying on
+/// compiler bitfield layout or a signed right shift. The Rack ABI is unchanged.
+struct int24_t {
+    uint8_t bytes[3];
 
-    // -----------------------------------------------------------------------
-    // MARK: Constructors (intentionally not explicit to allow implied cast)
-    // -----------------------------------------------------------------------
+    template<typename T, typename std::enable_if<std::is_integral<T>::value &&
+        (sizeof(T) <= 2), int>::type = 0>
+    constexpr int24_t(T value) : bytes{uint8_t(uint64_t(value)),
+        uint8_t(uint64_t(value) >> 8), uint8_t(uint64_t(value) >> 16)} {}
 
-    // TODO: templates?
+    template<typename T, typename std::enable_if<std::is_integral<T>::value &&
+        (sizeof(T) > 2), int>::type = 0>
+    constexpr explicit int24_t(T value) : bytes{uint8_t(uint64_t(value)),
+        uint8_t(uint64_t(value) >> 8), uint8_t(uint64_t(value) >> 16)} {}
 
-    /// Create a new 24-bit integer from an 8-bit signed value.
-    constexpr _int24_t(int8_t integer) : data(integer) { }
+    /// Decode in the signed 24-bit range, using only representable int32 values.
+    constexpr int32_t value() const {
+        return int32_t(uint32_t(bytes[0]) | (uint32_t(bytes[1]) << 8) |
+            (uint32_t(bytes[2]) << 16)) - ((bytes[2] & 0x80) ? 0x1000000 : 0);
+    }
 
-    /// Create a new 24-bit integer from an 8-bit unsigned value.
-    constexpr _int24_t(uint8_t integer) : data(integer) { }
-
-    /// Create a new 24-bit integer from an 16-bit signed value.
-    constexpr _int24_t(int16_t integer) : data(integer) { }
-
-    /// Create a new 24-bit integer from an 16-bit unsigned value.
-    constexpr _int24_t(uint16_t integer) : data(integer) { }
-
-    // -----------------------------------------------------------------------
-    // MARK: Constructors (explicit to require explicit cast from larger type)
-    // -----------------------------------------------------------------------
-
-    // TODO: templates?
-
-    /// Create a new 24-bit integer from an 32-bit signed value.
-    constexpr explicit _int24_t(int32_t integer) : data(integer) { }
-
-    /// Create a new 24-bit integer from an 32-bit unsigned value.
-    constexpr explicit _int24_t(uint32_t integer) : data(integer) { }
-
-    /// Create a new 24-bit integer from an 64-bit signed value.
-    constexpr explicit _int24_t(uint64_t integer) : data(integer) { }
-
-    /// Create a new 24-bit integer from an 64-bit unsigned value.
-    constexpr explicit _int24_t(int64_t integer) : data(integer) { }
-
-    // -----------------------------------------------------------------------
-    // MARK: Operators - Assignment
-    // -----------------------------------------------------------------------
-
-    // TODO: templates?
-
-    /// Assign an 8-bit signed value to this 24-bit container.
-    _int24_t& operator=(int8_t const& integer) {
-        data = integer;
+    template<typename T>
+    typename std::enable_if<std::is_integral<T>::value, int24_t&>::type
+    operator=(T integer) {
+        *this = int24_t(integer);
         return *this;
     }
 
-    /// Assign an 8-bit unsigned value to this 24-bit container.
-    _int24_t& operator=(uint8_t const& integer) {
-        data = integer;
-        return *this;
-    }
+    constexpr operator int32_t() const { return value(); }
+    constexpr operator int64_t() const { return value(); }
+    constexpr explicit operator int8_t() const { return int8_t(value()); }
+    constexpr explicit operator uint8_t() const { return uint8_t(value()); }
+    constexpr explicit operator int16_t() const { return int16_t(value()); }
+    constexpr explicit operator uint16_t() const { return uint16_t(value()); }
+    constexpr explicit operator uint32_t() const { return uint32_t(value()); }
+    constexpr explicit operator uint64_t() const { return uint64_t(value()); }
+};
+static_assert(sizeof(int24_t) == 3, "PCM storage must contain exactly three bytes");
 
-    /// Assign an 16-bit signed value to this 24-bit container.
-    _int24_t& operator=(int16_t const& integer) {
-        data = integer;
-        return *this;
-    }
-
-    /// Assign an 16-bit unsigned value to this 24-bit container.
-    _int24_t& operator=(uint16_t const& integer) {
-        data = integer;
-        return *this;
-    }
-
-    // -----------------------------------------------------------------------
-    // MARK: Operators - Type Casting
-    // -----------------------------------------------------------------------
-
-    // TODO: templates?
-
-    explicit operator int8_t() { return data; }
-    explicit operator int8_t() const { return data; }
-    explicit operator uint8_t() { return data; }
-    explicit operator uint8_t() const { return data; }
-    explicit operator int16_t() { return data; }
-    explicit operator int16_t() const { return data; }
-    explicit operator uint16_t() { return data; }
-    explicit operator uint16_t() const { return data; }
-    operator int32_t() { return data; }
-    operator int32_t() const { return data; }
-    explicit operator uint32_t() { return data; }
-    explicit operator uint32_t() const { return data; }
-    operator int64_t() { return data; }
-    operator int64_t() const { return data; }
-    explicit operator uint64_t() { return data; }
-    explicit operator uint64_t() const { return data; }
-} __attribute__((packed));  // packed to consume 3 bytes instead of 4
-
-// ---------------------------------------------------------------------------
-// MARK: Operators - Equality Comparison (==)
-// ---------------------------------------------------------------------------
-
-/// Return true if this 24-bit value is equal to the other 24-bit value.
-///
-/// @param l the int24_t on the left-hand side of the operation
-/// @param r the other integer to compare the 24-bit value against
-/// @returns True if this 24-bit value is equal to the given value
-///
-inline bool operator==(int24_t const& l, int24_t const& r) {
-    return l.data == r.data;
+inline bool operator==(const int24_t& l, const int24_t& r) {
+    return l.value() == r.value();
 }
 
-/// Return true if this 24-bit value is equal to the given value.
-///
-/// @tparam T the type of the value to compare against
-/// @param l the int24_t on the left-hand side of the operation
-/// @param r the other integer to compare the 24-bit value against
-/// @returns True if this 24-bit value is equal to the given value
-///
+/// Restrict comparisons to numbers so unrelated enums/classes retain their
+/// own overloads (including test-framework status enums).
 template<typename T>
-inline bool operator==(int24_t const& l, T const& r) { return l.data == r; }
-// 8-bit
-template<int8_t> bool operator==(int24_t const&,  int8_t const&);
-template<int8_t> bool operator==(int24_t const&, uint8_t const&);
-// 16-bit
-template<int8_t> bool operator==(int24_t const&,  int16_t const&);
-template<int8_t> bool operator==(int24_t const&, uint16_t const&);
-// 32-bit
-template<int8_t> bool operator==(int24_t const&,  int32_t const&);
-template<int8_t> bool operator==(int24_t const&, uint32_t const&);
-// 64-bit
-template<int8_t> bool operator==(int24_t const&,  int64_t const&);
-template<int8_t> bool operator==(int24_t const&, uint64_t const&);
-
-/// Return true if this 24-bit value is equal to the given value.
-///
-/// @tparam T the type of the value to compare against
-/// @param l the int24_t on the left-hand side of the operation
-/// @param r the other integer to compare the 24-bit value against
-/// @returns True if this 24-bit value is equal to the given value
-///
+inline typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+operator==(const int24_t& l, const T& r) { return l.value() == r; }
 template<typename T>
-inline bool operator==(T const& l, int24_t const& r) { return l == r.data; }
-// 8-bit
-template<int8_t> bool operator==( int8_t const&, int24_t const&);
-template<int8_t> bool operator==(uint8_t const&, int24_t const&);
-// 16-bit
-template<int8_t> bool operator==( int16_t const&, int24_t const&);
-template<int8_t> bool operator==(uint16_t const&, int24_t const&);
-// 32-bit
-template<int8_t> bool operator==( int32_t const&, int24_t const&);
-template<int8_t> bool operator==(uint32_t const&, int24_t const&);
-// 64-bit
-template<int8_t> bool operator==( int64_t const&, int24_t const&);
-template<int8_t> bool operator==(uint64_t const&, int24_t const&);
+inline typename std::enable_if<std::is_arithmetic<T>::value, bool>::type
+operator==(const T& l, const int24_t& r) { return l == r.value(); }
 
 // ---------------------------------------------------------------------------
 // MARK: Operators - Not Equality Comparison (!=)
@@ -246,11 +145,11 @@ template<> class numeric_limits<int24_t> {
     static constexpr bool is_specialized = true;
 
     static constexpr int24_t max() noexcept { return int24_t(0x7fffff); }
-    static constexpr int24_t min() noexcept { return int24_t(0xffffff); }
-    static constexpr int24_t lowest() noexcept { return int24_t(0xffffff); }
+    static constexpr int24_t min() noexcept { return int24_t(-0x800000); }
+    static constexpr int24_t lowest() noexcept { return min(); }
 
-    static constexpr int digits = 1;
-    static constexpr int digits10 = 0;
+    static constexpr int digits = 23;
+    static constexpr int digits10 = 6;
     static constexpr int max_digits10 = 0;
 
     static constexpr bool is_signed = true;

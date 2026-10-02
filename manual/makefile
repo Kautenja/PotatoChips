@@ -1,63 +1,14 @@
-
+# Stable release filenames; blanks and disabled models have no manuals.
+.DEFAULT_GOAL := all
+MODULES := YM2151 SuperEcho InfiniteStairs BossFight MiniBoss NameCorpOctalWaveGenerator PalletTownWavesSystem Blocks Jairasullator MegaTone PotKeys Pulses StepSaw SuperADSR SuperVCA
+.PHONY: all manual clean $(MODULES)
 all: manual
-
-build:
-	mkdir -p build
-
-mBlocks: build
-	make -C Blocks
-	cp Blocks/build/manual.pdf build/Blocks.pdf
-
-mNameCorpOctalWaveGenerator: build
-	make -C NameCorpOctalWaveGenerator
-	cp NameCorpOctalWaveGenerator/build/manual.pdf build/NameCorpOctalWaveGenerator.pdf
-
-mInfiniteStairs: build
-	make -C InfiniteStairs
-	cp InfiniteStairs/build/manual.pdf build/InfiniteStairs.pdf
-
-mJairasullator: build
-	make -C Jairasullator
-	cp Jairasullator/build/manual.pdf build/Jairasullator.pdf
-
-mBossFight: build
-	make -C BossFight
-	cp BossFight/build/manual.pdf build/BossFight.pdf
-
-mMiniBoss: build
-	make -C MiniBoss
-	cp MiniBoss/build/manual.pdf build/MiniBoss.pdf
-
-mPulses: build
-	make -C Pulses
-	cp Pulses/build/manual.pdf build/Pulses.pdf
-
-mPalletTownWavesSystem: build
-	make -C PalletTownWavesSystem
-	cp PalletTownWavesSystem/build/manual.pdf build/PalletTownWavesSystem.pdf
-
-mMegaTone: build
-	make -C MegaTone
-	cp MegaTone/build/manual.pdf build/MegaTone.pdf
-
-mPotKeys: build
-	make -C PotKeys
-	cp PotKeys/build/manual.pdf build/PotKeys.pdf
-
-mStepSaw: build
-	make -C StepSaw
-	cp StepSaw/build/manual.pdf build/StepSaw.pdf
-
-mSuperEcho: build
-	make -C SuperEcho
-	cp SuperEcho/build/manual.pdf build/SuperEcho.pdf
-
-mSuperVCA: build
-	make -C SuperVCA
-	cp SuperVCA/build/manual.pdf build/SuperVCA.pdf
-
-mSuperADSR: build
-	make -C SuperADSR
-	cp SuperADSR/build/manual.pdf build/SuperADSR.pdf
-
-manual: mBlocks mNameCorpOctalWaveGenerator mInfiniteStairs mJairasullator mBossFight mMiniBoss mPulses mPalletTownWavesSystem mMegaTone mPotKeys mStepSaw mSuperEcho mSuperVCA mSuperADSR
+manual: $(MODULES)
+$(MODULES):
+	@mkdir -p .build
+	rm -f ".build/$@.pdf"
+	$(MAKE) -C "$@"
+	cp "$@/.build/manual.pdf" ".build/$@.pdf"
+clean:
+	@set -e; for module in $(MODULES); do $(MAKE) -C "$$module" clean; done
+	rm -f $(addprefix .build/,$(addsuffix .pdf,$(MODULES)))

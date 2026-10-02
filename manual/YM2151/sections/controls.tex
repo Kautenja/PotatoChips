@@ -1,0 +1,52 @@
+\manualchapter{Control reference}{sec:controls}
+The left column contains shared controls. The other four columns use identical
+operator layouts and natural algorithm order 1, 2, 3, 4 (hardware register
+slots 0, 2, 1, 3). The algorithm display shows modulation connections in teal
+and audible carriers in gold. Feedback always belongs to operator 1.
+
+All numeric chip controls round to the nearest integer after adding CV,
+then clamp. A +8\,V input adds the full positive range; negative CV subtracts.
+Unpatched CV is zero. TUNE and output LEVEL are continuous. Every parameter
+is saved by Rack, including discrete choices; no custom JSON is required.
+
+\begin{longtable}{@{}p{.16\textwidth}p{.25\textwidth}p{.50\textwidth}@{}}
+\toprule Control & Range; default & Meaning and CV \\\midrule\endhead
+TUNE & $-4$--4 octaves; 0 & Adds to V/OCT; 0\,V is C4. Pitch input is 1\,V/octave. \\
+ALG / FB & 0--7; 0 / 0 & Eight algorithms / operator-1 feedback; dedicated CV each. \\
+LEVEL & 0--1; 0.8 & Output gain; dedicated CV adds 1 per 8\,V. \\
+LFO & 0--255; 0 & Native frequency register, faster at larger values; CV. \\
+AMD / PMD & 0--127; 0 & Separate LFO amplitude/pitch depths; dedicated CV each. \\
+AMS / PMS & 0--3 / 0--7; 0 & Channel modulation sensitivities; no CV. \\
+WAVE & 0--3; saw & Saw, square, triangle, noise LFO; no CV. \\
+NOISE / RATE & Off / 0--31; off / 16 & Replace operator 4's sine with noise. RATE has CV; larger values are faster. \\
+ROUTE & Left, Right, Both; Both & Hardware channel routing; no CV. \\
+\bottomrule
+\end{longtable}
+
+\clearpage
+\begin{longtable}{@{}p{.16\textwidth}p{.25\textwidth}p{.50\textwidth}@{}}
+\toprule Per operator & Range; default & Meaning and CV \\\midrule\endhead
+AR & 0--31; 31 & Attack rate; 0 prevents attack from silence. CV. \\
+D1 / SR & 0--31; 0 & First decay / sustain decay rates. Zero holds that stage. CV each. \\
+SL & 0--15; 15 & Sustain level, inverted to chip attenuation (15 minus knob). CV. \\
+RR & 0--15; 15 & Release rate. Zero is slowest, not an infinite hold. CV. \\
+VOL & 0--127; 100,100,100,127 & Level, inverted to chip total attenuation (127 minus knob), in 0.75\,dB steps. CV. \\
+MUL & 0--15; 1 & Frequency multiplier; register 0 means $0.5\times$, others $1$--$15\times$. CV. \\
+KS & 0--3; 0 & Key-rate scaling, increasing rate dependence on pitch; no CV. \\
+DT1 & 0--7; 0 & Native fine detune code: 0/4 zero, 1--3 positive, 5--7 negative. No CV. \\
+DT2 & 0--3; 0 & Coarse detune: 0, 600, 781, 950 cents. No CV. \\
+AM & 0--1; off & Enable LFO amplitude modulation for this operator; no CV. \\
+\bottomrule
+\end{longtable}
+
+The native sustain attenuation steps are 3\,dB; chip code 15 jumps to 93\,dB.
+Thus panel SL 0 selects that lowest threshold, while SL 15 selects 0\,dB.
+Rates are register values, not seconds. Higher rates are faster, and KS/pitch
+can change envelope timing. AM requires nonzero AMD and AMS as well as an
+operator's AM switch. PM requires both PMD and PMS. Setting depths alone
+therefore need not change the sound.
+
+GATE rises at 2\,V and falls at or below 0.01\,V. RETRIG uses the same
+hysteresis. With gate held high, one retrigger edge schedules key-off then
+key-on. A held trigger does not repeat. Simultaneous gate rise and retrigger
+key on once; gate fall wins over retrigger; retrigger alone cannot start a note.

@@ -1,0 +1,32 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} five waveform editors;
+\textbf{2} active Channels and CV;
+\textbf{3} waveform Morph and CV;
+\textbf{4} eight voices: frequency, FM, level and CV;
+\textbf{5} eight audio outputs and indicators.
+
+The five waveform editors run down the left edge. Beside them are global
+Active Channels and Waveform Morph controls, each with a depth knob and CV
+input. Eight voice columns to the right contain frequency, bipolar FM depth,
+level, corresponding CV inputs, and an audio output. Morph is shared by
+all eight oscillators within each polyphonic chip instance.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & CV and behavior \\\midrule
+Active Channels & 1--8; 4 & Adds $8aV/10$, truncates and clamps; depth $a$ defaults to 0. \\
+Frequency & $\pm2.5$ oct.; 0 & V/OCT adds octaves; active count also changes actual pitch. \\
+FM depth & $-1$--$+1$; 0 & Adds $aV/5$ octaves; unpatched first input is 5\,V. \\
+Morph & 1--5; 1 & Adds $5aV/7$ wave positions; morph depth defaults to 0. \\
+Level & 0--15; 15 & Multiplies by $V/10$, rounds and clamps; first input normals to 10\,V. \\
+\bottomrule
+\end{tabularx}
+
+At full active-count depth, 1.25\,V changes the count by one before clipping.
+At full morph depth, 1.4\,V moves one waveform position. Knobs supply offsets;
+the two depth controls scale and invert their respective CVs.
+
+Pitch, FM and level inputs normal forward along the voice columns.
+An inserted cable replaces that signal for the remainder of its chain.
+Pitch and FM run at audio rate; level, morph and active-count control update
+every 16 host samples. Chip frequency registers limit the tuning range and
+make the highest notes coarse.

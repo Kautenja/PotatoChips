@@ -22,8 +22,7 @@
 //
 
 #include "dsp/sony_s_dsp/gaussian_interpolation_filter.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: sizeof SonyS_DSP::GaussianInterpolationFilter

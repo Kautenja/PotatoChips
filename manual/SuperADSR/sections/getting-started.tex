@@ -1,0 +1,21 @@
+\manualchapter{Start with a gated envelope}{sec:start}
+Formerly Super ADSR. Saved controls retain their meanings; envelope timing
+now uses a fixed chip clock (see the timing section).
+
+Contour runs two Sony S-DSP-style envelopes. Each lane has stepped timing,
+a signed amplitude control, and normal/inverted outputs. Its fifth slider
+is Sustain Rate (SR), formerly mislabeled RR; it controls decay while held.
+
+\begin{enumerate}
+\item Initialize the module. Patch a keyboard's 5\,V gate to lane 1 GATE.
+\item Connect lane 1 envelope output to an external VCA's CV input. Feed an
+oscillator through that VCA, and monitor it at a low level. Attenuate the
+envelope if the VCA expects less than roughly 10\,V.
+\item Hold a note. Lower Attack for a faster rise; raise it for a slower one.
+Keep Amplitude positive while learning the envelope shape.
+\item Compare short and long gates. Releasing the gate enters a fixed,
+short release; the last slider does not lengthen that release.
+\end{enumerate}
+
+For inverted modulation, use the inverted output or set a negative amplitude.
+The two outputs of a lane are exact polarity opposites, not separate envelopes.

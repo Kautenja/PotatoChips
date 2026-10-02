@@ -1,5 +1,123 @@
 # Change Log
 
+## Unreleased
+
+-   Added Voice 2151 (`YM2151`), a 16-lane Yamaha OPM voice with four operators,
+    eight algorithms, independent LFO/noise, native detune and stereo routing.
+-   Added paired native panels, three original presets, a debug patch, manual,
+    pinned ymfm production core and an independent Nuked-OPM test reference.
+-   The historical YM2151 roadmap item below is implemented in current source;
+    it does not indicate that version 1.13.0 shipped.
+
+-   Read Voice 2612 and Operator 2612 gate/retrigger edges every host sample.
+    Restart held notes without a 16-sample release gap, preserving chip
+    attenuation, envelope/LFO clocks, soft-reset phase policy and SSG quirks.
+    Rearm removed polyphonic lanes; preserve parameter CV's divided cadence.
+-   Replace undefined signed shifts in YM2612 feedback/modulation with
+    equivalent bounded multiplication; before/after audio is unchanged.
+
+-   Correct Contour's envelope clock to 32 kHz at every host sample rate.
+    Attack, decay and sustain now also keep fixed durations in seconds;
+    existing patches run these stages host-rate/32000 times longer than
+    before (1.5x at 48 kHz, 3x at 96 kHz). Key-off remains fixed, at most 8 ms.
+-   Correct Contour's two RR labels to SR (Sustain Rate), preserve sub-tick
+    trigger edges, release disconnected voices, and fix exact 0.01 V gate
+    rearming under optimized builds (#98). No adjustable release is added.
+
+-   Restore Echo's eight horizontal FIR sliders, with signed integer edits
+    and RGB CV indicators in live modules and browser previews (#96). Legacy
+    fractional coefficients round to the nearest integer when loaded.
+-   Preserve Echo bypass, stereo Mix and stereo input gain during module
+    randomization; delay, feedback and FIR shaping still randomize (#97).
+
+-   Rebrand all 16 modules with shared outlined titles and hardware-inspired
+    light/dark panels. Saved patch identifiers and control positions stay
+    unchanged; see the README naming map.
+-   Follow Rack's native dark-panel preference, including screws, ports and
+    browser previews. Require Rack 2.4.0 or newer.
+-   Update all 14 manuals and regenerate dark production cover images and
+    named wireframe guides. Remove unused legacy logos and illustrations.
+
+-   Improve module-browser and Library metadata with chip/console search
+    keywords, specific module descriptions, accurate function tags, and
+    spaced Arhythmetic Units branding. Point the changelog and manual index
+    at the maintained branch; preserve module names, slugs, and PDF links.
+
+-   Remove unused math functions and constants while retaining unused methods
+    on the remaining DSP classes.
+
+-   Remove the unused Edges umbrella header and standalone LFSR/sample-and-hold
+    oscillators. Preserve the digital oscillator and tables used by Blocks.
+
+-   Remove the unused Sony S-DSP processor, BRR sample player, sample-format
+    helpers, and their tests. Preserve ADSR, echo, interpolation, and shared
+    DSP used by active modules.
+
+-   Remove the unused Konami SCC and NEC TurboGrafx-16 emulator headers.
+
+-   Remove the disabled experimental SuperSynth module, its panel, and its
+    debug patch. Experimental patches containing SuperSynth can no longer
+    load that module.
+
+-   Remove the disabled SuperSampler prototype, its panel and example patches,
+    and its instance from the combined demo patch. Experimental patches using
+    SuperSampler will no longer find that module.
+
+-   Generate manual covers and README panels from real Rack widgets; add
+    numbered vector panel guides and optional capture/validation tooling.
+-   Match Fourier's larger footer wordmark, use the square brand emblem on
+    panels below 12 HP, and improve Pallet Town footer contrast. Repair
+    compound-path artifacts in the Blocks and Name Corp titles.
+
+-   Replace the legacy social banner with Arhythmetic Units artwork in SVG,
+    PNG, and PDF, and display the new banner in the repository README.
+
+-   Rewrite all 14 active sound-module manuals with practical patches,
+    source-checked controls and shared Arhythmetic Units publication styling.
+-   Replace copied-source TeX recipes with checked, source-relative latexmk
+    builds, stable `.build/` PDF names and build-failure regressions.
+
+-   Flatten DSP math/trigger headers, move Rack helpers to `rack_extensions`,
+    and remove Rack dependencies from DSP exceptions and pitch conversions.
+-   Update registered module and blank-panel footers to Arhythmetic Units,
+    preserving other artwork, control positions, and patch identifiers.
+-   Fix wavetable right-edge writes and incomplete drags; make previews
+    read-only, resolve undo/redo against current module IDs, and use lock-free
+    samples for engine/editor access. Release indexed SVG frames and guard
+    missing assets/invalid indices; publish the Boss Fight display index atomically.
+-   Fix BLIP sample-tail and impulse-initialization/rescaling loop bounds.
+    Corrected impulse generation intentionally changes affected chip audio;
+    source-move equivalence and before/after captures are recorded separately.
+-   Initialize all Ricoh 2A03 oscillator registers and write flags on reset,
+    avoiding reads of uninitialized state during construction.
+-   Include the final Game Boy wavetable register in its storage and correct
+    Pallet Town's channel/oscillator buffer indexing for polyphonic pitch.
+-   Reuse mono CV on every Infinite Stairs polyphonic channel, including
+    pitch, FM, level, pulse width, and sync inputs.
+-   Store 24-bit PCM in three explicit little-endian bytes on every ABI,
+    correct signed limits, and constrain numeric comparison overloads.
+-   Add Rack registration, saved-patch/preset, polyphony, audio, widget-history,
+    and sanitizer regressions alongside the existing DSP suites.
+
+-   Replace SCons/Travis with SDK-free Make tests, a Rack-backed harness,
+    pinned Catch2/SDK dependencies, and three-platform GitHub Actions.
+-   Add separate coverage/sanitizer runs, incremental-build regression checks,
+    package validation, and publication completeness/version gates.
+
+-   Present Potato Chips as part of Arhythmetic Units while preserving plugin
+    and module identifiers, version, and disabled-module flags.
+-   Separate source/artwork licensing, inventory imported components and
+    provenance gaps, and include complete notices in plugin packages.
+-   Add installation/first-patch guidance, contributor/support documentation,
+    and focused issue/PR templates.
+-   Add agent instructions, shared style guides, and implementation specs.
+-   Remove Doxygen configuration and generated-API-documentation assets.
+
+Historical release notes below retain their original order and wording
+except documented corrections. GitHub, PDF, and VCV Library publication
+may differ from the source version; see
+[release preparation](CONTRIBUTING.md#prepare-a-release).
+
 ## 1.0.0 (2020-06-22)
 
 -   2A03 implementation
@@ -315,26 +433,35 @@
     - InfiniteStairs looked liked an input was missing for a VCA on the NES triangle
     - PalletTownWavesSystem had a missing sync input that has been removed from the panel
 
-## 1.11.1 (TBD)
+## Historical Unreleased Plans
+
+The following entries were labeled `TBD`; these version numbers and features
+were never established here as released. Current accepted work is tracked
+in [specs/](specs/README.md); this list makes no new feature commitment.
+
+### 1.11.1 (TBD)
 
 -   Fix gain control on Super Echo and Super VCA to be less drastic; fix maxes to have clean limits in the GUI (as opposed to something like _6.13434dB_ at max, it's now precisely _6dB_ at max)
 
-## 1.12.0 (TBD)
+### 1.12.0 (TBD)
 
 -   new module: S-SMP(BRR)
     -   Bit-Rate Reduction (BRR) based sampler/sample player
 -   new module: NES(DMC)
     -   DMC sampler from the Ricoh 2A03 audio processing chip
 
-## 1.13.0 (TBD)
+### 1.13.0 (TBD)
 
--   Yamaha YM2151
+-   Yamaha YM2151 (historical plan; implemented as Voice 2151 under Unreleased).
 
-## 1.14.0 (TBD)
+### 1.14.0 (TBD)
 
 -   Yamaha YM2413
 
-## 2.0.0 (2020-02-23)
+## 2.0.0 (2022-02-23)
+
+Date corrected from the 2020 typo using commit
+[`50fd2e73`](https://github.com/Kautenja/PotatoChips/commit/50fd2e7362e4f18e060f2ebbbc4b12d01ef14d58).
 
 -   Rack v2 support
 

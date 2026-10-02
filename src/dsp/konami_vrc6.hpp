@@ -129,7 +129,7 @@ class KonamiVRC6 {
     ///
     void run_until(int32_t time) {
         if (time < last_time)
-            throw Exception("time must be >= last_time");
+            throw DSPException("time must be >= last_time");
         else if (time == last_time)
             return;
         run_square(oscs[0], time);

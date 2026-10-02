@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/nukeykt/Nuked-OPM",
+  "commit": "f209e6ed3712032b641d53ce8fb24824eae6adc3",
+  "sha256": {
+    "LICENSE": "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331",
+    "opm.h": "186e042d1cd80c8fdf2e1a07d7c123bbe9a0d42e39518c50889db140a9ec4c39",
+    "opm.c": "983beecc471aebd8884fcc3aa48c50b1a26d4280ddbf1025b5196b540cf24188"
+  },
+  "local_changes": []
+}

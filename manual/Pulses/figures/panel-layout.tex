@@ -1,0 +1,74 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/190,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (120,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (60.0,10) {\MakeUppercase{\manualname}};
+\panelregion{1}{5}{39}{110}{117}
+\panelregion{2}{5}{165}{110}{37}
+\panelregion{3}{5}{213}{110}{91}
+\panelregion{4}{5}{308}{110}{48}
+% knob 0: Tone 1 Frequency
+\panelknob{15.0000}{45.0000}{17.8555}{17.8594}
+% input 0: Tone 1 V/Oct
+\panelinput{13.0000}{85.0000}{23.7000}{23.7000}
+% input 3: Tone 1 FM
+\panelinput{13.0000}{129.0000}{23.7000}{23.7000}
+% knob 3: Tone 1 FM
+\panelknob{15.0000}{173.0000}{17.8555}{17.8594}
+% knob 6: Tone 1 Level
+\panelknob{15.0000}{221.0000}{17.8555}{17.8594}
+% input 6: Tone 1 Level
+\panelinput{13.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{17.0000}{297.0000}{8.8583}{8.8583}
+% output 0: Tone 1 Audio
+\paneloutput{13.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Tone 2 Frequency
+\panelknob{50.0000}{45.0000}{17.8555}{17.8594}
+% input 1: Tone 2 V/Oct
+\panelinput{48.0000}{85.0000}{23.7000}{23.7000}
+% input 4: Tone 2 FM
+\panelinput{48.0000}{129.0000}{23.7000}{23.7000}
+% knob 4: Tone 2 FM
+\panelknob{50.0000}{173.0000}{17.8555}{17.8594}
+% knob 7: Tone 2 Level
+\panelknob{50.0000}{221.0000}{17.8555}{17.8594}
+% input 7: Tone 2 Level
+\panelinput{48.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{52.0000}{297.0000}{8.8583}{8.8583}
+% output 1: Tone 2 Audio
+\paneloutput{48.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Tone 3 Frequency
+\panelknob{85.0000}{45.0000}{17.8555}{17.8594}
+% input 2: Tone 3 V/Oct
+\panelinput{83.0000}{85.0000}{23.7000}{23.7000}
+% input 5: Tone 3 FM
+\panelinput{83.0000}{129.0000}{23.7000}{23.7000}
+% knob 5: Tone 3 FM
+\panelknob{85.0000}{173.0000}{17.8555}{17.8594}
+% knob 8: Tone 3 Level
+\panelknob{85.0000}{221.0000}{17.8555}{17.8594}
+% input 8: Tone 3 Level
+\panelinput{83.0000}{263.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{87.0000}{297.0000}{8.8583}{8.8583}
+% output 2: Tone 3 Audio
+\paneloutput{83.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{138}{97.5}
+\panelmarker{2}{138}{183.5}
+\panelmarker{3}{138}{258.5}
+\panelmarker{4}{138}{332.0}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch and pitch/FM inputs}
+\panelkey{2}{FM depth}
+\panelkey{3}{Level and level CV}
+\panelkey{4}{Audio outputs}
+\end{tabularx}
+\end{minipage}

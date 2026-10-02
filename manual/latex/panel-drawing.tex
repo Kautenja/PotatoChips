@@ -1,0 +1,40 @@
+% Static control references, with positions exported from production widgets.
+% Visual assets follow LICENSING.md; no live display or indicator values.
+\newcommand{\panelknob}[4]{%
+  \draw[fill=white,draw=manualInk,line width=.45pt]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/2*\panelunit}];
+  \draw[manualInk,line width=.6pt] (#1+#3/2,#2+2) -- (#1+#3/2,#2+#4/4);}
+\newcommand{\panelinput}[4]{%
+  \draw[fill=white,draw=manualInk,line width=.45pt]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/2*\panelunit}];
+  \draw[fill=manualInk!15,draw=manualInk,line width=.35pt]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/3*\panelunit}];}
+\newcommand{\paneloutput}[4]{%
+  \draw[fill=manualInk!22,draw=manualInk,line width=.6pt]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/2*\panelunit}];
+  \draw[fill=manualInk,draw=manualInk]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/4*\panelunit}];}
+\newcommand{\panelswitch}[4]{%
+  \draw[rounded corners=1pt,fill=manualInk!15,draw=manualInk,line width=.45pt]
+    (#1,#2) rectangle (#1+#3,#2+#4);}
+\newcommand{\panelslider}[4]{%
+  \ifdim #3pt>#4pt
+    \draw[fill=manualInk!15,draw=manualInk,line width=.45pt]
+      (#1,#2+#4*.35) rectangle (#1+#3,#2+#4*.65);
+  \else
+    \draw[fill=manualInk!15,draw=manualInk,line width=.45pt]
+      (#1+#3*.35,#2) rectangle (#1+#3*.65,#2+#4);
+  \fi}
+\newcommand{\panellight}[4]{%
+  \draw[fill=white,draw=manualMuted,line width=.3pt]
+    (#1+#3/2,#2+#4/2) circle[radius={#3/2*\panelunit}];}
+\newcommand{\paneldisplay}[4]{%
+  \draw[rounded corners=1pt,fill=manualInk!8,draw=manualInk,line width=.45pt]
+    (#1,#2) rectangle (#1+#3,#2+#4);}
+\newcommand{\panelregion}[5]{%
+  \draw[manualMuted!55,densely dashed,line width=.35pt]
+    (#2,#3) rectangle (#2+#4,#3+#5);}
+\newcommand{\panelmarker}[3]{%
+  \node[circle,draw=manualAccent,fill=white,text=manualAccent,
+    font=\small\bfseries,inner sep=2pt,line width=.7pt] at (#2,#3) {#1};}
+\newcommand{\panelkey}[2]{\textcolor{manualAccent}{\textbf{#1}} & #2\\}

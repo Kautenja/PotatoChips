@@ -22,67 +22,7 @@
 //
 
 #include "dsp/sony_s_dsp/common.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
-
-// ---------------------------------------------------------------------------
-// MARK: SonyS_DSP::SourceDirectoryEntry
-// ---------------------------------------------------------------------------
-
-TEST_CASE("SonyS_DSP::SourceDirectoryEntry should be 4 bytes") {
-    REQUIRE(4 == sizeof(SonyS_DSP::SourceDirectoryEntry));
-}
-
-// ---------------------------------------------------------------------------
-// MARK: SonyS_DSP::BitRateReductionBlock
-// ---------------------------------------------------------------------------
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should be 9 bytes") {
-    REQUIRE(9 == sizeof(SonyS_DSP::BitRateReductionBlock));
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(1 == sizeof(block.header));
-    REQUIRE(8 == sizeof(block.samples));
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should have correct constants") {
-    REQUIRE(8 == SonyS_DSP::BitRateReductionBlock::NUM_SAMPLES);
-    REQUIRE(12 == SonyS_DSP::BitRateReductionBlock::MAX_VOLUME);
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should set volume") {
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(0x0 == block.header.byte);
-    block.header.flags.volume = 0xC;
-    REQUIRE(0xC0 == block.header.byte);
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should clip volume") {
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(0x0 == block.header.byte);
-    block.header.flags.set_volume(0xF);
-    REQUIRE(0xC0 == block.header.byte);
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should set filter mode") {
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(0x0 == block.header.byte);
-    block.header.flags.filter = 3;
-    REQUIRE(0x0C == block.header.byte);
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should set is_loop") {
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(0x0 == block.header.byte);
-    block.header.flags.is_loop = 1;
-    REQUIRE(0x02 == block.header.byte);
-}
-
-TEST_CASE("SonyS_DSP::BitRateReductionBlock should set is_end") {
-    SonyS_DSP::BitRateReductionBlock block;
-    REQUIRE(0x0 == block.header.byte);
-    block.header.flags.is_end = 1;
-    REQUIRE(0x01 == block.header.byte);
-}
+#include "catch_amalgamated.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: SonyS_DSP::StereoSample

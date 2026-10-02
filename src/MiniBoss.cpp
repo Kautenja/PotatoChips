@@ -16,7 +16,9 @@
 #include <functional>
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/yamaha_ym2612/feedback_operator.hpp"
 #include "engine/yamaha_ym2612_params.hpp"
 
@@ -26,6 +28,8 @@
 
 /// A Eurorack FM operator module based on the Yamaha YM2612.
 struct MiniBoss : rack::Module {
+    // Read-only regression access; no diagnostics run in the audio path.
+    friend struct YM2612ModuleTestAccess;
  private:
     /// a YM2612 operator 1 emulator
     YamahaYM2612::FeedbackOperator apu[PORT_MAX_CHANNELS];
@@ -34,6 +38,9 @@ struct MiniBoss : rack::Module {
     Trigger::Threshold gates[PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
     Trigger::Threshold retriggers[PORT_MAX_CHANNELS];
+
+    /// Voices processed on the preceding sample; removed lanes must release.
+    unsigned activeChannels = 0;
 
     /// a clock divider for reducing computation (on CV acquisition)
     Trigger::Divider cvDivider;
@@ -238,7 +245,8 @@ struct MiniBoss : rack::Module {
     /// @returns true if the gate is high, false otherwise
     ///
     inline bool getGate(unsigned channel) {
-        const auto input = inputs[INPUT_GATE].getVoltage(channel);
+        const auto input = channel < static_cast<unsigned>(inputs[INPUT_GATE].getChannels()) ?
+            inputs[INPUT_GATE].getVoltage(channel) : 0.f;
         gates[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
         return gates[channel].isHigh();
     }
@@ -249,7 +257,8 @@ struct MiniBoss : rack::Module {
     /// @returns true if the channel is being re-triggered
     ///
     inline bool getRetrigger(unsigned channel) {
-        const auto input = inputs[INPUT_RETRIG].getVoltage(channel);
+        const auto input = channel < static_cast<unsigned>(inputs[INPUT_RETRIG].getChannels()) ?
+            inputs[INPUT_RETRIG].getVoltage(channel) : 0.f;
         return retriggers[channel].process(rescale(input, 0.01f, 2.f, 0.f, 1.f));
     }
 
@@ -290,8 +299,9 @@ struct MiniBoss : rack::Module {
         for (unsigned port = 0; port < outputs.size(); port++)
             outputs[port].setChannels(channels);
         // process control voltage when the CV divider is high
-        if (cvDivider.process()) {
-            for (unsigned channel = 0; channel < channels; channel++) {
+        const bool updateCV = cvDivider.process();
+        for (unsigned channel = 0; channel < channels; channel++) {
+            if (updateCV || channel >= activeChannels) {
                 apu[channel].set_attack_rate   (getParam(channel,       PARAM_AR,  INPUT_AR, 1, 31 ));
                 apu[channel].set_total_level   (100 - getParam(channel, PARAM_TL,  INPUT_TL, 0, 100));
                 apu[channel].set_decay_rate    (getParam(channel,       PARAM_D1,  INPUT_D1, 0, 31 ));
@@ -305,16 +315,23 @@ struct MiniBoss : rack::Module {
                 apu[channel].set_am_sensitivity(params[PARAM_AMS].getValue());
                 apu[channel].set_ssg_enabled   (params[PARAM_SSG_ENABLE].getValue());
                 apu[channel].set_rate_scale    (params[PARAM_RS].getValue());
-                // use the exclusive or of the gate and re-trigger. This ensures
-                // that when either gate or trigger alone is high, the gate is
-                // open, but when neither or both are high, the gate is closed.
-                // This causes the gate to get shut for a sample when
-                // re-triggering an already gated voice
-                apu[channel].set_gate(getGate(channel) ^ getRetrigger(channel), prevent_clicks);
             }
         }
-        // set the operator parameters
+        // Retiring a lane releases its key and rearms both input detectors.
+        for (unsigned channel = channels; channel < activeChannels; channel++) {
+            apu[channel].set_gate(false, prevent_clicks);
+            gates[channel].reset();
+            retriggers[channel].reset();
+        }
+        activeChannels = channels;
+        // Events run every host sample, independently of parameter CV.
         for (unsigned channel = 0; channel < channels; channel++) {
+            const bool gate = getGate(channel);
+            const bool retrigger = getRetrigger(channel);
+            // A retrigger is a key-off/key-on pair with no intervening audio
+            // step. Keep chip attenuation and envelope/LFO clocks intact.
+            if (retrigger) apu[channel].set_gate(false, prevent_clicks);
+            apu[channel].set_gate(gate || retrigger, prevent_clicks);
             apu[channel].set_frequency(getFrequency(channel));
             // set the output voltage based on the 14-bit signed sample
             const int16_t audio_output = (apu[channel].step(getFM(channel)) * getVolume(channel)) >> 7;
@@ -361,12 +378,12 @@ struct MiniBossWidget : ModuleWidget {
     ///
     explicit MiniBossWidget(MiniBoss *module) {
         setModule(module);
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, "res/MiniBoss.svg")));
+        setPanel(createThemedPanel(plugin_instance, "res/MiniBoss.svg"));
         // Panel Screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // ADSR
         for (unsigned i = 0; i < 6; i++) {
             const auto pos = Vec(7 + 33 * i, 41);
@@ -396,11 +413,11 @@ struct MiniBossWidget : ModuleWidget {
         // ports
         for (unsigned j = 0; j < 6; j++) {
             const auto x = 13 + j * 37;
-            addInput(createInput<PJ301MPort>(Vec(x, 288), module, MiniBoss::INPUT_AR + j));
+            addInput(createInput<ThemedPJ301MPort>(Vec(x, 288), module, MiniBoss::INPUT_AR + j));
             if (j >= 5) continue;
-            addInput(createInput<PJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
+            addInput(createInput<ThemedPJ301MPort>(Vec(x, 331), module, MiniBoss::INPUT_GATE + j));
         }
-        addOutput(createOutput<PJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
+        addOutput(createOutput<ThemedPJ301MPort>(Vec(198, 331), module, MiniBoss::OUTPUT_OSC));
     }
 
     /// @brief Append the context menu to the module when right clicked.

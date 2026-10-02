@@ -1,0 +1,22 @@
+\manualchapter{Play a first note}{sec:start}
+Voice 2151 is a polyphonic Yamaha YM2151 (OPM) voice. Each Rack lane has
+four operators, one common pitch and gate, an independent LFO and an
+independent noise generator. It uses hardware channel 8 so operator 4 can
+become noise in every lane. This is a modular adaptation of one chip
+channel per note, rather than an eight-part workstation.
+
+\begin{enumerate}
+\item Initialize Voice 2151. Connect MIDI-CV V/OCT to V/OCT and GATE to GATE.
+\item Patch L and R to two audio channels. Start with a low monitoring level.
+Both jacks carry the same full-level signal at the default Both route.
+\item Play a note: the default algorithm 0 is a chain, 1 into 2 into 3 into 4.
+Reduce operator 1--3 VOL for a simpler tone; operator 4 is the carrier.
+\item Set MIDI-CV to four voices for chords. The widest input determines the
+lane count. One mono modulation cable broadcasts to every lane.
+\end{enumerate}
+
+The original presets are Simple FM, Modulated Sustain and Noise Percussion.
+Load them from Rack's preset menu. Each needs a gate; there is no free-running
+or soft-reset mode. For noise percussion, use short gates and listen as
+operator 4's envelope and VOL shape the noise. The debug patch uses a clock
+and Scope without storing audio or MIDI device settings.

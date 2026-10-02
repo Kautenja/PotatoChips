@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/nintendo_gameboy.hpp"
 #include "dsp/wavetable4bit.hpp"
 #include "engine/chip_module.hpp"
@@ -26,7 +27,7 @@
 // ---------------------------------------------------------------------------
 
 /// A Nintendo GameBoy Sound System chip emulator module.
-struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
+struct PalletTownWavesSystem : ChipModule<NintendoGBS>, WavetableOwner {
  private:
     /// a Trigger for handling inputs to the LFSR port
     Trigger::Threshold lfsr[PORT_MAX_CHANNELS];
@@ -73,7 +74,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
     static constexpr int NUM_WAVEFORMS = 5;
 
     /// the wave-tables to morph between
-    uint8_t wavetable[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE];
+    std::atomic<uint8_t> (&wavetable)[NUM_WAVEFORMS][SAMPLES_PER_WAVETABLE] = waveBank->samples;
 
     /// @brief Initialize a new GBS Chip module.
     PalletTownWavesSystem() : ChipModule<NintendoGBS>() {
@@ -137,7 +138,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             RAMP_DOWN
         };
         for (unsigned i = 0; i < NUM_WAVEFORMS; i++)
-            memcpy(wavetable[i], wavetables[i], SAMPLES_PER_WAVETABLE);
+            for (unsigned sample = 0; sample < SAMPLES_PER_WAVETABLE; ++sample)
+                wavetable[i][sample].store(wavetables[i][sample], std::memory_order_relaxed);
     }
 
     /// @brief Respond to the module being reset by the host environment.
@@ -153,8 +155,8 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
                 wavetable[table][sample] = random::u32() % BIT_DEPTH;
                 // interpolate between random samples to smooth slightly
                 if (sample > 0) {
-                    auto last = wavetable[table][sample - 1];
-                    auto next = wavetable[table][sample];
+                    auto last = wavetable[table][sample - 1].load(std::memory_order_relaxed);
+                    auto next = wavetable[table][sample].load(std::memory_order_relaxed);
                     wavetable[table][sample] = (last + next) / 2;
                 }
             }
@@ -223,7 +225,7 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
         float freq = rack::dsp::FREQ_C4 * powf(2.0, pitch);
         freq = Math::clip(freq, 0.0f, 20000.0f);
         // convert the frequency to an 11-bit value
-        freq = 2048.f - (static_cast<uint32_t>(buffers[oscillator][channel].get_clock_rate() / freq) >> 5);
+        freq = 2048.f - (static_cast<uint32_t>(buffers[channel][oscillator].get_clock_rate() / freq) >> 5);
         return Math::clip(freq, 8.f, 2035.f);
     }
 
@@ -409,11 +411,11 @@ struct PalletTownWavesSystem : ChipModule<NintendoGBS> {
             // in pairs (e.g., two at a time)
             auto sample = i << 1;
             // get the first waveform data
-            auto nibbleHi0 = wavetable[wavetable0][sample];
-            auto nibbleLo0 = wavetable[wavetable0][sample + 1];
+            auto nibbleHi0 = wavetable[wavetable0][sample].load(std::memory_order_relaxed);
+            auto nibbleLo0 = wavetable[wavetable0][sample + 1].load(std::memory_order_relaxed);
             // get the second waveform data
-            auto nibbleHi1 = wavetable[wavetable1][sample];
-            auto nibbleLo1 = wavetable[wavetable1][sample + 1];
+            auto nibbleHi1 = wavetable[wavetable1][sample].load(std::memory_order_relaxed);
+            auto nibbleLo1 = wavetable[wavetable1][sample + 1].load(std::memory_order_relaxed);
             // floating point interpolation between both samples
             uint8_t nibbleHi = ((1.f - interpolate) * nibbleHi0 + interpolate * nibbleHi1);
             uint8_t nibbleLo = ((1.f - interpolate) * nibbleLo0 + interpolate * nibbleLo1);
@@ -456,12 +458,12 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
     explicit PalletTownWavesSystemWidget(PalletTownWavesSystem *module) {
         setModule(module);
         static constexpr auto panel = "res/PalletTownWavesSystem.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // the fill colors for the wave-table editor lines
         static constexpr NVGcolor colors[PalletTownWavesSystem::NUM_WAVEFORMS] = {
             {{{1.f, 0.f, 0.f, 1.f}}},  // red
@@ -483,10 +485,9 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             // get the wave-table buffer for this editor. if the module is
             // displaying in/being rendered for the library, the module will
             // be null and a dummy waveform is displayed
-            uint8_t* wavetable = module ? &module->wavetable[wave][0] : &wavetables[wave][0];
             // setup a table editor for the buffer
-            auto table_editor = new WaveTableEditor<uint8_t>(
-                wavetable,                       // wave-table buffer
+            auto table_editor = new WaveTableEditor(
+                module, wave, wavetables[wave], // live storage or browser preview
                 PalletTownWavesSystem::SAMPLES_PER_WAVETABLE,  // wave-table length
                 PalletTownWavesSystem::BIT_DEPTH,              // waveform bit depth
                 Vec(11, 26 + 67 * wave),         // position
@@ -501,28 +502,28 @@ struct PalletTownWavesSystemWidget : ModuleWidget {
             auto freq = createParam<Trimpot>(  Vec(162 + 35 * i, 32),  module, PalletTownWavesSystem::PARAM_FREQ        + i);
             freq->snap = i == 3;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 71),  module, PalletTownWavesSystem::INPUT_VOCT        + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 71),  module, PalletTownWavesSystem::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 99), module, PalletTownWavesSystem::INPUT_FM          + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 99), module, PalletTownWavesSystem::INPUT_FM          + i));
             if (i < 3)
                 addParam(createParam<Trimpot>( Vec(162 + 35 * i, 144), module, PalletTownWavesSystem::PARAM_FM          + i));
             else
                 addParam(createParam<CKSS>(    Vec(269, 141), module, PalletTownWavesSystem::PARAM_FM                  + i));
             // Level
             addParam(createParam<Trimpot>( Vec(162 + 35 * i, 170), module, PalletTownWavesSystem::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(160 + 35 * i, 210), module, PalletTownWavesSystem::INPUT_LEVEL       + i));
             // PW
             if (i < 3) {  // Pulse Width / Waveform
                 auto pw = createParam<Trimpot>(Vec(162 + 35 * i, 241), module, PalletTownWavesSystem::PARAM_PW + i);
                 pw->snap = i < 2;
                 addParam(pw);
-                addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 281), module, PalletTownWavesSystem::INPUT_PW + i));
+                addInput(createInput<ThemedPJ301MPort>(Vec(160 + 35 * i, 281), module, PalletTownWavesSystem::INPUT_PW + i));
             } else {  // LFSR Reset
-                // addInput(createInput<PJ301MPort>(Vec(160 + 35 * i, 264), module, PalletTownWavesSystem::INPUT_PW + i));
+                // addInput(createInput<ThemedPJ301MPort>(Vec(160 + 35 * i, 264), module, PalletTownWavesSystem::INPUT_PW + i));
             }
             // Output
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(179 + 35 * i, 326), module, PalletTownWavesSystem::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(160 + 35 * i, 331), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(160 + 35 * i, 331), module, PalletTownWavesSystem::OUTPUT_OSCILLATOR + i));
         }
     }
 };

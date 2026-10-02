@@ -1,0 +1,59 @@
+\manualchapter{Timing, polyphony and practical limits}{sec:operation}
+The fixed master clock is 3,579,545\,Hz, matching the nominal clock documented
+in ymfm's OPM phase-table derivation. The decoded YM3012 DAC runs at
+clock/64 = 55,930.390625\,Hz. Key code/fraction uses 1/64 semitone steps
+(1.5625 cents, at most 0.78125 cents rounding before chip table error).
+Common pitch clamps from C\#0 through just below C\#8, approximately
+$-3.9167$ to $4.0820$\,V relative to C4. Multipliers, DT1/DT2 and PM can
+push operator frequencies higher; they retain chip aliasing and limits.
+
+A 32-tap Blackman-windowed low-pass FIR at the native rate uses cutoff
+min(20\,kHz, 0.4 times host rate), followed by fractional linear resampling.
+This smooths DAC images; it is not an ideal brick-wall filter. The chip's own
+high-frequency aliasing remains part of synthesis. Sample-rate changes preserve
+chip and envelope state. The filter adds about 0.3\,ms of latency.
+
+The control scan runs every 16 audio frames. Writes use one address/data
+transaction per 64 master clocks, honoring the core's busy period. Replaceable
+controls coalesce; pitch code/fraction pairs remain ordered and the shared
+AM/PM depth register has independent pending values. Key edges are sampled
+every audio frame and enter a 64-entry FIFO. Initial controls settle before
+the first note. Regular key latency is at most two native sample periods
+plus host sampling; a retrigger adds one further native sample period.
+A burst can take up to roughly 1.2\,ms to drain, plus startup configuration.
+
+Sustained retrigger rates up to 1\,kHz per lane are supported. Above the queue
+limit a new rise/retrigger is rejected as a whole; one slot remains reserved
+for release. Accepted key events are never coalesced. This is finite chip
+bus bandwidth, not audio-rate arbitrary modulation. Continuous key traffic
+outside the supported rate can delay control updates.
+
+There are 1--16 lanes, determined by the widest input. Mono inputs broadcast;
+missing channels of shorter polyphonic cables read zero. Disconnecting an
+input removes its contribution. Removed lanes reset immediately, and return
+with clean chip, LFO, noise and trigger state. Inactive lanes do not synthesize.
+Reset and reload begin silently until gated; oscillator phase is not saved.
+
+Decoded PCM is scaled by 10/32768 volts and output LEVEL, then limited to
+$\pm10$\,V. A single full-level sine is approximately 2.5\,V peak before
+LEVEL; four carriers can approach full-scale. Each routed jack carries its
+own full-level signal, with no artificial stereo widening or output summing.
+Unplugging R does not change L. Noise follows operator 4's envelope and VOL,
+and is audible only when the chosen algorithm routes that operator to output.
+
+\manualchapter{CPU and troubleshooting}{sec:practical}
+The production engine is the pinned ymfm OPM core with mechanical C++11
+compatibility changes. Nuked-OPM is retained only as an independent test
+reference: the initial 16-chip prototype exceeded one thread's real-time
+budget. On the local macOS arm64 validation machine, production Rack-module
+benchmarks at 44.1, 48 and 96\,kHz with 64/256-frame workloads measured
+roughly 10--12\% median callback time for 16 lanes, single-threaded.
+These are headless production-module measurements, not a guarantee for every
+machine or a complete patch. Leave headroom for other modules and audio I/O.
+
+If silent, check GATE, output routing, carrier VOL and AR. If a held sound
+fades, reduce SR or D1 and inspect SL. If AM does nothing, enable AM on an
+audible operator and raise AMD and AMS. If a patch changes when a poly cable
+shrinks, remember that shorter polyphonic cables supply zero on missing
+lanes. Light/dark panels follow Rack's global preference without changing
+sound or saved parameters.

@@ -1,0 +1,235 @@
+{
+  "plugin": "KautenjaDSP-PotatoChips",
+  "model": "YM2151",
+  "version": "2.1.0",
+  "params": [
+    {
+      "id": 0,
+      "value": 0
+    },
+    {
+      "id": 1,
+      "value": 4
+    },
+    {
+      "id": 2,
+      "value": 0
+    },
+    {
+      "id": 3,
+      "value": 0.8
+    },
+    {
+      "id": 4,
+      "value": 210
+    },
+    {
+      "id": 5,
+      "value": 55
+    },
+    {
+      "id": 6,
+      "value": 38
+    },
+    {
+      "id": 7,
+      "value": 2
+    },
+    {
+      "id": 8,
+      "value": 3
+    },
+    {
+      "id": 9,
+      "value": 2
+    },
+    {
+      "id": 10,
+      "value": 0
+    },
+    {
+      "id": 11,
+      "value": 16
+    },
+    {
+      "id": 12,
+      "value": 2
+    },
+    {
+      "id": 13,
+      "value": 31
+    },
+    {
+      "id": 14,
+      "value": 0
+    },
+    {
+      "id": 15,
+      "value": 0
+    },
+    {
+      "id": 16,
+      "value": 15
+    },
+    {
+      "id": 17,
+      "value": 15
+    },
+    {
+      "id": 18,
+      "value": 100
+    },
+    {
+      "id": 19,
+      "value": 1
+    },
+    {
+      "id": 20,
+      "value": 0
+    },
+    {
+      "id": 21,
+      "value": 0
+    },
+    {
+      "id": 22,
+      "value": 0
+    },
+    {
+      "id": 23,
+      "value": 1
+    },
+    {
+      "id": 24,
+      "value": 31
+    },
+    {
+      "id": 25,
+      "value": 0
+    },
+    {
+      "id": 26,
+      "value": 0
+    },
+    {
+      "id": 27,
+      "value": 15
+    },
+    {
+      "id": 28,
+      "value": 15
+    },
+    {
+      "id": 29,
+      "value": 100
+    },
+    {
+      "id": 30,
+      "value": 1
+    },
+    {
+      "id": 31,
+      "value": 0
+    },
+    {
+      "id": 32,
+      "value": 0
+    },
+    {
+      "id": 33,
+      "value": 0
+    },
+    {
+      "id": 34,
+      "value": 1
+    },
+    {
+      "id": 35,
+      "value": 31
+    },
+    {
+      "id": 36,
+      "value": 0
+    },
+    {
+      "id": 37,
+      "value": 0
+    },
+    {
+      "id": 38,
+      "value": 15
+    },
+    {
+      "id": 39,
+      "value": 15
+    },
+    {
+      "id": 40,
+      "value": 100
+    },
+    {
+      "id": 41,
+      "value": 1
+    },
+    {
+      "id": 42,
+      "value": 0
+    },
+    {
+      "id": 43,
+      "value": 0
+    },
+    {
+      "id": 44,
+      "value": 0
+    },
+    {
+      "id": 45,
+      "value": 1
+    },
+    {
+      "id": 46,
+      "value": 31
+    },
+    {
+      "id": 47,
+      "value": 0
+    },
+    {
+      "id": 48,
+      "value": 0
+    },
+    {
+      "id": 49,
+      "value": 15
+    },
+    {
+      "id": 50,
+      "value": 15
+    },
+    {
+      "id": 51,
+      "value": 127
+    },
+    {
+      "id": 52,
+      "value": 1
+    },
+    {
+      "id": 53,
+      "value": 0
+    },
+    {
+      "id": 54,
+      "value": 0
+    },
+    {
+      "id": 55,
+      "value": 0
+    },
+    {
+      "id": 56,
+      "value": 1
+    }
+  ]
+}

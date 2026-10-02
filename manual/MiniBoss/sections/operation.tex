@@ -1,0 +1,47 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{External FM pair}
+Patch a second Operator 2612 OUT into FM. Give both modules the same pitch and
+gate, set the modulator's multiplier to 2, and raise the receiving module's
+FM depth from zero. A short modulator envelope changes the tone at the start
+of each note; a sustained modulator changes the whole note. Reduce either
+FM depth or modulator volume if the pitch becomes hard to hear.
+
+\subsection{When a control seems inactive}
+Check GATE, TL and output volume first if there is no sound. A zero D1R
+prevents the envelope reaching the second decay stage. AMS and FMS must be
+nonzero to hear the internal LFO. The FM knob only has an effect with an
+external signal. A patch to VOL is additive, so 0\,V does not mute a raised knob.
+
+\subsection{Gates, polyphony and saved patches}
+GATE opens at 2\,V and closes at or below 0.01\,V. RTRG uses the same
+thresholds. Both are read every host sample: even a one-sample pulse is
+recognized after a sampled low interval. A held-high RTRG causes one event.
+Envelope parameter CV still updates every 16 samples; pitch updates every sample.
+
+A rising RTRG restarts attack from the current chip attenuation. With GATE
+held high, the key-off/key-on pair completes before the next audio sample.
+Simultaneous gate and retrigger rises start once. With GATE low (including a
+simultaneous gate fall), RTRG opens the key for one sample, then releases it.
+Hold GATE high for continuing loops. Earlier builds sampled these inputs
+every 16 samples; short pulses could be missed and retriggers could insert
+16 samples of release. Existing patches may therefore have different note timing.
+
+The widest input sets 1--16 polyphonic voices. Most inputs read the matching
+channel directly; a mono gate does not automatically open every channel of
+a polyphonic pitch cable. Supply matching gate and pitch channel counts.
+Volume CV does repeat a mono voltage across active channels.
+
+Parameters and the context option \textbf{Soft Reset Envelope Generator}
+are saved in patches. The option is off by default and after reset. When
+enabled, key-on preserves oscillator phase; when disabled, key-on resets it.
+Both settings retain the current attenuation and the running envelope/LFO
+clocks. Loop-boundary phase resets still occur with either setting; the
+option does not guarantee click-free sound. Oscillator phase and envelope
+progress are not saved.
+
+Loop retains the existing simplified repeating SSG contour, not all hardware
+SSG shapes. Slow attacks and zero decay rates keep their chip-style behavior:
+a zero rate can hold a stage indefinitely, and a retrigger need not sound like
+a fresh note from silence. These details are part of the sound, not reasons
+to force the attack rate or clear the envelope level. Disconnected or removed
+polyphonic lanes release their keys and rearm their input detectors.

@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/aaronsgiles/ymfm",
+  "commit": "81aec25ccbb98f4873a255f7551ac4dadac59b4a",
+  "sha256": {
+    "ymfm_fm.ipp": "135aa8c2c412d034b81fe103f093bc2589615021a649ba909f6af11d5eb54552",
+    "LICENSE": "2d2e9213c170a9866c616fa85b6da993a6724e10befc61f468ed9bfb84c4691c",
+    "ymfm_opm.h": "1ac99e1af8b1636f992f528b6e137e0b576e0c2887c8f792d2e696be5289bf22",
+    "ymfm_fm.h": "1b27bfb7fa4963d7c54cb06fd9bf659450362d8ed496c6af7d487b068cac45c9",
+    "ymfm_opm.cpp": "2235d57101d26cdd70d4021fd1f3b8116faeba6fd5efb2ca83ba3be1298b22dc",
+    "ymfm.h": "f5ab6fed63c8669abab8403e0e93132e1dad0ae4d8e4954e7836ab9e5b228405"
+  },
+  "local_changes": [
+    "ymfm_fm.ipp: replace two make_unique calls with unique_ptr.reset(new ...).",
+    "ymfm_opm.h: remove constexpr from two offset helpers containing assertions."
+  ],
+  "upstream_sha256": {
+    "ymfm_fm.ipp": "4fb7fe59d4494a19e9f9c7888eb644a63d86e109fdefb27a8117bf6a5f6ab4b9",
+    "LICENSE": "2d2e9213c170a9866c616fa85b6da993a6724e10befc61f468ed9bfb84c4691c",
+    "ymfm_opm.h": "cab750257fe757cdab52fcf01917777c2b926ffa4c0aa2c8c9c714784e9aee7b",
+    "ymfm_fm.h": "1b27bfb7fa4963d7c54cb06fd9bf659450362d8ed496c6af7d487b068cac45c9",
+    "ymfm_opm.cpp": "2235d57101d26cdd70d4021fd1f3b8116faeba6fd5efb2ca83ba3be1298b22dc",
+    "ymfm.h": "f5ab6fed63c8669abab8403e0e93132e1dad0ae4d8e4954e7836ab9e5b228405"
+  }
+}

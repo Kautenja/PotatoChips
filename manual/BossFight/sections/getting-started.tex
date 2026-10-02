@@ -1,0 +1,32 @@
+\manualchapter{Start with four parallel operators}{sec:start}
+Formerly Boss Fight. Existing patches and presets remain compatible.
+
+Voice 2612 combines four independently tuned Yamaha YM2612-style operators
+using eight algorithms. Each operator has its own envelope. Carriers reach
+the audio output; modulators change another operator's waveform.
+
+\begin{enumerate}
+\item Initialize the module. Connect either bottom output to a mixer and
+turn the mixer down. The two outputs are identical mono copies.
+\item Patch pitch to operator 1 V/OCT and a 5\,V keyboard gate to its GATE.
+Leave the corresponding sockets on operators 2--4 empty to share these signals.
+\item Keep algorithm at its default, index 7: all four operators reach the
+output. Lower SAT from 127 if their sum clips.
+\item Lower TL on operators 2--4 to hear operator 1 alone. Restore those
+levels before trying another algorithm, where a silent carrier can mute a chain.
+\end{enumerate}
+
+The algorithm drawing uses labels 1--8; Rack's algorithm parameter uses
+indices 0--7. The final drawing is the default parallel arrangement.
+
+\begin{table}[ht]\centering
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule Parameter index & Starting patch \\\midrule
+0 (drawing 1) & Serial FM: lower the upstream levels for a simpler tone. \\
+4 (drawing 5) & One operator modulates three carriers; balance their levels. \\
+7 (drawing 8) & Four parallel tones: use integer multipliers for an organ. \\
+\bottomrule
+\end{tabularx}
+\caption{Practical starting points, not exclusive instrument assignments.}
+\label{tab:fm-algorithm-instruments}
+\end{table}

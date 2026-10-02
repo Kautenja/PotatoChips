@@ -1,0 +1,133 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/280,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (210,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (105.0,10) {\MakeUppercase{\manualname}};
+\panelregion{1}{5}{26}{140}{105}
+\panelregion{2}{5}{137}{140}{99}
+\panelregion{3}{5}{237}{140}{78}
+\panelregion{4}{5}{317}{140}{39}
+\panelregion{5}{147}{35}{59}{320}
+% knob 0: Tone 1 Frequency
+\panelknob{13.0000}{31.0000}{17.8555}{17.8594}
+% input 0: Tone 1 V/Oct
+\panelinput{11.0000}{70.0000}{23.7000}{23.7000}
+% input 4: Tone 1 FM
+\panelinput{11.0000}{98.0000}{23.7000}{23.7000}
+% knob 4: Tone 1 FM
+\panelknob{13.0000}{143.0000}{17.8555}{17.8594}
+% knob 12: Tone 1 Level
+\panelknob{13.0000}{169.0000}{17.8555}{17.8594}
+% input 12: Tone 1 Level
+\panelinput{11.0000}{209.0000}{23.7000}{23.7000}
+% knob 8: Tone 1 Noise
+\panelknob{13.0000}{241.0000}{17.8555}{17.8594}
+% input 8: Tone 1 Noise
+\panelinput{11.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{30.0000}{319.0000}{5.9055}{5.9055}
+% output 0: Tone 1 Audio
+\paneloutput{11.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Tone 2 Frequency
+\panelknob{48.0000}{31.0000}{17.8555}{17.8594}
+% input 1: Tone 2 V/Oct
+\panelinput{46.0000}{70.0000}{23.7000}{23.7000}
+% input 5: Tone 2 FM
+\panelinput{46.0000}{98.0000}{23.7000}{23.7000}
+% knob 5: Tone 2 FM
+\panelknob{48.0000}{143.0000}{17.8555}{17.8594}
+% knob 13: Tone 2 Level
+\panelknob{48.0000}{169.0000}{17.8555}{17.8594}
+% input 13: Tone 2 Level
+\panelinput{46.0000}{209.0000}{23.7000}{23.7000}
+% knob 9: Tone 2 Noise
+\panelknob{48.0000}{241.0000}{17.8555}{17.8594}
+% input 9: Tone 2 Noise
+\panelinput{46.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{65.0000}{319.0000}{5.9055}{5.9055}
+% output 1: Tone 2 Audio
+\paneloutput{46.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Tone 3 Frequency
+\panelknob{83.0000}{31.0000}{17.8555}{17.8594}
+% input 2: Tone 3 V/Oct
+\panelinput{81.0000}{70.0000}{23.7000}{23.7000}
+% input 6: Tone 3 FM
+\panelinput{81.0000}{98.0000}{23.7000}{23.7000}
+% knob 6: Tone 3 FM
+\panelknob{83.0000}{143.0000}{17.8555}{17.8594}
+% knob 14: Tone 3 Level
+\panelknob{83.0000}{169.0000}{17.8555}{17.8594}
+% input 14: Tone 3 Level
+\panelinput{81.0000}{209.0000}{23.7000}{23.7000}
+% knob 10: Tone 3 Noise
+\panelknob{83.0000}{241.0000}{17.8555}{17.8594}
+% input 10: Tone 3 Noise
+\panelinput{81.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{100.0000}{319.0000}{5.9055}{5.9055}
+% output 2: Tone 3 Audio
+\paneloutput{81.0000}{324.0000}{23.7000}{23.7000}
+% knob 3: Tone 4 Frequency
+\panelknob{118.0000}{31.0000}{17.8555}{17.8594}
+% input 3: Tone 4 V/Oct
+\panelinput{116.0000}{70.0000}{23.7000}{23.7000}
+% input 7: Tone 4 FM
+\panelinput{116.0000}{98.0000}{23.7000}{23.7000}
+% knob 7: Tone 4 FM
+\panelknob{118.0000}{143.0000}{17.8555}{17.8594}
+% knob 15: Tone 4 Level
+\panelknob{118.0000}{169.0000}{17.8555}{17.8594}
+% input 15: Tone 4 Level
+\panelinput{116.0000}{209.0000}{23.7000}{23.7000}
+% knob 11: Tone 4 Noise
+\panelknob{118.0000}{241.0000}{17.8555}{17.8594}
+% input 11: Tone 4 Noise
+\panelinput{116.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{135.0000}{319.0000}{5.9055}{5.9055}
+% output 3: Tone 4 Audio
+\paneloutput{116.0000}{324.0000}{23.7000}{23.7000}
+% switch 16: Low Frequency
+\panelswitch{152.0000}{45.0000}{14.0000}{20.6411}
+% input 16: Low Frequency
+\panelinput{175.0000}{44.0000}{23.7000}{23.7000}
+% switch 17: High-Pass Tone 2 from Tone 4
+\panelswitch{152.0000}{101.0000}{14.0000}{20.6411}
+% input 17: High-Pass Tone 2 from Tone 4
+\panelinput{175.0000}{100.0000}{23.7000}{23.7000}
+% switch 18: High-Pass Tone 1 from Tone 3
+\panelswitch{152.0000}{157.0000}{14.0000}{20.6411}
+% input 18: High-Pass Tone 1 from Tone 3
+\panelinput{175.0000}{156.0000}{23.7000}{23.7000}
+% switch 21: Tone 3 High Frequency
+\panelswitch{152.0000}{213.0000}{14.0000}{20.6411}
+% input 21: Tone 3 High Frequency
+\panelinput{175.0000}{212.0000}{23.7000}{23.7000}
+% switch 22: Tone 1 High Frequency
+\panelswitch{152.0000}{269.0000}{14.0000}{20.6411}
+% input 22: Tone 1 High Frequency
+\panelinput{175.0000}{268.0000}{23.7000}{23.7000}
+% switch 23: Linear Feedback Shift Register
+\panelswitch{152.0000}{325.0000}{14.0000}{20.6411}
+% input 23: Linear Feedback Shift Register
+\panelinput{175.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{-18}{78.5}
+\panelmarker{2}{-18}{186.5}
+\panelmarker{3}{-18}{276.0}
+\panelmarker{4}{-18}{336.5}
+\panelmarker{5}{178}{18}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch and pitch/FM inputs}
+\panelkey{2}{FM and level}
+\panelkey{3}{Noise mode and CV}
+\panelkey{4}{Audio outputs}
+\panelkey{5}{Shared clock, filter and LFSR switches/CV}
+\end{tabularx}
+\end{minipage}

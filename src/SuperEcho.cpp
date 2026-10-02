@@ -15,8 +15,10 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
 #include "dsp/sony_s_dsp/echo.hpp"
+#include "widget/horizontal_light_slider.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -77,6 +79,7 @@ struct SuperEcho : Module {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         for (unsigned coeff = 0; coeff < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; coeff++) {
             configParam(PARAM_FIR_COEFFICIENT     + coeff, -128, 127, apu[0].getFIR(coeff), "FIR Coefficient " + std::to_string(coeff + 1));
+            getParamQuantity(PARAM_FIR_COEFFICIENT + coeff)->snapEnabled = true;
             configParam(PARAM_FIR_COEFFICIENT_ATT + coeff, -1.f, 1.f, 0, "FIR Coefficient " + std::to_string(coeff + 1) + " CV Attenuverter");
             configInput(INPUT_FIR_COEFFICIENT + coeff, "FIR Coefficient " + std::to_string(coeff + 1));
         }
@@ -93,6 +96,12 @@ struct SuperEcho : Module {
         getParamQuantity(PARAM_MIX + 1)->snapEnabled = true;
 
         configParam<BooleanParamQuantity>(PARAM_BYPASS, 0, 1, 0, "Bypass");
+        // Keep routing and stereo levels stable when randomizing the sound.
+        for (unsigned lane = 0; lane < SonyS_DSP::StereoSample::CHANNELS; lane++) {
+            getParamQuantity(PARAM_MIX + lane)->randomizeEnabled = false;
+            getParamQuantity(PARAM_GAIN + lane)->randomizeEnabled = false;
+        }
+        getParamQuantity(PARAM_BYPASS)->randomizeEnabled = false;
         configInput(INPUT_DELAY, "Delay");
         configInput(INPUT_FEEDBACK, "Feedback");
         configInput(INPUT_AUDIO + 0, "Audio (Left)");
@@ -301,36 +310,36 @@ struct SuperEchoWidget : ModuleWidget {
     explicit SuperEchoWidget(SuperEcho *module) {
         setModule(module);
         static constexpr auto panel = "res/SuperEcho.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // Panel Screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // bypass switch
         addParam(createParam<CKSS>(Vec(15, 25), module, SuperEcho::PARAM_BYPASS));
         for (unsigned i = 0; i < SonyS_DSP::StereoSample::CHANNELS; i++) {
             // Echo Parameter (0 = delay, 1 = Feedback)
             addParam(createParam<Trimpot>(Vec(13 + 39 * i, 77), module, SuperEcho::PARAM_DELAY + i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 39 * i, 112), module, SuperEcho::INPUT_DELAY + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 39 * i, 112), module, SuperEcho::INPUT_DELAY + i));
             // Echo Mix
             addParam(createParam<Trimpot>(Vec(13 + 39 * i, 163), module, SuperEcho::PARAM_MIX + i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 39 * i, 198), module, SuperEcho::INPUT_MIX + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 39 * i, 198), module, SuperEcho::INPUT_MIX + i));
             // Stereo Input Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 39 * i, 236), module, SuperEcho::LIGHT_VU_INPUT + 3 * i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 39 * i, 243), module, SuperEcho::INPUT_AUDIO + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 39 * i, 243), module, SuperEcho::INPUT_AUDIO + i));
             addParam(createParam<Trimpot>(Vec(13 + 39 * i, 278), module, SuperEcho::PARAM_GAIN + i));
             // Stereo Output Ports
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(3 + 39 * i, 311), module, SuperEcho::LIGHT_VU_OUTPUT + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 39 * i, 323), module, SuperEcho::OUTPUT_AUDIO + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(10 + 39 * i, 323), module, SuperEcho::OUTPUT_AUDIO + i));
         }
         // FIR Coefficients
         for (unsigned i = 0; i < SonyS_DSP::Echo::FIR_COEFFICIENT_COUNT; i++) {
-            addInput(createInput<PJ301MPort>(Vec(84, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(84, 28 + i * 43), module, SuperEcho::INPUT_FIR_COEFFICIENT + i));
             addParam(createParam<Trimpot>(Vec(117, 30 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT_ATT + i));
-            auto param = createLightParam<LEDLightSliderHorizontal<RedGreenBlueLight>>(Vec(147, 29 + i * 43), module, SuperEcho::PARAM_FIR_COEFFICIENT + i, SuperEcho::LIGHT_FIR_COEFFICIENT + 3 * i);
-            param->snap = true;
-            addParam(param);
+            addParam(createLightParam<HorizontalLightSlider>(Vec(147, 29 + i * 43),
+                module, SuperEcho::PARAM_FIR_COEFFICIENT + i,
+                SuperEcho::LIGHT_FIR_COEFFICIENT + 3 * i));
         }
     }
 };

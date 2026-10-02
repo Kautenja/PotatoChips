@@ -1,0 +1,22 @@
+\manualchapter{Start with one wavetable voice}{sec:start}
+Formerly Name Corp Octal Wave Generator. Existing patches and presets remain compatible.
+
+Octal 163 emulates the Namco 163's multiplexed wavetable voices. It exposes
+five editable waves, interpolation between them, and up to eight active
+oscillators per polyphonic channel. Active voice count changes tuning.
+
+\begin{enumerate}
+\item Initialize the module. Set Active Channels to 1 and leave its CV empty.
+Only the highest-numbered voice, voice 8, is active in this configuration.
+\item Connect output 8 to a mixer at a low level. Keep voice 8 Level at 15,
+the global Morph at 1 and FM at zero. Tune with its frequency knob and a tuner.
+\item Patch a sequencer's pitch to voice 8 V/OCT. For articulation, patch a
+0--10\,V envelope to its Level input.
+\item Move Morph toward 2 to blend into the next wave. Drag in one of the
+five large waveform editors to replace that wave's samples.
+\end{enumerate}
+
+For a thicker sound, raise Active Channels and retune. Voices become active
+from 8 downward; increasing the count divides the shared chip's time among
+more oscillators and lowers pitch. This is part of the chip behavior, not
+additional polyphonic cable channels.

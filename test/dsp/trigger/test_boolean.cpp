@@ -21,9 +21,8 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/boolean.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "dsp/trigger_boolean.hpp"
+#include "catch_amalgamated.hpp"
 
 TEST_CASE("Trigger::Boolean should be false when initialized") {
     Trigger::Boolean trigger;

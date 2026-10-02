@@ -1,21 +1,25 @@
 ---
 name: Feature request
-about: Suggest an idea for this package
-
+about: Propose a focused musical or workflow improvement
 ---
 
-### Is your feature request related to a problem? Please describe.
+# Feature Request
 
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+Describe the musical task and module/workflow. Check existing issues and
+specs for accepted or previously declined work.
 
-### Describe the solution you'd like
+## Proposed Behavior
 
-A clear and concise description of what you want to happen.
+Explain the desired result with a concrete patching example. For chip
+behavior, link an authoritative reference and distinguish hardware behavior
+from a proposed modular extension.
 
-### Describe alternatives you've considered
+## Alternatives And Compatibility
 
-A clear and concise description of any alternative solutions or features you've considered.
+What can you do today, and why is it insufficient? Describe affected controls,
+CV/polyphony, saved patches, CPU cost, or panel space where relevant.
 
-### Additional context
+## Context
 
-Add any other context (e.g. notes, code snippets, figures) about the feature request here.
+Include Rack/plugin versions and diagrams or minimal patches that help
+explain the request. A feature request is not a release commitment.

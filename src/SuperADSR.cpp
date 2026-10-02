@@ -16,7 +16,9 @@
 #include <limits>
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/sony_s_dsp/adsr.hpp"
 
 // ---------------------------------------------------------------------------
@@ -35,6 +37,10 @@ struct SuperADSR : Module {
     Trigger::Threshold gateTrigger[LANES][PORT_MAX_CHANNELS];
     /// triggers for handling input re-trigger signals
     Trigger::Threshold retrigTrigger[LANES][PORT_MAX_CHANNELS];
+    /// Rising edges retained until the next chip tick, including short pulses.
+    bool pendingTrigger[LANES][PORT_MAX_CHANNELS] = {};
+    /// Fraction of a 32 kHz tick; preserved across host sample-rate changes.
+    double clockPhase = 0.;
     /// a clock divider for light updates
     Trigger::Divider lightDivider;
 
@@ -82,6 +88,8 @@ struct SuperADSR : Module {
             configParam(PARAM_DECAY         + lane,    0,   7,   7, "Decay");
             configParam(PARAM_SUSTAIN_LEVEL + lane,    0,   7,   5, "Sustain Level", "%", 0, 100.f / 7.f);
             configParam(PARAM_SUSTAIN_RATE  + lane,    0,  31,  20, "Sustain Rate");
+            getParamQuantity(PARAM_SUSTAIN_RATE + lane)->description =
+                "SR: decay while Gate is high. Key-off uses a fixed release of at most 8 ms.";
             configInput(INPUT_GATE + lane, "Gate");
             configInput(INPUT_RETRIG + lane, "Retrig");
             configOutput(OUTPUT_ENVELOPE + lane, "Envelope");
@@ -100,10 +108,18 @@ struct SuperADSR : Module {
     ///
     inline bool getTrigger(const unsigned& channel, const unsigned& lane) {
         // get the trigger from the gate input
-        const float gateCV = rescale(inputs[INPUT_GATE + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
+        auto& gateInput = inputs[INPUT_GATE + lane];
+        const float gateVoltage = channel < static_cast<unsigned>(gateInput.getChannels())
+            ? gateInput.getVoltage(channel) : 0.f;
+        // Compare voltage thresholds directly: rescale() can round 0.01 V
+        // slightly above zero and prevent a held gate from rearming.
+        const float gateCV = gateVoltage >= 2.f ? 1.f : gateVoltage <= 0.01f ? 0.f : 0.5f;
         const bool gate = gateTrigger[lane][channel].process(gateCV);
         // get the trigger from the re-trigger input
-        const float retrigCV = rescale(inputs[INPUT_RETRIG + lane].getVoltage(channel), 0.01f, 2.f, 0.f, 1.f);
+        auto& retrigInput = inputs[INPUT_RETRIG + lane];
+        const float retrigVoltage = channel < static_cast<unsigned>(retrigInput.getChannels())
+            ? retrigInput.getVoltage(channel) : 0.f;
+        const float retrigCV = retrigVoltage >= 2.f ? 1.f : retrigVoltage <= 0.01f ? 0.f : 0.5f;
         const bool retrig = retrigTrigger[lane][channel].process(retrigCV);
         // OR the two boolean values together
         return gate || retrig;
@@ -124,7 +140,8 @@ struct SuperADSR : Module {
         apu.setSustainLevel(params[PARAM_SUSTAIN_LEVEL + lane].getValue());
         apu.setAmplitude(params[PARAM_AMPLITUDE + lane].getValue());
         // trigger this APU and process the output
-        const bool trigger = getTrigger(channel, lane);
+        const bool trigger = pendingTrigger[lane][channel];
+        pendingTrigger[lane][channel] = false;
         const float sample = apu.run(trigger, gateTrigger[lane][channel].isHigh());
         const float voltage = Math::Eurorack::toDC(sample / 128.f);
         outputs[OUTPUT_ENVELOPE + lane].setVoltage(voltage, channel);
@@ -145,10 +162,21 @@ struct SuperADSR : Module {
         // set the number of polyphony channels for output ports
         for (unsigned port = 0; port < NUM_OUTPUTS; port++)
             outputs[port].setChannels(channels);
-        // process audio samples on the chip engine.
+        // Detect every host-sample edge before advancing the slower chip clock.
+        // Disconnected voices also see key-off so reconnecting cannot revive a
+        // frozen envelope or stale high gate. All storage/work is bounded to 32.
         for (unsigned lane = 0; lane < LANES; lane++) {
-            for (unsigned channel = 0; channel < channels; channel++)
-                processChannel(channel, lane);
+            for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
+                pendingTrigger[lane][channel] |= getTrigger(channel, lane);
+        }
+        clockPhase += double(SonyS_DSP::SAMPLE_RATE) / args.sampleRate;
+        // Tolerate sub-picosecond rounding at rational clock boundaries.
+        while (clockPhase >= 1. - 1e-9) {
+            clockPhase = std::max(0., clockPhase - 1.);
+            for (unsigned lane = 0; lane < LANES; lane++) {
+                for (unsigned channel = 0; channel < PORT_MAX_CHANNELS; channel++)
+                    processChannel(channel, lane);
+            }
         }
         if (lightDivider.process()) {
             const float sample_time = lightDivider.getDivision() * args.sampleTime;
@@ -196,18 +224,18 @@ struct SuperADSRWidget : ModuleWidget {
     explicit SuperADSRWidget(SuperADSR *module) {
         setModule(module);
         static constexpr auto panel = "res/SuperADSR.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < SuperADSR::LANES; i++) {
             // Gate, Retrig, Output
-            addInput(createInput<PJ301MPort>(Vec(20 + 84 * i, 281), module, SuperADSR::INPUT_GATE + i));
-            addInput(createInput<PJ301MPort>(Vec(53 + 84 * i, 281), module, SuperADSR::INPUT_RETRIG + i));
-            addOutput(createOutput<PJ301MPort>(Vec(20 + 84 * i, 324), module, SuperADSR::OUTPUT_ENVELOPE + i));
-            addOutput(createOutput<PJ301MPort>(Vec(53 + 84 * i, 324), module, SuperADSR::OUTPUT_INVERTED + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(20 + 84 * i, 281), module, SuperADSR::INPUT_GATE + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(53 + 84 * i, 281), module, SuperADSR::INPUT_RETRIG + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(20 + 84 * i, 324), module, SuperADSR::OUTPUT_ENVELOPE + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(53 + 84 * i, 324), module, SuperADSR::OUTPUT_INVERTED + i));
             // Amplitude
             auto amplitude = createLightParam<LEDLightSlider<RedGreenBlueLight>>(Vec(12, 48 + 119 * i), module, SuperADSR::PARAM_AMPLITUDE + i, SuperADSR::LIGHT_AMPLITUDE + 3 * i);
             amplitude->snap = true;

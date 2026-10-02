@@ -21,9 +21,8 @@
 // SOFTWARE.
 //
 
-#include "dsp/trigger/divider.hpp"
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "dsp/trigger_divider.hpp"
+#include "catch_amalgamated.hpp"
 
 SCENARIO("Trigger::Divider accessors and mutators are used") {
     GIVEN("an initialized divider") {

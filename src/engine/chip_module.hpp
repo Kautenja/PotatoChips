@@ -18,7 +18,8 @@
 #include "../plugin.hpp"
 #include "../dsp/blip_buffer.hpp"
 #include "../dsp/math.hpp"
-#include "../dsp/trigger.hpp"
+#include "../dsp/eurorack.hpp"
+#include "../dsp/trigger_divider.hpp"
 
 #ifndef ENGINE_CHIP_MODULE_HPP_
 #define ENGINE_CHIP_MODULE_HPP_

@@ -98,7 +98,7 @@ class Namco163 {
     ///
     void run_until(cpu_time_t nes_end_time) {
         if (nes_end_time < last_time)
-            throw Exception("end_time must be >= last_time");
+            throw DSPException("end_time must be >= last_time");
         else if (nes_end_time == last_time)
             return;
         // get the number of active oscillators

@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/general_instrument_ay_3_8910.hpp"
 #include "engine/chip_module.hpp"
 
@@ -443,53 +444,53 @@ struct JairasullatorWidget : ModuleWidget {
     explicit JairasullatorWidget(Jairasullator *module) {
         setModule(module);
         static constexpr auto panel = "res/Jairasullator.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         for (unsigned i = 0; i < GeneralInstrumentAy_3_8910::OSC_COUNT; i++) {
             // COLUMN 1
             // Frequency
             addParam(createParam<Trimpot>(     Vec(12 + 70 * i, 45),  module, Jairasullator::PARAM_FREQ + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 70 * i, 85),  module, Jairasullator::INPUT_VOCT + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 70 * i, 85),  module, Jairasullator::INPUT_VOCT + i));
             // FM
-            addInput(createInput<PJ301MPort>(  Vec(10 + 70 * i, 129), module, Jairasullator::INPUT_FM + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 70 * i, 129), module, Jairasullator::INPUT_FM + i));
             addParam(createParam<Trimpot>(     Vec(12 + 70 * i, 173), module, Jairasullator::PARAM_FM + i));
             // Level
             addParam(createParam<Trimpot>( Vec(12 + 70 * i, 221), module, Jairasullator::PARAM_LEVEL + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 70 * i, 263), module, Jairasullator::INPUT_LEVEL + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 70 * i, 263), module, Jairasullator::INPUT_LEVEL + i));
             // Hard Sync
-            addInput(createInput<PJ301MPort>(Vec(10 + 70 * i, 316), module, Jairasullator::INPUT_RESET + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 70 * i, 316), module, Jairasullator::INPUT_RESET + i));
             // COLUMN 2
             // Tone Enable
             addParam(createParam<CKSS>(        Vec(49 + 70 * i, 44), module, Jairasullator::PARAM_TONE + i));
-            addInput(createInput<PJ301MPort>(  Vec(45 + 70 * i, 86), module, Jairasullator::INPUT_TONE + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(45 + 70 * i, 86), module, Jairasullator::INPUT_TONE + i));
             // Noise Enable
-            addInput(createInput<PJ301MPort>(  Vec(45 + 70 * i, 130), module, Jairasullator::INPUT_NOISE + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(45 + 70 * i, 130), module, Jairasullator::INPUT_NOISE + i));
             addParam(createParam<CKSS>(        Vec(49 + 70 * i, 171), module, Jairasullator::PARAM_NOISE + i));
             // Envelope Enables
             addParam(createParam<CKSS>(Vec(49 + 70 * i, 225), module, Jairasullator::PARAM_ENVELOPE_ON + i));
-            addInput(createInput<PJ301MPort>(  Vec(45 + 70 * i, 264), module, Jairasullator::INPUT_ENVELOPE_ON + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(45 + 70 * i, 264), module, Jairasullator::INPUT_ENVELOPE_ON + i));
             // Output
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(52 + 70 * i, 297), module, Jairasullator::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(45 + 70 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(45 + 70 * i, 324), module, Jairasullator::OUTPUT_OSCILLATOR + i));
         }
         // Envelope / LFO Frequency
         addParam(createParam<Trimpot>(Vec(222, 47), module, Jairasullator::PARAM_ENVELOPE_FREQ));
-        addInput(createInput<PJ301MPort>(Vec(220, 86), module, Jairasullator::INPUT_ENVELOPE_VOCT));
+        addInput(createInput<ThemedPJ301MPort>(Vec(220, 86), module, Jairasullator::INPUT_ENVELOPE_VOCT));
         // Envelope / LFO Frequency Mod (NOTE: DISABLED)
-        // addInput(createInput<PJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_ENVELOPE_FM));
+        // addInput(createInput<ThemedPJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_ENVELOPE_FM));
         // addParam(createParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_ENVELOPE_FM));
         // Noise Period
-        addInput(createInput<PJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_NOISE_PERIOD));
+        addInput(createInput<ThemedPJ301MPort>(Vec(220, 130), module, Jairasullator::INPUT_NOISE_PERIOD));
         addParam(createParam<Trimpot>(Vec(222, 175), module, Jairasullator::PARAM_NOISE_PERIOD));
         // Envelope Mode
         addParam(createParam<TL1105>(Vec(222, 228), module, Jairasullator::PARAM_ENVELOPE_MODE));
         addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(227, 272), module, Jairasullator::LIGHTS_ENV_MODE));
         // Envelope Reset / Hard Sync
-        addInput(createInput<PJ301MPort>(Vec(220, 316), module, Jairasullator::INPUT_ENVELOPE_RESET));
+        addInput(createInput<ThemedPJ301MPort>(Vec(220, 316), module, Jairasullator::INPUT_ENVELOPE_RESET));
     }
 
     void appendContextMenu(Menu* menu) override {

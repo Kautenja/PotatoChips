@@ -1,0 +1,21 @@
+\manualchapter{Start with the wave channel}{sec:start}
+Formerly Pallet Town Waves System. Existing patches and presets remain compatible.
+
+Pocket APU combines the Game Boy's two pulse voices, wave playback channel
+and noise generator. Its five editable waves can be blended by the wave
+channel. Each output can also carry a sum of preceding, unpatched outputs.
+
+\begin{enumerate}
+\item Initialize the module. Lower Pulse 1, Pulse 2 and Noise Level to zero.
+Connect the third (Wave) output to a mixer at a low monitoring level.
+\item Leave Wave Level at 3 and patch pitch to the Wave V/OCT input. The
+initialized wave is audible without a gate.
+\item Move Wave Morph above 1 and toward 5 to hear the bank. Drag a large
+wave editor to draw a replacement; module-browser previews are read-only.
+\item Patch a 0--10\,V envelope to Wave Level. Its four amplitude settings
+make stepped articulation; use an external VCA for a smooth fade.
+\end{enumerate}
+
+To hear a full chip mix, restore the pulse/noise levels and monitor the last
+output with the first three empty. Keep levels low enough to avoid clipping
+the accumulated signal.

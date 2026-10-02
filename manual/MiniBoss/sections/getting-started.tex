@@ -1,0 +1,20 @@
+\manualchapter{Start with a gated tone}{sec:start}
+Formerly Mini Boss. Existing patches and presets remain compatible.
+
+Operator 2612 exposes one Yamaha YM2612-style operator. Its sine oscillator,
+feedback, envelope and internal LFO can form a complete voice or one stage
+of an external FM patch. It is one operator per polyphonic channel.
+
+\begin{enumerate}
+\item Initialize the module. Connect OUT to a mixer at a low monitoring level.
+\item Patch a keyboard or sequencer's pitch to V/OCT and its gate to GATE.
+Use a 5\,V gate; without a gate the initialized operator is silent.
+\item Leave multiplier at 1, feedback at 0 and TL at 100. The default AR 31
+and zero decay rates produce a quick, sustained tone while the gate is high.
+\item Lower RR from 15 to lengthen the tail. Raise feedback gradually to
+add harmonics, reducing output volume if the result becomes too loud.
+\end{enumerate}
+
+For a plucked sound, raise D1R, lower SL, and keep D2R at zero. Adjust the
+decay by ear across the pitch range; these rates follow the chip envelope,
+not a calibrated time scale.

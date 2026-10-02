@@ -17,9 +17,10 @@
 
 #include "plugin.hpp"
 #include "dsp/mi_edges/wavetable.hpp"
-#include "dsp/trigger/threshold.hpp"
-#include "dsp/trigger/divider.hpp"
+#include "dsp/trigger_threshold.hpp"
+#include "dsp/trigger_divider.hpp"
 #include "dsp/math.hpp"
+#include "dsp/eurorack.hpp"
 
 // ---------------------------------------------------------------------------
 // MARK: Module
@@ -283,24 +284,24 @@ struct BlocksWidget : rack::ModuleWidget {
     explicit BlocksWidget(Blocks *module) {
         setModule(module);
         static const auto panel = "res/Blocks.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // parameter knobs, inputs, outputs for each voice
         for (unsigned i = 0; i < Blocks::NUM_VOICES; i++) {
             addParam(createParam<Trimpot>(Vec(12 + 35 * i, 32), module, Blocks::PARAM_FREQ + i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 71), module, Blocks::INPUT_FREQ + i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 99), module, Blocks::INPUT_FM + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 35 * i, 71), module, Blocks::INPUT_FREQ + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 35 * i, 99), module, Blocks::INPUT_FM + i));
             addParam(createParam<Trimpot>(Vec(12 + 35 * i, 144), module, Blocks::PARAM_FM + i));
             addParam(createParam<Trimpot>(Vec(12 + 35 * i, 170), module, Blocks::PARAM_LEVEL + i));
-            addInput(createInput<PJ301MPort>(Vec(10 + 35 * i, 210), module, Blocks::INPUT_LEVEL + i));
+            addInput(createInput<ThemedPJ301MPort>(Vec(10 + 35 * i, 210), module, Blocks::INPUT_LEVEL + i));
             addChild(createLight<LargeLight<RedGreenBlueLight>>(Vec(14 + 35 * i, 246), module, Blocks::LIGHTS_SHAPE + 3 * i));
             addParam(createParam<TL1105>(Vec(14 + 35 * i, 282), module, Blocks::PARAM_SHAPE + i));
             addChild(createLight<SmallLight<RedGreenBlueLight>>(Vec(29 + 35 * i, 319), module, Blocks::LIGHTS_LEVEL + 3 * i));
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, Blocks::OUTPUT_AUDIO + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(10 + 35 * i, 324), module, Blocks::OUTPUT_AUDIO + i));
         }
     }
 

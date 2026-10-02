@@ -1,0 +1,33 @@
+\manualchapter{Patches and troubleshooting}{sec:operation}
+\subsection{Clocked percussion and coupled voices}
+Patch a short envelope to Tone 1 Level and sequence Noise with integer CV
+steps. Keep pitch fixed at first, then vary it to move the noise clock.
+For a coupled tone, enable High-Pass Tone 1 from Tone 3 and sweep Tone 3's
+frequency while monitoring Tone 1. Tone 3 now affects the result even when
+you are not listening to its separate output.
+
+Changing global clock switches can shift pitches abruptly. Return them to
+the initialized positions before comparing tuning. Do not infer the actual
+frequency from the current hover label; use a tuner, especially at the
+high end of the 8-bit period range. This guide does not claim calibrated
+tracking across every clock mode.
+
+Global switch CV uses Rack's mono-to-poly repetition. The per-voice pitch,
+noise and level inputs use indexed channels as described below. No extra
+context-menu setting or custom wave bank is stored with this module.
+
+\subsection{Cable channels, outputs and saved patches}
+The widest input selects 1--16 polyphonic chip instances. Voice columns are
+oscillators within each instance, not separate cable channels. Inputs read
+the matching channel; supply matching pitch and level channel counts rather
+than expecting a mono envelope to repeat across a polyphonic pitch cable.
+
+Each output adds the preceding output when that earlier socket is unpatched.
+The accumulated signal clips at approximately $\pm5$\,V. To hear the complete
+mix, use the last output and leave earlier outputs empty. Patching an earlier
+output removes that signal from the following mix. Lower source levels if
+the sum clips.
+
+Rack saves the panel parameters. Reset initializes the chip; oscillator
+phase is not preserved by a patch save. Pitch/FM update each sample, while
+level and other register controls update every 16 samples.

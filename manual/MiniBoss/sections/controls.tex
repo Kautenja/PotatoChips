@@ -1,0 +1,33 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} envelope sliders, Loop and Rate Scale;
+\textbf{2} tuning and modulation knobs;
+\textbf{3} envelope CV inputs;
+\textbf{4} performance inputs and audio output.
+
+The six top sliders and their CV sockets shape the envelope. The lower knobs
+set tuning, feedback and modulation; the bottom sockets handle performance
+signals and audio.
+
+\subsection{Envelope sliders, left to right}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Result \\\midrule
+AR & 1--31; 31 & Attack rate; larger values rise faster. \\
+TL & 0--100; 100 & Peak level; larger values are louder. \\
+D1R & 0--31; 0 & First decay rate; zero holds the peak. \\
+SL / T1L & 0--15; 15 & Level at which the second decay begins. \\
+D2R & 0--31; 0 & Second decay rate; zero holds this level. \\
+RR & 0--15; 15 & Release rate after gate falls. \\
+\bottomrule
+\end{tabularx}
+
+These are chip rate and attenuation settings, not seconds or linear amplitude
+percentages. Rate scaling (0--3, default 0) makes envelopes respond more quickly
+at higher pitches. Loop is off by default; it enables the existing simplified repeating
+SSG envelope contour. Use it for repeating contours after first establishing a gated sound.
+The hardware envelope terminology is retained in the reference figure and
+in \citet{genesis-sound-software-manual}.
+
+Each envelope CV adds $mV/8$ to its slider, where $m$ is that slider's maximum.
+The sum is truncated to an integer and clamped to the control range. For
+example, with AR at 15, $+4$\,V adds 15.5 before truncation, giving 30.
+This is an offset; a 0\,V cable leaves the slider's setting intact.

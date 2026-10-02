@@ -1,0 +1,29 @@
+\manualchapter{Wave editing and patches}{sec:operation}
+\subsection{Draw, blend and save}
+Each of the five editors stores 32 samples with 16 possible levels. The bank
+is shared across all polyphonic channels. Drawing supports undo/redo; patch
+and preset saves include the samples. Reset restores the supplied sine,
+pulse, rising ramp, distorted triangle and falling ramp; randomize replaces
+them with smoothed random waves. Chip phase is not saved.
+
+For a changing lead, draw a smooth wave in slot 1 and a jagged wave in slot 2.
+Set Wave Morph to 1 and apply a slowly rising CV from 0 to 1.4\,V. Tune the
+pulse voices an octave below and lower their levels to add a stable base.
+For percussion, mute the pitched voices, send an envelope to Noise Level,
+and sequence Noise Period in 2\,V increments.
+
+\subsection{Output routing and polyphony}
+A voice adds the preceding output only when that output is unpatched. Each
+stage clips to approximately $\pm5$\,V; the final output is not a headroom-free
+mixer. Patch an earlier output separately to remove its contribution from
+the following mix, or reduce source levels.
+
+The widest input selects 1--16 independent chip instances. Inputs generally
+read the matching polyphonic channel rather than broadcasting mono CV.
+Match pitch and level channel counts when playing chords. All instances use
+the same five drawn waves and panel settings.
+
+If the Wave output is silent, check its Level and CV: setting 0 is off. If
+morph seems inactive near zero, move it above 1. If low-frequency modulation
+sounds stepped, the wave volume has only four levels and the pulse/noise
+volumes have sixteen. Use an external VCA where that stepping is unwanted.

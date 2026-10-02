@@ -1,0 +1,29 @@
+\manualchapter{Control reference}{sec:controls}
+Panel map: \textbf{1} three tone voices: pitch, mix switches, FM and level;
+\textbf{2} shared envelope and noise;
+\textbf{3} sync inputs and voice outputs.
+
+The three tone columns contain frequency, FM, level and Tone/Noise/Envelope
+switches. The shared controls set envelope frequency and shape, plus noise
+period. Sync and CV sockets sit below the corresponding controls.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule Control & Range; default & Operation \\\midrule
+Tone frequency & $\pm5$ oct.; 0 & C4 reference; V/OCT adds octaves. \\
+Tone FM & $-1$--$+1$; 0 & Adds $aV/5$ octaves. \\
+Level & 0--15; 10 & In ordinary tone mode, knob times $V/10$, rounded/clipped. \\
+Noise period & 0--31; 0 & Adds $31V/7$, floors/clamps, then reverses the period register. \\
+Envelope frequency & $-5.5$--9; 1.75 & $2^{p+V}$\,Hz before chip quantization; default about 3.36\,Hz. \\
+\bottomrule
+\end{tabularx}
+
+Tone, Noise and Envelope CV toggle their respective panel states while high
+(2\,V high, 0.01\,V low). Tone defaults on; Noise and Envelope default off.
+Pitch, FM and Level normal across A, B and C, starting at 0, 5 and 10\,V.
+Envelope V/OCT inherits Pulse C pitch when empty. The configured envelope
+FM parameter is not applied by the current processing path.
+
+Sync detects rising edges at 2\,V and rearms below 0.01\,V. Pulse sync forwards
+A to B to C, then to envelope sync. Patch Pulse A Sync explicitly when you
+need a known reset source: its empty-input fallback currently reads the
+preceding envelope-mode input instead of a fixed zero.

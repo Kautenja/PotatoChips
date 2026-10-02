@@ -1,0 +1,20 @@
+\manualchapter{Start with a pulse voice}{sec:start}
+Formerly Pulses. Existing patches and presets remain compatible.
+
+Pulse FME-7 exposes the three tone channels of the Sunsoft FME-7 emulation as a
+compact pulse bank. Each has a frequency control, exponential modulation
+and a four-bit amplitude control.
+
+\begin{enumerate}
+\item Initialize the module. Connect output 1 to a mixer and reduce the
+monitoring level. The default Level 10 produces a continuous tone.
+\item Patch pitch to the first V/OCT socket and an envelope from 0 to 10\,V
+to the first Level socket. Leave FM at zero.
+\item Tune the second frequency knob one octave above the first. Pitch and
+level forward to the next voice when its matching input is empty.
+\item Monitor output 3 with outputs 1 and 2 empty to hear all three voices.
+Lower the individual levels to prevent clipping their sum.
+\end{enumerate}
+
+The fixed waveform keeps patching simple: use frequency offsets for chords,
+close detuning for beating, or audio-rate exponential FM for rougher tones.

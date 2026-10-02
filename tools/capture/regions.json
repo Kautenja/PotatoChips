@@ -1,0 +1,890 @@
+{
+  "Blocks": [
+    {
+      "label": "Pitch and pitch/FM inputs",
+      "box": [
+        5,
+        28,
+        140,
+        101
+      ],
+      "marker": [
+        168,
+        78.5
+      ]
+    },
+    {
+      "label": "FM depth",
+      "box": [
+        5,
+        137,
+        140,
+        28
+      ],
+      "marker": [
+        168,
+        151.0
+      ]
+    },
+    {
+      "label": "Level and level CV",
+      "box": [
+        5,
+        167,
+        140,
+        70
+      ],
+      "marker": [
+        168,
+        202.0
+      ]
+    },
+    {
+      "label": "Shape buttons and indicators",
+      "box": [
+        5,
+        242,
+        140,
+        62
+      ],
+      "marker": [
+        168,
+        273.0
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        308,
+        140,
+        49
+      ],
+      "marker": [
+        168,
+        332.5
+      ]
+    }
+  ],
+  "InfiniteStairs": [
+    {
+      "label": "Pitch, period and pitch/FM inputs",
+      "box": [
+        5,
+        28,
+        140,
+        103
+      ],
+      "marker": [
+        168,
+        79.5
+      ]
+    },
+    {
+      "label": "FM and level",
+      "box": [
+        5,
+        137,
+        140,
+        98
+      ],
+      "marker": [
+        168,
+        186.0
+      ]
+    },
+    {
+      "label": "Pulse width and sync",
+      "box": [
+        5,
+        237,
+        140,
+        77
+      ],
+      "marker": [
+        168,
+        275.5
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        316,
+        140,
+        42
+      ],
+      "marker": [
+        168,
+        337.0
+      ]
+    }
+  ],
+  "StepSaw": [
+    {
+      "label": "Pitch, period and pitch/FM inputs",
+      "box": [
+        5,
+        28,
+        110,
+        103
+      ],
+      "marker": [
+        138,
+        79.5
+      ]
+    },
+    {
+      "label": "FM and level",
+      "box": [
+        5,
+        137,
+        110,
+        98
+      ],
+      "marker": [
+        138,
+        186.0
+      ]
+    },
+    {
+      "label": "Pulse width and sync",
+      "box": [
+        5,
+        237,
+        110,
+        77
+      ],
+      "marker": [
+        138,
+        275.5
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        316,
+        110,
+        42
+      ],
+      "marker": [
+        138,
+        337.0
+      ]
+    }
+  ],
+  "MegaTone": [
+    {
+      "label": "Pitch, period and pitch/FM inputs",
+      "box": [
+        5,
+        39,
+        140,
+        117
+      ],
+      "marker": [
+        168,
+        97.5
+      ]
+    },
+    {
+      "label": "FM and noise mode",
+      "box": [
+        5,
+        165,
+        140,
+        37
+      ],
+      "marker": [
+        168,
+        183.5
+      ]
+    },
+    {
+      "label": "Level and level CV",
+      "box": [
+        5,
+        213,
+        140,
+        91
+      ],
+      "marker": [
+        168,
+        258.5
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        308,
+        140,
+        48
+      ],
+      "marker": [
+        168,
+        332.0
+      ]
+    }
+  ],
+  "Pulses": [
+    {
+      "label": "Pitch and pitch/FM inputs",
+      "box": [
+        5,
+        39,
+        110,
+        117
+      ],
+      "marker": [
+        138,
+        97.5
+      ]
+    },
+    {
+      "label": "FM depth",
+      "box": [
+        5,
+        165,
+        110,
+        37
+      ],
+      "marker": [
+        138,
+        183.5
+      ]
+    },
+    {
+      "label": "Level and level CV",
+      "box": [
+        5,
+        213,
+        110,
+        91
+      ],
+      "marker": [
+        138,
+        258.5
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        308,
+        110,
+        48
+      ],
+      "marker": [
+        138,
+        332.0
+      ]
+    }
+  ],
+  "MiniBoss": [
+    {
+      "label": "Envelope sliders, Loop and Rate Scale",
+      "box": [
+        5,
+        35,
+        230,
+        91
+      ],
+      "marker": [
+        258,
+        80.5
+      ]
+    },
+    {
+      "label": "Tuning and modulation knobs",
+      "box": [
+        5,
+        151,
+        230,
+        113
+      ],
+      "marker": [
+        258,
+        207.5
+      ]
+    },
+    {
+      "label": "Envelope CV inputs",
+      "box": [
+        5,
+        283,
+        230,
+        29
+      ],
+      "marker": [
+        258,
+        297.5
+      ]
+    },
+    {
+      "label": "Performance inputs and audio output",
+      "box": [
+        5,
+        326,
+        230,
+        31
+      ],
+      "marker": [
+        258,
+        341.5
+      ]
+    }
+  ],
+  "SuperADSR": [
+    {
+      "label": "Lane 1 envelope sliders",
+      "box": [
+        5,
+        42,
+        170,
+        99
+      ],
+      "marker": [
+        198,
+        91.5
+      ]
+    },
+    {
+      "label": "Lane 2 envelope sliders",
+      "box": [
+        5,
+        161,
+        170,
+        100
+      ],
+      "marker": [
+        198,
+        211.0
+      ]
+    },
+    {
+      "label": "Gate and Retrig inputs",
+      "box": [
+        5,
+        288,
+        170,
+        30
+      ],
+      "marker": [
+        198,
+        303.0
+      ]
+    },
+    {
+      "label": "Normal and inverted outputs",
+      "box": [
+        5,
+        330,
+        170,
+        31
+      ],
+      "marker": [
+        198,
+        345.5
+      ]
+    }
+  ],
+  "SuperVCA": [
+    {
+      "label": "Bypass and filter mode",
+      "box": [
+        5,
+        27,
+        80,
+        29
+      ],
+      "marker": [
+        108,
+        41.5
+      ]
+    },
+    {
+      "label": "Frequency and frequency CV",
+      "box": [
+        5,
+        71,
+        80,
+        85
+      ],
+      "marker": [
+        108,
+        113.5
+      ]
+    },
+    {
+      "label": "Output level and level CV",
+      "box": [
+        5,
+        157,
+        80,
+        85
+      ],
+      "marker": [
+        108,
+        199.5
+      ]
+    },
+    {
+      "label": "Audio inputs and input gain",
+      "box": [
+        5,
+        243,
+        80,
+        63
+      ],
+      "marker": [
+        108,
+        274.5
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        318,
+        80,
+        40
+      ],
+      "marker": [
+        108,
+        338.0
+      ]
+    }
+  ],
+  "PotKeys": [
+    {
+      "label": "Pitch and pitch/FM inputs",
+      "box": [
+        5,
+        26,
+        140,
+        105
+      ],
+      "marker": [
+        -18,
+        78.5
+      ]
+    },
+    {
+      "label": "FM and level",
+      "box": [
+        5,
+        137,
+        140,
+        99
+      ],
+      "marker": [
+        -18,
+        186.5
+      ]
+    },
+    {
+      "label": "Noise mode and CV",
+      "box": [
+        5,
+        237,
+        140,
+        78
+      ],
+      "marker": [
+        -18,
+        276.0
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        5,
+        317,
+        140,
+        39
+      ],
+      "marker": [
+        -18,
+        336.5
+      ]
+    },
+    {
+      "label": "Shared clock, filter and LFSR switches/CV",
+      "box": [
+        147,
+        35,
+        59,
+        320
+      ],
+      "marker": [
+        178,
+        18
+      ]
+    }
+  ],
+  "Jairasullator": [
+    {
+      "label": "Three tone voices: pitch, mix switches, FM and level",
+      "box": [
+        5,
+        37,
+        205,
+        252
+      ],
+      "marker": [
+        -18,
+        160
+      ]
+    },
+    {
+      "label": "Shared envelope and noise",
+      "box": [
+        215,
+        37,
+        36,
+        252
+      ],
+      "marker": [
+        274,
+        160
+      ]
+    },
+    {
+      "label": "Sync inputs and voice outputs",
+      "box": [
+        5,
+        299,
+        245,
+        50
+      ],
+      "marker": [
+        274,
+        324
+      ]
+    }
+  ],
+  "NameCorpOctalWaveGenerator": [
+    {
+      "label": "Five waveform editors",
+      "box": [
+        8,
+        24,
+        139,
+        336
+      ],
+      "marker": [
+        -18,
+        190
+      ]
+    },
+    {
+      "label": "Active Channels and CV",
+      "box": [
+        156,
+        32,
+        55,
+        153
+      ],
+      "marker": [
+        184,
+        15
+      ]
+    },
+    {
+      "label": "Waveform Morph and CV",
+      "box": [
+        156,
+        204,
+        55,
+        153
+      ],
+      "marker": [
+        184,
+        372
+      ]
+    },
+    {
+      "label": "Eight voices: frequency, FM, level and CV",
+      "box": [
+        221,
+        43,
+        278,
+        268
+      ],
+      "marker": [
+        529,
+        170
+      ]
+    },
+    {
+      "label": "Eight audio outputs and indicators",
+      "box": [
+        221,
+        312,
+        278,
+        45
+      ],
+      "marker": [
+        529,
+        336
+      ]
+    }
+  ],
+  "PalletTownWavesSystem": [
+    {
+      "label": "Five waveform editors",
+      "box": [
+        8,
+        24,
+        139,
+        336
+      ],
+      "marker": [
+        -18,
+        190
+      ]
+    },
+    {
+      "label": "Pitch, period and pitch/FM inputs",
+      "box": [
+        155,
+        28,
+        140,
+        104
+      ],
+      "marker": [
+        319,
+        80.0
+      ]
+    },
+    {
+      "label": "FM, noise mode and level",
+      "box": [
+        155,
+        137,
+        140,
+        99
+      ],
+      "marker": [
+        319,
+        186.5
+      ]
+    },
+    {
+      "label": "Pulse width and Wave Morph",
+      "box": [
+        155,
+        237,
+        140,
+        78
+      ],
+      "marker": [
+        319,
+        276.0
+      ]
+    },
+    {
+      "label": "Audio outputs",
+      "box": [
+        155,
+        317,
+        140,
+        40
+      ],
+      "marker": [
+        319,
+        337.0
+      ]
+    }
+  ],
+  "SuperEcho": [
+    {
+      "label": "Bypass",
+      "box": [
+        9,
+        20,
+        68,
+        34
+      ],
+      "marker": [
+        -18,
+        37
+      ]
+    },
+    {
+      "label": "Delay, feedback, mix and CV",
+      "box": [
+        6,
+        70,
+        73,
+        167
+      ],
+      "marker": [
+        -18,
+        151
+      ]
+    },
+    {
+      "label": "Audio inputs, gain and outputs",
+      "box": [
+        6,
+        240,
+        73,
+        112
+      ],
+      "marker": [
+        -18,
+        296
+      ]
+    },
+    {
+      "label": "Eight FIR sliders, CV inputs and attenuverters",
+      "box": [
+        80,
+        24,
+        147,
+        333
+      ],
+      "marker": [
+        154,
+        12
+      ]
+    }
+  ],
+  "BossFight": [
+    {
+      "label": "Algorithm, feedback, LFO, saturation and outputs",
+      "box": [
+        5,
+        17,
+        124,
+        343
+      ],
+      "marker": [
+        67,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 1: envelope, tuning, modulation and inputs",
+      "box": [
+        137,
+        25,
+        206,
+        335
+      ],
+      "marker": [
+        240,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 2: envelope, tuning, modulation and inputs",
+      "box": [
+        347,
+        25,
+        206,
+        335
+      ],
+      "marker": [
+        450,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 3: envelope, tuning, modulation and inputs",
+      "box": [
+        557,
+        25,
+        206,
+        335
+      ],
+      "marker": [
+        660,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 4: envelope, tuning, modulation and inputs",
+      "box": [
+        767,
+        25,
+        206,
+        335
+      ],
+      "marker": [
+        870,
+        -18
+      ]
+    }
+  ],
+  "YM2151": [
+    {
+      "label": "Shared pitch, modulation, routing and performance inputs",
+      "box": [
+        5,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        90,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 1: envelope, level, multiplier, detune and CV",
+      "box": [
+        185,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        270,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 2: envelope, level, multiplier, detune and CV",
+      "box": [
+        365,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        450,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 3: envelope, level, multiplier, detune and CV",
+      "box": [
+        545,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        630,
+        -18
+      ]
+    },
+    {
+      "label": "Operator 4: envelope, level, multiplier, detune and CV",
+      "box": [
+        725,
+        32,
+        170,
+        325
+      ],
+      "marker": [
+        810,
+        -18
+      ]
+    }
+  ]
+}

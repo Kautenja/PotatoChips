@@ -212,7 +212,7 @@ class TexasInstrumentsSN76489 {
     ///
     void run_until(int32_t end_time) {
         if (end_time < last_time) {  // time went backwards
-            throw Exception("end_time must be >= last_time");
+            throw DSPException("end_time must be >= last_time");
         } else if (end_time > last_time) {  // time moved forwards
             if (pulses[0].output) pulses[0].run(last_time, end_time);
             if (pulses[1].output) pulses[1].run(last_time, end_time);

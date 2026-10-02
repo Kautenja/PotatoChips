@@ -1,0 +1,84 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/190,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (120,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (60.0,10) {\MakeUppercase{\manualname}};
+\panelregion{1}{5}{28}{110}{103}
+\panelregion{2}{5}{137}{110}{98}
+\panelregion{3}{5}{237}{110}{77}
+\panelregion{4}{5}{316}{110}{42}
+% knob 0: Pulse 1 Frequency
+\panelknob{15.0000}{32.0000}{17.8555}{17.8594}
+% input 0: Pulse 1 V/Oct
+\panelinput{13.0000}{71.0000}{23.7000}{23.7000}
+% input 3: Pulse 1 FM
+\panelinput{13.0000}{99.0000}{23.7000}{23.7000}
+% knob 3: Pulse 1 FM
+\panelknob{15.0000}{144.0000}{17.8555}{17.8594}
+% knob 8: Pulse 1 Level
+\panelknob{15.0000}{170.0000}{17.8555}{17.8594}
+% input 8: Pulse 1 Level
+\panelinput{13.0000}{210.0000}{23.7000}{23.7000}
+% knob 6: Pulse 1 Duty Cycle
+\panelknob{15.0000}{241.0000}{17.8555}{17.8594}
+% input 6: Pulse 1 Duty Cycle
+\panelinput{13.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{32.0000}{319.0000}{5.9055}{5.9055}
+% output 0: Pulse 1
+\paneloutput{13.0000}{324.0000}{23.7000}{23.7000}
+% knob 1: Pulse 2 Frequency
+\panelknob{50.0000}{32.0000}{17.8555}{17.8594}
+% input 1: Pulse 2 V/Oct
+\panelinput{48.0000}{71.0000}{23.7000}{23.7000}
+% input 4: Pulse 2 FM
+\panelinput{48.0000}{99.0000}{23.7000}{23.7000}
+% knob 4: Pulse 2 FM
+\panelknob{50.0000}{144.0000}{17.8555}{17.8594}
+% knob 9: Pulse 2 Level
+\panelknob{50.0000}{170.0000}{17.8555}{17.8594}
+% input 9: Pulse 2 Level
+\panelinput{48.0000}{210.0000}{23.7000}{23.7000}
+% knob 7: Pulse 1 Duty Cycle
+\panelknob{50.0000}{241.0000}{17.8555}{17.8594}
+% input 7: Pulse 2 Duty Cycle
+\panelinput{48.0000}{281.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{67.0000}{319.0000}{5.9055}{5.9055}
+% output 1: Pulse 2
+\paneloutput{48.0000}{324.0000}{23.7000}{23.7000}
+% knob 2: Saw Frequency
+\panelknob{85.0000}{32.0000}{17.8555}{17.8594}
+% input 2: Saw V/Oct
+\panelinput{83.0000}{71.0000}{23.7000}{23.7000}
+% input 5: Saw FM
+\panelinput{83.0000}{99.0000}{23.7000}{23.7000}
+% knob 5: Saw FM
+\panelknob{85.0000}{144.0000}{17.8555}{17.8594}
+% knob 10: Saw Level
+\panelknob{85.0000}{170.0000}{17.8555}{17.8594}
+% input 10: Saw Level
+\panelinput{83.0000}{210.0000}{23.7000}{23.7000}
+% input 11: Saw Sync
+\panelinput{83.0000}{264.0000}{23.7000}{23.7000}
+% light -1:
+\panellight{102.0000}{319.0000}{5.9055}{5.9055}
+% output 2: Saw
+\paneloutput{83.0000}{324.0000}{23.7000}{23.7000}
+\panelmarker{1}{138}{79.5}
+\panelmarker{2}{138}{186.0}
+\panelmarker{3}{138}{275.5}
+\panelmarker{4}{138}{337.0}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Pitch, period and pitch/FM inputs}
+\panelkey{2}{FM and level}
+\panelkey{3}{Pulse width and sync}
+\panelkey{4}{Audio outputs}
+\end{tabularx}
+\end{minipage}

@@ -1,0 +1,17 @@
+\manualchapter{Start with one POKEY voice}{sec:start}
+Formerly Pot Keys. Existing patches and presets remain compatible.
+
+Polynomial exposes four Atari POKEY tone/noise channels and selected global
+control bits. Clock, noise and high-pass settings interact, making it useful
+for coarse digital tones and percussion rather than precision tracking.
+
+\begin{enumerate}
+\item Initialize the module. Leave the right-hand global switches off and
+connect Tone 1 output to a mixer at a low level.
+\item Keep Noise at 7 and Level at 7. Patch pitch to Tone 1 V/OCT and a
+0--10\,V envelope to its Level input.
+\item Tune with a tuner; the frequency hover label does not match the
+calculation's octave scale, and the chip's short period register is coarse.
+\item Change Noise one setting at a time. Keep the note and level fixed
+while learning how the eight bit combinations change the texture.
+\end{enumerate}

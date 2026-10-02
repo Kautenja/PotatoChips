@@ -1,0 +1,22 @@
+\manualchapter{Start here}{sec:start}
+Formerly Super Echo. Existing patches and presets remain compatible.
+
+Echo adds a filtered echo to a stereo signal. Use short settings for
+comb filtering and longer settings for distinct repeats. Each polyphonic
+channel has its own stereo buffer; the eight FIR coefficients are shared by
+that channel's left and right lanes.
+\subsection{First patch}
+\begin{enumerate}
+\item Add an oscillator, a VCA or mixer, Echo and VCV Audio. Select your
+output device and start with the monitoring level low.
+\item Connect a short gated sound to IN-L, and OUT-L to your mixer or Audio.
+Leave IN-R unpatched to copy the left input into the right lane.
+\item Leave input gain at 0 dB and bypass off. Set Delay to level 15 (the
+hover display says 240 ms), Feedback to 40 and both Mix controls to 64.
+\item Leave FIR coefficient 1 at 127 and coefficients 2--8 at zero. A short
+note produces a dry sound followed by repeats. At 48 kHz the buffer delay
+for level 15 is 160 ms, plus the filter's few samples of latency.
+\item Connect OUT-R for stereo and try a negative right Mix for inverted
+wet repeats on that side. This is polarity inversion, not stereo panning.
+\end{enumerate}
+Mix and Feedback both default to zero, so an initialized module sounds dry.

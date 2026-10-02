@@ -15,7 +15,8 @@
 
 #include "plugin.hpp"
 #include "dsp/math.hpp"
-#include "dsp/trigger.hpp"
+#include "dsp/eurorack.hpp"
+#include "dsp/trigger_threshold.hpp"
 #include "dsp/texas_instruments_sn76489.hpp"
 #include "engine/chip_module.hpp"
 
@@ -232,31 +233,31 @@ struct MegaToneWidget : ModuleWidget {
     explicit MegaToneWidget(MegaTone *module) {
         setModule(module);
         static constexpr auto panel = "res/MegaTone.svg";
-        setPanel(APP->window->loadSvg(asset::plugin(plugin_instance, panel)));
+        setPanel(createThemedPanel(plugin_instance, panel));
         // panel screws
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-        addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-        addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+        addChild(createWidget<ThemedScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+        addChild(createWidget<ThemedScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         // components
         for (unsigned i = 0; i < TexasInstrumentsSN76489::OSC_COUNT; i++) {
             // Frequency / Noise Period
             auto freq = createParam<Trimpot>(  Vec(12 + 35 * i, 45),  module, MegaTone::PARAM_FREQ        + i);
             freq->snap = i == TexasInstrumentsSN76489::NOISE;
             addParam(freq);
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 85),  module, MegaTone::INPUT_VOCT        + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 85),  module, MegaTone::INPUT_VOCT        + i));
             // FM / LFSR
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 129), module, MegaTone::INPUT_FM          + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 129), module, MegaTone::INPUT_FM          + i));
             if (i < TexasInstrumentsSN76489::TONE_COUNT)
                 addParam(createParam<Trimpot>( Vec(12 + 35 * i, 173), module, MegaTone::PARAM_FM          + i));
             else
                 addParam(createParam<CKSS>(    Vec(120, 173), module, MegaTone::PARAM_FM                  + i));
             // Level
             addParam(createParam<Trimpot>( Vec(12 + 35 * i, 221), module, MegaTone::PARAM_LEVEL       + i));
-            addInput(createInput<PJ301MPort>(  Vec(10 + 35 * i, 263), module, MegaTone::INPUT_LEVEL       + i));
+            addInput(createInput<ThemedPJ301MPort>(  Vec(10 + 35 * i, 263), module, MegaTone::INPUT_LEVEL       + i));
             addChild(createLight<MediumLight<RedGreenBlueLight>>(Vec(17 + 35 * i, 297), module, MegaTone::LIGHTS_LEVEL + 3 * i));
             // Output
-            addOutput(createOutput<PJ301MPort>(Vec(10 + 35 * i, 324), module, MegaTone::OUTPUT_OSCILLATOR + i));
+            addOutput(createOutput<ThemedPJ301MPort>(Vec(10 + 35 * i, 324), module, MegaTone::OUTPUT_OSCILLATOR + i));
         }
     }
 };

@@ -1,0 +1,225 @@
+% Production widget geometry; regenerate with tools/capture/draw_panels.py.
+% See LICENSING.md for visual-asset terms.
+\begingroup
+\pgfmathsetlengthmacro{\panelunit}{min(\textwidth/970,.60*\textheight/420)}
+\begin{tikzpicture}[x=\panelunit,y=-\panelunit]
+\draw[fill=white,draw=manualMuted,line width=.6pt] (0,0) rectangle (900,380);
+\node[font=\sffamily\bfseries\scriptsize,text=manualInk] at (450.0,10) {\MakeUppercase{\manualname}};
+\panelregion{1}{5}{32}{170}{325}
+\panelregion{2}{185}{32}{170}{325}
+\panelregion{3}{365}{32}{170}{325}
+\panelregion{4}{545}{32}{170}{325}
+\panelregion{5}{725}{32}{170}{325}
+% knob 0: Tune
+\panelknob{20.6621}{53.6621}{22.6758}{22.6758}
+% knob 1: Algorithm
+\panelknob{75.6621}{53.6621}{22.6758}{22.6758}
+% knob 2: Operator 1 feedback
+\panelknob{130.6621}{53.6621}{22.6758}{22.6758}
+% knob 3: Output level
+\panelknob{20.6621}{99.6621}{22.6758}{22.6758}
+% knob 4: LFO frequency register
+\panelknob{75.6621}{99.6621}{22.6758}{22.6758}
+% knob 5: LFO AM depth
+\panelknob{130.6621}{99.6621}{22.6758}{22.6758}
+% knob 6: LFO PM depth
+\panelknob{20.6621}{145.6621}{22.6758}{22.6758}
+% knob 7: Channel AM sensitivity
+\panelknob{75.6621}{145.6621}{22.6758}{22.6758}
+% knob 8: Channel PM sensitivity
+\panelknob{130.6621}{145.6621}{22.6758}{22.6758}
+% knob 9: LFO waveform
+\panelknob{20.6621}{191.6621}{22.6758}{22.6758}
+% knob 10: Operator 4 noise
+\panelknob{75.6621}{191.6621}{22.6758}{22.6758}
+% knob 11: Noise rate
+\panelknob{130.6621}{191.6621}{22.6758}{22.6758}
+% knob 12: Hardware output route
+\panelknob{20.6621}{237.6621}{22.6758}{22.6758}
+% input 0: V/oct
+\panelinput{12.1500}{288.1500}{23.7000}{23.7000}
+% input 1: Gate
+\panelinput{45.1500}{288.1500}{23.7000}{23.7000}
+% input 2: Retrigger
+\panelinput{78.1500}{288.1500}{23.7000}{23.7000}
+% input 3: Algorithm
+\panelinput{111.1500}{288.1500}{23.7000}{23.7000}
+% input 4: Feedback
+\panelinput{144.1500}{288.1500}{23.7000}{23.7000}
+% input 5: LFO frequency
+\panelinput{12.1500}{330.1500}{23.7000}{23.7000}
+% input 6: AM depth
+\panelinput{45.1500}{330.1500}{23.7000}{23.7000}
+% input 7: PM depth
+\panelinput{78.1500}{330.1500}{23.7000}{23.7000}
+% input 8: Noise rate
+\panelinput{111.1500}{330.1500}{23.7000}{23.7000}
+% input 9: Output level
+\panelinput{144.1500}{330.1500}{23.7000}{23.7000}
+% knob 13: Operator 1 Attack rate
+\panelknob{200.6621}{53.6621}{22.6758}{22.6758}
+% knob 14: Operator 1 First decay rate
+\panelknob{255.6621}{53.6621}{22.6758}{22.6758}
+% knob 15: Operator 1 Sustain rate
+\panelknob{310.6621}{53.6621}{22.6758}{22.6758}
+% knob 16: Operator 1 Sustain level
+\panelknob{200.6621}{108.6621}{22.6758}{22.6758}
+% knob 17: Operator 1 Release rate
+\panelknob{255.6621}{108.6621}{22.6758}{22.6758}
+% knob 18: Operator 1 Operator level
+\panelknob{310.6621}{108.6621}{22.6758}{22.6758}
+% knob 19: Operator 1 Multiplier
+\panelknob{200.6621}{163.6621}{22.6758}{22.6758}
+% knob 20: Operator 1 Key-rate scaling
+\panelknob{255.6621}{163.6621}{22.6758}{22.6758}
+% knob 21: Operator 1 DT1
+\panelknob{310.6621}{163.6621}{22.6758}{22.6758}
+% knob 22: Operator 1 DT2
+\panelknob{200.6621}{218.6621}{22.6758}{22.6758}
+% knob 23: Operator 1 AM enable
+\panelknob{255.6621}{218.6621}{22.6758}{22.6758}
+% input 10: Operator 1 Attack rate
+\panelinput{192.1500}{288.1500}{23.7000}{23.7000}
+% input 11: Operator 1 First decay rate
+\panelinput{235.1500}{288.1500}{23.7000}{23.7000}
+% input 12: Operator 1 Sustain rate
+\panelinput{278.1500}{288.1500}{23.7000}{23.7000}
+% input 13: Operator 1 Sustain level
+\panelinput{321.1500}{288.1500}{23.7000}{23.7000}
+% input 14: Operator 1 Release rate
+\panelinput{192.1500}{330.1500}{23.7000}{23.7000}
+% input 15: Operator 1 Operator level
+\panelinput{235.1500}{330.1500}{23.7000}{23.7000}
+% input 16: Operator 1 Multiplier
+\panelinput{278.1500}{330.1500}{23.7000}{23.7000}
+% knob 24: Operator 2 Attack rate
+\panelknob{380.6621}{53.6621}{22.6758}{22.6758}
+% knob 25: Operator 2 First decay rate
+\panelknob{435.6621}{53.6621}{22.6758}{22.6758}
+% knob 26: Operator 2 Sustain rate
+\panelknob{490.6621}{53.6621}{22.6758}{22.6758}
+% knob 27: Operator 2 Sustain level
+\panelknob{380.6621}{108.6621}{22.6758}{22.6758}
+% knob 28: Operator 2 Release rate
+\panelknob{435.6621}{108.6621}{22.6758}{22.6758}
+% knob 29: Operator 2 Operator level
+\panelknob{490.6621}{108.6621}{22.6758}{22.6758}
+% knob 30: Operator 2 Multiplier
+\panelknob{380.6621}{163.6621}{22.6758}{22.6758}
+% knob 31: Operator 2 Key-rate scaling
+\panelknob{435.6621}{163.6621}{22.6758}{22.6758}
+% knob 32: Operator 2 DT1
+\panelknob{490.6621}{163.6621}{22.6758}{22.6758}
+% knob 33: Operator 2 DT2
+\panelknob{380.6621}{218.6621}{22.6758}{22.6758}
+% knob 34: Operator 2 AM enable
+\panelknob{435.6621}{218.6621}{22.6758}{22.6758}
+% input 17: Operator 2 Attack rate
+\panelinput{372.1500}{288.1500}{23.7000}{23.7000}
+% input 18: Operator 2 First decay rate
+\panelinput{415.1500}{288.1500}{23.7000}{23.7000}
+% input 19: Operator 2 Sustain rate
+\panelinput{458.1500}{288.1500}{23.7000}{23.7000}
+% input 20: Operator 2 Sustain level
+\panelinput{501.1500}{288.1500}{23.7000}{23.7000}
+% input 21: Operator 2 Release rate
+\panelinput{372.1500}{330.1500}{23.7000}{23.7000}
+% input 22: Operator 2 Operator level
+\panelinput{415.1500}{330.1500}{23.7000}{23.7000}
+% input 23: Operator 2 Multiplier
+\panelinput{458.1500}{330.1500}{23.7000}{23.7000}
+% knob 35: Operator 3 Attack rate
+\panelknob{560.6621}{53.6621}{22.6758}{22.6758}
+% knob 36: Operator 3 First decay rate
+\panelknob{615.6621}{53.6621}{22.6758}{22.6758}
+% knob 37: Operator 3 Sustain rate
+\panelknob{670.6621}{53.6621}{22.6758}{22.6758}
+% knob 38: Operator 3 Sustain level
+\panelknob{560.6621}{108.6621}{22.6758}{22.6758}
+% knob 39: Operator 3 Release rate
+\panelknob{615.6621}{108.6621}{22.6758}{22.6758}
+% knob 40: Operator 3 Operator level
+\panelknob{670.6621}{108.6621}{22.6758}{22.6758}
+% knob 41: Operator 3 Multiplier
+\panelknob{560.6621}{163.6621}{22.6758}{22.6758}
+% knob 42: Operator 3 Key-rate scaling
+\panelknob{615.6621}{163.6621}{22.6758}{22.6758}
+% knob 43: Operator 3 DT1
+\panelknob{670.6621}{163.6621}{22.6758}{22.6758}
+% knob 44: Operator 3 DT2
+\panelknob{560.6621}{218.6621}{22.6758}{22.6758}
+% knob 45: Operator 3 AM enable
+\panelknob{615.6621}{218.6621}{22.6758}{22.6758}
+% input 24: Operator 3 Attack rate
+\panelinput{552.1500}{288.1500}{23.7000}{23.7000}
+% input 25: Operator 3 First decay rate
+\panelinput{595.1500}{288.1500}{23.7000}{23.7000}
+% input 26: Operator 3 Sustain rate
+\panelinput{638.1500}{288.1500}{23.7000}{23.7000}
+% input 27: Operator 3 Sustain level
+\panelinput{681.1500}{288.1500}{23.7000}{23.7000}
+% input 28: Operator 3 Release rate
+\panelinput{552.1500}{330.1500}{23.7000}{23.7000}
+% input 29: Operator 3 Operator level
+\panelinput{595.1500}{330.1500}{23.7000}{23.7000}
+% input 30: Operator 3 Multiplier
+\panelinput{638.1500}{330.1500}{23.7000}{23.7000}
+% knob 46: Operator 4 Attack rate
+\panelknob{740.6621}{53.6621}{22.6758}{22.6758}
+% knob 47: Operator 4 First decay rate
+\panelknob{795.6621}{53.6621}{22.6758}{22.6758}
+% knob 48: Operator 4 Sustain rate
+\panelknob{850.6621}{53.6621}{22.6758}{22.6758}
+% knob 49: Operator 4 Sustain level
+\panelknob{740.6621}{108.6621}{22.6758}{22.6758}
+% knob 50: Operator 4 Release rate
+\panelknob{795.6621}{108.6621}{22.6758}{22.6758}
+% knob 51: Operator 4 Operator level
+\panelknob{850.6621}{108.6621}{22.6758}{22.6758}
+% knob 52: Operator 4 Multiplier
+\panelknob{740.6621}{163.6621}{22.6758}{22.6758}
+% knob 53: Operator 4 Key-rate scaling
+\panelknob{795.6621}{163.6621}{22.6758}{22.6758}
+% knob 54: Operator 4 DT1
+\panelknob{850.6621}{163.6621}{22.6758}{22.6758}
+% knob 55: Operator 4 DT2
+\panelknob{740.6621}{218.6621}{22.6758}{22.6758}
+% knob 56: Operator 4 AM enable
+\panelknob{795.6621}{218.6621}{22.6758}{22.6758}
+% input 31: Operator 4 Attack rate
+\panelinput{732.1500}{288.1500}{23.7000}{23.7000}
+% input 32: Operator 4 First decay rate
+\panelinput{775.1500}{288.1500}{23.7000}{23.7000}
+% input 33: Operator 4 Sustain rate
+\panelinput{818.1500}{288.1500}{23.7000}{23.7000}
+% input 34: Operator 4 Sustain level
+\panelinput{861.1500}{288.1500}{23.7000}{23.7000}
+% input 35: Operator 4 Release rate
+\panelinput{732.1500}{330.1500}{23.7000}{23.7000}
+% input 36: Operator 4 Operator level
+\panelinput{775.1500}{330.1500}{23.7000}{23.7000}
+% input 37: Operator 4 Multiplier
+\panelinput{818.1500}{330.1500}{23.7000}{23.7000}
+% display -1:
+\paneldisplay{65.0000}{234.0000}{100.0000}{40.0000}
+% output 0: Left audio
+\paneloutput{827.1500}{250.1500}{23.7000}{23.7000}
+% output 1: Right audio
+\paneloutput{863.1500}{250.1500}{23.7000}{23.7000}
+\panelmarker{1}{90}{-18}
+\panelmarker{2}{270}{-18}
+\panelmarker{3}{450}{-18}
+\panelmarker{4}{630}{-18}
+\panelmarker{5}{810}{-18}
+\end{tikzpicture}
+\endgroup
+\par\smallskip
+\begin{minipage}{.95\textwidth}\small
+\begin{tabularx}{\textwidth}{@{}rX@{}}
+\panelkey{1}{Shared pitch, modulation, routing and performance inputs}
+\panelkey{2}{Operator 1: envelope, level, multiplier, detune and CV}
+\panelkey{3}{Operator 2: envelope, level, multiplier, detune and CV}
+\panelkey{4}{Operator 3: envelope, level, multiplier, detune and CV}
+\panelkey{5}{Operator 4: envelope, level, multiplier, detune and CV}
+\end{tabularx}
+\end{minipage}

@@ -391,10 +391,12 @@ class Tables {
 
     /// @brief Initialize the sine table.
     void init_sin_table() {
+        // Keep double precision without relying on the non-standard M_PI macro.
+        constexpr double pi = 3.1415926535897932384626433832795029;
         // build Logarithmic Sinus table
         for (unsigned i = 0; i < SIN_LENGTH; i++) {
             // non-standard sinus (checked against the real chip)
-            float m = sin(((i * 2) + 1) * M_PI / SIN_LENGTH);
+            float m = sin(((i * 2) + 1) * pi / SIN_LENGTH);
             // we never reach zero here due to ((i * 2) + 1)
             // convert to decibels
             float o;

@@ -1,6 +1,11 @@
 // YM2612 key-on and SSG quirk regressions.
 // Copyright (c) 2026 Christian Kauten. MIT license; see docs/licenses/MIT-TESTS.txt.
 #include "catch_amalgamated.hpp"
+#include <cmath>
+// The standalone DSP headers must compile without platform math extensions.
+#ifdef M_PI
+#undef M_PI
+#endif
 #include "test_access.hpp"
 #include <set>
 using namespace YamahaYM2612;

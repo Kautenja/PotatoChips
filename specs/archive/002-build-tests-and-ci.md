@@ -298,7 +298,7 @@ At local validation time, a hosted Windows build of this fix had not run;
 the local regression verifies the observed checkout failure, not subsequent
 Windows compilation, host tests or packaging.
 
-### Windows Build Fixture Dependency (2026-10-01)
+### Windows CI Follow-Up (2026-10-01)
 
 The [follow-up platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36942974718)
 for `e0954d39` passed dependency validation, Linux and macOS. Windows then
@@ -306,7 +306,30 @@ failed the checkout regression because `git` was absent from the isolated
 MSYS2 environment. Add Git to that environment's explicit package list so
 the regression can exercise checkout conversion on Windows as intended.
 
-Hosted verification of this follow-up is pending.
+The [next platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36943661221)
+for `416953aa` passed Windows checkout validation, plugin compilation, host
+checks and packaging. It exposed the remaining standalone YM2612 compile
+failure: MinGW's strict C++ mode does not provide the non-standard `M_PI`
+macro. Replace that use in the adapted emulator with a local C++11 `double`
+constant of the same value. No register, timing or table formula changes.
+The SSG suite now undefines `M_PI` after loading `<cmath>` to exercise this
+portability constraint on every platform.
+
+Local validation on macOS ARM64:
+
+-   `make check-build`: all four fixtures pass with the CI dependency change.
+-   `python3 scripts/validate.py dependencies`: passes.
+-   `make test/dsp/yamaha_ym2612/test_ssg_retrigger RACK_DIR=/nonexistent-sdk`:
+    reproduces the missing-`M_PI` error before the constant replacement.
+-   `make -k -j2 test RACK_DIR=/nonexistent-sdk`: all 13 DSP suites pass after
+    the fix, including 1,248,994 assertions in the four YM2612 cases.
+-   A C++11 syntax-only compile without `M_PI` passes; a compile-time
+    assertion verifies the replacement equals the prior macOS macro value.
+-   `make -j2 test-ym2612-ssg`: 9,850,532 assertions in six cases pass.
+-   `git diff --check`: passes. No GUI or listening checks were run for this
+    compile-portability fix.
+
+Hosted verification of the combined fixes is pending.
 
 ### Remaining Verification And Handoffs
 

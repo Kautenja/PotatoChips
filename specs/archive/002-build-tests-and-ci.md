@@ -329,7 +329,14 @@ Local validation on macOS ARM64:
 -   `git diff --check`: passes. No GUI or listening checks were run for this
     compile-portability fix.
 
-Hosted verification of the combined fixes is pending.
+Hosted verification of `70b03afd` is green:
+
+-   [Build and tests](https://github.com/Kautenja/PotatoChips/actions/runs/36944258871):
+    Linux x64, macOS ARM64 and Windows x64 all pass dependency/build-rule
+    validation, plugin compilation, DSP regressions, Rack host checks and
+    package validation/upload.
+-   [Coverage and sanitizers](https://github.com/Kautenja/PotatoChips/actions/runs/36944258869):
+    both Linux instrumentation jobs pass.
 
 ### Remaining Verification And Handoffs
 

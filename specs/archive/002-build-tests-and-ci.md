@@ -209,8 +209,8 @@ owns removing the production dependency. No assertions were dropped.
 
 ### Remote Verification
 
-[Build/platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36874253947)
-and [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36874253524)
+[Build/platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36874253947)
+and [instrumentation run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36874253524)
 executed implementation commit `0480380b` on October 1, 2026:
 
 | Platform / Mode | Result |
@@ -235,8 +235,8 @@ manifest, or root GPL text changed relative to `cb2809a4`.
 
 ### Final Platform Verification
 
-The [platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102314)
-and [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102334)
+The [platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36881102314)
+and [instrumentation run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36881102334)
 for `12e03225` pass. Linux x64, macOS arm64 and Windows x64 each complete
 build-rule checks, the plugin, all 13 DSP binaries, all four Rack binaries,
 package validation and artifact retention. Coverage and DSP ASan/UBSan pass.
@@ -274,7 +274,7 @@ sent events to `https://notify.travis-ci.org`. A subsequent hooks query
 returned an empty list. The Travis configuration and badge were already
 removed; historical migration evidence remains here.
 
-The [failing platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36940237330)
+The [failing platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36940237330)
 for `d965c615` passed Linux/macOS but failed Windows dependency validation
 with `ymfm checksum mismatch: ymfm_fm.ipp`. Git's CRLF checkout conversion
 changed the newly vendored OPM dependencies, which lacked Catch2's existing
@@ -300,13 +300,13 @@ Windows compilation, host tests or packaging.
 
 ### Windows CI Follow-Up (2026-10-01)
 
-The [follow-up platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36942974718)
+The [follow-up platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36942974718)
 for `e0954d39` passed dependency validation, Linux and macOS. Windows then
 failed the checkout regression because `git` was absent from the isolated
 MSYS2 environment. Add Git to that environment's explicit package list so
 the regression can exercise checkout conversion on Windows as intended.
 
-The [next platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36943661221)
+The [next platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36943661221)
 for `416953aa` passed Windows checkout validation, plugin compilation, host
 checks and packaging. It exposed the remaining standalone YM2612 compile
 failure: MinGW's strict C++ mode does not provide the non-standard `M_PI`
@@ -331,11 +331,11 @@ Local validation on macOS ARM64:
 
 Hosted verification of `70b03afd` is green:
 
--   [Build and tests](https://github.com/Kautenja/PotatoChips/actions/runs/36944258871):
+-   [Build and tests](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36944258871):
     Linux x64, macOS ARM64 and Windows x64 all pass dependency/build-rule
     validation, plugin compilation, DSP regressions, Rack host checks and
     package validation/upload.
--   [Coverage and sanitizers](https://github.com/Kautenja/PotatoChips/actions/runs/36944258869):
+-   [Coverage and sanitizers](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36944258869):
     both Linux instrumentation jobs pass.
 
 ### Remaining Verification And Handoffs

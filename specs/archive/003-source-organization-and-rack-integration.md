@@ -305,10 +305,10 @@ an OS-level leak report. Existing SDK deprecation warnings remain.
     the desktop unlocked; keyboard input did. User patches/settings were not
     changed: all native work used a temporary profile and fixture patches.
 
-The final [platform run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102314)
+The final [platform run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36881102314)
 for `12e03225` passes on Linux x64, macOS arm64 and Windows x64: build-rule
 fixtures, plugin build, 13 DSP binaries, four Rack binaries, package validation
-and artifact retention. The [instrumentation run](https://github.com/Kautenja/PotatoChips/actions/runs/36881102334)
+and artifact retention. The [instrumentation run](https://github.com/Arhythmetic-Units/PotatoChips/actions/runs/36881102334)
 also passes Linux DSP coverage and ASan/UBSan. Windows PCM and the original
 cross-platform metadata/audio fixtures pass without relaxed tolerances.
 

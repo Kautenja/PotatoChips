@@ -2,7 +2,7 @@
 
 Created: 2026-10-01
 Status: COMPLETE
-Issue: [#98](https://github.com/Kautenja/PotatoChips/issues/98)
+Issue: [#98](https://github.com/Arhythmetic-Units/PotatoChips/issues/98)
 Planning baseline: `4d162a02` (product source unchanged from `33fb1554`).
 
 Resolve the reported missing release in Super ADSR. Reproduce the gate-off
@@ -47,7 +47,7 @@ The current sources expose several distinctions that the fix must preserve:
 -   [The current ADSR test](../../test/dsp/sony_s_dsp/test_adsr.cpp) checks only
     the eight-byte object size. It does not verify envelope transitions or
     release. Historical commit
-    [`535cd150`](https://github.com/Kautenja/PotatoChips/commit/535cd150281d7c28b08a0b8e8b3ee9064bb4c2ea)
+    [`535cd150`](https://github.com/Arhythmetic-Units/PotatoChips/commit/535cd150281d7c28b08a0b8e8b3ee9064bb4c2ea)
     fixed inconsistent release output scaling and zero clamping; preserve
     those corrections.
 
@@ -252,9 +252,9 @@ Commenting is permitted during implementation; the close command is only
 for the verified resolution stage:
 
 ```shell
-gh issue comment 98 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-98-update.md
-gh issue close 98 --repo Kautenja/PotatoChips --reason completed
-gh issue view 98 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 98 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-98-update.md
+gh issue close 98 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 98 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Completion Evidence
@@ -370,7 +370,7 @@ remains. A pushed source fix does not imply VCV Library publication.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #98 | [`fb850a118444d7bdca40c659a15a16f59e5171a2`](https://github.com/Kautenja/PotatoChips/commit/fb850a118444d7bdca40c659a15a16f59e5171a2) | Core, module, sanitizer, native Scope and manual checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/98#issuecomment-5939853629) | CLOSED / COMPLETED; read back 2026-10-01 |
+| #98 | [`fb850a118444d7bdca40c659a15a16f59e5171a2`](https://github.com/Arhythmetic-Units/PotatoChips/commit/fb850a118444d7bdca40c659a15a16f59e5171a2) | Core, module, sanitizer, native Scope and manual checks passed | [Resolution](https://github.com/Arhythmetic-Units/PotatoChips/issues/98#issuecomment-5939853629) | CLOSED / COMPLETED; read back 2026-10-01 |
 
 The fixing commit was pushed to `v2.0.2` and verified accessible through the
 GitHub API before the resolution comment and closure. No new reports were

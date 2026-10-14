@@ -21,7 +21,7 @@ Clone from your projects directory, then run subsequent commands from the
 repository root unless a command explicitly changes directories:
 
 ```shell
-git clone https://github.com/Kautenja/PotatoChips.git
+git clone https://github.com/Arhythmetic-Units/PotatoChips.git
 cd PotatoChips
 ```
 

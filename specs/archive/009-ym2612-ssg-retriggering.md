@@ -2,7 +2,7 @@
 
 Created: 2026-10-01
 Status: COMPLETE
-Issue: [#82](https://github.com/Kautenja/PotatoChips/issues/82)
+Issue: [#82](https://github.com/Arhythmetic-Units/PotatoChips/issues/82)
 Planning baseline: `59638fd9` (product source unchanged from `33fb1554`).
 
 Make Mini Boss and Boss Fight reliably restart their looping envelopes
@@ -82,11 +82,11 @@ Relevant current implementation:
 -   The current menu says "Soft Reset Envelope Generator", but the saved
     key remains `prevent_clicks`. Preserve that key and its phase policy.
 -   Commit
-    [`34990c0c`](https://github.com/Kautenja/PotatoChips/commit/34990c0cd24c909e21d69ad620fb8736c3a5dfe6)
+    [`34990c0c`](https://github.com/Arhythmetic-Units/PotatoChips/commit/34990c0cd24c909e21d69ad620fb8736c3a5dfe6)
     replaced full SSG mode selection with a simplified looping envelope
     before this report. Later trigger fixes
-    [`33165d81`](https://github.com/Kautenja/PotatoChips/commit/33165d81e3da2b6bb0510065df1cf4b20fd31cb8)
-    and [`009015e5`](https://github.com/Kautenja/PotatoChips/commit/009015e5c391b2a66fd6b4de746aa0112d6cdcba)
+    [`33165d81`](https://github.com/Arhythmetic-Units/PotatoChips/commit/33165d81e3da2b6bb0510065df1cf4b20fd31cb8)
+    and [`009015e5`](https://github.com/Arhythmetic-Units/PotatoChips/commit/009015e5c391b2a66fd6b4de746aa0112d6cdcba)
     changed threshold handling. Their commit titles do not establish that
     #82 was fixed. The current test tree has no YM2612 regression suite.
 
@@ -304,14 +304,14 @@ With authenticated GitHub CLI, prepare a factual body file first. Comments
 are permitted during implementation; closure is only for verified resolution:
 
 ```shell
-gh issue comment 82 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-82-update.md
-gh issue close 82 --repo Kautenja/PotatoChips --reason completed
-gh issue view 82 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 82 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-82-update.md
+gh issue close 82 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 82 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Completion Evidence
 
-Implementation commit: [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Kautenja/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010).
+Implementation commit: [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Arhythmetic-Units/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010).
 
 Implemented on 2026-10-01 against baseline `3cff51d2`, on macOS arm64 with
 Apple Clang, the local Rack 2.6.0 SDK/runtime, and Catch2 3.16.0. Source work,
@@ -501,4 +501,4 @@ completed archive rather than treated as outstanding implementation work.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #82 | [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Kautenja/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010) | Focused DSP/Rack/stress, sanitizer, native replay, audio equivalence and manuals verified; original accepted-event one-shot unconfirmed | Pending | OPEN when re-read 2026-10-01 |
+| #82 | [`b7f1684db6e3617986e43d1da0860048648f3010`](https://github.com/Arhythmetic-Units/PotatoChips/commit/b7f1684db6e3617986e43d1da0860048648f3010) | Focused DSP/Rack/stress, sanitizer, native replay, audio equivalence and manuals verified; original accepted-event one-shot unconfirmed | Pending | OPEN when re-read 2026-10-01 |

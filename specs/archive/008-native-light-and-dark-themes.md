@@ -2,7 +2,7 @@
 
 Created: 2026-10-01
 Status: COMPLETE
-Issue: [#95](https://github.com/Kautenja/PotatoChips/issues/95)
+Issue: [#95](https://github.com/Arhythmetic-Units/PotatoChips/issues/95)
 Planning baseline: `e169db73` (product source unchanged from `33fb1554`).
 
 Make every enabled PotatoChips module follow VCV Rack's global light/dark
@@ -295,9 +295,9 @@ With authenticated GitHub CLI, prepare the factual comment body first.
 Only run the close command at the verified resolution stage:
 
 ```shell
-gh issue comment 95 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-95-update.md
-gh issue close 95 --repo Kautenja/PotatoChips --reason completed
-gh issue view 95 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 95 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-95-update.md
+gh issue close 95 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 95 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Completion Evidence
@@ -358,10 +358,10 @@ implementation, not release or VCV Library publication.
 ### Issue Follow-Through
 
 Implementation commit
-[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Kautenja/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403)
+[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Arhythmetic-Units/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403)
 was pushed to `origin/v2.0.2` and verified through GitHub's commit API.
 Re-read #95 before posting; it remained open with no intervening comments.
-The [resolution comment](https://github.com/Kautenja/PotatoChips/issues/95#issuecomment-5938819683)
+The [resolution comment](https://github.com/Arhythmetic-Units/PotatoChips/issues/95#issuecomment-5938819683)
 records the native setting, minimum version, fixing commit, paired images,
 validation and release availability. Closed as `COMPLETED` on October 1,
 2026 and verified the returned `CLOSED`/`COMPLETED` state. This resolves

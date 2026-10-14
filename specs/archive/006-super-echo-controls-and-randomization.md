@@ -2,8 +2,8 @@
 
 Created: 2026-10-01
 Status: COMPLETE
-Issues: [#96](https://github.com/Kautenja/PotatoChips/issues/96),
-[#97](https://github.com/Kautenja/PotatoChips/issues/97)
+Issues: [#96](https://github.com/Arhythmetic-Units/PotatoChips/issues/96),
+[#97](https://github.com/Arhythmetic-Units/PotatoChips/issues/97)
 Planning baseline: `937b72d4` (product source unchanged from `33fb1554`).
 
 Restore the eight missing FIR coefficient sliders and make module
@@ -22,7 +22,7 @@ Both issues were open when read on October 1, 2026, including all comments:
 [SuperEchoWidget](../../src/SuperEcho.cpp) currently adds each FIR input and
 attenuverter but comments out the `LEDLightSliderHorizontal` construction,
 snapping, and `addParam` calls. Commit
-[`33fb1554`](https://github.com/Kautenja/PotatoChips/commit/33fb15540617038fea42c79be38452cb32c03933)
+[`33fb1554`](https://github.com/Arhythmetic-Units/PotatoChips/commit/33fb15540617038fea42c79be38452cb32c03933)
 made that change in March 2025 with a missing-symbol TODO. This explains
 missing controls in the current checkout; it is later than the original
 report and does not establish the original rendering defect's cause.
@@ -255,12 +255,12 @@ not commands to run while authoring this spec. Prepare the two body files
 with the verified issue-specific summaries and real commit URLs first:
 
 ```shell
-gh issue comment 96 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-96-resolution.md
-gh issue close 96 --repo Kautenja/PotatoChips --reason completed
-gh issue comment 97 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-97-resolution.md
-gh issue close 97 --repo Kautenja/PotatoChips --reason completed
-gh issue view 96 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
-gh issue view 97 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 96 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-96-resolution.md
+gh issue close 96 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue comment 97 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-97-resolution.md
+gh issue close 97 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 96 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
+gh issue view 97 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Completion Evidence
@@ -359,7 +359,7 @@ Library publication is claimed.
 ### Issue Publication
 
 Completed on 2026-10-01. The implementation commit
-[`72eb6b956c87af6d35a9458b3c0a7441bea66101`](https://github.com/Kautenja/PotatoChips/commit/72eb6b956c87af6d35a9458b3c0a7441bea66101)
+[`72eb6b956c87af6d35a9458b3c0a7441bea66101`](https://github.com/Arhythmetic-Units/PotatoChips/commit/72eb6b956c87af6d35a9458b3c0a7441bea66101)
 was pushed to `origin/v2.0.2`; GitHub's commit API confirmed its canonical
 public reference before commenting. Each issue received its own resolution
 comment and was closed with reason `completed`. Read-back confirmed both
@@ -368,5 +368,5 @@ release publication remains separate.
 
 | Issue | Fix Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #96 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Native before/after, interaction and preview checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/96#issuecomment-5939430980) | CLOSED / COMPLETED |
-| #97 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Headless engine and native UI randomization checks passed | [Resolution](https://github.com/Kautenja/PotatoChips/issues/97#issuecomment-5939431618) | CLOSED / COMPLETED |
+| #96 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Native before/after, interaction and preview checks passed | [Resolution](https://github.com/Arhythmetic-Units/PotatoChips/issues/96#issuecomment-5939430980) | CLOSED / COMPLETED |
+| #97 | `72eb6b956c87af6d35a9458b3c0a7441bea66101` | Headless engine and native UI randomization checks passed | [Resolution](https://github.com/Arhythmetic-Units/PotatoChips/issues/97#issuecomment-5939431618) | CLOSED / COMPLETED |

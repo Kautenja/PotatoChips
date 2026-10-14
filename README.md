@@ -2,7 +2,7 @@
 
 ![Arhythmetic Units Potato Chips: a golden potato crisp on a rainbow-pinned sound chip](manual/PotatoChips-SocialMedia.png)
 
-[![Build and tests](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml/badge.svg)](https://github.com/Kautenja/PotatoChips/actions/workflows/build.yml)
+[![Build and tests](https://github.com/Arhythmetic-Units/PotatoChips/actions/workflows/build.yml/badge.svg)](https://github.com/Arhythmetic-Units/PotatoChips/actions/workflows/build.yml)
 
 Potato Chips is an Arhythmetic Units plugin for VCV Rack 2, by Christian
 Kauten and contributors. Build chiptune voices from classic sound-chip
@@ -10,7 +10,7 @@ oscillators, four-operator FM, wavetables, envelopes, and echo. The modules
 support polyphonic Rack signals and expose chip controls as knobs and CV.
 
 [VCV Library](https://library.vcvrack.com/KautenjaDSP-PotatoChips) ·
-[GitHub releases](https://github.com/Kautenja/PotatoChips/releases) ·
+[GitHub releases](https://github.com/Arhythmetic-Units/PotatoChips/releases) ·
 [Source license: GPL-3.0-or-later](LICENSE) ·
 [Artwork and dependency terms](LICENSING.md)
 
@@ -59,21 +59,21 @@ lag the checkout; editable sources are in [manual/](manual/).
 
 | Module | Chip / Source | Use | Manual |
 | --- | --- | --- | --- |
-| Facets | Mutable Instruments Edges | Digital waveforms and stepped noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf) |
-| Staircase 2A03 | Ricoh 2A03 | NES pulse, triangle, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf) |
-| Ramp VRC6 | Konami VRC6 | Pulse and quantized saw voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf) |
-| Pulse FME-7 | Sunsoft FME-7 | Three pulse voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf) |
-| Trio AY | General Instrument AY-3-8910 | Tone, noise, and envelope synthesis | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf) |
-| Polynomial | Atari POKEY | Pulse voices, noise, and distortion modes | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf) |
-| Tone 76489 | Texas Instruments SN76489 | Pulse voices and periodic/white noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf) |
-| Voice 2151 | Yamaha YM2151 | Four-operator FM, per-lane LFO and noise | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/YM2151.pdf) |
-| Voice 2612 | Yamaha YM2612 | Four-operator FM voice | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf) |
-| Operator 2612 | Yamaha YM2612 | Single FM operator with external modulation | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf) |
-| Octal 163 | Namco 163 | Eight voices with editable wavetables | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf) |
-| Pocket APU | Game Boy sound system | Pulse, wavetable, and noise voices | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf) |
-| Contour | Sony S-DSP | Two envelope generators | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf) |
-| Echo | Sony S-DSP | Stereo echo with an eight-tap FIR filter | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf) |
-| Gaussian | Sony S-DSP | Two Gaussian interpolation filters/VCAs | [PDF](https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf) |
+| Facets | Mutable Instruments Edges | Digital waveforms and stepped noise | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Blocks.pdf) |
+| Staircase 2A03 | Ricoh 2A03 | NES pulse, triangle, and noise voices | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/InfiniteStairs.pdf) |
+| Ramp VRC6 | Konami VRC6 | Pulse and quantized saw voices | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/StepSaw.pdf) |
+| Pulse FME-7 | Sunsoft FME-7 | Three pulse voices | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Pulses.pdf) |
+| Trio AY | General Instrument AY-3-8910 | Tone, noise, and envelope synthesis | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Jairasullator.pdf) |
+| Polynomial | Atari POKEY | Pulse voices, noise, and distortion modes | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/PotKeys.pdf) |
+| Tone 76489 | Texas Instruments SN76489 | Pulse voices and periodic/white noise | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/MegaTone.pdf) |
+| Voice 2151 | Yamaha YM2151 | Four-operator FM, per-lane LFO and noise | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/YM2151.pdf) |
+| Voice 2612 | Yamaha YM2612 | Four-operator FM voice | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/BossFight.pdf) |
+| Operator 2612 | Yamaha YM2612 | Single FM operator with external modulation | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/MiniBoss.pdf) |
+| Octal 163 | Namco 163 | Eight voices with editable wavetables | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf) |
+| Pocket APU | Game Boy sound system | Pulse, wavetable, and noise voices | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf) |
+| Contour | Sony S-DSP | Two envelope generators | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperADSR.pdf) |
+| Echo | Sony S-DSP | Stereo echo with an eight-tap FIR filter | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperEcho.pdf) |
+| Gaussian | Sony S-DSP | Two Gaussian interpolation filters/VCAs | [PDF](https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperVCA.pdf) |
 
 The **Contour 2612** illustrates an envelope;
 the **Silicon S-SMP** illustrates the chip. Both are passive panels.
@@ -138,4 +138,4 @@ historical provenance gaps. Source API documentation lives in code comments.
 
 [library]: https://library.vcvrack.com/KautenjaDSP-PotatoChips
 [installing]: https://vcvrack.com/manual/Installing#installing-plugins-not-available-on-the-vcv-library
-[InfiniteStairs]: https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf
+[InfiniteStairs]: https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/InfiniteStairs.pdf

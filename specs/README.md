@@ -62,18 +62,18 @@ The archived specs establish the inventory, executable baseline, source
 organization, manual system, and capture tooling for subsequent work.
 Their original handoffs remain documented as implementation history.
 
-006 completed the focused Echo fixes. It owns [#96](https://github.com/Kautenja/PotatoChips/issues/96)
-and [#97](https://github.com/Kautenja/PotatoChips/issues/97), including separate
+006 completed the focused Echo fixes. It owns [#96](https://github.com/Arhythmetic-Units/PotatoChips/issues/96)
+and [#97](https://github.com/Arhythmetic-Units/PotatoChips/issues/97), including separate
 resolution comments with fix commit references and closure after verification.
 Both issues are closed as completed; the archived spec records the fix and
 resolution comments.
 
 007 completed the Contour gate-off fixes and sustain-rate terminology.
-It owns [#98](https://github.com/Kautenja/PotatoChips/issues/98), now closed
+It owns [#98](https://github.com/Arhythmetic-Units/PotatoChips/issues/98), now closed
 as completed; its archived record includes native measurements, the timing
 compatibility change, the fixing commit and the resolution comment.
 
-008 independently owns [#95](https://github.com/Kautenja/PotatoChips/issues/95):
+008 independently owns [#95](https://github.com/Arhythmetic-Units/PotatoChips/issues/95):
 native global light/dark support, including both blanks, live switching,
 previews, and readable controls. Its verified implementation and resolution
 comment are recorded in the archived spec; #95 is closed as completed.
@@ -81,16 +81,16 @@ comment are recorded in the archived spec; #95 is closed as completed.
 009 records the verified YM2612 gate/retrigger corrections in Mini Boss and
 Boss Fight, including both soft-reset settings. It is complete and archived
 by user decision. The original accepted-event one-shot symptom remains
-unconfirmed, and [#82](https://github.com/Kautenja/PotatoChips/issues/82) remains
+unconfirmed, and [#82](https://github.com/Arhythmetic-Units/PotatoChips/issues/82) remains
 open; archiving the spec does not claim issue closure.
 
-010 owns [#83](https://github.com/Kautenja/PotatoChips/issues/83): selectable
+010 owns [#83](https://github.com/Arhythmetic-Units/PotatoChips/issues/83): selectable
 Nuked-OPN2 engines with the existing engine retained as the default. It
 includes control-mapping and performance validation, useful issue updates,
 and closure with accessible implementation commit references after verified
 resolution. Writing the spec does not resolve the issue.
 
-011 owns [#79](https://github.com/Kautenja/PotatoChips/issues/79): a new
+011 owns [#79](https://github.com/Arhythmetic-Units/PotatoChips/issues/79): a new
 YM2151 four-operator polyphonic synth voice with chip-specific modulation,
 detune, and noise. It includes core selection, performance/reference tests,
 complete module presentation, and issue follow-through. The implementation

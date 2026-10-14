@@ -2,7 +2,7 @@
 
 Start with the [first-sound guide](README.md#make-a-first-sound) and the
 [manual for your module](README.md#modules). Search
-[existing issues](https://github.com/Kautenja/PotatoChips/issues) before
+[existing issues](https://github.com/Arhythmetic-Units/PotatoChips/issues) before
 opening a report; a matching issue may contain a workaround or fix.
 
 ## Troubleshoot A Patch
@@ -20,7 +20,7 @@ opening a report; a matching issue may contain a workaround or fix.
 
 ## Report A Bug
 
-Use the [bug report template](https://github.com/Kautenja/PotatoChips/issues/new?template=bug_report.md).
+Use the [bug report template](https://github.com/Arhythmetic-Units/PotatoChips/issues/new?template=bug_report.md).
 Include expected/actual behavior, exact steps, environment versions, and
 installation source. Attach a minimal `.vcv` patch and list other plugins
 or files it needs. Remove personal paths, device identifiers, tokens, and
@@ -31,7 +31,7 @@ problems; they are not required for reports about installed modules.
 ## Request A Feature
 
 Explain the musical task, missing behavior, and alternatives tried in a
-[feature request](https://github.com/Kautenja/PotatoChips/issues/new?template=feature_request.md).
+[feature request](https://github.com/Arhythmetic-Units/PotatoChips/issues/new?template=feature_request.md).
 Include compatibility/UI considerations. Closed requests and
 [specifications](specs/README.md) explain prior scope decisions; planned
 work has no guaranteed completion date.

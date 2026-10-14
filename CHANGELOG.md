@@ -461,7 +461,7 @@ in [specs/](specs/README.md); this list makes no new feature commitment.
 ## 2.0.0 (2022-02-23)
 
 Date corrected from the 2020 typo using commit
-[`50fd2e73`](https://github.com/Kautenja/PotatoChips/commit/50fd2e7362e4f18e060f2ebbbc4b12d01ef14d58).
+[`50fd2e73`](https://github.com/Arhythmetic-Units/PotatoChips/commit/50fd2e7362e4f18e060f2ebbbc4b12d01ef14d58).
 
 -   Rack v2 support
 

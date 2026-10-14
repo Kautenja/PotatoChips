@@ -2,7 +2,7 @@
 
 Created: 2026-10-01
 Status: PLANNED
-Issue: [#83](https://github.com/Kautenja/PotatoChips/issues/83)
+Issue: [#83](https://github.com/Arhythmetic-Units/PotatoChips/issues/83)
 Planning baseline: `f7d07f36` (product source unchanged from `33fb1554`).
 
 Add optional Nuked-OPN2 YM2612 and YM3438 engines to Mini Boss and Boss
@@ -265,9 +265,9 @@ to [AGENTS.md](../AGENTS.md#planning-and-completion).
 Prepare a factual comment body file before using the authenticated CLI:
 
 ```shell
-gh issue comment 83 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-83-update.md
-gh issue close 83 --repo Kautenja/PotatoChips --reason completed
-gh issue view 83 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 83 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-83-update.md
+gh issue close 83 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 83 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Completion Evidence

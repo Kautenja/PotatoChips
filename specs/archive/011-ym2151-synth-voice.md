@@ -2,7 +2,7 @@
 
 Created: 2026-10-01
 Status: COMPLETE
-Issue: [#79](https://github.com/Kautenja/PotatoChips/issues/79)
+Issue: [#79](https://github.com/Arhythmetic-Units/PotatoChips/issues/79)
 Planning baseline: `a6e7f086` (product source unchanged from `33fb1554`).
 
 Add a new polyphonic four-operator FM synth voice based on the Yamaha
@@ -295,9 +295,9 @@ and issue follow-through are satisfied.
 Prepare a factual comment body file before using the authenticated CLI:
 
 ```shell
-gh issue comment 79 --repo Kautenja/PotatoChips --body-file /tmp/potatochips-79-update.md
-gh issue close 79 --repo Kautenja/PotatoChips --reason completed
-gh issue view 79 --repo Kautenja/PotatoChips --json state,stateReason,comments,url
+gh issue comment 79 --repo Arhythmetic-Units/PotatoChips --body-file /tmp/potatochips-79-update.md
+gh issue close 79 --repo Arhythmetic-Units/PotatoChips --reason completed
+gh issue view 79 --repo Arhythmetic-Units/PotatoChips --json state,stateReason,comments,url
 ```
 
 ## Non-Goals
@@ -473,7 +473,7 @@ confirmed the implementation was already published. A GitHub API read of
 commit `5f16481982de976480f0cc6e680da500898a6d15` verified its accessible
 canonical URL before issue closure. The issue and comments were re-read,
 a resolution comment was posted, and `gh issue close 79 --repo
-Kautenja/PotatoChips --reason completed` succeeded. The final issue read-back
+Arhythmetic-Units/PotatoChips --reason completed` succeeded. The final issue read-back
 reported `CLOSED` with `stateReason: COMPLETED` on 2026-10-01.
 
 This archive-only follow-up validates relative Markdown links and runs
@@ -482,7 +482,7 @@ build/test results above.
 
 | Issue | Implementation Commit | Verification | Resolution Comment | Final State |
 | --- | --- | --- | --- | --- |
-| #79 | [`5f16481982de976480f0cc6e680da500898a6d15`](https://github.com/Kautenja/PotatoChips/commit/5f16481982de976480f0cc6e680da500898a6d15) | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening limitations accepted by user decision | [Resolution](https://github.com/Kautenja/PotatoChips/issues/79#issuecomment-5942175136) | CLOSED / COMPLETED, read back 2026-10-01 |
+| #79 | [`5f16481982de976480f0cc6e680da500898a6d15`](https://github.com/Arhythmetic-Units/PotatoChips/commit/5f16481982de976480f0cc6e680da500898a6d15) | macOS core/module/reference/native/package/manual checks passed; cross-platform and listening limitations accepted by user decision | [Resolution](https://github.com/Arhythmetic-Units/PotatoChips/issues/79#issuecomment-5942175136) | CLOSED / COMPLETED, read back 2026-10-01 |
 
 [nuked-commit]: https://github.com/nukeykt/Nuked-OPM/commit/f209e6ed3712032b641d53ce8fb24824eae6adc3
 [nuked-header]: https://github.com/nukeykt/Nuked-OPM/blob/f209e6ed3712032b641d53ce8fb24824eae6adc3/opm.h

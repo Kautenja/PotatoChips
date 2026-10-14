@@ -524,6 +524,6 @@ shown/described in these manuals. No release upload or VCV Library publication
 is implied. Built PDFs/packages and temporary review pages stay ignored.
 
 Implementation committed and pushed as
-[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Kautenja/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403).
+[`7c4d14c140c3b9d815c7055b0869f65c6e62a403`](https://github.com/Arhythmetic-Units/PotatoChips/commit/7c4d14c140c3b9d815c7055b0869f65c6e62a403).
 All implementation acceptance is verified; archive with spec 008 after its
 issue follow-through. Publication remains a separate authorized task.

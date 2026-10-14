@@ -8,17 +8,17 @@
   "author": "Christian Kauten",
   "authorEmail": "KautenjaDSP@gmail.com",
   "authorUrl": "https://github.com/Kautenja",
-  "pluginUrl": "https://github.com/Kautenja/PotatoChips",
-  "manualUrl": "https://github.com/Kautenja/PotatoChips/tree/v2.0.2#modules",
-  "sourceUrl": "https://github.com/Kautenja/PotatoChips",
-  "changelogUrl": "https://github.com/Kautenja/PotatoChips/blob/v2.0.2/CHANGELOG.md",
+  "pluginUrl": "https://github.com/Arhythmetic-Units/PotatoChips",
+  "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/tree/v2.0.2#modules",
+  "sourceUrl": "https://github.com/Arhythmetic-Units/PotatoChips",
+  "changelogUrl": "https://github.com/Arhythmetic-Units/PotatoChips/blob/v2.0.2/CHANGELOG.md",
   "modules": [
     {
       "slug": "Blocks",
       "name": "Facets",
       "description": "Four digital oscillators with tonal and stepped-noise waveforms, based on Mutable Instruments Edges. Formerly Blocks.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Mutable Instruments Edges sine triangle NES LFSR sample-and-hold Blocks",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Blocks.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Blocks.pdf",
       "tags": [
         "Digital",
         "Noise",
@@ -32,7 +32,7 @@
       "name": "Operator 2612",
       "description": "Single Yamaha YM2612 FM operator with an envelope, feedback, and external modulation, from the Sega Genesis / Mega Drive. Formerly Mini Boss.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Yamaha YM2612 OPN2 Sega Genesis Mega Drive FM frequency modulation single operator SSG-EG Mini Boss",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/MiniBoss.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/MiniBoss.pdf",
       "tags": [
         "Digital",
         "Oscillator",
@@ -45,7 +45,7 @@
       "name": "Octal 163",
       "description": "Eight Namco 163 wavetable oscillators with five editable waves and morphing, from NES / Famicom cartridges. Formerly Name Corp Octal Wave Generator.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Namco 163 N163 N106 Nintendo NES Famicom wavetable morphing drawing Name Corp Octal Wave Generator",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/NameCorpOctalWaveGenerator.pdf",
       "tags": [
         "Digital",
         "Oscillator",
@@ -57,7 +57,7 @@
       "name": "Voice 2612",
       "description": "Four-operator Yamaha YM2612 FM synth voice with eight algorithms and looping envelopes, from the Sega Genesis / Mega Drive. Formerly Boss Fight.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Yamaha YM2612 OPN2 Sega Genesis Mega Drive FM frequency modulation four operator SSG-EG Boss Fight",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/BossFight.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/BossFight.pdf",
       "tags": [
         "Digital",
         "Oscillator",
@@ -79,7 +79,7 @@
       "name": "Staircase 2A03",
       "description": "Two pulse oscillators, triangle, and noise from the Ricoh 2A03 in the Nintendo Entertainment System (NES). Formerly Infinite Stairs.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Ricoh 2A03 Nintendo NES Famicom APU pulse square triangle PWM duty cycle Infinite Stairs",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/InfiniteStairs.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/InfiniteStairs.pdf",
       "tags": [
         "Digital",
         "Noise",
@@ -92,7 +92,7 @@
       "name": "Trio AY",
       "description": "Three General Instrument AY-3-8910 tone channels with shared noise, looping envelopes, and stepped DAC operation. Formerly Jairasullator.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro General Instrument AY-3-8910 AY8910 PSG pulse square DAC amplitude modulation Jairasullator",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Jairasullator.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Jairasullator.pdf",
       "tags": [
         "Digital",
         "Distortion",
@@ -109,7 +109,7 @@
       "name": "Pulse FME-7",
       "description": "Three pulse oscillators emulating the Sunsoft FME-7 sound chip from NES / Famicom cartridges. Formerly Pulses.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Sunsoft FME-7 FME7 Nintendo NES Famicom pulse square Pulses",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/Pulses.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/Pulses.pdf",
       "tags": [
         "Digital",
         "Oscillator",
@@ -121,7 +121,7 @@
       "name": "Pocket APU",
       "description": "Game Boy sound system with two pulse oscillators, an editable morphing wavetable, and noise. Formerly Pallet Town Waves System.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Nintendo Game Boy Gameboy GB DMG APU pulse square wavetable morphing drawing Pallet Town Waves System",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/PalletTownWavesSystem.pdf",
       "tags": [
         "Digital",
         "Noise",
@@ -134,7 +134,7 @@
       "name": "Polynomial",
       "description": "Four Atari POKEY tone/noise channels with selectable distortion, clock, and high-pass modes. Formerly Pot Keys.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Atari POKEY pulse square LFSR polynomial distortion high-pass Pot Keys",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/PotKeys.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/PotKeys.pdf",
       "tags": [
         "Digital",
         "Noise",
@@ -148,7 +148,7 @@
       "name": "Contour",
       "description": "Two envelope generators based on the Sony S-DSP in the Super Nintendo Entertainment System (SNES). Formerly Super ADSR.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Sony S-DSP SDSP SNES Super Nintendo Super Famicom ADSR attack decay sustain release Super ADSR",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperADSR.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperADSR.pdf",
       "tags": [
         "Digital",
         "Dual",
@@ -161,7 +161,7 @@
       "name": "Echo",
       "description": "Stereo Sony S-DSP echo with feedback and an eight-tap FIR filter, from the Super Nintendo Entertainment System (SNES). Formerly Super Echo.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Sony S-DSP SDSP SNES Super Nintendo Super Famicom stereo echo FIR feedback comb Super Echo",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperEcho.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperEcho.pdf",
       "tags": [
         "Delay",
         "Digital",
@@ -175,7 +175,7 @@
       "name": "Gaussian",
       "description": "Two Sony S-DSP-style Gaussian interpolation filters and VCAs with signed gain and 8-bit input quantization. Formerly Super VCA.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Sony S-DSP SDSP SNES Super Nintendo Super Famicom Gaussian interpolation stereo quantization Super VCA",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/SuperVCA.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/SuperVCA.pdf",
       "tags": [
         "Digital",
         "Dual",
@@ -199,7 +199,7 @@
       "name": "Tone 76489",
       "description": "Three pulse oscillators and periodic/white noise from the Texas Instruments SN76489 in the Sega Master System and Genesis. Formerly Mega Tone.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Texas Instruments TI SN76489 PSG Sega Master System Mega Drive Genesis pulse square LFSR Mega Tone",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/MegaTone.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/MegaTone.pdf",
       "tags": [
         "Digital",
         "Noise",
@@ -212,7 +212,7 @@
       "name": "Ramp VRC6",
       "description": "Two pulse oscillators and a stepped sawtooth from the Konami VRC6 sound chip in NES / Famicom cartridges. Formerly Step Saw.",
       "keywords": "Potato Chips KautenjaDSP chiptune retro Konami VRC6 Nintendo NES Famicom pulse square sawtooth PWM duty cycle Step Saw",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/StepSaw.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/StepSaw.pdf",
       "tags": [
         "Digital",
         "Oscillator",
@@ -224,7 +224,7 @@
       "name": "Voice 2151",
       "description": "Four-operator Yamaha YM2151 OPM synth voice with independent polyphonic LFO, detune and noise.",
       "keywords": "Yamaha YM2151 OPM FM chiptune arcade noise",
-      "manualUrl": "https://github.com/Kautenja/PotatoChips/releases/latest/download/YM2151.pdf",
+      "manualUrl": "https://github.com/Arhythmetic-Units/PotatoChips/releases/latest/download/YM2151.pdf",
       "tags": [
         "Digital",
         "Oscillator",
